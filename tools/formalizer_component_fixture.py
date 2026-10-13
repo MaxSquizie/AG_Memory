@@ -19,7 +19,7 @@ def with_components(release, *, regional_probes=True, relative_time=False, predi
         policy['entries'][0]['composition']['modifier_composition']='BOUNDED_FOREST_V1'
     if nominal_tree:
         if not modifier_forest: raise ValueError('nominal_tree requires modifier_forest')
-        policy['entries'][0]['composition'].update(substantive_readings='CONTEXTUAL_SUBSTANTIVE_V1',nominal_utterances='NOMINATIVE_DESCRIPTION_V1',nominal_composition='QUESTION_TREE_V1',nominal_host_role='SUBJECT',modifier_scope='SHARED_EVENT_V1')
+        policy['entries'][0]['composition'].update(narrative_continuity='SOURCE_CARRIER_V1',substantive_readings='CONTEXTUAL_SUBSTANTIVE_V1',nominal_utterances='NOMINATIVE_DESCRIPTION_V1',nominal_composition='QUESTION_TREE_V1',nominal_host_role='SUBJECT',modifier_scope='SHARED_EVENT_V1')
         policy['entries'][0]['composition']['nominal_references']={'version':'DETERMINER_GROUP_V1',
             'demonstratives':[{'rule_id':'TEST-DEMONSTRATIVE-'+str(i),'lemma':lemma,'POS':'ADJF'}
                              for i,lemma in enumerate(('тот','этот'))],
@@ -82,8 +82,8 @@ def with_components(release, *, regional_probes=True, relative_time=False, predi
                     if role['role_id']=='OBJECT':
                         role['omission']={'kind':'UNSPECIFIED_ENTITY','rule_id':'TEST-READ-UNSPECIFIED-THEME'}
     if regional_probes:
-        policy['entries'][0]['probe_budget']={'version':'SOURCE_WINDOW_V1','window_tokens':64,
-            'calls_per_window':32,'tokens_per_window':16384}
+        policy['entries'][0]['probe_budget']={'version':'SOURCE_WINDOW_V2','window_tokens':64,
+            'calls_per_window':0,'tokens_per_window':0}
     content={k:manifest[k] for k in ('kind','version','schema_version','entries','dependency_versions')}
     manifest['coverage_report']['resource_content_sha256']=digest(content)
     result,trust=sign_test_release(manifest)

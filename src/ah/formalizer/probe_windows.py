@@ -1,4 +1,4 @@
-"""Released finite probe budgets keyed by source token windows, never wall time."""
+"""Released source-window accounting; V2 zero means unlimited short probes."""
 from bisect import bisect_right
 
 

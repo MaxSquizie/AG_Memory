@@ -312,7 +312,7 @@ class Budget:
     def llm_exhausted(self) -> bool:
         if self.probe_scope_limits:
             key=self.probe_scope_key
-            return key not in self.probe_scope_limits or self.probe_scope_calls.get(key,0)>=self.probe_scope_limits[key]
+            return key not in self.probe_scope_limits or (self.probe_scope_limits[key]>0 and self.probe_scope_calls.get(key,0)>=self.probe_scope_limits[key])
         return self.llm_calls >= self.llm_limit
 
 

@@ -111,10 +111,10 @@ RESOURCE_SCHEMAS = {
         **{k: {'type': 'integer', 'minimum': 1} for k in ('max_nodes', 'max_edges', 'max_depth', 'max_source_tokens', 'max_rule_steps', 'max_rule_matches')},
         'max_calls_per_unit': I, 'verify_deterministic': B, 'version': S,
         'probe_budget': obj(('version','window_tokens','calls_per_window','tokens_per_window'), {
-            'version': enum('SOURCE_WINDOW_V1'),
+            'version': enum('SOURCE_WINDOW_V1','SOURCE_WINDOW_V2'),
             'window_tokens': {'type':'integer','minimum':16,'maximum':512},
-            'calls_per_window': {'type':'integer','minimum':1,'maximum':64},
-            'tokens_per_window': {'type':'integer','minimum':256,'maximum':131072}}),
+            'calls_per_window': {'type':'integer','minimum':0,'maximum':64},
+            'tokens_per_window': {'type':'integer','minimum':0,'maximum':131072}}),
         'spatial_references': obj(('version','context_chars','max_candidates','rules'), {
             'version':enum('SOURCE_RELATIVE_PLACE_V1'),
             'context_chars':{'type':'integer','minimum':64,'maximum':2048},
@@ -133,6 +133,7 @@ RESOURCE_SCHEMAS = {
         'validation_schema_version': S, 'model_key': S, 'params_hash': S,
         'composition': obj(('version','subject_role','open_case_roles','max_candidates','context_chars'), {
             'version': enum('COMPONENTS_V1'), 'subject_role': S,
+            'narrative_continuity':enum('SOURCE_CARRIER_V1'),
             'narrative_groups':obj(('version','sense_id','template_ref'),{'version':enum('OPEN_NARRATIVE_GROUP_V1'),'sense_id':S,'template_ref':S}),
             'coordination_operators': array(enum('AND')),
             'infinitive_composition': obj(('version','relations'), {

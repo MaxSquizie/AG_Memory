@@ -1,0 +1,1864 @@
+{
+  "schema": "diary-narrator-continuity-1",
+  "baseline_commit": "7de17b4f3ad3f075335fdd89b4ff2c64b108ca55",
+  "source": {
+    "text": "Двадцать восьмого июля. Четверг\nПервый день без дождя. Перед докладом принял Рузского. Дочери приехали к завтраку в палатке, Алексей поехал к Аликс к завтраку. До трех часов отправились вверх к тому же месту. Покатались в шлюпках. Пил чай и обедал с Аликс. Вечером прошло несколько ливней.\n\n",
+    "sha256": "f30e1e69e6a3f150721996fbaba091cdc0d23c336eb3e4202ae07d9539bd4889",
+    "whole_diary_sha256": "e1f39d7f418121ce5956be9410f058a14ef76f82c88a113df42570f5511d8e71",
+    "range": [
+      94816,
+      95107
+    ]
+  },
+  "resource_status": "TEST_ONLY",
+  "resource_snapshot": "139eaca0dc76336cf43eaad18da43e9392a0f1164742230e97f0c6c926461bff",
+  "probes": [
+    {
+      "run": "diary_continuity_final28",
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nClassify the source line «Двадцать восьмого июля. Четверг». Layout alone is not evidence of date scope. Do not infer a year, timezone or clock boundaries. Proposed area: [0, 291]\n\nDecision slot: document_scope — predicate value of frame region:4dd9a0fa10cda31e1df6c89aad9b1dea1f692205e86272e459c36c8ae09474f0|document_scope\nContext span: Двадцать восьмого июля. Четверг\nПервый день без дождя. Перед докладом принял Рузского. Дочери приехали к завтраку в палатке, Алексей поехал к Аликс к завтраку. До трех часов отправились вверх к тому же месту. Покатались в шлюпках. Пил чай и обедал с Аликс. Вечером прошло несколько ливней.\n\n\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema 139eaca0dc76336cf43eaad18da43e9392a0f1164742230e97f0c6c926461bff, closed set):\n1. Calendar header dates the following entry, until the next peer calendar header or end of source. Nested temporal expressions retain their own scope.\n2. Ordinary text; does not establish a temporal area over the following entry.\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"HEADER\"\n2 = \"INLINE\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "1\n",
+      "sha256": "d59fa22040c8a0ea87e09dc165f99e1ce451427bf514f3655c94be1d881d82c2"
+    },
+    {
+      "run": "diary_continuity_final28",
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nChoose the immediate grammatical attachment of «день» at 39. GENITIVE and CASE_DEPENDENCY record nominal grammar, not ownership, command, identity or a guessed semantic relation. CASE_DEPENDENCY is allowed only if the dependent completes that noun in this source, not merely because its case is compatible. APPOSITION records an explanation, not entity identity. Already fixed dependencies: [{'dependent': 'дождя', 'attachment': 'DEFER_PP', 'host': None}]. Preserve ambiguity if evidence is insufficient.\n\nDecision slot: nominal_dependency — predicate value of frame region:fa1f334822874151ed9b1ca1ff7dab17dfbe47983613999063d10ee90a0f2f8d|dependency:bf5344b37d5ccacaa9147d54e28fd7808c36f3029b17d1f5d8e4c79592a4f49a\nContext span: Первый день без дождя. Перед докладом принял Рузского. Дочери приехали к завтраку в палатке, Алексей поехал к Аликс к завтраку. До трех часов отправились вверх к тому же месту. Покатались в шлюпках. Пил чай и обедал с Аликс. Вечером прошло несколько ливней.\n\n\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema 139eaca0dc76336cf43eaad18da43e9392a0f1164742230e97f0c6c926461bff, closed set):\n1. Direct role SUBJECT of predicate «Первый»; whole reading={'lemma': 'день', 'pos': 'NOUN', 'cases': ['nom'], 'number': 'sing', 'gender': 'masc'}\n2. CASE_DEPENDENCY dependency on «дождя» at 48; whole reading={'lemma': 'день', 'pos': 'NOUN', 'cases': ['acc'], 'number': 'sing', 'gender': 'masc'}\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"ddc7c58aa1ad8ddee188f28d634c4246247a1348154d934d5db967512bb18012\"\n2 = \"0c722ed8f1ade84617f856d8497bfce8bddd63553f2048abf7b4fce0d9053853\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "0\n",
+      "sha256": "d099b510b31c36ac05dfdff0d48033951d05a943ffcc4aad2052a75502d1dce3"
+    },
+    {
+      "run": "diary_continuity_final28",
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nWhat does the prepositional phrase «без дождя» describe? Choose its attachment scope in the assembled structure. EVENT means the complete predicate area with its established dependents; a nominal option means that inner entity only. Established links: «день» -- SUBJECT --> «день». A place complement remains an entity: selecting its host does not identify it with the event or its landmark. Preserve the target subtree and all established links; do not infer a new relation sense or factuality from attachment alone. Keep distinct scopes when the wording does not discriminate.\n\nDecision slot: nominal_attachment — predicate value of frame region:fa1f334822874151ed9b1ca1ff7dab17dfbe47983613999063d10ee90a0f2f8d|nominal:5449c6531cbeee3e06ff9f2d22f458295a085c21c2d5a7d797fd93706ac47367\nContext span: Первый день без дождя.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema 139eaca0dc76336cf43eaad18da43e9392a0f1164742230e97f0c6c926461bff, closed set):\n1. Predicate subtree «Первый день»; head=«день»; head range=[39, 43]\n2. Nominal subtree «Первый день»; head=«день»; head range=[39, 43]\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"EVENT\"\n2 = \"tok:39:43\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "2\n",
+      "sha256": "c9e7489bf7cc83185889fe0d78015351dc4a4287871d4473ef2ad6ba1df61ca0"
+    },
+    {
+      "run": "diary_continuity_final28",
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nAlready established interpretation constraints: «без дождя» attaches to «Первый день» (previous resolved local question). Evaluate the remaining composition subject to these constraints; do not ask again which of those already selected hosts was intended. These constraints do not assert world facts. \n\nDecision slot: component_attachment — predicate value of frame region:fa1f334822874151ed9b1ca1ff7dab17dfbe47983613999063d10ee90a0f2f8d|composition\nContext span: Первый день без дождя.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema 139eaca0dc76336cf43eaad18da43e9392a0f1164742230e97f0c6c926461bff, closed set):\n1. без [PREP]; SUBJECT=день, SURFACE_ARG=дождя; linked morphology={'без': {'lemma': 'без', 'pos': 'PREP', 'cases': [], 'number': None, 'gender': None}, 'день': {'lemma': 'день', 'pos': 'NOUN', 'cases': ['nom'], 'number': 'sing', 'gender': 'masc'}, 'дождя': {'lemma': 'дождь', 'pos': 'NOUN', 'cases': ['gen'], 'number': 'sing', 'gender': 'masc'}} -> первый [ADJF]; SUBJECT=день; linked morphology={'Первый': {'lemma': 'первый', 'pos': 'ADJF', 'cases': ['nom'], 'number': 'sing', 'gender': 'masc'}, 'день': {'lemma': 'день', 'pos': 'NOUN', 'cases': ['nom'], 'number': 'sing', 'gender': 'masc'}} -> день [NOUN]; SUBJECT=день; linked morphology={'день': {'lemma': 'день', 'pos': 'NOUN', 'cases': ['nom'], 'number': 'sing', 'gender': 'masc'}}; nominal descriptions=[{'host': 'день', 'description': 'без'}, {'host': 'день', 'description': 'Первый'}]; event modifiers wrap propositions; nominal descriptions attach ONLY to their named entity hosts\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"component-nominal:c741ec8e36deaf3f8b08fc5d5089c6a130e72a16716a331c0eac006673c1dbeb\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "1\n",
+      "sha256": "005a2c23fe637cb999527690c52da5c8d11c2224db5b1224ff92f7a60a93025e"
+    },
+    {
+      "run": "diary_continuity_final28",
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nDoes this occurrence fill a noun-like slot by itself? Capitalization is only a clue, never sufficient evidence. Do not invent a missing named person.\n\nDecision slot: contextual_morphology — predicate value of frame region:9c118d7be2394761b958967069dcf4ed67c34f945f0a5d7ef0ab444ce1ee2df5|substantive:tok:77:85\nContext span:  Перед докладом принял Рузского.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema 139eaca0dc76336cf43eaad18da43e9392a0f1164742230e97f0c6c926461bff, closed set):\n1. «Рузского» is used as an entity-denoting nominal here (including a surname or substantivized adjective); preserve its inflection, no identity inference\n2. Keep adjectival analysis; no established entity-denoting nominal use\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"NOMINAL\"\n2 = \"ADJECTIVAL\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "1\n",
+      "sha256": "d32c143dfcd81f9ec2725b59e63c87661ca0efdb06390f742ea0fecdde722bfa"
+    },
+    {
+      "run": "diary_continuity_final28",
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nDecision slot: component_attachment — predicate value of frame region:9c118d7be2394761b958967069dcf4ed67c34f945f0a5d7ef0ab444ce1ee2df5|composition\nContext span:  Перед докладом принял Рузского.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema 139eaca0dc76336cf43eaad18da43e9392a0f1164742230e97f0c6c926461bff, closed set):\n1. принять [VERB]; OBJECT=Рузского; linked morphology={'принял': {'lemma': 'принять', 'pos': 'VERB', 'cases': [], 'number': 'sing', 'gender': 'masc'}, 'Рузского': {'lemma': 'рузский', 'pos': 'NOUN', 'cases': ['acc'], 'number': 'sing', 'gender': 'masc'}}; omitted roles, identity unresolved=['SUBJECT']; relative anchors=[{'operator': 'BEFORE', 'anchor_ref': 'tok:61:69', 'anchor_surface': 'докладом', 'anchor_lemma': 'доклад', 'anchor_refs': ['tok:55:60', 'tok:61:69'], 'source_range': [55, 69], 'preposition_ref': 'tok:55:60', 'resource_pattern': '\\\\bперед\\\\b'}]; event modifiers wrap propositions; nominal descriptions attach ONLY to their named entity hosts\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"component:42e415e6ecf55f37423faf5fe2d01def633e1f315f4e36f29c1e2c17e86a9aad\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "1\n",
+      "sha256": "84066dd637bef95719b7abd13d295a1363ba9ea081aef636fc0b699f7a763c33"
+    },
+    {
+      "run": "diary_continuity_final28",
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nCheck grammar and scope on BOTH sides. Separate finite verbs with a compatible subject, punctuation and capitalization are only weak clues. A name, heading, coordinated predicate or quoted content is not automatically a new clause. Select SPLIT only when the context supports an independent clause; otherwise KEEP or ?.\n\nDecision slot: clause_boundary — predicate value of frame region:9515cfd6937cd5a9b82175284f7edad7fbfc103e78769b942cb63f2d019a3072|soft-boundary:tok:125:132\nContext span:  Дочери приехали к завтраку в палатке, Алексей поехал к Аликс к завтраку.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema 139eaca0dc76336cf43eaad18da43e9392a0f1164742230e97f0c6c926461bff, closed set):\n1. Independent clauses at this boundary: LEFT «Дочери приехали к завтраку в палатке, » / RIGHT «Алексей поехал к Аликс к завтраку.»; the right clause is outside preceding descriptions\n2. This predicate remains in the existing clause/scope; do not split here\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"SPLIT\"\n2 = \"KEEP\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "1\n",
+      "sha256": "ebdc7e5e392f8a289095fc1148546a7af2563a42c4d9c6001dfb13bb58271cdc"
+    },
+    {
+      "run": "diary_continuity_final28",
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nChoose the immediate grammatical attachment of «Дочери» at 87. GENITIVE and CASE_DEPENDENCY record nominal grammar, not ownership, command, identity or a guessed semantic relation. CASE_DEPENDENCY is allowed only if the dependent completes that noun in this source, not merely because its case is compatible. APPOSITION records an explanation, not entity identity. Already fixed dependencies: [{'dependent': 'завтраку', 'attachment': 'DEFER_PP', 'host': None}, {'dependent': 'палатке', 'attachment': 'DEFER_PP', 'host': None}]. Preserve ambiguity if evidence is insufficient.\n\nDecision slot: nominal_dependency — predicate value of frame region:62d68f924bc214f0b0e11afab3101a7e7d5e8a823ded014a4bbdaedf928f7d76|dependency:5dbd90d4c8faf85b127ac675947c282cdfa337bb1803b0385e7c9daf983131c2\nContext span: Первый день без дождя. Перед докладом принял Рузского. Дочери приехали к завтраку в палатке, Алексей поехал к Аликс к завтраку. До трех часов отправились вверх к тому же месту. Покатались в шлюпках. Пил чай и обедал с Аликс. Вечером прошло несколько ливней.\n\n\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema 139eaca0dc76336cf43eaad18da43e9392a0f1164742230e97f0c6c926461bff, closed set):\n1. Direct role SUBJECT of predicate «приехали»; whole reading={'lemma': 'дочь', 'pos': 'NOUN', 'cases': ['nom'], 'number': 'plur', 'gender': 'femn'}\n2. GENITIVE dependency on «завтраку» at 105; whole reading={'lemma': 'дочь', 'pos': 'NOUN', 'cases': ['gen'], 'number': 'sing', 'gender': 'femn'}\n3. GENITIVE dependency on «палатке» at 116; whole reading={'lemma': 'дочь', 'pos': 'NOUN', 'cases': ['gen'], 'number': 'sing', 'gender': 'femn'}\n4. CASE_DEPENDENCY dependency on «завтраку» at 105; whole reading={'lemma': 'дочь', 'pos': 'NOUN', 'cases': ['dat'], 'number': 'sing', 'gender': 'femn'}\n5. CASE_DEPENDENCY dependency on «палатке» at 116; whole reading={'lemma': 'дочь', 'pos': 'NOUN', 'cases': ['dat'], 'number': 'sing', 'gender': 'femn'}\n6. CASE_DEPENDENCY dependency on «завтраку» at 105; whole reading={'lemma': 'дочь', 'pos': 'NOUN', 'cases': ['loc'], 'number': 'sing', 'gender': 'femn'}\n7. CASE_DEPENDENCY dependency on «палатке» at 116; whole reading={'lemma': 'дочь', 'pos': 'NOUN', 'cases': ['loc'], 'number': 'sing', 'gender': 'femn'}\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"cb503531ecebf2c4d2bbca62191af8593ccd8d9d5b993d636685656a58f9ac96\"\n2 = \"6dfe92c00b110011f22efef23544b09358092e25f29d5b9a0e9e14f165fe65bd\"\n3 = \"d83ffade8cec1b1400a4092bcf200db2cea86d721b9fad5d68e9fe653ec9964a\"\n4 = \"3430d91ed149badfc068bd0eab4390592611fa0eb15cfd35595c61c73c34a67e\"\n5 = \"bea9bb4caba9c09a6a276d00a3c865fb8a0e165ddc53b64d5bcc15a5cc08dbb8\"\n6 = \"6da68fc2099a50b51cca04171d3c6bde6425caffbcd4993ef56bff755815eeeb\"\n7 = \"1639085d2c63cb1e1bf1d169e1babe506d39cfdeb4c483650e8821636b57263c\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "1\n",
+      "sha256": "bd4ec1498c030092d6cfec9e26d11c1a3b0fe32c9646497d8a2bbe833f99d171"
+    },
+    {
+      "run": "diary_continuity_final28",
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nWhich complete morphological reading fits this phrase in the source? Do not resolve identities or replace the source words.\n\nDecision slot: nominal_attachment — predicate value of frame region:62d68f924bc214f0b0e11afab3101a7e7d5e8a823ded014a4bbdaedf928f7d76|nominal:07be8f4696a9fc8e38f659c96413410be26d30d6dcccf16e1f932623817d6ed0\nContext span: Дочери приехали к завтраку в палатке\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema 139eaca0dc76336cf43eaad18da43e9392a0f1164742230e97f0c6c926461bff, closed set):\n1. Whole phrase readings: {'в': {'lemma': 'в', 'pos': 'PREP', 'cases': [], 'number': None, 'gender': None}, 'палатке': {'lemma': 'палатка', 'pos': 'NOUN', 'cases': ['loc'], 'number': 'sing', 'gender': 'femn'}}\n2. Whole phrase readings: {'в': {'lemma': 'в', 'pos': 'PREP', 'cases': [], 'number': None, 'gender': None}, 'палатке': {'lemma': 'палатка', 'pos': 'NOUN', 'cases': ['dat'], 'number': 'sing', 'gender': 'femn'}}\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"e8091bf87cf14880f2ccf4132f451930ba60e0c592d0b642c56fe94bc244d701\"\n2 = \"ee92bd5eb4b549742c776fe3ab4e7797cb9f0875e94382fe69af6eb3f6f47c46\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "1\n",
+      "sha256": "29a980098aa06af244c42b78ba8f9c74220e5146e726876243876b6adf88cb21"
+    },
+    {
+      "run": "diary_continuity_final28",
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nWhat does the prepositional phrase «к завтраку» describe? Choose its attachment scope in the assembled structure. EVENT means the complete predicate area with its established dependents; a nominal option means that inner entity only. Established links: «приехали» -- SUBJECT --> «Дочери». A place complement remains an entity: selecting its host does not identify it with the event or its landmark. Preserve the target subtree and all established links; do not infer a new relation sense or factuality from attachment alone. Keep distinct scopes when the wording does not discriminate.\n\nDecision slot: nominal_attachment — predicate value of frame region:62d68f924bc214f0b0e11afab3101a7e7d5e8a823ded014a4bbdaedf928f7d76|nominal:7a2c1286cdea127a2d654300a6bdb94c392b77f58994ebd2f15724a5983b8b54\nContext span: Дочери приехали к завтраку в палатке\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema 139eaca0dc76336cf43eaad18da43e9392a0f1164742230e97f0c6c926461bff, closed set):\n1. Predicate subtree «Дочери приехали»; head=«приехали»; head range=[94, 102]\n2. Nominal subtree «Дочери»; head=«Дочери»; head range=[87, 93]\n3. Nominal subtree «палатке»; head=«палатке»; head range=[116, 123]\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"EVENT\"\n2 = \"tok:87:93\"\n3 = \"tok:116:123\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "1\n",
+      "sha256": "eacbeaa115721e72b5025568a7fe6002d5d180c0dd1b70873ee594ba12e60d37"
+    },
+    {
+      "run": "diary_continuity_final28",
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nWhat does the prepositional phrase «в палатке» describe? Choose its attachment scope in the assembled structure. EVENT means the complete predicate area with its established dependents; a nominal option means that inner entity only. Established links: «приехали» -- SUBJECT --> «Дочери»; «приехали» -- via «к» --> «завтраку». A place complement remains an entity: selecting its host does not identify it with the event or its landmark. Preserve the target subtree and all established links; do not infer a new relation sense or factuality from attachment alone. Keep distinct scopes when the wording does not discriminate.\n\nDecision slot: nominal_attachment — predicate value of frame region:62d68f924bc214f0b0e11afab3101a7e7d5e8a823ded014a4bbdaedf928f7d76|nominal:7cb894dcd8dd041f27fe62bdb2145de01b9f3b3b0b0895f0523ccf30c5aaa1fb\nContext span: Дочери приехали к завтраку в палатке\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema 139eaca0dc76336cf43eaad18da43e9392a0f1164742230e97f0c6c926461bff, closed set):\n1. Predicate subtree «Дочери приехали к завтраку»; head=«приехали»; head range=[94, 102]\n2. Nominal subtree «Дочери»; head=«Дочери»; head range=[87, 93]\n3. Nominal subtree «к завтраку»; head=«завтраку»; head range=[105, 113]\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"EVENT\"\n2 = \"tok:87:93\"\n3 = \"tok:105:113\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "3\n",
+      "sha256": "843d113e6c01e7151d9f35eea7f7092200edc5b5e8e4ab72f1bfc5f89711e4ff"
+    },
+    {
+      "run": "diary_continuity_final28",
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nAlready established interpretation constraints: «к завтраку» attaches to «Дочери приехали» (previous resolved local question); «в палатке» attaches to «к завтраку» (previous resolved local question). Evaluate the remaining composition subject to these constraints; do not ask again which of those already selected hosts was intended. These constraints do not assert world facts. \n\nDecision slot: component_attachment — predicate value of frame region:62d68f924bc214f0b0e11afab3101a7e7d5e8a823ded014a4bbdaedf928f7d76|composition\nContext span: Дочери приехали к завтраку в палатке\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema 139eaca0dc76336cf43eaad18da43e9392a0f1164742230e97f0c6c926461bff, closed set):\n1. приехать [VERB]; SUBJECT=Дочери; linked morphology={'приехали': {'lemma': 'приехать', 'pos': 'VERB', 'cases': [], 'number': 'plur', 'gender': None}, 'Дочери': {'lemma': 'дочь', 'pos': 'NOUN', 'cases': ['nom'], 'number': 'plur', 'gender': 'femn'}} -> в [PREP]; SUBJECT=завтраку, SURFACE_ARG=палатке; linked morphology={'в': {'lemma': 'в', 'pos': 'PREP', 'cases': [], 'number': None, 'gender': None}, 'завтраку': {'lemma': 'завтрак', 'pos': 'NOUN', 'cases': ['dat'], 'number': 'sing', 'gender': 'masc'}, 'палатке': {'lemma': 'палатка', 'pos': 'NOUN', 'cases': ['loc'], 'number': 'sing', 'gender': 'femn'}} -> к [PREP]; SURFACE_ARG=завтраку; linked morphology={'к': {'lemma': 'к', 'pos': 'PREP', 'cases': [], 'number': None, 'gender': None}, 'завтраку': {'lemma': 'завтрак', 'pos': 'NOUN', 'cases': ['dat'], 'number': 'sing', 'gender': 'masc'}}; nominal descriptions=[{'host': 'завтраку', 'description': 'в'}]; event modifiers wrap propositions; nominal descriptions attach ONLY to their named entity hosts\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"component-modifier:1d7de39efb186952820654cb29b62c0e8e062dc739384ee29a26d4d83f506c45\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "1\n",
+      "sha256": "de978f553967d93e2e66436e729ac5edc7fde98b716b35d565ab12315d1a5ed8"
+    },
+    {
+      "run": "diary_continuity_final28",
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nChoose a case reading only if this source supports an unchanged proper name governed by the preposition. The released cases are possibilities, not proof. Do not correct spelling, infer gender/identity, or turn every case error into an indeclinable name. Otherwise choose KEEP_SOURCE_ANALYSIS or ?.\n\nDecision slot: contextual_morphology — predicate value of frame region:74c37cade05bc8a39f270f107191551068f63e2fb1455ab506385ff2234b210d|preposition-name-case:0a8a2f20596ba82f9c7bba3dd2360155e5a0ae2d2704dec93f099cead8242736\nContext span: Алексей поехал к Аликс к завтраку.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema 139eaca0dc76336cf43eaad18da43e9392a0f1164742230e97f0c6c926461bff, closed set):\n1. Unchanged proper-name surface «Аликс» is the nominal complement of «к» with case=dat; dictionary reading insufficient for this occurrence; gender and identity unknown\n2. No supported unchanged-name reading; retain the source analysis\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"32d9ba1f3fd28c439197b00045baca087b65b4c95ddc08b86101d5b4404fdf00\"\n2 = \"KEEP_SOURCE_ANALYSIS\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "1\n",
+      "sha256": "fcfe428f5e6c34ecf71e5ce900579a29584f6a994227c2e4bd566f91e839a20c"
+    },
+    {
+      "run": "diary_continuity_final28",
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nWhat does the prepositional phrase «к Аликс» describe? Choose its attachment scope in the assembled structure. EVENT means the complete predicate area with its established dependents; a nominal option means that inner entity only. Established links: «поехал» -- SUBJECT --> «Алексей». A place complement remains an entity: selecting its host does not identify it with the event or its landmark. Preserve the target subtree and all established links; do not infer a new relation sense or factuality from attachment alone. Keep distinct scopes when the wording does not discriminate.\n\nDecision slot: nominal_attachment — predicate value of frame region:74c37cade05bc8a39f270f107191551068f63e2fb1455ab506385ff2234b210d|nominal:96e6ce5f95fae0c737edf42a92189c3cebd991bb0c97cbb3ee76d4190a3e4248\nContext span: Алексей поехал к Аликс к завтраку.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema 139eaca0dc76336cf43eaad18da43e9392a0f1164742230e97f0c6c926461bff, closed set):\n1. Predicate subtree «Алексей поехал»; head=«поехал»; head range=[133, 139]\n2. Nominal subtree «Алексей»; head=«Алексей»; head range=[125, 132]\n3. Nominal subtree «завтраку»; head=«завтраку»; head range=[150, 158]\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"EVENT\"\n2 = \"tok:125:132\"\n3 = \"tok:150:158\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "1\n",
+      "sha256": "b42ab34c5fc623fb3ba47c5c99d77d285dc793f83b5c0545ba0ce80a2de5752e"
+    },
+    {
+      "run": "diary_continuity_final28",
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nWhat does the prepositional phrase «к завтраку» describe? Choose its attachment scope in the assembled structure. EVENT means the complete predicate area with its established dependents; a nominal option means that inner entity only. Established links: «поехал» -- SUBJECT --> «Алексей»; «поехал» -- via «к» --> «Аликс». A place complement remains an entity: selecting its host does not identify it with the event or its landmark. Preserve the target subtree and all established links; do not infer a new relation sense or factuality from attachment alone. Keep distinct scopes when the wording does not discriminate.\n\nDecision slot: nominal_attachment — predicate value of frame region:74c37cade05bc8a39f270f107191551068f63e2fb1455ab506385ff2234b210d|nominal:a24f0a4611d80e78cf0bdcc977ed7ec9bdce6b1fe5c4b61989c815c0d5d56d93\nContext span: Алексей поехал к Аликс к завтраку.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema 139eaca0dc76336cf43eaad18da43e9392a0f1164742230e97f0c6c926461bff, closed set):\n1. Predicate subtree «Алексей поехал к Аликс»; head=«поехал»; head range=[133, 139]\n2. Nominal subtree «Алексей»; head=«Алексей»; head range=[125, 132]\n3. Nominal subtree «к Аликс»; head=«Аликс»; head range=[142, 147]\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"EVENT\"\n2 = \"tok:125:132\"\n3 = \"tok:142:147\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "1\n",
+      "sha256": "a7404bdc98cf32b07c1806f7fab46e71e6640be7a31f9bd01630c730d24864be"
+    },
+    {
+      "run": "diary_continuity_final28",
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nAlready established interpretation constraints: «к Аликс» attaches to «Алексей поехал» (previous resolved local question); «к завтраку» attaches to «Алексей поехал к Аликс» (previous resolved local question). Evaluate the remaining composition subject to these constraints; do not ask again which of those already selected hosts was intended. These constraints do not assert world facts. Only scope links differ; roles, whole morphology and nominal dependencies are fixed. BOTH means joint descriptions of the SAME event, not separate event occurrences. Which immediate scope links are supported by this source? Do not assume that lexical modifiers commute.\n\nDecision slot: component_attachment — predicate value of frame region:74c37cade05bc8a39f270f107191551068f63e2fb1455ab506385ff2234b210d|composition\nContext span: Алексей поехал к Аликс к завтраку.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema 139eaca0dc76336cf43eaad18da43e9392a0f1164742230e97f0c6c926461bff, closed set):\n1. «к»@140 (Аликс) scopes over «поехал»@133 (Алексей) [OBJECT, attitude=UNKNOWN]; BOTH descriptions scopes over «к»@148 (завтраку) [AND, attitude=OPERATOR]; source assertion scopes over BOTH descriptions [ASSERTS, attitude=ROOT]; «к»@148 (завтраку) scopes over «поехал»@133 (Алексей) [OBJECT, attitude=UNKNOWN]; BOTH descriptions scopes over «к»@140 (Аликс) [AND, attitude=OPERATOR]\n2. «к»@140 (Аликс) scopes over «к»@148 (завтраку) [OBJECT, attitude=UNKNOWN]; «к»@148 (завтраку) scopes over «поехал»@133 (Алексей) [OBJECT, attitude=UNKNOWN]; source assertion scopes over «к»@140 (Аликс) [ASSERTS, attitude=ROOT]\n3. source assertion scopes over «к»@148 (завтраку) [ASSERTS, attitude=ROOT]; «к»@140 (Аликс) scopes over «поехал»@133 (Алексей) [OBJECT, attitude=UNKNOWN]; «к»@148 (завтраку) scopes over «к»@140 (Аликс) [OBJECT, attitude=UNKNOWN]\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"component-modifier:34be0dd335904342b105809ee8edf9c84f95fc2fd5bfb989d9b54bf00ba1bf96\"\n2 = \"component-modifier:a7c8ed124b87ac959e3035b13570a8722a3d16a6b2cf3ee2a968777615e6564f\"\n3 = \"component-modifier:7b0ad929ad90ba732304e516de6d65a6cca124311ae3474eed680b992146c36c\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "3\n",
+      "sha256": "792ec9569e1a11e468106ad331fb3ff5f7029d271e46d92582482bf8b48db26e"
+    },
+    {
+      "run": "diary_continuity_final28",
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nChoose the grammatical function of the whole noun group, not its antecedent. Do not infer identity from proximity.\n\nDecision slot: nominal_attachment — predicate value of frame nominal-reference:c50b72c5afba7e919a68d111a6cbc5158d0b97c8b2901e69b79bfbe77ad15e64\nContext span:  До трех часов отправились вверх к тому же месту.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema 139eaca0dc76336cf43eaad18da43e9392a0f1164742230e97f0c6c926461bff, closed set):\n1. тому же месту: determiner identifies an antecedent of the noun; modifier requires the SAME antecedent\n2. These words do not form this referential noun group; keep original analyses\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"REFERENCE\"\n2 = \"OTHER\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "1\n",
+      "sha256": "d02e541b2916dcaaf7b80d8930a1640340af22939bceeebb8e2b411741e38e27"
+    },
+    {
+      "run": "diary_continuity_final28",
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nDo these two source expressions constrain one destination of this movement? This asks their local relationship, not which remembered place it is. Do not infer arrival, coordinates, distance or absolute height.\n\nDecision slot: component_attachment — predicate value of frame region:1706e08192f612fbf2a44dd8c64309d1c339cafa5c0266c402d7fca42eb3af89|directional-goal:f2dbd02df6f00bc84137f4aa2599e5dd0d02d7c03ee35540811070c024acb64f\nContext span:  До трех часов отправились вверх к тому же месту.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema 139eaca0dc76336cf43eaad18da43e9392a0f1164742230e97f0c6c926461bff, closed set):\n1. «вверх» gives the direction of «отправились»; «к тому же месту» names that SAME intended destination, whose identity may remain unknown\n2. The source does not establish that the direction and goal phrase describe the same intended destination; retain separate scope alternatives\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"SHARED_TARGET\"\n2 = \"OTHER\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "1\n",
+      "sha256": "d9833ca9f8cc53ec74b9ae1d8ac3f8e07cfd07627ad9fea68d14d4e297e8a1cc"
+    },
+    {
+      "run": "diary_continuity_final28",
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nAlready established interpretation constraints: «в шлюпках» attaches to «Покатались» (previous resolved local question). Evaluate the remaining composition subject to these constraints; do not ask again which of those already selected hosts was intended. These constraints do not assert world facts. \n\nDecision slot: component_attachment — predicate value of frame region:ff62f765d968c295276c38bf6b336fb356d64b849e3695420568e0adcb162d0e|composition\nContext span:  Покатались в шлюпках.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema 139eaca0dc76336cf43eaad18da43e9392a0f1164742230e97f0c6c926461bff, closed set):\n1. покататься [VERB]; ; linked morphology={'Покатались': {'lemma': 'покататься', 'pos': 'VERB', 'cases': [], 'number': 'plur', 'gender': None}}; omitted roles, identity unresolved=['SUBJECT'] -> в [PREP]; SURFACE_ARG=шлюпках; linked morphology={'в': {'lemma': 'в', 'pos': 'PREP', 'cases': [], 'number': None, 'gender': None}, 'шлюпках': {'lemma': 'шлюпка', 'pos': 'NOUN', 'cases': ['loc'], 'number': 'plur', 'gender': 'femn'}}; event modifiers wrap propositions; nominal descriptions attach ONLY to their named entity hosts\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"component-modifier:d4d098d22f280ca65545b6a1d52db48f97aa9ab82003deffddab299ec441be05\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "1\n",
+      "sha256": "bb95c18d8979c0e5b6b9c1a9144d51690af180cb8bf4df4587db54299498e191"
+    },
+    {
+      "run": "diary_continuity_final28",
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nChoose the immediate grammatical attachment of «чай» at 235. GENITIVE and CASE_DEPENDENCY record nominal grammar, not ownership, command, identity or a guessed semantic relation. CASE_DEPENDENCY is allowed only if the dependent completes that noun in this source, not merely because its case is compatible. APPOSITION records an explanation, not entity identity. Already fixed dependencies: []. Preserve ambiguity if evidence is insufficient.\n\nDecision slot: nominal_dependency — predicate value of frame region:ad58e2ce9d9b01da842269780a6b9d8dbf1c6a253c52d9bceaca67c3a25fd2f1|dependency:009849a18b173aa91b6188a3ddb2d81e92eb4944e47d2e539ca9f590933fe264\nContext span: Первый день без дождя. Перед докладом принял Рузского. Дочери приехали к завтраку в палатке, Алексей поехал к Аликс к завтраку. До трех часов отправились вверх к тому же месту. Покатались в шлюпках. Пил чай и обедал с Аликс. Вечером прошло несколько ливней.\n\n\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema 139eaca0dc76336cf43eaad18da43e9392a0f1164742230e97f0c6c926461bff, closed set):\n1. Direct role SUBJECT of predicate «Пил»; whole reading={'lemma': 'чай', 'pos': 'NOUN', 'cases': ['nom'], 'number': 'sing', 'gender': 'masc'}\n2. Direct role OBJECT of predicate «Пил»; whole reading={'lemma': 'чай', 'pos': 'NOUN', 'cases': ['acc'], 'number': 'sing', 'gender': 'masc'}\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"73f38a16f614fd1df9f528ffbbf50af996fc169081398659f84f6aea42f3c23f\"\n2 = \"2dbeb047601ed7639b40ea9ddb4584acaeffd4ef34686903e6afc3060152d8c5\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "2\n",
+      "sha256": "7c0363cf114f687376652e735dc8e7340a148d7a8696750865a226ed297754ed"
+    },
+    {
+      "run": "diary_continuity_final28",
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nChoose a case reading only if this source supports an unchanged proper name governed by the preposition. The released cases are possibilities, not proof. Do not correct spelling, infer gender/identity, or turn every case error into an indeclinable name. Otherwise choose KEEP_SOURCE_ANALYSIS or ?.\n\nDecision slot: contextual_morphology — predicate value of frame region:7f0aa0eea685b46ba2143035a5352f80e74056e8d6d2af268edd15f312681306|preposition-name-case:b15e96984421897ebaf8cf438a2beecc146866f86ce22a522df6b1503ea13392\nContext span:  обедал с Аликс.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema 139eaca0dc76336cf43eaad18da43e9392a0f1164742230e97f0c6c926461bff, closed set):\n1. Unchanged proper-name surface «Аликс» is the nominal complement of «с» with case=gen; dictionary reading insufficient for this occurrence; gender and identity unknown\n2. Unchanged proper-name surface «Аликс» is the nominal complement of «с» with case=acc; dictionary reading insufficient for this occurrence; gender and identity unknown\n3. Unchanged proper-name surface «Аликс» is the nominal complement of «с» with case=abl; dictionary reading insufficient for this occurrence; gender and identity unknown\n4. No supported unchanged-name reading; retain the source analysis\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"75d022688108ba1925d06ab1acfaf2097dcc126173d8a11ee49096325a819f74\"\n2 = \"4cd45609c936e4aed743309c3ecd6fd63549c28d42e7c62d449426d561af402e\"\n3 = \"9fd1475ec61acf835f6dc0be73d07830cc02c1c371965b3bb85ece3babbd26bd\"\n4 = \"KEEP_SOURCE_ANALYSIS\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "3\n",
+      "sha256": "ba2a9722bbe5a37ac519132200218458bc6da34d511cd3257e84e80f6d0298db"
+    },
+    {
+      "run": "diary_continuity_final28",
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nAlready established interpretation constraints: «с Аликс» attaches to «обедал» (previous resolved local question). Evaluate the remaining composition subject to these constraints; do not ask again which of those already selected hosts was intended. These constraints do not assert world facts. \n\nDecision slot: component_attachment — predicate value of frame region:7f0aa0eea685b46ba2143035a5352f80e74056e8d6d2af268edd15f312681306|composition\nContext span:  обедал с Аликс.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema 139eaca0dc76336cf43eaad18da43e9392a0f1164742230e97f0c6c926461bff, closed set):\n1. обедать [VERB]; ; linked morphology={'обедал': {'lemma': 'обедать', 'pos': 'VERB', 'cases': [], 'number': 'sing', 'gender': 'masc'}}; omitted roles, identity unresolved=['SUBJECT'] -> с [PREP]; SURFACE_ARG=Аликс; linked morphology={'с': {'lemma': 'с', 'pos': 'PREP', 'cases': [], 'number': None, 'gender': None}, 'Аликс': {'lemma': 'аликс', 'pos': 'NOUN', 'cases': ['abl'], 'number': 'sing', 'gender': None}}; event modifiers wrap propositions; nominal descriptions attach ONLY to their named entity hosts\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"component-modifier:5161f00a4361fe3021ef2aa2c8ea381358f16e9f08e90ca7a6e16b6ff91059e0\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "1\n",
+      "sha256": "c760a8131f4fe24731a9d1a73408152ca4c2d6f05c6ee4a55f1598b65d242c04"
+    },
+    {
+      "run": "diary_continuity_final28",
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nWhich clauses does each modifier actually describe here? 1 = «Пил чай»; 2 = «обедал с Аликс.». Local nesting is already fixed; shared lifting may not reverse it. Participant identities are a separate question.\n\nDecision slot: coordination — predicate value of frame region:3f36c7d1cce890b0cc5e03cc6640429bd9957ec5dd9d25da6b9faab7a5347ed4|coordination\nContext span:  Пил чай и обедал с Аликс.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema 139eaca0dc76336cf43eaad18da43e9392a0f1164742230e97f0c6c926461bff, closed set):\n1. M1 «с Аликс» (from clause 2) applies to only clause 2\n2. M1 «с Аликс» (from clause 2) applies to both clauses\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"coordination:ad0e5a8dd4222316b8fede08a6454cd982f2135c0d7b52471c4313ad5e9043ac\"\n2 = \"coordination-scope:b2ea3e76440b68da4fca8738daceef383047ffcc64b95db34535ba66a68391ba\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "?\n",
+      "sha256": "496668b48f38a77a79db32354f1e3e1775d77509dccd0e81eaf774081d69aad1"
+    },
+    {
+      "run": "diary_continuity_final28",
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nDoes the quantity expression describe the adjacent plural noun, rather than the degree of an action? Choose only from source wording; do not assign numbers.\n\nDecision slot: nominal_attachment — predicate value of frame region:ce1cbc5fd8abe9f1b2472872b2ac1805b9e99da33cd4ed0868d44390e515871c|quantity:aed8cb1b9a6b5fe03dbad28607974fffb1115cca517b5e0ba74e00a638b84ec6\nContext span:  Вечером прошло несколько ливней.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema 139eaca0dc76336cf43eaad18da43e9392a0f1164742230e97f0c6c926461bff, closed set):\n1. «несколько ливней»: quantity word describes this plural nominal group; members and numeric cardinality unspecified\n2. The quantity word does not describe this nominal group; retain original analyses\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"GROUP\"\n2 = \"OTHER\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "1\n",
+      "sha256": "8b990e6fb1aec2849a961ae7248ebce12bfb13f4576d5dbebc8923247a9d7ef1"
+    },
+    {
+      "run": "diary_continuity_final28",
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nChoose the immediate grammatical attachment of «ливней» at 282. GENITIVE and CASE_DEPENDENCY record nominal grammar, not ownership, command, identity or a guessed semantic relation. CASE_DEPENDENCY is allowed only if the dependent completes that noun in this source, not merely because its case is compatible. APPOSITION records an explanation, not entity identity. Already fixed dependencies: []. Preserve ambiguity if evidence is insufficient.\n\nDecision slot: nominal_dependency — predicate value of frame region:ce1cbc5fd8abe9f1b2472872b2ac1805b9e99da33cd4ed0868d44390e515871c|dependency:1677a098b6445e2aed6547b98c11daabc02bb613eed7dc7258edc12e26bb50f1\nContext span: Первый день без дождя. Перед докладом принял Рузского. Дочери приехали к завтраку в палатке, Алексей поехал к Аликс к завтраку. До трех часов отправились вверх к тому же месту. Покатались в шлюпках. Пил чай и обедал с Аликс. Вечером прошло несколько ливней.\n\n\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema 139eaca0dc76336cf43eaad18da43e9392a0f1164742230e97f0c6c926461bff, closed set):\n1. Direct role OBJECT of predicate «прошло»; whole reading={'lemma': 'ливень', 'pos': 'NOUN', 'cases': ['acc'], 'number': None, 'gender': None}\n2. Direct role SUBJECT of predicate «прошло»; whole reading={'lemma': 'ливень', 'pos': 'NOUN', 'cases': ['nom'], 'number': None, 'gender': None}\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"61d3122e3d309a2cc899d94c2e714d59ee1590738f104cc71851b27055b4ff94\"\n2 = \"0b9bf4ad0702f38029c6ca941a536be0250dfe09d892efc51815167096962966\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "2\n",
+      "sha256": "b2b8045b32f9fe23bae4f4cf32a6f49c914584b7be86ced9b2b5c5bd1af61886"
+    },
+    {
+      "run": "diary_continuity_final28",
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nResolve the omitted SUBJECT of the TARGET clause below, not of another clause in the context.\nTarget clause:  Перед докладом принял Рузского.\nTarget predicate: принял; source range: (54, 86)\nGrammatical features of omitted participant: {'gender': 'masc', 'number': 'sing'}\nUse the supplied narrative-area context, including later clauses, to choose a reference. An unidentified referent can still be the same participant as an earlier omitted role. A separate plural event need not reuse a preceding group. In established first-person narration it may include the narrator with unknown other members. In third-person narration do not add the narrator. Quotation, reported speech, a perspective switch or explicit continuation of another group can override the surrounding perspective. Prefer the most informative SUPPORTED candidate, not the nearest noun; membership does not identify the entire group. Compatibility alone does not establish identity; retain insufficient context when evidence is insufficient.\n\nDecision slot: implicit_argument — predicate value of frame gap:b528bc105bfaa8859a20a5d9933a7531a46f5ce785681ffc94b8f6c5a4b5edbe\nContext span: Первый день без дождя. Перед докладом принял Рузского. Дочери приехали к завтраку в палатке, Алексей поехал к Аликс к завтраку. До трех часов отправились вверх к тому же месту. Покатались в шлюпках. Пил чай и обедал с Аликс. Вечером прошло несколько ливней.\n\n\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema 139eaca0dc76336cf43eaad18da43e9392a0f1164742230e97f0c6c926461bff, closed set):\n1. Unidentified referent for SUBJECT; no antecedent established. Identity, animacy and unspecified number remain unknown. Does not identify the author/uploader or assert difference from other participants\n2. Same participant as день (identity requires contextual evidence)\n3. Same participant as дождя (identity requires contextual evidence)\n4. Current unidentified narrator of this SOURCE. A new paragraph, date heading or reading window does not change this referent. Select for first-person narration unless the text establishes a different speaker; do not confuse another character or a quotation with the narrator.\n5. A DIFFERENT unidentified narrator takes over here. Select ONLY with positive evidence of a speaker/viewpoint change, never because the paragraph, date or scene changed. An unrelated third-person action is not a narrator switch.\n6. Memory participant Previously grounded omitted individual (identity unidentified); source excerpt: йно. В два часа тридцать минут отправился на прогулку в лес за архиерейской церковью. После чая принял генерала Рузского, который снова назначается главнокомандующим Северным фронтом Обедал и провел\n7. Memory participant генерала; source excerpt: два часа тридцать минут отправился на прогулку в лес за архиерейской церковью. После чая принял генерала Рузского, который снова назначается главнокомандующим Северным фронтом Обедал и провел вечер с \nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"new:gap:b528bc105bfaa8859a20a5d9933a7531a46f5ce785681ffc94b8f6c5a4b5edbe\"\n2 = \"mention:tok:39:43\"\n3 = \"mention:tok:48:53\"\n4 = \"narrator:narrative-area:89204e603dae07c18034c7d8c3f80d487a3636c3e6a4397ac740a7d8fcdf8ade\"\n5 = \"narrator-switch:narrative-area:f9a588f02cce883819ff8e3523cdfbb588a5b1f71104b3aff0d313f629fe1db7\"\n6 = \"memory:M:implicit:011771740f8cb4798a89991b9c8605726a5823ad938f3b0bc78ad80eb2947068\"\n7 = \"memory:M:b989aab4865a8b3b0fcf8053a12ee1f4b7039a6ac8c86da648c8e23222e102b6\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "4\n",
+      "sha256": "aa56b88d144c00d7ab58f28afdd929ac3dc35ee694b617b9a34ec9e5cf8201b3"
+    },
+    {
+      "run": "diary_continuity_final28",
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nResolve the omitted SUBJECT of the TARGET clause below, not of another clause in the context.\nTarget clause:  До трех часов отправились вверх к тому же месту.\nTarget predicate: отправились; source range: (159, 208)\nGrammatical features of omitted participant: {'number': 'plur'}\nUse the supplied narrative-area context, including later clauses, to choose a reference. An unidentified referent can still be the same participant as an earlier omitted role. A separate plural event need not reuse a preceding group. In established first-person narration it may include the narrator with unknown other members. In third-person narration do not add the narrator. Quotation, reported speech, a perspective switch or explicit continuation of another group can override the surrounding perspective. Prefer the most informative SUPPORTED candidate, not the nearest noun; membership does not identify the entire group. Compatibility alone does not establish identity; retain insufficient context when evidence is insufficient.\n\nDecision slot: implicit_argument — predicate value of frame gap:cd4a7c71e97a9e23e72d30cab0d3abd0aae436d982746306540ac2f39c9364ac\nContext span: Первый день без дождя. Перед докладом принял Рузского. Дочери приехали к завтраку в палатке, Алексей поехал к Аликс к завтраку. До трех часов отправились вверх к тому же месту. Покатались в шлюпках. Пил чай и обедал с Аликс. Вечером прошло несколько ливней.\n\n\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema 139eaca0dc76336cf43eaad18da43e9392a0f1164742230e97f0c6c926461bff, closed set):\n1. Unidentified group for this clause, membership UNKNOWN; neither a particular antecedent nor narrator membership is supported for THIS clause\n2. Same participant as Дочери (identity requires contextual evidence)\n3. Separate first-person group: narrator = omitted SUBJECT at (54, 86) (принял); other members UNKNOWN. Requires supported narrator identity and perspective for this clause.\n4. Separate first-person group: narrator = Рузского; other members UNKNOWN. Requires supported narrator identity and perspective for this clause.\n5. Separate first-person group: narrator = Аликс; other members UNKNOWN. Requires supported narrator identity and perspective for this clause.\n6. Separate first-person group: narrator = Алексей; other members UNKNOWN. Requires supported narrator identity and perspective for this clause.\n7. Separate first-person group: narrator = the current unidentified narrator of this source (paragraphs, date headings and reading windows do not change the narrator); other members UNKNOWN. Requires supported narrator identity and perspective for this clause.\n8. Memory participant лес; source excerpt: сов тридцать минут. Завтракали одни семейно. В два часа тридцать минут отправился на прогулку в лес за архиерейской церковью. После чая принял генерала Рузского, который снова назначается главнок\n9. Separate first-person group: narrator = memory participant Previously grounded omitted individual (identity unidentified); source excerpt: осле чая принял генерала Рузского, который снова назначается главнокомандующим Северным фронтом Обедал и провел вечер с Аликс.; other members UNKNOWN. Requires supported narrator identity and perspective for this clause.\n10. Separate first-person group: narrator = memory participant генерала; source excerpt: два часа тридцать минут отправился на прогулку в лес за архиерейской церковью. После чая принял генерала Рузского, который снова назначается главнокомандующим Северным фронтом Обедал и провел вечер с ; other members UNKNOWN. Requires supported narrator identity and perspective for this clause.\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"new:gap:cd4a7c71e97a9e23e72d30cab0d3abd0aae436d982746306540ac2f39c9364ac\"\n2 = \"mention:tok:87:93\"\n3 = \"narrative-group:6cd7d224f54fd4b8b66153c785994084e55ca7ce778204056ef20467ddd452b6\"\n4 = \"narrative-group:e108654a7f80c8e7fea660490cc69889802e5c4ec9aaead9aaaab1383717ef01\"\n5 = \"narrative-group:a39b607b81374149fbbf122f22d78826ce9e530326c123c05c444017c6d21592\"\n6 = \"narrative-group:61bbf0e0ce10021a108f0ae9d463a53690d4d7918eada20342ef71dee84df2d7\"\n7 = \"narrative-group:98ba2a840c4011fe26116e630641684308daad62783e58881054dddabea7c15f\"\n8 = \"memory:M:dae85460b73ffaffba9e35a578460a87f96c44875745e45254e6564fa94b038f\"\n9 = \"narrative-group:0394032d5f816be6c5945f1c03fde4ee13bafb28156f1ec2ac4d98581f90ce24\"\n10 = \"narrative-group:7664818fc7b9fb89e5b35b3fc28106d90d9a1be6071ee8aa13af0302bf2d2cbf\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "3\n",
+      "sha256": "bc600cf563c93d76d00c2972b42640deffd66fbbcb12b032a69e36854e6c0d86"
+    },
+    {
+      "run": "diary_continuity_final28",
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nResolve the omitted SUBJECT of the TARGET clause below, not of another clause in the context.\nTarget clause:  Покатались в шлюпках.\nTarget predicate: Покатались; source range: (208, 230)\nGrammatical features of omitted participant: {'number': 'plur'}\nUse the supplied narrative-area context, including later clauses, to choose a reference. An unidentified referent can still be the same participant as an earlier omitted role. A separate plural event need not reuse a preceding group. In established first-person narration it may include the narrator with unknown other members. In third-person narration do not add the narrator. Quotation, reported speech, a perspective switch or explicit continuation of another group can override the surrounding perspective. Prefer the most informative SUPPORTED candidate, not the nearest noun; membership does not identify the entire group. Compatibility alone does not establish identity; retain insufficient context when evidence is insufficient.\n\nDecision slot: implicit_argument — predicate value of frame gap:62a2f29f6312dd38dd3533470d69fa60fb70e344ad1f0e6a104e66d41b8978b5\nContext span: Первый день без дождя. Перед докладом принял Рузского. Дочери приехали к завтраку в палатке, Алексей поехал к Аликс к завтраку. До трех часов отправились вверх к тому же месту. Покатались в шлюпках. Пил чай и обедал с Аликс. Вечером прошло несколько ливней.\n\n\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema 139eaca0dc76336cf43eaad18da43e9392a0f1164742230e97f0c6c926461bff, closed set):\n1. Unidentified group for this clause, membership UNKNOWN; neither a particular antecedent nor narrator membership is supported for THIS clause\n2. Same participant as Дочери (identity requires contextual evidence)\n3. Same participant as omitted SUBJECT at (159, 208) (отправились) (identity requires contextual evidence)\n4. Separate first-person group: narrator = omitted SUBJECT at (54, 86) (принял); other members UNKNOWN. Requires supported narrator identity and perspective for this clause.\n5. Separate first-person group: narrator = Рузского; other members UNKNOWN. Requires supported narrator identity and perspective for this clause.\n6. Separate first-person group: narrator = Аликс; other members UNKNOWN. Requires supported narrator identity and perspective for this clause.\n7. Separate first-person group: narrator = Алексей; other members UNKNOWN. Requires supported narrator identity and perspective for this clause.\n8. Separate first-person group: narrator = the current unidentified narrator of this source (paragraphs, date headings and reading windows do not change the narrator); other members UNKNOWN. Requires supported narrator identity and perspective for this clause.\n9. Memory participant лес; source excerpt: сов тридцать минут. Завтракали одни семейно. В два часа тридцать минут отправился на прогулку в лес за архиерейской церковью. После чая принял генерала Рузского, который снова назначается главнок\n10. Separate first-person group: narrator = memory participant Previously grounded omitted individual (identity unidentified); source excerpt: осле чая принял генерала Рузского, который снова назначается главнокомандующим Северным фронтом Обедал и провел вечер с Аликс.; other members UNKNOWN. Requires supported narrator identity and perspective for this clause.\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"new:gap:62a2f29f6312dd38dd3533470d69fa60fb70e344ad1f0e6a104e66d41b8978b5\"\n2 = \"mention:tok:87:93\"\n3 = \"gap:cd4a7c71e97a9e23e72d30cab0d3abd0aae436d982746306540ac2f39c9364ac\"\n4 = \"narrative-group:14359bd83b04212333e0370a36f28ee5b921e22bbe90fa48c3d1dff367ce9069\"\n5 = \"narrative-group:c4d2430cf6abd21041bdb0ca8c0e10f12c17e55d1948a0ce82a34925c1c1f2a2\"\n6 = \"narrative-group:50b403300ea3bb51f9c62882cc83755bc904630bdf3359bbeeb9fe8d19698541\"\n7 = \"narrative-group:0bc84ee3c1130894d008ea04b1e7ab01b8e844f0fd3430703a8de41396ac9a11\"\n8 = \"narrative-group:878b05d151a0e51a55a7d0a17d16ddac1d5d8bb92fa7e0a88c3b3823d0f22352\"\n9 = \"memory:M:dae85460b73ffaffba9e35a578460a87f96c44875745e45254e6564fa94b038f\"\n10 = \"narrative-group:2afefe03493c2ca168f4ee386cc4a4c74f979b210b9463516b4466480211f28a\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "3\n",
+      "sha256": "76d3d7370f58f181f650179bee363a1a5eff168d83be6de7a671ef4466cde007"
+    },
+    {
+      "run": "diary_continuity_final28",
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nResolve «тому же месту» as one noun group. Constraint=SAME. Select only a compatible antecedent supported by these source excerpts. Proximity and name spelling alone do not prove identity. If evidence is insufficient answer ?. Do not create an object.\n\nDecision slot: reference — predicate value of frame nominal-reference:c50b72c5afba7e919a68d111a6cbc5158d0b97c8b2901e69b79bfbe77ad15e64|referent\nContext span:  До трех часов отправились вверх к тому же месту.\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema 139eaca0dc76336cf43eaad18da43e9392a0f1164742230e97f0c6c926461bff, closed set):\n1. Previously grounded omitted individual (identity unidentified); source excerpt: осле чая принял генерала Рузского, который снова назначается главнокомандующим Северным фронтом Обедал и провел вечер с Аликс.; type=ENTITY; features=[{'gender': 'masc', 'number': 'sing'}]\n2. лес; source excerpt: сов тридцать минут. Завтракали одни семейно. В два часа тридцать минут отправился на прогулку в лес за архиерейской церковью. После чая принял генерала Рузского, который снова назначается главнок; type=ENTITY; features=[{'animacy': 'inan', 'gender': 'masc', 'number': 'sing', 'person': None}, {'animacy': 'inan', 'gender': 'masc', 'number': 'sing', 'person': None}, {'animacy': 'inan', 'gender': 'femn', 'number': 'plur', 'person': None}]\n3. Previously grounded omitted individual (identity unidentified); source excerpt: осле чая принял генерала Рузского, который снова назначается главнокомандующим Северным фронтом Обедал и провел вечер с Аликс.; type=ENTITY; features=[{'gender': 'masc', 'number': 'sing'}]\n4. Previously grounded omitted individual (identity unidentified); source excerpt: часов тридцать минут. Завтракали одни семейно. В два часа тридцать минут отправился на прогулку в лес за архиерейской церковью. После чая принял генерала Рузского, который снова назначается гла; type=ENTITY; features=[{'gender': 'masc', 'number': 'sing'}]\n5. Previously grounded omitted individual (identity unidentified); source excerpt: Двадцать седьмого июля. Среда\nПосле доклада поехал с Алексеем встречать Аликс и дочерей, прибывших в двенадцать часов тридцать минут. Завтракали одн; type=ENTITY; features=[{'gender': 'masc', 'number': 'sing'}]\n6. Previously grounded omitted individual (identity unidentified); source excerpt: йно. В два часа тридцать минут отправился на прогулку в лес за архиерейской церковью. После чая принял генерала Рузского, который снова назначается главнокомандующим Северным фронтом Обедал и провел; type=ENTITY; features=[{'gender': 'masc', 'number': 'sing'}]\n7. генерала; source excerpt: два часа тридцать минут отправился на прогулку в лес за архиерейской церковью. После чая принял генерала Рузского, который снова назначается главнокомандующим Северным фронтом Обедал и провел вечер с ; type=ENTITY; features=[{'animacy': 'anim', 'gender': 'masc', 'number': 'sing', 'person': None}, {'animacy': 'anim', 'gender': 'masc', 'number': 'sing', 'person': None}]\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"antecedent:0\"\n2 = \"antecedent:1\"\n3 = \"antecedent:2\"\n4 = \"antecedent:3\"\n5 = \"antecedent:4\"\n6 = \"antecedent:5\"\n7 = \"antecedent:6\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "?\n",
+      "sha256": "f077e23b43d0c9887f23ddca4f982ff3ca6d8f55a5970f39b15cc0914342d9af"
+    },
+    {
+      "run": "diary_continuity_clarified28",
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nResolve the omitted SUBJECT of the TARGET clause below, not of another clause in the context.\nTarget clause:  Перед докладом принял Рузского.\nTarget predicate: принял; source range: (54, 86)\nGrammatical features of omitted participant: {'gender': 'masc', 'number': 'sing'}\nUse the supplied narrative-area context, including later clauses, to choose a reference. An unidentified referent can still be the same participant as an earlier omitted role. A separate plural event need not reuse a preceding group. In established first-person narration it may include the narrator with unknown other members. In third-person narration do not add the narrator. Quotation, reported speech, a perspective switch or explicit continuation of another group can override the surrounding perspective. Prefer the most informative SUPPORTED candidate, not the nearest noun; membership does not identify the entire group. Compatibility alone does not establish identity; retain insufficient context when evidence is insufficient.\n\nDecision slot: implicit_argument — predicate value of frame gap:b528bc105bfaa8859a20a5d9933a7531a46f5ce785681ffc94b8f6c5a4b5edbe\nContext span: Первый день без дождя. Перед докладом принял Рузского. Дочери приехали к завтраку в палатке, Алексей поехал к Аликс к завтраку. До трех часов отправились вверх к тому же месту. Покатались в шлюпках. Пил чай и обедал с Аликс. Вечером прошло несколько ливней.\n\n\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema 139eaca0dc76336cf43eaad18da43e9392a0f1164742230e97f0c6c926461bff, closed set):\n1. Unidentified referent for SUBJECT; no antecedent established. Identity, animacy and unspecified number remain unknown. Does not identify the author/uploader or assert difference from other participants\n2. Same participant as день (identity requires contextual evidence)\n3. Same participant as дождя (identity requires contextual evidence)\n4. Current unidentified narrator of this SOURCE. A new paragraph, date heading or reading window does not change this referent. Select for first-person narration unless the text establishes a different speaker; do not confuse another character or a quotation with the narrator.\n5. A DIFFERENT unidentified narrator takes over here. Select ONLY with positive evidence of a speaker/viewpoint change, never because the paragraph, date or scene changed. An unrelated third-person action is not a narrator switch.\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"new:gap:b528bc105bfaa8859a20a5d9933a7531a46f5ce785681ffc94b8f6c5a4b5edbe\"\n2 = \"mention:tok:39:43\"\n3 = \"mention:tok:48:53\"\n4 = \"narrator:narrative-area:89204e603dae07c18034c7d8c3f80d487a3636c3e6a4397ac740a7d8fcdf8ade\"\n5 = \"narrator-switch:narrative-area:f9a588f02cce883819ff8e3523cdfbb588a5b1f71104b3aff0d313f629fe1db7\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "4\n",
+      "sha256": "88758c08a96dcdab45696106416ef500c9e15d1347eaea78d1e20642d5fd3800"
+    },
+    {
+      "run": "diary_continuity_clarified28",
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nResolve the omitted SUBJECT of the TARGET clause below, not of another clause in the context.\nTarget clause:  До трех часов отправились вверх к тому же месту.\nTarget predicate: отправились; source range: (159, 208)\nGrammatical features of omitted participant: {'number': 'plur'}\nUse the supplied narrative-area context, including later clauses, to choose a reference. An unidentified referent can still be the same participant as an earlier omitted role. A separate plural event need not reuse a preceding group. In established first-person narration it may include the narrator with unknown other members. In third-person narration do not add the narrator. Quotation, reported speech, a perspective switch or explicit continuation of another group can override the surrounding perspective. Prefer the most informative SUPPORTED candidate, not the nearest noun; membership does not identify the entire group. Compatibility alone does not establish identity; retain insufficient context when evidence is insufficient.\n\nDecision slot: implicit_argument — predicate value of frame gap:cd4a7c71e97a9e23e72d30cab0d3abd0aae436d982746306540ac2f39c9364ac\nContext span: Первый день без дождя. Перед докладом принял Рузского. Дочери приехали к завтраку в палатке, Алексей поехал к Аликс к завтраку. До трех часов отправились вверх к тому же месту. Покатались в шлюпках. Пил чай и обедал с Аликс. Вечером прошло несколько ливней.\n\n\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema 139eaca0dc76336cf43eaad18da43e9392a0f1164742230e97f0c6c926461bff, closed set):\n1. Unidentified group for this clause, membership UNKNOWN; neither a particular antecedent nor narrator membership is supported for THIS clause\n2. Same participant as Дочери (identity requires contextual evidence)\n3. Separate first-person group: narrator = omitted SUBJECT at (54, 86) (принял); other members UNKNOWN. Requires supported narrator identity and perspective for this clause.\n4. Separate first-person group: narrator = Рузского; other members UNKNOWN. Requires supported narrator identity and perspective for this clause.\n5. Separate first-person group: narrator = Аликс; other members UNKNOWN. Requires supported narrator identity and perspective for this clause.\n6. Separate first-person group: narrator = Алексей; other members UNKNOWN. Requires supported narrator identity and perspective for this clause.\n7. Separate first-person group: narrator = the current unidentified narrator of this source (paragraphs, date headings and reading windows do not change the narrator); other members UNKNOWN. Requires supported narrator identity and perspective for this clause.\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"new:gap:cd4a7c71e97a9e23e72d30cab0d3abd0aae436d982746306540ac2f39c9364ac\"\n2 = \"mention:tok:87:93\"\n3 = \"narrative-group:6cd7d224f54fd4b8b66153c785994084e55ca7ce778204056ef20467ddd452b6\"\n4 = \"narrative-group:e108654a7f80c8e7fea660490cc69889802e5c4ec9aaead9aaaab1383717ef01\"\n5 = \"narrative-group:a39b607b81374149fbbf122f22d78826ce9e530326c123c05c444017c6d21592\"\n6 = \"narrative-group:61bbf0e0ce10021a108f0ae9d463a53690d4d7918eada20342ef71dee84df2d7\"\n7 = \"narrative-group:98ba2a840c4011fe26116e630641684308daad62783e58881054dddabea7c15f\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "3\n",
+      "sha256": "d8d6755a182fc6e76cd0cc5bd312835a5c4372733209c8806c9b8a3d659811e1"
+    },
+    {
+      "run": "diary_continuity_clarified28",
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nResolve the omitted SUBJECT of the TARGET clause below, not of another clause in the context.\nTarget clause:  Покатались в шлюпках.\nTarget predicate: Покатались; source range: (208, 230)\nGrammatical features of omitted participant: {'number': 'plur'}\nUse the supplied narrative-area context, including later clauses, to choose a reference. An unidentified referent can still be the same participant as an earlier omitted role. A separate plural event need not reuse a preceding group. In established first-person narration it may include the narrator with unknown other members. In third-person narration do not add the narrator. Quotation, reported speech, a perspective switch or explicit continuation of another group can override the surrounding perspective. Prefer the most informative SUPPORTED candidate, not the nearest noun; membership does not identify the entire group. Compatibility alone does not establish identity; retain insufficient context when evidence is insufficient.\n\nDecision slot: implicit_argument — predicate value of frame gap:62a2f29f6312dd38dd3533470d69fa60fb70e344ad1f0e6a104e66d41b8978b5\nContext span: Первый день без дождя. Перед докладом принял Рузского. Дочери приехали к завтраку в палатке, Алексей поехал к Аликс к завтраку. До трех часов отправились вверх к тому же месту. Покатались в шлюпках. Пил чай и обедал с Аликс. Вечером прошло несколько ливней.\n\n\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema 139eaca0dc76336cf43eaad18da43e9392a0f1164742230e97f0c6c926461bff, closed set):\n1. Unidentified group for this clause, membership UNKNOWN; neither a particular antecedent nor narrator membership is supported for THIS clause\n2. Same participant as Дочери (identity requires contextual evidence)\n3. Same participant as omitted SUBJECT at (159, 208) (отправились) (identity requires contextual evidence)\n4. Separate first-person group: narrator = omitted SUBJECT at (54, 86) (принял); other members UNKNOWN. Requires supported narrator identity and perspective for this clause.\n5. Separate first-person group: narrator = Рузского; other members UNKNOWN. Requires supported narrator identity and perspective for this clause.\n6. Separate first-person group: narrator = Аликс; other members UNKNOWN. Requires supported narrator identity and perspective for this clause.\n7. Separate first-person group: narrator = Алексей; other members UNKNOWN. Requires supported narrator identity and perspective for this clause.\n8. Separate first-person group: narrator = the current unidentified narrator of this source (paragraphs, date headings and reading windows do not change the narrator); other members UNKNOWN. Requires supported narrator identity and perspective for this clause.\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"new:gap:62a2f29f6312dd38dd3533470d69fa60fb70e344ad1f0e6a104e66d41b8978b5\"\n2 = \"mention:tok:87:93\"\n3 = \"gap:cd4a7c71e97a9e23e72d30cab0d3abd0aae436d982746306540ac2f39c9364ac\"\n4 = \"narrative-group:14359bd83b04212333e0370a36f28ee5b921e22bbe90fa48c3d1dff367ce9069\"\n5 = \"narrative-group:c4d2430cf6abd21041bdb0ca8c0e10f12c17e55d1948a0ce82a34925c1c1f2a2\"\n6 = \"narrative-group:50b403300ea3bb51f9c62882cc83755bc904630bdf3359bbeeb9fe8d19698541\"\n7 = \"narrative-group:0bc84ee3c1130894d008ea04b1e7ab01b8e844f0fd3430703a8de41396ac9a11\"\n8 = \"narrative-group:878b05d151a0e51a55a7d0a17d16ddac1d5d8bb92fa7e0a88c3b3823d0f22352\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "3\n",
+      "sha256": "2b8d8b78b64511aa42a3bef0e9e3efb8c27ede3174f16424f7311e2ab25d286c"
+    },
+    {
+      "run": "diary_continuity_clarified28",
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nResolve the omitted SUBJECT of the TARGET clause below, not of another clause in the context.\nTarget clause:  Пил чай \nTarget predicate: Пил; source range: (230, 239)\nGrammatical features of omitted participant: {'gender': 'masc', 'number': 'sing'}\nUse the supplied narrative-area context, including later clauses, to choose a reference. An unidentified referent can still be the same participant as an earlier omitted role. A separate plural event need not reuse a preceding group. In established first-person narration it may include the narrator with unknown other members. In third-person narration do not add the narrator. Quotation, reported speech, a perspective switch or explicit continuation of another group can override the surrounding perspective. Prefer the most informative SUPPORTED candidate, not the nearest noun; membership does not identify the entire group. Compatibility alone does not establish identity; retain insufficient context when evidence is insufficient.\n\nDecision slot: implicit_argument — predicate value of frame gap:55cbfac1a2d50fce61321749336985a7483aa176bf669e7a31b1dd1cb7f03045\nContext span: Первый день без дождя. Перед докладом принял Рузского. Дочери приехали к завтраку в палатке, Алексей поехал к Аликс к завтраку. До трех часов отправились вверх к тому же месту. Покатались в шлюпках. Пил чай и обедал с Аликс. Вечером прошло несколько ливней.\n\n\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema 139eaca0dc76336cf43eaad18da43e9392a0f1164742230e97f0c6c926461bff, closed set):\n1. Unidentified referent for SUBJECT; no antecedent established. Identity, animacy and unspecified number remain unknown. Does not identify the author/uploader or assert difference from other participants\n2. Same participant as день (identity requires contextual evidence)\n3. Same participant as дождя (identity requires contextual evidence)\n4. Same participant as omitted SUBJECT at (54, 86) (принял) (identity requires contextual evidence)\n5. Same participant as Рузского (identity requires contextual evidence)\n6. Same participant as завтраку (identity requires contextual evidence)\n7. Same participant as завтраку (identity requires contextual evidence)\n8. Same participant as Аликс (identity requires contextual evidence)\n9. Same participant as Алексей (identity requires contextual evidence)\n10. Current unidentified narrator of this SOURCE. A new paragraph, date heading or reading window does not change this referent. Select for first-person narration unless the text establishes a different speaker; do not confuse another character or a quotation with the narrator.\n11. A DIFFERENT unidentified narrator takes over here. Select ONLY with positive evidence of a speaker/viewpoint change, never because the paragraph, date or scene changed. An unrelated third-person action is not a narrator switch.\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"new:gap:55cbfac1a2d50fce61321749336985a7483aa176bf669e7a31b1dd1cb7f03045\"\n2 = \"mention:tok:39:43\"\n3 = \"mention:tok:48:53\"\n4 = \"gap:b528bc105bfaa8859a20a5d9933a7531a46f5ce785681ffc94b8f6c5a4b5edbe\"\n5 = \"mention:tok:77:85\"\n6 = \"mention:tok:105:113\"\n7 = \"mention:tok:150:158\"\n8 = \"mention:tok:142:147\"\n9 = \"mention:tok:125:132\"\n10 = \"narrator:narrative-area:89204e603dae07c18034c7d8c3f80d487a3636c3e6a4397ac740a7d8fcdf8ade\"\n11 = \"narrator-switch:narrative-area:d1be07ab27217628a60baa27220ba134b2aeb27cfb3235596001d7c10114b94b\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "4\n",
+      "sha256": "de9bea7e2d1fc345d90347326c43529ff7c12e8a012b2c1a7623b6200b40f80e"
+    },
+    {
+      "run": "diary_continuity_clarified28",
+      "request": {
+        "prompt": "Choose only interpretations positively supported by this source and supplied context. Generated alternatives are not evidence. Multiple choices need support for EACH. If context cannot discriminate, answer ?. Do not invent context, identities or facts.\nResolve the omitted SUBJECT of the TARGET clause below, not of another clause in the context.\nTarget clause:  обедал с Аликс.\nTarget predicate: обедал; source range: (240, 256)\nGrammatical features of omitted participant: {'gender': 'masc', 'number': 'sing'}\nUse the supplied narrative-area context, including later clauses, to choose a reference. An unidentified referent can still be the same participant as an earlier omitted role. A separate plural event need not reuse a preceding group. In established first-person narration it may include the narrator with unknown other members. In third-person narration do not add the narrator. Quotation, reported speech, a perspective switch or explicit continuation of another group can override the surrounding perspective. Prefer the most informative SUPPORTED candidate, not the nearest noun; membership does not identify the entire group. Compatibility alone does not establish identity; retain insufficient context when evidence is insufficient.\n\nDecision slot: implicit_argument — predicate value of frame gap:a4a67fe86e0bd29229b26ca95556c2e7dea32d36d9a90d39c09fe76b3b1ee387\nContext span: Первый день без дождя. Перед докладом принял Рузского. Дочери приехали к завтраку в палатке, Алексей поехал к Аликс к завтраку. До трех часов отправились вверх к тому же месту. Покатались в шлюпках. Пил чай и обедал с Аликс. Вечером прошло несколько ливней.\n\n\nDeclared contextual statements: none\nMentions and preliminary structural links:\n\nCandidates (schema 139eaca0dc76336cf43eaad18da43e9392a0f1164742230e97f0c6c926461bff, closed set):\n1. Unidentified referent for SUBJECT; no antecedent established. Identity, animacy and unspecified number remain unknown. Does not identify the author/uploader or assert difference from other participants\n2. Same participant as день (identity requires contextual evidence)\n3. Same participant as дождя (identity requires contextual evidence)\n4. Same participant as omitted SUBJECT at (54, 86) (принял) (identity requires contextual evidence)\n5. Same participant as Рузского (identity requires contextual evidence)\n6. Same participant as завтраку (identity requires contextual evidence)\n7. Same participant as завтраку (identity requires contextual evidence)\n8. Same participant as Аликс (identity requires contextual evidence)\n9. Same participant as Алексей (identity requires contextual evidence)\n10. Same participant as omitted SUBJECT at (230, 239) (Пил) (identity requires contextual evidence)\n11. Same participant as чай (identity requires contextual evidence)\n12. Current unidentified narrator of this SOURCE. A new paragraph, date heading or reading window does not change this referent. Select for first-person narration unless the text establishes a different speaker; do not confuse another character or a quotation with the narrator.\n13. A DIFFERENT unidentified narrator takes over here. Select ONLY with positive evidence of a speaker/viewpoint change, never because the paragraph, date or scene changed. An unrelated third-person action is not a narrator switch.\nTask: select admissible candidates, or report no fit / insufficient context.\nResponse protocol: SELECT_LABELS_V1\nClosed candidate labels:\n1 = \"new:gap:a4a67fe86e0bd29229b26ca95556c2e7dea32d36d9a90d39c09fe76b3b1ee387\"\n2 = \"mention:tok:39:43\"\n3 = \"mention:tok:48:53\"\n4 = \"gap:b528bc105bfaa8859a20a5d9933a7531a46f5ce785681ffc94b8f6c5a4b5edbe\"\n5 = \"mention:tok:77:85\"\n6 = \"mention:tok:105:113\"\n7 = \"mention:tok:150:158\"\n8 = \"mention:tok:142:147\"\n9 = \"mention:tok:125:132\"\n10 = \"gap:55cbfac1a2d50fce61321749336985a7483aa176bf669e7a31b1dd1cb7f03045\"\n11 = \"mention:tok:235:238\"\n12 = \"narrator:narrative-area:89204e603dae07c18034c7d8c3f80d487a3636c3e6a4397ac740a7d8fcdf8ade\"\n13 = \"narrator-switch:narrative-area:e3c1b7c6cff25aec4b06074cccbfaf05a8a5757b6ed99cb288c3b1910cee34f5\"\nReply with one line only. One admissible candidate: its numeric label (ONE_SELECTED). Multiple admissible candidates: their distinct labels separated by commas, without spaces (MULTIPLE_ADMISSIBLE). Insufficient context: ? (INSUFFICIENT_CONTEXT). No candidate fits: 0 (NONE_FIT). Use only the labels above. No JSON, prose, explanation or code fence.",
+        "system": "You are a bounded language-protocol worker. Follow ONLY the exact response format in the request. For syntax proposals use declared token references, kinds and roles; declare local graph labels exactly as the grammar specifies. Syntax proposals do not assert that their contents are true. For selection return only the requested wire representation of choices from the closed candidate set. Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations.",
+        "role": "formalizer",
+        "override": {
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": 0,
+          "max_new_tokens": 4096,
+          "enable_thinking": false
+        }
+      },
+      "response": "10\n",
+      "sha256": "77ea2b3aee80495ea3c5f5e6eb8deae16d2680c4be7b944ae93e079049adc9c7"
+    }
+  ],
+  "selection": {
+    "source": "user clarification in chat 2026-10-13",
+    "wording": "3. совместные действия. Работай",
+    "meaning": "Пил чай и обедал с Аликс: с Аликс относится к обоим действиям",
+    "request_id": "dc521fee347d2b5fc02f0cc70623f1038bc36f5662ee1f46a5d38c945e4adecc",
+    "option": {
+      "candidate_id": "coordination-scope:b2ea3e76440b68da4fca8738daceef383047ffcc64b95db34535ba66a68391ba",
+      "label": "M1 «с Аликс» (from clause 2) applies to both clauses"
+    },
+    "resolution_key": "v7:dc521fee347d2b5fc02f0cc70623f1038bc36f5662ee1f46a5d38c945e4adecc:3fad7476c74e216e6364bfeff896c88d28bf1e83c472f7a6baf3113993910988"
+  },
+  "durable_selection": {
+    "kind": "CLARIFICATION_SELECTED",
+    "observation_id": "observation:ecc50626141e73ed8b7e934b83edf24c10e31880bd1a66c950ed6952364154aa",
+    "option_hash": "3fad7476c74e216e6364bfeff896c88d28bf1e83c472f7a6baf3113993910988",
+    "previous_version": 1,
+    "request_id": "dc521fee347d2b5fc02f0cc70623f1038bc36f5662ee1f46a5d38c945e4adecc",
+    "run_id": "run:146edf628b02bb9173b335f2a61406e4b96dd481230a80014103ecf0daf46386",
+    "selection_id": "clarification:b0cda7b6b71b640df689026403ce37aab20c5586d1f505ccd6b03bdd82c73324",
+    "target_version": 2
+  },
+  "selection_input_changes_sha256": "b953cccd8bfd3c75e297ee8b892de5748a83a57b87d4da0605bd92720ef1e3f8",
+  "report": {
+    "observation_id": "observation:ecc50626141e73ed8b7e934b83edf24c10e31880bd1a66c950ed6952364154aa",
+    "version": 2,
+    "run_id": "run:146edf628b02bb9173b335f2a61406e4b96dd481230a80014103ecf0daf46386",
+    "binding_ok": true,
+    "t5_eligibility": "OK",
+    "committed_fragments": [
+      "component-modifier:1d7de39efb186952820654cb29b62c0e8e062dc739384ee29a26d4d83f506c45",
+      "component-modifier:8cf79ad6c980ff104cee9af6c790a57214cba4f3ae69498a22b68fb9c79986c3",
+      "component-modifier:d4d098d22f280ca65545b6a1d52db48f97aa9ab82003deffddab299ec441be05",
+      "component-nominal:c741ec8e36deaf3f8b08fc5d5089c6a130e72a16716a331c0eac006673c1dbeb",
+      "component-nominal:cfd108573cc3798c7d45e314f0aaa86c4c61f75a813b7b15be9eb98a9175073d",
+      "component-scope:3ee1944639c88082a456ee33a217380feee52025157095eeabb490ec52630fc7",
+      "component:42e415e6ecf55f37423faf5fe2d01def633e1f315f4e36f29c1e2c17e86a9aad",
+      "logical:321efa43ac7b1c9e"
+    ],
+    "applied": true,
+    "terminal": "APPLIED",
+    "batch_hash": "a5e6b1263f4b4c7333d1439816745916c7a37d1bc8caa394446c9d7ce2954fc5",
+    "diagnostics": [],
+    "node_refs": [
+      "G:dbe5fdd12db6d41af362c426f70bac631222f999b649eef0615b3eb9b4e3b744",
+      "N:21e6359c55ba38bcfc9071c2229549dbc320fb6b6d990e68aa11ce884a14ae2c",
+      "N:278601f185931f23ccdf2e31585c30618a50cac76357438933a140b2d88bd0d1",
+      "N:75e54ac3be419bf1240a95cabd5a6f1f1d94927d1784980409bf1e830855329a",
+      "N:7e145ad26e8015122b9b8da0af22562517281114c9ad4d4dd0ef6412787ea57d",
+      "N:a00f7e538744e304ff64ba0c5dafbd817928186fd79731f7c833f98851741af4",
+      "N:dd37cb7d56bf5d6d97356f458452150284ddb3c3e1ccdc4effa7e24aed0fe68d",
+      "N:e24e19603eca1e5b8777ae410c113738a4ab78ac025e8dc9b86f991716bb223a",
+      "N:e472ea0298b5478e86e9a83958624458e355036a24d01747b32e0403f34a121f",
+      "N:f324178976df825d8504f4bb9570049bea257f727e200c7fa307ae9cdc97fa9a"
+    ]
+  },
+  "implicit_bindings": {
+    "gap:b528bc105bfaa8859a20a5d9933a7531a46f5ce785681ffc94b8f6c5a4b5edbe": {
+      "entity_ref": "M:narrator:16f71f1d4eaa53d810cb47ec1c1c93d66f938b37f24064ced968fa98e576d0d4",
+      "participant_kind": "INDIVIDUAL",
+      "perspective": "FIRST_PERSON",
+      "narrative_scope_ref": "narrative-area:89204e603dae07c18034c7d8c3f80d487a3636c3e6a4397ac740a7d8fcdf8ade",
+      "perspective_source_range": [
+        32,
+        291
+      ],
+      "anonymous": true,
+      "decision_ref": "gap:b528bc105bfaa8859a20a5d9933a7531a46f5ce785681ffc94b8f6c5a4b5edbe",
+      "features": {
+        "gender": "masc",
+        "number": "sing"
+      }
+    },
+    "gap:cd4a7c71e97a9e23e72d30cab0d3abd0aae436d982746306540ac2f39c9364ac": {
+      "entity_ref": "M:implicit:cefbb8c8455d01c517e89800cf466d83149df67c06b2c4215e3bdfefb7259a59",
+      "participant_kind": "GROUP",
+      "anonymous": true,
+      "known_members": [
+        {
+          "entity_ref": "M:narrator:16f71f1d4eaa53d810cb47ec1c1c93d66f938b37f24064ced968fa98e576d0d4",
+          "participant_kind": "INDIVIDUAL",
+          "perspective": "FIRST_PERSON",
+          "narrative_scope_ref": "narrative-area:89204e603dae07c18034c7d8c3f80d487a3636c3e6a4397ac740a7d8fcdf8ade",
+          "perspective_source_range": [
+            32,
+            291
+          ],
+          "anonymous": true,
+          "decision_ref": "gap:b528bc105bfaa8859a20a5d9933a7531a46f5ce785681ffc94b8f6c5a4b5edbe",
+          "features": {
+            "number": "sing"
+          }
+        }
+      ],
+      "perspective": "FIRST_PERSON",
+      "perspective_source_range": [
+        32,
+        291
+      ],
+      "decision_ref": "gap:cd4a7c71e97a9e23e72d30cab0d3abd0aae436d982746306540ac2f39c9364ac",
+      "features": {
+        "number": "plur"
+      }
+    },
+    "gap:62a2f29f6312dd38dd3533470d69fa60fb70e344ad1f0e6a104e66d41b8978b5": {
+      "entity_ref": "M:implicit:cefbb8c8455d01c517e89800cf466d83149df67c06b2c4215e3bdfefb7259a59",
+      "participant_kind": "GROUP",
+      "anonymous": true,
+      "known_members": [
+        {
+          "entity_ref": "M:narrator:16f71f1d4eaa53d810cb47ec1c1c93d66f938b37f24064ced968fa98e576d0d4",
+          "participant_kind": "INDIVIDUAL",
+          "perspective": "FIRST_PERSON",
+          "narrative_scope_ref": "narrative-area:89204e603dae07c18034c7d8c3f80d487a3636c3e6a4397ac740a7d8fcdf8ade",
+          "perspective_source_range": [
+            32,
+            291
+          ],
+          "anonymous": true,
+          "decision_ref": "gap:b528bc105bfaa8859a20a5d9933a7531a46f5ce785681ffc94b8f6c5a4b5edbe",
+          "features": {
+            "number": "sing"
+          }
+        }
+      ],
+      "perspective": "FIRST_PERSON",
+      "perspective_source_range": [
+        32,
+        291
+      ],
+      "decision_ref": "gap:62a2f29f6312dd38dd3533470d69fa60fb70e344ad1f0e6a104e66d41b8978b5",
+      "features": {
+        "number": "plur"
+      }
+    },
+    "gap:55cbfac1a2d50fce61321749336985a7483aa176bf669e7a31b1dd1cb7f03045": {
+      "entity_ref": "M:narrator:16f71f1d4eaa53d810cb47ec1c1c93d66f938b37f24064ced968fa98e576d0d4",
+      "participant_kind": "INDIVIDUAL",
+      "perspective": "FIRST_PERSON",
+      "narrative_scope_ref": "narrative-area:89204e603dae07c18034c7d8c3f80d487a3636c3e6a4397ac740a7d8fcdf8ade",
+      "perspective_source_range": [
+        32,
+        291
+      ],
+      "anonymous": true,
+      "decision_ref": "gap:55cbfac1a2d50fce61321749336985a7483aa176bf669e7a31b1dd1cb7f03045",
+      "features": {
+        "gender": "masc",
+        "number": "sing"
+      }
+    },
+    "gap:a4a67fe86e0bd29229b26ca95556c2e7dea32d36d9a90d39c09fe76b3b1ee387": {
+      "entity_ref": "M:narrator:16f71f1d4eaa53d810cb47ec1c1c93d66f938b37f24064ced968fa98e576d0d4",
+      "participant_kind": "INDIVIDUAL",
+      "perspective": "FIRST_PERSON",
+      "narrative_scope_ref": "narrative-area:89204e603dae07c18034c7d8c3f80d487a3636c3e6a4397ac740a7d8fcdf8ade",
+      "perspective_source_range": [
+        32,
+        291
+      ],
+      "anonymous": true,
+      "decision_ref": "gap:a4a67fe86e0bd29229b26ca95556c2e7dea32d36d9a90d39c09fe76b3b1ee387",
+      "features": {
+        "gender": "masc",
+        "number": "sing"
+      }
+    }
+  },
+  "nodes": {
+    "G:dbe5fdd12db6d41af362c426f70bac631222f999b649eef0615b3eb9b4e3b744": {
+      "content_key": "a7168f81271a304ae8ced3c7971b6f77c97d66f7e62c0d87a283c04d5fa3c5e9",
+      "function_id": "BEFORE",
+      "op_id": "ENSURE_FUNCTION:G:dbe5fdd12db6d41af362c426f70bac631222f999b649eef0615b3eb9b4e3b744",
+      "operands": [
+        "N:e24e19603eca1e5b8777ae410c113738a4ab78ac025e8dc9b86f991716bb223a",
+        "N:event-anchor:d173ae80b919a812f9f481134dbbcb7069e9a2508dca89ec4315d77de7a4e421"
+      ],
+      "polarity": true,
+      "source_tag": [
+        "observation:ecc50626141e73ed8b7e934b83edf24c10e31880bd1a66c950ed6952364154aa",
+        1
+      ],
+      "uid": "G:dbe5fdd12db6d41af362c426f70bac631222f999b649eef0615b3eb9b4e3b744"
+    },
+    "N:0101126df89cf2e9ba45a7acbcf3ab888117c498e0f8c9cdb5d970e20e360766": {
+      "actants": {
+        "OBJECT": "M:b193a499c4c832694f3ecad7d9cf1f709cc46c9cdc1e137a67edc0dec2d8a9d5",
+        "SUBJECT": "M:narrator:16f71f1d4eaa53d810cb47ec1c1c93d66f938b37f24064ced968fa98e576d0d4"
+      },
+      "content_key": "53f5d78d2d4a2e117b56a22b3c92a13f003d50d327ddf24b7afb2275b968e70a",
+      "identity_key": [
+        "53f5d78d2d4a2e117b56a22b3c92a13f003d50d327ddf24b7afb2275b968e70a",
+        "observation:ecc50626141e73ed8b7e934b83edf24c10e31880bd1a66c950ed6952364154aa",
+        "tok:231:234"
+      ],
+      "op_id": "ENSURE_NODE:N:0101126df89cf2e9ba45a7acbcf3ab888117c498e0f8c9cdb5d970e20e360766",
+      "polarity": true,
+      "proposition": {
+        "actants": {
+          "OBJECT": "M:b193a499c4c832694f3ecad7d9cf1f709cc46c9cdc1e137a67edc0dec2d8a9d5",
+          "SUBJECT": "M:narrator:16f71f1d4eaa53d810cb47ec1c1c93d66f938b37f24064ced968fa98e576d0d4"
+        },
+        "predicate": "T:open:30ca6863ea82f1b0c827c144584dab6962548847b87cbd7bd13f2750c1493752"
+      },
+      "semantic_status": "UNLINKED",
+      "source_ref": "tok:231:234",
+      "source_tag": [
+        "observation:ecc50626141e73ed8b7e934b83edf24c10e31880bd1a66c950ed6952364154aa",
+        2
+      ],
+      "template_ref": "T:open:30ca6863ea82f1b0c827c144584dab6962548847b87cbd7bd13f2750c1493752",
+      "temporal_mode": "UNKNOWN",
+      "uid": "N:0101126df89cf2e9ba45a7acbcf3ab888117c498e0f8c9cdb5d970e20e360766"
+    },
+    "N:1e5ba37163d3e3506645c0c7bcfc6250f6604f4023bb4608e10d2c102c6b26d0": {
+      "actants": {
+        "SUBJECT": "M:8878d641888d49356c7440cf436befcd290c4dc04929f3b58a26abdbbc24feab",
+        "SURFACE_ARG": "M:ac7e04881fe5034228b9c7381bd90ece288853e2c8414fb9043e451f931f3f75"
+      },
+      "content_key": "ce1f825418fef14036305abd9a33a8b2dfa4effd24a7d36ffa0783fddaf81135",
+      "identity_key": [
+        "ce1f825418fef14036305abd9a33a8b2dfa4effd24a7d36ffa0783fddaf81135",
+        "observation:ecc50626141e73ed8b7e934b83edf24c10e31880bd1a66c950ed6952364154aa",
+        "tok:114:115"
+      ],
+      "op_id": "ENSURE_NODE:N:1e5ba37163d3e3506645c0c7bcfc6250f6604f4023bb4608e10d2c102c6b26d0",
+      "polarity": true,
+      "proposition": {
+        "actants": {
+          "SUBJECT": "M:8878d641888d49356c7440cf436befcd290c4dc04929f3b58a26abdbbc24feab",
+          "SURFACE_ARG": "M:ac7e04881fe5034228b9c7381bd90ece288853e2c8414fb9043e451f931f3f75"
+        },
+        "predicate": "T:open:fbfa55742a3f95662e3c6ff9e3123cd64c33f2e85bbfda4f788ce666edecf019"
+      },
+      "semantic_status": "UNLINKED",
+      "source_ref": "tok:114:115",
+      "source_tag": [
+        "observation:ecc50626141e73ed8b7e934b83edf24c10e31880bd1a66c950ed6952364154aa",
+        1
+      ],
+      "template_ref": "T:open:fbfa55742a3f95662e3c6ff9e3123cd64c33f2e85bbfda4f788ce666edecf019",
+      "temporal_mode": "UNKNOWN",
+      "uid": "N:1e5ba37163d3e3506645c0c7bcfc6250f6604f4023bb4608e10d2c102c6b26d0"
+    },
+    "N:1ff8187d94cf1b94d7e3809c5a15b3f54962e6748f4ccdb8398bd08a942fa8c4": {
+      "actants": {
+        "SUBJECT": "M:98deed552f1cc1ca817e1b51fdf6385b1a09b37271d7dd0e42db9eb2a7fa161d"
+      },
+      "content_key": "4d531d18b6013f623063f043da43f99b6788f8db4d327ad03dc75e7204f859ea",
+      "identity_key": [
+        "4d531d18b6013f623063f043da43f99b6788f8db4d327ad03dc75e7204f859ea",
+        "observation:ecc50626141e73ed8b7e934b83edf24c10e31880bd1a66c950ed6952364154aa",
+        "tok:32:38"
+      ],
+      "op_id": "ENSURE_NODE:N:1ff8187d94cf1b94d7e3809c5a15b3f54962e6748f4ccdb8398bd08a942fa8c4",
+      "polarity": true,
+      "proposition": {
+        "actants": {
+          "SUBJECT": "M:98deed552f1cc1ca817e1b51fdf6385b1a09b37271d7dd0e42db9eb2a7fa161d"
+        },
+        "predicate": "T:open:533ff49ed0b2e9bca99f147d430ab8f7b245f9efdbf4176e5903a98b99a71769"
+      },
+      "semantic_status": "UNLINKED",
+      "source_ref": "tok:32:38",
+      "source_tag": [
+        "observation:ecc50626141e73ed8b7e934b83edf24c10e31880bd1a66c950ed6952364154aa",
+        1
+      ],
+      "template_ref": "T:open:533ff49ed0b2e9bca99f147d430ab8f7b245f9efdbf4176e5903a98b99a71769",
+      "temporal_mode": "UNKNOWN",
+      "uid": "N:1ff8187d94cf1b94d7e3809c5a15b3f54962e6748f4ccdb8398bd08a942fa8c4"
+    },
+    "N:21e6359c55ba38bcfc9071c2229549dbc320fb6b6d990e68aa11ce884a14ae2c": {
+      "actants": {
+        "SUBJECT": "M:98deed552f1cc1ca817e1b51fdf6385b1a09b37271d7dd0e42db9eb2a7fa161d"
+      },
+      "content_key": "5ed9f8e3a257394aa268fedcfb62027a2341e348997e06a2f2ffeae352afd1b8",
+      "identity_key": [
+        "5ed9f8e3a257394aa268fedcfb62027a2341e348997e06a2f2ffeae352afd1b8",
+        "observation:ecc50626141e73ed8b7e934b83edf24c10e31880bd1a66c950ed6952364154aa",
+        "tok:39:43"
+      ],
+      "op_id": "ENSURE_NODE:N:21e6359c55ba38bcfc9071c2229549dbc320fb6b6d990e68aa11ce884a14ae2c",
+      "polarity": true,
+      "proposition": {
+        "actants": {
+          "SUBJECT": "M:98deed552f1cc1ca817e1b51fdf6385b1a09b37271d7dd0e42db9eb2a7fa161d"
+        },
+        "predicate": "T:open:c0a09a2b0de9f89a3a22308968c9a2cb59cae4854e32b0f2dd5294acc40e12d3"
+      },
+      "semantic_status": "UNLINKED",
+      "source_ref": "tok:39:43",
+      "source_tag": [
+        "observation:ecc50626141e73ed8b7e934b83edf24c10e31880bd1a66c950ed6952364154aa",
+        1
+      ],
+      "template_ref": "T:open:c0a09a2b0de9f89a3a22308968c9a2cb59cae4854e32b0f2dd5294acc40e12d3",
+      "temporal_mode": "UNKNOWN",
+      "uid": "N:21e6359c55ba38bcfc9071c2229549dbc320fb6b6d990e68aa11ce884a14ae2c"
+    },
+    "N:278601f185931f23ccdf2e31585c30618a50cac76357438933a140b2d88bd0d1": {
+      "actants": {
+        "OBJECT": "M:narrator:16f71f1d4eaa53d810cb47ec1c1c93d66f938b37f24064ced968fa98e576d0d4",
+        "SUBJECT": "M:implicit:cefbb8c8455d01c517e89800cf466d83149df67c06b2c4215e3bdfefb7259a59"
+      },
+      "content_key": "a2a7b2b2e6eb3349968b0c5ec4ceda1d79698de51aa03c7381659f5613e6d34f",
+      "identity_key": [
+        "a2a7b2b2e6eb3349968b0c5ec4ceda1d79698de51aa03c7381659f5613e6d34f"
+      ],
+      "narrative_membership": true,
+      "op_id": "ENSURE_NODE:N:278601f185931f23ccdf2e31585c30618a50cac76357438933a140b2d88bd0d1",
+      "polarity": true,
+      "proposition": {
+        "actants": {
+          "OBJECT": "M:narrator:16f71f1d4eaa53d810cb47ec1c1c93d66f938b37f24064ced968fa98e576d0d4",
+          "SUBJECT": "M:implicit:cefbb8c8455d01c517e89800cf466d83149df67c06b2c4215e3bdfefb7259a59"
+        },
+        "predicate": "GROUP_HAS_MEMBER"
+      },
+      "semantic_status": "KNOWN",
+      "source_ref": "tok:174:185",
+      "source_tag": [
+        "observation:ecc50626141e73ed8b7e934b83edf24c10e31880bd1a66c950ed6952364154aa",
+        1
+      ],
+      "template_ref": "fixture:T:GROUP_HAS_MEMBER",
+      "temporal_mode": "STATE",
+      "uid": "N:278601f185931f23ccdf2e31585c30618a50cac76357438933a140b2d88bd0d1"
+    },
+    "N:3f668e560cf86341f784e1a502408d77ba8761ec063c663011597257ff91bb81": {
+      "actants": {
+        "OBJECT": "N:42a3a0888e3a95491f243b8b8292572b71b5df0068a2b52eddddddac5044045e",
+        "SURFACE_ARG": "M:2e9e45d3df4a8aec4e0e45302cb2aaff84b5c14feb98177a759551c8e77f7fc4"
+      },
+      "content_key": "fca5869cdc81cccb5f4cb92ac76a84011a59d3adf45e4f90698633308010f792",
+      "identity_key": [
+        "fca5869cdc81cccb5f4cb92ac76a84011a59d3adf45e4f90698633308010f792",
+        "observation:ecc50626141e73ed8b7e934b83edf24c10e31880bd1a66c950ed6952364154aa",
+        "tok:140:141"
+      ],
+      "op_id": "ENSURE_NODE:N:3f668e560cf86341f784e1a502408d77ba8761ec063c663011597257ff91bb81",
+      "polarity": true,
+      "proposition": {
+        "actants": {
+          "OBJECT": "N:42a3a0888e3a95491f243b8b8292572b71b5df0068a2b52eddddddac5044045e",
+          "SURFACE_ARG": "M:2e9e45d3df4a8aec4e0e45302cb2aaff84b5c14feb98177a759551c8e77f7fc4"
+        },
+        "predicate": "T:open:121333ddc8502b2fb7b141a4b477af319864d3e0196d7b233fd613bfb8abfa2e"
+      },
+      "semantic_status": "UNLINKED",
+      "source_ref": "tok:140:141",
+      "source_tag": [
+        "observation:ecc50626141e73ed8b7e934b83edf24c10e31880bd1a66c950ed6952364154aa",
+        1
+      ],
+      "template_ref": "T:open:121333ddc8502b2fb7b141a4b477af319864d3e0196d7b233fd613bfb8abfa2e",
+      "temporal_mode": "UNKNOWN",
+      "uid": "N:3f668e560cf86341f784e1a502408d77ba8761ec063c663011597257ff91bb81"
+    },
+    "N:42a3a0888e3a95491f243b8b8292572b71b5df0068a2b52eddddddac5044045e": {
+      "actants": {
+        "SUBJECT": "M:b4534894c3ec82e0f25ba684a52b607eab0302cbaef2ddbadbb76682f02bd72a"
+      },
+      "content_key": "a5e80902f211d6f2eb3dbf7afc68240aa21715831b74ad6e5911ae9df6efd145",
+      "identity_key": [
+        "a5e80902f211d6f2eb3dbf7afc68240aa21715831b74ad6e5911ae9df6efd145",
+        "observation:ecc50626141e73ed8b7e934b83edf24c10e31880bd1a66c950ed6952364154aa",
+        "tok:133:139"
+      ],
+      "op_id": "ENSURE_NODE:N:42a3a0888e3a95491f243b8b8292572b71b5df0068a2b52eddddddac5044045e",
+      "polarity": true,
+      "proposition": {
+        "actants": {
+          "SUBJECT": "M:b4534894c3ec82e0f25ba684a52b607eab0302cbaef2ddbadbb76682f02bd72a"
+        },
+        "predicate": "T:open:cccc4348ccd312df040bd8cbbc47548b7f408aeb6e7cc4b912ff76338a92777f"
+      },
+      "semantic_status": "UNLINKED",
+      "source_ref": "tok:133:139",
+      "source_tag": [
+        "observation:ecc50626141e73ed8b7e934b83edf24c10e31880bd1a66c950ed6952364154aa",
+        1
+      ],
+      "template_ref": "T:open:cccc4348ccd312df040bd8cbbc47548b7f408aeb6e7cc4b912ff76338a92777f",
+      "temporal_mode": "UNKNOWN",
+      "uid": "N:42a3a0888e3a95491f243b8b8292572b71b5df0068a2b52eddddddac5044045e"
+    },
+    "N:616c473ce8f69654d3633114296ecb9455f19ad8aadf56981a60d1b4b1ae9a48": {
+      "actants": {
+        "SUBJECT": "M:c5bd8db8059a70e6be9d4e36becc3fc90a4173fb78cfb6cf5774c205d89b159c"
+      },
+      "content_key": "b3b9b594f3aeeb24715bdc2a3da11306fe314f4fc146cc9f00783b1d1b556447",
+      "identity_key": [
+        "b3b9b594f3aeeb24715bdc2a3da11306fe314f4fc146cc9f00783b1d1b556447",
+        "observation:ecc50626141e73ed8b7e934b83edf24c10e31880bd1a66c950ed6952364154aa",
+        "tok:272:281"
+      ],
+      "op_id": "ENSURE_NODE:N:616c473ce8f69654d3633114296ecb9455f19ad8aadf56981a60d1b4b1ae9a48",
+      "polarity": true,
+      "proposition": {
+        "actants": {
+          "SUBJECT": "M:c5bd8db8059a70e6be9d4e36becc3fc90a4173fb78cfb6cf5774c205d89b159c"
+        },
+        "predicate": "T:open:6675e54bcbaa7da5fda877968a77f28c1a849b56e7a56ea6e2246d316d11d7fe"
+      },
+      "semantic_status": "UNLINKED",
+      "source_ref": "tok:272:281",
+      "source_tag": [
+        "observation:ecc50626141e73ed8b7e934b83edf24c10e31880bd1a66c950ed6952364154aa",
+        1
+      ],
+      "template_ref": "T:open:6675e54bcbaa7da5fda877968a77f28c1a849b56e7a56ea6e2246d316d11d7fe",
+      "temporal_mode": "UNKNOWN",
+      "uid": "N:616c473ce8f69654d3633114296ecb9455f19ad8aadf56981a60d1b4b1ae9a48"
+    },
+    "N:6c273a52a377688266bcb9c6b914aa7a2b15c8efce41a7631f0f4a200ade81f8": {
+      "actants": {
+        "SUBJECT": "M:98deed552f1cc1ca817e1b51fdf6385b1a09b37271d7dd0e42db9eb2a7fa161d",
+        "SURFACE_ARG": "M:cb7f4371ea52d9eb51ce8a9fb8ef6355af5ab6741b7beff73372b8251d56b247"
+      },
+      "content_key": "19afb583d4034dd8ad8d1e2901e8ce3a772458911d1498801021db64f4233376",
+      "identity_key": [
+        "19afb583d4034dd8ad8d1e2901e8ce3a772458911d1498801021db64f4233376",
+        "observation:ecc50626141e73ed8b7e934b83edf24c10e31880bd1a66c950ed6952364154aa",
+        "tok:44:47"
+      ],
+      "op_id": "ENSURE_NODE:N:6c273a52a377688266bcb9c6b914aa7a2b15c8efce41a7631f0f4a200ade81f8",
+      "polarity": true,
+      "proposition": {
+        "actants": {
+          "SUBJECT": "M:98deed552f1cc1ca817e1b51fdf6385b1a09b37271d7dd0e42db9eb2a7fa161d",
+          "SURFACE_ARG": "M:cb7f4371ea52d9eb51ce8a9fb8ef6355af5ab6741b7beff73372b8251d56b247"
+        },
+        "predicate": "T:open:5b725cc48d48e4e676264ebdec31ff189539e5dfb0781d0f75b31e8563832b40"
+      },
+      "semantic_status": "UNLINKED",
+      "source_ref": "tok:44:47",
+      "source_tag": [
+        "observation:ecc50626141e73ed8b7e934b83edf24c10e31880bd1a66c950ed6952364154aa",
+        1
+      ],
+      "template_ref": "T:open:5b725cc48d48e4e676264ebdec31ff189539e5dfb0781d0f75b31e8563832b40",
+      "temporal_mode": "UNKNOWN",
+      "uid": "N:6c273a52a377688266bcb9c6b914aa7a2b15c8efce41a7631f0f4a200ade81f8"
+    },
+    "N:75e54ac3be419bf1240a95cabd5a6f1f1d94927d1784980409bf1e830855329a": {
+      "actants": {
+        "OBJECT": "N:fb7a290d6781dc3636b7f72f98ef9a228cae0968fcf343405b86ce4387fb7cfb",
+        "SURFACE_ARG": "M:8878d641888d49356c7440cf436befcd290c4dc04929f3b58a26abdbbc24feab"
+      },
+      "content_key": "7a5e13ae9a272d6c732fede4cf30c444443963663d7914317dff55bc80afb360",
+      "identity_key": [
+        "7a5e13ae9a272d6c732fede4cf30c444443963663d7914317dff55bc80afb360",
+        "observation:ecc50626141e73ed8b7e934b83edf24c10e31880bd1a66c950ed6952364154aa",
+        "tok:103:104"
+      ],
+      "op_id": "ENSURE_NODE:N:75e54ac3be419bf1240a95cabd5a6f1f1d94927d1784980409bf1e830855329a",
+      "polarity": true,
+      "proposition": {
+        "actants": {
+          "OBJECT": "N:fb7a290d6781dc3636b7f72f98ef9a228cae0968fcf343405b86ce4387fb7cfb",
+          "SURFACE_ARG": "M:8878d641888d49356c7440cf436befcd290c4dc04929f3b58a26abdbbc24feab"
+        },
+        "predicate": "T:open:94763cdbff0cc8ca506f9d8087e81d1b9000c88e3ff1feb08cc77bbdea0e5b94"
+      },
+      "semantic_status": "UNLINKED",
+      "source_ref": "tok:103:104",
+      "source_tag": [
+        "observation:ecc50626141e73ed8b7e934b83edf24c10e31880bd1a66c950ed6952364154aa",
+        1
+      ],
+      "template_ref": "T:open:94763cdbff0cc8ca506f9d8087e81d1b9000c88e3ff1feb08cc77bbdea0e5b94",
+      "temporal_mode": "UNKNOWN",
+      "uid": "N:75e54ac3be419bf1240a95cabd5a6f1f1d94927d1784980409bf1e830855329a"
+    },
+    "N:7b84cfe948733d250a01da131fce115333d1e58ad2012db6da733fd6614fcd17": {
+      "actants": {
+        "SUBJECT": "M:implicit:cefbb8c8455d01c517e89800cf466d83149df67c06b2c4215e3bdfefb7259a59"
+      },
+      "content_key": "24005bffa8a794744b874b9e598b3ad6cbb561989e1e3077c072e60c58cc3bd7",
+      "identity_key": [
+        "24005bffa8a794744b874b9e598b3ad6cbb561989e1e3077c072e60c58cc3bd7",
+        "observation:ecc50626141e73ed8b7e934b83edf24c10e31880bd1a66c950ed6952364154aa",
+        "tok:174:185"
+      ],
+      "op_id": "ENSURE_NODE:N:7b84cfe948733d250a01da131fce115333d1e58ad2012db6da733fd6614fcd17",
+      "polarity": true,
+      "proposition": {
+        "actants": {
+          "SUBJECT": "M:implicit:cefbb8c8455d01c517e89800cf466d83149df67c06b2c4215e3bdfefb7259a59"
+        },
+        "predicate": "T:open:afaf06f4140a38f6039bdf3bc65c8b73480d3ed5c630cd1c41a86350b09a9e3b"
+      },
+      "semantic_status": "UNLINKED",
+      "source_ref": "tok:174:185",
+      "source_tag": [
+        "observation:ecc50626141e73ed8b7e934b83edf24c10e31880bd1a66c950ed6952364154aa",
+        1
+      ],
+      "template_ref": "T:open:afaf06f4140a38f6039bdf3bc65c8b73480d3ed5c630cd1c41a86350b09a9e3b",
+      "temporal_mode": "UNKNOWN",
+      "uid": "N:7b84cfe948733d250a01da131fce115333d1e58ad2012db6da733fd6614fcd17"
+    },
+    "N:7e145ad26e8015122b9b8da0af22562517281114c9ad4d4dd0ef6412787ea57d": {
+      "actants": {
+        "SUBJECT": "M:c5bd8db8059a70e6be9d4e36becc3fc90a4173fb78cfb6cf5774c205d89b159c"
+      },
+      "content_key": "47f062dba2e219f51b9a6a61e09ea4bbcbdcb18436e8441bcb841b93abb41ea8",
+      "identity_key": [
+        "47f062dba2e219f51b9a6a61e09ea4bbcbdcb18436e8441bcb841b93abb41ea8",
+        "observation:ecc50626141e73ed8b7e934b83edf24c10e31880bd1a66c950ed6952364154aa",
+        "tok:265:271"
+      ],
+      "op_id": "ENSURE_NODE:N:7e145ad26e8015122b9b8da0af22562517281114c9ad4d4dd0ef6412787ea57d",
+      "polarity": true,
+      "proposition": {
+        "actants": {
+          "SUBJECT": "M:c5bd8db8059a70e6be9d4e36becc3fc90a4173fb78cfb6cf5774c205d89b159c"
+        },
+        "predicate": "T:open:958b10f174af694d06afd3421e47fae44c9d83896b0eca3869866f1e5fe90d38"
+      },
+      "semantic_status": "UNLINKED",
+      "source_ref": "tok:265:271",
+      "source_tag": [
+        "observation:ecc50626141e73ed8b7e934b83edf24c10e31880bd1a66c950ed6952364154aa",
+        1
+      ],
+      "template_ref": "T:open:958b10f174af694d06afd3421e47fae44c9d83896b0eca3869866f1e5fe90d38",
+      "temporal_mode": "UNKNOWN",
+      "uid": "N:7e145ad26e8015122b9b8da0af22562517281114c9ad4d4dd0ef6412787ea57d"
+    },
+    "N:965b521094542798bc59f1b374a14f29ac93e443600a3d04947b9024bba4a953": {
+      "actants": {
+        "SUBJECT": "M:narrator:16f71f1d4eaa53d810cb47ec1c1c93d66f938b37f24064ced968fa98e576d0d4"
+      },
+      "content_key": "d0745f20b39d9004897533a9fd774b170fb16bd331e509ae7434c009a07b026e",
+      "identity_key": [
+        "d0745f20b39d9004897533a9fd774b170fb16bd331e509ae7434c009a07b026e",
+        "observation:ecc50626141e73ed8b7e934b83edf24c10e31880bd1a66c950ed6952364154aa",
+        "tok:241:247"
+      ],
+      "op_id": "ENSURE_NODE:N:965b521094542798bc59f1b374a14f29ac93e443600a3d04947b9024bba4a953",
+      "polarity": true,
+      "proposition": {
+        "actants": {
+          "SUBJECT": "M:narrator:16f71f1d4eaa53d810cb47ec1c1c93d66f938b37f24064ced968fa98e576d0d4"
+        },
+        "predicate": "T:open:9f43778b1b14cc1507b73a5d08190e8a55f5fd05e6eb354e68ae93346514289f"
+      },
+      "semantic_status": "UNLINKED",
+      "source_ref": "tok:241:247",
+      "source_tag": [
+        "observation:ecc50626141e73ed8b7e934b83edf24c10e31880bd1a66c950ed6952364154aa",
+        2
+      ],
+      "template_ref": "T:open:9f43778b1b14cc1507b73a5d08190e8a55f5fd05e6eb354e68ae93346514289f",
+      "temporal_mode": "UNKNOWN",
+      "uid": "N:965b521094542798bc59f1b374a14f29ac93e443600a3d04947b9024bba4a953"
+    },
+    "N:a00f7e538744e304ff64ba0c5dafbd817928186fd79731f7c833f98851741af4": {
+      "actants": {
+        "OBJECT": "G:2695c381a5ee4a5c2306b59ec0b0d67952d0ff448fc9cc460983015c5cd06d95",
+        "SURFACE_ARG": "M:4e6a7dc64b2070e415c3b61643299184f6a079f8aac2e5c24e0747b5409c1732"
+      },
+      "content_key": "108f9d8c7e8484f82d86b01c85a3a52ad9839ed8c9f85bac73c050584f21b1a6",
+      "identity_key": [
+        "108f9d8c7e8484f82d86b01c85a3a52ad9839ed8c9f85bac73c050584f21b1a6",
+        "observation:ecc50626141e73ed8b7e934b83edf24c10e31880bd1a66c950ed6952364154aa",
+        "tok:248:249"
+      ],
+      "op_id": "ENSURE_NODE:N:a00f7e538744e304ff64ba0c5dafbd817928186fd79731f7c833f98851741af4",
+      "polarity": true,
+      "proposition": {
+        "actants": {
+          "OBJECT": "G:2695c381a5ee4a5c2306b59ec0b0d67952d0ff448fc9cc460983015c5cd06d95",
+          "SURFACE_ARG": "M:4e6a7dc64b2070e415c3b61643299184f6a079f8aac2e5c24e0747b5409c1732"
+        },
+        "predicate": "T:open:44650425a71289b9175d18a174656e3986891d4ee8609e0f8365d6cb87556681"
+      },
+      "semantic_status": "UNLINKED",
+      "source_ref": "tok:248:249",
+      "source_tag": [
+        "observation:ecc50626141e73ed8b7e934b83edf24c10e31880bd1a66c950ed6952364154aa",
+        2
+      ],
+      "template_ref": "T:open:44650425a71289b9175d18a174656e3986891d4ee8609e0f8365d6cb87556681",
+      "temporal_mode": "UNKNOWN",
+      "uid": "N:a00f7e538744e304ff64ba0c5dafbd817928186fd79731f7c833f98851741af4"
+    },
+    "N:bb814dad7f8eebd8a64b04c5e13215ac6514469d90210ea8d2785c18ac58fdf4": {
+      "actants": {
+        "LOCATION": "M:reference:855aba988ba369298d5e37739a2ca3edf9e9523bae366f17929175be9f7642c6",
+        "OBJECT": "N:7b84cfe948733d250a01da131fce115333d1e58ad2012db6da733fd6614fcd17"
+      },
+      "content_key": "cb20d7bff637593792c98d9241dc6a9da7b49b64fcd6255b274631dbc6d7545c",
+      "identity_key": [
+        "cb20d7bff637593792c98d9241dc6a9da7b49b64fcd6255b274631dbc6d7545c",
+        "observation:ecc50626141e73ed8b7e934b83edf24c10e31880bd1a66c950ed6952364154aa",
+        1,
+        "component-modifier:8cf79ad6c980ff104cee9af6c790a57214cba4f3ae69498a22b68fb9c79986c3"
+      ],
+      "op_id": "ENSURE_NODE:N:bb814dad7f8eebd8a64b04c5e13215ac6514469d90210ea8d2785c18ac58fdf4",
+      "polarity": true,
+      "proposition": {
+        "actants": {
+          "LOCATION": "M:reference:855aba988ba369298d5e37739a2ca3edf9e9523bae366f17929175be9f7642c6",
+          "OBJECT": "N:7b84cfe948733d250a01da131fce115333d1e58ad2012db6da733fd6614fcd17"
+        },
+        "predicate": "RELATIVE_UP_DESTINATION"
+      },
+      "semantic_status": "KNOWN",
+      "source_ref": "tok:186:191",
+      "source_tag": [
+        "observation:ecc50626141e73ed8b7e934b83edf24c10e31880bd1a66c950ed6952364154aa",
+        1
+      ],
+      "template_ref": "fixture:T:RELATIVE_UP_DESTINATION",
+      "temporal_mode": "EVENT",
+      "uid": "N:bb814dad7f8eebd8a64b04c5e13215ac6514469d90210ea8d2785c18ac58fdf4"
+    },
+    "N:dd37cb7d56bf5d6d97356f458452150284ddb3c3e1ccdc4effa7e24aed0fe68d": {
+      "actants": {
+        "OBJECT": "N:3f668e560cf86341f784e1a502408d77ba8761ec063c663011597257ff91bb81",
+        "SURFACE_ARG": "M:0f7bf0defa8dc58b669973913e17c5d81f3fb437351fc36e8f3f1959c7b2f750"
+      },
+      "content_key": "7673af6650954e487d1fc8a718be767e99b80cecc21a9137af4de73420180ad8",
+      "identity_key": [
+        "7673af6650954e487d1fc8a718be767e99b80cecc21a9137af4de73420180ad8",
+        "observation:ecc50626141e73ed8b7e934b83edf24c10e31880bd1a66c950ed6952364154aa",
+        "tok:148:149"
+      ],
+      "op_id": "ENSURE_NODE:N:dd37cb7d56bf5d6d97356f458452150284ddb3c3e1ccdc4effa7e24aed0fe68d",
+      "polarity": true,
+      "proposition": {
+        "actants": {
+          "OBJECT": "N:3f668e560cf86341f784e1a502408d77ba8761ec063c663011597257ff91bb81",
+          "SURFACE_ARG": "M:0f7bf0defa8dc58b669973913e17c5d81f3fb437351fc36e8f3f1959c7b2f750"
+        },
+        "predicate": "T:open:cb861a90da3140c8b9ad425647ffab83907294ad1c1363ee8862735b8a937d58"
+      },
+      "semantic_status": "UNLINKED",
+      "source_ref": "tok:148:149",
+      "source_tag": [
+        "observation:ecc50626141e73ed8b7e934b83edf24c10e31880bd1a66c950ed6952364154aa",
+        1
+      ],
+      "template_ref": "T:open:cb861a90da3140c8b9ad425647ffab83907294ad1c1363ee8862735b8a937d58",
+      "temporal_mode": "UNKNOWN",
+      "uid": "N:dd37cb7d56bf5d6d97356f458452150284ddb3c3e1ccdc4effa7e24aed0fe68d"
+    },
+    "N:e24e19603eca1e5b8777ae410c113738a4ab78ac025e8dc9b86f991716bb223a": {
+      "actants": {
+        "OBJECT": "M:0e84c0fc478c475d0a144f6521fb4c89f21276f98bea00d0c76311b2391cd7a8",
+        "SUBJECT": "M:narrator:16f71f1d4eaa53d810cb47ec1c1c93d66f938b37f24064ced968fa98e576d0d4"
+      },
+      "content_key": "da2d3b4dc060568790b5035d6e69c7cc57561890faee9d4000132f3103fa1d02",
+      "identity_key": [
+        "da2d3b4dc060568790b5035d6e69c7cc57561890faee9d4000132f3103fa1d02",
+        "observation:ecc50626141e73ed8b7e934b83edf24c10e31880bd1a66c950ed6952364154aa",
+        "tok:70:76"
+      ],
+      "op_id": "ENSURE_NODE:N:e24e19603eca1e5b8777ae410c113738a4ab78ac025e8dc9b86f991716bb223a",
+      "polarity": true,
+      "proposition": {
+        "actants": {
+          "OBJECT": "M:0e84c0fc478c475d0a144f6521fb4c89f21276f98bea00d0c76311b2391cd7a8",
+          "SUBJECT": "M:narrator:16f71f1d4eaa53d810cb47ec1c1c93d66f938b37f24064ced968fa98e576d0d4"
+        },
+        "predicate": "T:open:a15ec67e8e7c5fc2cc345522160fc7b55b99a55f537d8eccf915da64c9db28a0"
+      },
+      "semantic_status": "UNLINKED",
+      "source_ref": "tok:70:76",
+      "source_tag": [
+        "observation:ecc50626141e73ed8b7e934b83edf24c10e31880bd1a66c950ed6952364154aa",
+        1
+      ],
+      "template_ref": "T:open:a15ec67e8e7c5fc2cc345522160fc7b55b99a55f537d8eccf915da64c9db28a0",
+      "temporal_mode": "UNKNOWN",
+      "uid": "N:e24e19603eca1e5b8777ae410c113738a4ab78ac025e8dc9b86f991716bb223a"
+    },
+    "N:e472ea0298b5478e86e9a83958624458e355036a24d01747b32e0403f34a121f": {
+      "actants": {
+        "LOCATION": "M:reference:47f683245d136cc876859836334f3d88db7965d77658a9f88118f63647a9a643",
+        "OBJECT": "N:7b84cfe948733d250a01da131fce115333d1e58ad2012db6da733fd6614fcd17"
+      },
+      "content_key": "27c90b1abef20ae90228b0833954719fd7c7279b1595f1d351ee79c8f9694795",
+      "identity_key": [
+        "27c90b1abef20ae90228b0833954719fd7c7279b1595f1d351ee79c8f9694795",
+        "observation:ecc50626141e73ed8b7e934b83edf24c10e31880bd1a66c950ed6952364154aa",
+        2,
+        "component-modifier:8cf79ad6c980ff104cee9af6c790a57214cba4f3ae69498a22b68fb9c79986c3"
+      ],
+      "op_id": "ENSURE_NODE:N:e472ea0298b5478e86e9a83958624458e355036a24d01747b32e0403f34a121f",
+      "polarity": true,
+      "proposition": {
+        "actants": {
+          "LOCATION": "M:reference:47f683245d136cc876859836334f3d88db7965d77658a9f88118f63647a9a643",
+          "OBJECT": "N:7b84cfe948733d250a01da131fce115333d1e58ad2012db6da733fd6614fcd17"
+        },
+        "predicate": "RELATIVE_UP_DESTINATION"
+      },
+      "semantic_status": "KNOWN",
+      "source_ref": "tok:186:191",
+      "source_tag": [
+        "observation:ecc50626141e73ed8b7e934b83edf24c10e31880bd1a66c950ed6952364154aa",
+        2
+      ],
+      "template_ref": "fixture:T:RELATIVE_UP_DESTINATION",
+      "temporal_mode": "EVENT",
+      "uid": "N:e472ea0298b5478e86e9a83958624458e355036a24d01747b32e0403f34a121f"
+    },
+    "N:ef21b7e009b930c89dccb7a0a8c154801fce43131bd068ee5cea631265ad6618": {
+      "actants": {
+        "SUBJECT": "M:implicit:cefbb8c8455d01c517e89800cf466d83149df67c06b2c4215e3bdfefb7259a59"
+      },
+      "content_key": "6723b02d28a95e4011614a032758e26239a07f3943237f8ea6944cf4d8f50c1f",
+      "identity_key": [
+        "6723b02d28a95e4011614a032758e26239a07f3943237f8ea6944cf4d8f50c1f",
+        "observation:ecc50626141e73ed8b7e934b83edf24c10e31880bd1a66c950ed6952364154aa",
+        "tok:209:219"
+      ],
+      "op_id": "ENSURE_NODE:N:ef21b7e009b930c89dccb7a0a8c154801fce43131bd068ee5cea631265ad6618",
+      "polarity": true,
+      "proposition": {
+        "actants": {
+          "SUBJECT": "M:implicit:cefbb8c8455d01c517e89800cf466d83149df67c06b2c4215e3bdfefb7259a59"
+        },
+        "predicate": "T:open:c909d32dba08a13882c8b833c7abbce39eab8720086a6bce2ec081e0a5a4fa2e"
+      },
+      "semantic_status": "UNLINKED",
+      "source_ref": "tok:209:219",
+      "source_tag": [
+        "observation:ecc50626141e73ed8b7e934b83edf24c10e31880bd1a66c950ed6952364154aa",
+        1
+      ],
+      "template_ref": "T:open:c909d32dba08a13882c8b833c7abbce39eab8720086a6bce2ec081e0a5a4fa2e",
+      "temporal_mode": "UNKNOWN",
+      "uid": "N:ef21b7e009b930c89dccb7a0a8c154801fce43131bd068ee5cea631265ad6618"
+    },
+    "N:event-anchor:d173ae80b919a812f9f481134dbbcb7069e9a2508dca89ec4315d77de7a4e421": {
+      "actants": {},
+      "content_key": "8f176a2502a6899463bc30679063d52eaf13b5b140e19a5b9a34f018caca9783",
+      "identity_key": [
+        "8f176a2502a6899463bc30679063d52eaf13b5b140e19a5b9a34f018caca9783",
+        "observation:ecc50626141e73ed8b7e934b83edf24c10e31880bd1a66c950ed6952364154aa",
+        "tok:61:69"
+      ],
+      "op_id": "ENSURE_NODE:N:event-anchor:d173ae80b919a812f9f481134dbbcb7069e9a2508dca89ec4315d77de7a4e421",
+      "polarity": true,
+      "proposition": {
+        "actants": {},
+        "predicate": "T:open:event-anchor:d173ae80b919a812f9f481134dbbcb7069e9a2508dca89ec4315d77de7a4e421"
+      },
+      "semantic_status": "UNLINKED",
+      "source_ref": "tok:61:69",
+      "source_tag": [
+        "observation:ecc50626141e73ed8b7e934b83edf24c10e31880bd1a66c950ed6952364154aa",
+        1
+      ],
+      "template_ref": "T:open:event-anchor:d173ae80b919a812f9f481134dbbcb7069e9a2508dca89ec4315d77de7a4e421",
+      "temporal_mode": "EVENT",
+      "uid": "N:event-anchor:d173ae80b919a812f9f481134dbbcb7069e9a2508dca89ec4315d77de7a4e421"
+    },
+    "N:f324178976df825d8504f4bb9570049bea257f727e200c7fa307ae9cdc97fa9a": {
+      "actants": {
+        "OBJECT": "N:ef21b7e009b930c89dccb7a0a8c154801fce43131bd068ee5cea631265ad6618",
+        "SURFACE_ARG": "M:54c734255daa97bcfc3ca137902c9f1fc3ca6435e96008dcacf9719b138aa9f2"
+      },
+      "content_key": "eb117cd32d50a931761ea3e86729bda3d6fd6d3d2e73eb64725fd839b7211a81",
+      "identity_key": [
+        "eb117cd32d50a931761ea3e86729bda3d6fd6d3d2e73eb64725fd839b7211a81",
+        "observation:ecc50626141e73ed8b7e934b83edf24c10e31880bd1a66c950ed6952364154aa",
+        "tok:220:221"
+      ],
+      "op_id": "ENSURE_NODE:N:f324178976df825d8504f4bb9570049bea257f727e200c7fa307ae9cdc97fa9a",
+      "polarity": true,
+      "proposition": {
+        "actants": {
+          "OBJECT": "N:ef21b7e009b930c89dccb7a0a8c154801fce43131bd068ee5cea631265ad6618",
+          "SURFACE_ARG": "M:54c734255daa97bcfc3ca137902c9f1fc3ca6435e96008dcacf9719b138aa9f2"
+        },
+        "predicate": "T:open:811f16f396df56221c23b313ccf61c6cd4454c4cf5a8a119b0a8b0b5dcb62565"
+      },
+      "semantic_status": "UNLINKED",
+      "source_ref": "tok:220:221",
+      "source_tag": [
+        "observation:ecc50626141e73ed8b7e934b83edf24c10e31880bd1a66c950ed6952364154aa",
+        1
+      ],
+      "template_ref": "T:open:811f16f396df56221c23b313ccf61c6cd4454c4cf5a8a119b0a8b0b5dcb62565",
+      "temporal_mode": "UNKNOWN",
+      "uid": "N:f324178976df825d8504f4bb9570049bea257f727e200c7fa307ae9cdc97fa9a"
+    },
+    "N:fb7a290d6781dc3636b7f72f98ef9a228cae0968fcf343405b86ce4387fb7cfb": {
+      "actants": {
+        "SUBJECT": "M:f015633ac9650692077806c1c435b8122a67e488d32302033ed03db61092498a"
+      },
+      "content_key": "5c425d246d1703b4e70cd3165f0b2bacb0225294810f55ece221fceb0a90a069",
+      "identity_key": [
+        "5c425d246d1703b4e70cd3165f0b2bacb0225294810f55ece221fceb0a90a069"
+      ],
+      "op_id": "ENSURE_NODE:N:fb7a290d6781dc3636b7f72f98ef9a228cae0968fcf343405b86ce4387fb7cfb",
+      "polarity": true,
+      "proposition": {
+        "actants": {
+          "SUBJECT": "M:f015633ac9650692077806c1c435b8122a67e488d32302033ed03db61092498a"
+        },
+        "predicate": "ARRIVE_CITY"
+      },
+      "semantic_status": "KNOWN",
+      "source_ref": "tok:94:102",
+      "source_tag": [
+        "observation:ecc50626141e73ed8b7e934b83edf24c10e31880bd1a66c950ed6952364154aa",
+        1
+      ],
+      "template_ref": "fixture:T:optional:11903c4c7dd466ae4241e529a0f753145a58b8ebb25fdcdcccc22a7068b3b2d6",
+      "temporal_mode": "EVENT",
+      "uid": "N:fb7a290d6781dc3636b7f72f98ef9a228cae0968fcf343405b86ce4387fb7cfb"
+    }
+  },
+  "joint_conjunction": {
+    "content_key": "3dbdbf5b667db2bd9eb1c3ec19673278bb3720c3031e48917ab7fad8bd62b0d7",
+    "function_id": "AND",
+    "op_id": "ENSURE_FUNCTION:G:2695c381a5ee4a5c2306b59ec0b0d67952d0ff448fc9cc460983015c5cd06d95",
+    "operands": [
+      "N:0101126df89cf2e9ba45a7acbcf3ab888117c498e0f8c9cdb5d970e20e360766",
+      "N:965b521094542798bc59f1b374a14f29ac93e443600a3d04947b9024bba4a953"
+    ],
+    "polarity": true,
+    "uid": "G:2695c381a5ee4a5c2306b59ec0b0d67952d0ff448fc9cc460983015c5cd06d95"
+  },
+  "node_visibility": {
+    "G:dbe5fdd12db6d41af362c426f70bac631222f999b649eef0615b3eb9b4e3b744": {
+      "S": true,
+      "F": true
+    },
+    "N:0101126df89cf2e9ba45a7acbcf3ab888117c498e0f8c9cdb5d970e20e360766": {
+      "S": true,
+      "F": false
+    },
+    "N:1e5ba37163d3e3506645c0c7bcfc6250f6604f4023bb4608e10d2c102c6b26d0": {
+      "S": true,
+      "F": false
+    },
+    "N:1ff8187d94cf1b94d7e3809c5a15b3f54962e6748f4ccdb8398bd08a942fa8c4": {
+      "S": true,
+      "F": false
+    },
+    "N:21e6359c55ba38bcfc9071c2229549dbc320fb6b6d990e68aa11ce884a14ae2c": {
+      "S": true,
+      "F": true
+    },
+    "N:278601f185931f23ccdf2e31585c30618a50cac76357438933a140b2d88bd0d1": {
+      "S": true,
+      "F": true
+    },
+    "N:3f668e560cf86341f784e1a502408d77ba8761ec063c663011597257ff91bb81": {
+      "S": true,
+      "F": false
+    },
+    "N:42a3a0888e3a95491f243b8b8292572b71b5df0068a2b52eddddddac5044045e": {
+      "S": true,
+      "F": false
+    },
+    "N:616c473ce8f69654d3633114296ecb9455f19ad8aadf56981a60d1b4b1ae9a48": {
+      "S": true,
+      "F": false
+    },
+    "N:6c273a52a377688266bcb9c6b914aa7a2b15c8efce41a7631f0f4a200ade81f8": {
+      "S": true,
+      "F": false
+    },
+    "N:75e54ac3be419bf1240a95cabd5a6f1f1d94927d1784980409bf1e830855329a": {
+      "S": true,
+      "F": true
+    },
+    "N:7b84cfe948733d250a01da131fce115333d1e58ad2012db6da733fd6614fcd17": {
+      "S": true,
+      "F": false
+    },
+    "N:7e145ad26e8015122b9b8da0af22562517281114c9ad4d4dd0ef6412787ea57d": {
+      "S": true,
+      "F": true
+    },
+    "N:965b521094542798bc59f1b374a14f29ac93e443600a3d04947b9024bba4a953": {
+      "S": true,
+      "F": false
+    },
+    "N:a00f7e538744e304ff64ba0c5dafbd817928186fd79731f7c833f98851741af4": {
+      "S": true,
+      "F": true
+    },
+    "N:bb814dad7f8eebd8a64b04c5e13215ac6514469d90210ea8d2785c18ac58fdf4": {
+      "S": false,
+      "F": false
+    },
+    "N:dd37cb7d56bf5d6d97356f458452150284ddb3c3e1ccdc4effa7e24aed0fe68d": {
+      "S": true,
+      "F": true
+    },
+    "N:e24e19603eca1e5b8777ae410c113738a4ab78ac025e8dc9b86f991716bb223a": {
+      "S": true,
+      "F": true
+    },
+    "N:e472ea0298b5478e86e9a83958624458e355036a24d01747b32e0403f34a121f": {
+      "S": true,
+      "F": true
+    },
+    "N:ef21b7e009b930c89dccb7a0a8c154801fce43131bd068ee5cea631265ad6618": {
+      "S": true,
+      "F": false
+    },
+    "N:event-anchor:d173ae80b919a812f9f481134dbbcb7069e9a2508dca89ec4315d77de7a4e421": {
+      "S": true,
+      "F": false
+    },
+    "N:f324178976df825d8504f4bb9570049bea257f727e200c7fa307ae9cdc97fa9a": {
+      "S": true,
+      "F": true
+    },
+    "N:fb7a290d6781dc3636b7f72f98ef9a228cae0968fcf343405b86ce4387fb7cfb": {
+      "S": true,
+      "F": false
+    }
+  },
+  "lexical_templates": {
+    "T:open:30ca6863ea82f1b0c827c144584dab6962548847b87cbd7bd13f2750c1493752": {
+      "uid": "T:open:30ca6863ea82f1b0c827c144584dab6962548847b87cbd7bd13f2750c1493752",
+      "predicate": {
+        "uid": "S_15113eca4a614dca8ae61bce4dbfa7da",
+        "kind": "S"
+      },
+      "roles": [
+        "OBJECT",
+        "SUBJECT"
+      ]
+    },
+    "T:open:fbfa55742a3f95662e3c6ff9e3123cd64c33f2e85bbfda4f788ce666edecf019": {
+      "uid": "T:open:fbfa55742a3f95662e3c6ff9e3123cd64c33f2e85bbfda4f788ce666edecf019",
+      "predicate": {
+        "uid": "S_382f6daaac944cc1995fe3cf9a9748f8",
+        "kind": "S"
+      },
+      "roles": [
+        "SUBJECT",
+        "SURFACE_ARG"
+      ]
+    },
+    "T:open:533ff49ed0b2e9bca99f147d430ab8f7b245f9efdbf4176e5903a98b99a71769": {
+      "uid": "T:open:533ff49ed0b2e9bca99f147d430ab8f7b245f9efdbf4176e5903a98b99a71769",
+      "predicate": {
+        "uid": "S_4153e18c43e148709311a9472e5e402e",
+        "kind": "S"
+      },
+      "roles": [
+        "SUBJECT"
+      ]
+    },
+    "T:open:c0a09a2b0de9f89a3a22308968c9a2cb59cae4854e32b0f2dd5294acc40e12d3": {
+      "uid": "T:open:c0a09a2b0de9f89a3a22308968c9a2cb59cae4854e32b0f2dd5294acc40e12d3",
+      "predicate": {
+        "uid": "S_ba8a3e59961a472d8adfe97f6149db81",
+        "kind": "S"
+      },
+      "roles": [
+        "SUBJECT"
+      ]
+    },
+    "fixture:T:GROUP_HAS_MEMBER": {
+      "uid": "fixture:T:GROUP_HAS_MEMBER",
+      "predicate": {
+        "uid": "fixture:S:GROUP_HAS_MEMBER",
+        "kind": "S"
+      },
+      "roles": [
+        "SUBJECT",
+        "OBJECT"
+      ]
+    },
+    "T:open:121333ddc8502b2fb7b141a4b477af319864d3e0196d7b233fd613bfb8abfa2e": {
+      "uid": "T:open:121333ddc8502b2fb7b141a4b477af319864d3e0196d7b233fd613bfb8abfa2e",
+      "predicate": {
+        "uid": "S_33b5011966fb4116ac4facb9b2d65292",
+        "kind": "S"
+      },
+      "roles": [
+        "OBJECT",
+        "SURFACE_ARG"
+      ]
+    },
+    "T:open:cccc4348ccd312df040bd8cbbc47548b7f408aeb6e7cc4b912ff76338a92777f": {
+      "uid": "T:open:cccc4348ccd312df040bd8cbbc47548b7f408aeb6e7cc4b912ff76338a92777f",
+      "predicate": {
+        "uid": "S_72839254a90c475eb50e81e5a434451e",
+        "kind": "S"
+      },
+      "roles": [
+        "SUBJECT"
+      ]
+    },
+    "T:open:6675e54bcbaa7da5fda877968a77f28c1a849b56e7a56ea6e2246d316d11d7fe": {
+      "uid": "T:open:6675e54bcbaa7da5fda877968a77f28c1a849b56e7a56ea6e2246d316d11d7fe",
+      "predicate": {
+        "uid": "S_9a74f0dad8184c96bfb11eb208745598",
+        "kind": "S"
+      },
+      "roles": [
+        "SUBJECT"
+      ]
+    },
+    "T:open:5b725cc48d48e4e676264ebdec31ff189539e5dfb0781d0f75b31e8563832b40": {
+      "uid": "T:open:5b725cc48d48e4e676264ebdec31ff189539e5dfb0781d0f75b31e8563832b40",
+      "predicate": {
+        "uid": "S_cf84a706af9f4b8da258361df48100c5",
+        "kind": "S"
+      },
+      "roles": [
+        "SUBJECT",
+        "SURFACE_ARG"
+      ]
+    },
+    "T:open:94763cdbff0cc8ca506f9d8087e81d1b9000c88e3ff1feb08cc77bbdea0e5b94": {
+      "uid": "T:open:94763cdbff0cc8ca506f9d8087e81d1b9000c88e3ff1feb08cc77bbdea0e5b94",
+      "predicate": {
+        "uid": "S_33b5011966fb4116ac4facb9b2d65292",
+        "kind": "S"
+      },
+      "roles": [
+        "OBJECT",
+        "SURFACE_ARG"
+      ]
+    },
+    "T:open:afaf06f4140a38f6039bdf3bc65c8b73480d3ed5c630cd1c41a86350b09a9e3b": {
+      "uid": "T:open:afaf06f4140a38f6039bdf3bc65c8b73480d3ed5c630cd1c41a86350b09a9e3b",
+      "predicate": {
+        "uid": "S_ef08afbbca23457e813173c2d939a37b",
+        "kind": "S"
+      },
+      "roles": [
+        "SUBJECT"
+      ]
+    },
+    "T:open:958b10f174af694d06afd3421e47fae44c9d83896b0eca3869866f1e5fe90d38": {
+      "uid": "T:open:958b10f174af694d06afd3421e47fae44c9d83896b0eca3869866f1e5fe90d38",
+      "predicate": {
+        "uid": "S_2a776aecac444266b08f628e08498dd1",
+        "kind": "S"
+      },
+      "roles": [
+        "SUBJECT"
+      ]
+    },
+    "T:open:9f43778b1b14cc1507b73a5d08190e8a55f5fd05e6eb354e68ae93346514289f": {
+      "uid": "T:open:9f43778b1b14cc1507b73a5d08190e8a55f5fd05e6eb354e68ae93346514289f",
+      "predicate": {
+        "uid": "S_dff65e22a707453397b220c297c6403e",
+        "kind": "S"
+      },
+      "roles": [
+        "SUBJECT"
+      ]
+    },
+    "T:open:44650425a71289b9175d18a174656e3986891d4ee8609e0f8365d6cb87556681": {
+      "uid": "T:open:44650425a71289b9175d18a174656e3986891d4ee8609e0f8365d6cb87556681",
+      "predicate": {
+        "uid": "S_93478624220e4da8b81736b32f402d20",
+        "kind": "S"
+      },
+      "roles": [
+        "OBJECT",
+        "SURFACE_ARG"
+      ]
+    },
+    "fixture:T:RELATIVE_UP_DESTINATION": {
+      "uid": "fixture:T:RELATIVE_UP_DESTINATION",
+      "predicate": {
+        "uid": "fixture:S:RELATIVE_UP_DESTINATION",
+        "kind": "S"
+      },
+      "roles": [
+        "OBJECT",
+        "LOCATION"
+      ]
+    },
+    "T:open:cb861a90da3140c8b9ad425647ffab83907294ad1c1363ee8862735b8a937d58": {
+      "uid": "T:open:cb861a90da3140c8b9ad425647ffab83907294ad1c1363ee8862735b8a937d58",
+      "predicate": {
+        "uid": "S_33b5011966fb4116ac4facb9b2d65292",
+        "kind": "S"
+      },
+      "roles": [
+        "OBJECT",
+        "SURFACE_ARG"
+      ]
+    },
+    "T:open:a15ec67e8e7c5fc2cc345522160fc7b55b99a55f537d8eccf915da64c9db28a0": {
+      "uid": "T:open:a15ec67e8e7c5fc2cc345522160fc7b55b99a55f537d8eccf915da64c9db28a0",
+      "predicate": {
+        "uid": "S_0fa54a8fddbc40c9a0be86df28fa5e24",
+        "kind": "S"
+      },
+      "roles": [
+        "OBJECT",
+        "SUBJECT"
+      ]
+    },
+    "T:open:c909d32dba08a13882c8b833c7abbce39eab8720086a6bce2ec081e0a5a4fa2e": {
+      "uid": "T:open:c909d32dba08a13882c8b833c7abbce39eab8720086a6bce2ec081e0a5a4fa2e",
+      "predicate": {
+        "uid": "S_a250fa49de00407584d0d089dc60b0c4",
+        "kind": "S"
+      },
+      "roles": [
+        "SUBJECT"
+      ]
+    },
+    "T:open:event-anchor:d173ae80b919a812f9f481134dbbcb7069e9a2508dca89ec4315d77de7a4e421": {
+      "uid": "T:open:event-anchor:d173ae80b919a812f9f481134dbbcb7069e9a2508dca89ec4315d77de7a4e421",
+      "predicate": {
+        "uid": "S_adf071106a414ddaa83e3ea0b939461c",
+        "kind": "S"
+      },
+      "roles": []
+    },
+    "T:open:811f16f396df56221c23b313ccf61c6cd4454c4cf5a8a119b0a8b0b5dcb62565": {
+      "uid": "T:open:811f16f396df56221c23b313ccf61c6cd4454c4cf5a8a119b0a8b0b5dcb62565",
+      "predicate": {
+        "uid": "S_382f6daaac944cc1995fe3cf9a9748f8",
+        "kind": "S"
+      },
+      "roles": [
+        "OBJECT",
+        "SURFACE_ARG"
+      ]
+    },
+    "fixture:T:optional:11903c4c7dd466ae4241e529a0f753145a58b8ebb25fdcdcccc22a7068b3b2d6": {
+      "uid": "fixture:T:optional:11903c4c7dd466ae4241e529a0f753145a58b8ebb25fdcdcccc22a7068b3b2d6",
+      "predicate": {
+        "uid": "fixture:S:ARRIVE_CITY",
+        "kind": "S"
+      },
+      "roles": [
+        "SUBJECT"
+      ]
+    }
+  },
+  "replay": {
+    "passed": true,
+    "before": {
+      "calls": 5,
+      "ledger": "861d58ca173f50ca2a17dc371dcd96d786ab6e46390c8fa50c6bdba6b0e11130",
+      "batch_hash": "a5e6b1263f4b4c7333d1439816745916c7a37d1bc8caa394446c9d7ce2954fc5"
+    },
+    "after": {
+      "calls": 5,
+      "ledger": "861d58ca173f50ca2a17dc371dcd96d786ab6e46390c8fa50c6bdba6b0e11130",
+      "batch_hash": "a5e6b1263f4b4c7333d1439816745916c7a37d1bc8caa394446c9d7ce2954fc5"
+    }
+  },
+  "recovery": {
+    "passed": true,
+    "ledger_hash": "861d58ca173f50ca2a17dc371dcd96d786ab6e46390c8fa50c6bdba6b0e11130"
+  },
+  "retraction": {
+    "all_entry_nodes_invisible": true,
+    "earlier_visible_facts_preserved": true,
+    "fresh_recovery_equal": true
+  },
+  "diagnostics": [
+    {
+      "code": "NOMINAL_REFERENCE_UNRESOLVED",
+      "detail": "nominal-reference:c50b72c5afba7e919a68d111a6cbc5158d0b97c8b2901e69b79bfbe77ad15e64|referent"
+    }
+  ],
+  "source_carrier_address_check": {
+    "kind": "SOURCE_CARRIER_ADDRESS_CHECK_ON_REAL_DIARY",
+    "source_sha256": "e1f39d7f418121ce5956be9410f058a14ef76f82c88a113df42570f5511d8e71",
+    "range": [
+      94447,
+      95107
+    ],
+    "paragraphs": [
+      {
+        "absolute_range": [
+          94697,
+          94703
+        ],
+        "scope_ref": "narrative-area:340f24cda172f0854baac849207d0e92065450c02bcc34976fb5b65aecd71672",
+        "source_range": [
+          0,
+          369
+        ],
+        "entity_ref": "M:narrator:2556f06cb1f4d63a391f1b40247374d0cf8fb12fb61bb7eb3832f0ab8ba80525",
+        "continuity": "SOURCE_CARRIER_V1"
+      },
+      {
+        "absolute_range": [
+          94886,
+          94892
+        ],
+        "scope_ref": "narrative-area:340f24cda172f0854baac849207d0e92065450c02bcc34976fb5b65aecd71672",
+        "source_range": [
+          369,
+          660
+        ],
+        "entity_ref": "M:narrator:2556f06cb1f4d63a391f1b40247374d0cf8fb12fb61bb7eb3832f0ab8ba80525",
+        "continuity": "SOURCE_CARRIER_V1"
+      }
+    ],
+    "separate_windows_same_source": [
+      {
+        "scope_ref": "narrative-area:340f24cda172f0854baac849207d0e92065450c02bcc34976fb5b65aecd71672",
+        "source_range": [
+          0,
+          369
+        ],
+        "entity_ref": "M:narrator:2556f06cb1f4d63a391f1b40247374d0cf8fb12fb61bb7eb3832f0ab8ba80525",
+        "continuity": "SOURCE_CARRIER_V1"
+      },
+      {
+        "scope_ref": "narrative-area:340f24cda172f0854baac849207d0e92065450c02bcc34976fb5b65aecd71672",
+        "source_range": [
+          0,
+          291
+        ],
+        "entity_ref": "M:narrator:2556f06cb1f4d63a391f1b40247374d0cf8fb12fb61bb7eb3832f0ab8ba80525",
+        "continuity": "SOURCE_CARRIER_V1"
+      }
+    ],
+    "full_semantic_run": false,
+    "passed": true
+  },
+  "initial_native_replay": {
+    "checks": {
+      "no_new_provider_calls": true,
+      "no_new_ignition_ticks": true,
+      "ledger_unchanged": true,
+      "batch_hash_equal": true,
+      "committed_fragments_equal": true,
+      "both_executed": true
+    },
+    "passed": true,
+    "before": {
+      "calls": 29,
+      "tick": 67,
+      "ledger": "2632455bee3b786178c1970cd3c701c405bb42fc22809c8f5288fdbd3f90c670"
+    },
+    "after": {
+      "calls": 29,
+      "tick": 67,
+      "ledger": "2632455bee3b786178c1970cd3c701c405bb42fc22809c8f5288fdbd3f90c670"
+    },
+    "semantic_correctness": "NOT_EVALUATED"
+  },
+  "probe_accounting": {
+    "initial_calls": 29,
+    "initial_approx_tokens": 17483,
+    "calls_per_window": 0,
+    "tokens_per_window": 0,
+    "jev_measured": false
+  },
+  "limitations": [
+    "Concrete same-place referent unresolved",
+    "No automatic factual projection through arbitrary OPEN modifiers",
+    "Separate uploaded source IDs are not automatically merged",
+    "Explicit narrator-shift transfer across future native chunks is not implemented; current native parse uses whole source",
+    "Source-carrier address check spans two entries but is not a complete semantic run of both entries"
+  ],
+  "gates": "UNCHANGED_BLOCKED",
+  "journal_sha256": "051cfe6df0934740169412ad1435587d2f01983fe2d380a672f54f88a8e48981"
+}

@@ -29,8 +29,9 @@ def add_local(state,gap,previous,release,frame):
     members=[dict(x,candidate_id=x['key']) for x in previous if x['features'].get('number')=='sing'
         and x['end']<=frame.source_range[0] and end-x['end']<=cfg['context_chars'] and x['features'].get('animacy')!='inan']
     # Introduction is a referent of the source's narrator, never the uploader.
-    members.append({'candidate_id':'narrator:new','kind':'ANONYMOUS','entity_ref':area['entity_ref'],'narrative_scope_ref':area['scope_ref'],
-        'participant_kind':'INDIVIDUAL','label':'an unidentified narrator of this local narrative area (use an established narrator reference instead when the supplied context supports one)'})
+    continuous=area['continuity']=='SOURCE_CARRIER_V1'
+    members.append({'candidate_id':'narrator:current' if continuous else 'narrator:new','kind':'ANONYMOUS','entity_ref':area['entity_ref'],'narrative_scope_ref':area['scope_ref'],
+        'participant_kind':'INDIVIDUAL','label':('the current unidentified narrator of this source (paragraphs, date headings and reading windows do not change the narrator)' if continuous else 'an unidentified narrator of this local narrative area (use an established narrator reference instead when the supplied context supports one)')})
     gap['options'].extend(option(gap,m,source) for m in members)
     gap['narrative_source']=source
 
@@ -50,7 +51,11 @@ def add_memory(gap,rows,release):
 
 def resolved_group(opt,resolved,gap):
     m=opt['member']
-    if m['kind']=='CHAIN':
+    from .narrative_perspective import current
+    carrier=current(resolved) if gap.get('narrative_area',{}).get('continuity')=='SOURCE_CARRIER_V1' else None
+    if m['candidate_id']=='narrator:current' and carrier:
+        member=deepcopy(carrier)
+    elif m['kind']=='CHAIN':
         member=deepcopy(resolved.get(m['gap_ref']))
         if member is None: return None
     else:

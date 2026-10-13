@@ -96,6 +96,8 @@ def h_provenance(frames):
 
 def persist_offers(state, store, binding, release):
     from ah.perception.contracts import StructuralClarificationOption, StructuralClarificationSpec
+    from .clarification_liveness import prune
+    prune(state)
     result = []
     with binding._lock, store._journal.atomic():
         frozen = binding.input_snapshot(state.source_uid, state.interpretation_version)
@@ -178,6 +180,7 @@ def resolve(adapter, resolution_key, *, source_text=None):
         if len(requests) != 1:
             raise ValueError('CLARIFICATION_REQUEST_MISSING')
         request = requests[0]
+        from .clarification_liveness import obsolete
         if source_text is not None and request['source_text'] != source_text:
             raise ValueError('CLARIFICATION_INPUT_MISMATCH')
         if request['resource_snapshot'] != release.sha256:
@@ -190,6 +193,7 @@ def resolve(adapter, resolution_key, *, source_text=None):
         if frozen is None or digest(frozen) != request['input_sha256']:
             raise ValueError('CLARIFICATION_INPUT_CHANGED')
         old = [r for r in records if r.get('kind') == 'CLARIFICATION_SELECTED' and r.get('request_id') == rid]
+        if not old and obsolete(request): raise ValueError('CLARIFICATION_BRANCH_REJECTED')
         if old:
             if len(old) != 1 or old[0]['option_hash'] != option_hash:
                 raise ValueError('CLARIFICATION_ALREADY_SELECTED')
@@ -236,7 +240,8 @@ def request_current(adapter, resolution_key):
     records = [r['payload'] for r in adapter._store._journal.scan_unprocessed()]
     request = next((r for r in records if r.get('kind') == 'CLARIFICATION_REQUEST'
                     and r.get('request_id') == match[1]), None)
-    if request is None or request['resource_snapshot'] != adapter._release.sha256:
+    from .clarification_liveness import obsolete
+    if request is None or obsolete(request) or request['resource_snapshot'] != adapter._release.sha256:
         return False
     with adapter._store._journal.atomic(), adapter._store._store._lock:
         adapter._store._refresh()

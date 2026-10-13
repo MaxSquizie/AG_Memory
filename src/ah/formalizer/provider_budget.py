@@ -1,4 +1,4 @@
-"""Finite source-window provider accounting, independent of transport and WAL."""
+"""Source-window provider accounting; a zero ceiling disables only that cap."""
 from .canonical_ledger import digest
 
 
@@ -14,7 +14,7 @@ class WindowTokens:
         self.key=key
 
     def available(self,cost):
-        return self.key is not None and self.used[self.key]+cost<=self.limits[self.key]
+        return self.key is not None and (self.limits[self.key]==0 or self.used[self.key]+cost<=self.limits[self.key])
 
     def charge(self,cost):
         self.used[self.key]+=cost

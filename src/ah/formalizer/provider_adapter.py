@@ -97,7 +97,7 @@ class ProviderAdapter:
 
     def configure_probe_windows(self, keys, token_limit):
         from .provider_budget import WindowTokens
-        limit=min(token_limit,self.budget.token_limit) if self.budget.token_limit else token_limit
+        limit=0 if token_limit==0 else min(token_limit,self.budget.token_limit) if self.budget.token_limit else token_limit
         self._window_tokens=WindowTokens(keys,limit,self.params_hash)
 
     def enter_probe_window(self,key):

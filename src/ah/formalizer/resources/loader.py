@@ -88,6 +88,9 @@ class ResourceRelease:
                 if not set(rule['role_ids']) <= {r['role_id'] for r in self.entries('RoleRegistry')}:
                     raise ResourceMissing('RESOURCE_MISSING: unknown event reference role')
         policy=self.entries('ProposalPolicy')[0]
+        budget=policy.get('probe_budget')
+        if budget and budget['version']=='SOURCE_WINDOW_V1' and (budget['calls_per_window']<1 or budget['tokens_per_window']<256):
+            raise ResourceMissing('SOURCE_WINDOW_V1 requires finite positive probe budgets')
         if policy.get('spatial_references'):
             from ..spatial_release import validate
             try: validate(self,policy['spatial_references'])

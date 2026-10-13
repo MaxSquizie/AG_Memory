@@ -86,8 +86,10 @@ def resolve_implicit(state, release, selector):
                 state.diag('IMPLICIT_ARGUMENT_UNRESOLVED',gap['gap_id']); continue
             options=gap['options']
             lo,hi=gap['context_range']
+            from .narrative_perspective import current
+            carrier=current(resolved) if gap.get('narrative_area',{}).get('continuity')=='SOURCE_CARRIER_V1' else None
             targets={o['candidate_id']:(resolved.get(o.get('gap_ref'),{}).get('entity_ref')
-                if o['kind']=='CHAIN' else None if o['kind']=='NARRATIVE_GROUP' else o.get('entity_ref')) for o in options}
+                if o['kind']=='CHAIN' else None if o['kind']=='NARRATIVE_GROUP' else carrier['entity_ref'] if o['kind']=='NARRATOR' and carrier else o.get('entity_ref')) for o in options}
             from .implicit_introduction import introduce_without_antecedent
             chosen=introduce_without_antecedent(state,gap)
             if chosen is None:
@@ -110,6 +112,8 @@ def resolve_implicit(state, release, selector):
                 value=resolved_group(opt,resolved,gap)
                 if value is None:
                     state.diag('IMPLICIT_CHAIN_UNRESOLVED',gap['gap_id']);continue
+            elif opt['kind']=='NARRATOR' and carrier:
+                value=deepcopy(carrier)
             elif opt['kind']=='CHAIN':
                 target=resolved.get(opt['gap_ref'])
                 if target is None:
@@ -119,7 +123,7 @@ def resolve_implicit(state, release, selector):
                 value={k:deepcopy(v) for k,v in opt.items() if k in {'entity_ref','participant_kind','premise_support_refs','anchor_binding_ref','context_decision_ref','perspective','perspective_source_range','narrative_scope_ref'}}
                 if opt['kind']=='MEMORY':
                     value['premise_support_refs']=list(min(tuple(path) for path in opt['grounding_paths']))
-                value['anonymous']=opt['kind'] in {'ANONYMOUS','NARRATOR'}
+                value['anonymous']=opt['kind'] in {'ANONYMOUS','NARRATOR','NARRATOR_SHIFT'}
                 if opt['kind']=='MENTION': value['label']=opt['anchor_label']; value['anchor_mention']=opt['mention_ref']
             if any(v['entity_ref']==value['entity_ref'] and not compatible(v['features'],gap['features']) for v in resolved.values()):
                 state.diag('IMPLICIT_CHAIN_FEATURE_CONFLICT',gap['gap_id']); continue

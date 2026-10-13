@@ -48,6 +48,7 @@ def reduce(state,release,selector,region,tokens,p,pv,roles,nominals,groups,cfg):
             if cid is None:
                 decision=state.decisions.get(probe_key)
                 if decision and decision.selector_outcome=='NONE_FIT':
+                    state.clarification_candidates=[r for r in state.clarification_candidates if r['decision_ref']!=probe_key]
                     state.syntax_trace.append({'kind':'DEPENDENCY_REJECTED','region_ref':region.region_id,'predicate_ref':p.token_id,'decision_ref':probe_key,'reason':'NO_LICENSED_ATTACHMENT'})
                 else:state.diag('COMPONENT_DEPENDENCY_UNRESOLVED',region.region_id)
                 return None
