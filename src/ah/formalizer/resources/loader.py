@@ -203,6 +203,10 @@ class ResourceRelease:
             if not all(x.get(k) for k in ('read_id','lemma','snapshot_version')): raise ResourceMissing('invalid declared read')
         import re
         for x in self.entries('ScopeLexicon'):
+            if 'QUANTIFIED_NOMINAL' in x.get('attachment_kinds',()):
+                from ..quantifier_composition import validate_rule
+                try:validate_rule(x,{r['role_id'] for r in self.entries('RoleRegistry')})
+                except ValueError as exc:raise ResourceMissing(str(exc)) from exc
             if x.get('operator') and x['operator'] not in {'NOT','AND','OR','XOR','IMPLIES','FORALL','EXISTS','POSSIBLE','NECESSARY','COUNTERFACTUAL','BEFORE','AFTER','DURING','ASSOCIATION','AT_LEAST_N','EXACTLY_N','AT_MOST_N'}: raise ResourceMissing('invalid scope operator')
             if 'TEMPORAL_NOMINAL' in x.get('attachment_kinds',()):
                 restriction=x.get('restriction_pattern',{})

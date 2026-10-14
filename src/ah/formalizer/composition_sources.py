@@ -16,7 +16,7 @@ def token_key(tokens):
 class CompositionSources:
     def __init__(self,state,release):
         from .native_frontend import _required_operators
-        self.state=state;self.by_tokens=defaultdict(list);self.child_domains={}
+        self.state=state;self.release=release;self.by_tokens=defaultdict(list);self.child_domains={};self.projected=set();self.failed=set()
         self.evidence={e.token_id:e for e in state.evidence}
         self.required=_required_operators(state,release)
         required_by_token=defaultdict(set)
@@ -68,10 +68,53 @@ class CompositionSources:
     def complete(self,tokens):
         return len(self.alternatives(tokens))==1
 
+    def project_grammar(self,tokens):
+        """Close the same released capture domains in an addressed child area.
+
+        Source token IDs/readings are reused. No second tokenizer, grammar DSL
+        or model-generated subtree is introduced by a recursive boundary.
+        """
+        from copy import copy
+        from .morphology_domain import clean
+        key=digest([[t.token_id,[clean(v) for v in t.variants]] for t in tokens])
+        if key in self.failed:return False
+        if key in self.projected:return
+        self.projected.add(key)
+        from .grammar_domains import chart
+        chart(self.state)
+        local=copy(self.state);local.evidence=list(tokens);local.frames=[];local.clause_candidates=[]
+        from .tp_proposer import StructureProposalRequest
+        from .native_frontend import OPERATORS, _frames_for_hypotheses
+        from .syntax_rules import propose_graphs, SearchLimit
+        from .selection_protocol import ProtocolError
+        p=self.release.entries('ProposalPolicy')[0];owned={t.token_id for t in tokens}
+        request=StructureProposalRequest('syntax-child:'+key,'',tuple(t.token_id for t in tokens),
+            allowed_node_kinds=frozenset({'PREDICATE','ENTITY','BOUND_VAR','TIME','WH','COUNT_REQUEST','NUMERAL',*OPERATORS}),
+            allowed_edge_kinds=frozenset({'ARGUMENT','OPERAND','ATTITUDE','BIND','TIME_SCOPE','QUERY_SLOT'}),
+            allowed_role_ids=frozenset(x['role_id'] for x in self.release.entries('RoleRegistry')),
+            max_nodes=p['max_nodes'],max_edges=p['max_edges'],max_depth=p['max_depth'],
+            required_operators=tuple((op,refs) for op,refs in self.required if set(refs)<=owned))
+        try:
+            hypotheses,provenance,bindings=propose_graphs(local,self.release,request)
+            accepted=_frames_for_hypotheses(local,hypotheses,self.release,provenance,bindings)
+        except (SearchLimit,ProtocolError) as exc:
+            self.failed.add(key)
+            self.state.grammar_search_incomplete=True
+            self.state.diag('COMPONENT_SEARCH_INCOMPLETE',str(exc));return False
+        local.frames=[f for _,frames in accepted for f in frames]
+        inventory=CompositionSources(local,self.release)
+        target=token_key(tokens)
+        existing={cid for cid,_ in self.by_tokens[target]}
+        self.by_tokens[target].extend((cid,frames) for cid,frames in inventory.by_tokens.get(target,()) if cid not in existing)
+        self.state.syntax_trace.append({'kind':'GRAMMAR_CHILD_PROJECTED','projection_ref':key,
+            'owned_token_refs':[t.token_id for t in tokens],
+            'candidate_refs':[cid for cid,_ in self.by_tokens[target]]})
+
     def reuse(self,region,tokens,attachment,infinitive,request):
         if attachment is not None or infinitive is not None:return None
         if request and (request.output_sort!='PROPOSITION' or request.head_ref or request.allowed_cases
                         or request.proposition_slots or request.agreement_source or request.pending_proposition_roles):return None
+        if not self.alternatives(tokens) and self.project_grammar(tokens) is False:return []
         choices=self.alternatives(tokens)
         if not choices:return None
         if len(choices)>1:

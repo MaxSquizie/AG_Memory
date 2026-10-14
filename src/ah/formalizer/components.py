@@ -20,6 +20,9 @@ def _compose(state, release, selector):
     cfg = policy(release)
     if not cfg:
         return
+    if state.grammar_search_incomplete:
+        state.diag('COMPONENT_SEARCH_INCOMPLETE','released grammar enumeration incomplete')
+        return
     state.require_structures_open('COMPONENT_COMPOSITION')
     evidence = {e.token_id:e for e in state.evidence}
     from .component_refinement import compose_area

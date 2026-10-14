@@ -39,3 +39,13 @@ def execute(live,state,selector,release,key,slot,options,context,source_range,*,
     state.component_probe_records[key]={'signature':signature,'dependency_signature':dependency_signature,
                                       'decision':asdict(state.decisions[key]),'attempts':attempts}
     return result
+
+
+def supersede(state,previous,current):
+    """Retire a replaced question, retaining its exact reply as audit evidence."""
+    if not previous or previous==current:return
+    state.clarification_candidates[:]=[r for r in state.clarification_candidates if r['decision_ref']!=previous]
+    record=state.component_probe_records.get(previous)
+    if record is not None:record['superseded_by']=current
+    state.syntax_trace.append({'kind':'COMPOSITION_PROBE_SUPERSEDED',
+                               'previous_decision_ref':previous,'decision_ref':current})

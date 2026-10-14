@@ -446,7 +446,18 @@ def enumerate_matches(state, rules, stage, policy, release):
                     token = state.evidence[i]
                     for variant_index,variant in enumerate(token.variants or (None,)):
                         spend()
-                        truth = matches(pattern['captures'][capture], token, variant, spend)
+                        if stage=='T2':
+                            from .grammar_domains import chart
+                            def evaluate_feature():
+                                cost=0
+                                def charged():
+                                    nonlocal cost
+                                    spend();cost+=1
+                                truth=matches(pattern['captures'][capture],token,variant,charged)
+                                return truth,cost
+                            truth=chart(state).feature(rule,capture,token,variant,
+                                evaluate_feature,spend)
+                        else:truth = matches(pattern['captures'][capture], token, variant, spend)
                         if regional: checks.append([steps,token.token_id,variant_index,truth])
                         else: trace(rule,'FEATURE_CHECK',truth,capture=capture,token_ref=token.token_id,variant_index=variant_index)
                         if truth is True:
@@ -455,6 +466,15 @@ def enumerate_matches(state, rules, stage, policy, release):
                 # Do not enumerate unrelated argument captures after that.
                 if not options[capture]: break
             if any(not rows for rows in options.values()): continue
+            if stage=='T2':
+                from .grammar_domains import chart
+                for assignment in chart(state).close(state,release,rule,options,(lo,hi),spend):
+                    out.append(RuleMatch(rule,assignment,(lo,hi)))
+                    window_matches[current_window]=window_matches.get(current_window,0)+1
+                    if (window_matches[current_window] if regional else len(out))>max_matches:
+                        trace(rule,'LIMIT','COMPUTATION_LIMIT',assignment)
+                        raise SearchLimit('COMPUTATION_LIMIT: SyntaxRules matches')
+                continue
             if 'where' in pattern and True not in _possible_ast(pattern['where'], options, state, release, (lo,hi), spend):
                 trace(rule, 'DOMAIN_PRUNE', False, window=[lo,hi],
                       reason='declared predicate cannot be True over capture domains')

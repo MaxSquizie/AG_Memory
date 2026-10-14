@@ -1,0 +1,308 @@
+{
+  "schema": "joint-composition-domains-audit-1",
+  "baseline_commit": "48c2e47efc7285b6230b6c95882745ee134be806",
+  "resource_status": "TEST_ONLY",
+  "provider_semantic_correctness": "NOT_EVALUATED",
+  "full_acceptance": false,
+  "tests": {
+    "passed": 69,
+    "files": [
+      "tests/test_joint_composition_domains.py",
+      "tests/test_formalizer_v7_syntax_fixture.py",
+      "tests/test_document_syntax_budget.py",
+      "tests/test_region_attention.py",
+      "tests/test_formalizer_goal_executor.py"
+    ],
+    "full_suite": false
+  },
+  "code_sha256": {
+    "src/ah/formalizer/component_probe_replay.py": "91cd4d439b3ea4b5aee6f7d0809abe03474cfaeccbd453bd1a5419d86e92d3c1",
+    "src/ah/formalizer/components.py": "96f51e5a7e94eb9a2aa1546c74242f1d17dcca251644d45b86109ddf8c2e3a98",
+    "src/ah/formalizer/composition_boundaries.py": "e8b2d830ac1c2a2e54d49c915e24f87724e0a015181fdd3d07a0b2a4abed649a",
+    "src/ah/formalizer/composition_domains.py": "31ffe8184acd306246b1a20a0eb1ea99cde9707fd2ed160b18038891ede29c90",
+    "src/ah/formalizer/composition_sources.py": "452bdc916530e9745b820436ef56738f959073d06e536ea0017ffc0c8b1bbb90",
+    "src/ah/formalizer/composition_tasks.py": "7f9295ac2670de3c98464b54e2161d7237e24fabe64b5af89df44f9d8c725e05",
+    "src/ah/formalizer/native_frontend.py": "866738b5417f53c52475e4a53579b54a2548e4ad461aba14b9fb2af791747671",
+    "src/ah/formalizer/operator_composition.py": "632492601d9eb6c73934d3ad53afdc5a82fef3df6505f2634b39fdf93dbdf975",
+    "src/ah/formalizer/resources/loader.py": "8ac81d2f3b378164c7c885d9108047cebbab4b896a94ed5eddc20c5ebcfe6773",
+    "src/ah/formalizer/scope_assignment.py": "3f172c000ebd5b3d49648e864f31369839de3e7932fc1d363dce7ca43d35e489",
+    "src/ah/formalizer/syntax_rules.py": "37485e06e459b2c27c640a87a85bba567c946aee4afb0c8437a03474cb857569",
+    "tools/formalizer_component_fixture.py": "09e42cfb03b8621ebe0f3b6d8fdfdcb5a93054cf9a7fe165e32344b908e11625",
+    "tools/read_document_probe_mailbox.py": "55049eb9978b72890e5aa37fab43b9987d43ac2bc9ae5ad6556bdd07ae353be4",
+    "src/ah/formalizer/grammar_domains.py": "a4e1e9406ec702228be7782edb8706f36dc4f319b5cace9bfa2fb50d9f385bf0",
+    "src/ah/formalizer/quantifier_composition.py": "a0dfd3a83e0e4271958b676745b6108d2f46454568087986f00046f473272fa3",
+    "tests/test_joint_composition_domains.py": "30bb32f21b9936cd8e217e79dae580afe0708ba39582d0a065efa7de7cacb1d5"
+  },
+  "runs": [
+    {
+      "run": "quantified_domains_final",
+      "source": "Не каждый студент мог не сдать экзамен.\n",
+      "source_sha256": "8c1a333c8cd88e8dfb83273a2edb824d2368448d8a76616633fc97a4f46b853f",
+      "terminal": "APPLIED",
+      "fragments": 1,
+      "calls": 7,
+      "diagnostics": [],
+      "replay": {
+        "no_new_provider_calls": true,
+        "no_new_ignition_ticks": true,
+        "ledger_unchanged": true,
+        "batch_hash_equal": true,
+        "committed_fragments_equal": true,
+        "both_executed": true
+      },
+      "artifact_sha256": {
+        "reading/report.json": "d19768b719318c497bde2adcd4ef28ad6bc8985846b211cef1da789a59529710",
+        "reading/interpretation.json": "f4bc3eba86d6614c3860527a90a1ec4d7529d6656c0e2888314becfcb757a070",
+        "native_replay_check.json": "e737070ea9f6bcce27f27704609b00139f490ef8f1784285531de0e1b4b8e6ae",
+        "journal.log": "ad18bbd57cd161cbecf991fd46a50ff3991a1466d908323249af6f6f950bed98",
+        "resource_manifest.json": "b14478853760be69fcb269e5f423610bb6abcd9722afd2db8893f01afca90ade",
+        "probe_0001.request.json": "ee5a95590ce946908f5003c8ebf01f4ba6b6b1c6beda7e30f99756d10ae802ca",
+        "probe_0002.request.json": "54df509b74a057a4ecaad1286901e69e1565f0cdf9778949150ca6180dec7be2",
+        "probe_0003.request.json": "00c5123266ecd5adb0a9bc22528d2ccf694e697d3990bc675d7fc695a08938d9",
+        "probe_0004.request.json": "70728e73ce1b423da80d7232c0cf25e0159e5385da92cae8ffebc4a76c2f520d",
+        "probe_0005.request.json": "6a6d037a23f618ea967624eef5523c2782ad35acacea3067d7a05e376d37f40e",
+        "probe_0006.request.json": "df96c2102bd5abf602046b70bccc04aaafd6bc7c925aeb3ed12dfd7316b45789",
+        "probe_0007.request.json": "325675152a2e7c80878ecde5fd56db88478331ef760c706b41eec4f28044fcd5",
+        "probe_0001.reply.txt": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+        "probe_0002.reply.txt": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+        "probe_0003.reply.txt": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+        "probe_0004.reply.txt": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+        "probe_0005.reply.txt": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+        "probe_0006.reply.txt": "53c234e5e8472b6ac51c1ae1cab3fe06fad053beb8ebfd8977b010655bfdd3c3",
+        "probe_0007.reply.txt": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      }
+    },
+    {
+      "run": "quantified_two_final",
+      "source": "Каждый студент мог видеть некоторого врача.\n",
+      "source_sha256": "c873f5f5be3e6cead1552fd55d2d73498d45a51ab7f0ed601d8aa05ef691e458",
+      "terminal": "APPLIED",
+      "fragments": 1,
+      "calls": 6,
+      "diagnostics": [],
+      "replay": {
+        "no_new_provider_calls": true,
+        "no_new_ignition_ticks": true,
+        "ledger_unchanged": true,
+        "batch_hash_equal": true,
+        "committed_fragments_equal": true,
+        "both_executed": true
+      },
+      "artifact_sha256": {
+        "reading/report.json": "dfc52ee71e5c2176dcadc0ea98ea2304a25513eab36284dddeceb10bba63d577",
+        "reading/interpretation.json": "5615b72000a13f6332d3d070521f54c58636efc574e1dc4859a80509259caea3",
+        "native_replay_check.json": "097a0a7db3ba0ec1a125cb6837e6809ddf465ac8adb21fd189246693cf6289a5",
+        "journal.log": "fbce576341adf9e9df22ba1965e98926242feb11b18f334dd8ee8b3c77592f54",
+        "resource_manifest.json": "b14478853760be69fcb269e5f423610bb6abcd9722afd2db8893f01afca90ade",
+        "probe_0001.request.json": "98f7087a1971243639a6c3773b899ceea22b7633fa4b3b3e2298eac2ac99d8c2",
+        "probe_0002.request.json": "eaa418f5482821d1620881745a6b3845742c53cad18b5333b1ddbdc356617c76",
+        "probe_0003.request.json": "a3940d7ca2e54cfa0cd515ea4606f8cd0836633fd9426381041c2d5f39964029",
+        "probe_0004.request.json": "df6a0ec254b445f20a53257768279e2491c8b9366b7e480982d850544c9a3260",
+        "probe_0005.request.json": "eadb9f9651b7340a5f94a655e2fae1cfd77bff46af2aec3b95b5103e70b05d11",
+        "probe_0006.request.json": "a87c7e509ca444501a84b7ca9bdd1164591aa3b8ed76fd7b6ff6230dbedde0b8",
+        "probe_0001.reply.txt": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+        "probe_0002.reply.txt": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+        "probe_0003.reply.txt": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+        "probe_0004.reply.txt": "1121cfccd5913f0a63fec40a6ffd44ea64f9dc135c66634ba001d10bcf4302a2",
+        "probe_0005.reply.txt": "53c234e5e8472b6ac51c1ae1cab3fe06fad053beb8ebfd8977b010655bfdd3c3",
+        "probe_0006.reply.txt": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      }
+    },
+    {
+      "run": "quantified_unknown_verified",
+      "source": "Каждый студент мог видеть некоторого врача.\n",
+      "source_sha256": "c873f5f5be3e6cead1552fd55d2d73498d45a51ab7f0ed601d8aa05ef691e458",
+      "terminal": "RESOLUTION_ONLY",
+      "fragments": 0,
+      "calls": 6,
+      "diagnostics": [
+        {
+          "code": "COMPOSITION_SCOPE_UNRESOLVED",
+          "detail": "region:b7378cf55cfcf33f6faff6ff04057d60917381769776d4275e9c8c2abe3ccf3a"
+        },
+        {
+          "code": "STRUCTURAL_OPERAND_UNRESOLVED",
+          "detail": "STRUCTURAL_OPERAND_UNRESOLVED:component:4d4af288347666fd5e9877101dcb36fc4dde9e0a8e74b9e0d57f1dd90e989261"
+        }
+      ],
+      "replay": {
+        "no_new_provider_calls": true,
+        "no_new_ignition_ticks": true,
+        "ledger_unchanged": true,
+        "batch_hash_equal": true,
+        "committed_fragments_equal": true,
+        "both_executed": true
+      },
+      "artifact_sha256": {
+        "reading/report.json": "425e6a7920f808f53f1dcf1837365de70c973346b2f444b1f4688edcbf6584c1",
+        "reading/interpretation.json": "2d8d585dd7bfdd04cd19f6abb0dcf942b053544e808d6571296a8a3b9cc519a6",
+        "native_replay_check.json": "8279e3483bf220b5a98081439e7c8f7c07afcf27588784de6df55b0241938da5",
+        "journal.log": "fa5e84de40136548707eac2cc63a512acc6125c8840fe04e35e6447b6e8faf34",
+        "resource_manifest.json": "b14478853760be69fcb269e5f423610bb6abcd9722afd2db8893f01afca90ade",
+        "probe_0001.request.json": "98f7087a1971243639a6c3773b899ceea22b7633fa4b3b3e2298eac2ac99d8c2",
+        "probe_0002.request.json": "eaa418f5482821d1620881745a6b3845742c53cad18b5333b1ddbdc356617c76",
+        "probe_0003.request.json": "a3940d7ca2e54cfa0cd515ea4606f8cd0836633fd9426381041c2d5f39964029",
+        "probe_0004.request.json": "df6a0ec254b445f20a53257768279e2491c8b9366b7e480982d850544c9a3260",
+        "probe_0005.request.json": "5497537a06381347f7f87ead1c5efc707bdf65cf066f005ccd00be22376b03c5",
+        "probe_0006.request.json": "7c3719db1876890a7c496bc98fdab4211f246964ceb69f54b5a269bcd0bd3e8f",
+        "probe_0001.reply.txt": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+        "probe_0002.reply.txt": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+        "probe_0003.reply.txt": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+        "probe_0004.reply.txt": "ce773b87709a04bbcb0ead74fea94b1f20fa4a4d185fc06a24a9bc703dd99613",
+        "probe_0005.reply.txt": "ce773b87709a04bbcb0ead74fea94b1f20fa4a4d185fc06a24a9bc703dd99613",
+        "probe_0006.reply.txt": "ce773b87709a04bbcb0ead74fea94b1f20fa4a4d185fc06a24a9bc703dd99613"
+      }
+    },
+    {
+      "run": "grammar_child_live",
+      "source": "Иван не читал книгу.\n",
+      "source_sha256": "0400a898c3712a9f2f4ad14ae7be473517b5b61bf94f3b7efe4653a2feb7d707",
+      "terminal": "APPLIED",
+      "fragments": 1,
+      "calls": 1,
+      "diagnostics": [],
+      "replay": {
+        "no_new_provider_calls": true,
+        "no_new_ignition_ticks": true,
+        "ledger_unchanged": true,
+        "batch_hash_equal": true,
+        "committed_fragments_equal": true,
+        "both_executed": true
+      },
+      "artifact_sha256": {
+        "reading/report.json": "89ddb47f520bee7074ab6bcb603d8c8c3683aaf0457b02e36f60e195412e0226",
+        "reading/interpretation.json": "8662abcd3a8c8e3a05d1933546b8fe95d85de0715c2359bdd2b52f115d2578e8",
+        "native_replay_check.json": "927109bc22d770d4ccc46ccfd381cde13a73b67c982dc38e1098b1e575971fc4",
+        "journal.log": "43c578caf7ef972a9eb8c1eb95ba9cb6337a42d860becb9b288c4f57028eccf2",
+        "resource_manifest.json": "b14478853760be69fcb269e5f423610bb6abcd9722afd2db8893f01afca90ade",
+        "probe_0001.request.json": "d36e806c757ac465dcdaaad33d06235d580d54c553849b64d71023f1cb502a47",
+        "probe_0001.reply.txt": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      }
+    },
+    {
+      "run": "joint_scope_quantity_live",
+      "source": "Смотрели на игры двадцать мальчиков, знакомых Алексея по городскому саду.",
+      "source_sha256": "e6dc65147857ec8fcfac69d8785ea84d2d9d739cf3a9be668af7a35d94145cda",
+      "terminal": "APPLIED",
+      "fragments": 2,
+      "calls": 11,
+      "diagnostics": [],
+      "replay": {
+        "no_new_provider_calls": true,
+        "no_new_ignition_ticks": true,
+        "ledger_unchanged": true,
+        "batch_hash_equal": true,
+        "committed_fragments_equal": true,
+        "both_executed": true
+      },
+      "artifact_sha256": {
+        "reading/report.json": "7fb3f936ddd53af8343cac9cd15fbd555a48d10c522fe1ebfb7fc58d067f4c66",
+        "reading/interpretation.json": "951eed9488518584ca1d30e40ffe8b7662d4334affa947c93c8233b20744101f",
+        "native_replay_check.json": "b7cfa6b77fe5ebdcde9b5767b11143e407a2144c253b90bdd6c007833de3c558",
+        "journal.log": "d17ced43777a5b079c6c0f4f37ef7f8f747e30b919edc7acbaf352642dd13663",
+        "resource_manifest.json": "88cdae68a68f0c78acff81b467ea350a0dbd9726529f074c5bff129edc349594",
+        "probe_0001.request.json": "3ae7d4f0fba6daadcb6e05f757a29c9771fbf8b4ef0d4def2f98e41d7d545c92",
+        "probe_0002.request.json": "35794841d97548405967191beeffec1e14ddff61a7e72c232c7b4a1e4f44f809",
+        "probe_0003.request.json": "be7c607b0da22c599da84430f5d539d90850e18f784c9d03b37d67aa0c46a467",
+        "probe_0004.request.json": "052e7adbb9bea9b397ae58c42925fdb9439c66968b3d7299a9ec236656ff5537",
+        "probe_0005.request.json": "72e4c2466bd35ff20c6303a296985c4663aa9a8bee37c003cec86f22888f15d8",
+        "probe_0006.request.json": "3b5d9272921208467579675e347bc8bf4fed31f522b18bb491e510318ddd4fd0",
+        "probe_0007.request.json": "b325a74d1d1b48118377537d3e9c0368f18d29977d2bf25f6cba9fa5f70aad6d",
+        "probe_0008.request.json": "640306a60eb8163c9612d647a0500698fb23caef00f698dce70bedfc80a322e1",
+        "probe_0009.request.json": "581ae01097069ee05513cc16fcd4250bc7699e75e97b85945f6a074d5e202d05",
+        "probe_0010.request.json": "7f8ab8d5ffa2cb5bad61f1b91b127ba06b2c055f0656045357d78b49c04d8f64",
+        "probe_0011.request.json": "85a85e14455dd09762cbedc657e634f7f2730f579e63f0efde2b183bbfa9c6bb",
+        "probe_0001.reply.txt": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+        "probe_0002.reply.txt": "53c234e5e8472b6ac51c1ae1cab3fe06fad053beb8ebfd8977b010655bfdd3c3",
+        "probe_0003.reply.txt": "53c234e5e8472b6ac51c1ae1cab3fe06fad053beb8ebfd8977b010655bfdd3c3",
+        "probe_0004.reply.txt": "53c234e5e8472b6ac51c1ae1cab3fe06fad053beb8ebfd8977b010655bfdd3c3",
+        "probe_0005.reply.txt": "7de1555df0c2700329e815b93b32c571c3ea54dc967b89e81ab73b9972b72d1d",
+        "probe_0006.reply.txt": "f0b5c2c2211c8d67ed15e75e656c7862d086e9245420892a7de62cd9ec582a06",
+        "probe_0007.reply.txt": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+        "probe_0008.reply.txt": "7de1555df0c2700329e815b93b32c571c3ea54dc967b89e81ab73b9972b72d1d",
+        "probe_0009.reply.txt": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+        "probe_0010.reply.txt": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+        "probe_0011.reply.txt": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      }
+    }
+  ],
+  "canonical_ledger_checks": [
+    {
+      "run": "quantified_domains_verified",
+      "terminal": "APPLIED",
+      "calls": 7,
+      "root_types": [
+        "NOT"
+      ],
+      "no_binder_identity_records": true,
+      "no_independent_body_or_restriction_support": true,
+      "replay": {
+        "no_new_provider_calls": true,
+        "no_new_ignition_ticks": true,
+        "ledger_unchanged": true,
+        "batch_hash_equal": true,
+        "committed_fragments_equal": true,
+        "both_executed": true
+      }
+    },
+    {
+      "run": "quantified_two_verified",
+      "terminal": "APPLIED",
+      "calls": 6,
+      "root_types": [
+        "FORALL"
+      ],
+      "no_binder_identity_records": true,
+      "no_independent_body_or_restriction_support": true,
+      "replay": {
+        "no_new_provider_calls": true,
+        "no_new_ignition_ticks": true,
+        "ledger_unchanged": true,
+        "batch_hash_equal": true,
+        "committed_fragments_equal": true,
+        "both_executed": true
+      }
+    },
+    {
+      "run": "quantified_unknown_verified",
+      "terminal": "RESOLUTION_ONLY",
+      "calls": 6,
+      "root_types": [],
+      "no_binder_identity_records": true,
+      "no_independent_body_or_restriction_support": true,
+      "replay": {
+        "no_new_provider_calls": true,
+        "no_new_ignition_ticks": true,
+        "ledger_unchanged": true,
+        "batch_hash_equal": true,
+        "committed_fragments_equal": true,
+        "both_executed": true
+      }
+    },
+    {
+      "run": "grammar_child_live",
+      "terminal": "APPLIED",
+      "calls": 1,
+      "root_types": [
+        "NOT"
+      ],
+      "no_binder_identity_records": true,
+      "no_independent_body_or_restriction_support": true,
+      "replay": {
+        "no_new_provider_calls": true,
+        "no_new_ignition_ticks": true,
+        "ledger_unchanged": true,
+        "batch_hash_equal": true,
+        "committed_fragments_equal": true,
+        "both_executed": true
+      }
+    }
+  ],
+  "ledger_check_scope": "Four pre-final run journals restored into AHStore; final positive runs revalidated after binder budget and conflicting-resource checks.",
+  "remaining": [
+    "outer boundary selection precedes child parsing",
+    "no universal forest across all source families and clause boundaries",
+    "multiple finite governors in unsplit area unresolved",
+    "single nominal head restrictions; complex restrictors and arbitrary elliptical control not implemented"
+  ]
+}

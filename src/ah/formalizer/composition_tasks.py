@@ -42,7 +42,7 @@ class ChildTasks:
         try:
             result=compute()
             records=self.state.component_probe_records
-            pending=[k for k in sorted(reads['probes']) if k in records and records[k]['decision'].get('selector_outcome')
+            pending=[k for k in sorted(reads['probes']) if k in records and not records[k].get('superseded_by') and records[k]['decision'].get('selector_outcome')
                      in {'MULTIPLE_ADMISSIBLE','INSUFFICIENT_CONTEXT'}]
             diagnostics=list(self.state.diagnostics[start:])
             blocked=reads['blocked'] or any('INCOMPLETE' in d.code or d.code in {

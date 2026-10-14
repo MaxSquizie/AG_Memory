@@ -4,7 +4,7 @@ from ah.formalizer.canonical_ledger import digest
 from tools.formalizer_v7_test_support import sign_test_release
 
 
-def with_components(release, *, regional_probes=True, relative_time=False, predication=False, clock_time=False, omissions=False, modifier_forest=False, clock_ranges=False, nominal_tree=False,dependency_reduction=False,refinement=False,document_scopes=False,spatial_references=False,core=None):
+def with_components(release, *, regional_probes=True, relative_time=False, predication=False, clock_time=False, omissions=False, modifier_forest=False, clock_ranges=False, nominal_tree=False,dependency_reduction=False,refinement=False,document_scopes=False,spatial_references=False,quantified_scopes=False,core=None):
     manifest=deepcopy(release.manifest)
     policy=next(r for r in manifest['entries'] if r['kind']=='ProposalPolicy')
     policy['entries'][0]['composition']={
@@ -45,6 +45,16 @@ def with_components(release, *, regional_probes=True, relative_time=False, predi
         if not any(r['role_id']=='PURPOSE' for r in registry):
             registry.append({'role_id':'PURPOSE','allowed_argument_kinds':['PROPOSITION','EVENT']})
     scopes=next(r for r in manifest['entries'] if r['kind']=='ScopeLexicon')['entries']
+    if quantified_scopes:
+        for rule in scopes:
+            if rule.get('operator') in {'FORALL','EXISTS'}:
+                rule.update(attachment_kinds=['QUANTIFIED_NOMINAL'],variable_sort='ENTITY',
+                    restriction_pattern={'head_pos':['NOUN'],'agreement':['cases','number','gender'],
+                        'role':'SUBJECT','body_operator':'IMPLIES' if rule['operator']=='FORALL' else 'AND'})
+        scopes.append({'pattern':r'\bнекотор\w*\b','operator':'EXISTS',
+            'attachment_kinds':['QUANTIFIED_NOMINAL'],'variable_sort':'ENTITY',
+            'restriction_pattern':{'head_pos':['NOUN'],'agreement':['cases','number','gender'],
+                'role':'SUBJECT','body_operator':'AND'}})
     if not any(r.get('operator')=='AND' for r in scopes):
         scopes.append({'pattern':r'\bи\b','operator':'AND'})
     if relative_time:

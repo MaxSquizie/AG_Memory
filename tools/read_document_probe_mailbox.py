@@ -94,6 +94,7 @@ def main(argv=None):
     parser.add_argument('--refinement',action='store_true',help='TEST_ONLY recursive postnominal areas')
     parser.add_argument('--document-scopes',action='store_true',help='TEST_ONLY calendar areas and symbolic day parts')
     parser.add_argument('--spatial-references',action='store_true',help='TEST_ONLY released relative places and source-local anaphora')
+    parser.add_argument('--quantified-scopes',action='store_true',help='TEST_ONLY typed nominal quantifier restrictions')
     args=parser.parse_args(argv)
     if args.resume_journal and not args.resume_journal.is_file(): parser.error('--resume-journal must name an existing journal')
     if args.spatial_references and not args.predication: parser.error('--spatial-references requires --predication')
@@ -129,7 +130,7 @@ def main(argv=None):
     release,_=fixture(core,'known')
     if args.components:
         from tools.formalizer_component_fixture import with_components
-        release=with_components(release,relative_time=args.relative_time,predication=args.predication,clock_time=args.clock_time,omissions=args.omissions,modifier_forest=args.modifier_forest,clock_ranges=args.clock_ranges,nominal_tree=args.nominal_tree,dependency_reduction=args.dependency_reduction,refinement=args.refinement,document_scopes=args.document_scopes,spatial_references=args.spatial_references,core=core)
+        release=with_components(release,relative_time=args.relative_time,predication=args.predication,clock_time=args.clock_time,omissions=args.omissions,modifier_forest=args.modifier_forest,clock_ranges=args.clock_ranges,nominal_tree=args.nominal_tree,dependency_reduction=args.dependency_reduction,refinement=args.refinement,document_scopes=args.document_scopes,spatial_references=args.spatial_references,quantified_scopes=args.quantified_scopes,core=core)
     (args.out/'resource_manifest.json').write_text(json.dumps(release.manifest,ensure_ascii=False,indent=2),encoding='utf-8')
     (args.out/'experiment.json').write_text(json.dumps({
         'resource_status':'TEST_ONLY_COMPONENTS' if args.components else 'TEST_ONLY_EXISTING_FIXTURE','production_validation':False,

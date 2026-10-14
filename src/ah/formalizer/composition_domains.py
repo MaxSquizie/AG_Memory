@@ -38,12 +38,23 @@ class DomainNetwork:
             for other in sorted(self.neighbours[name]):self._enqueue(other,name)
         return bool(self.domains[name])
 
-    def propagate(self):
+    def copy(self):
+        other=DomainNetwork(self.domains)
+        other.neighbours=defaultdict(set,{k:set(v) for k,v in self.neighbours.items()})
+        other.constraints=defaultdict(list,{k:list(v) for k,v in self.constraints.items()})
+        other.queue=deque(self.queue);other.queued=set(self.queued)
+        other.removals=list(self.removals)
+        return other
+
+    def propagate(self, spend=None):
         while self.queue:
             left,right=self.queue.popleft();self.queued.remove((left,right))
             checks=self.constraints[left,right]
+            def compatible(a,b):
+                if spend:spend()
+                return all(check(a,b) for check,_ in checks)
             allowed=[cid for cid,a in self.domains[left].items()
-                     if any(all(check(a,b) for check,_ in checks)
+                     if any(compatible(a,b)
                             for b in self.domains[right].values())]
             if not self.restrict(left,allowed,{'peer_ref':right,
                     'constraints':[reason for _,reason in checks]}):

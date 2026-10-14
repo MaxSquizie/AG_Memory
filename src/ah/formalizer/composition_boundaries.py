@@ -26,6 +26,10 @@ def select(state, release, selector, region, tokens, cfg):
         return None
     from .operator_composition import lexical_matches
     unary = lexical_matches(state,release,region,tokens)
+    from .quantifier_composition import lexical_matches as quantified_matches
+    quantified=quantified_matches(state,release,region,tokens)
+    if quantified is None:return False
+    unary={**unary,**quantified}
     if (len(candidates) + len(unary) + 1 > cfg['max_candidates']
             or region.source_range[1]-region.source_range[0]>cfg['context_chars']):
         state.diag('COMPONENT_SEARCH_INCOMPLETE', region.region_id)

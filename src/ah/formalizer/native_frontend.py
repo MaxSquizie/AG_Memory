@@ -603,6 +603,11 @@ def _bindings(frame,evidence,valency,extra_gaps=()):
         from .relative_pronoun import role_readings
         readings=role_readings(frame,tid,evidence,_frame_variants(frame,e))
         allowed=[r['role_id'] for r in roles if any(set(r.get('allowed_cases',())) & set(v.cases) for v in readings) and (not r.get('allowed_preps') or prep in r['allowed_preps'])]
+        from .quantifier_composition import restriction_role
+        binder_role=restriction_role(frame,tid)
+        if binder_role:
+            allowed=[r['role_id'] for r in roles if r['role_id']==binder_role and
+                     set(r.get('argument_types',()))=={'ENTITY'} and not r.get('allowed_preps')]
         if frame.construction=='COMPONENTS_V1':
             # The sealed PP binding must match this valency, not a different
             # bare-case sense which happens to use the same role name.
@@ -812,6 +817,12 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
     evidence={e.token_id:e for e in state.evidence}
     candidate_specs={}
     for frame in state.frames:
+        from .quantifier_composition import licensed as quantifier_licensed
+        if not quantifier_licensed(state,release,frame):
+            frame.semantic['structural_unresolved']=True
+            state.diag('QUANTIFIER_RESTRICTION_UNGROUNDED',frame.frame_id)
+            candidate_specs[frame.frame_id]=[]
+            continue
         e=evidence[frame.predicate_token_ref]
         frame.semantic['quoted']=state.text[:e.start].count('«')>state.text[:e.start].count('»') or state.text[:e.start].count('\"')%2==1
         if frame.semantic.get('nominal_dependency_kind'):
