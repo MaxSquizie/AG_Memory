@@ -120,8 +120,10 @@ def test_prompt_preserves_declared_context_and_closed_candidate_mapping(schema):
     assert '1 = "sense:3"' in prompt
     assert '2 = "sense:14"' in prompt
     assert "sense:200" not in prompt
-    assert "Insufficient context: ? (INSUFFICIENT_CONTEXT)" in prompt
-    assert "No candidate fits: 0 (NONE_FIT)" in prompt
+    assert "Insufficient context: ?" in prompt
+    assert "No candidate fits: 0" in prompt
+    assert "ONE_SELECTED" not in prompt and "MULTIPLE_ADMISSIBLE" not in prompt
+    assert "internal ID on the RIGHT is never an answer" in prompt
     assert "No JSON" in prompt
 
 

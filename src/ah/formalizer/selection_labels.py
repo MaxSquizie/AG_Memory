@@ -49,13 +49,15 @@ def selection_label_instructions(candidate_ids: Sequence[str]) -> str:
     ) or "(empty candidate set)"
     return (
         f"Response protocol: {PROTOCOL_VERSION}\n"
-        f"Closed candidate labels:\n{mapping}\n"
-        "Reply with one line only. One admissible candidate: its numeric label "
-        "(ONE_SELECTED). Multiple admissible candidates: their distinct labels "
-        "separated by commas, without spaces (MULTIPLE_ADMISSIBLE). "
-        "Insufficient context: ? (INSUFFICIENT_CONTEXT). "
-        "No candidate fits: 0 (NONE_FIT). "
-        "Use only the labels above. No JSON, prose, explanation or code fence."
+        f"Audit mapping (numeric label on the LEFT; internal ID on the RIGHT is never an answer):\n{mapping}\n"
+        "Reply with one line only. One admissible candidate: its numeric label alone. "
+        "Multiple admissible candidates: their distinct numeric labels separated by commas, without spaces. "
+        "Insufficient context: ?\n"
+        "No candidate fits: 0\n"
+        "Do not output an outcome name or an internal ID. No JSON, prose, explanation or code fence.\n"
+        + ("Format examples only (not evidence for a choice): 1\n" if ids else "")
+        + ("To select both of the first two candidates: 1,2\n" if len(ids)>1 else "")
+        + "To abstain because context is insufficient: ?\nTo reject all candidates: 0"
     )
 
 

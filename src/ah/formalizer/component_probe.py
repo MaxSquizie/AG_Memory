@@ -33,10 +33,12 @@ def _live_probe(state, selector, release, key, slot, options, context, source_ra
         'Do not invent context, identities or facts.\n'+
         ((question+'\n\n') if question else '')+prompt)
     try:
+        d.last_prompt = prompt
         state.budget.spend_llm()
         raw = selector.select(prompt)
+        d.raw_response = raw
         reply = validate_selector_reply(selector, raw, schema, ids, allowed=frozenset(ids))
-        d.last_prompt, d.raw_response, d.selector_outcome = prompt, raw, reply.outcome
+        d.selector_outcome = reply.outcome
     except IntegrityError:
         raise
     except BudgetExceeded as exc:
@@ -45,7 +47,9 @@ def _live_probe(state, selector, release, key, slot, options, context, source_ra
         return None
     except Exception as exc:
         d.outcome = 'UNRESOLVED'
-        state.diag('COMPONENT_PROBE_FAILED', type(exc).__name__)
+        d.history.append({'kind':'PROBE_FAILURE','error_type':type(exc).__name__,
+                          'message':str(exc)})
+        state.diag('COMPONENT_PROBE_FAILED', type(exc).__name__ + ': ' + str(exc))
         return None
     if reply.outcome == 'MULTIPLE_ADMISSIBLE' and equivalent_targets:
         targets = {equivalent_targets.get(cid) for cid in reply.selected}

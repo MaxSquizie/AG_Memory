@@ -164,7 +164,9 @@ def fixture(core, profile):
     # Ordinary conditionals and counterfactual conditionals are distinct
     # declared constructions, with mutually exclusive scope triggers. The
     # runtime still validates them through its generic required_operators path.
-    R['ScopeLexicon']['entries']=[{'pattern':pattern,'operator':op} for pattern,op in [(r'\bне\b|\bневерно\b','NOT'),(r'\bили\b','OR'),(r'\bкажд\w*\b','FORALL'),(r'\bмож\w*\b|\bмог(?:ла|ло|ли)?\b|\bвозможно\b','POSSIBLE'),(r'\bесли\b(?!\s+бы\b)','IMPLIES'),(r'\bесли\s+бы\b','COUNTERFACTUAL')]]
+    # Declare the whole introducer, including its complementizer/delimiter.
+    # Otherwise these tokens leak into the child as unexplained arguments.
+    R['ScopeLexicon']['entries']=[{'pattern':pattern,'operator':op} for pattern,op in [(r'\bне\b|\bневерно\b(?:\s*,?\s*что\b|\s*,)?','NOT'),(r'\bили\b','OR'),(r'\bкажд\w*\b','FORALL'),(r'\bмож\w*\b|\bмог(?:ла|ло|ли)?\b|\bвозможно\b(?:\s*,?\s*что\b|\s*,)?','POSSIBLE'),(r'\bесли\b(?!\s+бы\b)','IMPLIES'),(r'\bесли\s+бы\b','COUNTERFACTUAL')]]
     # The generic and explicit-continuity patterns are mutually exclusive.
     # An unspecified day does not acquire continuous truth from a fixture.
     R['TemporalRules']['entries']=[

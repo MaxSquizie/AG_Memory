@@ -281,6 +281,13 @@ class ReadableInspection:
         if d.get('raw_response') is not None:
             out+=paragraph('Ответ модели: '+str(d['raw_response']).strip())
             out+=paragraph('В этой пробе модель выбирала вариант. Объяснение её рассуждений не записано; номер ответа сам по себе не является обоснованием.')
+        for event in d.get('history',()):
+            if event.get('kind')=='PROBE_FAILURE':
+                if event.get('error_type')=='ProtocolError':
+                    out+=paragraph('Ответ отклонён из-за нарушения формата протокола. Выбор не подтверждён.')
+                else:
+                    out+=paragraph('Проба завершилась ошибкой: '+event.get('error_type','неизвестная ошибка'))
+                out+=paragraph('Причина: '+event.get('message','не записана'))
         grounds=d.get('grounds',())
         out+='<h3>Сохранённые основания</h3>'
         if not grounds:out+=paragraph('Основания в снимке отсутствуют.')

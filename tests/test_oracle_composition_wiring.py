@@ -4,12 +4,15 @@ import json
 from pathlib import Path
 import subprocess
 import sys
+import pytest
 
 from ah.config import load_config
 from ah.core import AHCore
 from ah.formalizer.resources.loader import ResourceRelease
 from tools.formalizer_component_fixture import with_full_composition
 from tools.formalizer_v7_native_binding import fixture
+from tools.formalizer_v7_native_binding import execute_native, ChatBackend
+from tools.formalizer_v7_extended_binding import Session
 from tools.prepare_formalizer_v7_gui import prepare
 from test_formalizer_v7_gui_fixture import source_config
 from test_formalizer_v7_oracle_transport import local_server
@@ -60,3 +63,50 @@ def test_oracle_cli_sends_closed_probes_and_replays_without_http(tmp_path):
         cwd=ROOT, capture_output=True, text=True, timeout=60)
     assert result.returncode == 1, result.stdout + result.stderr
     assert json.loads((live/'comparison.json').read_text()) == json.loads((replay/'comparison.json').read_text())
+
+
+def test_complete_operator_introducers_pass_existing_oracle_checks(tmp_path):
+    with local_server({'output': [{'type': 'message', 'content': '1'}]}) as (url, requests):
+        result = subprocess.run([sys.executable, str(ROOT/'tools/run_formalizer_v7_oracle.py'),
+            '--provider', 'lmstudio', '--base-url', url, '--model', 'test',
+            '--case', 'A12', '--case', 'LANG-00-0-not', '--out', str(tmp_path/'run')],
+            cwd=ROOT, capture_output=True, text=True, timeout=60)
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert len(requests) == 2
+    for request in requests:
+        prompt = request['body']['input']
+        assert 'ONE_SELECTED' not in prompt and 'MULTIPLE_ADMISSIBLE' not in prompt
+    comparison = json.loads((tmp_path/'run/comparison.json').read_text())
+    assert comparison['passed_cases'] == 2
+
+
+def test_invalid_component_reply_is_retained_for_manual_review(tmp_path, monkeypatch):
+    monkeypatch.setattr(ChatBackend, 'generate', lambda *args, **kwargs: 'ONE_SELECTED')
+    text = 'Возможно, Иван пришёл.'
+    payload = {'raw_input': {'text': text, 'source_id': 'invalid-reply', 'revision': 1,
+        'range': [0, len(text)], 'language': 'ru', 'request_kind': 'ASSERTION', 'batch_kind': 'MESSAGE'}}
+    result = execute_native(Session([payload], tmp_path/'journal.log'), payload,
+        {'provider': 'lmstudio', 'model': 'test', 'structure_mode': 'region_probes'})
+    decisions = result['runtime']['ir']['decisions'].values()
+    failed = [d for d in decisions if any(h.get('kind')=='PROBE_FAILURE' for h in d['history'])]
+    assert len(failed) == 1
+    assert failed[0]['raw_response'] == 'ONE_SELECTED'
+    assert 'SELECT_LABELS_V1' in failed[0]['last_prompt']
+    assert not failed[0]['selected'] and failed[0]['outcome'] == 'UNRESOLVED'
+    assert result['assertions']['ah'] == []
+
+
+@pytest.mark.parametrize('text,operator', [
+    ('Возможно, что Иван пришёл.', 'POSSIBLE'),
+    ('Возможно что Иван пришёл.', 'POSSIBLE'),
+    ('Неверно, Иван пришёл.', 'NOT'),
+])
+def test_declared_introducer_owns_only_its_tokens(tmp_path, monkeypatch, text, operator):
+    monkeypatch.setattr(ChatBackend, 'generate', lambda *args, **kwargs: '1')
+    payload = {'raw_input': {'text': text, 'source_id': 'intro', 'revision': 1,
+        'range': [0, len(text)], 'language': 'ru', 'request_kind': 'ASSERTION', 'batch_kind': 'MESSAGE'}}
+    result = execute_native(Session([payload], tmp_path/'journal.log'), payload,
+        {'provider': 'lmstudio', 'model': 'test', 'structure_mode': 'region_probes'})
+    assert result['diagnostics']['codes'] == []
+    assert result['assertions']['ah'] == [{'operator': operator, 'operands': [
+        {'predicate': 'ARRIVE', 'roles': {'AGENT': {'entity': 'ivan'}}}]}]

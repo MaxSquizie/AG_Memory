@@ -51,6 +51,17 @@ def test_choices_use_recorded_mapping_and_never_invent_reasoning():
     assert all('Описание варианта не сохранено' in row[1] for row in r.choices(d))
 
 
+def test_invalid_model_reply_is_explained_without_confirming_choice():
+    data=sample();d=data['state']['decisions']['gap']
+    d.update(outcome='UNRESOLVED',selected=[],raw_response='ONE_SELECTED',
+             history=[{'kind':'PROBE_FAILURE','error_type':'ProtocolError',
+                       'message':'malformed SELECT_LABELS_V1 reply'}])
+    html=ReadableInspection(Inspection(data)).decision(d)
+    assert 'Ответ модели: ONE_SELECTED' in html
+    assert 'Ответ отклонён из-за нарушения формата протокола' in html
+    assert 'Выбор не подтверждён' in html
+
+
 def test_report_escapes_source_comments_and_has_no_app_links():
     data=sample();data['source_text']='<script>alert(1)</script>'
     report=ReadableInspection(Inspection(data)).report([{'comment':'<img src=x>','verdict':'Ошибка'}])
