@@ -22,8 +22,10 @@ LEGACY_PATHS=(
 
 def copy_config(tmp_path):
     target=tmp_path/'config.toml'
-    target.write_text((PROJECT/'config/lmstudio.toml').read_text(encoding='utf-8')
-                      +'\n[formalizer]\nnative_commit = true\n',encoding='utf-8')
+    target.write_text((PROJECT/'config/lmstudio.toml').read_text(encoding='utf-8'),encoding='utf-8')
+    document=ConfigDocument(target)
+    document.set('formalizer.native_commit',True)
+    document.save()
     return target
 
 

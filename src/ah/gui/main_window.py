@@ -652,9 +652,13 @@ class MainWindow(QMainWindow):
         self.document_dock = dock
         self.document_panel = DocumentPanelWidget(self)
         self.document_panel.ingest_requested.connect(self._ingest_document_from_gui)
+        self.document_panel.text_requested.connect(self._formalize_text_from_gui)
         self.document_panel.activate_requested.connect(self._build_document_context_from_gui)
         self.document_panel.summary_requested.connect(self._summarize_document_from_gui)
-        dock.setWidget(self.document_panel)
+        scroll = QScrollArea(dock)
+        scroll.setWidgetResizable(True)
+        scroll.setWidget(self.document_panel)
+        dock.setWidget(scroll)
         dock.setMinimumWidth(520)
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, dock)
         dock.hide()
@@ -679,6 +683,24 @@ class MainWindow(QMainWindow):
             )
         )
 
+    def _formalize_text_from_gui(self, text: str) -> None:
+        if not text.strip() or self._cognitive_run_active():
+            return
+        from hashlib import sha256
+        # Stable identity for a repeated input; each run still gets its own
+        # immutable artifact directory and native replay decides admission.
+        folder = self.services.config.paths.data_dir / 'input_sources'
+        try:
+            folder.mkdir(parents=True, exist_ok=True)
+            path = folder / (sha256(text.encode('utf-8')).hexdigest() + '.txt')
+            if not path.exists():
+                with path.open('x', encoding='utf-8', newline='') as stream:stream.write(text)
+            elif path.read_bytes() != text.encode('utf-8'):
+                raise ValueError('Сохранённый источник изменён: ' + str(path))
+        except (OSError, ValueError) as exc:
+            QMessageBox.warning(self, 'Источник', str(exc));return
+        self._ingest_document_from_gui(str(path))
+
     def _ingest_document_from_gui(self, path: str) -> None:
         if self._cognitive_run_active():
             self.statusBar().showMessage("Другой cognitive run ещё выполняется", 2500)
@@ -691,6 +713,7 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "Документ", f"Файл не найден:\n{path}")
             return
         self.document_panel.set_busy(True)
+        self.document_panel.begin_reading()
         self.document_panel.status.setText("Чтение V7: источник → области → короткие пробы → admission…")
         from ah.documents.reading import read_document
         from datetime import datetime

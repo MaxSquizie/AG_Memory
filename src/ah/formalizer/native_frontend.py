@@ -458,6 +458,13 @@ def _frames_for_hypotheses(state,hypotheses,release,provenance=None,morph_bindin
         if not localframes:
             state.syntax_trace.append({'stage':'T2','literal_hypothesis':h.local_id,
                                        'operator_forest':[{**t,'alignment_refs':list(h.alignment)} for t in forest]})
+        if localframes:
+            from .scope_boundaries import retain as retain_scope_boundaries
+            from types import SimpleNamespace
+            source_range=(min(f.source_range[0] for f in localframes.values()),
+                          max(f.source_range[1] for f in localframes.values()))
+            retain_scope_boundaries(state,SimpleNamespace(region_id='grammar:'+h.local_id,
+                source_range=source_range),list(localframes.values()))
         accepted.append((h,list(localframes.values())))
     # An unsupported reading cannot silently disappear and turn the remaining
     # prefix into a uniquely resolved structure.

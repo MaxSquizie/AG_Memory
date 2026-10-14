@@ -1,0 +1,319 @@
+{
+  "schema": "indivisible-scopes-gui-evidence-1",
+  "date": "2026-10-14",
+  "baseline_commit": "437f4f29a93ef991cf876a305926047f16e57636",
+  "scope": "Indivisible nonnumeric conditions, bound implicit participants, local GUI inspection and review export",
+  "arithmetic": "DEFERRED_USER_DECISION",
+  "resources": "TEST_ONLY",
+  "tests": {
+    "targeted": {
+      "files": [
+        "tests/test_indivisible_scope_boundaries.py",
+        "tests/test_formalization_inspection.py",
+        "tests/test_joint_composition_domains.py",
+        "tests/test_formalizer_v7_syntax_fixture.py",
+        "tests/test_document_syntax_budget.py",
+        "tests/test_region_attention.py",
+        "tests/test_formalizer_goal_executor.py",
+        "tests/test_formalizer_v7_gui_fixture.py",
+        "tests/test_document_reading.py",
+        "tests/test_formalizer_v7_gui_diagnostics.py",
+        "tests/test_gui_v7_config_visibility.py",
+        "tests/test_gui_screen_fit_v063.py",
+        "tests/test_gui_semantic_test_surface_2606.py",
+        "tests/test_formalizer_gui_resource_startup.py"
+      ],
+      "passed": 128,
+      "failed": 0,
+      "exit_code": 0,
+      "environment": "CPython runtime; pytest; QT_QPA_PLATFORM=offscreen; PySide6/vispy installed in scratch dependencies"
+    },
+    "adjacent_baseline_comparison": {
+      "files": [
+        "tests/test_formalizer_component_coordination.py",
+        "tests/test_formalizer_seal.py",
+        "tests/test_formalizer_v7_scope_binding.py",
+        "tests/test_formalizer_coordination_scope.py",
+        "tests/test_formalizer_omissions.py",
+        "tests/test_formalizer_components.py"
+      ],
+      "working_tree": {
+        "passed": 69,
+        "failed": 18
+      },
+      "baseline": {
+        "passed": 69,
+        "failed": 18
+      },
+      "same_failing_test_cases": true,
+      "failing_tests_with_parameter_count": {
+        "test_formalizer_component_coordination.py": {
+          "test_coordination_commits_and_group_identity_is_a_separate_probe": 1,
+          "test_rejected_coordination_has_no_independently_assertible_child": 1
+        },
+        "test_formalizer_coordination_scope.py": {
+          "test_shared_scope_commits_outer_only_and_restores": 4,
+          "test_unresolved_enclosing_scope_cannot_leak_local_facts": 2,
+          "test_two_modifiers_preserve_both_orders_and_partial_lifts": 1,
+          "test_scope_does_not_repair_an_unresolved_nominal_morphology": 1,
+          "test_nary_subgroup_scope_is_not_silently_missing_from_choices": 1,
+          "test_durable_offer_replay_and_declared_scope_choice": 2
+        },
+        "test_formalizer_omissions.py": {
+          "test_unanswered_gap_does_not_commit_or_become_optional": 1
+        },
+        "test_formalizer_components.py": {
+          "test_gap_inventory_is_sealed_without_fabricated_tokens": 1,
+          "test_real_commit_chain_group_and_recovery": 1,
+          "test_singleton_group_still_requires_grounded_answer": 1,
+          "test_implicit_context_receipts_replay_without_new_ticks": 1
+        }
+      },
+      "new_failures_observed": 0,
+      "existing_failures_not_fixed": true
+    },
+    "full_suite_run": false
+  },
+  "runtime_runs": [
+    {
+      "id": "quantified_domains_scope_final",
+      "source_text": "Не каждый студент мог не сдать экзамен.\n",
+      "source_sha256": "8c1a333c8cd88e8dfb83273a2edb824d2368448d8a76616633fc97a4f46b853f",
+      "terminal": "APPLIED",
+      "committed_fragments": 1,
+      "closed_probes": 7,
+      "replay": {
+        "checks": {
+          "no_new_provider_calls": true,
+          "no_new_ignition_ticks": true,
+          "ledger_unchanged": true,
+          "batch_hash_equal": true,
+          "committed_fragments_equal": true,
+          "both_executed": true
+        },
+        "passed": true,
+        "before": {
+          "calls": 7,
+          "tick": 14,
+          "ledger": "b57e32d0dd69d42e53bab5fe7f7a0f81fb47f9116637a48f8740e16ba2c68a6d"
+        },
+        "after": {
+          "calls": 7,
+          "tick": 14,
+          "ledger": "b57e32d0dd69d42e53bab5fe7f7a0f81fb47f9116637a48f8740e16ba2c68a6d"
+        },
+        "semantic_correctness": "NOT_EVALUATED"
+      },
+      "artifact_sha256": {
+        "reading/report.json": "6893a1358a2b29bed2382e582654fd89c0b37bb605cb2a1e7745a0b9b1ea7a07",
+        "reading/interpretation.json": "31397caa9f0309cb9ba9a14f5dfc41fe62861c905b2ccc73ecbb278fdd6274c0",
+        "journal.log": "44179447fc6d5755a1e97e05f17a15a7ea196445282b0efe8287da1719ba5d7e",
+        "native_replay_check.json": "6934ab9856dbda6899b657c3d23a2248c9e541cb3c9b59d90264a045716aa634",
+        "resource_manifest.json": "b14478853760be69fcb269e5f423610bb6abcd9722afd2db8893f01afca90ade",
+        "probe_0001.request.json": "ee5a95590ce946908f5003c8ebf01f4ba6b6b1c6beda7e30f99756d10ae802ca",
+        "probe_0002.request.json": "54df509b74a057a4ecaad1286901e69e1565f0cdf9778949150ca6180dec7be2",
+        "probe_0003.request.json": "00c5123266ecd5adb0a9bc22528d2ccf694e697d3990bc675d7fc695a08938d9",
+        "probe_0004.request.json": "70728e73ce1b423da80d7232c0cf25e0159e5385da92cae8ffebc4a76c2f520d",
+        "probe_0005.request.json": "6a6d037a23f618ea967624eef5523c2782ad35acacea3067d7a05e376d37f40e",
+        "probe_0006.request.json": "df96c2102bd5abf602046b70bccc04aaafd6bc7c925aeb3ed12dfd7316b45789",
+        "probe_0007.request.json": "325675152a2e7c80878ecde5fd56db88478331ef760c706b41eec4f28044fcd5",
+        "probe_0001.reply.txt": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+        "probe_0002.reply.txt": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+        "probe_0003.reply.txt": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+        "probe_0004.reply.txt": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+        "probe_0005.reply.txt": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+        "probe_0006.reply.txt": "53c234e5e8472b6ac51c1ae1cab3fe06fad053beb8ebfd8977b010655bfdd3c3",
+        "probe_0007.reply.txt": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "provider": "external closed replies, captured replay; not local model evaluation"
+    },
+    {
+      "id": "quantified_two_scope_final",
+      "source_text": "Каждый студент мог видеть некоторого врача.\n",
+      "source_sha256": "c873f5f5be3e6cead1552fd55d2d73498d45a51ab7f0ed601d8aa05ef691e458",
+      "terminal": "APPLIED",
+      "committed_fragments": 1,
+      "closed_probes": 6,
+      "replay": {
+        "checks": {
+          "no_new_provider_calls": true,
+          "no_new_ignition_ticks": true,
+          "ledger_unchanged": true,
+          "batch_hash_equal": true,
+          "committed_fragments_equal": true,
+          "both_executed": true
+        },
+        "passed": true,
+        "before": {
+          "calls": 6,
+          "tick": 13,
+          "ledger": "4c084e610be9ca5fda23ecafe32bff6b11c503d1a7e4a7dc5461c06a23546d8d"
+        },
+        "after": {
+          "calls": 6,
+          "tick": 13,
+          "ledger": "4c084e610be9ca5fda23ecafe32bff6b11c503d1a7e4a7dc5461c06a23546d8d"
+        },
+        "semantic_correctness": "NOT_EVALUATED"
+      },
+      "artifact_sha256": {
+        "reading/report.json": "1b7d39a79cfadaef4bff9c26f8df00409ff88759b17a0e795da737ab3bec8c51",
+        "reading/interpretation.json": "c9393ad2e13c688daf398daaacc626abf7aad0d8540c4b11ba3e6f6230b8cd77",
+        "journal.log": "39e7b18f01dae54c99b3c4074fd543393fa594529bdfd6c24f880ea928631a00",
+        "native_replay_check.json": "7a4f643eaadfd7e35a3840047f7c01b8117883aa33c0bd66a44d4c44589a5d66",
+        "resource_manifest.json": "b14478853760be69fcb269e5f423610bb6abcd9722afd2db8893f01afca90ade",
+        "probe_0001.request.json": "98f7087a1971243639a6c3773b899ceea22b7633fa4b3b3e2298eac2ac99d8c2",
+        "probe_0002.request.json": "eaa418f5482821d1620881745a6b3845742c53cad18b5333b1ddbdc356617c76",
+        "probe_0003.request.json": "a3940d7ca2e54cfa0cd515ea4606f8cd0836633fd9426381041c2d5f39964029",
+        "probe_0004.request.json": "df6a0ec254b445f20a53257768279e2491c8b9366b7e480982d850544c9a3260",
+        "probe_0005.request.json": "eadb9f9651b7340a5f94a655e2fae1cfd77bff46af2aec3b95b5103e70b05d11",
+        "probe_0006.request.json": "a87c7e509ca444501a84b7ca9bdd1164591aa3b8ed76fd7b6ff6230dbedde0b8",
+        "probe_0001.reply.txt": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+        "probe_0002.reply.txt": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+        "probe_0003.reply.txt": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+        "probe_0004.reply.txt": "1121cfccd5913f0a63fec40a6ffd44ea64f9dc135c66634ba001d10bcf4302a2",
+        "probe_0005.reply.txt": "53c234e5e8472b6ac51c1ae1cab3fe06fad053beb8ebfd8977b010655bfdd3c3",
+        "probe_0006.reply.txt": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "provider": "external closed replies, captured replay; not local model evaluation"
+    },
+    {
+      "id": "scope_coordination_verified",
+      "source_text": "Не каждый студент может сдать экзамен и получить диплом.\n",
+      "source_sha256": "bd68c95f1852ab8f420c59f2bdf9dc5860ebc3b50a84f59278ba4559c06d3596",
+      "terminal": "APPLIED",
+      "committed_fragments": 1,
+      "closed_probes": 11,
+      "replay": {
+        "checks": {
+          "no_new_provider_calls": true,
+          "no_new_ignition_ticks": true,
+          "ledger_unchanged": true,
+          "batch_hash_equal": true,
+          "committed_fragments_equal": true,
+          "both_executed": true
+        },
+        "passed": true,
+        "before": {
+          "calls": 11,
+          "tick": 25,
+          "ledger": "7a694cbc27fb6d7537217e9bfa7254161ff5c0c0f65771a8c6d7d1f6f090be00"
+        },
+        "after": {
+          "calls": 11,
+          "tick": 25,
+          "ledger": "7a694cbc27fb6d7537217e9bfa7254161ff5c0c0f65771a8c6d7d1f6f090be00"
+        },
+        "semantic_correctness": "NOT_EVALUATED"
+      },
+      "artifact_sha256": {
+        "reading/report.json": "3fcff070df6168859545edcc7e4f83f18b85ad03a5835977ede9520c17d8296d",
+        "reading/interpretation.json": "07ca88fa72a551d073e31dbf1e43cef6149820b80b434dfba8bbc27e25b136f3",
+        "journal.log": "bc784e219698aa0eba5aa01cfb948dc6357095fa4fe0bfd4a33d2ef73dd35beb",
+        "native_replay_check.json": "7dfb6eb5d8caf1afd339c519ded7d4c60076cc98e8359bf64877cee90a247b92",
+        "resource_manifest.json": "5825f26062e086b81abd3d2ad2c5aacac2dff5579c60daf6bbbaf63843ec70e5",
+        "probe_0001.request.json": "daa1aa764398fd667b7938a908606210d962d507962b3731e2f66beb46cba221",
+        "probe_0002.request.json": "2574092d4cdfb46cb8545e45857040a59ffad6d1f044e1a2c40ff47d74e631b4",
+        "probe_0003.request.json": "4210386e6c9644dbf6a1a4a0c2bcae03d999a7c3e486b8f32d53029c504d2d24",
+        "probe_0004.request.json": "06dc7e5df5c953b4c3580f94ea926fcdb0d02717de6f42390f0c66ea1cf2da3f",
+        "probe_0005.request.json": "b33917c94de66d6090b6d75a6472138a9018055f8d48dbd8e7f4281039f9fa6c",
+        "probe_0006.request.json": "1009574cf5f6e2547d8addae711e7d90f18cea0b63751e209709b4244e8a136b",
+        "probe_0007.request.json": "286406c6d5d1bbbb22dbeea24767cf72fbc47f764504f88a1e6d7967deb39b2a",
+        "probe_0008.request.json": "7ac8de0440979137481408275a810140c6e9b7c48491aa6656f058645f0a2761",
+        "probe_0009.request.json": "4a965385fe244c1fca73724529a0c456a686a71f7d552e8ddc48165bed0fb3f1",
+        "probe_0010.request.json": "4f4f1fccf72c0de03080c5824f80d2cf0e773b0d1aa9b84ed9502cba3bcbdb31",
+        "probe_0011.request.json": "85de7e4719b9d2cfcc3304429f639b7c16c0512aaba3fa55ac7148dfce12b2c0",
+        "probe_0001.reply.txt": "53c234e5e8472b6ac51c1ae1cab3fe06fad053beb8ebfd8977b010655bfdd3c3",
+        "probe_0002.reply.txt": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+        "probe_0003.reply.txt": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+        "probe_0004.reply.txt": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+        "probe_0005.reply.txt": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+        "probe_0006.reply.txt": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+        "probe_0007.reply.txt": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+        "probe_0008.reply.txt": "1121cfccd5913f0a63fec40a6ffd44ea64f9dc135c66634ba001d10bcf4302a2",
+        "probe_0009.reply.txt": "53c234e5e8472b6ac51c1ae1cab3fe06fad053beb8ebfd8977b010655bfdd3c3",
+        "probe_0010.reply.txt": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+        "probe_0011.reply.txt": "53c234e5e8472b6ac51c1ae1cab3fe06fad053beb8ebfd8977b010655bfdd3c3"
+      },
+      "provider": "external closed replies, captured replay; not local model evaluation",
+      "verified_graph": {
+        "receipt_root": "NOT",
+        "subject_occurrences": [
+          {
+            "bound_var": 2,
+            "sort": "ENTITY"
+          },
+          {
+            "bound_var": 2,
+            "sort": "ENTITY"
+          },
+          {
+            "bound_var": 2,
+            "sort": "ENTITY"
+          }
+        ],
+        "projection_truncated": false,
+        "restored_ledger_manual_checks": [
+          "only NOT has ROOT support",
+          "no identity binding for student or implicit SUBJECT gap",
+          "exam and diploma retain entity bindings"
+        ],
+        "open_lexical": [
+          "получить"
+        ],
+        "structural_descendants_are_not_facts": true
+      }
+    }
+  ],
+  "regression_discovery": {
+    "id": "scope_coordination_live",
+    "source_text": "Не каждый студент может сдать экзамен и получить диплом.",
+    "symptom": "APPLIED with concrete implicit student identity instead of binder variable",
+    "fixed_and_verified_by": "scope_coordination_verified"
+  },
+  "gui_verification": {
+    "method": "Rendered and visually inspected real traces in Qt offscreen; tested UTF-16 source highlighting, export/reopen, stale result clearing, paging, graph projection",
+    "images_sha256": {
+      "inspection_qa.png": "05abd997fe114f95297c2cd11584da228e9ac44ce02fa542f4fcaa577e8a3006",
+      "inspection_final_qa.png": "b3d13c96e618972f7dee507a45d77e17a10adf4da32a1dedc0991cd396bb8fc9",
+      "document_panel_qa.png": "a4e128c9c65f503b0d8df3ad1086b7cfdc12f504aa6e17e44612df271f9cca64"
+    },
+    "windows_launcher_executed": false,
+    "composition_profile_preparation_validated": true
+  },
+  "code_sha256": {
+    "run_formalizer_lab.bat": "6b642ed486b035a17151d61b4c0b502b50a1f53c399dbd16d7b0e3805f515887",
+    "src/ah/documents/reading.py": "a12e7feb48dbfbf7e8b605aed34323b59c8314002a16e0612812c0753f8ae33e",
+    "src/ah/formalizer/component_participants.py": "21d252b8391fa0a2bf85f5cd7a8e9a1dbda7ae5ff11e63e58cd267afdeae1f37",
+    "src/ah/formalizer/component_refinement.py": "af3835f45b27fc7919ae83ab48a1ce6aebfe2ba85c6b1e1c475a669af3880d51",
+    "src/ah/formalizer/composition_sources.py": "bbec66a4ab2c8ea85bccedafbe2519bb66979725b9f7396f64290c11c0218730",
+    "src/ah/formalizer/composition_tree.py": "59ef3d669c2f670eaec78de54dd9320a1d01e661d87544c3bb8915f6a9ae02e0",
+    "src/ah/formalizer/coordination_assignment.py": "3df67468354fc005f2cb083f3aa63255398a68259366427dac536984d7c98637",
+    "src/ah/formalizer/diagnostic_graph.py": "4914b1c75ee4820c51b16fb32b407ec1f2027625a5e2128876af88947dc1bed1",
+    "src/ah/formalizer/implicit_plan.py": "3a1008bdb59d4a4ec7b1fa7bb2f7bd4ef7e630f0038462365fc95300eb778a67",
+    "src/ah/formalizer/narrative_groups.py": "950722205dfc76c084bd793844c4fb1f8df0851d677ed2df06965d216900a558",
+    "src/ah/formalizer/native_frontend.py": "d8388df11563197246f7cebadbb20e5bce38ee271706d53d2846e22395b00646",
+    "src/ah/formalizer/runtime_adapter.py": "ca43dfe48fafda6115db1bf9897100204cc93b1ca11fca5ef9cf6205fb82724e",
+    "src/ah/formalizer/scope_assignment.py": "c37311d9613f2d3beeb4a97761799b355061e9a615873fa119fe3e4e253a6749",
+    "src/ah/formalizer/scope_boundaries.py": "1e863999be903b2836994ea1b495ce3fc4e5d17e13d1062779d76550c5970ad6",
+    "src/ah/formalizer/seal.py": "5c1a2e6fc0747ea2e1e695970dc0be1ebf8a326ce9dcd64e47b63ef9c1eb929f",
+    "src/ah/gui/document_panel.py": "0731c71d7e97b2740868e779549675d6633672ff13da4f015b7e2913d84a2ddb",
+    "src/ah/gui/formalization_inspection.py": "4ce67868e9a805ad682462d73c325c6951ed787c7c345035953a90bc68886d7e",
+    "src/ah/gui/formalization_inspector.py": "7c3783134f004aec8bfde5912532c98aa7a92fc26d431e758819528fbe09a0c6",
+    "src/ah/gui/llm_panel.py": "3a0ffb138727b0ed1743c157524a90962ec6411f60d025ed18a3441eecdb988f",
+    "src/ah/gui/main_window.py": "b12dc3c03ca4a039e4389460140b8ff1a903510a12b1ffc180e86fb93af290c3",
+    "tests/test_document_reading.py": "7f348602955771cf83ecc5de07994f1370dadfa4c60bb8320c0e52fd1eac4643",
+    "tests/test_formalization_inspection.py": "b455144574e2c11207d2bd6f650912d53d4ec6c2d78fc50fc0288fcc890cc46c",
+    "tests/test_formalizer_v7_gui_fixture.py": "1cbff1137b18c344c4c211dd4567bccaec1bc266121d4ec5cf08aad3745a3ed3",
+    "tests/test_gui_v7_config_visibility.py": "c8fcfb42ed1813976294e5da62e103b0d59e4b507aaae859c06207aa21fca18f",
+    "tests/test_indivisible_scope_boundaries.py": "efcacec215d5e594ed7b5ce6f507355ff406486015096acfd7873db858e7fcdd",
+    "tools/prepare_formalizer_v7_gui.py": "0a36362cddb7196eab82bb2f95ae9bb70fb0751595b3cb34138d531bc1243095"
+  },
+  "limitations": [
+    "Local model semantic accuracy not measured",
+    "No G0/G5 acceptance claim",
+    "Complex restriction/reference resolution not claimed complete",
+    "Historical adjacent tests retain 18 baseline failures",
+    "Numbers and arithmetic deferred"
+  ]
+}

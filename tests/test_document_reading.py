@@ -184,3 +184,16 @@ def test_document_panel_reports_actual_progress_and_no_gold_pass():
     assert not panel.summary_button.isEnabled()
     assert 'NOT_EVALUATED' in panel.continuation_view.toPlainText()
     panel.close()
+
+
+def test_decode_failure_retains_stopped_report_and_never_calls_runtime(tmp_path,monkeypatch):
+    source=tmp_path/'broken.docx';source.write_bytes(b'not a document archive')
+    def fail(path):raise ValueError('DOCUMENT_DECODE_FAILED')
+    from ah.documents.pipeline import DocumentProcessor as ReaderProcessor
+    monkeypatch.setattr(ReaderProcessor,'load_text',fail)
+    def runtime():pytest.fail('decode error must precede runtime startup')
+    report=read_document(runtime,source,tmp_path/'stopped')
+    assert report['status']=='STOPPED'
+    assert report['error']['message']=='DOCUMENT_DECODE_FAILED'
+    assert not (tmp_path/'stopped/interpretation.json').exists()
+    assert json.loads((tmp_path/'stopped/report.json').read_text())['status']=='STOPPED'

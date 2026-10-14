@@ -10,6 +10,14 @@ def emit_implicit_roles(state, store, frame, selected, tag, fragment, roles, men
         target=state.observation.get('implicit_bindings',{}).get(gap['gap_id'])
         if not target: raise ValueError('IMPLICIT_ARGUMENT_UNRESOLVED')
         if role in mention_roles or role in roles: raise ValueError('ARGUMENT_CARDINALITY_UNRESOLVED')
+        if 'bound_var' in target:
+            from .scope_boundaries import environments
+            decision=state.decisions.get(target.get('decision_ref'))
+            if (target['bound_var'] not in environments(list((frames or {}).values())).get(f.frame_id,())
+                    or decision is None or decision.outcome!='RESOLVED'):
+                raise ValueError('QUANTIFIED_CONTROL_UNRESOLVED')
+            roles[role]={'bound_var':target['bound_var'],'sort':'ENTITY'}
+            continue
         mid=target['entity_ref']
         anonymous=target.get('anonymous',False)
         if not anonymous and not target.get('anchor_mention') and not store.has_uid(mid):

@@ -57,7 +57,7 @@ def resolved_group(opt,resolved,gap):
         member=deepcopy(carrier)
     elif m['kind']=='CHAIN':
         member=deepcopy(resolved.get(m['gap_ref']))
-        if member is None: return None
+        if member is None or 'bound_var' in member: return None
     else:
         member={k:deepcopy(m[k]) for k in ('entity_ref','participant_kind','anchor_binding_ref','context_decision_ref','narrative_scope_ref') if k in m}
         member['anonymous']=m['kind']=='ANONYMOUS'

@@ -32,8 +32,9 @@ def _write_json(path: Path, value: object) -> None:
         stream.write("\n")
 
 
-def prepare(config_path: str | Path, destination: str | Path) -> Path:
+def prepare(config_path: str | Path, destination: str | Path, *, profile="oracle") -> Path:
     """Create a new fixture directory and return its runnable config path."""
+    if profile not in {'oracle','composition'}:raise ValueError('Unknown GUI resource profile: '+profile)
     source = Path(config_path).expanduser().resolve()
     output = Path(destination).expanduser().resolve()
     if output.exists():
@@ -59,6 +60,12 @@ def prepare(config_path: str | Path, destination: str | Path) -> Path:
 
     core = AHCore()
     release, _ = fixture(core, "native_language")
+    if profile == 'composition':
+        from tools.formalizer_component_fixture import with_components
+        release = with_components(release, core=core, predication=True, relative_time=True,
+            omissions=True, modifier_forest=True, nominal_tree=True, dependency_reduction=True,
+            refinement=True, document_scopes=True, spatial_references=True, quantified_scopes=True)
+        document.set('formalizer.structure_mode', 'region_probes')
     trusted = release._oracle_test_trust
     # mkdir is the exclusive reservation: existing (even empty) sessions cannot
     # be overwritten or accidentally mixed with a previous canonical WAL.
@@ -90,6 +97,8 @@ def prepare(config_path: str | Path, destination: str | Path) -> Path:
     AHStoreAdapter(snapshot.store, JournalChannel(output / "formalizer_journal.log"), snapshot)
     _write_json(output / "fixture_manifest.json", {
         "profile": "FORMALIZER_V7_GUI_ORACLE_FIXTURE",
+        "composition_profile": profile,
+        "arithmetic_development": "DEFERRED_USER_DECISION",
         "reviewer": "ORACLE_FIXTURE_ONLY",
         "key_id": "TEST_ONLY",
         "production_review_claim": False,
@@ -109,9 +118,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--config", type=Path, default=ROOT / "config" / "lmstudio.toml",
                         help="Existing config whose backend/model settings are preserved")
     parser.add_argument("--out", type=Path, required=True, help="New isolated session directory; must not exist")
+    parser.add_argument("--profile", choices=("oracle", "composition"), default="oracle")
     args = parser.parse_args(argv)
     try:
-        generated = prepare(args.config, args.out)
+        generated = prepare(args.config, args.out, profile=args.profile)
     except (OSError, ValueError) as exc:
         parser.error(str(exc))
     print("Prepared TEST_ONLY / ORACLE_FIXTURE_ONLY resources and matching AH memory.")

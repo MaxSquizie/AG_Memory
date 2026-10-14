@@ -87,9 +87,14 @@ def read_document(services, path, output_dir, *, progress=None, source_timestamp
     out.mkdir(parents=True, exist_ok=False)
     saved_source = out / ('source' + source.suffix)
     saved_source.write_bytes(raw)
-    text = DocumentProcessor.load_text(saved_source)
-    with (out / 'source.txt.decoded').open('w', encoding='utf-8', newline='') as stream:
-        stream.write(text)
+    text = ''
+    decoding_error = None
+    try:
+        text = DocumentProcessor.load_text(saved_source)
+        with (out / 'source.txt.decoded').open('w', encoding='utf-8', newline='') as stream:
+            stream.write(text)
+    except Exception as exc:
+        decoding_error = exc
     adapter = None
     report = {'schema': 'document-reading-1', 'source_path': str(source.resolve()),
               'source_sha256': hashlib.sha256(raw).hexdigest(),
@@ -129,7 +134,10 @@ def read_document(services, path, output_dir, *, progress=None, source_timestamp
         try:
             # CLI may provide a factory: retain a report even if reviewed
             # resources or backend startup fail before the first observation.
+            if decoding_error is not None:raise decoding_error
             if callable(services): services = services()
+            from ah.formalizer.diagnostic_graph import configuration
+            report['runtime_configuration']=configuration(getattr(services,'config',None))
             processor = services.document_processor()
             adapter = getattr(getattr(services, 'perception', None), '_formalizer', None)
             report.update(resource_snapshot=getattr(getattr(adapter, '_release', None), 'sha256', None),
@@ -155,6 +163,7 @@ def read_document(services, path, output_dir, *, progress=None, source_timestamp
                           events=dict(counts), artifact_errors=event_io_errors)
             artifacts_started = monotonic()
             if snapshot is not None:
+                snapshot['runtime_configuration']=report.get('runtime_configuration',{})
                 _dump(out / 'interpretation.json', snapshot)
                 state = snapshot.get('state', {})
                 _dump(out / 'regions.json', state.get('region_forest') or {})

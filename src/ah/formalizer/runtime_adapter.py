@@ -99,6 +99,8 @@ class FormalizerAdapter:
                 'commit_receipt': {f.name: deepcopy(getattr(receipt, f.name)) for f in fields(receipt)
                                    if f.name != 'perception'},
             }
+            from .diagnostic_graph import capture
+            snapshot['committed_graph']=capture(self._store,receipt.node_refs)
         except Exception as exc:
             snapshot = {
                 'source': 'native V7 runtime',

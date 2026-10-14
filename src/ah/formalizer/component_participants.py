@@ -11,6 +11,8 @@ def prepare_implicit(state, release):
     state.require_structures_open('IMPLICIT_ARGUMENTS')
     evidence={e.token_id:e for e in state.evidence}
     source=state.observation.get('source_id') or state.source_uid
+    from .scope_boundaries import environments
+    bound_environments=environments(state.frames)
     previous=[]
     for f in sorted(state.frames,key=lambda f:(f.source_range,f.frame_id)):
         if f.semantic.get('composition_decision'):
@@ -33,6 +35,12 @@ def prepare_implicit(state, release):
             for earlier in previous:
                 if earlier['end']>f.source_range[0] or f.source_range[0]-earlier['end']>cfg['context_chars']: continue
                 if not compatible(gap['features'],earlier['features']): continue
+                if earlier['kind']=='BOUND_VARIABLE':
+                    if earlier['bound_var'] not in bound_environments.get(f.frame_id,()):continue
+                    options.append({**earlier,'candidate_id':earlier['key'],
+                        'label':'Same bound variable v'+str(earlier['bound_var'])+' as '+earlier['label']+
+                            '; reuse the quantifier variable inside its whole scope, no entity or identity assertion'})
+                    continue
                 options.append({**earlier,'candidate_id':earlier['key'],
                     'label':'Same participant as '+earlier['label']+' (identity requires contextual evidence)'})
             # Equal entities from different paths remain one choice with unioned grounds.
@@ -47,7 +55,7 @@ def prepare_implicit(state, release):
             from .narrative_perspective import prepare as prepare_perspective
             prepare_perspective(state,gap,f,cfg)
             from .narrative_groups import add_local
-            add_local(state,gap,previous,release,f)
+            add_local(state,gap,[p for p in previous if p['kind']!='BOUND_VARIABLE'],release,f)
             if len(gap['options'])>cfg['max_candidates'] or gap['context_range'][1]-gap['context_range'][0]>cfg['context_chars']:
                 gap['search_incomplete']=True
             previous.append({'key':gap['gap_id'],'kind':'CHAIN','gap_ref':gap['gap_id'],
@@ -71,6 +79,11 @@ def prepare_implicit(state, release):
             if not variants: continue  # pronoun resolution has its own closed question
             features=[{**_features(v),'animacy':next(iter(set(v.features)&{'anim','inan'}),None)} for v in variants]
             common={k:features[0][k] for k in features[0] if all(x.get(k)==features[0][k] for x in features)}
+            if tid in f.semantic.get('bound_arguments',{}):
+                previous.append({'key':'bound:'+mention,'kind':'BOUND_VARIABLE','mention_ref':mention,
+                    'bound_var':f.semantic['bound_arguments'][tid],
+                    'features':common,'end':f.source_range[1],'label':unit.get('surface',ev.span)})
+                continue
             previous.append({'key':'mention:'+mention,'kind':'MENTION','mention_ref':mention,
                 'entity_ref':state.observation.get('entity_bindings',{}).get(mention) or 'M:'+digest([state.source_uid,mention]),
                 'anchor_label':unit.get('surface',ev.span), 'features':common,'end':f.source_range[1],'label':unit.get('surface',ev.span)})
@@ -107,7 +120,9 @@ def resolve_implicit(state, release, selector):
                 if unknown is not None:resolved[gap['gap_id']]=unknown
                 continue
             opt=next(o for o in options if o['candidate_id']==chosen)
-            if opt['kind']=='NARRATIVE_GROUP':
+            if opt['kind']=='BOUND_VARIABLE':
+                value={'bound_var':opt['bound_var'],'sort':'ENTITY','anchor_mention':opt['mention_ref']}
+            elif opt['kind']=='NARRATIVE_GROUP':
                 from .narrative_groups import resolved_group
                 value=resolved_group(opt,resolved,gap)
                 if value is None:
@@ -125,7 +140,11 @@ def resolve_implicit(state, release, selector):
                     value['premise_support_refs']=list(min(tuple(path) for path in opt['grounding_paths']))
                 value['anonymous']=opt['kind'] in {'ANONYMOUS','NARRATOR','NARRATOR_SHIFT'}
                 if opt['kind']=='MENTION': value['label']=opt['anchor_label']; value['anchor_mention']=opt['mention_ref']
-            if any(v['entity_ref']==value['entity_ref'] and not compatible(v['features'],gap['features']) for v in resolved.values()):
+            if 'bound_var' in value:
+                from .scope_boundaries import environments
+                if value['bound_var'] not in environments(state.frames).get(f.frame_id,()):
+                    state.diag('QUANTIFIED_CONTROL_UNRESOLVED',gap['gap_id']);continue
+            if any(v.get('entity_ref')==value.get('entity_ref') and value.get('entity_ref') is not None and not compatible(v['features'],gap['features']) for v in resolved.values()):
                 state.diag('IMPLICIT_CHAIN_FEATURE_CONFLICT',gap['gap_id']); continue
             value['decision_ref']=gap['gap_id']
             value['features']=gap['features']

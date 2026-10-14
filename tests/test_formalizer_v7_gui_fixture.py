@@ -118,3 +118,19 @@ def test_cli_prints_exact_launch_config_and_test_only_status(tmp_path, capsys):
     assert f'-m ah.gui.app --config "{output / "gui.toml"}"' in emitted
     assert "TEST_ONLY / ORACLE_FIXTURE_ONLY" in emitted
     assert "not a production review" in emitted
+
+
+def test_composition_gui_profile_enables_current_domains_with_native_region_probes(tmp_path):
+    source=source_config(tmp_path)
+    generated=prepare(source,tmp_path/'composition',profile='composition')
+    config=load_config(generated)
+    trust=json.loads((generated.parent/'formalizer_reviews.json').read_text())
+    release=ResourceRelease.load(generated.parent/'formalizer_release.json',trusted_reviews=trust)
+    policy=release.entries('ProposalPolicy')[0]['composition']
+    assert policy['nominal_composition']=='QUESTION_TREE_V1'
+    assert policy['refinement']
+    assert config.formalizer.structure_mode=='region_probes'
+    assert any('QUANTIFIED_NOMINAL' in r.get('attachment_kinds',()) for r in release.entries('ScopeLexicon'))
+    notice=json.loads((generated.parent/'fixture_manifest.json').read_text())
+    assert notice['composition_profile']=='composition' and notice['arithmetic_development']=='DEFERRED_USER_DECISION'
+    assert config.llm==load_config(source).llm

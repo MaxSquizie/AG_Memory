@@ -41,7 +41,7 @@ def compose(state, release, selector, region, selected, frames, anchors, cfg):
     wrappers, lowered = [], {}
     def lower(node):
         if 'frame_ref' not in node:
-            return {**node, 'operands': [lower(c) for c in node.get('operands', ())]}
+            return {**node, 'operands': [lower(c) for c in node['operands']]} if 'operands' in node else node
         mid = node['frame_ref']
         if mid not in replacements:
             return node

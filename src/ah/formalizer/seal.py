@@ -93,6 +93,11 @@ def structural_hash(state: FormalizationState) -> str:
 
 def validate_closure(state: FormalizationState) -> tuple[str, ...]:
     """Return descriptions of dangling references (empty when the set is self-contained)."""
+    from .scope_boundaries import validate as validate_scope_boundaries
+    try:
+        validate_scope_boundaries([f for f in state.frames if not f.semantic.get('structural_unresolved')])
+    except ValueError as exc:
+        return (str(exc),)
     # IDs name immutable candidate payloads. Equal IDs with different content
     # must not silently collapse at seal, even when references happen to close.
     identities={}

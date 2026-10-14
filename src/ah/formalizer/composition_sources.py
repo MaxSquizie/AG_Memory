@@ -167,6 +167,8 @@ class CompositionSources:
             carrier=next(f for f in reversed(frames) if f.frame_id in leaves(trees[0]))
             carrier.semantic['component_scope_tree']=deepcopy(trees[0])
             for f in frames:f.semantic['composition_group_root']=carrier.frame_id
+        from .scope_boundaries import rebase as rebase_scope_boundaries
+        rebase_scope_boundaries(frames,mapping)
         self.state.syntax_trace.append({'kind':'COMPOSITION_SOURCE_REUSED','source':'GRAMMAR',
             'source_ref':source_id,'region_ref':region.region_id,'source_frame_refs':list(mapping),
             'frame_refs':list(mapping.values()),'owned_token_refs':sorted(token_key(tokens))})

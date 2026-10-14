@@ -142,6 +142,8 @@ def unary_modifier(frame):
 
 def validate(frames, trees=()):
     """Validate closure/cycles once on the DAG; shared children are legal."""
+    from .scope_boundaries import validate as validate_boundaries
+    validate_boundaries(frames)
     by_id = {f.frame_id: f for f in frames}
     if len(by_id) != len(frames):
         raise ValueError('COMPOSITION_DUPLICATE_FRAME')

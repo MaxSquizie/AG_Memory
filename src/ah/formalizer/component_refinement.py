@@ -41,6 +41,10 @@ def compose_area(state, release, selector, region, tokens, cfg, depth=0, attachm
     key=child_key(region,tokens,attachment,infinitive,request)
     def compute():
         frames=_compose_area(state,release,selector,region,tokens,cfg,depth,attachment,infinitive,request)
+        from .scope_boundaries import retain
+        try:retain(state,region,frames)
+        except ValueError as exc:
+            block(state,region,frames,str(exc))
         if runtime:runtime.sources.retain(key,region,tokens,frames,request)
         return frames
     return runtime.child(key,compute) if runtime else compute()

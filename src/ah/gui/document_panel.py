@@ -20,6 +20,7 @@ from ah.documents import last_document_summary_runtime_state
 class DocumentPanelWidget(QWidget):
     """UI boundary for full-document ingestion and AH-only summarization."""
 
+    text_requested = Signal(str)
     ingest_requested = Signal(str)
     summary_requested = Signal(str, str)
     activate_requested = Signal(str)
@@ -27,6 +28,8 @@ class DocumentPanelWidget(QWidget):
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self._source_ref: str | None = None
+        self._report_path = None
+        self._inspector = None
         self._summary_polling = False
         self._telemetry_timer = QTimer(self)
         self._telemetry_timer.setInterval(250)
@@ -59,6 +62,27 @@ class DocumentPanelWidget(QWidget):
         self.ingest_button.clicked.connect(self._emit_ingest)
         row.addWidget(self.ingest_button)
         layout.addLayout(row)
+
+        self.text_input = QPlainTextEdit()
+        self.text_input.setPlaceholderText("Отдельная фраза, вопрос или вставленный текст документа")
+        self.text_input.setMaximumHeight(110)
+        layout.addWidget(self.text_input)
+        input_row = QHBoxLayout()
+        self.text_button = QPushButton("Разобрать текст в AH")
+        self.text_button.clicked.connect(lambda: self.text_requested.emit(self.text_input.toPlainText()) if self.text_input.toPlainText().strip() else None)
+        input_row.addWidget(self.text_button)
+        self.inspect_button = QPushButton("Проверить разбор…")
+        self.inspect_button.setEnabled(False)
+        self.inspect_button.clicked.connect(self._inspect)
+        input_row.addWidget(self.inspect_button)
+        saved_button = QPushButton("Открыть сохранённый…")
+        saved_button.clicked.connect(self._open_saved)
+        input_row.addWidget(saved_button)
+        layout.addLayout(input_row)
+        explanation = QLabel("Файл и текст проходят один V7-конвейер с записью допущенных фактов в текущую AH. "
+            "Для отдельной тестовой памяти используйте run_formalizer_lab.bat. Успешный разбор не означает отсутствие смысловых ошибок.")
+        explanation.setWordWrap(True)
+        layout.addWidget(explanation)
 
         self.progress = QProgressBar()
         self.progress.setTextVisible(False)
@@ -135,8 +159,22 @@ class DocumentPanelWidget(QWidget):
             self.continuation_view.setPlainText("Continuation запускается…")
             self.summary_requested.emit(self._source_ref, self.summary_request.text().strip())
 
+    def begin_reading(self):
+        self._report_path = None
+        self._source_ref = None
+        self.inspect_button.setEnabled(False)
+        self.activate_button.setEnabled(False)
+        self.summary_button.setEnabled(False)
+        self.file_stat.setText('Новый вход')
+        self.chunk_stat.setText('Области: —')
+        self.coverage_stat.setText('Результат ожидается')
+        self.source_stat.setText('Source: —')
+        self.context_view.clear();self.continuation_view.clear();self.summary_view.clear()
+
     def set_busy(self, busy: bool) -> None:
         self.ingest_button.setEnabled(not busy)
+        self.text_button.setEnabled(not busy)
+        self.inspect_button.setEnabled(not busy and self._report_path is not None)
         enabled = not busy and self._source_ref is not None
         self.activate_button.setEnabled(enabled)
         self.summary_button.setEnabled(enabled)
@@ -187,6 +225,9 @@ class DocumentPanelWidget(QWidget):
 
     def set_reading_report(self, report) -> None:
         import json
+        from pathlib import Path
+        self._report_path = str(Path(report['output_dir']) / 'report.json')
+        self.inspect_button.setEnabled(True)
         self._source_ref = report.get('source_ref')
         detail = report.get('interpretation', {})
         self.file_stat.setText(f"Файл: {report['source_path']}")
@@ -252,3 +293,23 @@ class DocumentPanelWidget(QWidget):
                 f"Summary готов: {len(state.slice_diagnostics)} slices, "
                 f"coverage {state.source_coverage_ratio:.1%}, stop={state.stop_reason}."
             )
+
+    def _inspection_window(self):
+        if self._inspector is None:
+            from .formalization_inspector import FormalizationInspector
+            self._inspector = FormalizationInspector(self)
+        return self._inspector
+
+    def _inspect(self):
+        if not self._report_path:return
+        from PySide6.QtWidgets import QMessageBox
+        try:
+            window = self._inspection_window()
+            window.load_path(self._report_path)
+            window.show();window.raise_()
+        except (OSError,ValueError,KeyError,TypeError) as exc:
+            QMessageBox.warning(self,"Разбор",str(exc))
+
+    def _open_saved(self):
+        window = self._inspection_window()
+        window.show();window.raise_();window.open_file()

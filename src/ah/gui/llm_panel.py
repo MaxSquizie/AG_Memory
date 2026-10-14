@@ -184,6 +184,10 @@ class LLMControlWidget(QWidget):
         buttons.addWidget(self.start_button)
         buttons.addWidget(self.stop_button)
         buttons.addWidget(self.restart_button)
+        inspect = QPushButton("Проверить последний разбор…")
+        inspect.clicked.connect(self._inspect_native)
+        buttons.addWidget(inspect)
+        self._inspection_window = None
         root.addLayout(buttons)
 
         self.tabs = QTabWidget()
@@ -224,6 +228,19 @@ class LLMControlWidget(QWidget):
         self.reload_prompts()
         self.refresh_status()
 
+
+    def _inspect_native(self):
+        from .formalization_inspector import FormalizationInspector
+        from PySide6.QtWidgets import QMessageBox
+        adapter = getattr(self.services.perception, '_formalizer', None)
+        snapshot = adapter.diagnostic_snapshot() if adapter is not None else None
+        if snapshot is None:
+            QMessageBox.information(self, 'Разбор', 'Завершённого нативного разбора пока нет.');return
+        from ah.formalizer.diagnostic_graph import configuration
+        snapshot['runtime_configuration']=configuration(self.services.config)
+        if self._inspection_window is None:self._inspection_window = FormalizationInspector(self)
+        self._inspection_window.set_snapshot(snapshot)
+        self._inspection_window.show();self._inspection_window.raise_()
 
     def set_monitor_compact(self, compact: bool) -> None:
         """Collapse secondary process metadata while the shared MONITOR view is active."""

@@ -22,6 +22,8 @@ def positions(tree, contents, path=(), active=frozenset()):
     # where a proposition modifier/operator may be inserted.
     if 'frame_ref' not in tree and 'operator' not in tree:return
     yield path, tree
+    from .scope_boundaries import atomic
+    if atomic(tree):return
     if 'frame_ref' in tree and tree['frame_ref'] in contents:
         fid = tree['frame_ref']
         if fid in active:
