@@ -114,3 +114,21 @@ def test_native_graph_projection_is_addressed_bounded_and_not_aliased():
     assert index.by_ref['body'].status=='STRUCTURAL DESCENDANT'
     result['nodes']['body']['actants'].clear()
     assert nodes['body']['actants']=={'SUBJECT':{'bound_var':1}}
+
+
+def test_readable_default_navigation_and_optional_raw_data(qt_session,tmp_path):
+    from PySide6.QtCore import QUrl
+    from ah.gui.formalization_inspector import FormalizationInspector
+    from test_formalization_readable import sample
+    w=FormalizationInspector();data=sample();before=deepcopy(data);w.set_snapshot(data)
+    assert w.tabs.currentIndex()==0 and not w.technical.toPlainText()
+    assert 'Как система поняла текст' in w.detail.toPlainText()
+    w.follow_link(QUrl('review:gap'))
+    assert w.current.ref=='gap' and not w.search.text()
+    assert w.source.textCursor().selectedText()=='читает'
+    assert 'Тот же связанный участник' in w.detail.toPlainText()
+    assert not w.technical.toPlainText()
+    w.tabs.setCurrentIndex(1)
+    assert 'raw_response' in w.technical.toPlainText()
+    assert data==before
+    w.close()

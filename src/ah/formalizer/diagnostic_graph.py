@@ -3,16 +3,24 @@ from copy import deepcopy
 
 
 def capture(store,refs,limit=10000):
-    nodes=store.ledger.data['nodes'];pending=list(refs);seen=set();result={}
+    nodes=store.ledger.data['nodes'];pending=list(refs);seen=set();result={};entities={}
     while pending and len(seen)<limit:
         ref=pending.pop()
         if not isinstance(ref,str) or ref in seen:continue
         seen.add(ref);node=nodes.get(ref)
-        if node is None:continue
+        if node is None:
+            # Addressed entity lookup: participants are not canonical formula nodes.
+            core_store=getattr(store,'_store',None)
+            entity=core_store.get_element_any_domain(ref) if core_store is not None and ref.startswith('M:') else None
+            prop=getattr(entity,'properties',{}).get('name')
+            if prop is not None:
+                entities[ref]={'name':str(prop.value),
+                    'mention_ref':getattr(entity,'meta',{}).get('mention_ref')}
+            continue
         result[ref]=deepcopy(node)
         values=[*node.get('operands',()),*node.get('actants',{}).values(),node.get('template_ref')]
         pending.extend(v for v in values if isinstance(v,str) and v not in seen)
-    return {'receipt_refs':list(refs),'nodes':result,'truncated':bool(pending),
+    return {'receipt_refs':list(refs),'nodes':result,'entities':entities,'truncated':bool(pending),
             'remaining_refs':sorted(set(v for v in pending if isinstance(v,str))),
             'semantics':'STRUCTURAL_DESCENDANTS_ARE_NOT_INDEPENDENT_FACTS'}
 

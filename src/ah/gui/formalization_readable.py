@@ -1,0 +1,427 @@
+"""Deterministic Russian explanations of recorded data, never a second parser."""
+from html import escape
+import ast
+import re
+from urllib.parse import quote
+
+OPERATORS = {
+    'NOT': 'Неверно, что', 'FORALL': 'Для каждого', 'EXISTS': 'Существует',
+    'AND': 'Выполняются все условия', 'OR': 'Выполняется хотя бы одно условие',
+    'XOR': 'Выполняется ровно одно условие', 'IMPLIES': 'Если …, то …',
+    'POSSIBLE': 'Возможно, что', 'NECESSARY': 'Необходимо, что',
+    'COUNTERFACTUAL': 'Контрфактическое условие', 'GOAL': 'Требуется установить',
+}
+ROLES = {'SUBJECT': 'Кто / что', 'OBJECT': 'Объект действия', 'RECIPIENT': 'Получатель',
+    'LOCATION': 'Место', 'LOCATIVE': 'Место', 'INSTRUMENT': 'Инструмент',
+    'SOURCE': 'Откуда', 'DESTINATION': 'Куда', 'TIME': 'Время', 'AGENT': 'Действующее лицо'}
+STATUS = {'APPLIED': 'Записано в память', 'RESOLVED': 'Выбор подтверждён',
+    'UNRESOLVED': 'Не разрешено', 'CANDIDATE': 'Вариант разбора',
+    'SUPERSEDED': 'Заменено последующим решением', 'ONE_SELECTED': 'Выбран один вариант',
+    'MULTIPLE_ADMISSIBLE': 'Осталось несколько вариантов', 'INSUFFICIENT_CONTEXT': 'Недостаточно контекста',
+    'NONE_FIT': 'Ни один вариант не подошёл', 'RECEIPT': 'Записанный корень',
+    'STRUCTURAL DESCENDANT': 'Часть записанного выражения', 'STRUCTURE ≠ FACT': 'Промежуточная структура',
+    'RESOLVED REFERENCE ≠ FACT': 'Привязка участника', 'UNANCHORED ≠ ERROR': 'Нет привязки к фрейму',
+    'SELECTED': 'Граница выбрана', 'CONFIGURATION': 'Параметры запуска',
+    'ERROR': 'Ошибка', 'TRUNCATED': 'Показана часть данных', 'STOPPED': 'Разбор остановлен',
+    'KNOWN': 'Словарное значение известно', 'UNLINKED': 'Словарный смысл не установлен',
+    'OPEN_LEXICAL': 'Словарный смысл не установлен', 'UNKNOWN': 'Не установлено'}
+QUESTIONS = {'composition_boundary': 'Что охватывает всё выражение?',
+    'nominal_dependency': 'К какому слову относится участник и в какой роли?',
+    'component_attachment': 'Как связаны действие и его участники?',
+    'nominal_attachment': 'К какому имени относится определение или квантор?',
+    'modifier_scope': 'На какую часть выражения действует оператор?',
+    'implicit_argument': 'Кто подразумевается в пропущенной роли?',
+    'predicate_value': 'Какое значение слова выбрано?', 'composition': 'Как объединены части выражения?'}
+MORPH = {'NOUN':'существительное','VERB':'глагол','INFN':'инфинитив','ADJF':'прилагательное',
+    'ADJS':'краткое прилагательное','PRTF':'причастие','PRTS':'краткое причастие',
+    'GRND':'деепричастие','ADVB':'наречие','NPRO':'местоимение','PREP':'предлог',
+    'CONJ':'союз','PRCL':'частица','NUMR':'числительное','PNCT':'пунктуация',
+    'nom':'именительный','gen':'родительный','dat':'дательный','acc':'винительный',
+    'ins':'творительный','loc':'предложный','sing':'единственное число','plur':'множественное число',
+    'masc':'мужской род','femn':'женский род','neut':'средний род','past':'прошедшее время',
+    'pres':'настоящее время','futr':'будущее время','1st':'1-е лицо','2nd':'2-е лицо','3rd':'3-е лицо',
+    'perf':'совершенный вид','impf':'несовершенный вид','anim':'одушевлённое','inan':'неодушевлённое',
+    'tran':'переходный','intr':'непереходный','indc':'изъявительное наклонение','impr':'повелительное наклонение'}
+TRACE = {'FEATURE_CHECK_BATCH':'Проверка грамматических признаков',
+    'COMPOSITION_SOURCE_DOMAIN':'Источники вариантов разбора', 'SCOPE_DOMAIN':'Варианты области действия',
+    'SCOPE_SLOT':'Выбор области действия','GRAMMAR_CHILD_PROJECTED':'Перенос дочернего разбора',
+    'COMPOSITION_BOUNDARY':'Выбор границы выражения','DEPENDENCY_CONSTRAINT_CLOSURE':'Согласование зависимостей',
+    'COORDINATION_TREE':'Группировка однородных частей','COORDINATION':'Связь однородных частей',
+    'QUANTIFIER_BINDING_DOMAIN':'Варианты связывания квантора','OPERATOR_COMPOSITION':'Вложенность операторов',
+    'COMPOSITION_CLOSED':'Объединение частей завершено','COMPOSITION_EMPTY':'Допустимый разбор не построен'}
+DIAGNOSTICS = {'COMPOSITION_SCOPE_BOUNDARY_CHANGED':'При объединении изменилось содержимое цельного условия.',
+    'COMPOSITION_SCOPE_BOUNDARY_LOST':'При объединении потерялась ранее выбранная граница условия.',
+    'COMPOSITION_SCOPE_BOUNDARY_CROSSING':'Области условий пересекаются, но не вложены друг в друга.',
+    'QUANTIFIED_CONTROL_UNRESOLVED':'Не подтверждено, что пропущенный участник находится внутри области своего квантора.',
+    'IMPLICIT_ARGUMENT_UNRESOLVED':'Не удалось определить пропущенного участника.',
+    'RUN_WITHOUT_IR':'Разбор остановился до сохранения структуры.'}
+
+
+def esc(value):
+    return escape(str(value))
+
+
+def paragraph(text):
+    return '<p>'+esc(text)+'</p>'
+
+
+def table(headers, rows):
+    return '<table cellspacing="0" cellpadding="7" border="1"><tr>'+''.join('<th>'+esc(h)+'</th>' for h in headers)+'</tr>'+''.join(
+        '<tr>'+''.join('<td>'+str(c)+'</td>' for c in row)+'</tr>' for row in rows)+'</table>'
+
+
+def document(body):
+    return '<!doctype html><html lang="ru"><meta charset="utf-8"><style>body{font-family:Segoe UI,Arial,sans-serif;line-height:1.5} table{border-collapse:collapse} td,th{border-color:#88958c;text-align:left} li{margin:7px 0} blockquote{border-left:3px solid #708f79;padding-left:12px} a{color:#4e9470} .muted{color:#858e88}</style><body>'+body+'</body></html>'
+
+
+class ReadableInspection:
+    def __init__(self, inspection):
+        self.index=inspection; self.state=inspection.state
+        self.tokens={e['token_id']:e for e in self.state.get('evidence',())}
+        self.frames={f['frame_id']:f for f in self.state.get('frames',())}
+        self.graph=inspection.snapshot.get('committed_graph',{}); self.nodes=self.graph.get('nodes',{})
+        self.entities={};self.variables={};self.aliases={};self.gaps={};self.specs={}
+        self.option_labels={};self.domain_names={}
+        observation=self.state.get('observation',{})
+        self.implicit=observation.get('implicit_bindings',{})
+        for mention,ref in observation.get('entity_bindings',{}).items():
+            if isinstance(ref,str):self.entities.setdefault(ref,[]).append(self.word(mention))
+        for f in self.frames.values():
+            sem=f.get('semantic',{});self.specs.update(sem.get('candidate_specs',{}))
+            for token,var in sem.get('bound_arguments',{}).items():self.variables.setdefault(var,self.word(token))
+            for role,gap in sem.get('implicit_arguments',{}).items():self.gaps[gap['gap_id']]=(f,role,gap)
+        for ref,entity in self.graph.get('entities',{}).items():
+            if entity.get('name'):self.entities[ref]=[entity['name']]
+        for e in self.index.entries:
+            gapref=e.record.get('decision',e.record).get('frame_id') if e.category in {'Решения','Пробы'} else e.ref.removesuffix('|binding')
+            if gapref in self.gaps:
+                f,role,gap=self.gaps[gapref];token=self.tokens.get(f.get('predicate_token_ref'),{})
+                e.source_range=[token['start'],token['end']] if 'start' in token else f.get('source_range')
+        for trace in self.state.get('syntax_trace',()):
+            for domain,options in trace.get('values',{}).items():
+                if not isinstance(options,dict):continue
+                for ref,value in options.items():
+                    if isinstance(value,dict) and value.get('label'):
+                        self.option_labels[ref]=value['label']
+                        self.domain_names.setdefault(domain,value['label'].split(' applies to ')[0])
+            for option in trace.get('alternatives',()):
+                if isinstance(option,dict) and option.get('candidate_id') and option.get('label'):self.option_labels[option['candidate_id']]=option['label']
+
+    def word(self,ref):
+        token=self.tokens.get(ref)
+        if token:return token.get('span',token.get('lemma','слово'))
+        return self.alias(ref)
+
+    def alias(self,ref):
+        if not isinstance(ref,str):return 'объект без названия'
+        if ref in self.frames:return self.frames[ref].get('anchor_span') or 'фрейм'
+        if ref in self.entities:return ' / '.join(self.entities[ref])
+        if ref in self.index.by_ref:
+            e=self.index.by_ref[ref]
+            if e.source_range:return self.excerpt(e.source_range,100)
+        if not re.search(r'[a-f0-9]{16,}|^(?:tok|region|gap|M|N|G):',ref):return ref
+        if ref not in self.aliases:self.aliases[ref]='объект №'+str(len(self.aliases)+1)+' (название не сохранено)'
+        return self.aliases[ref]
+
+    def excerpt(self,bounds,limit=400):
+        if not bounds or len(bounds)!=2:return 'фрагмент источника не указан'
+        text=self.index.text[max(0,bounds[0]):bounds[1]]
+        return text[:limit]+('…' if len(text)>limit else '')
+
+    def variable(self,var):
+        name=self.variables.get(var)
+        return ('«'+name+'», ' if name else '')+'переменная '+str(var)
+
+    def target(self,value):
+        if isinstance(value,dict):
+            if 'bound_var' in value:return self.variable(value['bound_var'])+' (связана квантором)'
+            if 'entity_ref' in value:return self.alias(value['entity_ref'])+(' (личность не установлена)' if value.get('anonymous') else '')
+            if 'frame_ref' in value:return self.alias(value['frame_ref'])
+            return 'структурированный участник; подробности в технических данных'
+        return self.word(value) if isinstance(value,str) and value in self.tokens else self.alias(value)
+
+    def link(self,ref,label=None):
+        return '<a href="review:'+quote(str(ref),safe='')+'">'+esc(label or self.alias(ref))+'</a>'
+
+    def morphology(self,v):
+        values=[v.get('pos'),*v.get('cases',()),v.get('number'),v.get('gender'),v.get('person'),v.get('tense'),v.get('mood')]
+        values += [x for x in v.get('features',()) if x in MORPH and x not in values]
+        return ', '.join(MORPH.get(x,x) for x in values if x) or 'признаки не сохранены'
+
+    def title(self,e):
+        r=e.record;c=e.category
+        if c in {'Решения','Пробы'}:
+            d=r.get('decision',r);return QUESTIONS.get(d.get('slot_id'),'Выбор интерпретации')+' · '+self.excerpt(e.source_range,60)
+        if c=='Граф AH':return OPERATORS.get(r.get('function_id')) or self.word(r.get('source_ref','')) or 'Узел памяти'
+        if c in {'Формулы','Подформула'}:return self.node_label(r)
+        if c=='Трасса':return TRACE.get(r.get('kind',r.get('event')),'Шаг разбора')
+        if c=='Границы условий':return OPERATORS.get(r.get('operator'),'Условие')+' · «'+self.excerpt(e.source_range,70)+'»'
+        if c=='Привязки':
+            ref=e.ref.removesuffix('|binding');gap=self.gaps.get(ref)
+            label=('Пропущенный участник «'+gap[0].get('anchor_span','')+'»') if gap else self.word(ref)
+            return label+' → '+self.target(r.get('target'))
+        if c=='Области':return {'DOCUMENT':'Документ','PARAGRAPH':'Абзац','SENTENCE':'Предложение','CLAUSE':'Клауза','TOKEN':'Слово','CLAUSE_WINDOW':'Окно разбора'}.get(r.get('kind'),'Область')+' · '+self.excerpt(e.source_range,60)
+        if c=='Диагностика':return DIAGNOSTICS.get(r.get('code'), 'Сообщение о разборе')
+        if c=='Контекст':return 'Обращение к памяти · '+self.excerpt(r.get('request',{}).get('source_range'),60)
+        if e.ref=='receipt':return 'Что записано в память'
+        return e.label
+
+    def node_label(self,node):
+        if isinstance(node,str):node=self.nodes.get(node,{})
+        if not isinstance(node,dict):return 'Значение'
+        if 'bound_var' in node:return self.variable(node['bound_var'])
+        if 'frame_ref' in node:return self.alias(node['frame_ref'])
+        return OPERATORS.get(node.get('operator',node.get('function_id')), 'Оператор '+str(node.get('operator',node.get('function_id','без названия'))))
+
+    def frame_roles(self,f):
+        sem=f.get('semantic',{});rows=[]
+        for token,role in sem.get('proposed_roles',{}).items():
+            var=sem.get('bound_arguments',{}).get(token)
+            target=self.variable(var)+' (связана квантором)' if var is not None else self.word(token)
+            rows.append([esc(ROLES.get(role,role)),esc(target),self.link(token,'«'+self.word(token)+'»'),esc(self.morphology(sem.get('morph_bindings',{}).get(token,{})))])
+        for role,gap in sem.get('implicit_arguments',{}).items():
+            binding=self.implicit.get(gap['gap_id'])
+            rows.append([esc(ROLES.get(role,role)),esc(self.target(binding) if binding else 'Не определён'),self.link(gap['gap_id'],'Пропущен в тексте; открыть выбор') if gap['gap_id'] in self.index.by_ref else 'Пропущен в тексте',esc(self.morphology(gap.get('features',{})))])
+        return rows
+
+    def formula(self,node,depth=0,seen=frozenset(),budget=None):
+        if budget is None:budget=[400]
+        if depth>24 or budget[0]<=0:return paragraph('Продолжение скрыто из-за размера; откройте нужную часть отдельно.')
+        budget[0]-=1
+        ref=node if isinstance(node,str) else None
+        if ref:
+            if ref in seen:return paragraph('Повторная ссылка на '+self.alias(ref))
+            seen=seen|{ref};node=self.nodes.get(ref)
+            if node is None:return paragraph('Данные для '+self.alias(ref)+' отсутствуют в снимке.')
+        if not isinstance(node,dict):return paragraph('Структура узла не сохранена.')
+        if 'bound_var' in node:return esc(self.variable(node['bound_var']))
+        fid=node.get('frame_ref');f=self.frames.get(fid)
+        if f:
+            roles=self.frame_roles(f);out=self.link(fid,'«'+f.get('anchor_span','')+'»')
+            return out+(table(['Роль','Участник','В тексте','Морфология'],roles) if roles else '')
+        if 'actants' in node:
+            label=self.word(node.get('source_ref',''))
+            out=self.link(ref,'«'+label+'»') if ref else esc(label)
+            if node.get('polarity') is False:out='Неверно, что: '+out
+            out+=table(['Роль','Участник'],[[esc(ROLES.get(k,k)),esc(self.target(v))] for k,v in node['actants'].items()])
+            if node.get('semantic_status') in {'UNLINKED','OPEN_LEXICAL'}:out+=paragraph('Словарный смысл этого слова не установлен. Сохранены исходное слово и связи.')
+            return out
+        op=node.get('operator',node.get('function_id'));children=list(node.get('operands',()))
+        label=self.node_label(node)
+        if op in {'FORALL','EXISTS'} and children and isinstance(children[0],dict) and 'bound_var' in children[0]:
+            label+=': '+self.variable(children.pop(0)['bound_var'])
+        out='<b>'+(self.link(ref,label) if ref else esc(label))+'</b>'
+        if not children:return out+paragraph('Операнды не сохранены.')
+        items=[]
+        for i,child in enumerate(children):
+            prefix=('Условие: ' if i==0 else 'Следствие: ') if op=='IMPLIES' else ''
+            items.append('<li>'+esc(prefix)+self.formula(child,depth+1,seen,budget)+'</li>')
+            if budget[0]<=0:
+                if i+1<len(children):items.append('<li>Остальные части скрыты из-за размера.</li>')
+                break
+        return out+'<ul>'+''.join(items)+'</ul>'
+
+    def choice_text(self,text):
+        # Translate known protocol labels only. Never infer a model rationale.
+        text=re.sub(r'tok:\d+:\d+',lambda m:'«'+self.word(m[0])+'»',text)
+        match=re.match(r'Direct role (\w+) of predicate «(.*?)»; whole reading=(.*)',text)
+        if match:
+            try:v=ast.literal_eval(match[3]);morph=self.morphology(v)
+            except (ValueError,SyntaxError):morph='морфологические признаки см. в исходном вопросе'
+            return 'Участник действия «'+match[2]+'». Роль: '+ROLES.get(match[1],match[1])+'. '+morph
+        match=re.match(r'CASE_DEPENDENCY dependency on «(.*?)» at \d+; whole reading=(.*)',text)
+        if match:
+            try:morph=self.morphology(ast.literal_eval(match[2]))
+            except (ValueError,SyntaxError):morph='признаки см. в исходном вопросе'
+            return 'Именная зависимость от «'+match[1]+'». '+morph
+        match=re.match(r'(FORALL|EXISTS) «(.*?)» binds the existing nominal «(.*?)»',text)
+        if match:return 'Квантор «'+match[2]+'» относится к «'+match[3]+'». Имя ограничивает область квантора; отдельный конкретный участник не утверждается.'
+        match=re.match(r'Same bound variable v(\d+) as (.*?);',text)
+        if match:return 'Тот же связанный участник: '+self.variable(int(match[1]))+'. Отдельная сущность не создаётся.'
+        if text.startswith('Unidentified referent'):return 'Неустановленный участник. Связь с ранее названными участниками не подтверждена.'
+        if text.startswith('Current unidentified narrator'):return 'Текущий рассказчик источника; личность не установлена.'
+        if text.startswith('A DIFFERENT unidentified narrator'):return 'Другой рассказчик; требуется свидетельство смены говорящего.'
+        if text.startswith('Same participant as '):return 'Тот же участник: '+text[len('Same participant as '):].split(' (')[0]+'. Тождество требует контекстного основания.'
+        if text.startswith('Defer root selection:'):return 'Отложить выбор внешней связи и сначала разобрать вложенную часть.'
+        if '; linked morphology=' in text:
+            head=text.split('; linked morphology=')[0]
+            for k,v in ROLES.items():head=head.replace(k+'=',v+': ')
+            head=re.sub(r'\[(\w+)\]',lambda m:'('+MORPH.get(m[1],m[1])+')',head)
+            return head+('. Есть пропущенные роли; их участники определяются отдельно.' if 'omitted roles' in text else '')
+        for old,new in [('Outer ','Внешняя связь: '),('applies to','охватывает'),(' binding ',' связывает '),(' (at ',' (внутри '),(' at ',' на позиции '),
+            ('its content is the whole remaining area, including the conjunction','область — всё оставшееся выражение вместе с однородными частями'),
+            ('each child keeps its own operators and agreement','каждая часть сохраняет свои операторы и согласование')]:text=text.replace(old,new)
+        for old,new in OPERATORS.items():text=re.sub(r'\b'+old+r'\b',new,text)
+        return text
+
+    def choices(self,d):
+        prompt=d.get('last_prompt') or ''
+        labels={int(n):text.strip() for n,text in re.findall(r'^\s*(\d+)\. (.+)$',prompt,re.M)}
+        mapping={}
+        for n,encoded in re.findall(r'^\s*(\d+) = (".*")\s*$',prompt,re.M):
+            import json
+            try:mapping[json.loads(encoded)]=int(n)
+            except ValueError:pass
+        rows=[]
+        for i,ref in enumerate(d.get('candidates',())):
+            n=mapping.get(ref);spec=self.specs.get(ref,{})
+            # The displayed question and its label map are authoritative together.
+            label=labels.get(n) if n is not None else None
+            if label:label=self.choice_text(label)
+            elif spec:label=('Словарный смысл не установлен: ' if spec.get('sense_kind')=='OPEN_LEXICAL' else 'Словарное значение: ')+spec.get('label',spec.get('sense_id','без названия'))
+            else:label='Описание варианта не сохранено (вариант '+str(i+1)+')'
+            rows.append([str(n if n is not None else i+1),esc(label),'Выбран' if ref in d.get('selected',()) else 'Не выбран'])
+        return rows
+
+    def decision(self,d):
+        out='<h3>'+esc(QUESTIONS.get(d.get('slot_id'),'Выбор интерпретации'))+'</h3>'
+        out+=paragraph('Результат: '+STATUS.get(d.get('outcome'),d.get('outcome') or 'не сохранён'))
+        rows=self.choices(d)
+        out+=table(['№','Допустимый вариант','Выбор'],rows) if rows else paragraph('Список вариантов не сохранён.')
+        if d.get('raw_response') is not None:
+            out+=paragraph('Ответ модели: '+str(d['raw_response']).strip())
+            out+=paragraph('В этой пробе модель выбирала вариант. Объяснение её рассуждений не записано; номер ответа сам по себе не является обоснованием.')
+        grounds=d.get('grounds',())
+        out+='<h3>Сохранённые основания</h3>'
+        if not grounds:out+=paragraph('Основания в снимке отсутствуют.')
+        for g in grounds:
+            if g.get('text')=='closed source-grounded component question':out+=paragraph('Выбор в закрытом наборе по исходному фрагменту и предоставленному контексту.')
+            else:out+=self.fields(g)
+        if d.get('history'):out+=paragraph('У решения есть предыдущие состояния: '+str(len(d['history']))+'. Они сохранены в технических подробностях.')
+        return out
+
+    def fields(self,record):
+        names={'kind':'Тип','event':'Событие','stage':'Этап','reason':'Причина','detail':'Подробности',
+            'message':'Сообщение','status':'Состояние','result':'Результат','source_range':'Фрагмент',
+            'selected':'Выбрано','remaining':'Осталось','outcome':'Итог','search_complete':'Поиск завершён',
+            'search_incomplete':'Поиск неполон','global_search_complete':'Вся память просмотрена',
+            'rows':'Найденные записи','proof_results':'Результаты проверки','type':'Тип основания','text':'Описание',
+            'value':'Значение','count':'Количество','slot':'Задача','domains':'Домены вариантов',
+            'operator':'Оператор','policy':'Правило','backend':'Backend','lmstudio_model':'Модель LM Studio',
+            'ollama_model':'Модель Ollama','temperature':'Температура','max_new_tokens':'Лимит ответа'}
+        rows=[]
+        for k,v in record.items():
+            if k not in names or v is None:continue
+            if k=='source_range':value=self.excerpt(v)
+            elif isinstance(v,bool):value='Да' if v else 'Нет'
+            elif isinstance(v,(list,dict)):value='Записей: '+str(len(v))+'; состав доступен в технических подробностях'
+            else:value=STATUS.get(str(v),TRACE.get(str(v),OPERATORS.get(str(v),self.alias(str(v)))))
+            rows.append([esc(names[k]),esc(value)])
+        return table(['Сведения','Значение'],rows) if rows else paragraph('Для этого вида записи понятное описание пока не предусмотрено. Исходные поля доступны во вкладке «Технические данные».')
+
+    def constraint_trace(self,r):
+        state=r['constraint_state']
+        def name(ref):
+            if ref=='ROOT':return 'Общий разбор'
+            if ref.startswith('MORPH:'):return 'Морфология «'+self.word(ref[6:])+'»'
+            return self.choice_text(self.domain_names[ref]) if ref in self.domain_names else self.word(ref)
+        def option(ref):return self.choice_text(self.option_labels[ref]) if ref in self.option_labels else self.alias(ref)
+        rules={'SHARED_OCCURRENCE_READING':'Одно вхождение слова должно иметь совместимое морфологическое чтение во всех частях разбора.',
+            'NOMINAL_ROLE_AGREEMENT_AND_PARENT':'Проверка согласования, роли участника и слова, к которому он относится.',
+            'SCOPE_SINGLE_CONTENT_ACYCLIC_DOMINANCE':'У оператора одна область действия; вложенность должна быть без циклов и совместима с другими операторами.',
+            'RESOLVED_SCOPE_EDGE':'Область действия уже выбрана предыдущим решением.',
+            'FIXED_SOURCE_DEPENDENCY':'Зависимость уже зафиксирована при разборе исходника.'}
+        out=paragraph('Здесь видно, какие варианты оставались на этом шаге и какие ограничения исключили остальные.')
+        out+=table(['Что согласуется','Осталось вариантов','Описание вариантов'],[[esc(name(k)),str(len(v)),'<br>'.join(esc(option(x)) for x in v[:15]) + ('<br>Показаны первые 15.' if len(v)>15 else '')] for k,v in list(state.get('domains',{}).items())[:100]])
+        rows=[]
+        for removal in state.get('removals',())[:100]:
+            reason=removal.get('reason');peer=''
+            if isinstance(reason,dict):
+                peer=' Совместимость с: '+name(reason.get('peer_ref',''))
+                why=' '.join(rules.get(x,'Правило без расшифровки: '+x) for x in reason.get('constraints',()))
+            else:why=rules.get(reason,'Причина без расшифровки: '+str(reason))
+            rows.append([esc(name(removal.get('variable_ref',''))),'<br>'.join(esc(option(x)) for x in removal.get('removed',())[:15]),esc(why+peer)])
+        out+='<h3>Исключённые варианты</h3>'+(table(['Область','Исключено','Причина'],rows) if rows else paragraph('На этом шаге исключения не записаны.'))
+        if len(state.get('domains',{}))>100 or len(state.get('removals',()))>100:out+=paragraph('Показаны первые 100 записей; остальные доступны в технических данных.')
+        return out
+
+    def overview(self):
+        receipt=self.index.snapshot.get('commit_receipt',{});out='<h2>Как система поняла текст</h2>'
+        out+=paragraph(STATUS.get(receipt.get('terminal'),'Запись результата не подтверждена')+'. Успешная запись не гарантирует верного понимания.')
+        roots=self.graph.get('receipt_refs',())
+        if roots:
+            out+='<h3>Фактически записанное выражение</h3>'+paragraph('Вложенные блоки показывают область действия. Условие внутри «возможно» или «для каждого» не утверждается отдельно.')
+            for ref in roots[:30]:out+='<blockquote>'+self.formula(ref)+'</blockquote>'
+            if len(roots)>30:out+=paragraph('Показаны первые 30 корней. Остальные доступны в разделе «Граф AH».')
+        else:
+            out+=paragraph('Записанный граф отсутствует в снимке. Ниже — промежуточные формулы; они не доказывают запись в память.')
+            formulas=[e for e in self.index.entries if e.category=='Формулы']
+            for e in formulas[:20]:out+='<blockquote>'+self.formula(e.record)+'</blockquote>'
+            if len(formulas)>20:out+=paragraph('Остальные формулы доступны в разделе «Формулы».')
+            if not formulas:out+=paragraph('Формулы не построены или не сохранены. Откройте диагностику и решения.')
+        out+='<h3>Что требует внимания</h3>'
+        unknown=[r for r,n in self.nodes.items() if n.get('semantic_status') in {'UNLINKED','OPEN_LEXICAL'}]
+        for ref in unknown[:30]:out+=paragraph('Словарный смысл не установлен: '+self.word(self.nodes[ref].get('source_ref','')))
+        for e in [e for e in self.index.entries if e.category=='Диагностика'][:30]:out+='<p>'+self.link(e.ref,self.title(e))+'</p>'
+        if not unknown:out+=paragraph('Отсутствие сообщений не подтверждает смысловую точность. Проверьте отрицание, область кванторов и одинаковых участников у связанных действий.')
+        out+='<h3>Как проверить вручную</h3>'+paragraph('Сравните каждый блок с исходником. Нажмите действие, чтобы увидеть его участников; откройте «Решения», чтобы сравнить выбранный вариант с альтернативами. Выберите ошибочный узел и запишите, что ожидалось.')
+        return out
+
+    def explain(self,e):
+        if e.category=='Обзор':return self.overview()
+        r=e.record;c=e.category;out='<h2>'+esc(self.title(e))+'</h2>'
+        if e.source_range:out+='<blockquote>'+esc(self.excerpt(e.source_range))+'</blockquote>'
+        if c in {'Формулы','Подформула','Граф AH'}:
+            out+=paragraph(STATUS.get(e.status,e.status))
+            out+=self.formula(e.ref if c=='Граф AH' else r)
+            if c=='Граф AH' and r.get('source_ref'):
+                for fid,f in self.frames.items():
+                    if f.get('predicate_token_ref')==r['source_ref']:out+='<p>'+self.link(fid,'Разбор «'+f.get('anchor_span','')+'»: роли и решения')+'</p>'
+        elif c=='Фреймы':
+            sem=r.get('semantic',{});out+=paragraph('Этот вариант не завершён и не должен считаться готовым фактом.' if sem.get('structural_unresolved') else 'Это промежуточный разбор действия или свойства. Фактическую запись смотрите в обзоре.')
+            out+=table(['Роль','Участник','В тексте','Морфология'],self.frame_roles(r))
+            for role in sem.get('missing_required_roles',()):out+=paragraph('Не заполнена обязательная роль: '+ROLES.get(role,role))
+            for tree in sem.get('operator_forest',()):out+='<h3>Область действия</h3>'+self.formula(tree)
+            for ref,d in self.state.get('decisions',{}).items():
+                gap=self.gaps.get(d.get('frame_id'))
+                if d.get('frame_id')==e.ref or (gap and gap[0]['frame_id']==e.ref):out+='<p>'+self.link(ref,QUESTIONS.get(d.get('slot_id'),'Решение'))+'</p>'
+        elif c in {'Решения','Пробы'}:
+            if r.get('superseded_by'):out+=paragraph('Это прежняя проба. Её заменило последующее решение.')
+            out+=self.decision(r.get('decision',r))
+            for i,a in enumerate(r.get('attempts',())[:20]):
+                out+='<h3>Предыдущая попытка '+str(i+1)+'</h3>'
+                out+=self.decision(a.get('decision',a)) if isinstance(a,dict) else paragraph(str(a))
+        elif c=='Морфология':
+            out+=paragraph('Варианты словарного чтения. Вероятность словаря не означает, что вариант принят в этом предложении.')
+            out+=table(['Начальная форма','Признаки'],[[esc(v.get('lemma','')),esc(self.morphology(v))] for v in r.get('variants',())])
+            for fid,f in self.frames.items():
+                v=f.get('semantic',{}).get('morph_bindings',{}).get(e.ref)
+                if v:out+='<p>В разборе '+self.link(fid,'«'+f.get('anchor_span','')+'»')+': '+esc(self.morphology(v))+'</p>'
+        elif c=='Границы условий':
+            out+=paragraph('Эта область выбрана как цельное условие. Внешняя композиция должна сохранить её содержимое.')
+            rows=[]
+            for i,part in enumerate(r.get('operands',())):
+                label=('Ограничение / условие' if i==0 else 'Следствие / тело') if r.get('operator')=='IMPLIES' else ('Связанная переменная' if i==0 and r.get('operator') in {'FORALL','EXISTS'} else 'Содержимое')
+                rows.append([esc(label),esc(self.excerpt(part.get('source_range')) if part.get('source_range') else 'Без собственного фрагмента текста')])
+            out+=table(['Часть условия','Исходный текст'],rows)
+        elif c=='Без привязки':out+=paragraph('Это слово не связано с фреймом в сохранённом разборе. Оно может быть служебным словом либо пропуском разбора. Проверьте его роль в исходном предложении.')
+        elif c=='Привязки':out+=paragraph('Установленная ссылка: '+self.target(r.get('target')))
+        elif c=='Трасса' and r.get('event')=='FEATURE_CHECK_BATCH':
+            rows=[[esc(self.word(x[1])),str(x[2]+1),'Подошёл' if x[3] else 'Не подошёл'] for x in r.get('checks',())[:100]]
+            out+=paragraph('Проверка вариантов слов на соответствие одному грамматическому правилу. Отказ здесь не означает ошибку всего предложения.')
+            out+=table(['Слово','Номер морфологического варианта','Проверка'],rows)
+            if len(r.get('checks',()))>100:out+=paragraph('Показаны первые 100 проверок; остальные сохранены в технических данных.')
+        elif c=='Трасса' and 'constraint_state' in r:out+=self.constraint_trace(r)
+        elif c=='Трасса' and r.get('alternatives'):
+            out+=table(['Вариант области','Выбор'],[[esc(self.choice_text(x.get('label','Описание не сохранено'))),'Выбран' if x.get('candidate_id')==r.get('selected') else 'Не выбран'] for x in r['alternatives'][:100]])
+        elif c=='Контекст':
+            out+=paragraph('Адресное обращение к памяти. Ничего не найдено в просмотренной области не означает, что сведений нет во всей памяти.')
+            out+=self.fields(r)
+            for proof in r.get('proof_results',())[:30]:out+=self.fields(proof)
+        elif c=='Диагностика':out+=paragraph(DIAGNOSTICS.get(r.get('code'),'Сообщение сохранено без готовой расшифровки: '+str(r.get('code',''))))+self.fields(r.get('detail') if isinstance(r.get('detail'),dict) else r)
+        elif e.ref=='receipt':out+=paragraph('Результат: '+STATUS.get(r.get('terminal'),r.get('terminal') or 'не сохранён'))+paragraph('Записанных фрагментов: '+str(len(r.get('committed_fragments',()))))
+        elif e.ref=='runtime-configuration':out+=self.fields(r.get('llm',{}))
+        else:out+=self.fields(r)
+        links=self.index.links(e)
+        if links:out+='<h3>Связанные части разбора</h3><ul>'+''.join('<li>'+self.link(ref,self.title(self.index.by_ref[ref]))+'</li>' for ref in links[:40])+'</ul>'
+        return out
+
+    def report(self,notes):
+        body='<h1>Проверка формализации</h1><h2>Исходный текст</h2><pre style="white-space:pre-wrap">'+esc(self.index.text)+'</pre>'+self.overview()
+        entries=[e for e in self.index.entries if e.category in {'Решения','Границы условий','Диагностика','Привязки'}]
+        for e in entries[:1000]:body+='<hr>'+self.explain(e)
+        if len(entries)>1000:body+=paragraph('Отчёт ограничен первыми 1000 записями. Полный снимок сохраните отдельно для повторного открытия.')
+        body+='<h2>Замечания проверяющего</h2>'+table(['Оценка','Фрагмент','Комментарий'],[[esc(n.get('verdict','')),esc(self.excerpt(n.get('source_range'))),esc(n.get('comment',''))] for n in notes])
+        # Standalone reports have no application link handler.
+        body=re.sub(r'<a href="review:[^"]*">(.*?)</a>',r'\1',body,flags=re.S)
+        return document(body)
