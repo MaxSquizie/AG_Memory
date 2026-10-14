@@ -1100,6 +1100,11 @@ class MainWindow(QMainWindow):
         self.close()
 
     def _save_memory(self) -> None:
+        if not self.services.persistence.settings.enabled:
+            message = ("Сохранение заблокировано из-за ошибки ресурсов; исправьте сессию и перезапустите GUI"
+                       if self.services.formalizer_resource_error else "Сохранение памяти отключено")
+            self.statusBar().showMessage(message, 7000)
+            return
         try:
             with self.services.operation_lock:
                 self.services.save()

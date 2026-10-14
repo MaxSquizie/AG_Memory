@@ -300,9 +300,18 @@ class ResourceRelease:
                         raise ResourceMissing('RESOURCE_MISSING: event reference T missing:'+uid)
         for row in self.entries('TemplateMap'):
             uid = row['template_ref']
-            if (not store.has_uid(uid) or store.kind_of(uid) is not RefKind.T
-                    or {r.value for r in store.get_template(uid).roles} != set(row['roles'])):
-                raise ResourceMissing('RESOURCE_MISSING: TemplateMap does not match actual AH T:' + uid)
+            if not store.has_uid(uid):
+                reason = 'шаблон отсутствует в загруженной памяти'
+            elif store.kind_of(uid) is not RefKind.T:
+                reason = 'в памяти найден объект другого типа: ' + store.kind_of(uid).value
+            else:
+                actual = {r.value for r in store.get_template(uid).roles}
+                expected = set(row['roles'])
+                if actual == expected:
+                    continue
+                reason = f'роли не совпадают; ожидаются {sorted(expected)}, найдены {sorted(actual)}'
+            raise ResourceMissing('RESOURCE_MISSING: TemplateMap does not match actual AH T:' + uid
+                                  + '\nПричина: ' + reason)
         for row in self.resources.get('DomainCertificate', {}).get('entries', ()):
             uid=row['template_ref']
             if not store.has_uid(uid) or store.kind_of(uid) is not RefKind.T:

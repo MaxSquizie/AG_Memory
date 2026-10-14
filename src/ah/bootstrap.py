@@ -86,7 +86,15 @@ def _build_perception_service(config, core, llm, *, allow_missing_resources=Fals
             '--config', str(config.source_path), '--out', 'artifacts/gui-composition', '--profile', 'composition',
         ])
         return None, (
-            str(exc) + '\nДля локального тестирования из корня проекта:\n' + prepare
+            str(exc)
+            + '\nКонфигурация: ' + str(config.source_path)
+            + '\nПамять: ' + str(config.paths.persistence_file)
+            + (' (файл существует)' if config.paths.persistence_file.is_file() else ' (файл отсутствует)')
+            + f'\nСохранение включено: {config.persistence.enabled}; загрузка при запуске: {config.persistence.load_on_start}.'
+            + '\nРесурсы: ' + str(config.paths.data_dir)
+            + '\nРелиз, память и журнал должны принадлежать одной сессии. Копирования файлов релиза недостаточно.'
+            + '\nСохранение памяти в этом запуске заблокировано, чтобы не перезаписать исходный файл.'
+            + '\nДля нового изолированного теста из корня проекта (каталог --out не должен существовать):\n' + prepare
             + '\nЗапуск: python -m ah.gui.app --config artifacts/gui-composition/gui.toml'
         )
     service = LLMPerceptionService(
@@ -216,6 +224,10 @@ class RuntimeServices:
             config, core, llm,
             allow_missing_resources=allow_missing_formalizer_resources,
         )
+        if resource_error:
+            # Inspection-only startup must not replace a valid snapshot with
+            # an empty/mismatched core on close or on the next autosave tick.
+            persistence.settings = replace(persistence.settings, enabled=False)
         if perception is not None and getattr(perception, '_formalizer', None) is not None:
             perception._formalizer._ignition = ignition
         agent = (
@@ -333,6 +345,8 @@ class RuntimeServices:
                 new_config, self.core, self.llm,
                 allow_missing_resources=self.allow_missing_formalizer_resources,
             )
+            if self.formalizer_resource_error:
+                self.persistence.settings = replace(self.persistence.settings, enabled=False)
             if self.perception is not None and getattr(self.perception, '_formalizer', None) is not None:
                 self.perception._formalizer._ignition = self.ignition
             self.agent = LLMAgent(

@@ -13,15 +13,17 @@ import hashlib
 import json
 from pathlib import Path
 import sys
+import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT), str(ROOT / "src")]
 
 from ah.config import PersistenceSettings, load_config
 from ah.core import AHCore, JsonPersistence
-from ah.core.journal import JournalChannel
+from ah.core.journal import JournalChannel, JournalIntegrityError
+from ah.core.persistence import PersistenceError
 from ah.formalizer.ah_adapter import AHStoreAdapter
-from ah.formalizer.resources.loader import ResourceRelease
+from ah.formalizer.resources.loader import ResourceRelease, ResourceMissing
 from ah.gui.config_store import ConfigDocument, dumps_toml
 from tools.formalizer_v7_native_binding import fixture
 
@@ -125,6 +127,31 @@ def check_composition_session(config_path: str | Path) -> None:
             'then launch ah.gui.app with that directory/gui.toml.')
     if not config.llm.enabled:
         raise ValueError('LLM is disabled in this session: enable llm.enabled in '+str(config.source_path))
+    if not config.persistence.enabled or not config.persistence.load_on_start:
+        raise ValueError('Загрузка подготовленной памяти отключена. В '+str(config.source_path)
+                         +' установите persistence.enabled = true и persistence.load_on_start = true.')
+    memory = config.paths.persistence_file
+    if not memory.is_file():
+        raise ValueError('Файл памяти с каталогом шаблонов отсутствует: '+str(memory)
+                         +'. Восстановите полную сессию из резервной копии или подготовьте новый каталог через --out.')
+    core = JsonPersistence(memory, config.persistence).load().core
+    # Recovery can repair tails and finish pending transactions. Run it only
+    # against a disposable copy: this command must never change the session.
+    journal_path = config.paths.data_dir/config.formalizer.journal_filename
+    if not journal_path.is_file():
+        raise ValueError('Журнал сессии отсутствует: '+str(journal_path))
+    with tempfile.TemporaryDirectory(prefix='ah-session-check-') as directory:
+        copied_journal = Path(directory)/'journal.log'
+        copied_journal.write_bytes(journal_path.read_bytes())
+        store = AHStoreAdapter(core.store, JournalChannel(copied_journal), core)
+        store.recover_from_head()
+        try:
+            release.validate_store(core.store)
+        except ResourceMissing as exc:
+            raise ValueError(str(exc)+'\nПроверена память: '+str(memory)
+                             +'\nПроверен журнал: '+str(journal_path)
+                             +'\nИсходная сессия не изменена. Восстановите согласованную резервную копию '
+                             +'или подготовьте НОВЫЙ каталог через --out; не копируйте только JSON релиза.') from exc
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -139,10 +166,10 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if args.check_session:
             check_composition_session(args.check_session)
-            print('Composition probes enabled; existing memory/resources were not modified.')
+            print('Композиционные пробы включены. Память и журнал согласованы с релизом. Исходная сессия не изменена.')
             return 0
         generated = prepare(args.config, args.out, profile=args.profile)
-    except (OSError, ValueError) as exc:
+    except (OSError, ValueError, JournalIntegrityError, PersistenceError) as exc:
         parser.error(str(exc))
     print("Prepared TEST_ONLY / ORACLE_FIXTURE_ONLY resources and matching AH memory.")
     print("The public fixture key is not a production review or architecture gate PASS.")
