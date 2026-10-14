@@ -102,6 +102,9 @@ def validate_closure(state: FormalizationState) -> tuple[str, ...]:
     # must not silently collapse at seal, even when references happen to close.
     identities={}
     for record in _canonical_records(state):
+        # Trace events refer to candidates; they do not define their identity.
+        # The same selected relation may license several morphology uses.
+        if record['_kind']=='syntax_trace':continue
         identifier=next((record[k] for k in ('candidate_id','frame_id','mention_id','hypothesis_id') if k in record),None)
         if identifier is None: continue
         key=(record['_kind'],identifier)

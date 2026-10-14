@@ -10,6 +10,8 @@ from tools.run_formalizer_v7_oracle import main
 @pytest.mark.parametrize('provider',['lmstudio','ollama'])
 def test_cli_partial_http_history_replays_without_transport(tmp_path,provider):
     calls=[]
+    from test_structural_relation_tasks import Script,relation
+    script=Script(relation('LEXICAL'))
     class Handler(BaseHTTPRequestHandler):
         def log_message(self,*args): pass
         def do_POST(self):
@@ -21,21 +23,10 @@ def test_cli_partial_http_history_replays_without_transport(tmp_path,provider):
             else:
                 assert request['think'] is False and request['stream'] is False
                 prompt=request['messages'][-1]['content']
-            if prompt.startswith('{'):
-                tokens=json.loads(prompt)['tokens']
-                anchors={t['text']:t['id'] for t in tokens}
-                reply={'hypotheses':[{'local_id':'independent-enter-fixture',
-                    'nodes':[{'kind':'PREDICATE','anchor_spans':[anchors['вошёл']]},
-                             {'kind':'ENTITY','anchor_spans':[anchors['Иван']]}],
-                    'edges':[{'kind':'ARGUMENT','from':0,'to':1,'role_id':'SUBJECT'}],
-                    'alignment':list(anchors.values())}]}
-            else:
-                lines=prompt.split('closed set):\n',1)[1].split('\nTask:',1)[0].splitlines()
-                reply={'outcome':'ONE_SELECTED','selected':[
-                    line.split('. ',1)[0] for line in lines if '. ' in line and 'ENTER' in line][:1]}
-            response=({'output':[{'type':'message','content':json.dumps(reply)}]}
+            reply=script.generate(prompt)
+            response=({'output':[{'type':'message','content':reply}]}
                       if provider=='lmstudio' else
-                      {'message':{'role':'assistant','content':json.dumps(reply)},'done':True})
+                      {'message':{'role':'assistant','content':reply},'done':True})
             raw=json.dumps(response).encode()
             self.send_response(200)
             self.send_header('Content-Type','application/json')
@@ -51,6 +42,7 @@ def test_cli_partial_http_history_replays_without_transport(tmp_path,provider):
     finally:
         server.shutdown();server.server_close();thread.join(timeout=5)
     original_calls=len(calls)
+    assert not script.errors and not script.steps
     assert original_calls and set(calls)=={'/api/v1/chat' if provider=='lmstudio' else '/api/chat'}
     provenance=json.loads((live/'provenance.json').read_text())
     assert provenance['model_live_execution'] is True

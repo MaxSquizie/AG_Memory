@@ -51,10 +51,11 @@ def test_gui_service_document_route_reaches_real_backend_selector(tmp_path,monke
     assert result['probe_activity']['finished']==expected_calls
     info=result['probe_configuration']
     assert info['selector']=='RealBackendSelector' and info['composition_enabled']==(profile=='composition')
+    assert info['structural_tasks']==('CLOSED_RELATIONS_V1' if profile=='composition' else None)
     assert info['config_path']==str(cfg.source_path)
     if expected_calls:
         assert backend.calls[0][1]['role']=='formalizer'
-        assert 'composition_boundary' in backend.calls[0][0]
+        assert 'structural_relation' in backend.calls[0][0]
         assert 'SELECT_LABELS_V1' in backend.calls[0][0]
         snapshot=json.loads((tmp_path/'first/interpretation.json').read_text())
         assert snapshot['probe_activity']==result['probe_activity']

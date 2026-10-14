@@ -27,6 +27,24 @@ def visible(html):
     return re.sub('<[^>]+>',' ',html)
 
 
+def test_structural_tasks_explain_frontier_parts_and_limit_without_json():
+    data=sample();data['state']['syntax_trace']=[
+        {'kind':'STRUCTURAL_TASK','slot':'structural_partition','decision_ref':'partition',
+         'source_range':[0,26],'page':1,'examined':18,'status':'SELECTED','selected':'p',
+         'alternatives':[{'candidate_id':'p','relation':'IMPLIES','operands':[['student'],['read']],
+            'marker_refs':[],'label':'machine wording'}]},
+        {'kind':'STRUCTURAL_TASK','slot':'structural_relation','source_range':[0,26],
+         'status':'BLOCKED','reason':'CONTEXT_LIMIT','examined':0}]
+    idx=Inspection(data);reader=ReadableInspection(idx)
+    chosen=visible(reader.explain(idx.by_ref['trace:0']))
+    assert 'Части по порядку: «студент»; «читает»' in chosen
+    assert 'Локальный выбор подтверждён' in chosen and 'Порция: 2' in chosen
+    assert 'machine wording' not in chosen and 'marker_refs' not in chosen
+    blocked=visible(reader.explain(idx.by_ref['trace:1']))
+    assert 'Проба не вызывалась' in blocked
+    assert 'Проба не вызывалась' in reader.report([])
+
+
 def test_actual_graph_preserves_negation_scope_variables_and_unknown_meaning():
     data=sample();before=deepcopy(data);r=ReadableInspection(Inspection(data));html=r.overview()
     assert html.index('Неверно, что')<html.index('Для каждого')<html.index('«читает»')

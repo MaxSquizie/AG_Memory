@@ -72,9 +72,10 @@ def _bind(state,release,selector,region,frames,matches,cfg,spend):
             if frame.semantic.get('structural_unresolved'):continue
             for tid in frame.argument_token_refs:
                 spend()
+                if rule.get('head_ref') and tid!=rule['head_ref']:continue
                 reading=frame.semantic.get('morph_bindings',{}).get(tid)
                 if not reading or reading['pos'] not in spec['head_pos']:continue
-                if not any(compatible(v,reading,spec['agreement']) for token in anchors for v in token.variants):continue
+                if not rule.get('structural_license') and not any(compatible(v,reading,spec['agreement']) for token in anchors for v in token.variants):continue
                 cid='quantifier-head:'+digest([mid,tid,clean(reading)])
                 values[cid]={'candidate_id':cid,'head_ref':tid,'reading':clean(reading),
                     'label':rule['operator']+' «'+state.text[bounds[0]:bounds[1]]+'» binds the existing nominal «'+
@@ -151,17 +152,27 @@ def licensed(state,release,frame):
     license=frame.semantic.get('quantifier_restriction')
     if not license:return True
     rule=license['rule'];tid=license['head_ref']
-    if rule not in release.entries('ScopeLexicon') or 'QUANTIFIED_NOMINAL' not in rule.get('attachment_kinds',()):return False
+    generic=rule.get('structural_license')
+    if generic:
+        from .structural_tasks import enabled,licensed as task_licensed
+        if not enabled(release) or not task_licensed(state,generic,relation=rule['operator']):return False
+        if not task_licensed(state,rule.get('head_license'),head_ref=tid):return False
+        if rule['operator'] not in {'FORALL','EXISTS'} or rule.get('head_ref')!=tid:return False
+        try:validate_rule(rule,{r['role_id'] for r in release.entries('RoleRegistry')})
+        except (ValueError,KeyError,TypeError):return False
+        if not task_licensed(state,rule.get('partition_license'),relation=rule['operator'],
+                             marker_refs=license['marker_refs'],relation_proof=generic):return False
+    elif rule not in release.entries('ScopeLexicon') or 'QUANTIFIED_NOMINAL' not in rule.get('attachment_kinds',()):return False
     decision=state.decisions.get(license['decision_ref'])
     if not decision or decision.outcome!='RESOLVED' or license['candidate_id'] not in decision.selected:return False
     evidence={t.token_id:t for t in state.evidence}
     if tid not in evidence or any(t not in evidence for t in license['marker_refs']):return False
     markers=[evidence[t] for t in license['marker_refs']]
     if not markers:return False
-    if not any([t.token_id for t in state.evidence if m.start()<=t.start and t.end<=m.end()]==license['marker_refs']
+    if not generic and not any([t.token_id for t in state.evidence if m.start()<=t.start and t.end<=m.end()]==license['marker_refs']
                for m in re.finditer(rule['pattern'],state.text,re.I)):return False
     reading=frame.semantic.get('morph_bindings',{}).get(tid)
-    if not reading or not any(compatible(v,reading,rule['restriction_pattern']['agreement']) for t in markers for v in t.variants):return False
+    if not reading or not generic and not any(compatible(v,reading,rule['restriction_pattern']['agreement']) for t in markers for v in t.variants):return False
     from .nominal_readings import attested
     return (attested(state,tid,reading) and frame.predicate_token_ref==tid
         and frame.semantic['proposed_roles']=={tid:restriction_role(frame,tid)}

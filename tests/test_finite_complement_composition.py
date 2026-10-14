@@ -1,4 +1,4 @@
-"""Finite content must never escape its released proposition owner."""
+"""Legacy released-complement producer; general tasks have separate route tests."""
 from types import SimpleNamespace
 from copy import deepcopy
 
@@ -12,6 +12,13 @@ from tools.formalizer_v7_extended_binding import Session
 
 
 def run(tmp_path, monkeypatch, text, answer='1'):
+    # Exercise this producer directly, even when the GUI's full profile also
+    # enables the general relation producer (whose labels are different).
+    from tools.formalizer_component_fixture import with_components
+    monkeypatch.setattr('tools.formalizer_component_fixture.with_full_composition',
+        lambda release,core:with_components(release,core=core,predication=True,relative_time=True,
+            omissions=True,modifier_forest=True,nominal_tree=True,dependency_reduction=True,
+            refinement=True,document_scopes=True,spatial_references=True,quantified_scopes=True))
     prompts=[]
     def generate(self, prompt, **kwargs):
         prompts.append(prompt)

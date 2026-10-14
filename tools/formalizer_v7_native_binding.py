@@ -731,6 +731,7 @@ def execute_native(session,p,config):
         'runtime':{'report':json_safe(asdict(report)),'ir':json_safe(asdict(state)),
             'probe_configuration':{'structure_mode':structure_mode,
                 'composition_enabled':bool(release.entries('ProposalPolicy')[0].get('composition')),
+                'structural_tasks':release.entries('ProposalPolicy')[0].get('composition',{}).get('structural_tasks'),
                 'release_sha256':release.sha256},
             'coverage_evidence':coverage_evidence,
             'variable_bindings':{str(k):v for k,v in session.native_variable_aliases.items()},

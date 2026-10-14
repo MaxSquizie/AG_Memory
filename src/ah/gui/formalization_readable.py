@@ -5,6 +5,11 @@ import re
 from urllib.parse import quote
 
 OPERATORS = {
+    'LEXICAL':'Действие или описание без внешней логической связи',
+    'CONTENT':'Вложенное содержание высказывания', 'QUERY':'Вопрос к содержанию',
+    'GROUP':'Скобки объединяют выражение',
+    'BEFORE':'Первое событие раньше второго', 'AFTER':'Первое событие позже второго',
+    'DURING':'Первое событие во время второго',
     'NOT': 'Неверно, что', 'FORALL': 'Для каждого', 'EXISTS': 'Существует',
     'AND': 'Выполняются все условия', 'OR': 'Выполняется хотя бы одно условие',
     'XOR': 'Выполняется ровно одно условие', 'IMPLIES': 'Если …, то …',
@@ -26,6 +31,20 @@ STATUS = {'APPLIED': 'Записано в память', 'RESOLVED': 'Выбор
     'KNOWN': 'Словарное значение известно', 'UNLINKED': 'Словарный смысл не установлен',
     'OPEN_LEXICAL': 'Словарный смысл не установлен', 'UNKNOWN': 'Не установлено'}
 QUESTIONS = {'composition_boundary': 'Что охватывает всё выражение?',
+    'structural_relation':'Какая связь охватывает весь фрагмент?',
+    'structural_revision':'Можно ли пересмотреть выбор с учётом противоречия во вложенных частях?',
+    'structural_partition':'Согласованы ли тип связи, порядок частей и всё исходное содержание?',
+    'structural_owner':'Какому слову принадлежит вложенное содержание?',
+    'structural_content_role':'Какую роль играет содержание и как к нему относится говорящий?',
+    'structural_control':'Кто выполняет действие в инфинитиве?',
+    'structural_governor':'Какой глагол задаёт согласование вложенного действия?',
+    'structural_function_owner':'К внешней связи или к вложенной части относится служебное слово?',
+    'structural_binder_head':'Какое имя связывает квантор?',
+    'structural_event_head':'Какое имя обозначает событие?',
+    'structural_refinement':'Где начинается и заканчивается описание имени?',
+    'structural_marker_reading':'Какое целое морфологическое чтение имеет связующее слово?',
+    'structural_oov_reading':'Какую грамматическую функцию выполняет неизвестное слово?',
+    'child_slot':'Какой из разборов подходит к требованиям родительской части?',
     'attitude_attachment':'К какому высказыванию относится вложенное содержание и где его границы?',
     'nominal_dependency': 'К какому слову относится участник и в какой роли?',
     'component_attachment': 'Как связаны действие и его участники?',
@@ -44,6 +63,9 @@ MORPH = {'NOUN':'существительное','VERB':'глагол','INFN':'�
     'perf':'совершенный вид','impf':'несовершенный вид','anim':'одушевлённое','inan':'неодушевлённое',
     'tran':'переходный','intr':'непереходный','indc':'изъявительное наклонение','impr':'повелительное наклонение'}
 TRACE = {'FEATURE_CHECK_BATCH':'Проверка грамматических признаков',
+    'STRUCTURAL_TASK':'Выбор связи или границы по исходному тексту',
+    'STRUCTURAL_RELATION_COMPOSED':'Связь собрана из согласованных частей',
+    'COMPOSITION_PRODUCERS':'Проверка всех источников разбора',
     'ATTITUDE_COMPOSITION':'Вложенное содержание высказывания',
     'DEFERRED_CLAUSE_BOUNDARY':'Разбиение отложено до проверки вложенности',
     'COMPOSITION_SOURCE_DOMAIN':'Источники вариантов разбора', 'SCOPE_DOMAIN':'Варианты области действия',
@@ -53,6 +75,10 @@ TRACE = {'FEATURE_CHECK_BATCH':'Проверка грамматических п
     'QUANTIFIER_BINDING_DOMAIN':'Варианты связывания квантора','OPERATOR_COMPOSITION':'Вложенность операторов',
     'COMPOSITION_CLOSED':'Объединение частей завершено','COMPOSITION_EMPTY':'Допустимый разбор не построен'}
 DIAGNOSTICS = {'COMPOSITION_SCOPE_BOUNDARY_CHANGED':'При объединении изменилось содержимое цельного условия.',
+    'STRUCTURAL_TASK_UNRESOLVED':'Тип связи, границы или вложенные части ещё не согласованы. Отдельные части не записаны как самостоятельные факты.',
+    'STRUCTURAL_TASK_SEARCH_INCOMPLETE':'Достигнут предел поиска или размера контекста. Это не означает отсутствия подходящего разбора.',
+    'COMPOSITION_PRODUCER_PENDING':'Один из источников разбора ещё не разрешён. Готовый вариант другого источника не признан единственным.',
+    'ARITHMETIC_QUANTIFIER_DEFERRED':'Числовой квантор отложен: арифметический движок не включён.',
     'ATTITUDE_SLOT_UNCLOSED':'Не подтверждены границы или владелец вложенного высказывания. Его содержание не записано как самостоятельный факт.',
     'ATTITUDE_PARENT_UNRESOLVED':'Вложенное содержание разобрано, но не удалось собрать высказывание, которому оно принадлежит.',
     'COMPOSITION_SCOPE_BOUNDARY_LOST':'При объединении потерялась ранее выбранная граница условия.',
@@ -60,6 +86,13 @@ DIAGNOSTICS = {'COMPOSITION_SCOPE_BOUNDARY_CHANGED':'При объединени
     'QUANTIFIED_CONTROL_UNRESOLVED':'Не подтверждено, что пропущенный участник находится внутри области своего квантора.',
     'IMPLICIT_ARGUMENT_UNRESOLVED':'Не удалось определить пропущенного участника.',
     'RUN_WITHOUT_IR':'Разбор остановился до сохранения структуры.'}
+
+for _slot,_name in {'structural_operand_1':'первой части', 'structural_operand_2':'второй части',
+    'structural_introducer':'выражения внешней связи','structural_content':'вложенного содержания',
+    'structural_parent':'главного высказывания','structural_quantifier':'выражения квантора',
+    'structural_group':'выражения в скобках'}.items():
+    QUESTIONS[_slot+'_start']='Где начало '+_name+'?'
+    QUESTIONS[_slot+'_end']='Где конец '+_name+'?'
 
 
 def esc(value):
@@ -86,7 +119,7 @@ class ReadableInspection:
         self.frames={f['frame_id']:f for f in self.state.get('frames',())}
         self.graph=inspection.snapshot.get('committed_graph',{}); self.nodes=self.graph.get('nodes',{})
         self.entities={};self.variables={};self.aliases={};self.gaps={};self.specs={}
-        self.option_labels={};self.domain_names={}
+        self.option_labels={};self.domain_names={};self.task_options={}
         observation=self.state.get('observation',{})
         self.implicit=observation.get('implicit_bindings',{})
         for mention,ref in observation.get('entity_bindings',{}).items():
@@ -111,6 +144,8 @@ class ReadableInspection:
                         self.domain_names.setdefault(domain,value['label'].split(' applies to ')[0])
             for option in trace.get('alternatives',()):
                 if isinstance(option,dict) and option.get('candidate_id') and option.get('label'):self.option_labels[option['candidate_id']]=option['label']
+                if trace.get('kind')=='STRUCTURAL_TASK' and isinstance(option,dict):
+                    self.task_options[(trace.get('decision_ref'),option.get('candidate_id'))]=option
 
     def word(self,ref):
         token=self.tokens.get(ref)
@@ -226,8 +261,52 @@ class ReadableInspection:
                 break
         return out+'<ul>'+''.join(items)+'</ul>'
 
+    def task_choice(self,value):
+        if value.get('frame_refs'):
+            parts=[]
+            for fid in value['frame_refs']:
+                frame=self.frames.get(fid,{})
+                sem=frame.get('semantic',{})
+                roles=[ROLES.get(role,role)+': «'+self.word(tid)+'» ('+
+                       self.morphology(sem.get('morph_bindings',{}).get(tid,{}))+')' for tid,role in sem.get('proposed_roles',{}).items()]
+                source='грамматика' if sem.get('composition_source')=='GRAMMAR' else 'компонентная композиция'
+                reading=self.morphology(sem.get('morph_bindings',{}).get(frame.get('predicate_token_ref'),{}))
+                parts.append('«'+frame.get('anchor_span','часть разбора')+'» ('+source+'; '+reading+'). '+ '; '.join(roles))
+            return ' '.join(parts)
+        if value.get('controller'):
+            alias=value['controller']
+            token=alias.get('token_ref') or alias.get('head_ref') or alias.get('host_token_ref')
+            return 'Тот же участник управляющего действия'+(': «'+self.word(token)+'».' if token else '; отдельный участник не создаётся.')
+        if value.get('operands'):
+            parts=['«'+' '.join(self.word(t) for t in part)+'»' for part in value['operands']]
+            markers=' '.join(self.word(t) for t in value.get('marker_refs',()))
+            return OPERATORS.get(value['relation'],value['relation'])+'. Части по порядку: '+ '; '.join(parts)+'. Служебное выражение: «'+markers+'». Остальное содержание не опущено.'
+        if value.get('relation'):return OPERATORS.get(value['relation'],value['relation'])
+        if value.get('reading'):return 'Чтение слова: '+self.morphology(value['reading'])+'. Словарный смысл и неизвестные признаки не додумываются.'
+        if value.get('attitude'):
+            attitudes={'QUOTED':'пересказ','EMBEDDED':'мысленное содержание','HYPOTHETICAL':'предполагаемое или желаемое содержание','UNKNOWN':'отношение не уточнено'}
+            return ROLES.get(value['role'],value['role'])+' слова «'+self.word(value['owner_ref'])+'»: '+attitudes[value['attitude']]+'. Вложенное содержание отдельно не утверждается.'
+        if value.get('owner_ref'):return 'Владелец содержания: «'+self.word(value['owner_ref'])+'».'
+        if value.get('head_ref'):return 'Связанное квантором имя: «'+self.word(value['head_ref'])+'».'
+        if value.get('head'):return 'Имя события: «'+self.word(value['head'])+'».'
+        return self.choice_text(value.get('label','Описание варианта не сохранено'))
+
     def choice_text(self,text):
         # Translate known protocol labels only. Never infer a model rationale.
+        if text.startswith('Revise the provisional'):return 'Пересмотреть предварительный тип связи и границы с учётом требований вложенных частей.'
+        if text.startswith('Keep the whole area unresolved'):return 'Оставить весь фрагмент неразрешённым: подтверждённого исправления нет.'
+        if text.startswith('No agreement governor'):return 'Вложенная часть имеет собственное сказуемое и самостоятельное согласование.'
+        match=re.match(r'Start at «(.*?)» @(\d+)',text)
+        if match:return 'Начало перед «'+match[1]+'», позиция '+match[2]+'.'
+        match=re.match(r'End after «(.*?)» @(\d+); full content «(.*)»',text,re.S)
+        if match:return 'Конец после «'+match[1]+'», позиция '+match[2]+'. Вся выбранная часть: «'+match[3]+'».'
+        if text.startswith('Every listed function token'):return 'Все перечисленные служебные слова остаются внутри своих частей.'
+        match=re.match(r'Outer relation owns «(.*?)» @(\d+)',text)
+        if match:return 'Слово «'+match[1]+'» на позиции '+match[2]+' относится к внешней связи.'
+        match=re.match(r'Agreement/controller anchor «(.*?)»',text)
+        if match:return 'Согласование задаёт «'+match[1]+'».'
+        match=re.match(r'(?:RELATIVE|PARTICIPLE) description «(.*?)»; parent «(.*?)»',text,re.S)
+        if match:return 'Описание: «'+match[1]+'». Главная часть: «'+match[2]+'».'
         match=re.fullmatch(r'Proposition content «(.*)» fills (\w+) of «(.*?)»; holder role (\w+); attitude=(\w+); remaining parent «(.*)»; the content is NOT independently asserted',text,re.S)
         if match:
             return ('Содержание «'+match[1]+'» относится к «'+match[3]+'». Роль: '+ROLES.get(match[2],match[2])+
@@ -276,7 +355,9 @@ class ReadableInspection:
             n=mapping.get(ref);spec=self.specs.get(ref,{})
             # The displayed question and its label map are authoritative together.
             label=labels.get(n) if n is not None else None
-            if label:label=self.choice_text(label)
+            task=self.task_options.get((d.get('frame_id'),ref))
+            if label and task:label=self.task_choice(task)
+            elif label:label=self.choice_text(label)
             elif spec:label=('Словарный смысл не установлен: ' if spec.get('sense_kind')=='OPEN_LEXICAL' else 'Словарное значение: ')+spec.get('label',spec.get('sense_id','без названия'))
             else:label='Описание варианта не сохранено (вариант '+str(i+1)+')'
             rows.append([str(n if n is not None else i+1),esc(label),'Выбран' if ref in d.get('selected',()) else 'Не выбран'])
@@ -417,6 +498,27 @@ class ReadableInspection:
         elif c=='Привязки':out+=paragraph('Установленная ссылка: '+self.target(r.get('target')))
         elif c=='Трасса' and r.get('kind')=='DEFERRED_CLAUSE_BOUNDARY':
             out+=paragraph('Возможна вложенная часть высказывания. Разбиение на самостоятельные предложения отложено: сначала нужно подтвердить владельца и полные границы содержания отдельной пробой.')
+        elif c=='Трасса' and r.get('kind')=='STRUCTURAL_TASK':
+            out+=paragraph(QUESTIONS.get(r.get('slot'),'Выбор части разбора'))
+            reasons={'CONTEXT_LIMIT':'Фрагмент превышает допустимый размер контекста. Проба не вызывалась.',
+                'SEARCH_LIMIT':'Бюджет поиска исчерпан. Оставшиеся варианты не проверены.',
+                'GRAMMAR_SEARCH_LIMIT':'Перебор грамматических вариантов не завершён. Проба связи не вызывалась.',
+                'NO_REMAINING_CANDIDATES':'Предложенные варианты закончились. Это не доказательство отсутствия связи в языке.',
+                'NONE_FIT':'Ни один вариант этой порции не подошёл. Поиск продолжится, если остались варианты.',
+                'INSUFFICIENT_CONTEXT':'Не хватает контекста. Следующая порция не подменяет неопределённый ответ.',
+                'MULTIPLE_ADMISSIBLE':'Остались несколько допустимых вариантов.',
+                'PROBE_BLOCKED':'Подтверждённого ответа нет. Проверьте связанное решение и диагностику.'}
+            out+=paragraph('Локальный выбор подтверждён; согласование дочерних частей проверяется отдельно.' if r.get('selected') else reasons.get(r.get('reason'),'Задача не завершена.'))
+            out+=paragraph('Порция: '+str(r.get('page',0)+1)+'. Рассмотрено вариантов: '+str(r.get('examined',0))+'.')
+            if r.get('enumeration_complete') is False:out+=paragraph('Остались непоказанные варианты. Локальный выбор не означает полного перебора.')
+            if r.get('alternatives'):out+=table(['Вариант','Выбор'],[[esc(self.task_choice(v)),'Выбран' if v.get('candidate_id')==r.get('selected') else 'Не выбран'] for v in r['alternatives']])
+        elif c=='Трасса' and r.get('kind')=='COMPOSITION_PRODUCERS':
+            out+=paragraph('Проверены все применимые источники. Наличие грамматического разбора не отключает компонентный поиск.')
+            out+=table(['Источник','Кандидатов'],[[{'GRAMMAR':'Грамматика','COMPONENT':'Компонентная композиция'}.get(x['source'],x['source']),str(x['frames'])] for x in r.get('sources',())])
+        elif c=='Трасса' and r.get('kind')=='STRUCTURAL_RELATION_COMPOSED':
+            out+=paragraph(OPERATORS.get(r.get('relation'),'Связь')+'. Части и границы согласованы.')
+            if r.get('tree'):out+=self.formula(r['tree'])
+            if r.get('owner_ref'):out+=paragraph('Владелец: «'+self.word(r['owner_ref'])+'». Содержание: «'+self.word(r.get('content_ref'))+'». Оно отдельно не утверждается.')
         elif c=='Трасса' and r.get('kind')=='ATTITUDE_COMPOSITION':
             out+=paragraph('Вложенное содержание связано с высказыванием.' if r.get('resolved') else 'Попытка присоединить вложенное содержание; завершение связи не подтверждено.')
             out+=table(['Часть разбора','Исходный текст'],[
@@ -448,7 +550,7 @@ class ReadableInspection:
 
     def report(self,notes):
         body='<h1>Проверка формализации</h1><h2>Исходный текст</h2><pre style="white-space:pre-wrap">'+esc(self.index.text)+'</pre>'+self.overview()
-        entries=[e for e in self.index.entries if e.category in {'Решения','Границы условий','Диагностика','Привязки'}]
+        entries=[e for e in self.index.entries if e.category in {'Решения','Границы условий','Диагностика','Привязки'} or e.category=='Трасса' and e.record.get('kind') in {'STRUCTURAL_TASK','STRUCTURAL_RELATION_COMPOSED','COMPOSITION_PRODUCERS'}]
         for e in entries[:1000]:body+='<hr>'+self.explain(e)
         if len(entries)>1000:body+=paragraph('Отчёт ограничен первыми 1000 записями. Полный снимок сохраните отдельно для повторного открытия.')
         body+='<h2>Замечания проверяющего</h2>'+table(['Оценка','Фрагмент','Комментарий'],[[esc(n.get('verdict','')),esc(self.excerpt(n.get('source_range'))),esc(n.get('comment',''))] for n in notes])

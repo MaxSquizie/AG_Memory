@@ -1,0 +1,285 @@
+"""Closed source choices over the real GUI/oracle route, not a graph stub."""
+import json
+import re
+from collections import deque
+
+import pytest
+
+from tools.formalizer_v7_native_binding import ChatBackend,execute_native
+from tools.formalizer_v7_extended_binding import Session
+
+
+class Script:
+    def __init__(self,steps,default='1'):
+        self.steps=deque(steps);self.default=default;self.calls=[];self.errors=[]
+
+    def generate(self,prompt,**kwargs):
+        slot=re.search(r'Decision slot: (\S+)',prompt).group(1)
+        self.calls.append((slot,prompt))
+        if not slot.startswith('structural_') and (not self.steps or self.steps[0][0]!=slot):return self.default
+        if not self.steps:
+            self.errors.append('Unexpected '+slot);return '?'
+        expected,value=self.steps[0]
+        if slot!=expected:
+            self.errors.append('Expected '+expected+', got '+slot);return '?'
+        if value in {'?','0','ONE_SELECTED'}:
+            self.steps.popleft();return value
+        mapping={json.loads(cid):n for n,cid in re.findall(r'^(\d+) = (".*")$',prompt,re.M)}
+        labels=dict(re.findall(r'^(\d+)\. (.*)$',prompt,re.M))
+        number=mapping.get(value) or next((n for n,label in labels.items() if label.startswith(value)),None)
+        if number:
+            self.steps.popleft();return number
+        return '0'  # reject only this page, retaining the intended source choice
+
+
+def run(tmp_path,monkeypatch,text,steps,kind='ASSERTION',default='1'):
+    script=Script(steps,default)
+    monkeypatch.setattr(ChatBackend,'generate',lambda self,prompt,**kw:script.generate(prompt,**kw))
+    payload={'raw_input':{'text':text,'source_id':'structural-task-test','revision':1,
+        'range':[0,len(text)],'language':'ru','request_kind':kind,'batch_kind':'MESSAGE'}}
+    result=execute_native(Session([payload],tmp_path/'journal.log'),payload,
+        {'provider':'lmstudio','model':'scripted-source-selection','structure_mode':'region_probes'})
+    assert not script.errors,script.errors
+    assert not script.steps,list(script.steps)
+    return result,script
+
+
+def relation(kind):return [('structural_relation',kind)]
+
+
+def bounds(slot,first,last):
+    return [(slot+'_start','Start at «'+first+'»'),(slot+'_end','End after «'+last+'»')]
+
+
+def binary(kind,left,right):
+    return relation(kind)+bounds('structural_operand_1',*left)+bounds('structural_operand_2',*right)+[
+        ('structural_partition','PARTITION')]+relation('LEXICAL')+relation('LEXICAL')
+
+
+def unary(kind,first,last):
+    return relation(kind)+bounds('structural_introducer',first,last)+[('structural_partition','PARTITION')]
+
+
+def atom(predicate,person):return {'predicate':predicate,'roles':{'AGENT':{'entity':person}}}
+
+
+@pytest.mark.parametrize('text,operator,left,right',[
+    ('Если Иван пришёл, то Мария спит.','IMPLIES',('Иван','пришёл'),('Мария','спит')),
+    ('Мария спит только если Иван пришёл.','IMPLIES',('Мария','спит'),('Иван','пришёл')),
+    ('Если бы Иван пришёл, Мария бы спала.','COUNTERFACTUAL',('Иван','пришёл'),('Мария','спала')),
+    ('Иван пришёл или Мария спит.','OR',('Иван','пришёл'),('Мария','спит')),
+    ('Либо Иван пришёл, либо Мария спит.','XOR',('Иван','пришёл'),('Мария','спит')),
+    ('Иван пришёл и Мария спит.','AND',('Иван','пришёл'),('Мария','спит')),
+])
+def test_binary_relation_uses_shared_source_slots(tmp_path,monkeypatch,text,operator,left,right):
+    steps=binary(operator,left,right)
+    if operator=='COUNTERFACTUAL':steps.insert(5,('structural_function_owner','Outer relation owns «бы»'))
+    result,_=run(tmp_path,monkeypatch,text,steps)
+    expected=[atom('SLEEP','maria'),atom('ARRIVE','ivan')] if left[0]=='Мария' else [atom('ARRIVE','ivan'),atom('SLEEP','maria')]
+    facts=[{'operator':operator,'operands':expected}]
+    if operator=='AND':facts+=expected  # ordinary AND elimination is licensed
+    assert result['assertions']['ah']==facts
+    assert result['diagnostics']['codes']==[]
+
+
+@pytest.mark.parametrize('text,operator,first,last',[
+    ('Неверно, что Иван пришёл.','NOT','Неверно','что'),
+    ('Вполне вероятно, что Иван пришёл.','POSSIBLE','Вполне','что'),
+    ('Иван не пришёл.','NOT','не','не'),
+])
+def test_unlisted_unary_phrases_reach_same_compiler(tmp_path,monkeypatch,text,operator,first,last):
+    steps=unary(operator,first,last)+([('structural_governor','INDEPENDENT')] if operator=='POSSIBLE' else [])+relation('LEXICAL')
+    result,_=run(tmp_path,monkeypatch,text,steps)
+    assert result['assertions']['ah']==[{'operator':operator,'operands':[atom('ARRIVE','ivan')]}]
+    assert result['diagnostics']['codes']==[]
+
+
+@pytest.mark.parametrize('verb',['сказал','сообщил','предположил'])
+def test_proposition_owner_does_not_require_a_lemma_whitelist(tmp_path,monkeypatch,verb):
+    text='Иван '+verb+', что Пётр пришёл.'
+    steps=relation('CONTENT')+bounds('structural_content','Пётр','пришёл')+bounds('structural_parent','Иван',verb)+[
+        ('structural_partition','PARTITION'),('structural_owner','Content belongs to predicate «'+verb+'»'),
+        ('structural_content_role','OBJECT:'+('HYPOTHETICAL' if verb=='предположил' else 'QUOTED'))]+relation('LEXICAL')+relation('LEXICAL')
+    result,_=run(tmp_path,monkeypatch,text,steps)
+    facts=result['assertions']['ah']
+    assert len(facts)==1 and facts[0].get('predicate')!='ARRIVE'
+    assert atom('ARRIVE','petr') in facts[0]['roles'].values()
+    assert result['diagnostics']['codes']==[]
+
+
+def content_steps(owner,first,last,parent_first='Иван',attitude='QUOTED'):
+    return relation('CONTENT')+bounds('structural_content',first,last)+bounds('structural_parent',parent_first,owner)+[
+        ('structural_partition','PARTITION'),('structural_owner','Content belongs to predicate «'+owner+'»'),
+        ('structural_content_role','OBJECT:'+attitude)]+relation('LEXICAL')
+
+
+@pytest.mark.parametrize('quoted',[False,True])
+def test_recursive_propositions_and_quotes(tmp_path,monkeypatch,quoted):
+    text='Иван сказал'+(': «' if quoted else ', что ')+'Пётр думал, что Мария пришла'+('».' if quoted else '.')
+    steps=content_steps('сказал','Пётр','пришла')+content_steps('думал','Мария','пришла','Пётр','EMBEDDED')+relation('LEXICAL')
+    result,_=run(tmp_path,monkeypatch,text,steps)
+    assert result['diagnostics']['codes']==[]
+    assert result['assertions']['ah']==[{'predicate':'SAY','roles':{'AGENT':{'entity':'ivan'},
+        'CONTENT':{'predicate':'THINK','roles':{'AGENT':{'entity':'petr'},'CONTENT':atom('ARRIVE','maria')}}}}]
+
+
+def test_modal_control_inside_modal(tmp_path,monkeypatch):
+    steps=unary('POSSIBLE','может','может')+[('structural_governor','Agreement/controller anchor «может»')]+content_steps(
+        'хотеть','читать','книгу',attitude='HYPOTHETICAL')+[
+        ('structural_control','Same')]+relation('LEXICAL')
+    result,_=run(tmp_path,monkeypatch,'Иван может хотеть читать книгу.',steps)
+    assert result['diagnostics']['codes']==[]
+    assert len(result['assertions']['ah'])==1
+    assert result['assertions']['ah'][0]['operator']=='POSSIBLE'
+
+
+def test_relative_clause_is_quantifier_restriction(tmp_path,monkeypatch):
+    text='Каждый студент, который прочитал книгу, может сдать экзамен.'
+    steps=relation('FORALL')+bounds('structural_quantifier','Каждый','Каждый')+[
+        ('structural_partition','PARTITION'),('structural_binder_head','Bind the nominal «студент»')]+unary('POSSIBLE','может','может')+[
+        ('structural_governor','Agreement/controller anchor «может»')]+relation('LEXICAL')+[
+        ('structural_refinement','RELATIVE description «который прочитал книгу»')]+relation('LEXICAL')+relation('LEXICAL')
+    result,_=run(tmp_path,monkeypatch,text,steps)
+    assert result['diagnostics']['codes']==[]
+    assert len(result['assertions']['ah'])==1 and result['assertions']['ah'][0]['operator']=='FORALL'
+    frames=result['runtime']['ir']['frames']
+    restrictions=[f for f in frames if f['semantic'].get('quantifier_restriction')]
+    assert len(restrictions)==1 and restrictions[0]['semantic'].get('quantifier_description_refs')
+    assert result['assertions']['ah'][0]['operands'][1]['operands'][0]['operator']=='AND'
+
+
+@pytest.mark.parametrize('text,kind,left,right',[
+    ('Иван пришёл прежде, чем Мария уснула.','BEFORE',('Иван','пришёл'),('Мария','уснула')),
+    ('Мария спит после прихода Ивана.','AFTER',('Мария','спит'),('прихода','Ивана')),
+])
+def test_temporal_relations_accept_finite_and_nominal_children(tmp_path,monkeypatch,text,kind,left,right):
+    steps=binary(kind,left,right)
+    if right[0]=='прихода':steps[-1:]=[('structural_event_head','Nominal event head «прихода»')]
+    result,_=run(tmp_path,monkeypatch,text,steps)
+    assert result['diagnostics']['codes']==[]
+    assert result['assertions']['ah'] and result['assertions']['ah'][0]['operator']==kind
+
+
+def test_oov_role_is_explicitly_licensed(tmp_path,monkeypatch):
+    steps=[('structural_oov_reading','Source «Флырка»: NOUN; cases=[\'nom\']')]+relation('LEXICAL')
+    result,_=run(tmp_path,monkeypatch,'Флырка пришла.',steps)
+    assert result['diagnostics']['codes']==['OOV_KEEP_AS_IS']
+    assert result['assertions']['ah'] and result['assertions']['ah'][0]['predicate']=='ARRIVE'
+
+
+def test_quantified_modal_has_indivisible_coordinated_body(tmp_path,monkeypatch):
+    text='Каждый студент может читать книгу и спать.'
+    steps=relation('FORALL')+bounds('structural_quantifier','Каждый','Каждый')+[
+        ('structural_partition','PARTITION'),('structural_binder_head','Bind the nominal «студент»')]+unary('POSSIBLE','может','может')+[
+        ('structural_governor','Agreement/controller anchor «может»')]+binary('AND',('студент','книгу'),('спать','спать'))+[
+        ('implicit_argument','Same bound variable')]
+    result,_=run(tmp_path,monkeypatch,text,steps)
+    assert result['diagnostics']['codes']==[]
+    assert len(result['assertions']['ah'])==1
+    formula=result['assertions']['ah'][0]
+    assert formula['operator']=='FORALL'
+    body=formula['operands'][1]['operands'][1]
+    assert body['operator']=='POSSIBLE' and body['operands'][0]['operator']=='AND'
+    assert all(atom['roles']['AGENT']=={'bound_var':'x'} for atom in body['operands'][0]['operands'])
+
+
+def test_nested_modals_share_adjectival_agreement_governor(tmp_path,monkeypatch):
+    steps=unary('NECESSARY','должен','должен')+[
+        ('structural_governor','Agreement/controller anchor «должен»')]+unary('POSSIBLE','мочь','мочь')+relation('LEXICAL')
+    result,_=run(tmp_path,monkeypatch,'Иван должен мочь читать книгу.',steps)
+    assert result['diagnostics']['codes']==[]
+    facts=result['assertions']['ah']
+    assert len(facts)==1 and facts[0]['operator']=='NECESSARY'
+    assert facts[0]['operands'][0]['operator']=='POSSIBLE'
+
+
+def test_arithmetic_quantifier_remains_deferred(tmp_path,monkeypatch):
+    result,_=run(tmp_path,monkeypatch,'Два студента читают книгу.',
+        relation('EXISTS')+bounds('structural_quantifier','Два','Два'))
+    assert result['assertions']['ah']==[]
+    assert 'ARITHMETIC_QUANTIFIER_DEFERRED' in result['diagnostics']['codes']
+
+
+def test_unlisted_owner_after_content_uses_same_contract(tmp_path,monkeypatch):
+    steps=relation('CONTENT')+bounds('structural_content','Пётр','пришёл')+bounds('structural_parent','сообщил','Иван')+[
+        ('structural_partition','PARTITION'),('structural_owner','Content belongs to predicate «сообщил»'),
+        ('structural_content_role','OBJECT:QUOTED')]+relation('LEXICAL')+relation('LEXICAL')
+    result,_=run(tmp_path,monkeypatch,'Пётр пришёл, как сообщил Иван.',steps)
+    assert result['diagnostics']['codes']==[]
+    assert len(result['assertions']['ah'])==1 and result['assertions']['ah'][0]['predicate']!='ARRIVE'
+
+
+def test_all_producers_remain_reachable_for_complete_grammar(tmp_path,monkeypatch):
+    result,script=run(tmp_path,monkeypatch,'Иван пришёл.',relation('LEXICAL'))
+    traces=result['runtime']['ir']['syntax_trace']
+    both=[r for r in traces if r.get('kind')=='COMPOSITION_PRODUCERS']
+    assert both and all(x['frames'] for x in both[-1]['sources'])
+    assert any(slot=='child_slot' for slot,_ in script.calls)
+    assert result['assertions']['ah']==[atom('ARRIVE','ivan')]
+
+
+def test_partition_conflict_reopens_relation_and_boundaries(tmp_path,monkeypatch):
+    first=binary('OR',('Иван','пришёл'),('Мария','спит'))[:5]+[
+        ('structural_partition','0'),('structural_revision','REVISE')]
+    steps=first+binary('IMPLIES',('Мария','спит'),('Иван','пришёл'))
+    result,_=run(tmp_path,monkeypatch,'Иван пришёл при условии, что Мария спит.',steps)
+    assert result['diagnostics']['codes']==[]
+    assert result['assertions']['ah']==[{'operator':'IMPLIES','operands':[atom('SLEEP','maria'),atom('ARRIVE','ivan')]}]
+
+
+def test_description_can_precede_its_nominal_host(tmp_path,monkeypatch):
+    steps=relation('LEXICAL')+[
+        ('structural_refinement','PARTICIPLE description «Прочитавший книгу»')]+relation('LEXICAL')+relation('LEXICAL')
+    result,_=run(tmp_path,monkeypatch,'Прочитавший книгу студент спит.',steps)
+    assert result['diagnostics']['codes']==[]
+    traces=result['runtime']['ir']['syntax_trace']
+    refinements=[r for r in traces if r.get('kind')=='NOMINAL_REFINEMENT']
+    assert refinements
+    assert len(result['assertions']['ah'])==1 and result['assertions']['ah'][0]['predicate']=='SLEEP'
+
+
+def test_oov_verb_keeps_surface_instead_of_guessing_known_sense(tmp_path,monkeypatch):
+    steps=[('structural_oov_reading','Source «флыркает»: VERB;')]+relation('LEXICAL')
+    result,_=run(tmp_path,monkeypatch,'Иван флыркает.',steps)
+    assert result['diagnostics']['codes']==['OOV_KEEP_AS_IS']
+    assert len(result['assertions']['ah'])==1
+    assert 'флыркает' in result['assertions']['ah'][0]['predicate']
+
+
+@pytest.mark.parametrize('answer',['?','0','ONE_SELECTED'])
+def test_unresolved_outer_task_never_asserts_a_child(tmp_path,monkeypatch,answer):
+    result,_=run(tmp_path,monkeypatch,'Иван сообщил, что Пётр пришёл.',relation(answer)*(2 if answer=='0' else 1))
+    assert result['assertions']['ah']==[]
+    assert 'STRUCTURAL_TASK_UNRESOLVED' in result['diagnostics']['codes']
+
+
+def test_parenthesized_relation_reaches_child_tasks(tmp_path,monkeypatch):
+    steps=relation('GROUP')+bounds('structural_group','Иван','спит')+[
+        ('structural_partition','PARTITION')]+binary('OR',('Иван','пришёл'),('Мария','спит'))
+    result,_=run(tmp_path,monkeypatch,'(Иван пришёл или Мария спит).',steps)
+    assert result['diagnostics']['codes']==[]
+    assert result['assertions']['ah']==[{'operator':'OR','operands':[atom('ARRIVE','ivan'),atom('SLEEP','maria')]}]
+
+
+def test_confirmed_child_does_not_escape_unresolved_sibling(tmp_path,monkeypatch):
+    steps=binary('IMPLIES',('Иван','пришёл'),('Мария','спит'))
+    steps[-1]=('structural_relation','?')
+    steps.append(('structural_relation','?'))  # one retry with new parent context
+    result,_=run(tmp_path,monkeypatch,'Если Иван пришёл, то Мария спит.',steps)
+    assert result['assertions']['ah']==[]
+
+
+def test_query_wrapper_preserves_question_scope(tmp_path,monkeypatch):
+    result,_=run(tmp_path,monkeypatch,'Верно ли, что Иван пришёл?',
+        unary('QUERY','Верно','что')+relation('LEXICAL'),kind='QUERY')
+    assert result['assertions']['ah']==[]
+    assert 'STRUCTURE_NOT_COVERED' not in result['diagnostics']['codes']
+
+
+@pytest.mark.parametrize('marker,operator',[('Каждый','FORALL'),('Любой','FORALL'),('Некоторый','EXISTS')])
+def test_nonnumeric_binders_without_keyword_admission(tmp_path,monkeypatch,marker,operator):
+    steps=relation(operator)+bounds('structural_quantifier',marker,marker)+[
+        ('structural_partition','PARTITION'),('structural_binder_head','Bind the nominal «студент»')]+relation('LEXICAL')
+    result,_=run(tmp_path,monkeypatch,marker+' студент читает книгу.',steps)
+    assert result['assertions']['ah'] and result['assertions']['ah'][0]['operator']==operator
+    assert result['diagnostics']['codes']==[]

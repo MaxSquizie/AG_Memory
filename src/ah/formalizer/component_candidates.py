@@ -12,7 +12,7 @@ def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nomin
     alternatives = {}
     grouped={t for g in nominal_groups for t in g["member_refs"]}
     connectors={t for g in nominal_groups for t in g["marker_refs"]}
-    governors=[v for v in agreement_source.variants if v.pos=='VERB' and v.mood!='imperative'] if agreement_source else [None]
+    governors=[v for v in agreement_source.variants if v.pos=='ADJS' or v.pos=='VERB' and v.mood!='imperative'] if agreement_source else [None]
     for pv,gv in product(p.variants,governors):
         from .participial_roles import projection
         projected = projection(pv, attachment, cfg)

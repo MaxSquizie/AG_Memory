@@ -14,14 +14,17 @@ def _compose(state, release, selector):
 
     Released conjunction and relative-event constructors compose local clauses;
     unsupported control/scope/adjuncts remain uncovered, not silently discarded.
-    Existing complete SyntaxRules frames take priority
-    as coverage, not as lexical winners over a newly guessed analysis.
+    The general task profile combines all producers. Legacy profiles retain
+    their released grammar-first coverage policy.
     """
     cfg = policy(release)
     if not cfg:
         return
     if state.grammar_search_incomplete:
         state.diag('COMPONENT_SEARCH_INCOMPLETE','released grammar enumeration incomplete')
+        state.syntax_trace.append({'kind':'STRUCTURAL_TASK','slot':'structural_relation',
+            'status':'BLOCKED','reason':'GRAMMAR_SEARCH_LIMIT','examined':0,
+            'source_range':[0,len(state.text)]})
         return
     state.require_structures_open('COMPONENT_COMPOSITION')
     evidence = {e.token_id:e for e in state.evidence}
@@ -29,6 +32,8 @@ def _compose(state, release, selector):
     from .soft_clause_boundaries import areas
     from .composition_session import current
     inventory=current(state).sources
+    from .structural_tasks import enabled
+    joint=enabled(release)
     from bisect import bisect_left
     grammar_frames=sorted(state.frames,key=lambda f:f.source_range[0])
     starts=[f.source_range[0] for f in grammar_frames]
@@ -37,9 +42,9 @@ def _compose(state, release, selector):
         tokens = [evidence[t] for t in region.token_refs]
         existing=[f for f in grammar_frames[bisect_left(starts,region.source_range[0]):bisect_left(starts,region.source_range[1])]
                   if not f.semantic.get('structural_rejection') and f.source_range[1]<=region.source_range[1]]
-        if inventory.complete(tokens):continue
+        if inventory.complete(tokens) and not joint:continue
         generated=[]
-        for area,owned in areas(state,release,selector,region,tokens,cfg):
+        for area,owned in ([(region,tokens)] if joint else areas(state,release,selector,region,tokens,cfg)):
             from .composition_tree import finalize
             children=compose_area(state,release,selector,area,owned,cfg)
             finalize(state,area,children)

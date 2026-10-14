@@ -69,6 +69,8 @@ class InputSlot:
     proposition_slots: dict | None = None
     agreement_source: object = None
     pending_proposition_roles: frozenset = frozenset()
+    controller: object = None
+    constraint_signature: str = ''
 
 
 def slots(frame):

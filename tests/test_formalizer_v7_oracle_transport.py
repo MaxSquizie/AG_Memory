@@ -21,7 +21,8 @@ def local_server(reply, status=200, *, wait=None):
             body=json.loads(self.rfile.read(int(self.headers['Content-Length'])))
             requests.append({'path':self.path,'body':body})
             if wait:wait.wait(timeout=5)
-            raw=reply if isinstance(reply,bytes) else json.dumps(reply).encode('utf-8')
+            response=reply(body) if callable(reply) else reply
+            raw=response if isinstance(response,bytes) else json.dumps(response).encode('utf-8')
             self.send_response(status)
             self.send_header('Content-Type','application/json')
             self.send_header('Content-Length',str(len(raw)))

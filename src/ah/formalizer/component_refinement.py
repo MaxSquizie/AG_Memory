@@ -51,10 +51,77 @@ def compose_area(state, release, selector, region, tokens, cfg, depth=0, attachm
 
 
 def _compose_area(state, release, selector, region, tokens, cfg, depth=0, attachment=None, infinitive=None, request=None):
+    from .structural_tasks import enabled
+    if enabled(release):
+        if depth>=cfg.get('refinement',{}).get('max_depth',release.entries('ProposalPolicy')[0]['max_depth']):
+            return block(state,region,[],'COMPONENT_REFINEMENT_SEARCH_INCOMPLETE')
+        from .relation_composition import compose
+        from .structural_tasks import choose
+        from .composition_tree import roots
+        from .component_probe_replay import supersede
+        from dataclasses import replace
+        from .composition_tree import InputSlot
+        import json
+        retired=[]
+        for revision in range(cfg.get('refinement',{}).get('max_depth',16)):
+            begin=len(state.syntax_trace);diagnostics_begin=len(state.diagnostics)
+            result=compose(state,release,selector,region,tokens,cfg,request,
+                lambda owned,slot:compose_area(state,release,selector,region_for(state,region,owned,'RELATION_CHILD'),
+                    owned,cfg,depth+1,attachment=attachment,infinitive=(slot.controller if slot and slot.controller else infinitive),
+                    request=replace(slot or InputSlot(),constraint_signature=digest(cfg['_task_constraints'])) if cfg.get('_task_constraints') else slot))
+            if result is None:
+                result=_compose_lexical_area(state,release,selector,region,tokens,
+                    {**cfg,'_literal_relation':True},depth,attachment,infinitive,request)
+            tasks=[r for r in state.syntax_trace[begin:] if r.get('kind')=='STRUCTURAL_TASK']
+            if len(roots(result))==1:
+                current=next((r['decision_ref'] for r in tasks if r.get('selected')),None)
+                for key in retired:supersede(state,key,current)
+                return result
+            reasons=[d.code for d in state.diagnostics[diagnostics_begin:]]
+            from .composition_session import current as current_session
+            runtime=current_session(state)
+            used=runtime.tasks.reads[-1]['probes'] if runtime and runtime.tasks.reads else set()
+            pending_context=any(state.component_probe_records.get(k,{}).get('decision',{}).get('selector_outcome')
+                in {'MULTIPLE_ADMISSIBLE','INSUFFICIENT_CONTEXT'} and not state.component_probe_records[k].get('superseded_by') for k in used)
+            # Unknown context, invalid responses, resources and budgets are
+            # not invitations to guess another interpretation.
+            if (not any(r.get('slot')=='structural_relation' and r.get('selected') for r in tasks)
+                    or pending_context or any(r.get('status') in {'PENDING','BLOCKED'} for r in tasks)
+                    or any('INCOMPLETE' in c or c in {'RESOURCE_MISSING','ARITHMETIC_QUANTIFIER_DEFERRED',
+                        'COMPONENT_PROBE_FAILED','COMPUTATION_LIMIT','COMPOSITION_PRODUCER_PENDING','VALENCY_UNKNOWN','INTEGRITY_ERROR'} for c in reasons)):
+                return result
+            constraints=json.dumps({'rejected_choices':[
+                {'slot':r['slot'],'value':next((v for v in r.get('alternatives',()) if v['candidate_id']==r.get('selected')),None)}
+                for r in tasks if r.get('selected')], 'failures':reasons},ensure_ascii=False,sort_keys=True)
+            revision_choice=choose(state,release,selector,region,cfg,'structural_revision',[
+                {'candidate_id':'REVISE','label':'Revise the provisional relation/boundaries using the recorded child constraints'},
+                {'candidate_id':'DEFER','label':'Keep the whole area unresolved; no supported repair is available'}],
+                'The selected local choices do not close into a complete interpretation. '+constraints+
+                ' Is a different source-supported interpretation available? Do not retry merely to fill a slot.')
+            if not revision_choice or revision_choice[0]['candidate_id']!='REVISE':return result
+            retired.extend(r['decision_ref'] for r in tasks if r.get('decision_ref') and not r.get('selected'))
+            del state.diagnostics[diagnostics_begin:]
+            cfg={**cfg,'_task_constraints':constraints}
+        return block(state,region,result,'STRUCTURAL_TASK_SEARCH_INCOMPLETE')
+    return _compose_lexical_area(state,release,selector,region,tokens,cfg,depth,attachment,infinitive,request)
+
+
+def _compose_lexical_area(state, release, selector, region, tokens, cfg, depth=0, attachment=None, infinitive=None, request=None):
     from .composition_session import current
     runtime=current(state)
-    if runtime:
+    if runtime and not cfg.get('_skip_reuse'):
         reused=runtime.sources.reuse(region,tokens,attachment,infinitive,request)
+        if cfg.get('_literal_relation'):
+            if state.grammar_search_incomplete:
+                state.syntax_trace.append({'kind':'STRUCTURAL_TASK','region_ref':region.region_id,
+                    'source_range':list(region.source_range),'slot':'child_slot','status':'BLOCKED',
+                    'reason':'GRAMMAR_SEARCH_LIMIT','examined':0})
+                return block(state,region,[],'COMPONENT_SEARCH_INCOMPLETE')
+            from .composition_source_union import merge
+            before=len(state.diagnostics)
+            built=_compose_lexical_area(state,release,selector,region,tokens,
+                {**cfg,'_skip_reuse':True},depth,attachment,infinitive,request)
+            return merge(state,release,selector,region,tokens,cfg,reused,built,before)
         if reused is not None:
             if len(runtime.sources.alternatives(tokens))>1:
                 from .composition_children import select_child
@@ -67,12 +134,12 @@ def _compose_area(state, release, selector, region, tokens, cfg, depth=0, attach
     if depth>=cfg.get('refinement',{}).get('max_depth',release.entries('ProposalPolicy')[0]['max_depth']):
         return block(state,region,[],'COMPONENT_REFINEMENT_SEARCH_INCOMPLETE')
     from .attitude_composition import compose as compose_attitude
-    attitude_frames=compose_attitude(state,release,selector,region,tokens,cfg,request,
+    attitude_frames=None if cfg.get('_literal_relation') else compose_attitude(state,release,selector,region,tokens,cfg,request,
         lambda owned,slot:compose_area(state,release,selector,region_for(state,region,owned,'ATTITUDE_CHILD'),
                                       owned,cfg,depth+1,request=slot))
     if attitude_frames is not None:return attitude_frames
     from .composition_boundaries import select as select_outer_boundary
-    outer = select_outer_boundary(state,release,selector,region,tokens,cfg)
+    outer = None if cfg.get('_literal_relation') else select_outer_boundary(state,release,selector,region,tokens,cfg)
     if outer is False:
         return block(state,region,[],'COMPOSITION_BOUNDARY_UNRESOLVED')
     if outer is not None and outer['kind']=='CONNECTIVE':
@@ -82,7 +149,7 @@ def _compose_area(state, release, selector, region, tokens, cfg, depth=0, attach
                 depth+1,attachment,infinitive,request),
             inside_attitude=bool(request and request.inside_attitude))
     from .operator_composition import compose as compose_operator
-    operator_frames=compose_operator(state,release,selector,region,tokens,cfg,
+    operator_frames=None if cfg.get('_literal_relation') else compose_operator(state,release,selector,region,tokens,cfg,
         lambda owned,slot:compose_area(state,release,selector,region_for(state,region,owned,'OPERATOR_CONTENT'),
                                   owned,cfg,depth+1,attachment,infinitive,slot),request=request,
         outer=outer['operator'] if outer is not None else None)
@@ -90,14 +157,14 @@ def _compose_area(state, release, selector, region, tokens, cfg, depth=0, attach
         return operator_frames
     from .relative_composition import compose as compose_relative
     from dataclasses import replace
-    relative_frames=compose_relative(state,release,selector,region,tokens,cfg,
+    relative_frames=None if cfg.get('_literal_relation') else compose_relative(state,release,selector,region,tokens,cfg,
         lambda owned,slot:compose_area(state,release,selector,region_for(state,region,owned,'TYPED_CHILD'),
             owned,cfg,depth+1,attachment if slot is None else None,infinitive if slot is None else None,
             replace(slot,inside_attitude=bool(request and request.inside_attitude)) if slot is not None else request))
     if relative_frames is not None:
         return relative_frames
     from .component_area_scope import allowed, connectives
-    if not allowed(state,release,region,tokens,conjunction=True,inside_attitude=bool(request and request.inside_attitude)):
+    if not allowed(state,release,region,tokens,conjunction=True,inside_attitude=bool(request and request.inside_attitude),literal_scope=cfg.get('_literal_relation',False)):
         return block(state,region,[],'COMPONENT_SCOPE_UNRESOLVED')
     # A participating head is already owned by this area, not a nested start.
     participial=isinstance(attachment,tuple)
@@ -161,7 +228,7 @@ def _compose_area(state, release, selector, region, tokens, cfg, depth=0, attach
     for frame in accepted(frames):
         for tid in frame.argument_token_refs:
             h=evidence[tid]
-            if h.start>=body[0].start: continue
+            if h.start>=body[0].start and not cfg.get('_literal_relation'): continue
             reading=frame.semantic.get('morph_bindings',{}).get(tid)
             if not reading: continue
             from .state import MorphVariant
@@ -214,7 +281,14 @@ def _compose_area(state, release, selector, region, tokens, cfg, depth=0, attach
         variants=[v for v in marker.variants if v.pos==rule['POS'] and v.lemma==rule['lemma']]
         # Non-equivalent whole readings are not silently selected.
         unique={digest({k:v for k,v in _morph(m).items() if k!='score'}):m for m in variants}
-        if len(unique)!=1: return block(state,region,[*frames,*children],'COMPONENT_REFINEMENT_MARKER_UNRESOLVED')
+        if len(unique)!=1:
+            if not cfg.get('_literal_relation'):return block(state,region,[*frames,*children],'COMPONENT_REFINEMENT_MARKER_UNRESOLVED')
+            from .structural_tasks import choose
+            selected=choose(state,release,selector,region,cfg,'structural_marker_reading',
+                [{'candidate_id':cid,'reading':_morph(v),'label':str(_morph(v))} for cid,v in unique.items()],
+                'Choose the whole reading of the source connector under the selected host and child constraints.')
+            if not selected:return block(state,region,[*frames,*children],'COMPONENT_REFINEMENT_MARKER_UNRESOLVED')
+            unique={selected[0]['candidate_id']:unique[selected[0]['candidate_id']]}
         sem=deepcopy(content.semantic)
         sem={k:sem[k] for k in ('component_region',) if k in sem}
         from .modifier_scope_shapes import argument

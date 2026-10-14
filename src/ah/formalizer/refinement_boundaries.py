@@ -9,7 +9,7 @@ def agreeing(host, participle):
             and compatible(_features(host), _features(participle)))
 
 
-def starts(tokens, rules):
+def starts(tokens, rules, all_hosts=False):
     for index, token in enumerate(tokens):
         matches = []
         for rule in rules['relative_markers']:
@@ -17,17 +17,32 @@ def starts(tokens, rules):
                 matches.append({'kind': 'RELATIVE', 'rule': rule})
         for variant in token.variants:
             if variant.pos == 'PRTF' and any(
-                    agreeing(v, variant) for h in tokens[:index] for v in h.variants):
+                    agreeing(v, variant) for h in (tokens if all_hosts else tokens[:index]) for v in h.variants):
                 matches.append({'kind': 'PARTICIPLE'})
-        if matches and any(v.pos in {'NOUN', 'NPRO'} for h in tokens[:index] for v in h.variants):
+        if matches and any(v.pos in {'NOUN', 'NPRO'} for h in (tokens if all_hosts else tokens[:index]) for v in h.variants):
             unique = {digest(m): m for m in matches}
             yield index, list(unique.values())
 
 
 def select(state, release, selector, region, tokens, cfg):
-    entries = list(starts(tokens, cfg['refinement']))
+    entries = list(starts(tokens, cfg['refinement'],cfg.get('_literal_relation',False)))
     if not entries:
         return None
+    if cfg.get('_literal_relation'):
+        from .structural_tasks import choose
+        def candidates():
+            for index,kinds in entries:
+                for spec in kinds:
+                    for end in range(index+1,len(tokens)+1):
+                        body=tokens[index:end]
+                        if spec['kind']=='RELATIVE' and not any(v.pos in {'VERB','INFN','ADJS'} for t in body[1:] for v in t.variants):continue
+                        yield {**spec,'start':index,'end':end,'candidate_id':digest([index,end,spec]),
+                            'label':spec['kind']+' description «'+state.text[tokens[index].start:tokens[end-1].end]+'»; parent «'+
+                                ' '.join(t.span for t in [*tokens[:index],*tokens[end:]])+'»'}
+        result=choose(state,release,selector,region,cfg,'structural_refinement',candidates(),
+            'Select the whole nominal description. Its host may precede OR follow it. '
+            'All morphologically eligible starts and token ends remain available in later pages.')
+        return result[0] if result else False
     index, kinds = entries[0]
     options = {}
     for spec in kinds:

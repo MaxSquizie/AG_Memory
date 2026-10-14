@@ -9,6 +9,7 @@ def describe(adapter, config=None):
             'selector':type(adapter._selector).__name__ if getattr(adapter,'_selector',None) is not None else None,
             'structure_mode':getattr(adapter,'_structure_mode',None),
             'composition_enabled':bool(composition),
+            'structural_tasks':(composition or {}).get('structural_tasks'),
             'release_sha256':getattr(release,'sha256',None),
             'config_path':str(config.source_path) if getattr(config,'source_path',None) else None,
             'data_dir':str(config.paths.data_dir) if getattr(config,'paths',None) else None}
@@ -22,7 +23,10 @@ def configuration_text(info):
     if not info.get('composition_enabled'):
         return ('В активных ресурсах НЕТ компонентов композиции. Пробы границ, ролей и областей действия недоступны. '
                 'Для текущего стенда запустите run_formalizer_lab.bat; старую память и релиз не заменяйте.')
-    return 'Композиционные пробы включены. Вопросы передаются подключённому backend модели при необходимости.'
+    if info.get('structural_tasks')=='CLOSED_RELATIONS_V1':
+        return ('Композиционные пробы включены: общий выбор типа связи, границ и участников. '
+                'Вопросы передаются подключённому backend модели; варианты не ограничены найденными ключевыми словами.')
+    return 'Композиционные пробы включены. Активен прежний набор генераторов; общий выбор типа связи не включён.'
 
 
 def activity(events):

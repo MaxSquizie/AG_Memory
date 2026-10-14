@@ -824,6 +824,14 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
     evidence={e.token_id:e for e in state.evidence}
     candidate_specs={}
     for frame in state.frames:
+        from .structural_tasks import licensed as task_licensed
+        if any(child.get('structural_license') and not task_licensed(state,child['structural_license'],
+               owner_ref=frame.predicate_token_ref,role=role,attitude=child.get('attitude'))
+               for role,child in frame.semantic.get('proposition_args',{}).items()):
+            frame.semantic['structural_unresolved']=True
+            state.diag('STRUCTURAL_RELATION_UNGROUNDED',frame.frame_id)
+            candidate_specs[frame.frame_id]=[]
+            continue
         from .quantifier_composition import licensed as quantifier_licensed
         if not quantifier_licensed(state,release,frame):
             frame.semantic['structural_unresolved']=True
@@ -918,7 +926,7 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
                 bs=frame.semantic.get('proposed_roles') or {tid:'SURFACE_ARG' for tid in frame.argument_token_refs}
                 open_spec={'candidate_id':'open:'+digest([state.source_uid,frame.frame_id]),'label':lexical.get('surface',e.span),'sense_kind':'OPEN_LEXICAL','roles':bs,'implicit_roles':list(implicit_frame_roles(frame)),'state_class':'UNKNOWN'}
                 specs.append(open_spec)
-        if senses and not specs: state.diag('VALENCY_UNKNOWN',frame.frame_id)
+        if senses and not specs and not frame.semantic.get('structural_unresolved'): state.diag('VALENCY_UNKNOWN',frame.frame_id)
         known_specs=[s for s in specs if s['sense_kind']=='KNOWN']
         schema_ids=[s['candidate_id'] for s in known_specs if s['sense_id'] in declared_ids]
         traces=build_source_traces(frame.frame_id,'predicate_value',schema_candidates=schema_ids,rs_senses=[s['candidate_id'] for s in known_specs],rx3_prior=[s['candidate_id'] for s in known_specs if s['sense_id'] in priors],wc_reads=[s['candidate_id'] for s in known_specs if s['sense_id'] in context_senses],rx3_applicable=True,wc_applicable=True,open_candidate=open_spec['candidate_id'] if open_spec else None,open_path_verified=True,resource_versions=(release.sha256,),blocked=blocked,blocked_reasons=blocked_reasons)

@@ -66,18 +66,28 @@ def test_oracle_cli_sends_closed_probes_and_replays_without_http(tmp_path):
 
 
 def test_operator_introducers_and_finite_content_pass_existing_oracle_checks(tmp_path):
-    with local_server({'output': [{'type': 'message', 'content': '1'}]}) as (url, requests):
+    from test_structural_relation_tasks import Script,content_steps,unary,relation
+    script=Script(content_steps('сказал','Пётр','пришёл')+relation('LEXICAL')+
+        unary('POSSIBLE','Возможно','Возможно')+[('structural_governor','INDEPENDENT')]+relation('LEXICAL')+
+        unary('NOT','Неверно','что')+relation('LEXICAL'))
+    with local_server(lambda body:{'output':[{'type':'message','content':script.generate(body['input'])}]}) as (url, requests):
         result = subprocess.run([sys.executable, str(ROOT/'tools/run_formalizer_v7_oracle.py'),
             '--provider', 'lmstudio', '--base-url', url, '--model', 'test',
             '--case', 'A01', '--case', 'A12', '--case', 'LANG-00-0-not', '--out', str(tmp_path/'run')],
             cwd=ROOT, capture_output=True, text=True, timeout=60)
     assert result.returncode == 0, result.stdout + result.stderr
-    assert len(requests) == 3
+    assert not script.errors and not script.steps,(script.errors,list(script.steps))
+    assert len(requests) > 3
     for request in requests:
         prompt = request['body']['input']
         assert 'ONE_SELECTED' not in prompt and 'MULTIPLE_ADMISSIBLE' not in prompt
     comparison = json.loads((tmp_path/'run/comparison.json').read_text())
     assert comparison['passed_cases'] == 3
+    replay=subprocess.run([sys.executable,str(ROOT/'tools/run_formalizer_v7_oracle.py'),
+        '--provider','replay','--replay-from',str(tmp_path/'run'),'--out',str(tmp_path/'replayed')],
+        cwd=ROOT,capture_output=True,text=True,timeout=60)
+    assert replay.returncode==0,replay.stdout+replay.stderr
+    assert json.loads((tmp_path/'replayed/comparison.json').read_text())==comparison
 
 
 def test_invalid_component_reply_is_retained_for_manual_review(tmp_path, monkeypatch):
@@ -102,11 +112,16 @@ def test_invalid_component_reply_is_retained_for_manual_review(tmp_path, monkeyp
     ('Неверно, Иван пришёл.', 'NOT'),
 ])
 def test_declared_introducer_owns_only_its_tokens(tmp_path, monkeypatch, text, operator):
-    monkeypatch.setattr(ChatBackend, 'generate', lambda *args, **kwargs: '1')
+    from test_structural_relation_tasks import Script,unary,relation
+    first=text.split(',')[0].split()[0]
+    script=Script(unary(operator,first,'что' if 'что' in text else first)+
+        ([('structural_governor','INDEPENDENT')] if operator=='POSSIBLE' else [])+relation('LEXICAL'))
+    monkeypatch.setattr(ChatBackend, 'generate', lambda self,prompt,**kwargs:script.generate(prompt,**kwargs))
     payload = {'raw_input': {'text': text, 'source_id': 'intro', 'revision': 1,
         'range': [0, len(text)], 'language': 'ru', 'request_kind': 'ASSERTION', 'batch_kind': 'MESSAGE'}}
     result = execute_native(Session([payload], tmp_path/'journal.log'), payload,
         {'provider': 'lmstudio', 'model': 'test', 'structure_mode': 'region_probes'})
+    assert not script.errors and not script.steps
     assert result['diagnostics']['codes'] == []
     assert result['assertions']['ah'] == [{'operator': operator, 'operands': [
         {'predicate': 'ARRIVE', 'roles': {'AGENT': {'entity': 'ivan'}}}]}]

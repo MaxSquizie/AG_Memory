@@ -12,16 +12,17 @@ def with_full_composition(release, *, core):
     """
     return with_components(release, core=core, predication=True, relative_time=True,
         omissions=True, modifier_forest=True, nominal_tree=True, dependency_reduction=True,
-        refinement=True, document_scopes=True, spatial_references=True, quantified_scopes=True)
+        refinement=True, document_scopes=True, spatial_references=True, quantified_scopes=True, structural_tasks=True)
 
 
-def with_components(release, *, regional_probes=True, relative_time=False, predication=False, clock_time=False, omissions=False, modifier_forest=False, clock_ranges=False, nominal_tree=False,dependency_reduction=False,refinement=False,document_scopes=False,spatial_references=False,quantified_scopes=False,core=None):
+def with_components(release, *, regional_probes=True, relative_time=False, predication=False, clock_time=False, omissions=False, modifier_forest=False, clock_ranges=False, nominal_tree=False,dependency_reduction=False,refinement=False,document_scopes=False,spatial_references=False,quantified_scopes=False,structural_tasks=False,core=None):
     manifest=deepcopy(release.manifest)
     policy=next(r for r in manifest['entries'] if r['kind']=='ProposalPolicy')
     policy['entries'][0]['composition']={
         'version':'COMPONENTS_V1','subject_role':'SUBJECT','coordination_operators':['AND'],
         'open_case_roles':{'nom':'SUBJECT','acc':'OBJECT','dat':'RECIPIENT'},
         'max_candidates':16,'context_chars':2048}
+    if structural_tasks:policy['entries'][0]['composition']['structural_tasks']='CLOSED_RELATIONS_V1'
     if predication:
         policy['entries'][0]['composition'].update(quality_predicate_pos=['ADJF','ADJS'],
             copula_lemmas=['быть'], modifier_content_role='OBJECT',preposition_nominal_role='SURFACE_ARG')

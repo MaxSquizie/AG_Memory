@@ -26,16 +26,23 @@ def select_child(state,release,selector,region,frames,contract,context):
     if not domains:return None
     from .component_policy import policy
     cfg=policy(release)
-    if len(domains)>cfg['max_candidates'] or region.source_range[1]-region.source_range[0]>cfg['context_chars']:
+    from .structural_tasks import enabled,choose
+    general=enabled(release)
+    if (not general and len(domains)>cfg['max_candidates']) or region.source_range[1]-region.source_range[0]>cfg['context_chars']:
         state.diag('COMPONENT_SEARCH_INCOMPLETE',region.region_id);return None
-    options=[{'candidate_id':fid,'label':d['label']} for fid,d in domains.items()]
+    options=[{'candidate_id':fid,'label':d['label'],**({'frame_refs':d['frame_refs']} if general else {})} for fid,d in domains.items()]
     key=region.region_id+'|child-slot:'+digest([contract,context,options])
-    selected=_probe(state,selector,release,key,'child_slot',options,
-        state.text[slice(*region.source_range)],region.source_range,
-        question='Resolve this child under its parent constraint '+contract+'. '+context+
+    question=('Resolve this child under its parent constraint '+contract+'. '+context+
         ' Do not reparse accepted children or change their identities. '
         'Choose only if the parent/source context distinguishes the retained alternatives; '
         'mere need for a complete tree is not evidence. Otherwise answer ?. ')
+    if general:
+        result=choose(state,release,selector,region,cfg,'child_slot',options,question)
+        selected=result[0]['candidate_id'] if result else None
+        if result:key=result[1]['decision_ref']
+    else:
+        selected=_probe(state,selector,release,key,'child_slot',options,
+            state.text[slice(*region.source_range)],region.source_range,question=question)
     state.syntax_trace.append({'kind':'CHILD_DOMAIN_CONSTRAINT','decision_ref':key,
         'parent_contract':contract,'child_domain_refs':[d['decision_ref'] for d in domains.values()],
         'candidates':list(domains),'selected':selected})
@@ -60,4 +67,6 @@ def select_child(state,release,selector,region,frames,contract,context):
             frame.semantic['structural_unresolved']=False
             frame.semantic['composition_decision']=key
             frame.semantic['parent_constraint_decision']=key
+            from .morphology_domain import license_use,frame_readings
+            for _,tid,reading in frame_readings(frame):license_use(state,tid,reading,key,selected)
     return next(f for f in frames if f.frame_id==selected)
