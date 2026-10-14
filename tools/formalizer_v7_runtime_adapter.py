@@ -401,7 +401,7 @@ def source_snapshot(*, refresh=False):
     global _SOURCE
     if _SOURCE is None or refresh:
         root=Path(__file__).resolve().parents[1]
-        paths=[*sorted((root/'src/ah').rglob('*.py')),*sorted((root/'tools').glob('*formalizer_v7*.py'))]
+        paths=[*sorted((root/'src/ah').rglob('*.py')),*sorted((root/'tools').glob('*formalizer*.py'))]
         current={str(p.relative_to(root)):hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}
         if refresh:return current
         _SOURCE=current

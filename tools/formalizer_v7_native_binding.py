@@ -572,6 +572,10 @@ def execute_native(session,p,config):
     if not getattr(session,'native_ready',False):
         # Fresh fixture core is the same actual AH core owned by the session.
         session.release,session.native_aliases=fixture(session.core,p.get('resource_profile','known'))
+        if config.get('structure_mode','legacy_proposal') == 'region_probes':
+            from tools.formalizer_component_fixture import with_full_composition
+            session.release=with_full_composition(session.release,core=session.core)
+            session.release.validate_store(session.core.store)
         session.entities.update({'fixture:language:M:'+name:name for name in set(ENTITY_NAMES.values())})
         from tools import formalizer_v7_runtime_adapter as base
         if base.RESOURCE_ARTIFACT_DIR:
@@ -720,6 +724,9 @@ def execute_native(session,p,config):
         'decision':{'outcome':next(iter(decision_outcomes)) if len(decision_outcomes)==1 else None,'records':decisions},
         'bindings':bindings_observed,
         'runtime':{'report':json_safe(asdict(report)),'ir':json_safe(asdict(state)),
+            'probe_configuration':{'structure_mode':structure_mode,
+                'composition_enabled':bool(release.entries('ProposalPolicy')[0].get('composition')),
+                'release_sha256':release.sha256},
             'coverage_evidence':coverage_evidence,
             'variable_bindings':{str(k):v for k,v in session.native_variable_aliases.items()},
             'provider_call_count':len([r for r in rows if r['payload'].get('kind')=='prov_call' and r['payload'].get('state')=='RECEIVED'])},

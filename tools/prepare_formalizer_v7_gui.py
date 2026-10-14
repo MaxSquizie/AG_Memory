@@ -63,10 +63,8 @@ def prepare(config_path: str | Path, destination: str | Path, *, profile="oracle
     core = AHCore()
     release, _ = fixture(core, "native_language")
     if profile == 'composition':
-        from tools.formalizer_component_fixture import with_components
-        release = with_components(release, core=core, predication=True, relative_time=True,
-            omissions=True, modifier_forest=True, nominal_tree=True, dependency_reduction=True,
-            refinement=True, document_scopes=True, spatial_references=True, quantified_scopes=True)
+        from tools.formalizer_component_fixture import with_full_composition
+        release = with_full_composition(release, core=core)
         document.set('formalizer.structure_mode', 'region_probes')
     trusted = release._oracle_test_trust
     # mkdir is the exclusive reservation: existing (even empty) sessions cannot

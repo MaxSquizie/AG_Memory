@@ -4,6 +4,17 @@ from ah.formalizer.canonical_ledger import digest
 from tools.formalizer_v7_test_support import sign_test_release
 
 
+def with_full_composition(release, *, core):
+    """Shared TEST_ONLY profile for the document GUI and the native oracle.
+
+    Resource construction depends on declared capabilities, never on the input
+    sentence, oracle case ID, gold checks or provider answers.
+    """
+    return with_components(release, core=core, predication=True, relative_time=True,
+        omissions=True, modifier_forest=True, nominal_tree=True, dependency_reduction=True,
+        refinement=True, document_scopes=True, spatial_references=True, quantified_scopes=True)
+
+
 def with_components(release, *, regional_probes=True, relative_time=False, predication=False, clock_time=False, omissions=False, modifier_forest=False, clock_ranges=False, nominal_tree=False,dependency_reduction=False,refinement=False,document_scopes=False,spatial_references=False,quantified_scopes=False,core=None):
     manifest=deepcopy(release.manifest)
     policy=next(r for r in manifest['entries'] if r['kind']=='ProposalPolicy')
