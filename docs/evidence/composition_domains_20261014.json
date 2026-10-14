@@ -1,0 +1,593 @@
+{
+  "date": "2026-10-14",
+  "baseline_commit": "759fd789da0276085606bc9868e457063ac2d4fc",
+  "state": "UNCOMMITTED_WORKING_TREE",
+  "scope": "TEST_ONLY_EXTERNAL_SHORT_PROBE_EXECUTION_NOT_MODEL_QUALITY_OR_FULL_ACCEPTANCE",
+  "runtime_sha256": {
+    "src/ah/formalizer/__init__.py": "d6b0f066ea43f142c851b0944e26d0aa13ba447ad416802bff0c21ea1871a747",
+    "src/ah/formalizer/aggregate_count.py": "0b1313d2d1c90e5475bdc03c13689ac69c6f8cd25fc87ca27bc4d41f53920ca0",
+    "src/ah/formalizer/ah_adapter.py": "c519a5d4082d64d1a61c6be90c9b275afc36108086b3c9fd12d9c8d82890ebd0",
+    "src/ah/formalizer/attention_context.py": "7c6cd254b95fc8a420c6cbc14cd02939049fc23ee2689fc7de66eb7313cab8cf",
+    "src/ah/formalizer/attitude_composition.py": "bedfce4cdbdfe891a5a620d35a8dd6ccc09e2b8d358a45daa5318955049c657a",
+    "src/ah/formalizer/c_consolidate.py": "71f43ceb69e05de83444df4fe64d413e1fe99be5dfdf10612397f1712e61f7d4",
+    "src/ah/formalizer/candidate_ir.py": "7c07a05c11c7b17bcb12646d82e6df01247e2134ff44f15f7d501d08be9234b2",
+    "src/ah/formalizer/canonical_ledger.py": "9bc1f578f8750caa3c93283b18c10f84a0f2f39b63977d6f4cad3362a5111076",
+    "src/ah/formalizer/clarification_deferral.py": "9255b46c5f3df8a7ddd3d0817c0cf392eed0397c584789270d347f5774aaf57e",
+    "src/ah/formalizer/clarification_liveness.py": "4bda8a102658e907ded7bd295e4db97259c062d960598bb831f25e6fed2e487c",
+    "src/ah/formalizer/clarifications.py": "848b735bdada5c3d605159e86a2be61d0e39dbff6ddaed9389108673af75b99d",
+    "src/ah/formalizer/clause_boundary_candidates.py": "e11eb358d7cfc220a92b5e8bf867c1573ae7cb03f857feb646f1cd1f89450541",
+    "src/ah/formalizer/clause_detection.py": "81a6ffb1a2187afa794ff97681dac7de17eb7c62dd1fb6f6d6cb255d883cdcc9",
+    "src/ah/formalizer/clock_expressions.py": "e3781199b52c00c1808c89ac3cb9fd39adfcbb616b0873bbf7e5b0428338a0a6",
+    "src/ah/formalizer/clock_range_evidence.py": "b92ffd7bd5922973fcdd98084b6b9b282c110a66e177a0ee112e76efed826c35",
+    "src/ah/formalizer/clock_ranges.py": "54e4ab26d925191cc7d57d695e45e832dc81493864d920785901bf8ee0d9d237",
+    "src/ah/formalizer/commit_stage.py": "144a1e03f8e1c4bd1f72c0db0f7e00f8ccb8cc640fc8274a937f9d1f94f4d9ca",
+    "src/ah/formalizer/component_area_scope.py": "823581a9694e2b2b0d5b53f3f41d751cebf3c9b6186ebc45537a080283dc9f8b",
+    "src/ah/formalizer/component_candidates.py": "9880e6396bebd22ba86942816d73c7aa521902984deab1a253b52916a5a59fe6",
+    "src/ah/formalizer/component_clause.py": "f5b562ce74a3b5e346c5a6fe5cf4ed09ba23ce3a9177aa070567e01659a72070",
+    "src/ah/formalizer/component_constraints.py": "cf2b01c04e5f818ca085708886807585ccd64d2e272d2ba4c2a8328f224a8e6e",
+    "src/ah/formalizer/component_coordination.py": "761fea4387ea5167fe59b814a8b212a48b332e73066ac2c6f1fc753acdcc7076",
+    "src/ah/formalizer/component_dependency_domains.py": "e20b6c5eeeb4205fd6c2afe30ddd28d15ecee0f09eab837a96e8a507cc69134e",
+    "src/ah/formalizer/component_dependency_materialization.py": "3a6d5ac3d655e39446beb254de284d072fd0ba3be4d9a0f795cd716bb684d1e1",
+    "src/ah/formalizer/component_dependency_reduction.py": "1cd5e2289ac2e85015d69d8aa7158816ae86be444d1392f810ceae0fd1788a23",
+    "src/ah/formalizer/component_infinitives.py": "9a878a88a8fd134a1967888bdb815599b6b883f09c8e47ba4fce5fb3273567ac",
+    "src/ah/formalizer/component_modifiers.py": "9107aaaa70d5e8601e0cdc141501fe3abc01a50d0960ffbb47bba47713dc4682",
+    "src/ah/formalizer/component_nominal_groups.py": "4b391195870703bb9f62bd7006e8de6cde7f636f2ce5f442a4f2a74d2d930c5c",
+    "src/ah/formalizer/component_nominal_questions.py": "35040b84b2201a01084db033b93243966d7ce747a0ec863872cacccb79302b85",
+    "src/ah/formalizer/component_nominal_tree.py": "87dc5e0042a827abbf784378e43575953bafd7a5c46dfff87926595f93dc697f",
+    "src/ah/formalizer/component_nominal_utterance.py": "629a62a5b8c680713b7ba48d3140ba2ea2cff0a9f7da26b8012b342cf5689883",
+    "src/ah/formalizer/component_omissions.py": "f4e950973331b10bc271c735ba6491835123644afa875b00bccdbd81e3422fde",
+    "src/ah/formalizer/component_participants.py": "f92bb44e22c08c52d4b70b5be2bf49738be7437ab80171c829104547d83184e0",
+    "src/ah/formalizer/component_phrases.py": "cbf8e6aecf72efc3cd1c5a77c3491396c45cbff0de3108402c12b57460a96bbc",
+    "src/ah/formalizer/component_policy.py": "8a6ab41c803fd98d80b9cda64706d58a6cd015219dbb64fc267c84932193b02d",
+    "src/ah/formalizer/component_predication.py": "f59d3ada279e67bf864fa3d24dcac431a4ea4977328cf521a12fb220a967ace3",
+    "src/ah/formalizer/component_probe.py": "e1ac03f71ae2bea7ae1048f17d74af95a88119773cf49a8ea4e8510bd911d845",
+    "src/ah/formalizer/component_probe_replay.py": "b4acd4beb65febf971d97ddad3568a2e992f631e0748319b3f0279b1fb2f5653",
+    "src/ah/formalizer/component_refinement.py": "13447e4036c0c3a358fb0a65b182e5a1a1c5a1196b34f724324652dbb1185027",
+    "src/ah/formalizer/component_scope_contrast.py": "4fa62f604163e98d5344e72564d79a138473494e5c9dd31a563b7dd074c65c25",
+    "src/ah/formalizer/component_source.py": "4718189fcdf5490162ca0c7d8d8d29737497d6b43f6aea81cdb774741f70053a",
+    "src/ah/formalizer/component_temporal_scope.py": "abc12d6c7fc895bb2312d5e2a2001634b4994f581cdf55f732d572ee7a0d2ca1",
+    "src/ah/formalizer/components.py": "672f74041abc332147d9b6a10bdb5e9e4219071b6ddcccad98a038c7d0c761fe",
+    "src/ah/formalizer/composition.py": "77aad4fe0d1f1ab5c7d05b7280b13f6dc9180a4e37cf9ebd5880ec85d1794385",
+    "src/ah/formalizer/composition_boundaries.py": "8ed1d6f917ab3005d3a2071645fe45eb5f035c5127491195a24016a13db22180",
+    "src/ah/formalizer/composition_children.py": "7c47cffb51ea81c095de7b814d2b9c18c1eb938848db944a37d6634325e6d70b",
+    "src/ah/formalizer/composition_domains.py": "c45f9fb9dcb3c2e865ec62562aa775dee9d626a5a5bb3db9a87528053b2b50e4",
+    "src/ah/formalizer/composition_session.py": "d50fd1d841772efb5500e57db5dfd7266f26d35465ae60de6031500ebff52f3c",
+    "src/ah/formalizer/composition_sources.py": "65c458427c7d8d429eb6ce95931415494e7ab5185f2db5ba36b691602b29ffa1",
+    "src/ah/formalizer/composition_tasks.py": "9224002f8219af8dca9e6999e6010570536d58e7a2a75e8aecc7a1d7b6ae2f97",
+    "src/ah/formalizer/composition_tree.py": "a304b77a760397fae38e8ae2cfe7991531803ea5ccd1ad701d9caca9e13631ae",
+    "src/ah/formalizer/context_proofs.py": "74949159af37750190241d9853aee1d7bf3847c0c54c48aec4fd8a77dd007652",
+    "src/ah/formalizer/contextual_agreement.py": "d10d045673f808ce63f7ecba7a007a10e2d57020a159fba3efe3ca8f9f4f095e",
+    "src/ah/formalizer/contextual_name_case.py": "cb2eab5e0bb92b9fa1aeea7a6128dffa9eff7371204d60a7f5a8e6b4de348f27",
+    "src/ah/formalizer/contextual_oov.py": "40b38dbd8b899834830e72ea4745e7728ae24dba8f263365e735b6111a14d26c",
+    "src/ah/formalizer/contextual_oov_roles.py": "06587dfc1d5f6685c925863342781dfa80e7d60067af3e5d283c8d415eebec96",
+    "src/ah/formalizer/contextual_preposition_case.py": "3c14b972fd238e2808e7b5e556d5c13b04434919ee475a999be6ae52356d15bd",
+    "src/ah/formalizer/contextual_substantives.py": "121433e4805f7885a5c6e10ddbf7057f2f31bba0552698f85e6baf356750bfac",
+    "src/ah/formalizer/control_arguments.py": "02fb005a120c68e74c235b0c9345326ee92e989db163d0c780882a94aee15713",
+    "src/ah/formalizer/coordination_assignment.py": "b8464e765b7f0fa805b9930fb4c04875962c349cfc4bff8adb4be496e2f9357e",
+    "src/ah/formalizer/coordination_clarifications.py": "2b59613293be1cac84f7d5818b67b779945ccb026657e45053b9d960635fdf23",
+    "src/ah/formalizer/coordination_scope.py": "2a9812b639ae8aa88bb9981324d5ddf56013a5c11126753ef98beb3de60cb38d",
+    "src/ah/formalizer/coreference.py": "77badc6d1619ffe7f9c1c1ac79cb4b610aef01bc9d7816d740f1b2acff276958",
+    "src/ah/formalizer/count_reader.py": "ecc4763037c45afa861a25977cdcb2e3091a8a59ad74e7b54b05ab3ff9952bb9",
+    "src/ah/formalizer/coverage.py": "012ec5568b161be90b0019b317cc9af8996fcec111e9af4f52d3c307e1b98914",
+    "src/ah/formalizer/dependency_constraints.py": "6f136956e52cf59d51a9ae949bf2604b6acacbaa9daa23dfb9361f2af6f695a6",
+    "src/ah/formalizer/directional_goal.py": "a74a292a5ce3617318fac6d553ce7da9212a66a171587ad3ac310fb0278bef24",
+    "src/ah/formalizer/document_calendar.py": "b8c6463c8af8c08152a833a42dbdbf9be0833a45b296ad454b22effa327e4468",
+    "src/ah/formalizer/document_scopes.py": "ea86a58c839400cf78f7de2fbd96d20881d6042a35f0a8613739f4f316927547",
+    "src/ah/formalizer/fact_query.py": "c3983b69856c866498991c895ce1fbe9b00271df8f41b110b53dd81a797ec6e6",
+    "src/ah/formalizer/fake_selector.py": "0cffec6a5e683e703a1dcb9319f48d7e59ce7b5876c8585ad31a5eb7cfe40709",
+    "src/ah/formalizer/goal_channel.py": "2babd127890b9c432c075df7abcd5148e90619882c8b445b7fe192672450c3b6",
+    "src/ah/formalizer/goal_executor.py": "216e26eb5b6ae0031e8e44e3911950ac11fb10881b16074900fd3c605f5dc818",
+    "src/ah/formalizer/goal_forms.py": "12a5fe6e73de7f03acb22374d0102bedbba40db33bc4005340c5c5ede14e03c9",
+    "src/ah/formalizer/goal_queries.py": "ada483aa87cf8247f4089558d1c462367642d9ee5f728782e8211de10dc0644c",
+    "src/ah/formalizer/graph_ops.py": "3b00a16b90bd57b32bd4bb2a688c67d1f34abbe49ef0515f3c2efcb491829f6d",
+    "src/ah/formalizer/if_query.py": "607573e11533ab8597742f112f8ae4265d58ea5fbfca31dcdad20149995c56f2",
+    "src/ah/formalizer/implicit_descriptions.py": "fdc970dac89ec7ff539c4dfd6d1005808144a2888f10a8c1ac9c306b0838e844",
+    "src/ah/formalizer/implicit_introduction.py": "61fd9f96dcced1a6728a6acbed4941a6b9cca73c103d0d2412280b35bd1b360a",
+    "src/ah/formalizer/implicit_plan.py": "b931583b4ece19076bdce07f45a97ba91f02bc4e43edf33d57bfaa4fae722b39",
+    "src/ah/formalizer/inference_engine.py": "8afba4505aea16849d1ca67b6d7406e89b62c83425697da686e1ed682eeabbdc",
+    "src/ah/formalizer/inference_policy.py": "6080f8179eb8d5304ea5c65cfb5736a35da84e3c9781a7c833877182337e4eaf",
+    "src/ah/formalizer/integration_ir.py": "a9ac974be890d0d20e42de7293a63145fc9b45d1825aba1507117d2c95571c23",
+    "src/ah/formalizer/interrogatives.py": "690835e60f3ad18f3fad875d79f0b1ea81e19658ff6c6e8c81c936ebf8404dd9",
+    "src/ah/formalizer/ir_to_graph.py": "749398b89e5cc8edf49f55c6919997988baf1c07c61a1a78fb2f3408dbaa7442",
+    "src/ah/formalizer/legacy_compare.py": "ce44c0b8af990a5194a18d73e9b33dae450c90a3af607896cc2b1097aaac9dfa",
+    "src/ah/formalizer/lexical_snapshot.py": "8c13e1e64f411ee3724996dd7c0a4e60f10261aa82ef86f7265990cc633a3a2d",
+    "src/ah/formalizer/lmstudio_selector.py": "cd1c1cc37c8a8e391366bcba0072bd3a269cf3d09e5114eaa583204fb414608d",
+    "src/ah/formalizer/memory_service.py": "a7691eb88fb99976c730bf88f252eacfbbbb249c4cd112d200d37cc80c8b40c2",
+    "src/ah/formalizer/memory_store.py": "630596d93e9f8c116beb03aad008fee49779321b9ae04fe7ada09121d1a590f7",
+    "src/ah/formalizer/migration.py": "ee75fff618c2f149939696354d41be473ec1e45f3e63fc57dbf8b1851d53bf11",
+    "src/ah/formalizer/modifier_scope_shapes.py": "d1ca839cbb3c71fb64b12a7bfc867e5ab4e8706d3ed95eece06b7724e1e9e426",
+    "src/ah/formalizer/morph_evidence.py": "53636d9e4009face2d1a44681a28c3ac7316f79d72d2cb22f84540e813418aec",
+    "src/ah/formalizer/morphology_domain.py": "06b935d1ee8f8b451d7d6e624d250a04a8dc0e483a88e966963a0a501a23ffe4",
+    "src/ah/formalizer/mutation_plan.py": "f8ed263ce99a82bdeea29254f84889f4780eee3a0dd73817489741deb4779453",
+    "src/ah/formalizer/named_periods.py": "c3dc5597e4394a426e53a7e747052f5b5c97953966539b50348aeeaca60db6bc",
+    "src/ah/formalizer/naming_probe.py": "013eb9dfb3663b254a8a36c6f5f28740c560974541e27bad9f98857cfd9e5bee",
+    "src/ah/formalizer/narrative_group_plan.py": "bf8dd45e14f333bc017d18977edb9334a0c62a2cdd962103f269702dc9a51248",
+    "src/ah/formalizer/narrative_groups.py": "bd6b6819483497932b61b59f29ebabe830671437d5758997a82962dddf64052b",
+    "src/ah/formalizer/narrative_perspective.py": "db895e569a2b1941ef3bccff5053f3f57336e08204ce6763bdc2a798ad082087",
+    "src/ah/formalizer/native_derivations.py": "1e0e920ca20852b1af69e7f6c8f91257106ab03d44bf786a6938b3130d770d09",
+    "src/ah/formalizer/native_frontend.py": "bd97bef4dcdf9344ef177b5731e457a8c9392db785ca58c9fefe0401732a4bb1",
+    "src/ah/formalizer/native_plan.py": "6d0f661bdfd94a21ecfa740a112a05a02e59d88033c7a9877ba16010d73b4d17",
+    "src/ah/formalizer/native_queries.py": "09a1468260b0de2c1efda88bdb95dd5068fbe72235c7126c99f3f7e540cadf9d",
+    "src/ah/formalizer/native_questions.py": "2dd85f374d1415eefa2c407b13e0608c5159a54d13dd251a9a09bbcd1d07e446",
+    "src/ah/formalizer/native_records.py": "277abf863011e644305f622e77ce0fb0577e48d1ab63fd6799622005070a4fc3",
+    "src/ah/formalizer/native_scope.py": "519ffa259027bc5e6484d12de01ac58839bf306945ea4c50691708bd4637773f",
+    "src/ah/formalizer/nominal_apposition.py": "d67c245d0af31d33cdacc23aaf9fab029f7d85ea24a76e1c03d46b4ffda21be7",
+    "src/ah/formalizer/nominal_group_member.py": "28bb937cbba79986d3e10f8124b55d37b417242dda925208ea7abc26014faeec",
+    "src/ah/formalizer/nominal_host_question.py": "6eddc3148e5e78f280a61d58a65a8c9cf76f888d6046cc5bcbb4ef0e67406788",
+    "src/ah/formalizer/nominal_host_views.py": "560f2450af2b4961f53d344048defc7bf255f5bfe559575b0e8fb32654fda11e",
+    "src/ah/formalizer/nominal_prefix_descriptions.py": "23eff28b8ef39ade3732c35ded30cb8734722f8279d43bcac98e963146dc3dc3",
+    "src/ah/formalizer/nominal_readings.py": "5011d2d48cf7731564c77b1c4b87e0dd8dfa9c44ab7135433af6c9f8bd72946e",
+    "src/ah/formalizer/nominal_reference_binding.py": "faa8113939013d09cfd5374f8c1d5494a7ee86a2f30d4c56a4eb0517de5793dc",
+    "src/ah/formalizer/nominal_reference_groups.py": "b059237de23edda8594f2ef13f49a3e3dcfd62f7de1bd55f0ab3b29262ef2998",
+    "src/ah/formalizer/nominal_reference_local.py": "82f3e7fbd1ed55a56448b3d7c5008265d4e672ef7faf1d908508aebc44e04524",
+    "src/ah/formalizer/nominal_reference_memory.py": "dd192375c9a34c9dd98ee06decf286ba1fcc99bd2b312bd1597c20df064e790f",
+    "src/ah/formalizer/nominal_residual_descriptions.py": "84e0c4115f4689e107edaba13684f58328ebb8139b1212d71eb8a8f5895edc5f",
+    "src/ah/formalizer/nominal_usage.py": "3d0a7053c211deb3f25a1b7f878ff78374c27c44e470e99b44fadd871f1a467d",
+    "src/ah/formalizer/numeral_extraction.py": "f3a1dfee885939f36c57d703ca642e79cc4b715fd8a981618cdd31fa5afc6c26",
+    "src/ah/formalizer/open_set_gate.py": "7af43db3b2e5e39f41dc2c50567cd5cfa82c763573b11763aa7cfeb7133a05bf",
+    "src/ah/formalizer/open_set_probe.py": "d911a90c586e56351a59237cc8d7cd69b669c5a613c1208127c523df50b8afe4",
+    "src/ah/formalizer/operator_algebra.py": "f5b59453be7673f4071325e9460d10b709e9d61b9e9b1aebcc0481dceddde900",
+    "src/ah/formalizer/operator_composition.py": "0a5c167ba885b21f472a9f3ebcb3dc18fa0cce783d040d03147976d916e45f20",
+    "src/ah/formalizer/oracle.py": "0cc5db329a7d781787948df97b50c26bb296a16caf4591ba641645e252210219",
+    "src/ah/formalizer/orchestrator.py": "180e2136c12f89c9bcf8edf88e83a6a933a13fb3337faa372653313e5c5de6bd",
+    "src/ah/formalizer/participial_roles.py": "fc65231df3dba29b13659c3b293a544e21ea897f76c479b22906c49cd9d406de",
+    "src/ah/formalizer/phrase_readings.py": "31333177088620402f446cb956372000961752abbbeeb1294dc4b43cdddfc0d2",
+    "src/ah/formalizer/pipeline.py": "d7ea721b1105f0c2713fbe62a067e5a4a1093c167aaecb894f623b23d4311b28",
+    "src/ah/formalizer/probe_windows.py": "8676573f2ded9a7672b7783daec6561b761ebf8d46c33629b1d569c3b7aa777a",
+    "src/ah/formalizer/proof_closure.py": "501efaa6b2e6141ae45f81886d3bdd52d66a1f6201705253a523765e2582d69f",
+    "src/ah/formalizer/provider_adapter.py": "e261daf3a7fbb854bbccee6925255487e728e73e0518672b3d2e23414cf19133",
+    "src/ah/formalizer/provider_budget.py": "adef477d648c1d969a32d807ee42395fed8195ab376a0335908811415a91b777",
+    "src/ah/formalizer/provider_call_log.py": "a1cd212c15f95e95e1b4b9a2c6b336696477975cff7f140d381d71703871fd04",
+    "src/ah/formalizer/qualitative_group_entity.py": "f87c5c4d3cd982f5b58491ef2398c595846f21a50865d9c963cb8f266deb2076",
+    "src/ah/formalizer/qualitative_quantity.py": "ad7faa58c84cc1b418e3323adf8ed6816a5433cb3eff83a440da9d56eac4ae91",
+    "src/ah/formalizer/quantifiers.py": "8ce576233730e7faa7760854cd92f0c8dd30f0c53ccead94517116125593e69a",
+    "src/ah/formalizer/quantity_phrases.py": "b52af1bde5e0a2aedb0e7209ffaa94a9bd94dff0b4d5ba2cce73c8b77930debf",
+    "src/ah/formalizer/query_bindings.py": "d77aa25525abb180f766e5b4a2c20d4a3164a390eed2a57922b24fac38866ded",
+    "src/ah/formalizer/query_requests.py": "10c6ad0e54e82ffd08ffc46165019b86740266c8b8855030b2b87e9c6e27542c",
+    "src/ah/formalizer/query_resources.py": "14624dba667762885ca9da6a3e8b286fe5c9352abb763e80d527b12faea21ba7",
+    "src/ah/formalizer/question_projection.py": "cb767084dbef5537c9000469bf1dee3891c06e5da6c17a79755c3770281eaeaf",
+    "src/ah/formalizer/real_backend.py": "a54464a1a810b63d5f3a3b14a87c78d68e54b51414b93be365f582a0114c170f",
+    "src/ah/formalizer/recovery.py": "f3b9ce677b94eb6a4b157db4269b4b9f0e9357f3c0e870045612aa54cb588c05",
+    "src/ah/formalizer/reference_source_context.py": "fceaa3e3877eeec8c87fc5ed97b75867f0e728e20cf6335bb3b2db8ad36b7c04",
+    "src/ah/formalizer/referential_placeholder.py": "53ff222c87547cba8468cf86d25384691b4664edf9d1661dfd905a0d6ac11583",
+    "src/ah/formalizer/refinement_boundaries.py": "46bf3eb591651952982ff59d5708d79be00afbb5b495bd643912b8fb86a58c67",
+    "src/ah/formalizer/refinement_group_hosts.py": "73bf7fad34b5c758858c74659efa2fb9ba18babe394bc6c41d4f7b1e2d2020b3",
+    "src/ah/formalizer/refinement_host_path.py": "e0cf33826038719fce6abd3fe38d0c1935b9fef9e0311fa0847aca8c8a1c5c0c",
+    "src/ah/formalizer/refinement_release.py": "a8cb4accc2fc11cace36f0f089667887409fcc3c1282b8e92f2923d0a1fc7ec3",
+    "src/ah/formalizer/refinement_uncertainty.py": "6a39a7a6d09c6d6975acc825a530f31c92f519203304a19fb48b4a5270f50a1b",
+    "src/ah/formalizer/region_probes.py": "a578b13215fee4fb596bfd19ba72f510e0cc20781a4df7cc0f95df6688b8e705",
+    "src/ah/formalizer/regions.py": "b828234b2236fbbbb2af44d3b4c5b60d3a4d313955a4cbb917f288073b5702fd",
+    "src/ah/formalizer/relative_composition.py": "791fb95450950e4cef0b6fb23d58baa232404b6ca7b6844b5f51514d846f5182",
+    "src/ah/formalizer/relative_pronoun.py": "55f3b0e229efdaf5b0da08b3243c073bcc4931546432009adfb8e9ef39add34a",
+    "src/ah/formalizer/relative_time_plan.py": "a22c48c3ddbd82ab6e7fc892612b038031e4208a7a72a042fbf25c3610895719",
+    "src/ah/formalizer/replay.py": "f50aeabd6b41e23d67e62c416931eed8f4af8879551ae93d324a6701232780ea",
+    "src/ah/formalizer/resources/__init__.py": "a542a6e4eb0ba2a504a0da7b2927b3e6d832e0777e9e5b4af4ea350f6de7d136",
+    "src/ah/formalizer/resources/authoring.py": "a9c1103c9f0dd4aa82ee49f7276f495b529bb299d665a0fb14307fb3905a2a00",
+    "src/ah/formalizer/resources/coverage.py": "aa7f22939ff120d3b95ae81e969d9c216d4b2212fb4479041939353f48100262",
+    "src/ah/formalizer/resources/dependency_release.py": "1003e106db99c5f75d0d4ebf2ca94868fabb7d8c96ac47ba36c177bd5994f7a7",
+    "src/ah/formalizer/resources/loader.py": "4a1fe4956cef4b8e0c2109e306d317e142178672dbee9f76473350c7baf1db33",
+    "src/ah/formalizer/resources/registry.py": "3bc4664f5a349080f8afcfdf69b0c8095dfeee326fd21c15073867587d8ad679",
+    "src/ah/formalizer/resources/release_cli.py": "ae02c97e60af21c5b7a5c3492e6be7441dc786464b0b6eb9e2b8ad7b7f6c4a78",
+    "src/ah/formalizer/resources/rule_dsl.py": "087376b148428ec1785da62b907915c74f3aeb40d2f64a476913cb9cc3a37fbb",
+    "src/ah/formalizer/resources/schemas.py": "ea2084f35cb6684f0f6e209ecdd158c8c4e0778316339a548d90f434e9422a9d",
+    "src/ah/formalizer/resources/signatures.py": "f1a6375d951b36e64613d6e711bc6fff3317faa33be7441967af7ea0fe128c4c",
+    "src/ah/formalizer/retraction.py": "21b9bf0cd990219400b2c633d70e0dbcdb6230a9dfb766915fb7dda6dc3240c0",
+    "src/ah/formalizer/rules.py": "e69e54b2886e702595c9126fc2098878e29b7e8819da293d7cf8298d68e9b549",
+    "src/ah/formalizer/run_binding.py": "754daa126b8c4c898e9757e64705c45f33ce560fe60e1216e8ea7a19a6e7e634",
+    "src/ah/formalizer/runtime_adapter.py": "72e3e23c30541107c63ccd293a795fb281a923fa32688671c09b05d6a9575330",
+    "src/ah/formalizer/rx_cache.py": "f5b5e97bf3a5957747c2bb09b8549d42d97ee3bfdd52b295c9a443b7321fb52c",
+    "src/ah/formalizer/rx_observability.py": "b34539c8c65cb2198d443c5ff3beed21f457746ca90674c4e005f60a5d83fd6e",
+    "src/ah/formalizer/scalar_values.py": "07daf891442938d641351aca3760940d9d83f1c86a34c1d156c237ccbdbe8bc6",
+    "src/ah/formalizer/scope_assignment.py": "7a8a6229b03a22c9055f035f7faeb81e8717559fd3a071bc2bcde1ba49d922f4",
+    "src/ah/formalizer/scope_validation.py": "41a64d8452f815725cf0a334d704a4cda58d83ef2fa0205f9ae22f2ed5af91a1",
+    "src/ah/formalizer/seal.py": "8e48329d3d70a67b856ade17b30065d0638f0bfec62bd8c5f9b6ed33bc324143",
+    "src/ah/formalizer/selection_labels.py": "439a3292330822e1a06c6e06f51c30c50b5d9ba84d74816b495bae0add7a3260",
+    "src/ah/formalizer/selection_protocol.py": "6e79848c529c7c8b199eb9ab0e79796c24b0e999a61da76330bc916d474a4eac",
+    "src/ah/formalizer/selector_wire.py": "00e1a4ee475c34e26b60bec1b2ee02403c2b5e8676285f426c2b2aa234e60a58",
+    "src/ah/formalizer/soft_clause_boundaries.py": "c2e2f3bd881eb4c073cc60f67b24f34136775d8fff84dd67fd2f09593d00ee25",
+    "src/ah/formalizer/source_assertions.py": "65ac3c07eb4638c5e663fad5237187e5c3a372d86e42d157f463e8020be25fb4",
+    "src/ah/formalizer/spatial_entities.py": "2b2035773d2da09c086b90d3f7afad9c8607726eff14f0ec404271ce5d633507",
+    "src/ah/formalizer/spatial_memory.py": "22b855785f23e78df8f3d63bcf98c9ea4ee9a3766ca1623dfa474ed7431a36f3",
+    "src/ah/formalizer/spatial_plan.py": "6570a3c1c97180ebbb2a33af885f308b4480bb19fe81d7292c302921288b2bc7",
+    "src/ah/formalizer/spatial_references.py": "add22cd5af49746c2da146aefce33049084ba13d0ab4b45d3dc031e4d8f8c583",
+    "src/ah/formalizer/spatial_release.py": "763843f819c6ba733c6c29445bbaae088983b4c1ac722c229a8906ee0a8e429a",
+    "src/ah/formalizer/speech_act.py": "16818d509d84fe8a87b3098cc2e6c9299fc4adc8846edac2d61fc633354f9e48",
+    "src/ah/formalizer/state.py": "04f354dc8a1358a9b3af976475336726b27b452439eb72ff4d75bf85f180c7e3",
+    "src/ah/formalizer/store_interface.py": "ac944de9d7539936445b7c73204e11455f60adfc3d97f8e599e5b3f555f80ac1",
+    "src/ah/formalizer/structural_content_time.py": "36d9dc1fb15fb78d133f2fff3ff326f921ea7167e40001be7716ad8f99218496",
+    "src/ah/formalizer/support_som.py": "a2e1883e6aea51b0c320e5e24cfb4567cc7ab9b170d8fa9ef2b707d07f487b4f",
+    "src/ah/formalizer/symbolic_temporal_bounds.py": "c765f4eb386905926da56a91c77b925fbaf1097ef0e7736d0fb4282306e92979",
+    "src/ah/formalizer/syntax_rules.py": "d07faa67b3b9587664354892358a9514e1bb5b2c61e2b2e8002bc096462737e9",
+    "src/ah/formalizer/t3_sources.py": "1285ab7334f1ce85fd80fc65d34534426f6aba194b8b174f2c3a254a9c6b5562",
+    "src/ah/formalizer/t5_batch.py": "3ee43d8b093b4b60a6949b26e939f5b01adbf8a6cede9f0295828a90817d792d",
+    "src/ah/formalizer/t6_admission.py": "e0cc3f8faa12e8574886d23226c9840f1a83f476ab1727c60ad631ac2edbebd9",
+    "src/ah/formalizer/t6_core.py": "a2de11096b3e23cf59183f29482884db2e477686a221b3d0aaa02662e30b8464",
+    "src/ah/formalizer/t6b_revision.py": "e5fb1e83f6f256a1ecc5afd35a4edc35b182818261c73557835b19f9bad20ee8",
+    "src/ah/formalizer/tag_source.py": "f15c587cd7deb9b47bfef36c82e1a636a666f1037950139d1cba48abc86976f6",
+    "src/ah/formalizer/telemetry.py": "6b9f38913a302e8e85502a337ae19ebf786fb7a2df5056a7fdba6b9e575d9585",
+    "src/ah/formalizer/temporal.py": "cbd88d45b22f056cad50f2ca9748c96f5240b69a1d840f69c1bc02571a453564",
+    "src/ah/formalizer/temporal_adapter.py": "4b54d0f9a63bd0fec186e9f407dfc71cbc6baaf43a7fa810fa75d7d158074f3f",
+    "src/ah/formalizer/temporal_attachment.py": "5d35b06ba12b2eddfa30162d34ba0c5d4bd147647e677ea1350c34f2d3703d44",
+    "src/ah/formalizer/temporal_constraints.py": "d4bf2b6698c2df605bc96330846fdec4fca706e28a2a1acc7ed4d92ba52cd02e",
+    "src/ah/formalizer/temporal_license.py": "740c89567732e0ef55df2d22dd8c2dd9646e3c6d5ce82d121d225700553240f5",
+    "src/ah/formalizer/temporal_order.py": "b56b9cac095660d7d4e84b511f48c4b7b673bfca922addbea4157929b2b98f3b",
+    "src/ah/formalizer/temporal_sources.py": "995018e3a2ef9a351ba9f9e2ecb0617ab6aea9c574e9490845e7fbb160cff377",
+    "src/ah/formalizer/temporal_token_ownership.py": "536951251d4cbcefd778b8f3906582175cef2e9462a615f1f39d9474598eab56",
+    "src/ah/formalizer/tp_compact_protocol.py": "78ddb2e0803715e7669f2222576d24f8cbf37cfcc45ea3a90b0e08a626b760c7",
+    "src/ah/formalizer/tp_proposer.py": "399147c576b742f5af74c0c75804e8d3db2d58d4d0a5b9171fb3180130cb7b2f",
+    "src/ah/formalizer/tp_readable_protocol.py": "297fc9dc330485bc625e7e48a0833beded93ace6e6c86714aa6dc4bb25a091fa",
+    "src/ah/formalizer/usage_layer.py": "aceef5cf807a250720a4b80c139ff65bb09cf67bb9698dc47467decb3487e44c",
+    "src/ah/formalizer/v7_pipeline.py": "6ee13d29b8e7fc1af51cf7add557b6ff9917a4338b0e3da4fc6dcca2ef4d1e02",
+    "tools/formalizer_dependency_fixture.py": "8770d44deccb91de5b8895f61f287b51762e34e163f7694be36d5a8c4ac53071",
+    "tools/read_document_probe_mailbox.py": "6055de6d496f76ca481b4fc471f0670af7d73098cfeef27f4fbe70ded92b62c6"
+  },
+  "runs": [
+    {
+      "run": "usage_domains_final_v3",
+      "terminal": "APPLIED",
+      "fragments": 5,
+      "calls": 14,
+      "replay": {
+        "no_new_provider_calls": true,
+        "no_new_ignition_ticks": true,
+        "ledger_unchanged": true,
+        "batch_hash_equal": true,
+        "committed_fragments_equal": true,
+        "both_executed": true
+      },
+      "diagnostics": [],
+      "source_text": "После чая принял Шуваева. Провел вечер с Аликс. Встречал Аликс и дочерей.\n",
+      "experiment": {
+        "resource_status": "TEST_ONLY_COMPONENTS",
+        "production_validation": false,
+        "source_sha256": "9baa3f57800d5a69e3388b05eb6ea8ebe3e85fb13284ef81262cd53c24781bb1",
+        "entity_bindings": "NO_ORACLE_ALIASES",
+        "provider": "external-short-probe-executor",
+        "transport": "EXACT_CAPTURED_TRANSPORT",
+        "resume_journal_sha256": null,
+        "attention_start": "EMPTY_MEMORY",
+        "captured_probes": "/workspace/scratch/ce998c263405/tree_usage_domain_verified"
+      },
+      "artifact_sha256": {
+        "reading/interpretation.json": "baf6941bf433b9d8f1082c581b2b518f09cb4265e4e95d8210827ea6da8537ea",
+        "native_replay_check.json": "7b15b78c04f27d0536342f2cca6234bd8511d38728f24c639bdbdc17f7dc2d93",
+        "resource_manifest.json": "88cdae68a68f0c78acff81b467ea350a0dbd9726529f074c5bff129edc349594"
+      },
+      "probes": [
+        {
+          "request_sha256": "1e5da5114226b16d3870491f6acfb26da40cd6c83cb5aab8c9e2c6173e16f3df",
+          "response": "1"
+        },
+        {
+          "request_sha256": "33c211c8c6af0bd61683a1142fe78829cd0bc1ea2a194b3dc23cab815b8bf561",
+          "response": "1"
+        },
+        {
+          "request_sha256": "699ae13c21fa9730b84f9766b1476591de2076f61ff43561f031538f1f071df0",
+          "response": "2"
+        },
+        {
+          "request_sha256": "754029e673cd15e587e39cb02e5ab9b61bbf0c24e6608f7348e474b4ea281ed9",
+          "response": "1"
+        },
+        {
+          "request_sha256": "c49648122ce620a0880aaa0be1bf44df83f99c89b6392de021892dcea34b9b8c",
+          "response": "3"
+        },
+        {
+          "request_sha256": "0264741e82947c2369067192d2e4f3ee95c0cbd03464315f11d0135372bcb8b3",
+          "response": "1"
+        },
+        {
+          "request_sha256": "7b75f783a78076030613d79e58408fa08378f118c53bc9d496082e64e2504148",
+          "response": "1"
+        },
+        {
+          "request_sha256": "ee9a2c78918cc73a1fb436f4579dbf35b0c87561e785ff856179c5840efc0d95",
+          "response": "1"
+        },
+        {
+          "request_sha256": "dff99cfaf7afd7c6841b2b9e2c0fa1453a22eac7afe5781f2d64005ce1b4f224",
+          "response": "1"
+        },
+        {
+          "request_sha256": "e32397eb8003e0d76cd7b758cf9df1a27a4439b056a88f920472b69c9cf7497b",
+          "response": "1"
+        },
+        {
+          "request_sha256": "b0df053cdfe01d5a2494e5f85ec66ba703526fff15beca1310b076aa8ebddcdb",
+          "response": "3"
+        },
+        {
+          "request_sha256": "35b7eb2c0eb6eacb599f7f443cb32a288b6156abd6ebe39533048df0d4fd071c",
+          "response": "5"
+        },
+        {
+          "request_sha256": "f1c997e7f967ef83ab21ba78c2733f459d8af387974187ac19daa75daaf31b54",
+          "response": "8"
+        },
+        {
+          "request_sha256": "f13d5bee947c10c3f119bf37199435860ef2f1aa19c5a3d096d1bb3904263f5c",
+          "response": "1"
+        }
+      ]
+    },
+    {
+      "run": "source_domains_final_v3",
+      "terminal": "APPLIED",
+      "fragments": 1,
+      "calls": 1,
+      "replay": {
+        "no_new_provider_calls": true,
+        "no_new_ignition_ticks": true,
+        "ledger_unchanged": true,
+        "batch_hash_equal": true,
+        "committed_fragments_equal": true,
+        "both_executed": true
+      },
+      "diagnostics": [],
+      "source_text": "Мать встретила дочь.\n",
+      "experiment": {
+        "resource_status": "TEST_ONLY_COMPONENTS",
+        "production_validation": false,
+        "source_sha256": "ef56e48db4621b184cbd1c37f96b4fef91f4c752bff5c67de6136ecc44419804",
+        "entity_bindings": "NO_ORACLE_ALIASES",
+        "provider": "external-short-probe-executor",
+        "transport": "EXACT_CAPTURED_TRANSPORT",
+        "resume_journal_sha256": null,
+        "attention_start": "EMPTY_MEMORY",
+        "captured_probes": "/workspace/scratch/ce998c263405/tree_source_domain_verified"
+      },
+      "artifact_sha256": {
+        "reading/interpretation.json": "28afcda6782e8b219094374bdf1a54200cc26de183b0d2771c4385c801925eea",
+        "native_replay_check.json": "b70a15898aae5c3ca6796f38497a0a981e67398cd010f9c9502f93c9caa14871",
+        "resource_manifest.json": "88cdae68a68f0c78acff81b467ea350a0dbd9726529f074c5bff129edc349594"
+      },
+      "probes": [
+        {
+          "request_sha256": "7fcb246617ae60bcb858102b189e759085e4e5ac3625d1e240e49558c3bdabd2",
+          "response": "2"
+        }
+      ]
+    },
+    {
+      "run": "source_domains_unknown_final_v3",
+      "terminal": "RESOLUTION_ONLY",
+      "fragments": 0,
+      "calls": 1,
+      "replay": {
+        "no_new_provider_calls": true,
+        "no_new_ignition_ticks": true,
+        "ledger_unchanged": true,
+        "batch_hash_equal": true,
+        "committed_fragments_equal": true,
+        "both_executed": true
+      },
+      "diagnostics": [
+        "STRUCTURAL_OPERAND_UNRESOLVED:composition-grammar:216e11cc0ba14b871dfa2a13a643c0edca9587dbda5f74a84ec70dc48474040f",
+        "STRUCTURAL_OPERAND_UNRESOLVED:composition-grammar:3a4b42a3904e8a71ae6c5e83fdc8cc87f7f03b9ff47da8c0f98a535f48f9c871"
+      ],
+      "source_text": "Мать встретила дочь.\n",
+      "experiment": {
+        "resource_status": "TEST_ONLY_COMPONENTS",
+        "production_validation": false,
+        "source_sha256": "ef56e48db4621b184cbd1c37f96b4fef91f4c752bff5c67de6136ecc44419804",
+        "entity_bindings": "NO_ORACLE_ALIASES",
+        "provider": "external-short-probe-executor",
+        "transport": "EXACT_CAPTURED_TRANSPORT",
+        "resume_journal_sha256": null,
+        "attention_start": "EMPTY_MEMORY",
+        "captured_probes": "/workspace/scratch/ce998c263405/tree_source_domain_unknown"
+      },
+      "artifact_sha256": {
+        "reading/interpretation.json": "72b2957629a8809ba65a0baf524fb40e41b00dcae609707e868f655bd8481618",
+        "native_replay_check.json": "28575b14bb7a58457754421708dee417991eecad814d2e7c0edcc435b05fcfb2",
+        "resource_manifest.json": "88cdae68a68f0c78acff81b467ea350a0dbd9726529f074c5bff129edc349594"
+      },
+      "probes": [
+        {
+          "request_sha256": "7fcb246617ae60bcb858102b189e759085e4e5ac3625d1e240e49558c3bdabd2",
+          "response": "?"
+        }
+      ]
+    },
+    {
+      "run": "nested_domains_final_v3",
+      "terminal": "APPLIED",
+      "fragments": 4,
+      "calls": 13,
+      "replay": {
+        "no_new_provider_calls": true,
+        "no_new_ignition_ticks": true,
+        "ledger_unchanged": true,
+        "batch_hash_equal": true,
+        "committed_fragments_equal": true,
+        "both_executed": true
+      },
+      "diagnostics": [],
+      "source_text": "Иван сказал: «Пётр помог дежурному».\nПомог двадцати знакомым мальчикам.\nПосле кровопролитных боёв войска не могли продвинуться.\n",
+      "experiment": {
+        "resource_status": "TEST_ONLY_COMPONENTS",
+        "production_validation": false,
+        "source_sha256": "b68dcf806cf599b6bf4dca67c0d0c257ad19d1c3b4959ee69266ce92b3a2eb23",
+        "entity_bindings": "NO_ORACLE_ALIASES",
+        "provider": "external-short-probe-executor",
+        "transport": "EXACT_CAPTURED_TRANSPORT",
+        "resume_journal_sha256": null,
+        "attention_start": "EMPTY_MEMORY",
+        "captured_probes": "/workspace/scratch/ce998c263405/tree_domains_final_nested"
+      },
+      "artifact_sha256": {
+        "reading/interpretation.json": "1443ea9d1cd951e1fc5ece8d2b286f80bc213bcf52527b66906f9cceba57c46e",
+        "native_replay_check.json": "5ac9dd4037954ffba98cc00167d8c16e4e69b5ac4eeb29201f6997b832d73e82",
+        "resource_manifest.json": "88cdae68a68f0c78acff81b467ea350a0dbd9726529f074c5bff129edc349594"
+      },
+      "probes": [
+        {
+          "request_sha256": "82f864fee0ddfc58484fc93398f0aad7619c28d79c0aedcfc60793337d02df19",
+          "response": "1"
+        },
+        {
+          "request_sha256": "3eeff0448ae86ce26b1a4c7fab6c9a281a42719a1a1759499969f87f171b6265",
+          "response": "1"
+        },
+        {
+          "request_sha256": "d87d1f626f2f26fd66f2e65e1af9f7123bfcb2992f8f214b43993f92c2ad02bc",
+          "response": "2"
+        },
+        {
+          "request_sha256": "c9a959d3233a61d8c40f1a65c0da40da941ae3aa7f378ccd63adff19063c94ca",
+          "response": "1"
+        },
+        {
+          "request_sha256": "acded3613b688e5678bf000dbe464379237eae20f1bbfa106308ba4be3328fc2",
+          "response": "3"
+        },
+        {
+          "request_sha256": "d6a1b7e14292d48fa80556749d42009c3b4b000537f1c140d9e0ac896e430f0c",
+          "response": "1"
+        },
+        {
+          "request_sha256": "1f9ffca9b4642d3b17e6463e45eddcb642a2ea11121300de880aaf30181ec661",
+          "response": "1"
+        },
+        {
+          "request_sha256": "808d696c1745aad072a743c5db83e95259fda41358c2caba35494bc6ecfe8eee",
+          "response": "1"
+        },
+        {
+          "request_sha256": "b8ecf02c4d82082821f8d2e2c9d7d8da0e0715138458690beae1dd09108c3a0d",
+          "response": "1"
+        },
+        {
+          "request_sha256": "58eb4a44f2898deee9f497691ca0aafcbd08910ba6f1cfc2eb6681f7eb1c2619",
+          "response": "1"
+        },
+        {
+          "request_sha256": "73aeeabe2b9638320c2ab51813a9466431ddc61624f36ce73520c6a8460068dd",
+          "response": "2"
+        },
+        {
+          "request_sha256": "05f49676cdc48425281385fea7c4581c9edd67dfbae8b21acab500745576cc88",
+          "response": "2"
+        },
+        {
+          "request_sha256": "d87f93307167e573624cbc10fecab18019324ae367d0880d2c6a8b1333155d88",
+          "response": "1"
+        }
+      ]
+    },
+    {
+      "run": "quantity_domains_final_v3",
+      "terminal": "APPLIED",
+      "fragments": 2,
+      "calls": 11,
+      "replay": {
+        "no_new_provider_calls": true,
+        "no_new_ignition_ticks": true,
+        "ledger_unchanged": true,
+        "batch_hash_equal": true,
+        "committed_fragments_equal": true,
+        "both_executed": true
+      },
+      "diagnostics": [],
+      "source_text": "Смотрели на игры двадцать мальчиков, знакомых Алексея по городскому саду.",
+      "experiment": {
+        "resource_status": "TEST_ONLY_COMPONENTS",
+        "production_validation": false,
+        "source_sha256": "e6dc65147857ec8fcfac69d8785ea84d2d9d739cf3a9be668af7a35d94145cda",
+        "entity_bindings": "NO_ORACLE_ALIASES",
+        "provider": "external-short-probe-executor",
+        "transport": "EXACT_CAPTURED_TRANSPORT",
+        "resume_journal_sha256": null,
+        "attention_start": "EMPTY_MEMORY",
+        "captured_probes": "/workspace/scratch/ce998c263405/quantity_domains_live_final"
+      },
+      "artifact_sha256": {
+        "reading/interpretation.json": "fa4ebb6259b742e858a8cdd50c669be78dd589e21b9b025bbc11167007c80c09",
+        "native_replay_check.json": "2c6cefc77f4a3cfba1204dfa06ae3b5edd1f321a5e8f2d152533716b53a4a9ec",
+        "resource_manifest.json": "88cdae68a68f0c78acff81b467ea350a0dbd9726529f074c5bff129edc349594"
+      },
+      "probes": [
+        {
+          "request_sha256": "3ae7d4f0fba6daadcb6e05f757a29c9771fbf8b4ef0d4def2f98e41d7d545c92",
+          "response": "1"
+        },
+        {
+          "request_sha256": "35794841d97548405967191beeffec1e14ddff61a7e72c232c7b4a1e4f44f809",
+          "response": "2"
+        },
+        {
+          "request_sha256": "be7c607b0da22c599da84430f5d539d90850e18f784c9d03b37d67aa0c46a467",
+          "response": "2"
+        },
+        {
+          "request_sha256": "052e7adbb9bea9b397ae58c42925fdb9439c66968b3d7299a9ec236656ff5537",
+          "response": "2"
+        },
+        {
+          "request_sha256": "72e4c2466bd35ff20c6303a296985c4663aa9a8bee37c003cec86f22888f15d8",
+          "response": "4"
+        },
+        {
+          "request_sha256": "3b5d9272921208467579675e347bc8bf4fed31f522b18bb491e510318ddd4fd0",
+          "response": "5"
+        },
+        {
+          "request_sha256": "b325a74d1d1b48118377537d3e9c0368f18d29977d2bf25f6cba9fa5f70aad6d",
+          "response": "1"
+        },
+        {
+          "request_sha256": "640306a60eb8163c9612d647a0500698fb23caef00f698dce70bedfc80a322e1",
+          "response": "4"
+        },
+        {
+          "request_sha256": "0ca7fd6461da206e55fd8142e1c93696216b4026fdf0cb1264f216b52660b0ee",
+          "response": "1"
+        },
+        {
+          "request_sha256": "7f8ab8d5ffa2cb5bad61f1b91b127ba06b2c055f0656045357d78b49c04d8f64",
+          "response": "1"
+        },
+        {
+          "request_sha256": "85a85e14455dd09762cbedc657e634f7f2730f579e63f0efde2b183bbfa9c6bb",
+          "response": "1"
+        }
+      ]
+    }
+  ],
+  "focused_pytest": {
+    "files": [
+      "tests/test_formalizer_goal_executor.py",
+      "tests/test_region_attention.py"
+    ],
+    "passed": 27
+  },
+  "additional_pytest": {
+    "files": [
+      "tests/test_formalizer_goal_executor.py",
+      "tests/test_formalizer_native_inference_policy.py"
+    ],
+    "passed": 15,
+    "failed": 4,
+    "observed_failure": "PROVIDER_UNAVAILABLE in configured mock-backed route; export/attestation expectations not met"
+  },
+  "proof_checks": {
+    "two_step_modus_ponens": true,
+    "forall_instantiation": true,
+    "or_elimination_temporal_compatible": true,
+    "or_elimination_temporal_incompatible_unknown": true,
+    "inactive_premise_unknown": true,
+    "current_source_excluded": true,
+    "explicit_budget_exhaustion": true,
+    "deterministic_certificate": true,
+    "memory_hash_and_journal_unchanged": true,
+    "composition_reader_path_and_receipt_replay": true
+  },
+  "remaining": [
+    "Partial grammar states are not all packed into the common domain",
+    "Arbitrary mutually dependent modal and quantifier boundaries remain incomplete",
+    "Productive OOV paradigms remain open",
+    "No full corpus or production acceptance claim"
+  ]
+}

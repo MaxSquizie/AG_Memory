@@ -16,7 +16,13 @@ def prepositional_groups(tokens, excluded=()):
         variants=[v for v in prep.variants if v.pos=='PREP']
         if not variants or prep.token_id in excluded: continue
         j=i+1
-        while j<len(tokens) and (functional(tokens[j]) or any(v.pos in {'ADJF','PRTF'} for v in tokens[j].variants)): j+=1
+        nominal_ends=[]
+        while j<len(tokens) and (functional(tokens[j]) or any(v.pos in {'ADJF','PRTF'} for v in tokens[j].variants)):
+            if any(v.pos in {'NOUN','NPRO'} for v in tokens[j].variants):nominal_ends.append(j)
+            j+=1
+        # Keep nominal use reachable without deleting its ADJF alternative.
+        if (j==len(tokens) or not any(v.pos in {'NOUN','NPRO'} for v in tokens[j].variants)) and nominal_ends:
+            j=nominal_ends[-1]
         if j==len(tokens): continue
         head=tokens[j]
         if head.token_id in excluded or not any(v.pos in {'NOUN','NPRO'} for v in head.variants): continue

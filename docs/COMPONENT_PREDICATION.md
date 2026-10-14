@@ -78,6 +78,8 @@ proposition не проецируется как плоский предикат
 Replay и отзыв проходят обычный журнал, без повторного генератора шаблонов.
 
 Модули: `component_predication.py`, `component_modifiers.py`,
-`component_prepositions.py`; прежние clause/coordination/participants и native
+`component_nominal_tree.py`, `scope_assignment.py`; прежние clause/coordination/participants и native
 планировщик сохраняют свои границы. Политика требует нового resource release.
 TEST_ONLY-прогон не повышает production coverage или статусы G0–G5.
+
+Общий актуальный интерфейс композиции: [COMPOSITION_RUNTIME_CONTRACT.md](COMPOSITION_RUNTIME_CONTRACT.md).

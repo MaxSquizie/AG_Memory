@@ -94,11 +94,14 @@ def _temporal(text, observation, release, *, source_start=0):
 
 
 def _required_operators(state,release):
+    from bisect import bisect_left, bisect_right
+    evidence=sorted(state.evidence,key=lambda e:e.start)
+    starts=[e.start for e in evidence];ends=[e.end for e in evidence]
     required=[]
     for entry in release.entries('ScopeLexicon'):
         if not entry.get('operator') or not entry.get('pattern'): continue
         for match in re.finditer(entry['pattern'],state.text,re.I):
-            required.append((entry['operator'],tuple(e.token_id for e in state.evidence if e.start<match.end() and e.end>match.start())))
+            required.append((entry['operator'],tuple(e.token_id for e in evidence[bisect_right(ends,match.start()):bisect_left(starts,match.end())])))
     return tuple(required)
 
 
@@ -277,9 +280,6 @@ def _grammar_frames(state,release,selector=None):
     for h, _frames in accepted:
         state.linked_alternatives.append(LinkedAlternative(h.local_id,'STRUCTURAL_HYPOTHESIS',digest(asdict(h)),h.local_id,provenance=provenance[h.local_id]))
     accepted = choose_structures(state, accepted, stage='GRAMMAR', provenance=provenance)
-    if selector is not None:
-        from .region_probes import select_generated
-        accepted=select_generated(state,accepted,selector,release)
     # Multiple overlapping structures are alternatives, never multiple facts.
     by_anchor={}
     for h,frames in accepted:
@@ -289,6 +289,7 @@ def _grammar_frames(state,release,selector=None):
     for h,local in accepted:
         ambiguous=any(len(by_anchor[f.predicate_token_ref])>1 for f in local)
         for f in local:
+            f.semantic['grammar_ambiguity']=ambiguous and not f.semantic.get('structural_unresolved')
             f.semantic['structural_unresolved'] |= ambiguous
         frames.extend(local)
     if len(accepted)==1 and not accepted[0][1]:
@@ -443,7 +444,9 @@ def _frames_for_hypotheses(state,hypotheses,release,provenance=None,morph_bindin
                 frame.semantic.setdefault('time_scope_owner',owner)
             for child in t.get('operands',()): inherit_scope(child,reg,owner)
         for t in [*forest,*children.values()]: inherit_scope(t)
-        for f in localframes.values(): f.semantic['operator_forest']=forest
+        for f in localframes.values():
+            f.semantic['operator_forest']=forest
+            f.semantic['owned_token_refs']=list(h.alignment)
         if not localframes and not forest:
             # A typed ENTITY/TIME-only reply is not a proposition. Keep the
             # validated structure for audit and block a valid sibling from
@@ -724,7 +727,7 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
             reject_entity_overlap(state,release,state.frames)
         if region_mode:
             from .components import compose
-            compose(state,release,selector)
+            compose(state,release,selector,context_reader=context_reader)
             if not state.frames and not state.logical_roots:
                 state.diag('STRUCTURE_NOT_COVERED','region generator has no licensed complete candidate')
         else:
@@ -930,7 +933,7 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
         enter_probe_window(state,selector,f.source_range)
         specs=candidate_specs[f.frame_id]; ids=tuple(s['candidate_id'] for s in specs)
         d=Decision('predicate_value',f.frame_id,ids); d.source_traces=f.semantic['source_traces']; state.decisions[f.frame_id+'|predicate_value']=d
-        if f.construction=='COMPONENTS_V1' and f.semantic.get('structural_unresolved'):
+        if f.semantic.get('structural_unresolved') or f.semantic.get('structural_rejection'):
             d.outcome='UNRESOLVED'
             continue  # No semantic probe can repair an uncovered structural dependency.
         from .clarifications import choice

@@ -2,7 +2,6 @@
 from dataclasses import replace
 from .canonical_ledger import digest
 from .component_policy import _morph
-from .component_probe import _probe
 from .state import MorphVariant
 
 
@@ -49,24 +48,9 @@ def overlay(state, release, selector, region, tokens, cfg):
                 options[cid]=variant
         if len(options)+1>cfg['max_candidates']:
             state.diag('COMPONENT_SEARCH_INCOMPLETE',region.region_id);return None
-        choices=[{'candidate_id':cid,'label':'Unchanged proper-name surface «'+head.span+
-            '» is the nominal complement of «'+prep.span+'» with case='+next(iter(v.cases))+
-            '; dictionary reading insufficient for this occurrence; gender and identity unknown'}
-            for cid,v in options.items()]
-        choices.append({'candidate_id':'KEEP_SOURCE_ANALYSIS','label':'No supported unchanged-name reading; retain the source analysis'})
-        selected=_probe(state,selector,release,key,'contextual_morphology',choices,
-            state.text[slice(*region.source_range)],region.source_range,
-            question='Choose a case reading only if this source supports an unchanged proper name governed by the preposition. '
-            'The released cases are possibilities, not proof. Do not correct spelling, infer gender/identity, '
-            'or turn every case error into an indeclinable name. Otherwise choose KEEP_SOURCE_ANALYSIS or ?.')
-        state.syntax_trace.append({'kind':'CONTEXTUAL_PREPOSITION_CASE','decision_ref':key,
-            'token_ref':head_ref,'governor_ref':prep.token_id,'source_variants':source,
-            'rules':governed,'alternatives':{cid:_morph(v) for cid,v in options.items()},
-            'selected':selected,'release_sha256':release.sha256})
-        if selected in options:
-            result[tokens.index(head)]=replace(head,variants=(options[selected],))
-        else:
-            # Preserving R1 is not a license to accept its conflicting case.
-            state.diag('PREPOSITION_CASE_UNRESOLVED',head_ref)
-            return None
+        from .morphology_domain import offer
+        readings=offer(state,head,options.values(),'PREPOSITION_CASE',group['anchor_refs'])
+        # Preserve dictionary alternatives. Government constrains relation
+        # candidates; the existence of a proposal does not select its case.
+        result[tokens.index(head)]=replace(head,variants=(*head.variants,*readings))
     return result

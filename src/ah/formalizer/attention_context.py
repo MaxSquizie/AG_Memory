@@ -166,7 +166,7 @@ class AttentionContextReader:
                     emit("reading", tokens_read=len(self.read_token_refs), tokens_total=len(state.evidence), tick=self.engine.tick_index)
             emit("reading", tokens_read=len(self.read_token_refs), tokens_total=len(state.evidence), tick=self.engine.tick_index)
             search_incomplete = False
-            if request['kind'] in {'REFERENCE','IMPLICIT_ARGUMENT','SPATIAL_REFERENCE','NOMINAL_REFERENCE'}:
+            if request['kind'] in {'REFERENCE','IMPLICIT_ARGUMENT','SPATIAL_REFERENCE','NOMINAL_REFERENCE','STRUCTURE'}:
                 # A goal redistributes existing excitation; it injects no new
                 # semantic evidence and gives no fresh independent seed.
                 for _ in range(self.engine.settings.context_query_ticks):
@@ -186,7 +186,7 @@ class AttentionContextReader:
                     else:
                         rows = freeze_context(store, self.release, state.observation.get('coreference_sources', []),
                                               active_refs=active)
-                        if request['kind']=='IMPLICIT_ARGUMENT':
+                        if request['kind'] in {'IMPLICIT_ARGUMENT','STRUCTURE'}:
                             from .reference_source_context import attach
                             attach(store,[r for r in rows if r.get('reference_kind')!='EVENT'])
                 except ValueError as exc:
@@ -199,7 +199,17 @@ class AttentionContextReader:
             # A replacement version must not depend on bindings it will itself
             # retire. Its own current-source references are resolved locally.
             rows=[r for r in rows if r.get('source_tag',[None])[0]!=state.source_uid]
-            result = {'rows': rows, 'events': events, 'scope': 'ACTIVE_WORKSPACE',
+            proofs=[]
+            if request.get('proof_goals'):
+                from .context_proofs import read_goals
+                proofs,proof_incomplete=read_goals(store,{r.uid for r in self.engine.workspace_refs()},
+                    request['proof_goals'],state.source_uid,allowed_sources=state.observation.get('coreference_sources',()))
+                search_incomplete |= proof_incomplete
+                events.append({'kind':'CONTEXT_LOGICAL_GOAL','decision_ref':request['decision_ref'],
+                               'goals':request['proof_goals'],'mode':'READ_ONLY_PROOF'})
+                if memory_hash(store)!=self.base['memory_hash']:
+                    raise ContextReadError('CONTEXT_SNAPSHOT_STALE')
+            result = {'rows': rows, 'proof_results':proofs,'events': events, 'scope': 'ACTIVE_WORKSPACE',
                       'search_incomplete': search_incomplete,
                       'global_search_complete': False, 'read_token_refs': sorted(self.read_token_refs),
                       'attention_after': attention_snapshot(self.engine)}
@@ -232,5 +242,6 @@ class AttentionContextReader:
     def _deliver(state, request, result):
         state.context_reads.append({'request': request, 'result_hash': digest(result),
                                     'scope': result['scope'], 'events': result['events'],
-                                    'rows': result['rows'], 'global_search_complete': False})
+                                    'rows': result['rows'],'proof_results':result.get('proof_results',[]),
+                                    'search_incomplete':result.get('search_incomplete',False), 'global_search_complete': False})
         return result

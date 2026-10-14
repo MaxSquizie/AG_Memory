@@ -2,7 +2,6 @@
 from dataclasses import replace
 from .canonical_ledger import digest
 from .component_policy import _morph
-from .component_probe import _probe
 from .state import MorphVariant
 
 
@@ -33,27 +32,21 @@ def resolve(state, release, selector, region, left, right, cfg):
             'variants':[_morph(v) for v in variants]}
     if not options or len(options)>cfg['max_candidates']:
         return None
-    evidence={left.token_id:left, right.token_id:right}
-    choices=[{'candidate_id':key,'label':'Unchanged proper-name surface «'+evidence[row['token_ref']].span+
-        '» fills the SAME coordinated nominal slot as «'+evidence[row['peer_ref']].span+
-        '»; contextual case alternatives='+str(sorted({c for v in row['variants'] for c in v['cases']}))+
-        '; dictionary case is insufficient for this occurrence; no gender or identity is inferred'}
-        for key,row in options.items()]
-    choices.append({'candidate_id':'KEEP_SOURCE_ANALYSIS','label':'No supported local name-case reinterpretation; keep conflict unresolved'})
-    key=region.region_id+'|contextual-name-case'
-    selected=_probe(state,selector,release,key,'contextual_morphology',choices,
-        state.text[slice(*region.source_range)],region.source_range,
-        question='Does the wording positively support a proper name used unchanged in the coordinated slot despite its dictionary case? '
-        'Do not repair arbitrary malformed phrases or assume every name is indeclinable. '
-        'Choose KEEP_SOURCE_ANALYSIS or ? unless this local reinterpretation is supported.')
-    state.syntax_trace.append({'kind':'CONTEXTUAL_NAME_CASE','decision_ref':key,
-        'alternatives':options,'selected':selected,'release_sha256':release.sha256})
-    return options.get(selected)
+    from .morphology_domain import offer
+    from .nominal_readings import variant
+    evidence={left.token_id:left,right.token_id:right}
+    rows=[]
+    for row in options.values():
+        token=evidence[row['token_ref']]
+        values=offer(state,token,[variant(v) for v in row['variants']],
+                     'COORDINATION_CASE',[row['peer_ref']])
+        rows.append({**row,'variants':[_morph(v) for v in values]})
+    return rows
 
 
 def overlay(tokens, groups):
     """Keep original R1 evidence immutable; only this candidate area sees variants."""
     readings={r['token_ref']:r for g in groups for r in g.get('contextual_readings',())}
-    return [replace(t, variants=tuple(MorphVariant(**{**v,'cases':frozenset(v['cases']),
+    return [replace(t, variants=(*t.variants,*tuple(MorphVariant(**{**v,'cases':frozenset(v['cases']),
         'features':frozenset(v['features']),'evidence_refs':tuple(v['evidence_refs'])})
-        for v in readings[t.token_id]['variants'])) if t.token_id in readings else t for t in tokens]
+        for v in readings[t.token_id]['variants']))) if t.token_id in readings else t for t in tokens]

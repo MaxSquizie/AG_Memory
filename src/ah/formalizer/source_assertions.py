@@ -8,26 +8,15 @@ def enabled(release):
     return release.entries('ProposalPolicy')[0].get('composition',{}).get('source_assertions')=='BOUNDED_SOURCE_V1'
 
 
-def leaves(tree):
-    if 'frame_ref' in tree:return {tree['frame_ref']}
-    return set().union(*(leaves(t) for t in tree.get('operands',())))
+from .composition_tree import leaves, forests as composition_forests, embedded
 
 
 def resolve(state,release,selector):
     if not enabled(release):return
     frames={f.frame_id:f for f in state.frames}
     state.observation['source_assertions']=[]
-    children=set()
-    for f in frames.values():
-        for arg in f.semantic.get('proposition_args',{}).values():
-            children.update(leaves(arg.get('tree') or {'frame_ref':arg['frame_ref']}))
-        for arg in f.semantic.get('nominal_args',()):
-            children.update(leaves(arg.get('tree') or {'frame_ref':arg['frame_ref']}))
-    forests=list(state.logical_roots)
-    for f in frames.values():
-        forests.extend(f.semantic.get('operator_forest',()))
-        if f.semantic.get('component_scope_tree') and not f.semantic.get('component_child') and not f.semantic.get('structural_unresolved'):forests.append(f.semantic['component_scope_tree'])
-    for tree in forests:children.update(leaves(tree))
+    forests=composition_forests(state.frames,state.logical_roots)
+    children=embedded(state.frames,forests)
     cfg=release.entries('ProposalPolicy')[0]['composition']
     visited=set()
 
@@ -63,9 +52,10 @@ def resolve(state,release,selector):
             if hi-lo>cfg['context_chars']:
                 state.diag('SOURCE_ASSERTION_SCOPE_UNRESOLVED',key);continue
             context=state.text[lo:hi]
-            # Negated/questions roots are handled by the operator/goal compiler.
-            import re
-            if '?' in context or any(re.search(r['pattern'],context,re.I) for r in release.entries('ScopeLexicon') if r.get('operator')=='NOT'):continue
+            # Operator scope is controlled by walk(), not by finding NOT in
+            # the text of a sibling or a quoted child. Question/command source
+            # acts remain guarded here and by the ordinary T5 boundary.
+            if '?' in context or state.observation.get('request_kind') in {'QUERY','COMMAND'}:continue
             choice=_probe(state,selector,release,key,'source_assertion',[
                 {'candidate_id':'SOURCE_ASSERTED','label':'The source itself asserts '+label(target)+' as occurring/holding, independently of the descriptive modifier.'},
                 {'candidate_id':'EMBEDDED','label':'The content is only possible, intended, reported, questioned, denied or otherwise not asserted by the source.'}],
@@ -90,7 +80,6 @@ def resolve(state,release,selector):
 
 def roots(state,release):
     """T5 consumes only checked decisions about existing sealed argument trees."""
-    if not enabled(release):return []
     frames={f.frame_id:f for f in state.frames};result=[];seen=set()
     for row in state.observation.get('source_assertions',()):
         d=state.decisions.get(row['decision_ref'])
@@ -100,4 +89,23 @@ def roots(state,release):
         if tree!=row['tree']:raise ValueError('SOURCE_ASSERTION_TREE_CHANGED')
         key=digest(tree)
         if key not in seen:result.append(('source-asserted:'+key,deepcopy(tree)));seen.add(key)
+    # A temporal adjunct construction explicitly preserves its main clause,
+    # but never promotes its nominal anchor. Only traverse asserted scope:
+    # NOT/OR/modality/report stop this walk, including around a temporal node.
+    def project(tree):
+        if tree.get('operator')=='AND':
+            for child in tree['operands']:project(child)
+        projection=tree.get('source_projection')
+        if not projection or projection.get('rule_id')!='TEMPORAL_MAIN_CLAUSE':return
+        if tree.get('operator') not in {'BEFORE','AFTER','DURING'} or projection.get('operand')!=0:return
+        decision=state.decisions.get(projection['decision_ref'])
+        if decision is None or decision.outcome!='RESOLVED':return
+        child=tree['operands'][0]
+        if any(frames[f].semantic.get('query_request') or frames[f].semantic.get('structural_unresolved') for f in leaves(tree)):return
+        key=digest(child)
+        if key not in seen:
+            result.append(('source-asserted:'+key,deepcopy(child)));seen.add(key)
+        project(child)
+    for tree in composition_forests(state.frames,state.logical_roots):project(tree)
+    for _,tree in list(result):project(tree)
     return result

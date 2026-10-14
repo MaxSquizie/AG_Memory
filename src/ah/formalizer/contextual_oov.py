@@ -1,8 +1,6 @@
 """Bounded grammatical readings of a preserved OOV surface, not lexical repair."""
-from dataclasses import replace
 from .canonical_ledger import digest
 from .component_policy import policy, _morph
-from .component_probe import _probe
 from .state import MorphVariant
 
 
@@ -35,17 +33,8 @@ def resolve(state,release,selector):
                 state.diag('OOV_GRAMMAR_UNRESOLVED',token.token_id);continue
             if len(options)>cfg['max_candidates'] or region.source_range[1]-region.source_range[0]>cfg['context_chars']:
                 state.diag('COMPONENT_SEARCH_INCOMPLETE',key);continue
-            choices=[{'candidate_id':cid,'label':'Preserve unknown surface «'+token.span+'» as a noun; '+
-                str({k:v for k,v in _morph(m).items() if k in {'pos','cases','number','gender'}})+
-                '; grammatical constraint anchors='+str(m.evidence_refs)} for cid,m in options.items()]
-            chosen=_probe(state,selector,release,key,'oov_morphology',choices,
-                state.text[slice(*region.source_range)],region.source_range,
-                question='Choose a grammatical reading supported by the local agreement or released sentence role. '
-                'The surface is absent from the dictionary. Do NOT expand, correct, translate, or assign its lexical meaning. '
-                'The analyzer prediction is not evidence. If no offered reading is supported, answer ?.')
+            from .morphology_domain import offer
+            offer(state,token,options.values(),'OOV_NOMINAL')
             state.syntax_trace.append({'kind':'CONTEXTUAL_OOV','token_ref':token.token_id,
-                'surface':token.span,'candidates':{cid:_morph(v) for cid,v in options.items()},'selected':chosen})
-            if chosen is None:continue
-            v=replace(options[chosen],evidence_refs=(*options[chosen].evidence_refs,key))
-            token.variants=(v,);token.lemma=token.span.casefold();token.pos=v.pos;token.cases=v.cases
-            # Lexical identity remains unknown even after a grammatical decision.
+                'surface':token.span,'candidates':{cid:_morph(v) for cid,v in options.items()},
+                'selection':'DEFER_TO_RELATION'})

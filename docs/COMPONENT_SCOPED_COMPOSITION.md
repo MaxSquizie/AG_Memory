@@ -89,9 +89,11 @@ M. Ни пол/число, ни первый подходящий кандида
 | `probe_windows.py`, `provider_budget.py` | Источник окна и транспортный расход |
 | `component_clause.py` | Одна клауза, подготовка закрытого вопроса |
 | `component_coordination.py` | AND и блок неполной композиции |
-| `component_temporal.py` | Исходные относительные группы |
+| `relative_composition.py` | Типизированный относительный якорь через общий детский разбор |
 | `relative_time_plan.py` | Обычные T5-операции относительной связи |
 | `component_participants.py` | Подготовка и разрешение анонимных цепочек |
 
 Новых писателей памяти и обходов T5/T6 нет. Проверка этих механик не повышает
 G0/G5 и не доказывает полную формализацию книги.
+
+Выбор scope и рекурсивный интерфейс: [COMPOSITION_RUNTIME_CONTRACT.md](COMPOSITION_RUNTIME_CONTRACT.md).

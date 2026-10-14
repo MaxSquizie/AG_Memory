@@ -4,25 +4,6 @@ from .component_policy import _morph
 from .state import FrameCandidate
 
 
-def scoped_bundle(state, release, region, tokens, frame, cfg):
-    role = cfg.get('modifier_content_role')
-    missing = frame.semantic['uncovered_token_refs']
-    if not role or frame.semantic['missing_required_roles']:
-        return [frame]
-    if frame.semantic.get('relative_temporal'):
-        # The root-only relative planner must not lose a nested relation.
-        return [frame]
-    if len(missing) != 1:
-        from .component_prepositions import prepositional_bundle
-        return prepositional_bundle(state, region, tokens, frame, cfg)
-    token = next(e for e in tokens if e.token_id == missing[0])
-    variants = {v.lemma:v for v in token.variants if v.pos == 'ADVB'}
-    if len(variants) != 1:
-        return [frame]
-    variant = next(iter(variants.values()))
-    return wrap(frame, region, token, variant, role)
-
-
 def wrap(frame, region, token, variant, role, *, entities=(), nominal_role=None):
     # This constructor licenses a scoped reading, not the modifier's factivity.
     # T3 still checks known R-S/R-V/TemplateMap; it may not bypass broken mapping.

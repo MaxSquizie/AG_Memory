@@ -27,7 +27,10 @@ def _live_probe(state, selector, release, key, slot, options, context, source_ra
         contextual_statements=())
     prompt = ('Choose only interpretations positively supported by this source and supplied context. '
         'Generated alternatives are not evidence. Multiple choices need support for EACH. '
-        'If context cannot discriminate, answer ?. Do not invent context, identities or facts.\n'+
+        'If context cannot discriminate and no applicable declared preference is supplied, answer ?. '
+        'An explicitly supplied preference may resolve ordinary pragmatic underspecification; '
+        'it never overrides incompatible grammar, missing candidate coverage or a semantic scope barrier. '
+        'Do not invent context, identities or facts.\n'+
         ((question+'\n\n') if question else '')+prompt)
     try:
         state.budget.spend_llm()
@@ -70,6 +73,18 @@ def _live_probe(state, selector, release, key, slot, options, context, source_ra
 
 
 def _probe(state, selector, release, key, slot, options, context, source_range, *, equivalent_targets=None, question=None):
+    from .canonical_ledger import digest
+    dependency_signature=digest([release.sha256,slot,options,context,source_range,equivalent_targets,question])
+    from .composition_session import current
+    runtime=current(state)
+    if runtime is not None:
+        runtime.tasks.record_probe(key)
+        from .component_policy import policy
+        prior=state.component_probe_records.get(key)
+        unchanged=bool(prior and prior['decision']['outcome']=='RESOLVED'
+                       and prior.get('dependency_signature')==dependency_signature)
+        memory='' if unchanged else runtime.memory(slot,options,source_range,policy(release))
+        question=(question or '')+memory+runtime.tasks.question(key)
     from .component_probe_replay import execute
     return execute(_live_probe,state,selector,release,key,slot,options,context,source_range,
-                   equivalent_targets=equivalent_targets,question=question)
+                   equivalent_targets=equivalent_targets,question=question,dependency_signature=dependency_signature)

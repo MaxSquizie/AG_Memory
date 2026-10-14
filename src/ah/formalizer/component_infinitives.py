@@ -30,31 +30,39 @@ def compose(state, release, selector, region, tokens, cfg, depth):
     a,b=options[chosen]; body=tokens[a:b];parent=[*tokens[:a],*tokens[b:]]
     if not parent:return block(state,region,[],'COMPONENT_INFINITIVE_UNRESOLVED')
     pr=region_for(state,region,parent,'INFINITIVE_PARENT')
-    frames=compose_area(state,release,selector,pr,parent,cfg,depth+1)
-    if root(frames) is None:return block(state,region,frames,'COMPONENT_INFINITIVE_PARENT_UNRESOLVED')
-    # Shared implicit identity is one existing licensed slot, not a new subject.
-    owners=[f for f in accepted(frames) if f.semantic.get('implicit_arguments',{}).get(cfg['subject_role'],{}).get('license')=='SUBJECT_AGREEMENT']
-    links={digest([f.frame_id,r]):(f,r) for f in owners for r in policy['relations']
-           if r['role'] not in f.semantic.get('proposed_roles',{}).values() and r['role'] not in f.semantic.get('proposition_args',{})}
+    from .composition_tree import InputSlot, internalize
+    from .composition_children import select_child
+    frames=compose_area(state,release,selector,pr,parent,cfg,depth+1,request=InputSlot(
+        pending_proposition_roles=frozenset(r['role'] for r in policy['relations'])))
+    if select_child(state,release,selector,region,frames,'INFINITIVE_PARENT',
+        'The parent must accept the retained infinitive child in a declared proposition slot.') is None:return block(state,region,frames,'COMPONENT_INFINITIVE_PARENT_UNRESOLVED')
+    # Control binds an existing entity slot, explicit or implicit. The common
+    # child composer still builds the infinitive and all its dependents.
+    from .control_arguments import controllers as argument_controllers
+    controllers=[(f,alias,label) for f in accepted(frames) for alias,label in argument_controllers(f)]
+    links={digest([f.frame_id,r,alias]):(f,r,alias,label) for f,alias,label in controllers for r in policy['relations']
+           if (f.semantic.get('allowed_proposition_roles') is None or r['role'] in f.semantic['allowed_proposition_roles'])
+           and r['role'] not in f.semantic.get('proposed_roles',{}).values() and r['role'] not in f.semantic.get('proposition_args',{})}
     if not links or len(links)>cfg['max_candidates']:
         return block(state,region,frames,'COMPONENT_INFINITIVE_CONTROL_UNRESOLVED')
     choices=[{'candidate_id':cid,'label':'«'+body[0].span+'» fills '+r['role']+' of «'+f.anchor_span+
-        '»; its omitted subject is the SAME omitted '+cfg['subject_role']+' of that predicate; attitude='+r['attitude']+
-        '; does not assert that the infinitive event occurred'} for cid,(f,r) in links.items()]
+        '»; its omitted subject is the SAME '+label+' of that predicate; attitude='+r['attitude']+
+        '; does not assert that the infinitive event occurred'} for cid,(f,r,alias,label) in links.items()]
     key=region.region_id+'|infinitive-link'
     chosen=_probe(state,selector,release,key,'component_attachment',choices,state.text[slice(*region.source_range)],region.source_range,
         question='Select a source-supported infinitive relation AND subject control. PURPOSE is a goal, not an accomplished event. '
         'A complement may have a different controller: if no candidate represents the source, answer 0 or ?. Do not assign identity from proximity.')
     if chosen is None:return block(state,region,frames,'COMPONENT_INFINITIVE_CONTROL_UNRESOLVED')
-    owner,relation=links[chosen]
-    alias={'frame_ref':owner.frame_id,'role':cfg['subject_role']}
+    owner,relation,alias,label=links[chosen]
     cr=region_for(state,region,body,'INFINITIVE')
     children=compose_area(state,release,selector,cr,body,cfg,depth+1,infinitive=alias)
-    content=root(children)
+    content=select_child(state,release,selector,region,children,'CONTROLLED_INFINITIVE',
+        'The subject uses the already selected controller '+label+'.')
     if content is None:return block(state,region,[*frames,*children],'COMPONENT_INFINITIVE_CHILD_UNRESOLVED')
     from .modifier_scope_shapes import argument
     owner.semantic.setdefault('proposition_args',{})[relation['role']]=argument(content,relation['attitude'])
-    content.semantic['component_child']=owner.frame_id
+    owner.semantic['pending_proposition_roles']=[r for r in owner.semantic.get('pending_proposition_roles',()) if r!=relation['role']]
+    internalize(children,content,owner)
     state.syntax_trace.append({'kind':'INFINITIVE_ATTACHMENT','decision_ref':key,'owner_ref':owner.frame_id,
         'content_ref':content.frame_id,'relation':relation,'controller':alias,
         'parent_token_refs':[t.token_id for t in parent],'content_token_refs':[t.token_id for t in body]})

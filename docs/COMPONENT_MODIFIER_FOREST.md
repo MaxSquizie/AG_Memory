@@ -1,5 +1,12 @@
 # Полные варианты модификаторов
 
+**Исторический контракт.** Описанный ниже генератор полных перестановок удалён.
+`BOUNDED_FOREST_V1` в старом release больше не выбирает отдельный алгоритм.
+Действующий конструктор — `component_nominal_tree`, выбор связей —
+`scope_assignment`; морфологические чтения — `phrase_readings`.
+См. [единый контракт композиции](COMPOSITION_RUNTIME_CONTRACT.md).
+
+
 `ProposalPolicy.composition.modifier_composition=BOUNDED_FOREST_V1` включает
 программный конструктор полных покрытий неразобранных токенов клаузы.
 Обязательны разные `modifier_content_role` и `preposition_nominal_role`.

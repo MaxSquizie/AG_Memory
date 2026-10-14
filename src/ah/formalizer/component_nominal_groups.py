@@ -18,10 +18,10 @@ def select(state, release, selector, region, tokens, cfg):
         contextual=[]
         if not cases and av and bv:
             from .contextual_name_case import resolve
-            row=resolve(state,release,selector,region,a,b,cfg)
-            if row:
-                contextual.append(row)
-                cases=sorted({c for v in row['variants'] for c in v['cases']})
+            rows=resolve(state,release,selector,region,a,b,cfg)
+            if rows:
+                contextual.extend(rows)
+                cases=sorted({c for row in rows for v in row['variants'] for c in v['cases']})
         if not cases:
             if av and bv:
                 state.diag('NOMINAL_COORDINATION_CASE_CONFLICT',region.region_id)

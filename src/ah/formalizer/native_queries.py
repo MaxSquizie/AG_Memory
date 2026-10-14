@@ -49,18 +49,13 @@ class QueryVar:
 
 def project_native_queries(state,release):
     """Project validated syntax, with explicit intent supplied by host or rules."""
-    evidence={e.token_id:e for e in state.evidence}; atoms={}; trees=list(state.logical_roots)
+    from .composition_tree import leaves, forests, slots
+    evidence={e.token_id:e for e in state.evidence}; atoms={}; trees=forests(state.frames,state.logical_roots)
     frames={f.frame_id:f for f in state.frames}
     embedded=set()
-    def leaves(t):
-        if 'frame_ref' in t: return {t['frame_ref']}
-        return set().union(*(leaves(c) for c in t.get('operands',())))
     for f in state.frames:
-        for tree in f.semantic.get('operator_forest',()):
-            if tree not in trees: trees.append(tree)
-        embedded.update(c['frame_ref'] for c in f.semantic.get('nominal_args',()))
-        for child in f.semantic.get('proposition_args',{}).values():
-            embedded.update(leaves(child.get('tree') or {'frame_ref':child['frame_ref']}))
+        for slot in slots(f):
+            embedded.update(leaves(slot.tree))
         d=state.decisions.get(f.frame_id+'|predicate_value')
         if any(t in state.observation.get('unresolved_references',()) for t in f.argument_token_refs):
             state.diag('QUERY_ENTITY_UNBOUND',f.frame_id); continue
@@ -89,9 +84,6 @@ def project_native_queries(state,release):
     for f in state.frames:
         if f.frame_id in structural or f.frame_id in embedded: continue
         tree={'frame_ref':f.frame_id}
-        local=state.text[slice(*f.source_range)]
-        if any(r.get('operator')=='NOT' and re.search(r['pattern'],local,re.I) for r in release.entries('ScopeLexicon')):
-            tree={'operator':'NOT','operands':[tree]}
         trees.append(tree)
     out=[]
     for tree in trees:

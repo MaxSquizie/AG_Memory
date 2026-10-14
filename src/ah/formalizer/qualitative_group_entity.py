@@ -15,7 +15,8 @@ def payload(frame, token_ref):
         return {}
     row = rows[0]
     return {'qualitative_group':{'membership_status':'UNKNOWN', 'cardinality_status':'UNSPECIFIED',
-        **{k:row[k] for k in ('raw','source_range','head_ref','marker_ref','decision_ref','rule_id','resource_sha256')}}}
+        **{k:row[k] for k in ('raw','source_range','head_ref','marker_ref','decision_ref','rule_id','resource_sha256')},
+        **({'quantity_expression':row['quantity_expression']} if row.get('quantity_expression') else {})}}
 
 
 def validate(payload):
@@ -24,11 +25,14 @@ def validate(payload):
         return
     keys = {'membership_status','cardinality_status','raw','source_range','head_ref',
             'marker_ref','decision_ref','rule_id','resource_sha256'}
-    if (not isinstance(value, dict) or set(value) != keys or
+    if (not isinstance(value, dict) or set(value)-{'quantity_expression'} != keys or
             value['membership_status'] != 'UNKNOWN' or value['cardinality_status'] != 'UNSPECIFIED' or
             any(not isinstance(value[k], str) or not value[k] for k in keys-{'source_range'}) or
             payload.get('implicit_participant') is not None or payload.get('scalar_properties')):
         raise ValueError('QUALITATIVE_GROUP_INVALID')
+    if value.get('quantity_expression') is not None:
+        from .quantity_phrases import validate_expression
+        validate_expression(value['quantity_expression'])
     span = value['source_range']
     if (not isinstance(span, (list, tuple)) or len(span) != 2 or any(type(x) is not int for x in span)
             or not 0 <= span[0] < span[1] or span[1]-span[0] != len(value['raw'])):

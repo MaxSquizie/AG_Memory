@@ -102,9 +102,9 @@ def _instantiate(store, source_ref, bindings, budget):
 
 
 class Search:
-    def __init__(self,store,budget=None,point=None,window=None):
+    def __init__(self,store,budget=None,point=None,window=None,*,executor=execute):
         self.store=store; self.budget=budget if budget is not None else [4096]
-        self.point=point; self.window=window; self.attempts=0
+        self.point=point; self.window=window; self.attempts=0; self.executor=executor
 
     def _run(self,rule,root_option,proof,support_options,source_ref,bindings=None,target=None,conclusion_path=()):
         self.attempts+=1; spend(self.budget)
@@ -116,7 +116,7 @@ class Search:
         selected=[root_option,*support_options]
         supports=tuple(sorted({sid for sid,aid in selected}))
         assertions=tuple(sorted({aid for sid,aid in selected if aid is not None}))
-        result=execute(self.store,GoalRequest('goal:'+uuid4().hex,rule,supports,signature,
+        result=self.executor(self.store,GoalRequest('goal:'+uuid4().hex,rule,supports,signature,
             temporal_premise_assertion_refs=assertions,conclusion_ref=target,
             conclusion_ops=ops,instantiation=tuple(sorted((bindings or {}).items())),antecedent_proof=proof,
             rule_root_support_id=root_option[0],conclusion_path=conclusion_path,instantiation_depth=len(bindings or {}) if rule=='FORALL_INST' else None,request_window=self.window or ((self.point,self.point) if self.point is not None else None)))

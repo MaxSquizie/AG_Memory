@@ -1,6 +1,6 @@
 """Typed syntax descriptions, licensed by released senses, never identity links."""
 from .canonical_ledger import digest
-from .component_dependency_domains import clean
+from .nominal_readings import variant, attested
 
 
 def prepare_entities(deps,evidence,morphology,lexical):
@@ -13,8 +13,8 @@ def prepare_entities(deps,evidence,morphology,lexical):
 def describe_dependencies(deps,describe,evidence,owners,pending,cfg):
     for d in deps:
         head,host=d['head_ref'],d['host_ref'];e=evidence[head]
-        variant=next(v for v in e.variants if clean(v)==d['morph'])
-        child=describe(e,variant,{host:cfg['nominal_host_role'],head:cfg['preposition_nominal_role']})
+        reading=variant(d['morph'])
+        child=describe(e,reading,{host:cfg['nominal_host_role'],head:cfg['preposition_nominal_role']})
         child.semantic['nominal_dependency_kind']=d['kind']
         child.semantic['dependency_evidence']=d
         owners[head]=child;pending.append((host,child))
@@ -27,16 +27,15 @@ def prepare_candidate(frame,state,release):
     kind=frame.semantic['nominal_dependency_kind'];sid=cfg['dependency_senses'][kind]
     d=frame.semantic['dependency_evidence'];evidence={e.token_id:e for e in state.evidence}
     head,host=d['head_ref'],d['host_ref'];reading=d['morph']
-    valid=any(clean(v)==reading for v in evidence[head].variants)
+    valid=attested(state,head,reading)
     valid &= frame.semantic['proposed_roles']=={host:cfg['nominal_host_role'],head:cfg['preposition_nominal_role']}
     if kind=='GENITIVE': valid &= 'gen' in reading['cases']
     elif kind=='CASE_DEPENDENCY':
         valid &= d.get('case') in cfg.get('nominal_dependency_cases',()) and d.get('case') in reading['cases']
         valid &= head!=host
     else:
-        marker=evidence.get(d.get('marker_ref'))
-        valid &= bool(marker and marker.span in cfg['apposition_markers'] and
-                      evidence[host].end<=marker.start and marker.end<=evidence[head].start and 'nom' in reading['cases'])
+        from .nominal_apposition import licensed
+        valid &= licensed(state,evidence,d,cfg)
     if not valid:
         frame.semantic['structural_unresolved']=True
         state.diag('COMPONENT_DEPENDENCY_LICENSE_FAILED',frame.frame_id)

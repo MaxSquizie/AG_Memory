@@ -234,25 +234,9 @@ def build_plan(state,release,store):
                 'stages':{'T1':{'morphological_priors':morphology},'T2':{'structural_priors':shapes},'T3':{'semantic_priors':rows}}},frag)
         return sid
 
-    forests=list(state.logical_roots)
-    forests.extend(f.semantic['component_scope_tree'] for f in state.frames
-        if f.semantic.get('component_scope_tree') and not f.semantic.get('component_child')
-        and not f.semantic.get('structural_unresolved'))
-    for f in state.frames:
-        for t in f.semantic.get('operator_forest',()):
-            if t not in forests: forests.append(t)
-    structural_leaves=set()
-    def leaf_refs(t):
-        if 'bound_var' in t or 'time_literal' in t or 'count_literal' in t: return set()
-        if 'frame_ref' in t: return {t['frame_ref']}
-        return set().union(*(leaf_refs(c) for c in t['operands']))
-    for t in forests: structural_leaves.update(leaf_refs(t))
-    for f in state.frames:
-        for child in f.semantic.get('proposition_args',{}).values():
-            structural_leaves.update(leaf_refs(child.get('tree') or {'frame_ref':child['frame_ref']}))
-    for f in state.frames:
-        for c in f.semantic.get('nominal_args',()):
-            structural_leaves.update(leaf_refs(c.get('tree') or {'frame_ref':c['frame_ref']}))
+    from .composition_tree import forests as composition_forests, embedded, leaves as leaf_refs
+    forests=composition_forests(state.frames,state.logical_roots)
+    structural_leaves=embedded(state.frames,forests)
     from .component_policy import rejected
     roots=[(f.frame_id,{'frame_ref':f.frame_id}) for f in state.frames if f.frame_id not in structural_leaves and not f.semantic.get('coordination_owner') and not rejected(state,f)]
     roots += [('logical:'+digest(t)[:16],t) for t in forests]
@@ -294,10 +278,9 @@ def build_plan(state,release,store):
         try:
             if 'frame_ref' in t:
                 f=frames[t['frame_ref']]
-                not_rules=[x for x in release.entries('ScopeLexicon') if x.get('operator')=='NOT']
-                neg=any(re.search(x['pattern'],local,re.I) for x in not_rules)
-                tree={'operator':'NOT','operands':[t]} if neg else t
-                uid,ck=tree_node(tree,frag) if neg else node_for(f.frame_id,frag,False)
+                # Scope belongs to the sealed tree. The writer must never
+                # reinterpret a source span and introduce another NOT.
+                uid,ck=node_for(f.frame_id,frag,False)
                 polarity=next(op.payload['polarity'] for op in op_by_id.values() if op.op_type in {'ENSURE_NODE','ENSURE_FUNCTION'} and op.payload['uid']==uid)
             else:
                 uid,ck=tree_node(t,frag)

@@ -20,8 +20,7 @@ def consume_copula(tokens, predicate, variant, cfg, used, morph):
     return e.token_id
 
 
-def compose_alternatives(state, release, selector, region, tokens, predicates, cfg, *, attachment=None, nominal_groups=(), infinitive=None):
-    from .component_modifiers import scoped_bundle
+def compose_alternatives(state, release, selector, region, tokens, predicates, cfg, *, attachment=None, nominal_groups=(), infinitive=None, request=None):
     from .contextual_name_case import overlay as coordinated_readings
     from .contextual_preposition_case import overlay as governed_readings
     tokens=governed_readings(state,release,selector,region,coordinated_readings(tokens,nominal_groups),cfg)
@@ -41,26 +40,30 @@ def compose_alternatives(state, release, selector, region, tokens, predicates, c
     diagnostics_before = len(state.diagnostics)
     bases=[]
     for predicate in predicates:
-        bases.extend(build_clause(state, release, selector, region, tokens, predicate, cfg, select=False, attachment=attachment, nominal_groups=nominal_groups,infinitive=infinitive,qualitative_groups=quantities))
+        bases.extend(build_clause(state, release, selector, region, tokens, predicate, cfg, select=False, attachment=attachment, nominal_groups=nominal_groups,infinitive=infinitive,qualitative_groups=quantities,
+            proposition_slots=(request.proposition_slots or {}).get(predicate.token_id,{}) if request else {},
+            agreement_source=request.agreement_source if request else None,
+            pending_roles=request.pending_proposition_roles if request else ()))
     if attachment is None and infinitive is None:
         from .component_nominal_utterance import candidates as nominatives
-        bases.extend(nominatives(state,release,region,tokens,cfg))
+        bases.extend(nominatives(state,release,region,tokens,cfg,request=request if request and request.output_sort=='EVENT_DESCRIPTION' else None,selector=selector,quantities=quantities))
+    from .component_nominal_tree import bundles as nominal_bundles
     for frame in bases:
-        if cfg.get('modifier_composition')=='BOUNDED_FOREST_V1':
-            from .component_modifier_forest import bundles as modifier_bundles
-            if cfg.get('nominal_composition')=='QUESTION_TREE_V1':
-                from .component_nominal_tree import bundles as nominal_bundles
-                bundles.extend(nominal_bundles(state,release,selector,region,tokens,frame,cfg))
-            else:
-                bundles.extend(modifier_bundles(state,region,tokens,frame,cfg))
+        if cfg.get('modifier_content_role'):
+            bundles.extend(nominal_bundles(state,release,selector,region,tokens,frame,cfg))
         else:
-            bundles.append(scoped_bundle(state, release, region, tokens, frame, cfg))
+            bundles.append([frame])
     frames = [f for bundle in bundles for f in bundle]
     attach_references(frames,references)
     complete = [b for b in bundles if all(not f.semantic['structural_unresolved'] for f in b)]
-    incomplete_search = any(d.code in {'COMPONENT_SEARCH_INCOMPLETE','COMPONENT_NOMINAL_SELECTION_UNRESOLVED',
-        'COMPONENT_DEPENDENCY_UNRESOLVED','COMPONENT_NOMINAL_SEGMENTATION_UNRESOLVED','COMPONENT_NOMINAL_CYCLE','COMPONENT_NOMINAL_HOST_UNRESOLVED'} and d.detail==region.region_id
-                            for d in state.diagnostics[diagnostics_before:])
+    local_diagnostics=[d for d in state.diagnostics[diagnostics_before:] if d.detail==region.region_id]
+    incomplete_search=any(d.code=='COMPONENT_SEARCH_INCOMPLETE' for d in local_diagnostics)
+    pending_search=any(d.code in {'COMPONENT_NOMINAL_SELECTION_UNRESOLVED',
+        'COMPONENT_DEPENDENCY_UNRESOLVED','COMPONENT_NOMINAL_SEGMENTATION_UNRESOLVED',
+        'COMPONENT_NOMINAL_CYCLE','COMPONENT_NOMINAL_HOST_UNRESOLVED'} for d in local_diagnostics)
+    if pending_search and not incomplete_search:
+        for frame in frames:frame.semantic['structural_unresolved']=True
+        return frames
     if incomplete_search or len(complete) > cfg['max_candidates']:
         state.diag('COMPONENT_SEARCH_INCOMPLETE', region.region_id)
         for frame in frames:
@@ -72,9 +75,9 @@ def compose_alternatives(state, release, selector, region, tokens, predicates, c
     chosen = complete[0][-1].frame_id if len(complete) == 1 and not needs_probe else None
     from .component_source import view
     raw = view(state,region,tokens)
+    options = []
     if complete and needs_probe and len(raw) <= cfg['context_chars']:
         evidence = {e.token_id:e for e in state.evidence}
-        options = []
         for bundle in complete:
             labels = []
             for f in bundle:
@@ -83,7 +86,7 @@ def compose_alternatives(state, release, selector, region, tokens, predicates, c
                 label = f.semantic.get('nominal_dependency_kind',m['lemma'])+' ['+m['pos']+']; '+roles
                 if cfg.get('modifier_composition')=='BOUNDED_FOREST_V1':
                     label += '; linked morphology='+str({evidence[t].span:{k:v for k,v in morph.items()
-                        if k in {'lemma','pos','cases','gender','number'}} for t,morph in f.semantic['morph_bindings'].items()})
+                        if k in {'lemma','pos','cases','gender','number','features'}} for t,morph in f.semantic['morph_bindings'].items()})
                 if f.semantic.get('nominal_groups'):
                     label += '; one coordinated slot per group='+str([
                         [evidence[t].span for t in g['member_refs']] for g in f.semantic['nominal_groups']])
@@ -125,14 +128,28 @@ def compose_alternatives(state, release, selector, region, tokens, predicates, c
         chosen = _probe(state, selector, release, region.region_id+'|composition',
                         'component_attachment', options, context, region.source_range,
                         question=target_question+(local['question'] if local else ''))
+    decision=state.decisions.get(region.region_id+'|composition')
+    deferred=chosen is None and decision is not None and decision.selector_outcome in {
+        'MULTIPLE_ADMISSIBLE','INSUFFICIENT_CONTEXT'}
+    admissible=set(options[i]['candidate_id'] for i in range(len(options)))
+    if deferred and decision.selector_outcome=='MULTIPLE_ADMISSIBLE':
+        admissible=set(next((h['selected'] for h in reversed(decision.history)
+                             if h.get('kind')=='CLOSED_PROBE_ALTERNATIVES'),()))
+    labels={o['candidate_id']:o['label'] for o in options}
     for bundle in complete:
-        if bundle[-1].frame_id==chosen:
-            from .component_temporal_scope import resolve
-            if not resolve(state,release,selector,region,tokens,bundle,cfg): chosen=None
+        carrier=bundle[-1]
+        if deferred and carrier.frame_id in admissible:
+            carrier.semantic['composition_domain']={'decision_ref':region.region_id+'|composition',
+                'candidate_id':carrier.frame_id,'frame_refs':[f.frame_id for f in bundle],
+                'label':labels[carrier.frame_id]}
     for bundle in bundles:
         for f in bundle:
             f.semantic['composition_decision'] = region.region_id+'|composition'
             f.semantic['composition_bundle_root'] = bundle[-1].frame_id
             if bundle[-1].frame_id != chosen:
                 f.semantic['structural_unresolved'] = True
+            elif decision is not None:
+                from .morphology_domain import license_use
+                for tid,reading in f.semantic.get('morph_bindings',{}).items():
+                    license_use(state,tid,reading,region.region_id+'|composition',chosen)
     return frames

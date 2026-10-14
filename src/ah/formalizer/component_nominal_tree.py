@@ -1,7 +1,5 @@
 """Build typed recursive nominal descriptions and event scopes from questions."""
 from copy import deepcopy
-from itertools import permutations
-from math import factorial
 from .canonical_ledger import digest
 from .component_policy import _morph
 from .component_phrases import prepositional_groups
@@ -9,7 +7,7 @@ from .state import FrameCandidate
 
 
 def bundles(state,release,selector,region,tokens,frame,cfg):
-    from .component_modifier_forest import nominal_variants,unique
+    from .phrase_readings import nominal_variants,unique
     from .component_nominal_questions import select_units,select_hosts
     from .nominal_prefix_descriptions import pending_refs
     missing=set(frame.semantic['uncovered_token_refs'])|pending_refs(frame,tokens)
@@ -20,11 +18,11 @@ def bundles(state,release,selector,region,tokens,frame,cfg):
     if missing or deps: frame.semantic['structural_unresolved']=True  # must discharge every pending description
     try:
         from .nominal_prefix_descriptions import units as prefix_units
-        units=list(prefix_units(tokens,missing,frame))
+        units=list(prefix_units(tokens,missing,frame)) if cfg.get('nominal_host_role') else []
         from .nominal_residual_descriptions import units as residual_units
-        units.extend(list(residual_units(tokens,missing,frame,units)))
+        if cfg.get('nominal_host_role'):units.extend(list(residual_units(tokens,missing,frame,units)))
         from .implicit_descriptions import units as implicit_units
-        units.extend(implicit_units(tokens,missing,frame,cfg))
+        if cfg.get('nominal_host_role'):units.extend(implicit_units(tokens,missing,frame,cfg))
         from .qualitative_quantity import units as quantity_units
         quantities=list(quantity_units(tokens,missing,frame))
         units.extend(quantities)
@@ -35,6 +33,15 @@ def bundles(state,release,selector,region,tokens,frame,cfg):
             if e.token_id in missing and e.token_id not in quantity_refs:
                 units.extend({'token':e,'variant':v,'refs':(e.token_id,),'entities':[],'adjectives':[]}
                              for v in unique(v for v in e.variants if v.pos=='ADVB'))
+        from .component_dependency_domains import clean
+        for head,reading in frame.semantic.get('pp_readings',{}).items():
+            units=[u for u in units if head not in u['refs'] or
+                   any(e.token_id==head and clean(v)==reading for e,v in u['entities'])]
+        for constraint in frame.semantic.get('attribute_constraints',()):
+            units=[u for u in units if constraint['head_ref'] not in u['refs'] or
+                   (u.get('bound_host')==constraint['host_ref'] and clean(u['variant'])==constraint['morph']) or
+                   (any(e.token_id==constraint['head_ref'] and clean(v)==constraint['morph'] for e,v in u['adjectives']) and
+                    any(e.token_id==constraint['host_ref'] and clean(v)==constraint['host_morph'] for e,v in u['entities']))]
         covers=[]
         def visit(remaining,chosen):
             if not remaining:
@@ -58,18 +65,25 @@ def bundles(state,release,selector,region,tokens,frame,cfg):
     hosts=select_hosts(state,release,selector,region,units,frame,cfg)
     if hosts is None: return [[frame]]
     event=[u for u in units if not u.get('bound_host') and not u.get('implicit_host_role') and (not u['entities'] or hosts[u['entities'][0][0].token_id]=='EVENT')]
-    from .directional_goal import bundle as directional_bundle
-    shared=directional_bundle(state,release,selector,region,tokens,frame,units,hosts,event,cfg)
-    if shared is not None:return [shared]
-    if cfg.get('modifier_scope')=='SHARED_EVENT_V1' and len(event)>1:
-        from .modifier_scope_shapes import shapes
-        try: topology=shapes(len(event),limit)
-        except OverflowError:
-            state.diag('COMPONENT_SEARCH_INCOMPLETE',region.region_id);return [[frame]]
-        return [materialize(state,region,tokens,frame,units,hosts,event,cfg,shape=s) for s in topology]
-    if factorial(len(event))>limit:
-        state.diag('COMPONENT_SEARCH_INCOMPLETE',region.region_id);return [[frame]]
-    return [materialize(state,region,tokens,frame,units,hosts,order,cfg) for order in permutations(event)]
+    from .directional_goal import constrain
+    constrained=constrain(state,release,selector,region,frame,units,hosts,event,cfg)
+    if constrained is None:return [[frame]]
+    units,event=constrained
+    if not event:
+        return [materialize(state,region,tokens,frame,units,hosts,[],cfg)]
+    from .scope_assignment import assign, modifier_shape
+    from .composition_tree import reference
+    ids=['modifier-slot:'+digest([frame.frame_id,u['refs'],_morph(u['variant'])]) for u in event]
+    modifiers=[{'id':fid,'label':'«'+' '.join(t.span for t in tokens if t.token_id in u['refs'])+'»',
+                'allow_shared':True} for fid,u in zip(ids,event)]
+    selected=assign(state,release,selector,region,reference(frame),modifiers,cfg,
+                    node_labels={frame.frame_id:'«'+frame.anchor_span+' '+', '.join(frame.arguments)+'»'})
+    if selected is None:return [[frame]]
+    tree,contents,decisions=selected
+    shape=modifier_shape(tree,contents,ids,frame.frame_id)
+    result=materialize(state,region,tokens,frame,units,hosts,event,cfg,shape=shape)
+    for item in result:item.semantic['scope_decision_refs']=decisions
+    return [result]
 
 
 def materialize(state,region,tokens,original,units,hosts,order,cfg,*,shape=None):
@@ -119,11 +133,17 @@ def materialize(state,region,tokens,original,units,hosts,order,cfg,*,shape=None)
     root=base
     def apply(unit,inner,content=None):
         outer=wrap(inner,region,unit['token'],unit['variant'],cfg['modifier_content_role'],
-            entities=unit['entities'],nominal_role=cfg['preposition_nominal_role'] if unit['entities'] else None)[-1]
+            entities=unit['entities'],nominal_role=unit.get('nominal_role',cfg['preposition_nominal_role']) if unit['entities'] else None)[-1]
         if content is not None:
             outer.semantic['proposition_args'][cfg['modifier_content_role']]={'tree':content,'attitude':'UNKNOWN'}
         for e,v in unit['entities']:
             outer.semantic['lexical_units'][e.token_id]=deepcopy(lexical[e.token_id]);owners[e.token_id]=outer
+        if unit.get('referent_constraint'):
+            marker,mv=unit['role_marker']
+            head=unit['referent_constraint']['target_token_ref']
+            outer.semantic['morph_bindings'][marker.token_id]=_morph(mv)
+            outer.semantic['preposition_bindings'][head]={'token_ref':marker.token_id,'lemma':mv.lemma}
+            outer.semantic['explicit_directional_goal']=deepcopy(unit['referent_constraint'])
         frames.append(outer)
         return outer
     if shape is None:
@@ -156,6 +176,10 @@ def materialize(state,region,tokens,original,units,hosts,order,cfg,*,shape=None)
                 state.diag('PARTICIPLE_PROJECTION_UNRESOLVED',u['token'].token_id)
                 continue
             f=describe(u['token'],u['variant'],{head:role})
+            if u.get('quantity_surface'):
+                f.semantic['lexical_units'][u['token'].token_id]={'head_ref':u['token'].token_id,
+                    'anchor_refs':list(u['refs']),'surface':u['quantity_surface'],
+                    'mention_ref':'quantity:'+digest(u['refs'])}
             f.semantic['nominal_host_role']=role;pending.append((head,f))
         for adj,av in u['adjectives']:
             head=u['entities'][0][0].token_id

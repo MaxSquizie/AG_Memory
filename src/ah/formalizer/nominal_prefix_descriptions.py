@@ -13,8 +13,8 @@ def pending_refs(frame,tokens):
 
 
 def units(tokens,missing,frame):
-    readings=dict(frame.semantic['morph_bindings'])
-    readings.update({d['head_ref']:d['morph'] for d in frame.semantic.get('nominal_dependencies',())})
+    from .nominal_readings import description_heads
+    readings=description_heads(frame)
     for i,head in enumerate(tokens):
         raw=readings.get(head.token_id)
         if not raw or raw['pos'] not in {'NOUN','NPRO'}:continue

@@ -8,6 +8,11 @@ def validate_dependency_policy(release,cfg):
         raise ResourceMissing('RESOURCE_MISSING: incomplete dependency constructor policy')
     if any(not marker or any(c.isalnum() for c in marker) for marker in cfg['apposition_markers']):
         raise ResourceMissing('RESOURCE_MISSING: apposition marker must be punctuation')
+    from ..nominal_apposition import rules
+    appositions=rules(cfg)
+    if (len({r['rule_id'] for r in appositions})!=len(appositions) or
+            any(not r['rule_id'] or any(not m or any(c.isalnum() for c in m) for m in r['markers']) for r in appositions)):
+        raise ResourceMissing('RESOURCE_MISSING: invalid apposition licenses')
     expected={cfg['nominal_host_role'],cfg['preposition_nominal_role']}
     if len(set(cfg['dependency_senses'].values()))!=len(expected_kinds):
         raise ResourceMissing('RESOURCE_MISSING: dependency kinds need distinct senses')

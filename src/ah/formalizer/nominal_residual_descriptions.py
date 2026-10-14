@@ -5,8 +5,8 @@ from .state import MorphVariant
 
 def units(tokens, missing, frame, established):
     covered={t for u in established for t in u['refs']}
-    readings=dict(frame.semantic['morph_bindings'])
-    readings.update({d['head_ref']:d['morph'] for d in frame.semantic.get('nominal_dependencies',())})
+    from .nominal_readings import description_heads
+    readings=description_heads(frame)
     for token in tokens:
         if token.token_id not in missing-covered: continue
         for variant in token.variants:

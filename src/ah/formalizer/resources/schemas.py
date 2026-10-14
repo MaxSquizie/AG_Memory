@@ -165,6 +165,8 @@ RESOURCE_SCHEMAS = {
             'agreement_recovery': obj(('version','max_edits'),{'version':enum('MODIFIER_AGREEMENT_V1'),
                 'max_edits':{'type':'integer','minimum':1,'maximum':2}}),
             'apposition_markers': array(S,minimum=1),
+            'apposition_rules': array(obj(('rule_id','mode','markers'), {
+                'rule_id':S,'mode':enum('NOMINATIVE','AGREEMENT'), 'markers':array(S,minimum=1)}),minimum=1),
             'dependency_senses': obj(('GENITIVE','APPOSITION'), {'GENITIVE':S,'APPOSITION':S,'CASE_DEPENDENCY':S}),
             'nominal_dependency_cases': array(enum('acc','dat','abl','ins','loc','loct'),minimum=1),
             'refinement': obj(('version','max_depth','relative_markers','participle_voices'), {

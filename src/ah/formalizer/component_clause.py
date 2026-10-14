@@ -4,7 +4,7 @@ from .component_probe import _probe
 from .component_candidates import enumerate_candidates
 
 
-def build_clause(state,release,selector,region,tokens,p,cfg, *, select=True, attachment=None, nominal_groups=(), infinitive=None,qualitative_groups=()):
+def build_clause(state,release,selector,region,tokens,p,cfg, *, select=True, attachment=None, nominal_groups=(), infinitive=None,qualitative_groups=(),proposition_slots=None,agreement_source=None,pending_roles=()):
     from .contextual_name_case import overlay
     tokens=overlay(tokens,nominal_groups)
     if select:
@@ -14,9 +14,9 @@ def build_clause(state,release,selector,region,tokens,p,cfg, *, select=True, att
     evidence={e.token_id:e for e in tokens}
     from .component_source import view
     raw=view(state,region,tokens)
-    from .component_temporal import relative_adjuncts, questions
-    relative=relative_adjuncts(state,release,region,tokens)
-    temporal = {tid for row in relative for tid in row['anchor_refs']}
+    # Relative event anchors are typed children of the common composer.
+    # This layer owns only lexical calendar/clock expressions.
+    temporal = set()
     for rule in release.entries('TemporalRules'):
         for m in re.finditer(rule['pattern'],raw,re.I):
             from .clock_ranges import boundary_spans
@@ -32,18 +32,16 @@ def build_clause(state,release,selector,region,tokens,p,cfg, *, select=True, att
     if cfg.get('dependency_reduction'):
         allowed_cases.update({'gen','nom'})  # nominal dependencies need not fill a predicate role
     nominal_connectors={t for g in nominal_groups for t in g['marker_refs']}
-    nominals = [e for e in tokens if e.token_id not in temporal|prep_markers|nominal_connectors and e != p
+    quantity_markers={t for g in qualitative_groups for t in g.get('quantity_token_refs',[g['marker_ref']])}
+    nominals = [e for e in tokens if e.token_id not in temporal|prep_markers|nominal_connectors|quantity_markers and e != p
                 and (e.token_id in groups or any(v.pos in {'NOUN','NPRO'} and set(v.cases)&allowed_cases for v in e.variants))]
-    # No arbitrary truncation of the argument candidate inventory.
-    if len(nominals) > 3 and not cfg.get('dependency_reduction'):
-        state.diag('COMPONENT_SEARCH_INCOMPLETE', region.region_id)
-        return []
-    candidates=enumerate_candidates(state,release,cfg,region,tokens,p,temporal,nominals,groups,selector=selector,attachment=attachment,nominal_groups=nominal_groups,infinitive=infinitive)
+    # The number of nominals is not a grammatical exclusion. Large domains
+    # go through constraint reduction, under the same released search budget.
+    candidates=enumerate_candidates(state,release,cfg,region,tokens,p,temporal,nominals,groups,selector=selector,attachment=attachment,nominal_groups=nominal_groups,infinitive=infinitive,proposition_slots=proposition_slots,agreement_source=agreement_source,pending_roles=pending_roles,qualitative_groups=qualitative_groups)
     for f in candidates:
-        f.semantic['qualitative_groups']=[g for g in qualitative_groups if g['head_ref'] in f.semantic['proposed_roles']]
-        f.semantic['relative_temporal']=relative
-        f.semantic['component_questions'].extend(questions(relative))
-        if relative: f.semantic['requires_attachment_probe']=True
+        from .nominal_readings import attach_groups
+        attach_groups(f,qualitative_groups)
+        f.semantic['relative_temporal']=[]  # legacy reader field, no new producer
     if not select: return candidates
     if not candidates: return []
     if len(candidates)>cfg['max_candidates']:

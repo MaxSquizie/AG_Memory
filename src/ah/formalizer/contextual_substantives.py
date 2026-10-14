@@ -1,26 +1,31 @@
-"""Local nominal use of adjective forms, selected before role composition."""
+"""Nominal-use proposals; attachment selects a reading in the shared domain.
+
+R1 remains immutable. An adjective and its nominal use coexist until the
+dependent/host question is resolved. Proposal generation is not a license.
+"""
 from dataclasses import replace
-from .component_policy import compatible,_features,_morph
-from .component_probe import _probe
+from .canonical_ledger import digest
+from .component_policy import _morph
+
+
+def nominal_use(token, reading):
+    source={k:v for k,v in _morph(reading).items() if k!='score'}
+    key='nominal-use:'+digest([token.token_id,source])
+    return replace(reading,pos='NOUN',features=(reading.features-{'ADJF'})|{'NOUN','SUBSTANTIVE'},
+                   origin='CONTEXTUAL',evidence_refs=(key,token.token_id))
 
 
 def overlay(state,release,selector,region,tokens,cfg):
     if cfg.get('substantive_readings')!='CONTEXTUAL_SUBSTANTIVE_V1':return tokens
-    result=list(tokens)
-    for i,e in enumerate(tokens):
+    result=[]
+    for e in tokens:
         variants=[v for v in e.variants if v.pos=='ADJF' and not v.features & {'Anum','Apro'}]
-        if not variants or any(v.pos in {'NOUN','NPRO'} for v in e.variants):continue
-        # Keep adjectives with a possible overt head in the ordinary forest.
-        if any(abs(j-i)==1 and any(n.pos=='NOUN' and n.cases&v.cases and compatible(_features(n),_features(v))
-            for n in h.variants for v in variants) for j,h in enumerate(tokens)):continue
-        key=region.region_id+'|substantive:'+e.token_id
-        selected=_probe(state,selector,release,key,'contextual_morphology',[
-            {'candidate_id':'NOMINAL','label':'«'+e.span+'» is used as an entity-denoting nominal here (including a surname or substantivized adjective); preserve its inflection, no identity inference'},
-            {'candidate_id':'ADJECTIVAL','label':'Keep adjectival analysis; no established entity-denoting nominal use'}],
-            state.text[slice(*region.source_range)],region.source_range,
-            question='Does this occurrence fill a noun-like slot by itself? Capitalization is only a clue, never sufficient evidence. Do not invent a missing named person.')
-        if selected=='NOMINAL':
-            readings=tuple(replace(v,pos='NOUN',features=(v.features-{'ADJF'})|{'NOUN','SUBSTANTIVE'},origin='CONTEXTUAL',evidence_refs=(key,e.token_id)) for v in variants)
-            result[i]=replace(e,variants=readings)
-            state.syntax_trace.append({'kind':'CONTEXTUAL_SUBSTANTIVE','decision_ref':key,'token_ref':e.token_id,'variants':[_morph(v) for v in readings]})
+        # Existing noun readings already participate in the same domain.
+        if not variants or any(v.pos in {'NOUN','NPRO'} for v in e.variants):
+            result.append(e);continue
+        readings=tuple(nominal_use(e,v) for v in variants)
+        result.append(replace(e,variants=(*e.variants,*readings)))
+        state.syntax_trace.append({'kind':'MORPHOLOGY_DOMAIN','region_ref':region.region_id,
+            'token_ref':e.token_id,'source_variants':[_morph(v) for v in e.variants],
+            'proposals':[_morph(v) for v in readings]})
     return result

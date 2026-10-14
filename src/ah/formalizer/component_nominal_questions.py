@@ -8,8 +8,8 @@ def choose(state, release, selector, region, key, options, question):
     if len(options)==1: return options[0]['candidate_id']
     key=region.region_id+'|nominal:'+digest([key,options])
     previous=state.decisions.get(key)
-    if previous:
-        return previous.selected[0] if previous.outcome=='RESOLVED' and len(previous.selected)==1 else None
+    if previous and previous.outcome=='RESOLVED' and len(previous.selected)==1:
+        return previous.selected[0]
     return _probe(state,selector,release,key,'nominal_attachment',options,
         state.text[slice(*region.source_range)],region.source_range,question=question)
 
@@ -20,29 +20,68 @@ def select_units(state, release, selector, region, covers, frame, cfg):
     for cover in covers:
         signature=tuple(u['refs'] for u in cover)
         grouped.setdefault(signature,[]).append(cover)
-    if len(grouped)!=1:
-        state.diag('COMPONENT_NOMINAL_SEGMENTATION_UNRESOLVED',region.region_id)
-        return None
-    alternatives=next(iter(grouped.values())); selected=[]
+    if not grouped:return None
+    if len(grouped)>1:
+        options=[{'candidate_id':digest(signature),'label':'Phrase boundaries: '+str([
+            [next(e.span for e in state.evidence if e.token_id==tid) for tid in refs] for refs in signature])}
+            for signature in grouped]
+        if len(options)>cfg['max_candidates']:
+            state.diag('COMPONENT_SEARCH_INCOMPLETE',region.region_id);return None
+        chosen=choose(state,release,selector,region,['segmentation',frame.frame_id],options,
+            'Choose the phrase boundaries under the existing predicate and nominal slots. '
+            'Preserve every source token; do not merge competing covers. If no boundary is supported, answer ?.')
+        if chosen is None:
+            state.diag('COMPONENT_NOMINAL_SEGMENTATION_UNRESOLVED',region.region_id);return None
+        grouped={signature:values for signature,values in grouped.items() if digest(signature)==chosen}
+    alternatives=next(iter(grouped.values())); selected={}; deferred={}; previous_keys={}
+    from .composition_domains import DomainNetwork
+    def unit_key(u):
+        return digest([_morph(u['variant']),u.get('bound_host'),u.get('implicit_host_role'),[(e.token_id,_morph(v)) for e,v in [*u['entities'],*u['adjectives']]]])
+    packed={str(i):[unit_key(u) for u in cover] for i,cover in enumerate(alternatives)}
+    domains={'COVER':packed}
     for index in range(len(alternatives[0])):
+        domains[str(index)]={unit_key(c[index]):unit_key(c[index]) for c in alternatives}
+    graph=DomainNetwork(domains)
+    for index in range(len(alternatives[0])):
+        graph.connect('COVER',str(index),lambda cover,uid,index=index:cover[index]==uid,'PHRASE_BOUNDARY_READING')
+    graph.propagate()
+    while len(selected)<len(alternatives[0]):
+        stamps={i:digest([list(graph.domains[str(i)]),list(graph.domains['COVER'])])
+                for i in range(len(alternatives[0])) if i not in selected}
+        pending=[i for i in stamps if deferred.get(i)!=stamps[i]]
+        if not pending:
+            state.diag('COMPONENT_NOMINAL_SELECTION_UNRESOLVED',region.region_id);return None
+        index=pending[0]
         units={digest([_morph(u['variant']),u.get('bound_host'),u.get('implicit_host_role'),[(e.token_id,_morph(v)) for e,v in
                 [*u['entities'],*u['adjectives']]]]):u for u in (c[index] for c in alternatives)}
+        units={k:u for k,u in units.items() if k in graph.domains[str(index)]}
         options=[{'candidate_id':k,'label':'Whole phrase readings: '+str({e.span:
-            {a:b for a,b in _morph(v).items() if a in {'lemma','pos','cases','number','gender'}}
+            {a:b for a,b in _morph(v).items() if a in {'lemma','pos','cases','number','gender','features'}}
             for e,v in [(u['token'],u['variant']),*u['adjectives'],*u['entities']]})+
             ('; description host: '+next(e.span for e in state.evidence if e.token_id==u['bound_host'])+
              '; host_ref='+u['bound_host'] if u.get('bound_host') else '')+
             ('; description host: the omitted '+u['implicit_host_role']+' of «'+frame.anchor_span+'» (same slot, identity unresolved)'
              if u.get('implicit_host_role') else '')}
             for k,u in units.items()]
-        cid=choose(state,release,selector,region,['morphology',alternatives[0][index]['refs']],options,
+        local_key=['morphology',alternatives[0][index]['refs']]
+        decision_ref=region.region_id+'|nominal:'+digest([local_key,options])
+        previous=previous_keys.get(index)
+        if previous and previous!=decision_ref:
+            state.clarification_candidates[:]=[row for row in state.clarification_candidates if row['decision_ref']!=previous]
+        previous_keys[index]=decision_ref
+        cid=choose(state,release,selector,region,local_key,options,
             'Which complete morphological reading fits this phrase in the source? '
             'Do not resolve identities or replace the source words.')
         if cid is None:
-            state.diag('COMPONENT_NOMINAL_SELECTION_UNRESOLVED',region.region_id)
-            return None
-        selected.append(units[cid])
-    return selected
+            deferred[index]=stamps[index]
+            continue
+        graph.restrict(str(index),[cid],'SELECTED_PHRASE_READING')
+        if not graph.propagate():
+            state.diag('COMPONENT_NOMINAL_SELECTION_UNRESOLVED',region.region_id);return None
+        selected[index]=units[cid]
+    state.syntax_trace.append({'kind':'PHRASE_DOMAIN_CLOSURE','region_ref':region.region_id,
+        'constraint_state':graph.snapshot()})
+    return [selected[i] for i in range(len(alternatives[0]))]
 
 
 def select_hosts(state, release, selector, region, units, frame, cfg):

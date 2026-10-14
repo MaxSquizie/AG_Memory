@@ -1,9 +1,9 @@
-"""Closed probes over code-generated structures; the model cannot add a graph."""
+"""Compatibility adapter for structural deltas, using the common closed probe.
+
+Region-mode runtime resolves source alternatives through CompositionSources.
+This entry point remains for older callers; it has no independent selector.
+"""
 from .canonical_ledger import digest
-from .state import Decision, Ground
-from .selection_protocol import Relation, DecisionSchema
-from .selector_wire import build_selector_prompt, validate_selector_reply
-from .provider_adapter import BudgetExceeded, IntegrityError
 
 
 def _edge_labels(h, evidence):
@@ -40,43 +40,14 @@ def select_generated(state, accepted, selector, release):
                 or sum(map(len,state.context_facts))>2048):
             state.diag('REGION_PROBE_NOT_LOCAL', row['decision_ref'])
             continue
-        from .probe_windows import enter
-        enter(state,selector,(start,end))
-        if state.budget.llm_exhausted:
-            state.diag('COMPUTATION_LIMIT', row['decision_ref'])
-            continue
-        relations = {cid: Relation(cid, '; '.join(delta[cid]) or 'No additional attachment',
-                                  0, (), 'Existing structural alternative') for cid in ids}
-        schema = DecisionSchema(release.sha256, relations)
-        prompt = build_selector_prompt(selector, slot_id='structural_attachment', frame_id=row['decision_ref'],
-            context_span=state.text[region.source_range[0]:region.source_range[1]], mentions={},
-            schema=schema, candidates=ids, contextual_statements=state.context_facts)
-        d = Decision('structural_attachment', row['decision_ref'], ids)
-        state.decisions[row['decision_ref']] = d
-        try:
-            state.budget.spend_llm()
-            raw = selector.select(prompt)
-            reply = validate_selector_reply(selector, raw, schema, ids, allowed=frozenset(ids))
-            d.last_prompt, d.raw_response, d.selector_outcome = prompt, raw, reply.outcome
-        except IntegrityError:
-            raise
-        except BudgetExceeded as exc:
-            d.outcome = 'UNRESOLVED'
-            state.diag(exc.code, row['decision_ref'])
-            continue
-        except Exception as exc:
-            d.outcome = 'UNRESOLVED'
-            state.diag('REGION_PROBE_FAILED', type(exc).__name__)
-            continue
-        if reply.outcome != 'ONE_SELECTED':
-            d.outcome = 'INSUFFICIENT_CONTEXT' if reply.outcome == 'INSUFFICIENT_CONTEXT' else 'UNRESOLVED'
-            continue
-        chosen = reply.selected[0]
-        d.selected, d.outcome, d.lifecycle = (chosen,), 'RESOLVED', 'PROVISIONAL'
-        d.grounds.append(Ground('M', 'bounded attachment choice over released structures', chosen))
+        from .component_probe import _probe
+        choices=[{'candidate_id':cid,'label':'; '.join(delta[cid]) or 'No additional attachment'} for cid in ids]
+        chosen=_probe(state,selector,release,row['decision_ref'],'structural_attachment',choices,
+            state.text[region.source_range[0]:region.source_range[1]],(start,end))
+        if chosen is None:continue
         for cid in ids:
             if cid != chosen:
                 removed.add(cid)
                 state.reject(cid, 'REGION_PROBE', 'M: selected compatible alternative '+chosen)
-        state.clarification_candidates.remove(row)
+        # The common probe retires the resolved offer.
     return [(h, frames) for h, frames in accepted if h.local_id not in removed]

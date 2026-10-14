@@ -24,66 +24,68 @@ def agrees(predicate):
 
 
 def resolve(state, release, selector, region, tokens, cfg):
-    policy = cfg.get('qualitative_quantity', {})
-    if policy.get('version') != 'LEXICAL_GROUP_V1':
-        return tokens, []
-    state.require_structures_open('QUALITATIVE_QUANTITY')
-    groups, readings = [], {}
-    for marker, head in zip(tokens, tokens[1:]):
-        rules = [r for r in policy['rules'] if any(v.lemma == r['lemma'] and
-                 v.pos == r['POS'] for v in marker.variants)]
-        nouns = [v for v in head.variants if v.pos == 'NOUN' and v.number == 'plur' and 'gen' in v.cases]
-        if not rules or not nouns:
-            continue
-        if region.source_range[1]-region.source_range[0] > cfg['context_chars']:
-            state.diag('COMPONENT_SEARCH_INCOMPLETE', region.region_id)
-            return None, []
-        # Multiple resource interpretations are not silently ordered by priority.
-        if len(rules) != 1 or len({v.lemma for v in nouns}) != 1:
-            state.diag('QUALITATIVE_QUANTITY_UNRESOLVED', region.region_id)
-            return None, []
-        rule = rules[0]
-        variants = [v for v in marker.variants if v.lemma == rule['lemma'] and v.pos == rule['POS']]
-        cases = sorted({c for v in variants for c in v.cases if c in {'nom', 'acc'}})
-        if not cases:
-            continue
-        key = region.region_id+'|quantity:'+digest([marker.token_id, head.token_id, rule])
-        previous = state.decisions.get(key)
-        choice = previous.selected[0] if previous and previous.outcome == 'RESOLVED' and len(previous.selected) == 1 else None
-        if previous is None:
-            choice = _probe(state, selector, release, key, 'nominal_attachment', [
-                {'candidate_id':'GROUP', 'label':'«'+marker.span+' '+head.span+'»: quantity word describes this plural nominal group; members and numeric cardinality unspecified'},
-                {'candidate_id':'OTHER', 'label':'The quantity word does not describe this nominal group; retain original analyses'}],
-                state.text[slice(*region.source_range)], region.source_range,
-                question='Does the quantity expression describe the adjacent plural noun, rather than the degree of an action? Choose only from source wording; do not assign numbers.')
-        if choice is None:
-            state.diag('QUALITATIVE_QUANTITY_UNRESOLVED', region.region_id)
-            return None, []
-        if choice != 'GROUP':
-            continue
-        row = {'head_ref':head.token_id, 'marker_ref':marker.token_id,
-               'decision_ref':key, 'rule_id':rule['rule_id'], 'resource_sha256':release.sha256,
-               'marker_variants':[_morph(v) for v in variants], 'internal_readings':[_morph(v) for v in nouns],
-               'raw':state.text[marker.start:head.end], 'source_range':[marker.start, head.end]}
+    if not cfg.get('nominal_host_role'):return tokens, []
+    state.require_structures_open('QUANTITY_COMPOSITION')
+    from .quantity_phrases import candidates
+    proposals=[]
+    for row in candidates(tokens,release,cfg.get('qualitative_quantity',{})):
+        # Competing heads/qualifiers consuming the same quantity are one
+        # boundary domain. Do not select each head independently.
+        refs={t.token_id for t in row['quantity_tokens']}
+        overlaps=[i for i,(owned,rows) in enumerate(proposals) if owned & refs]
+        rows=[row]
+        for i in reversed(overlaps):
+            owned,prior=proposals.pop(i);refs.update(owned);rows=prior+rows
+        proposals.append((refs,rows))
+    groups,readings=[],{}
+    for _,rows in proposals:
+        options={digest([row['head'].token_id,[t.token_id for t in row['quantity_tokens']],row['rule_id']]):row for row in rows}
+        if len(options)+1>cfg['max_candidates']:
+            state.diag('COMPONENT_SEARCH_INCOMPLETE',region.region_id);return None,[]
+        choices=[{'candidate_id':cid,'label':'Quantity child «'+state.text[row['quantity_tokens'][0].start:row['quantity_tokens'][-1].end]+
+                  '» describes group «'+row['head'].span+'»; members unspecified. Preserve the expression; do not invent a number.'}
+                 for cid,row in options.items()]
+        choices.append({'candidate_id':'OTHER','label':'None is a quantity of this noun; retain its original morphology'})
+        key=region.region_id+'|quantity:'+digest(choices)
+        chosen=_probe(state,selector,release,key,'nominal_attachment',choices,
+                      state.text[slice(*region.source_range)],region.source_range,
+                      question='Select the full quantity child of this nominal group, including a qualifier ONLY if it qualifies the quantity, not the event. '
+                      'This is phrase attachment, not numerical calculation or identification of individual members.')
+        if chosen is None:
+            state.diag('QUALITATIVE_QUANTITY_UNRESOLVED',region.region_id);return None,[]
+        if chosen=='OTHER':continue
+        r=options[chosen];marker=r['marker'];head=r['head'];nouns=r['nouns'];variants=r['variants'];cases=r['cases']
+        if len({v.lemma for v in nouns})!=1:
+            state.diag('QUALITATIVE_QUANTITY_UNRESOLVED',region.region_id);return None,[]
+        from .morphology_domain import license_use
+        for v in nouns:license_use(state,head.token_id,_morph(v),key,chosen)
+        start=r['quantity_tokens'][0].start
+        row={'head_ref':head.token_id,'marker_ref':marker.token_id,'decision_ref':key,
+             'rule_id':r['rule_id'],'resource_sha256':release.sha256,
+             'marker_variants':[_morph(v) for v in variants],'internal_readings':[_morph(v) for v in nouns],
+             'internal_by_case':r['internal_by_case'],
+             'raw':state.text[start:head.end],'source_range':[start,head.end],
+             'quantity_token_refs':[t.token_id for t in r['quantity_tokens']],
+             'quantity_surface':state.text[start:r['quantity_tokens'][-1].end],
+             'quantity_expression':r['expression']}
         groups.append(row)
-        # External case belongs to the WHOLE phrase. The noun's genitive R1
-        # readings remain immutable in evidence and in internal_readings.
-        # Aggregate agreement permits singular/neuter or plural predicates;
-        # it does not invent gender or individual participants.
-        readings[head.token_id] = tuple(MorphVariant(nouns[0].lemma, 'NOUN', frozenset({c}),
-            features=frozenset({'NOUN','QUALITATIVE_GROUP'}), origin='CONTEXTUAL',
-            evidence_refs=(key, marker.token_id, head.token_id)) for c in cases)
-        state.syntax_trace.append({'kind':'QUALITATIVE_QUANTITY', **row, 'external_cases':cases})
-    return [replace(t, variants=readings[t.token_id]) if t.token_id in readings else t for t in tokens], groups
+        readings[head.token_id]=tuple(MorphVariant(nouns[0].lemma,'NOUN',frozenset({c}),
+            features=frozenset({'NOUN','QUALITATIVE_GROUP'}),origin='CONTEXTUAL',
+            evidence_refs=(key,marker.token_id,head.token_id)) for c in cases)
+        state.syntax_trace.append({'kind':'QUANTITY_COMPOSITION',**row,'external_cases':cases})
+    return [replace(t,variants=readings[t.token_id]) if t.token_id in readings else t for t in tokens],groups
 
 
 def units(tokens, missing, frame):
     evidence = {e.token_id:e for e in tokens}
+    external=dict(frame.semantic['morph_bindings'])
+    external.update({d['head_ref']:d['morph'] for d in frame.semantic.get('nominal_dependencies',())})
+    external.update(frame.semantic.get('pp_readings',{}))
     for row in frame.semantic.get('qualitative_groups', ()):
         head, marker = row['head_ref'], row['marker_ref']
-        if marker not in missing or head not in frame.semantic['proposed_roles']:
+        if marker not in missing or head not in external:
             continue
-        cases = set(frame.semantic['morph_bindings'][head]['cases'])
+        cases = set(external[head]['cases'])
         unique = {}
         for raw in row['marker_variants']:
             if not cases.intersection(raw['cases']):
@@ -92,5 +94,6 @@ def units(tokens, missing, frame):
                 'features':frozenset(raw['features']), 'evidence_refs':tuple(raw['evidence_refs'])})
             unique[digest({k:v for k,v in raw.items() if k not in {'score','features'}})] = v
         for v in unique.values():
-            yield {'token':evidence[marker], 'variant':v, 'refs':(marker,), 'entities':[],
-                   'adjectives':[], 'bound_host':head, 'host_reading':frame.semantic['morph_bindings'][head]}
+            yield {'token':evidence[marker], 'variant':v, 'refs':tuple(row.get('quantity_token_refs',[marker])), 'entities':[],
+                   'adjectives':[], 'bound_host':head, 'host_reading':external[head],
+                   'quantity_surface':row.get('quantity_surface',evidence[marker].span)}
