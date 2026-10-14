@@ -83,11 +83,11 @@ def _build_perception_service(config, core, llm, *, allow_missing_resources=Fals
         import subprocess
         prepare = subprocess.list2cmdline([
             'python', 'tools/prepare_formalizer_v7_gui.py',
-            '--config', str(config.source_path), '--out', 'artifacts/gui-local',
+            '--config', str(config.source_path), '--out', 'artifacts/gui-composition', '--profile', 'composition',
         ])
         return None, (
             str(exc) + '\nДля локального тестирования из корня проекта:\n' + prepare
-            + '\nЗапуск: python -m ah.gui.app --config artifacts/gui-local/gui.toml'
+            + '\nЗапуск: python -m ah.gui.app --config artifacts/gui-composition/gui.toml'
         )
     service = LLMPerceptionService(
         llm,

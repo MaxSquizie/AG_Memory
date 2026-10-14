@@ -113,14 +113,34 @@ def prepare(config_path: str | Path, destination: str | Path, *, profile="oracle
     return generated
 
 
+def check_composition_session(config_path: str | Path) -> None:
+    """Read-only preflight: never replace a persisted session's resources."""
+    config=load_config(config_path)
+    trusted=json.loads((config.paths.data_dir/config.formalizer.review_records_filename).read_text(encoding='utf-8'))
+    release=ResourceRelease.load(config.paths.data_dir/config.formalizer.resource_release_filename,trusted_reviews=trusted)
+    policies=release.entries('ProposalPolicy')
+    if config.formalizer.structure_mode!='region_probes' or not policies or not policies[0].get('composition'):
+        raise ValueError('This session does not enable composition probes. Keep its memory/resources intact. '
+            'Prepare a NEW directory with --profile composition --out artifacts/formalizer-lab-new, '
+            'then launch ah.gui.app with that directory/gui.toml.')
+    if not config.llm.enabled:
+        raise ValueError('LLM is disabled in this session: enable llm.enabled in '+str(config.source_path))
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", type=Path, default=ROOT / "config" / "lmstudio.toml",
                         help="Existing config whose backend/model settings are preserved")
-    parser.add_argument("--out", type=Path, required=True, help="New isolated session directory; must not exist")
+    mode=parser.add_mutually_exclusive_group(required=True)
+    mode.add_argument("--out", type=Path, help="New isolated session directory; must not exist")
+    mode.add_argument("--check-session", type=Path, help="Read-only validation of an existing composition GUI config")
     parser.add_argument("--profile", choices=("oracle", "composition"), default="oracle")
     args = parser.parse_args(argv)
     try:
+        if args.check_session:
+            check_composition_session(args.check_session)
+            print('Composition probes enabled; existing memory/resources were not modified.')
+            return 0
         generated = prepare(args.config, args.out, profile=args.profile)
     except (OSError, ValueError) as exc:
         parser.error(str(exc))

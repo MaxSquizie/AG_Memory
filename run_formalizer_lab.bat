@@ -13,6 +13,11 @@ if not exist "%LAB_SESSION%\gui.toml" (
     exit /b 1
   )
 )
+"%LAB_PYTHON%" tools\prepare_formalizer_v7_gui.py --check-session "%LAB_SESSION%\gui.toml"
+if errorlevel 1 (
+  pause
+  exit /b 1
+)
 echo TEST_ONLY composition session: %LAB_SESSION%
 echo Memory and reports persist here. Backend settings: %LAB_SESSION%\gui.toml
 "%LAB_PYTHON%" -m ah.gui.app --config "%LAB_SESSION%\gui.toml"

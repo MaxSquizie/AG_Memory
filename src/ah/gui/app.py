@@ -28,7 +28,7 @@ def parse_args() -> argparse.Namespace:
     return p.parse_args()
 
 
-def _auto_provision_formalizer_config(config_path: Path) -> Path | None:
+def _auto_provision_formalizer_config(config_path: Path, *, fixture_root: Path | None = None) -> Path | None:
     """Return an isolated TEST_ONLY fixture config to run against when the configured
     session lacks formalizer resources, else ``None`` (use the configured session as-is).
 
@@ -46,7 +46,9 @@ def _auto_provision_formalizer_config(config_path: Path) -> Path | None:
     if release.is_file() and review.is_file():
         return None  # resources present; run the configured session normally
     root = Path(__file__).resolve().parents[3]
-    fixture = root / "artifacts" / "gui-local"
+    # The former gui-local seed used the narrow oracle profile. Do not reuse
+    # or rewrite that release/WAL as if it supported component probes.
+    fixture = (fixture_root or root / "artifacts") / "gui-local-composition"
     existing = fixture / "gui.toml"
     if existing.is_file():
         return existing  # reuse a previously prepared isolated session
@@ -56,7 +58,9 @@ def _auto_provision_formalizer_config(config_path: Path) -> Path | None:
         if str(root) not in sys.path:
             sys.path.insert(0, str(root))
         from tools.prepare_formalizer_v7_gui import prepare
-        return Path(prepare(config_path, fixture))
+        prepared=Path(prepare(config_path, fixture, profile='composition'))
+        print(f'[ah.gui] Composition probe session: {prepared}; existing sessions were not changed.')
+        return prepared
     except Exception as exc:  # noqa: BLE001 - degrade to inspectable startup, never crash the GUI
         print(f"[ah.gui] auto-provision of formalizer resources failed: {exc}", file=sys.stderr)
         return None

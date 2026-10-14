@@ -74,7 +74,8 @@ class FormalizationInspector(QDialog):
         if value.get('schema')=='document-reading-1':
             report=value;artifact=path.parent/'interpretation.json'
             value=json.loads(artifact.read_text(encoding='utf-8')) if artifact.is_file() else {
-                'state':{'diagnostics':[{'code':'RUN_WITHOUT_IR','detail':report.get('error')}]},'commit_receipt':{}}
+                'state':{'diagnostics':[{'code':'RUN_WITHOUT_IR','detail':report.get('error')}]},'commit_receipt':{},
+                'probe_configuration':report.get('probe_configuration'), 'probe_activity':report.get('probe_activity')}
         if value.get('schema')=='formalization-review-1':
             self.set_snapshot(value['snapshot'],path=str(path),notes=value.get('notes',()))
         else:

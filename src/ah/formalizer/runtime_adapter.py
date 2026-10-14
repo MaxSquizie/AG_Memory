@@ -101,6 +101,8 @@ class FormalizerAdapter:
             }
             from .diagnostic_graph import capture
             snapshot['committed_graph']=capture(self._store,receipt.node_refs)
+            from .probe_diagnostics import describe
+            snapshot['probe_configuration']=describe(self)
         except Exception as exc:
             snapshot = {
                 'source': 'native V7 runtime',

@@ -50,6 +50,9 @@ class DocumentPanelWidget(QWidget):
         )
         intro.setWordWrap(True)
         layout.addWidget(intro)
+        self.probe_configuration=QLabel('Подключение проб ещё не проверено')
+        self.probe_configuration.setWordWrap(True)
+        layout.addWidget(self.probe_configuration)
 
         row = QHBoxLayout()
         self.path_edit = QLineEdit()
@@ -171,6 +174,11 @@ class DocumentPanelWidget(QWidget):
         self.source_stat.setText('Source: —')
         self.context_view.clear();self.continuation_view.clear();self.summary_view.clear()
 
+    def set_probe_configuration(self,info):
+        from ah.formalizer.probe_diagnostics import configuration_text
+        self.probe_configuration.setText(configuration_text(info)+('\nКонфиг: '+info['config_path'] if info.get('config_path') else ''))
+        self.probe_configuration.setToolTip('Конфиг: '+str(info.get('config_path') or '—')+'\nДанные: '+str(info.get('data_dir') or '—'))
+
     def set_busy(self, busy: bool) -> None:
         self.ingest_button.setEnabled(not busy)
         self.text_button.setEnabled(not busy)
@@ -224,7 +232,7 @@ class DocumentPanelWidget(QWidget):
                 f"{event.get('search_steps',0)} шагов · {event.get('matches',0)} совпадений")
 
     def set_reading_report(self, report) -> None:
-        import json
+        from ah.formalizer.probe_diagnostics import activity_text,configuration_text
         from pathlib import Path
         self._report_path = str(Path(report['output_dir']) / 'report.json')
         self.inspect_button.setEnabled(True)
@@ -234,13 +242,13 @@ class DocumentPanelWidget(QWidget):
         self.chunk_stat.setText(f"Области: {sum(detail.get('regions_by_kind', {}).values())}")
         self.coverage_stat.setText(f"Фреймы: {detail.get('frames', 0)} · коммит: {len(detail.get('committed_fragments', []))}")
         self.source_stat.setText(f"Source: {self._source_ref or '—'}")
-        self.status.setText(f"{report['status']} · {report['elapsed_seconds']:.1f} с. Артефакты: {report['output_dir']}")
-        self.continuation_view.setPlainText(json.dumps({
-            'terminal': detail.get('terminal'), 'error': report.get('error'),
-            'decisions': detail.get('decisions_by_outcome'),
-            'diagnostics': detail.get('diagnostics'), 'stages_seconds': report.get('stages_seconds'),
-            'semantic_correctness': 'NOT_EVALUATED',
-        }, ensure_ascii=False, indent=2))
+        self.status.setText(f"{report['status']} · {report['elapsed_seconds']:.1f} с.\n"+activity_text(report.get('probe_activity')))
+        if report.get('probe_configuration'):self.set_probe_configuration(report['probe_configuration'])
+        lines=[configuration_text(report.get('probe_configuration')),activity_text(report.get('probe_activity')),
+               'Смысловая точность автоматически не оценивалась.',
+               'Подробный разбор: кнопка «Проверить разбор…».', 'Папка отчёта: '+report['output_dir']]
+        if report.get('error'):lines.append('Ошибка: '+str(report['error'].get('message',report['error'])))
+        self.continuation_view.setPlainText('\n\n'.join(lines))
         self.context_view.clear()
         self.summary_view.clear()
         self.activate_button.setEnabled(self._source_ref is not None)

@@ -646,8 +646,10 @@ class LLMControlWidget(QWidget):
         backend = self.services.llm
         cfg = self.services.config
         resource_error = getattr(self.services, 'formalizer_resource_error', None)
+        from ah.formalizer.probe_diagnostics import describe,configuration_text
+        probe_info=describe(getattr(getattr(self.services,'perception',None),'_formalizer',None),cfg)
         self.formalizer_resources_label.setText(
-            resource_error or getattr(self.services, 'formalizer_status', 'READY')
+            resource_error or (getattr(self.services, 'formalizer_status', 'READY')+'\n'+configuration_text(probe_info))
         )
         self.model_label.setText(str(cfg.paths.llm_model_dir or "<not configured>"))
         self.history_label.setText(

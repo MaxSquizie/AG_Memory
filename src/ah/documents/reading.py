@@ -140,6 +140,8 @@ def read_document(services, path, output_dir, *, progress=None, source_timestamp
             report['runtime_configuration']=configuration(getattr(services,'config',None))
             processor = services.document_processor()
             adapter = getattr(getattr(services, 'perception', None), '_formalizer', None)
+            from ah.formalizer.probe_diagnostics import describe
+            report['probe_configuration']=describe(adapter,getattr(services,'config',None))
             report.update(resource_snapshot=getattr(getattr(adapter, '_release', None), 'sha256', None),
                           structural_contract=getattr(adapter, '_structure_mode', None))
             if adapter is None or adapter._structure_mode != 'region_probes':
@@ -162,8 +164,12 @@ def read_document(services, path, output_dir, *, progress=None, source_timestamp
             report.update(pipeline_seconds=monotonic()-started, stages_seconds=dict(stage_times),
                           events=dict(counts), artifact_errors=event_io_errors)
             artifacts_started = monotonic()
+            from ah.formalizer.probe_diagnostics import activity
+            report['probe_activity']=activity(counts)
             if snapshot is not None:
                 snapshot['runtime_configuration']=report.get('runtime_configuration',{})
+                snapshot['probe_configuration']=report.get('probe_configuration',{})
+                snapshot['probe_activity']=report['probe_activity']
                 _dump(out / 'interpretation.json', snapshot)
                 state = snapshot.get('state', {})
                 _dump(out / 'regions.json', state.get('region_forest') or {})

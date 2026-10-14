@@ -338,6 +338,9 @@ class ReadableInspection:
     def overview(self):
         receipt=self.index.snapshot.get('commit_receipt',{});out='<h2>Как система поняла текст</h2>'
         out+=paragraph(STATUS.get(receipt.get('terminal'),'Запись результата не подтверждена')+'. Успешная запись не гарантирует верного понимания.')
+        from ah.formalizer.probe_diagnostics import configuration_text,activity_text
+        out+='<h3>Пробы модели</h3>'+paragraph(configuration_text(self.index.snapshot.get('probe_configuration')))
+        out+=paragraph(activity_text(self.index.snapshot.get('probe_activity')))
         roots=self.graph.get('receipt_refs',())
         if roots:
             out+='<h3>Фактически записанное выражение</h3>'+paragraph('Вложенные блоки показывают область действия. Условие внутри «возможно» или «для каждого» не утверждается отдельно.')

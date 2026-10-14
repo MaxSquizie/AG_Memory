@@ -182,7 +182,7 @@ def test_document_panel_reports_actual_progress_and_no_gold_pass():
         'elapsed_seconds': 2.0, 'output_dir': 'run', 'error': {'message': 'COMPUTATION_LIMIT'}})
     panel.set_busy(False)
     assert not panel.summary_button.isEnabled()
-    assert 'NOT_EVALUATED' in panel.continuation_view.toPlainText()
+    assert 'Смысловая точность автоматически не оценивалась' in panel.continuation_view.toPlainText()
     panel.close()
 
 

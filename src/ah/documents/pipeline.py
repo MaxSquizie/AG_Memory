@@ -283,6 +283,7 @@ class DocumentProcessor:
                     if original['text'] != chunk.text or source_timestamp is not None and original.get('time_anchor') != declared['time_anchor']:
                         raise DocumentProcessingError('DOCUMENT_REPLAY_INPUT_CHANGED: use a declared reinterpretation')
                     declared = original
+                    emit('document_input_reused', observation_id=oid, source_ref=source_ref)
                 # Serialize the attention snapshot, parse, commit and receipt
                 # with other operations on the same live runtime.
                 with self.services.operation_lock:

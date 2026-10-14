@@ -664,6 +664,8 @@ class MainWindow(QMainWindow):
         dock.hide()
 
     def _show_document_panel(self) -> None:
+        from ah.formalizer.probe_diagnostics import describe
+        self.document_panel.set_probe_configuration(describe(getattr(self.services.perception,'_formalizer',None),self.services.config))
         if self._workspace_mode != "graph":
             self._set_workspace_mode("graph")
         self.document_dock.setFloating(False)
@@ -714,6 +716,8 @@ class MainWindow(QMainWindow):
             return
         self.document_panel.set_busy(True)
         self.document_panel.begin_reading()
+        from ah.formalizer.probe_diagnostics import describe
+        self.document_panel.set_probe_configuration(describe(getattr(self.services.perception,'_formalizer',None),self.services.config))
         self.document_panel.status.setText("Чтение V7: источник → области → короткие пробы → admission…")
         from ah.documents.reading import read_document
         from datetime import datetime
