@@ -1,4 +1,4 @@
-"""Delimited content fills a declared proposition slot through the same composer.
+"""Delimited or conjunction-led content fills a released proposition slot.
 
 Delimiters license a boundary, not a SAY predicate or factivity. The parent and
 its role/attitude must be licensed by AttitudeMap and pass ordinary R-V/T5.
@@ -11,8 +11,46 @@ from .component_probe import _probe
 from .regions import delimiter_scopes
 
 
+def complement_options(state,release,tokens,request,limit):
+    """Released conjunction readings introduce finite proposition slots.
+
+    Enumerate source boundaries; no nearest-owner or top-morphology decision.
+    The closed selection and both recursive children must validate the result.
+    """
+    options={}
+    # Markers inside a complete delimiter pair belong to that child's call.
+    # They cannot attach across a quotation/parenthesis boundary in this call.
+    starts={t.start for t in tokens};ends={t.end for t in tokens}
+    protected=[s['source_range'] for s in delimiter_scopes(state.text) if s['closed']
+               and s['source_range'][0] in starts and s['source_range'][1] in ends] if state else []
+    for index,marker in enumerate(tokens):
+        if any(lo<marker.start and marker.end<hi for lo,hi in protected):continue
+        for rule in release.entries('AttitudeMap'):
+            readings=[m for m in rule.get('complementizers',())
+                      if any(v.lemma==m['lemma'] and v.pos==m['POS'] for v in marker.variants)]
+            if not readings:continue
+            ends=[len(tokens),*[i for i in range(index+2,len(tokens)) if tokens[i].span in {',',';'}]]
+            for end in ends:
+                body=tokens[index+1:end]
+                if not any(v.pos=='VERB' and v.mood!='imperative' for t in body for v in t.variants):continue
+                prefix=list(tokens[:index]);suffix=list(tokens[end:]);separators=[]
+                if prefix and prefix[-1].span==',':separators.append(prefix.pop())
+                if suffix and suffix[0].span in {',',';'}:separators.append(suffix.pop(0))
+                parent=prefix+suffix
+                for owner in prefix:
+                    if any(lo<owner.start and owner.end<hi for lo,hi in protected):continue
+                    if not any(v.lemma==rule['lemma'] and v.pos=='VERB' for v in owner.variants):continue
+                    if request and rule['argument_role'] in (request.proposition_slots or {}).get(owner.token_id,{}):continue
+                    for reading in readings:
+                        scope={'kind':'RELEASED_COMPLEMENT','source_range':[marker.start,body[-1].end],
+                               'marker_ref':marker.token_id,'marker_reading':dict(reading)}
+                        cid='attitude-slot:'+digest([owner.token_id,rule,scope])
+                        options[cid]=(owner,rule,body,parent,scope,separators)
+                        if len(options)>=limit:return options
+    return options
+
+
 def compose(state,release,selector,region,tokens,cfg,request,child_composer):
-    token_ids={t.token_id for t in tokens}
     scopes=[s for s in delimiter_scopes(state.text) if s['closed'] and
             s['opening'] in {'«','“','„','"'} and
             any(t.start==s['source_range'][0] for t in tokens) and
@@ -20,8 +58,8 @@ def compose(state,release,selector,region,tokens,cfg,request,child_composer):
     # Only immediate children; nested quotation is owned by its child call.
     scopes=[s for s in scopes if not any(a['source_range'][0]<s['source_range'][0]
              and s['source_range'][1]<=a['source_range'][1] for a in scopes)]
-    if not scopes:return None
-    options={}
+    options=complement_options(state,release,tokens,request,cfg['max_candidates']+1)
+    if not scopes and not options:return None
     for scope in scopes:
         lo,hi=scope['source_range']
         body=[t for t in tokens if lo<t.start and t.end<hi]
@@ -42,24 +80,27 @@ def compose(state,release,selector,region,tokens,cfg,request,child_composer):
         state.diag('ATTITUDE_SLOT_UNCLOSED',region.region_id);return []
     if len(options)>cfg['max_candidates']:
         state.diag('COMPONENT_SEARCH_INCOMPLETE',region.region_id);return []
-    choices=[{'candidate_id':cid,'label':'Quoted content «'+state.text[b[0].start:b[-1].end]+
+    choices=[{'candidate_id':cid,'label':'Proposition content «'+state.text[b[0].start:b[-1].end]+
         '» fills '+r['argument_role']+' of «'+o.span+'»; holder role '+r.get('holder_role',cfg['subject_role'])+
-        '; the content is NOT independently asserted'} for cid,(o,r,b,p,s,seps) in options.items()]
+        '; attitude='+r['attitude']+'; remaining parent «'+' '.join(t.span for t in p)+
+        '»; the content is NOT independently asserted'} for cid,(o,r,b,p,s,seps) in options.items()]
     key=region.region_id+'|attitude-slot:'+digest(choices)
     selected=_probe(state,selector,release,key,'attitude_attachment',choices,
                     state.text[slice(*region.source_range)],region.source_range,
-                    question='Which released parent/role owns this quotation? Delimiters alone do not identify a speaker or assert the quoted event.')
+                    question='Which released parent/role owns this full proposition content? '
+                    'Check its start AND end and the remaining parent. A conjunction reading must introduce a clause, '
+                    'not a pronoun argument. Delimiters alone do not identify a speaker or assert the child event.')
     if selected not in options:
         state.diag('ATTITUDE_SLOT_UNCLOSED',region.region_id);return []
     owner,rule,body,parent,scope,separators=options[selected]
     children=child_composer(body,InputSlot(inside_attitude=True))
-    child=select_child(state,release,selector,region,children,'QUOTED PROPOSITION',
-                       'The text is quoted content; its internal syntax remains meaningful without being asserted.')
+    child=select_child(state,release,selector,region,children,rule['attitude']+' PROPOSITION',
+                       'This is the released parent proposition slot; its content is not independently asserted.')
     if child is None:
         for f in children:f.semantic['structural_unresolved']=True
         return children
     args={k:dict(v) for k,v in (request.proposition_slots or {}).items()} if request else {}
-    args.setdefault(owner.token_id,{})[rule['argument_role']]={'tree':expression(child),'attitude':'QUOTED',
+    args.setdefault(owner.token_id,{})[rule['argument_role']]={'tree':expression(child),'attitude':rule['attitude'],
         'holder_role':rule.get('holder_role',cfg['subject_role']),'attachment_decision_ref':key}
     parent_request=replace(request or InputSlot(),proposition_slots=args)
     parents=child_composer(parent,parent_request)
@@ -71,6 +112,7 @@ def compose(state,release,selector,region,tokens,cfg,request,child_composer):
     else:
         internalize(children,child,target[0])
     state.syntax_trace.append({'kind':'ATTITUDE_COMPOSITION','decision_ref':key,'parent_anchor':owner.token_id,
-        'child_ref':child.frame_id,'argument_role':rule['argument_role'],'attitude':'QUOTED',
-        'delimiter_scope':scope,'separator_refs':[t.token_id for t in separators]})
+        'child_ref':child.frame_id,'argument_role':rule['argument_role'],'attitude':rule['attitude'],
+        'source_range':list(region.source_range),'content_range':[body[0].start,body[-1].end],
+        'resolved':len(target)==1,'delimiter_scope':scope,'separator_refs':[t.token_id for t in separators]})
     return [*parents,*children]

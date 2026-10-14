@@ -26,6 +26,7 @@ STATUS = {'APPLIED': 'Записано в память', 'RESOLVED': 'Выбор
     'KNOWN': 'Словарное значение известно', 'UNLINKED': 'Словарный смысл не установлен',
     'OPEN_LEXICAL': 'Словарный смысл не установлен', 'UNKNOWN': 'Не установлено'}
 QUESTIONS = {'composition_boundary': 'Что охватывает всё выражение?',
+    'attitude_attachment':'К какому высказыванию относится вложенное содержание и где его границы?',
     'nominal_dependency': 'К какому слову относится участник и в какой роли?',
     'component_attachment': 'Как связаны действие и его участники?',
     'nominal_attachment': 'К какому имени относится определение или квантор?',
@@ -43,6 +44,8 @@ MORPH = {'NOUN':'существительное','VERB':'глагол','INFN':'�
     'perf':'совершенный вид','impf':'несовершенный вид','anim':'одушевлённое','inan':'неодушевлённое',
     'tran':'переходный','intr':'непереходный','indc':'изъявительное наклонение','impr':'повелительное наклонение'}
 TRACE = {'FEATURE_CHECK_BATCH':'Проверка грамматических признаков',
+    'ATTITUDE_COMPOSITION':'Вложенное содержание высказывания',
+    'DEFERRED_CLAUSE_BOUNDARY':'Разбиение отложено до проверки вложенности',
     'COMPOSITION_SOURCE_DOMAIN':'Источники вариантов разбора', 'SCOPE_DOMAIN':'Варианты области действия',
     'SCOPE_SLOT':'Выбор области действия','GRAMMAR_CHILD_PROJECTED':'Перенос дочернего разбора',
     'COMPOSITION_BOUNDARY':'Выбор границы выражения','DEPENDENCY_CONSTRAINT_CLOSURE':'Согласование зависимостей',
@@ -50,6 +53,8 @@ TRACE = {'FEATURE_CHECK_BATCH':'Проверка грамматических п
     'QUANTIFIER_BINDING_DOMAIN':'Варианты связывания квантора','OPERATOR_COMPOSITION':'Вложенность операторов',
     'COMPOSITION_CLOSED':'Объединение частей завершено','COMPOSITION_EMPTY':'Допустимый разбор не построен'}
 DIAGNOSTICS = {'COMPOSITION_SCOPE_BOUNDARY_CHANGED':'При объединении изменилось содержимое цельного условия.',
+    'ATTITUDE_SLOT_UNCLOSED':'Не подтверждены границы или владелец вложенного высказывания. Его содержание не записано как самостоятельный факт.',
+    'ATTITUDE_PARENT_UNRESOLVED':'Вложенное содержание разобрано, но не удалось собрать высказывание, которому оно принадлежит.',
     'COMPOSITION_SCOPE_BOUNDARY_LOST':'При объединении потерялась ранее выбранная граница условия.',
     'COMPOSITION_SCOPE_BOUNDARY_CROSSING':'Области условий пересекаются, но не вложены друг в друга.',
     'QUANTIFIED_CONTROL_UNRESOLVED':'Не подтверждено, что пропущенный участник находится внутри области своего квантора.',
@@ -223,6 +228,10 @@ class ReadableInspection:
 
     def choice_text(self,text):
         # Translate known protocol labels only. Never infer a model rationale.
+        match=re.fullmatch(r'Proposition content «(.*)» fills (\w+) of «(.*?)»; holder role (\w+); attitude=(\w+); remaining parent «(.*)»; the content is NOT independently asserted',text,re.S)
+        if match:
+            return ('Содержание «'+match[1]+'» относится к «'+match[3]+'». Роль: '+ROLES.get(match[2],match[2])+
+                    '. Оставшаяся часть: «'+match[6]+'». Содержание не утверждается как самостоятельный факт.')
         text=re.sub(r'tok:\d+:\d+',lambda m:'«'+self.word(m[0])+'»',text)
         match=re.match(r'Direct role (\w+) of predicate «(.*?)»; whole reading=(.*)',text)
         if match:
@@ -406,6 +415,17 @@ class ReadableInspection:
             out+=table(['Часть условия','Исходный текст'],rows)
         elif c=='Без привязки':out+=paragraph('Это слово не связано с фреймом в сохранённом разборе. Оно может быть служебным словом либо пропуском разбора. Проверьте его роль в исходном предложении.')
         elif c=='Привязки':out+=paragraph('Установленная ссылка: '+self.target(r.get('target')))
+        elif c=='Трасса' and r.get('kind')=='DEFERRED_CLAUSE_BOUNDARY':
+            out+=paragraph('Возможна вложенная часть высказывания. Разбиение на самостоятельные предложения отложено: сначала нужно подтвердить владельца и полные границы содержания отдельной пробой.')
+        elif c=='Трасса' and r.get('kind')=='ATTITUDE_COMPOSITION':
+            out+=paragraph('Вложенное содержание связано с высказыванием.' if r.get('resolved') else 'Попытка присоединить вложенное содержание; завершение связи не подтверждено.')
+            out+=table(['Часть разбора','Исходный текст'],[
+                ['Высказывание',esc(self.word(r.get('parent_anchor')))],
+                ['Содержание',esc(self.excerpt(r.get('content_range')))]])
+            scope=r.get('delimiter_scope',{})
+            if scope.get('marker_ref'):
+                out+=paragraph('Слово «'+self.word(scope['marker_ref'])+'» выбрано как союз, вводящий вложенную часть.')
+            out+=paragraph('Содержание не утверждается как самостоятельный факт.')
         elif c=='Трасса' and r.get('event')=='FEATURE_CHECK_BATCH':
             rows=[[esc(self.word(x[1])),str(x[2]+1),'Подошёл' if x[3] else 'Не подошёл'] for x in r.get('checks',())[:100]]
             out+=paragraph('Проверка вариантов слов на соответствие одному грамматическому правилу. Отказ здесь не означает ошибку всего предложения.')

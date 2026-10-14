@@ -51,6 +51,20 @@ def test_choices_use_recorded_mapping_and_never_invent_reasoning():
     assert all('Описание варианта не сохранено' in row[1] for row in r.choices(d))
 
 
+def test_proposition_content_trace_is_readable_and_preserves_confirmation():
+    data=sample()
+    data['state']['syntax_trace']=[{'kind':'ATTITUDE_COMPOSITION','parent_anchor':'read',
+        'content_range':[7,14],'resolved':True,'delimiter_scope':{'marker_ref':'student'}}]
+    idx=Inspection(data);reader=ReadableInspection(idx)
+    html=reader.explain(idx.by_ref['trace:0'])
+    assert 'Вложенное содержание связано' in html and 'читает' in html and 'студент' in html
+    assert 'не утверждается как самостоятельный факт' in html
+    data['state']['syntax_trace'][0]['resolved']=False
+    assert 'завершение связи не подтверждено' in reader.explain(idx.by_ref['trace:0'])
+    label='Proposition content «Пётр пришёл» fills OBJECT of «сказал»; holder role SUBJECT; attitude=QUOTED; remaining parent «Иван сказал»; the content is NOT independently asserted'
+    assert reader.choice_text(label).startswith('Содержание «Пётр пришёл» относится к «сказал»')
+
+
 def test_invalid_model_reply_is_explained_without_confirming_choice():
     data=sample();d=data['state']['decisions']['gap']
     d.update(outcome='UNRESOLVED',selected=[],raw_response='ONE_SELECTED',

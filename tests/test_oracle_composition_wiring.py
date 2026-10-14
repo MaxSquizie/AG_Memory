@@ -65,19 +65,19 @@ def test_oracle_cli_sends_closed_probes_and_replays_without_http(tmp_path):
     assert json.loads((live/'comparison.json').read_text()) == json.loads((replay/'comparison.json').read_text())
 
 
-def test_complete_operator_introducers_pass_existing_oracle_checks(tmp_path):
+def test_operator_introducers_and_finite_content_pass_existing_oracle_checks(tmp_path):
     with local_server({'output': [{'type': 'message', 'content': '1'}]}) as (url, requests):
         result = subprocess.run([sys.executable, str(ROOT/'tools/run_formalizer_v7_oracle.py'),
             '--provider', 'lmstudio', '--base-url', url, '--model', 'test',
-            '--case', 'A12', '--case', 'LANG-00-0-not', '--out', str(tmp_path/'run')],
+            '--case', 'A01', '--case', 'A12', '--case', 'LANG-00-0-not', '--out', str(tmp_path/'run')],
             cwd=ROOT, capture_output=True, text=True, timeout=60)
     assert result.returncode == 0, result.stdout + result.stderr
-    assert len(requests) == 2
+    assert len(requests) == 3
     for request in requests:
         prompt = request['body']['input']
         assert 'ONE_SELECTED' not in prompt and 'MULTIPLE_ADMISSIBLE' not in prompt
     comparison = json.loads((tmp_path/'run/comparison.json').read_text())
-    assert comparison['passed_cases'] == 2
+    assert comparison['passed_cases'] == 3
 
 
 def test_invalid_component_reply_is_retained_for_manual_review(tmp_path, monkeypatch):

@@ -9,6 +9,13 @@ def areas(state,release,selector,region,tokens,cfg):
     if version not in {'CAPITAL_FINITE_HINT_V1','FINITE_SUBJECT_HINT_V2'}:return [(region,tokens)]
     from .component_area_scope import allowed
     if not allowed(state,release,region,tokens,conjunction=True):return [(region,tokens)]
+    # A possible released proposition slot must reach the recursive composer
+    # intact. A weak subject boundary cannot assert its content independently.
+    from .attitude_composition import complement_options
+    if complement_options(state,release,tokens,None,1):
+        state.syntax_trace.append({'kind':'DEFERRED_CLAUSE_BOUNDARY',
+            'region_ref':region.region_id,'reason':'RELEASED_PROPOSITION_SCOPE'})
+        return [(region,tokens)]
     finite=lambda t:any(v.pos=='VERB' and v.mood!='imperative' for v in t.variants)
     proper=lambda t:any(v.features & {'Name','Surn','Patr','Geox','Orgn','Trad'} for v in t.variants)
     proposals={i:'CAPITAL_FINITE_NONPROPER' for i,t in enumerate(tokens) if i and t.span[:1].isupper() and

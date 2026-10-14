@@ -246,6 +246,11 @@ class ResourceRelease:
             key=(x['lemma'],x['argument_role'])
             if key in attitudes: raise ResourceMissing('duplicate/ambiguous AttitudeMap key')
             attitudes.add(key)
+            markers=x.get('complementizers',[])
+            if (not isinstance(markers,list) or any(not isinstance(m,dict) or
+                    set(m)!={'lemma','POS'} or not isinstance(m['lemma'],str) or not m['lemma']
+                    or m['POS']!='CONJ' for m in markers)):
+                raise ResourceMissing('invalid AttitudeMap complementizers')
         seen_mappings=set()
         for m in self.entries('TemplateMap'):
             if m['sense_id'] not in sense_ids or not m.get('template_ref') or not set(m.get('roles',()))<=roles: raise ResourceMissing('invalid TemplateMap')

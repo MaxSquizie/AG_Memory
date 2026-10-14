@@ -161,6 +161,9 @@ def fixture(core, profile):
                     'event_anaphora_rules':[]}], 'dependency_versions':{}}
     m['entries'].append(R['CorefPolicy']);m['dependency_versions']['CorefPolicy']='test-v1'
     R['AttitudeMap']['entries']=[{'lemma':lemma,'argument_role':'OBJECT','holder_role':'SUBJECT','attitude':att,'factivity':False} for lemma,att in [('сказать','QUOTED'),('думать','EMBEDDED'),('считать','EMBEDDED'),('хотеть','HYPOTHETICAL'),('обещать','HYPOTHETICAL'),('просить','HYPOTHETICAL')]]
+    for entry in R['AttitudeMap']['entries']:
+        if entry['lemma'] in {'сказать','думать','считать'}:
+            entry['complementizers']=[{'lemma':'что','POS':'CONJ'}]
     # Ordinary conditionals and counterfactual conditionals are distinct
     # declared constructions, with mutually exclusive scope triggers. The
     # runtime still validates them through its generic required_operators path.
