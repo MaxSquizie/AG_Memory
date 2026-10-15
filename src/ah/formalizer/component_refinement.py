@@ -93,7 +93,8 @@ def _compose_area(state, release, selector, region, tokens, cfg, depth=0, attach
             child_cfg={k:v for k,v in cfg.items() if k not in {'_task_constraints','_task_constraints_text'}}
             result=compose(state,release,selector,region,tokens,cfg,request,
                 lambda owned,slot:compose_area(state,release,selector,region_for(state,region,owned,'RELATION_CHILD'),
-                    owned,child_cfg,depth+1,attachment=attachment,infinitive=(slot.controller if slot and slot.controller else infinitive),
+                    owned,child_cfg,depth+1,attachment=attachment,
+                    infinitive=(None if slot and slot.independent_subject else slot.controller if slot and slot.controller else infinitive),
                     request=slot))
             if result is None:
                 result=_compose_lexical_area(state,release,selector,region,tokens,

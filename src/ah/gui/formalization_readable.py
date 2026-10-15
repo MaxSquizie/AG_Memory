@@ -290,6 +290,14 @@ class ReadableInspection:
         return out+'<ul>'+''.join(items)+'</ul>'
 
     def task_choice(self,value):
+        content=(' Содержание: «'+' '.join(self.word(t) for t in value['content_refs'])+'».'
+                 if value.get('content_refs') else '')
+        if value.get('independent_content'):
+            return 'Вложенное содержание самостоятельно определяет участников. Участник родительского действия не переносится в инфинитив.'+content
+        if value.get('marker_relation_ref'):
+            return '«'+self.word(value['marker_relation_ref'])+'» выражает только внешнюю связь; описываемое действие или состояние остаётся в содержании.'
+        if value.get('marker_content_ref'):
+            return '«'+self.word(value['marker_content_ref'])+'» называет часть описываемого действия, состояния или участника. Это значение нужно сохранить в содержании.'
         if value.get('frame_refs'):
             parts=[]
             for fid in value['frame_refs']:
@@ -304,7 +312,7 @@ class ReadableInspection:
         if value.get('controller'):
             alias=value['controller']
             token=alias.get('token_ref') or alias.get('head_ref') or alias.get('host_token_ref')
-            return 'Тот же участник управляющего действия'+(': «'+self.word(token)+'».' if token else '; отдельный участник не создаётся.')
+            return 'Тот же участник управляющего действия'+(': «'+self.word(token)+'».' if token else '; отдельный участник не создаётся.')+content
         if value.get('operands'):
             parts=['«'+' '.join(self.word(t) for t in part)+'»' for part in value['operands']]
             markers=' '.join(self.word(t) for t in value.get('marker_refs',()))
@@ -318,14 +326,17 @@ class ReadableInspection:
             return lemma+'Чтение слова: '+self.morphology(reading)+'. Словарный смысл и неизвестные признаки не додумываются.'
         if value.get('attitude'):
             attitudes={'QUOTED':'пересказ','EMBEDDED':'мысленное содержание','HYPOTHETICAL':'предполагаемое или желаемое содержание','UNKNOWN':'отношение не уточнено'}
-            return ROLES.get(value['role'],value['role'])+' слова «'+self.word(value['owner_ref'])+'»: '+attitudes[value['attitude']]+'. Вложенное содержание отдельно не утверждается.'
-        if value.get('owner_ref'):return 'Владелец содержания: «'+self.word(value['owner_ref'])+'».'
+            return ROLES.get(value['role'],value['role'])+' слова «'+self.word(value['owner_ref'])+'»: '+attitudes[value['attitude']]+'. Вложенное содержание отдельно не утверждается.'+content
+        if value.get('owner_ref'):return 'Владелец содержания: «'+self.word(value['owner_ref'])+'».'+content
         if value.get('head_ref'):return 'Связанное квантором имя: «'+self.word(value['head_ref'])+'».'
         if value.get('head'):return 'Имя события: «'+self.word(value['head'])+'».'
         return self.choice_text(value.get('label','Описание варианта не сохранено'))
 
     def choice_text(self,text):
         # Translate known protocol labels only. Never infer a model rationale.
+        boundary=re.fullmatch(r'End after «(.*?)» @(\d+); selected words «(.*?)»; content left for this relation: «(.*?)»',text,re.S)
+        if boundary:return ('Конец после «'+boundary[1]+'», позиция '+boundary[2]+'. Слова связи: «'+boundary[3]+
+                            '». Во вложенном содержании останется: «'+boundary[4]+'».')
         if text.startswith('A complete clause:'):return 'Полное высказывание: сказуемое описывает участника; явный глагол может отсутствовать.'
         if text.startswith('All these words only express the outer relation;'):
             return 'Эти слова выражают только внешнюю связь. Описываемое событие или состояние полностью сохранено во вложенном содержании.'

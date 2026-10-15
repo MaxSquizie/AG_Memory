@@ -169,7 +169,7 @@ def test_infinitive_producer_remains_available_inside_reported_content(tmp_path,
     result,script=run(tmp_path,monkeypatch,'Иван сказал: «Мария хочет читать книгу».',steps)
     assert result['diagnostics']['codes']==[]
     assert result['assertions']['ah']==[{'predicate':'SAY','roles':{'AGENT':{'entity':'ivan'},
-        'CONTENT':{'predicate':'WANT','roles':{'AGENT':{'entity':'maria'},'CONTENT':{
+        'CONTENT':{'predicate':'WANT','roles':{'EXPERIENCER':{'entity':'maria'},'CONTENT':{
             'predicate':'READ','roles':{'AGENT':{'entity':'maria'},'THEME':{'entity':'book'}}}}}}}]
     assert any('what the parent predicate is about' in p for s,p in script.calls if s=='component_attachment')
 

@@ -78,7 +78,7 @@ LEXICON = (
  ('SAY','сказать','EVENT',(('AGENT','SUBJECT','nom','ENTITY'),('CONTENT','OBJECT','acc','PROPOSITION'))),
  ('THINK','думать','STATE',(('AGENT','SUBJECT','nom','ENTITY'),('CONTENT','OBJECT','acc','PROPOSITION'))),
  ('BELIEVE','считать','STATE',(('AGENT','SUBJECT','nom','ENTITY'),('CONTENT','OBJECT','acc','PROPOSITION'))),
- ('WANT','хотеть','STATE',(('AGENT','SUBJECT','nom','ENTITY'),('CONTENT','OBJECT','acc','PROPOSITION'))),
+ ('WANT','хотеть','STATE',(('EXPERIENCER','SUBJECT','nom','ENTITY'),('CONTENT','OBJECT','acc','PROPOSITION'))),
  ('PROMISE','обещать','EVENT',(('AGENT','SUBJECT','nom','ENTITY'),('RECIPIENT','RECIPIENT','dat','ENTITY'),('CONTENT','OBJECT','acc','PROPOSITION'))),
  ('ASK','просить','EVENT',(('AGENT','SUBJECT','nom','ENTITY'),('RECIPIENT','RECIPIENT','acc','ENTITY'),('CONTENT','OBJECT','acc','PROPOSITION'))),
  ('OPEN','открыть','EVENT',(('AGENT','SUBJECT','nom','ENTITY'),('THEME','OBJECT','acc','ENTITY'))),

@@ -173,3 +173,20 @@ def test_graph_observer_captures_names_only_for_addressed_entities():
     result=capture(store,['root'])
     assert looked_up==['M:book'] and result['entities']['M:book']['name']=='книга'
     assert set(result['nodes'])=={'root'}
+
+
+def test_selected_content_and_independent_control_have_readable_source_links():
+    reader=ReadableInspection(Inspection(sample()))
+    source={'content_refs':['student','read']}
+    owner=reader.task_choice({'owner_ref':'read',**source})
+    assert 'Владелец содержания: «читает»' in owner and 'Содержание: «студент читает»' in owner
+    independent=reader.task_choice({'independent_content':True,**source})
+    assert 'не переносится в инфинитив' in independent and 'Содержание: «студент читает»' in independent
+    assert 'independent_content' not in independent
+    role=reader.task_choice({'marker_content_ref':'read'})
+    assert '«читает» называет часть' in role and 'сохранить в содержании' in role
+    wording=reader.task_choice({'marker_relation_ref':'read'})
+    assert '«читает» выражает только внешнюю связь' in wording
+    boundary=reader.choice_text('End after «не» @7; selected words «не»; content left for this relation: «Иван прочитал книгу .»')
+    assert 'Слова связи: «не»' in boundary and 'останется: «Иван прочитал книгу .»' in boundary
+    assert 'content left' not in boundary

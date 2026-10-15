@@ -79,7 +79,7 @@ def licensed(state,proof,**expected):
     return False
 
 
-def span(state,release,selector,region,tokens,cfg,slot,question,*,exclude=()):
+def span(state,release,selector,region,tokens,cfg,slot,question,*,exclude=(),show_remainder=False):
     """Every source token boundary is reachable; no punctuation whitelist."""
     forbidden=set(exclude)
     eligible=[(i,t) for i,t in enumerate(tokens) if t.token_id not in forbidden]
@@ -96,7 +96,9 @@ def span(state,release,selector,region,tokens,cfg,slot,question,*,exclude=()):
                 if tokens[b].token_id in forbidden:break
                 yield {'candidate_id':'end:'+tokens[b].token_id,'index':b+1,
                     'label':'End after «'+tokens[b].span+'» @'+str(tokens[b].end)+
-                            '; selected words «'+' '.join(t.span for t in tokens[a:b+1])+'»'}
+                            '; selected words «'+' '.join(t.span for t in tokens[a:b+1])+'»'+
+                            ('; content left for this relation: «'+' '.join(t.span for t in [*tokens[:a],*tokens[b+1:]])+'»'
+                             if show_remainder else '')}
         end=choose(state,release,selector,region,cfg,slot+'_end',ends(),
             question+' The start is «'+tokens[a].span+'» @'+str(tokens[a].start)+'. Select the LAST token.')
         if end:return tokens[a:end[0]['index']],(start[1],end[1])

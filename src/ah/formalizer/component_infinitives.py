@@ -63,6 +63,8 @@ def compose(state, release, selector, region, tokens, cfg, depth,request=None):
     cr=region_for(state,region,body,'INFINITIVE')
     child_slot=InputSlot(inside_attitude=True,controller=alias,
         pending_propositions={ref:roles for ref,roles in (request.pending_propositions or {}).items()
+            if ref in {t.token_id for t in body}} if request else None,
+        pending_proposition_sources={ref:refs for ref,refs in (request.pending_proposition_sources or {}).items()
             if ref in {t.token_id for t in body}} if request else None)
     children=compose_area(state,release,selector,cr,body,cfg,depth+1,infinitive=alias,request=child_slot)
     content=select_child(state,release,selector,region,children,'CONTROLLED_INFINITIVE',

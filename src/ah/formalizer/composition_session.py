@@ -73,6 +73,9 @@ class CompositionSession:
             parts.append('Already handled outside the target: '+'; '.join(RELATIONS[k] for k in request.surrounding_relations)+
                 '. Select another such relation only if the target words themselves express it.')
         if request.output_sort=='EVENT_DESCRIPTION':parts.append('This area must describe an event or state.')
+        if request.independent_subject:
+            parts.append('No subject is inherited from the surrounding predicate. Determine participants from this content itself; '
+                         'do not copy a speaker or an ancestor controller into it.')
         if request.allowed_cases:
             from .probe_wording import reading
             parts.append('The parent requires '+reading({'cases':sorted(request.allowed_cases)})+'.')
@@ -86,8 +89,10 @@ class CompositionSession:
         for ref,roles in (request.pending_propositions or {}).items():
             if ref not in owned:continue
             owner=self.original[ref]
+            supplied=[self.original[t].span for t in (request.pending_proposition_sources or {}).get(ref,())
+                      if t in self.original]
             parts.append('Only «'+owner.span+'» @'+str(owner.start)+' has separately supplied content ('+
-                         ', '.join(sorted(roles))+'). Leave that slot open. '
+                         ', '.join(sorted(roles))+')'+(' — «'+' '.join(supplied)+'»' if supplied else '')+'. Leave that slot open. '
                          'Any other parent predicate and dependent clause INSIDE the target must still be connected.')
         if request.agreement_source:
             from .probe_wording import reading
