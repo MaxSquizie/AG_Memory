@@ -8,16 +8,18 @@ from ah.formalizer.v7_pipeline import interpret_full
 from ah.formalizer.pipeline import MorphProvider
 from tools.formalizer_component_fixture import with_components
 from tools.formalizer_v7_test_support import test_release
-from test_formalizer_components import Choices,frontend
+from test_formalizer_components import Choices,AddressedChoices,frontend
 
 
 def test_coordination_commits_and_group_identity_is_a_separate_probe(tmp_path):
     core=AHCore();release=with_components(test_release(core))
     journal=JournalChannel(tmp_path/'journal');store=AHStoreAdapter(core.store,journal,core)
-    # Coordination then first unidentified group then continuation of that group.
-    selector=Choices([0,0,lambda cid:cid.startswith('gap:')])
+    # The first group is licensed by agreement; only its reuse needs identity evidence.
+    selector=AddressedChoices({'composition_boundary':['Outer AND:'],
+        'implicit_argument':['Same participant as omitted SUBJECT']})
     st,report=interpret_full('Покатались и купались.',None,selector,store,InterpretationRunBinding(journal),
         release=release,morph=MorphProvider(),run_id='coord')
+    selector.assert_complete()
     assert report.applied,report
     assert len(report.committed_fragments)==1
     assert len(store.ledger.paths())==3  # AND root and two derived occurrences
@@ -32,10 +34,16 @@ def test_coordination_commits_and_group_identity_is_a_separate_probe(tmp_path):
     assert not store.ledger.paths()
 
 
-def test_rejected_coordination_has_no_independently_assertible_child():
-    st=frontend('Покатались и купались.',MorphProvider(),Choices())
-    assert len(st.frames)==2
-    assert all(f.semantic['structural_unresolved'] and f.semantic['coordination_owner'] for f in st.frames)
+def test_rejected_coordination_has_no_independently_assertible_child(tmp_path):
+    core=AHCore();release=with_components(test_release(core))
+    journal=JournalChannel(tmp_path/'j');store=AHStoreAdapter(core.store,journal,core)
+    selector=AddressedChoices({'composition_boundary':[None]})
+    st,report=interpret_full('Покатались и купались.',None,selector,store,InterpretationRunBinding(journal),
+        release=release,morph=MorphProvider(),run_id='reject-coordination')
+    selector.assert_complete()
+    assert any(d.code=='COMPOSITION_BOUNDARY_UNRESOLVED' for d in st.diagnostics)
+    assert not report.applied and not report.committed_fragments
+    assert not store.ledger.paths() and not store.ledger.data['nodes']
     assert not st.observation['implicit_bindings']
 
 

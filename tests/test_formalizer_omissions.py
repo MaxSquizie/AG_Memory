@@ -10,7 +10,7 @@ from ah.formalizer.v7_pipeline import interpret_full
 from ah.formalizer.component_omissions import licenses_match
 from tools.formalizer_v7_test_support import test_release, role
 from tools.formalizer_component_fixture import with_components
-from test_formalizer_components import Choices, frontend, morph
+from test_formalizer_components import Choices, AddressedChoices, frontend, morph
 
 
 def release_for(core, lemma='читать', licensed=True):
@@ -48,7 +48,11 @@ def test_real_commit_preserves_required_role_without_invented_identity(tmp_path,
 
 
 def test_unanswered_gap_does_not_commit_or_become_optional(morph):
-    st=frontend('Читал.',morph,Choices(),release_for(AHCore()))
+    # A preceding object creates a real identity alternative; an isolated
+    # licensed anonymous slot no longer asks the model to invent identity.
+    selector=AddressedChoices({'implicit_argument':[None,None]})
+    st=frontend('Иван читал книгу. Читал.',morph,selector,release_for(AHCore()))
+    selector.assert_complete()
     assert not st.observation['implicit_bindings']
     assert any('OBJECT' in f.semantic.get('implicit_arguments',{}) for f in st.frames)
 

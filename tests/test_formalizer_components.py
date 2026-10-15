@@ -27,6 +27,39 @@ class Choices:
         return json.dumps({'outcome':'ONE_SELECTED','selected':[cid]})
 
 
+class AddressedChoices(Choices):
+    """Script semantic labels per task; unexpected/missing questions fail the test."""
+    def __init__(self, choices):
+        super().__init__()
+        self.by_slot={slot:list(labels) for slot,labels in choices.items()}
+        self.failures=[]
+
+    def select(self,prompt):
+        self.prompts.append(prompt)
+        try:
+            return self._select(prompt)
+        except Exception as exc:
+            # Runtime records provider failures instead of raising them. A bad
+            # test script must not masquerade as a successful refusal test.
+            self.failures.append(str(exc))
+            raise
+
+    def _select(self,prompt):
+        slot=prompt.split('Decision slot: ',1)[1].split(' ',1)[0]
+        assert self.by_slot.get(slot), ('Unexpected probe',slot)
+        label=self.by_slot[slot].pop(0)
+        if label is None:
+            return json.dumps({'outcome':'INSUFFICIENT_CONTEXT','selected':[]})
+        section=prompt.split('closed set):\n',1)[1].split('\nTask:',1)[0]
+        matches=[line.split('. ',1)[0] for line in section.splitlines() if label in line]
+        assert len(matches)==1, (slot,label,section)
+        return json.dumps({'outcome':'ONE_SELECTED','selected':matches})
+
+    def assert_complete(self):
+        assert not self.failures, self.failures
+        assert not any(self.by_slot.values()), self.by_slot
+
+
 @pytest.fixture(scope='module')
 def morph(): return MorphProvider()
 
@@ -44,7 +77,13 @@ def test_gap_inventory_is_sealed_without_fabricated_tokens(morph):
     assert gap['gap_id'] not in {e.token_id for e in st.evidence}
     assert f.semantic['proposed_roles']=={next(e.token_id for e in st.evidence if e.span=='Алека'):'OBJECT'}
     assert st.structural_closed and st.structural_hash
-    assert st.observation['implicit_bindings']=={}
+    binding=st.observation['implicit_bindings'][gap['gap_id']]
+    assert binding['anonymous'] and binding['participant_kind']=='INDIVIDUAL'
+    decision=st.decisions[gap['gap_id']]
+    assert decision.selector_outcome is None
+    assert decision.history[-1]['kind']=='ANONYMOUS_INTRODUCTION'
+    assert decision.history[-1]['identity_status']=='UNKNOWN'
+    assert decision.history[-1]['distinctness_asserted'] is False
     assert len([o for o in gap['options'] if o['kind']=='ANONYMOUS'])==1
     assert all(o['candidate_id']!='narrative-centre' for o in gap['options'])
 
@@ -54,9 +93,10 @@ def test_real_commit_chain_group_and_recovery(tmp_path,morph):
     journal=JournalChannel(tmp_path/'journal.jsonl'); store=AHStoreAdapter(core.store,journal,core)
     binding=InterpretationRunBinding(journal)
     text='Принял Алека. Занимался. Отправились. Купались.'
-    selector=Choices([0,lambda i:i.startswith('gap:'),0,lambda i:i.startswith('gap:')])
+    selector=AddressedChoices({'implicit_argument':['Same participant as omitted SUBJECT']*2})
     st,receipt=interpret_full(text,None,selector,store,binding,release=release,morph=morph,
         raw_input={'source_id':'source','range':[0,len(text)]},run_id='components-run')
+    selector.assert_complete()
     assert receipt.applied and len(receipt.committed_fragments)==4,receipt
     values=list(st.observation['implicit_bindings'].values())
     assert len(values)==4
@@ -81,11 +121,15 @@ def test_real_commit_chain_group_and_recovery(tmp_path,morph):
     assert not store.ledger.paths()
 
 
-def test_singleton_group_still_requires_grounded_answer(morph):
+def test_singleton_group_uses_agreement_without_guessing_identity(morph):
     sel=Choices()
     st=frontend('Купались.',morph,sel)
-    assert len(sel.prompts)==1
-    assert st.observation['implicit_bindings']=={}
+    assert not sel.prompts
+    binding,=st.observation['implicit_bindings'].values()
+    assert binding['anonymous'] and binding['participant_kind']=='GROUP'
+    decision=st.decisions[binding['decision_ref']]
+    assert decision.history[-1]['identity_status']=='UNKNOWN'
+    assert decision.history[-1]['distinctness_asserted'] is False
 
 
 def test_context_has_both_people_not_first_compatible_winner(morph):
@@ -155,7 +199,7 @@ def test_implicit_context_receipts_replay_without_new_ticks(tmp_path,morph):
     journal=JournalChannel(tmp_path/'journal');store=AHStoreAdapter(core.store,journal,core)
     binding=InterpretationRunBinding(journal)
     ignition=IgnitionEngine(core,IgnitionSettings(),WorkspaceSettings(.02))
-    text='Занимался. Купались.'
+    text='Занимался. Отдыхал. Гулял.'
     from ah.formalizer.real_backend import RealBackendSelector
     class Backend:
         model='scripted-contract-fixture'
@@ -168,7 +212,7 @@ def test_implicit_context_receipts_replay_without_new_ticks(tmp_path,morph):
     st,report=interpret_full(text,None,selector,store,binding,**kwargs)
     assert report.applied,report
     requests=[r['request'] for r in st.context_reads]
-    assert [r['kind'] for r in requests]==['IMPLICIT_ARGUMENT','IMPLICIT_ARGUMENT','READ_REMAINDER']
+    assert [r['kind'] for r in requests]==['IMPLICIT_ARGUMENT']*3+['READ_REMAINDER']
     assert [r['source_range'][1] for r in requests]==sorted(r['source_range'][1] for r in requests)
     tick=ignition.tick_index
     again,report2=interpret_full(text,None,selector,store,binding,**kwargs)
