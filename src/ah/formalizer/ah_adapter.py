@@ -317,7 +317,7 @@ class AHStoreAdapter(Store):
                 if old and old!=p: raise ValueError('INTEGRITY_ERROR: usage identity changed')
                 ledger.data['usage_links'].setdefault(p['link_id'],p)
             else:
-                if op.op_type not in {'ENSURE_ENTITY','ENSURE_TEMPLATE','ENSURE_NODE','ENSURE_FUNCTION','ENSURE_GROUP','ENSURE_LINK'}: raise ValueError('LEGACY_MUTATION_NOT_ALLOWED:'+op.op_type)
+                if op.op_type not in {'ENSURE_ENTITY','ENSURE_TEMPLATE','ENSURE_NODE','ENSURE_FUNCTION','ENSURE_GROUP','ENSURE_LINK','ENSURE_LEXICAL_FORMS'}: raise ValueError('LEGACY_MUTATION_NOT_ALLOWED:'+op.op_type)
                 handler=self._op_handlers.get(op.op_type)
                 if handler is None: raise ValueError('UNKNOWN_MUTATION_OPERATION:'+op.op_type)
                 uid=handler(draft,p)

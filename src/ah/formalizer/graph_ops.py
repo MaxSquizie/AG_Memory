@@ -213,13 +213,31 @@ def ensure_entity(core,p):
     return uid
 
 
+def ensure_lexical_forms(core,p):
+    """Extend a selected paradigm; lexical S identity is not entity/sense identity."""
+    surface=p['surface']
+    lemma=p.get('lemma')
+    if not isinstance(surface,str) or not surface.strip():
+        raise ValueError('LEXICAL_FORM_INVALID')
+    if lemma is not None and (not isinstance(lemma,str) or not lemma.strip()):
+        raise ValueError('LEXICAL_FORM_INVALID')
+    symbol=_ensure_symbol(core,lemma or surface)
+    if surface not in core.store.get_symbol(symbol.uid).forms:
+        core.add_symbol_form(symbol.uid,surface)
+    return symbol.uid
+
+
 def ensure_template(core,p):
     uid=p['uid']
     if core.store.has_uid(uid):
         if core.store.kind_of(uid).value!='T': raise ValueError('TEMPLATE_REF_TYPE_MISMATCH')
         return uid
     if p.get('semantic_status')!='UNLINKED': raise ValueError('CANONICAL_MAPPING_MISSING')
-    pred=_ensure_symbol(core,p['predicate_form'])
+    surface=p['predicate_form']
+    lemma=p.get('predicate_lemma')
+    # A selected lemma addresses the paradigm. A shared surface alone does not
+    # merge an existing homograph with a newly established lexical identity.
+    pred=core.ref(ensure_lexical_forms(core,{'surface':surface,'lemma':lemma}))
     core.add_template(Domain(p.get('domain','C')),pred,_roles(p['roles']),uid=uid)
     return uid
 
@@ -304,4 +322,4 @@ def ensure_link(core,p):
     return uid
 
 
-GRAPH_HANDLERS.update(ENSURE_ENTITY=ensure_entity,ENSURE_TEMPLATE=ensure_template,ENSURE_NODE=ensure_node,ENSURE_FUNCTION=ensure_function,ENSURE_GROUP=ensure_group,ENSURE_LINK=ensure_link)
+GRAPH_HANDLERS.update(ENSURE_ENTITY=ensure_entity,ENSURE_TEMPLATE=ensure_template,ENSURE_NODE=ensure_node,ENSURE_FUNCTION=ensure_function,ENSURE_GROUP=ensure_group,ENSURE_LINK=ensure_link,ENSURE_LEXICAL_FORMS=ensure_lexical_forms)

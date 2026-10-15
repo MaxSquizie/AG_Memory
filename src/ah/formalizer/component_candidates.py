@@ -25,7 +25,7 @@ def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nomin
         if attachment and projected is None: continue
         if not projected and not controlled and not governed and not quality and (pv.pos != 'VERB' or pv.mood == 'imperative'): continue
         if quality and pv.pos == 'ADJF' and 'nom' not in pv.cases: continue
-        senses = [s for s in release.entries('R-S') if s['lemma'] == pv.lemma and s['POS'] == pv.pos and not s.get('anchor_pattern')]
+        senses = [s for s in release.entries('R-S') if not p.is_oov() and s['lemma'] == pv.lemma and s['POS'] == pv.pos and not s.get('anchor_pattern')]
         vals = [v for v in release.entries('R-V') if v['sense_id'] in {s['sense_id'] for s in senses}]
         if senses and not vals:
             state.diag('VALENCY_UNKNOWN', p.token_id); continue

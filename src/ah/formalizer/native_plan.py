@@ -113,6 +113,14 @@ def build_plan(state,release,store):
         for role,child in f.semantic.get('proposition_args',{}).items():
             roles[role]=tree_node(child.get('tree') or {'frame_ref':child['frame_ref']},frag,active)[0]
         sense=selected.get('sense_id')
+        from .lexical_forms import selected_forms
+        for token_ref in f.semantic.get('morph_bindings',{}):
+            token=evidence[token_ref]
+            if token_ref==f.predicate_token_ref or not token.is_oov():continue
+            surface,lemma=selected_forms(f,token)
+            emit('ENSURE_LEXICAL_FORMS',{'surface':surface,'lemma':lemma,
+                'source_ref':token_ref,'source_tag':tag},frag)
+        predicate_surface,predicate_lemma=selected_forms(f,e)
         if selected['sense_kind']=='KNOWN':
             mapping=next((m for m in release.entries('TemplateMap') if m['sense_id']==sense and tuple(sorted(m.get('roles',())))==tuple(sorted(roles))),None)
             if mapping is None or not store.has_uid(mapping['template_ref']) or store._store.kind_of(mapping['template_ref']).value!='T': raise ValueError('CANONICAL_MAPPING_MISSING')
@@ -120,14 +128,17 @@ def build_plan(state,release,store):
             tid=mapping['template_ref']
         else:
             tid='T:open:'+digest([state.source_uid,f.predicate_token_ref,selected['candidate_id'],roles])
-            emit('ENSURE_TEMPLATE',{'uid':tid,'predicate_form':f.semantic.get('lexical_units',{}).get(f.predicate_token_ref,{}).get('surface',e.span),'roles':sorted(roles),'semantic_status':'UNLINKED','source_ref':f.predicate_token_ref,'source_tag':tag},frag)
+            emit('ENSURE_TEMPLATE',{'uid':tid,'predicate_form':predicate_surface,
+                **({'predicate_lemma':predicate_lemma} if predicate_lemma else {}),
+                'roles':sorted(roles),'semantic_status':'UNLINKED','source_ref':f.predicate_token_ref,'source_tag':tag},frag)
         content={'predicate':sense or tid,'actants':roles}
         ck=digest(content); mode=selected['state_class']; open_=selected['sense_kind']=='OPEN_LEXICAL'
         identity=[ck]
         if open_: identity.extend([state.source_uid,f.predicate_token_ref])
         elif mode!='STATE' and not structural: identity.extend([state.source_uid,state.interpretation_version,fid])
         nid='N:'+digest(identity)
-        emit('ENSURE_NODE',{'uid':nid,'template_ref':tid,'actants':roles,'semantic_status':'UNLINKED' if open_ else 'KNOWN','temporal_mode':mode,'identity_key':identity,'content_key':ck,'polarity':True,'proposition':content,'source_tag':tag,'source_ref':f.predicate_token_ref},frag)
+        emit('ENSURE_NODE',{'uid':nid,'template_ref':tid,'actants':roles,'semantic_status':'UNLINKED' if open_ else 'KNOWN','temporal_mode':mode,'identity_key':identity,'content_key':ck,'polarity':True,'proposition':content,'source_tag':tag,'source_ref':f.predicate_token_ref,
+            **({'lexical_anchor':predicate_lemma or predicate_surface.casefold()} if open_ else {})},frag)
         for role,child in f.semantic.get('proposition_args',{}).items():
             target=roles[role]
             qualification=content_time(frames[child['frame_ref']],target,tag) if child.get('frame_ref') else {}

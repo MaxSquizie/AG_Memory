@@ -31,23 +31,36 @@ def resolve(state,release,selector):
             key='oov-reading:'+token.token_id
             from .structural_tasks import enabled,choose
             if enabled(release):
-                # Function classes, never guessed dictionary lemmas or tense.
+                # Keep a reading without a lemma available even when the analyzer
+                # can predict a paradigm. Predictions are proposals, not evidence
+                # of a dictionary sense or a spelling correction.
                 for pos in ('VERB','INFN','ADVB'):
                     v=MorphVariant(token.span.casefold(),pos,origin='CONTEXTUAL')
                     options.setdefault(digest(_morph(v)),v)
+                for v in token.morph_guesses:
+                    if v.pos and v.lemma:
+                        options.setdefault(digest(_morph(v)),v)
                 from .morphology_domain import offer,license_use,clean
+                from .probe_wording import reading as describe
                 readings=offer(state,token,options.values(),'OOV_FUNCTION')
+                originals=list(options.values())
                 selected=choose(state,release,selector,region,cfg,'structural_oov_reading',
-                    [{'candidate_id':digest(_morph(v)),'reading':_morph(v),
-                      'label':'Source «'+token.span+'»: '+v.pos+'; cases='+str(sorted(v.cases))+
-                              '; all other unsupported features and lexical meaning remain unknown'} for v in readings],
-                    'Choose a grammatical FUNCTION for this unknown source word from context. '
-                    'Do not repair its spelling, invent dictionary identity or assume the closest known word.')
+                    [{'candidate_id':digest(_morph(v)),'reading':_morph(v),'predicted_lemma':original.origin=='PREDICTED',
+                      'label':('Source «'+token.span+'»: predicted inflection; '+describe(_morph(v))+
+                               '; lexical meaning remains unknown' if original.origin=='PREDICTED' else
+                               'Source «'+token.span+'»: '+v.pos+'; cases='+str(sorted(v.cases))+
+                               '; lemma and all other unsupported features remain unknown')}
+                     for v,original in zip(readings,originals)],
+                    'Choose the grammatical reading of the unknown word «'+token.span+'» in this source. '
+                    'Predicted inflections describe possible forms of this same word, not spelling repairs. '
+                    'Use agreement and sentence meaning to distinguish them. If only the function is clear, '
+                    'choose a reading with unknown lemma. Do not infer a known lexical meaning from a predicted lemma.')
                 if selected:
                     value,proof=selected
                     license_use(state,token.token_id,value['reading'],proof['decision_ref'],value['candidate_id'])
                     state.syntax_trace.append({'kind':'MORPHOLOGY_DOMAIN_RESTRICTION','token_ref':token.token_id,
-                        'reading':clean(value['reading']),'decision_ref':proof['decision_ref'],'candidate_id':value['candidate_id']})
+                        'reading':clean(value['reading']),'predicted_lemma':value['predicted_lemma'],
+                        'decision_ref':proof['decision_ref'],'candidate_id':value['candidate_id']})
                 else:state.diag('OOV_GRAMMAR_UNRESOLVED',token.token_id)
                 continue
             if not options:

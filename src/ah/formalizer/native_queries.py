@@ -78,8 +78,10 @@ def project_native_queries(state,release):
         request=f.semantic.get('query_request',{})
         all_roles={r for r,v in roles}|set(request.get('requested_roles',()))|({request['count_role']} if request.get('count_role') else set())|set(selected.get('query_existential_roles',()))
         mapping=[m for m in release.entries('TemplateMap') if m['sense_id']==selected.get('sense_id') and set(m.get('roles',()))==all_roles]
+        from .lexical_forms import selected_forms
+        surface,lemma=selected_forms(f,evidence[f.predicate_token_ref])
         atoms[f.frame_id]={'template_ref':mapping[0]['template_ref'] if len(mapping)==1 else None,
-            'roles':roles,'query_existential_roles':selected.get('query_existential_roles',()),'temporal':f.semantic.get('region'),'lexical_anchor':f.semantic.get('lexical_units',{}).get(f.predicate_token_ref,{}).get('surface',evidence[f.predicate_token_ref].span).casefold() if selected['sense_kind']=='OPEN_LEXICAL' else None}
+            'roles':roles,'query_existential_roles':selected.get('query_existential_roles',()),'temporal':f.semantic.get('region'),'lexical_anchor':(lemma or surface).casefold() if selected['sense_kind']=='OPEN_LEXICAL' else None}
     structural=set().union(*(leaves(t) for t in trees))
     for f in state.frames:
         if f.frame_id in structural or f.frame_id in embedded: continue

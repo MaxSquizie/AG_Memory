@@ -36,4 +36,5 @@ def probe_context(state, region, cfg, local, *, include_surrounding=True):
     return local.strip()+'\nSurrounding source (reference only): '+surrounding, (
         'Resolve ONLY the target area «'+local.strip()+
         '». Words in the surrounding source but outside this target are not part of the current task. '
-        'Use them only to understand references and grammar. ')
+        'Use the surrounding source to understand the meaning, references and grammar. '
+        'Choose a structure for the target words; do not assign surrounding words to it again. ')

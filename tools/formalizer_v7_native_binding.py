@@ -502,9 +502,10 @@ def native_candidate_patterns(session,state,release,limit=1024):
                 if len(mappings)!=1 or mappings[0]['template_ref'] not in session.native_aliases:continue
                 pred,role_map=session.native_aliases[mappings[0]['template_ref']]
             else:
-                unit=frame.semantic.get('lexical_units',{}).get(frame.predicate_token_ref,{})
                 ev=evidence[frame.predicate_token_ref]
-                label=unit.get('surface') if len(unit.get('anchor_refs',()))>1 else ev.lemma or ev.span
+                from ah.formalizer.lexical_forms import selected_forms
+                surface,lemma=selected_forms(frame,ev)
+                label=lemma or surface.casefold()
                 pred='OPEN:'+label
                 role_map={r:{'SUBJECT':'AGENT','OBJECT':'THEME'}.get(r,r) for r in role_ids}
             roles={};valid=True
@@ -679,7 +680,8 @@ def execute_native(session,p,config):
     for node_id,node in L.data['nodes'].items():
         if node.get('semantic_status')=='UNLINKED' and node.get('source_tag')==[state.source_uid,state.interpretation_version]:
             ev=evidence.get(node.get('source_ref'))
-            if ev and ev.lemma:session.native_lexical_labels[node_id]=ev.lemma
+            if node.get('lexical_anchor'):session.native_lexical_labels[node_id]=node['lexical_anchor']
+            elif ev and ev.lemma:session.native_lexical_labels[node_id]=ev.lemma
     facts=session.unique([decode_native(session,uid) for uid in visible])
     # IR is exported separately; this asserted view uses actual T5 eligibility,
     # not all generated parser hypotheses as facts.

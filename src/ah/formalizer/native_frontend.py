@@ -880,7 +880,9 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
             declared_ids &= allowed; priors &= allowed; context_senses &= allowed
         else:
             # A phrase sense is not licensed by an isolated matching head.
-            senses=[s for s in senses if not s.get('anchor_pattern')]
+            # Productive OOV morphology establishes a possible paradigm, not a
+            # dictionary sense, even if its predicted lemma happens to match R-S.
+            senses=[s for s in senses if not e.is_oov() and not s.get('anchor_pattern')]
             allowed={s['sense_id'] for s in senses}
             declared_ids &= allowed; priors &= allowed; context_senses &= allowed
         frame.semantic['has_known_senses']=bool(senses)

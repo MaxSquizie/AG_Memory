@@ -335,7 +335,8 @@ class FormalizerAdapter:
                 continue
             if not frame.predicate_token_ref and ev.span != frame.anchor_span:
                 continue
-            variants=ev.variants if frame.predicate_token_ref else sorted(ev.variants,key=lambda v:v.pos!='VERB')
+            from .native_frontend import _frame_variants
+            variants=_frame_variants(frame,ev) if frame.predicate_token_ref else sorted(ev.variants,key=lambda v:v.pos!='VERB')
             for var in variants:
                 if var.pos in {"VERB", "INFN", "PRED", "ADJS", "ADJF", "NOUN", "PRTF", "PRTS", "GRND"}:
                     return PredicateCandidate(

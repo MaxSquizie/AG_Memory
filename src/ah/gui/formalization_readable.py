@@ -43,7 +43,7 @@ QUESTIONS = {'composition_boundary': 'Что охватывает всё выр�
     'structural_event_head':'Какое имя обозначает событие?',
     'structural_refinement':'Где начинается и заканчивается описание имени?',
     'structural_marker_reading':'Какое целое морфологическое чтение имеет связующее слово?',
-    'structural_oov_reading':'Какую грамматическую функцию выполняет неизвестное слово?',
+    'structural_oov_reading':'Какое морфологическое чтение подходит неизвестному слову?',
     'child_slot':'Какой из разборов подходит к требованиям родительской части?',
     'attitude_attachment':'К какому высказыванию относится вложенное содержание и где его границы?',
     'nominal_dependency': 'К какому слову относится участник и в какой роли?',
@@ -61,8 +61,11 @@ MORPH = {'NOUN':'существительное','VERB':'глагол','INFN':'�
     'masc':'мужской род','femn':'женский род','neut':'средний род','past':'прошедшее время',
     'pres':'настоящее время','futr':'будущее время','1st':'1-е лицо','2nd':'2-е лицо','3rd':'3-е лицо',
     'perf':'совершенный вид','impf':'несовершенный вид','anim':'одушевлённое','inan':'неодушевлённое',
-    'tran':'переходный','intr':'непереходный','indc':'изъявительное наклонение','impr':'повелительное наклонение'}
+    'tran':'переходный','intr':'непереходный','indc':'изъявительное наклонение','impr':'повелительное наклонение',
+    'abl':'творительный','present':'настоящее время','future':'будущее время',
+    'indicative':'изъявительное наклонение','imperative':'повелительное наклонение'}
 TRACE = {'FEATURE_CHECK_BATCH':'Проверка грамматических признаков',
+    'MORPHOLOGY_DOMAIN_RESTRICTION':'Выбранное морфологическое чтение слова',
     'STRUCTURAL_TASK':'Выбор связи или границы по исходному тексту',
     'STRUCTURAL_RELATION_COMPOSED':'Связь собрана из согласованных частей',
     'COMPOSITION_PRODUCERS':'Проверка всех источников разбора',
@@ -286,7 +289,12 @@ class ReadableInspection:
             markers=' '.join(self.word(t) for t in value.get('marker_refs',()))
             return OPERATORS.get(value['relation'],value['relation'])+'. Части по порядку: '+ '; '.join(parts)+'. Служебное выражение: «'+markers+'». Остальное содержание не опущено.'
         if value.get('relation'):return OPERATORS.get(value['relation'],value['relation'])
-        if value.get('reading'):return 'Чтение слова: '+self.morphology(value['reading'])+'. Словарный смысл и неизвестные признаки не додумываются.'
+        if value.get('reading'):
+            reading=value['reading']
+            lemma=('Лемма не установлена; сохраняется исходная форма. ' if value.get('predicted_lemma') is False else
+                'Начальная форма «'+str(reading.get('lemma') or 'не установлена')+'»'+
+                (' (морфологическая гипотеза). ' if value.get('predicted_lemma') else '. '))
+            return lemma+'Чтение слова: '+self.morphology(reading)+'. Словарный смысл и неизвестные признаки не додумываются.'
         if value.get('attitude'):
             attitudes={'QUOTED':'пересказ','EMBEDDED':'мысленное содержание','HYPOTHETICAL':'предполагаемое или желаемое содержание','UNKNOWN':'отношение не уточнено'}
             return ROLES.get(value['role'],value['role'])+' слова «'+self.word(value['owner_ref'])+'»: '+attitudes[value['attitude']]+'. Вложенное содержание отдельно не утверждается.'
@@ -519,9 +527,16 @@ class ReadableInspection:
             if r.get('context_policy')=='OWNED_TARGET':
                 out+=paragraph('Текст этой структурной задачи: «'+' '.join(self.word(t) for t in r.get('target_token_refs',()))+
                     '». Слова внешних областей в вопрос не включены; ограничения входного слота переданы отдельно.')
+            elif r.get('context_policy')=='TARGET_WITH_CONTEXT':
+                out+=paragraph('Текст этой структурной задачи: «'+' '.join(self.word(t) for t in r.get('target_token_refs',()))+
+                    '». Окружение доступно для понимания смысла и грамматики. Выбор относится к указанным словам; внешние операторы не присваиваются им повторно.')
             out+=paragraph('Порция: '+str(r.get('page',0)+1)+'. Рассмотрено вариантов: '+str(r.get('examined',0))+'.')
             if r.get('enumeration_complete') is False:out+=paragraph('Остались непоказанные варианты. Локальный выбор не означает полного перебора.')
             if r.get('alternatives'):out+=table(['Вариант','Выбор'],[[esc(self.task_choice(v)),'Выбран' if v.get('candidate_id')==r.get('selected') else 'Не выбран'] for v in r['alternatives']])
+        elif c=='Трасса' and r.get('kind')=='MORPHOLOGY_DOMAIN_RESTRICTION':
+            out+=paragraph('Для слова «'+self.word(r.get('token_ref'))+'» выбрано чтение: '+self.task_choice(r))
+            out+=paragraph('Это чтение ещё проверяется вместе с ролями и согласованием всей конструкции. '
+                'Выбор начальной формы сам по себе не устанавливает значение слова или тождество упомянутых объектов.')
         elif c=='Трасса' and r.get('kind')=='STRUCTURAL_REVISION_STALLED':
             out+=paragraph('Повторены те же локальные решения без устранения ошибки. Нового различающего свидетельства нет. '
                            'Разбор оставлен неразрешённым; одинаковые вопросы дальше не отправляются.')

@@ -153,7 +153,10 @@ class AttentionContextReader:
                 if tid in self.read_token_refs:
                     continue
                 e = evidence[tid]
-                forms = {e.span.casefold(), *(v.lemma for v in e.variants if v.lemma)}
+                # Productive lemmas are lexical retrieval cues, not assertions of
+                # identity or meaning. Activate every matching stored paradigm;
+                # later reading/role decisions still resolve the ambiguity.
+                forms = {e.span.casefold(), *(v.lemma for v in (*e.variants,*e.morph_guesses) if v.lemma)}
                 refs = {s.uid for form in sorted(forms) for s in store._store.find_symbols_by_form(form)}
                 for variant in e.variants:
                     refs.update(self.lexical_symbols.get((variant.lemma,variant.pos),()))
