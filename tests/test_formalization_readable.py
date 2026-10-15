@@ -53,6 +53,23 @@ def test_lost_parent_and_impersonal_state_are_explained_without_machine_fields()
     assert 'ADVB' not in label and 'impersonal' not in label
 
 
+def test_content_separator_and_marker_decisions_are_readable_and_provisional():
+    data=sample();data['state']['syntax_trace']=[
+        {'kind':'CONTENT_SEPARATOR_OWNERSHIP','separator_refs':['read'],
+         'parent_after':['student'],'status':'UNCONFIRMED'},
+        {'kind':'STRUCTURAL_PARTITION_COVERAGE','relation':'POSSIBLE',
+         'uncovered_token_refs':['read'],'reason':'CONTENT_INSIDE_RELATION_MARKER'}]
+    idx=Inspection(data);reader=ReadableInspection(idx)
+    proposal=reader.explain(idx.by_ref['trace:0'])
+    assert 'ещё не подтверждено' in proposal and 'Родительская часть после этого: «студент»' in proposal
+    data['state']['syntax_trace'][0]['status']='CONFIRMED'
+    assert 'Разбиение подтверждено пробой' in reader.explain(idx.by_ref['trace:0'])
+    lost=reader.explain(idx.by_ref['trace:1'])
+    assert 'пересмотреть границы содержания' in lost and 'прочитал' not in lost
+    label=reader.choice_text('«читать» @5 names part of the event/state being related, not just the outer relation; revise its boundary')
+    assert 'вернуть его в содержание' in label and 'event/state' not in label
+
+
 def test_structural_tasks_explain_frontier_parts_and_limit_without_json():
     data=sample();data['state']['syntax_trace']=[
         {'kind':'STRUCTURAL_TASK','slot':'structural_partition','decision_ref':'partition',

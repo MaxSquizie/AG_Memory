@@ -25,6 +25,7 @@ SLOTS={
     'structural_owner':'Предикат — владелец содержания',
     'structural_content_role':'Роль и статус вложенного содержания',
     'structural_oov_reading':'Грамматическое чтение неизвестного слова',
+    'relation_marker_role':'Слова связи или содержимое действия',
 }
 for key,label in [('structural_introducer','Вводящее выражение'),('structural_content','Вложенное содержание'),
                   ('structural_operand_1','Первая часть'),('structural_operand_2','Вторая часть'),

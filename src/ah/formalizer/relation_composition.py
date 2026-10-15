@@ -74,6 +74,9 @@ def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof
                 'reason':'LEXICAL_CONTENT_OUTSIDE_PARTS'})
             state.diag('STRUCTURAL_CONTENT_UNCOVERED',region.region_id)
             return None
+    else:
+        from .relation_markers import confirm
+        if not confirm(state,release,selector,region,cfg,kind,links,groups):return None
     names=(['parent clause with a content slot', 'content filling that slot'] if kind=='CONTENT' else
            ['condition','consequence'] if kind in {'IMPLIES','COUNTERFACTUAL'} else
            ['restriction and whole body'] if kind in {'FORALL','EXISTS'} else
@@ -99,7 +102,7 @@ def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof
     return (markers,result[1]) if result else None
 
 
-def function_ownership(state,release,selector,region,cfg,kind,groups):
+def function_ownership(state,release,selector,region,cfg,kind,groups,*,eligible_refs=None):
     """Repeated/discontinuous function tokens can belong to the outer edge.
 
     Morphology proposes them; no particle spelling determines its scope.
@@ -107,7 +110,9 @@ def function_ownership(state,release,selector,region,cfg,kind,groups):
     actually owns it. The full partition is confirmed afterwards.
     """
     while True:
-        possible=[t for group in groups for t in group if any(v.pos in {'PRCL','CONJ'} for v in t.variants)]
+        possible=[t for group in groups for t in group if
+            (eligible_refs is None or t.token_id in eligible_refs) and
+            any(v.pos in {'PRCL','CONJ'} for v in t.variants)]
         if not possible:return groups
         options=[{'candidate_id':'KEEP_ALL','label':'Keep all listed words inside their parts; none expresses the chosen outer relation: '+
             ', '.join('«'+t.span+'» @'+str(t.start) for t in possible)}]
@@ -120,6 +125,8 @@ def function_ownership(state,release,selector,region,cfg,kind,groups):
             'Select that occurrence to move it out of its part. '
             +('Words introducing the condition or consequence belong to this outer conditional relation. '
               if kind in {'IMPLIES','COUNTERFACTUAL'} else '')+
+            ('Part 1 is the parent, part 2 is its selected content. Move only an introducer of THIS content; '
+             'a conjunction introducing a different clause still inside the parent must stay there. ' if kind=='CONTENT' else '')+
             'Keep all only if none expresses the outer relation. Negation, modality and quantification of an inner proposition stay inside it.')
         if not selected:return None
         if selected[0]['candidate_id']=='KEEP_ALL':return groups
@@ -278,12 +285,24 @@ def content(state,release,selector,region,tokens,cfg,request,compose_child,proof
     body=chosen[0];body_ids={t.token_id for t in body}
     rest=[t for t in tokens if t.token_id not in body_ids]
     parent_span=span(state,release,selector,region,rest,cfg,'structural_parent',
-        'Select ALL remaining parent content, including its participants and any still nested parent clauses. '
-        'Exclude only the content introducer and enclosing punctuation. '
-        'Do not omit an earlier speaker or predicate: it must remain in this part and be analysed recursively.')
+        'Select the parent predicate with its participants and any other clauses still attached to that parent. '
+        'The selected dependent content is already removed from this list. '
+        'Stop at the last parent word, not at the quotation marks or punctuation surrounding the removed content. '
+        'An earlier speaker or predicate must remain in the parent; exclude the introducer of THIS content.')
     if not parent_span:return block(state,region)
     parent=parent_span[0]
-    if not confirm_partition(state,release,selector,region,tokens,cfg,'CONTENT',[parent,body],proof):return block(state,region)
+    groups=function_ownership(state,release,selector,region,cfg,'CONTENT',[parent,body],
+        eligible_refs={t.token_id for t in parent})
+    if groups is None:return block(state,region)
+    parent,body=groups
+    from .content_separators import separate
+    parent,separators=separate(state,region,tokens,parent,body)
+    if not parent:return block(state,region)
+    partition=confirm_partition(state,release,selector,region,tokens,cfg,'CONTENT',[parent,body],proof)
+    if separators:
+        separators['status']='CONFIRMED' if partition else 'UNCONFIRMED'
+        if partition:separators['decision_ref']=partition[1]['decision_ref']
+    if not partition:return block(state,region)
     owners=[t for t in parent if any(v.pos in {'VERB','INFN','ADJF','ADJS','NOUN'} for v in t.variants)]
     owner_choice=choose(state,release,selector,region,cfg,'structural_owner',
         [{'candidate_id':t.token_id,'owner_ref':t.token_id,'label':'Content belongs to predicate «'+t.span+'» @'+str(t.start)} for t in owners],

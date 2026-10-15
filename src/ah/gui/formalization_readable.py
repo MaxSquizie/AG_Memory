@@ -18,7 +18,8 @@ OPERATORS = {
 }
 ROLES = {'SUBJECT': 'Кто / что', 'OBJECT': 'Объект действия', 'RECIPIENT': 'Получатель',
     'LOCATION': 'Место', 'LOCATIVE': 'Место', 'INSTRUMENT': 'Инструмент',
-    'SOURCE': 'Откуда', 'DESTINATION': 'Куда', 'TIME': 'Время', 'AGENT': 'Действующее лицо'}
+    'SOURCE': 'Откуда', 'DESTINATION': 'Куда', 'TIME': 'Время', 'AGENT': 'Действующее лицо',
+    'EXPERIENCER':'Кто испытывает состояние'}
 STATUS = {'APPLIED': 'Записано в память', 'RESOLVED': 'Выбор подтверждён',
     'UNRESOLVED': 'Не разрешено', 'CANDIDATE': 'Вариант разбора',
     'SUPERSEDED': 'Заменено последующим решением', 'ONE_SELECTED': 'Выбран один вариант',
@@ -34,6 +35,7 @@ QUESTIONS = {'composition_boundary': 'Что охватывает всё выр�
     'structural_relation':'Какая связь охватывает весь фрагмент?',
     'structural_revision':'Можно ли пересмотреть выбор с учётом противоречия во вложенных частях?',
     'structural_partition':'Согласованы ли тип связи, порядок частей и всё исходное содержание?',
+    'relation_marker_role':'Это слова внешней связи или часть описываемого действия?',
     'structural_owner':'Какому слову принадлежит вложенное содержание?',
     'structural_content_role':'Какую роль играет содержание и как к нему относится говорящий?',
     'structural_control':'Кто выполняет действие в инфинитиве?',
@@ -65,6 +67,8 @@ MORPH = {'NOUN':'существительное','VERB':'глагол','INFN':'�
     'abl':'творительный','present':'настоящее время','future':'будущее время',
     'indicative':'изъявительное наклонение','imperative':'повелительное наклонение'}
 TRACE = {'FEATURE_CHECK_BATCH':'Проверка грамматических признаков',
+    'CONTENT_SEPARATOR_OWNERSHIP':'Пунктуация, связывающая родителя с содержанием',
+    'STRUCTURAL_PARTITION_COVERAGE':'Слова, оставшиеся без содержательной роли',
     'MORPHOLOGY_DOMAIN_RESTRICTION':'Выбранное морфологическое чтение слова',
     'DISPATCH_COMPLETED':'Диспетчер: задача пересчитана',
     'DISPATCH_REUSED':'Диспетчер: результат сохранён',
@@ -92,6 +96,7 @@ DIAGNOSTICS = {'COMPOSITION_SCOPE_BOUNDARY_CHANGED':'При объединени
     'COMPOSITION_CYCLE':'Задача требует собственный ещё не рассчитанный результат. Цикл не разрешает выбрать ответ.',
     'STRUCTURAL_TASK_UNRESOLVED':'Тип связи, границы или вложенные части ещё не согласованы. Отдельные части не записаны как самостоятельные факты.',
     'STRUCTURAL_CONTENT_UNCOVERED':'Вне частей сообщения остались значимые слова. Они не имеют служебного чтения и не могут быть отброшены как вводящее выражение.',
+    'STRUCTURAL_MARKER_CONTENT':'Проба нашла слово описываемого действия внутри внешнего связующего выражения. Его нужно вернуть в содержание и пересмотреть границы.',
     'STRUCTURAL_TASK_SEARCH_INCOMPLETE':'Достигнут предел поиска или размера контекста. Это не означает отсутствия подходящего разбора.',
     'STRUCTURAL_REVISION_NO_PROGRESS':'Пересмотр повторил те же варианты и ту же ошибку. Повторный поиск остановлен; разбор остаётся неразрешённым.',
     'COMPOSITION_PRODUCER_PENDING':'Один из источников разбора ещё не разрешён. Готовый вариант другого источника не признан единственным.',
@@ -322,6 +327,10 @@ class ReadableInspection:
     def choice_text(self,text):
         # Translate known protocol labels only. Never infer a model rationale.
         if text.startswith('A complete clause:'):return 'Полное высказывание: сказуемое описывает участника; явный глагол может отсутствовать.'
+        if text.startswith('All these words only express the outer relation;'):
+            return 'Эти слова выражают только внешнюю связь. Описываемое событие или состояние полностью сохранено во вложенном содержании.'
+        marker=re.match(r'«(.*?)» @\d+ names part of the event/state being related,',text)
+        if marker:return 'Слово «'+marker[1]+'» относится к самому описываемому событию или состоянию. Нужно вернуть его в содержание и пересмотреть границы.'
         nominal=re.search(r'noun predicate: «(.*?)» describes what «(.*?)» is',text)
         if nominal:return 'Именное сказуемое «'+nominal[1]+'» характеризует «'+nominal[2]+'». Это предложенный разбор; его соответствие тексту проверяется пробой.'
         if '; impersonal state;' in text:
@@ -544,7 +553,15 @@ class ReadableInspection:
             out+=paragraph('Возможна вложенная часть высказывания. Разбиение на самостоятельные предложения отложено: сначала нужно подтвердить владельца и полные границы содержания отдельной пробой.')
         elif c=='Трасса' and r.get('kind')=='STRUCTURAL_PARTITION_COVERAGE':
             out+=paragraph('Разбиение потеряло значимые слова: «'+' '.join(self.word(t) for t in r.get('uncovered_token_refs',()))+
-                '». Они не могут исчезнуть во вводящем выражении. Нужно расширить родительскую часть или пересмотреть связь; запись вложенной части отдельно заблокирована.')
+                ('». Они не могут исчезнуть во вводящем выражении. Нужно расширить родительскую часть или пересмотреть связь; запись вложенной части отдельно заблокирована.' if r.get('relation') in {None,'CONTENT'} else
+                 '». Проба отнесла их к описываемому событию или состоянию. Нужно пересмотреть границы содержания; запись неполного выражения заблокирована.'))
+        elif c=='Трасса' and r.get('kind')=='CONTENT_SEPARATOR_OWNERSHIP':
+            out+=paragraph('Предложено отнести к связи с вложенным содержанием знаки «'+
+                ' '.join(self.word(t) for t in r.get('separator_refs',()))+'». Родительская часть после этого: «'+
+                ' '.join(self.word(t) for t in r.get('parent_after',()))+'».')
+            out+=paragraph('Разбиение подтверждено пробой; завершение вложенных частей проверяется отдельно.' if r.get('status')=='CONFIRMED' else
+                'Это предложение по пунктуации ещё не подтверждено полным разбиением и не разрешает запись факта.')
+            if r.get('decision_ref'):out+='<p>'+self.link(r['decision_ref'],'Проверка полного разбиения')+'</p>'
         elif c=='Трасса' and r.get('kind')=='DEPENDENCY_REJECTED':
             out+=paragraph('Этот вариант зависимостей слова «'+self.word(r.get('predicate_ref'))+'» отклонён: '+
                 ('проба не подтвердила ни одного прикрепления.' if r.get('reason')=='NO_LICENSED_ATTACHMENT' else

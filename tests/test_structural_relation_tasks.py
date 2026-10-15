@@ -139,6 +139,7 @@ def test_inner_content_can_be_separated_before_its_ancestor(tmp_path,monkeypatch
     text='Иван сказал, что Пётр думал, что Мария пришла.'
     # The first split leaves THINK's content open inside the still nested parent.
     steps=content_steps('думал','Мария','пришла',attitude='EMBEDDED')[:-1]
+    steps.insert(5,('structural_function_owner','KEEP_ALL'))
     steps+=content_steps('сказал','Пётр','думал')+relation('LEXICAL')+relation('LEXICAL')
     result,script=run(tmp_path,monkeypatch,text,steps)
     assert result['diagnostics']['codes']==[]
