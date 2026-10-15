@@ -82,11 +82,9 @@ def _probe(state, selector, release, key, slot, options, context, source_range, 
     if runtime is not None:
         runtime.tasks.record_probe(key)
         from .component_policy import policy
-        prior=state.component_probe_records.get(key)
-        unchanged=bool(prior and prior['decision']['outcome']=='RESOLVED'
-                       and prior.get('dependency_signature')==dependency_signature)
-        memory='' if unchanged else runtime.memory(slot,options,source_range,policy(release))
-        question=(question or '')+memory+runtime.tasks.question(key)
+        memory=runtime.memory(slot,options,source_range,policy(release))
+        question=(question or '')+memory+runtime.tasks.question(key)+runtime.input_question()
+        dependency_signature=digest([dependency_signature,runtime.input_signature(),question])
     from .component_probe_replay import execute
     return execute(_live_probe,state,selector,release,key,slot,options,context,source_range,
                    equivalent_targets=equivalent_targets,question=question,dependency_signature=dependency_signature)

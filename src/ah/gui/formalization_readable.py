@@ -66,6 +66,11 @@ MORPH = {'NOUN':'существительное','VERB':'глагол','INFN':'�
     'indicative':'изъявительное наклонение','imperative':'повелительное наклонение'}
 TRACE = {'FEATURE_CHECK_BATCH':'Проверка грамматических признаков',
     'MORPHOLOGY_DOMAIN_RESTRICTION':'Выбранное морфологическое чтение слова',
+    'DISPATCH_COMPLETED':'Диспетчер: задача пересчитана',
+    'DISPATCH_REUSED':'Диспетчер: результат сохранён',
+    'DISPATCH_INVALIDATED':'Диспетчер: требуется пересмотр',
+    'DISPATCH_RECHECK':'Диспетчер: зависимости изменились во время расчёта',
+    'DISPATCH_MORPHOLOGY':'Диспетчер: морфология текущей области',
     'STRUCTURAL_TASK':'Выбор связи или границы по исходному тексту',
     'STRUCTURAL_RELATION_COMPOSED':'Связь собрана из согласованных частей',
     'COMPOSITION_PRODUCERS':'Проверка всех источников разбора',
@@ -81,6 +86,10 @@ TRACE = {'FEATURE_CHECK_BATCH':'Проверка грамматических п
     'QUANTIFIER_BINDING_DOMAIN':'Варианты связывания квантора','OPERATOR_COMPOSITION':'Вложенность операторов',
     'COMPOSITION_CLOSED':'Объединение частей завершено','COMPOSITION_EMPTY':'Допустимый разбор не построен'}
 DIAGNOSTICS = {'COMPOSITION_SCOPE_BOUNDARY_CHANGED':'При объединении изменилось содержимое цельного условия.',
+    'COMPOSITION_DEPENDENCY_NO_PROGRESS':'Зависимости повторяют те же несовместимые состояния. Разбор остановлен без принудительного выбора.',
+    'COMPOSITION_DEPENDENCY_STALE':'Связанный результат изменился после расчёта. Устаревший разбор не допущен к записи.',
+    'COMPOSITION_DISPATCH_INCOMPLETE':'Диспетчер достиг предела согласования зависимостей. Разбор не завершён.',
+    'COMPOSITION_CYCLE':'Задача требует собственный ещё не рассчитанный результат. Цикл не разрешает выбрать ответ.',
     'STRUCTURAL_TASK_UNRESOLVED':'Тип связи, границы или вложенные части ещё не согласованы. Отдельные части не записаны как самостоятельные факты.',
     'STRUCTURAL_TASK_SEARCH_INCOMPLETE':'Достигнут предел поиска или размера контекста. Это не означает отсутствия подходящего разбора.',
     'STRUCTURAL_REVISION_NO_PROGRESS':'Пересмотр повторил те же варианты и ту же ошибку. Повторный поиск остановлен; разбор остаётся неразрешённым.',
@@ -127,6 +136,12 @@ class ReadableInspection:
         self.graph=inspection.snapshot.get('committed_graph',{}); self.nodes=self.graph.get('nodes',{})
         self.entities={};self.variables={};self.aliases={};self.gaps={};self.specs={}
         self.option_labels={};self.domain_names={};self.task_options={}
+        self.dispatch_tasks={};self.dispatch_versions={}
+        for entry in self.index.entries:
+            row=entry.record
+            if entry.category=='Трасса' and row.get('kind','').startswith('DISPATCH_') and row.get('task_kind'):
+                self.dispatch_tasks[row.get('task_ref')]=entry
+                if row.get('revision'):self.dispatch_versions[(row.get('task_ref'),row['revision'])]=entry
         observation=self.state.get('observation',{})
         self.implicit=observation.get('implicit_bindings',{})
         for mention,ref in observation.get('entity_bindings',{}).items():
@@ -533,6 +548,36 @@ class ReadableInspection:
             out+=paragraph('Порция: '+str(r.get('page',0)+1)+'. Рассмотрено вариантов: '+str(r.get('examined',0))+'.')
             if r.get('enumeration_complete') is False:out+=paragraph('Остались непоказанные варианты. Локальный выбор не означает полного перебора.')
             if r.get('alternatives'):out+=table(['Вариант','Выбор'],[[esc(self.task_choice(v)),'Выбран' if v.get('candidate_id')==r.get('selected') else 'Не выбран'] for v in r['alternatives']])
+        elif c=='Трасса' and r.get('kind','').startswith('DISPATCH_'):
+            names={'COMPOSITION':'Согласование структуры', 'AGREEMENT':'Проверка согласования слов',
+                   'MORPHOLOGY':'Выбор морфологических чтений', 'GRAMMAR':'Грамматические варианты',
+                   'GOAL_CONTEXT':'Контекст и проверка логических целей'}
+            out+=paragraph(names.get(r.get('task_kind'),'Морфология текущей области'))
+            explanations={
+                'DISPATCH_COMPLETED':'Задача рассчитана по текущим входам. Зависимые результаты теперь могут использовать эту версию.',
+                'DISPATCH_REUSED':'Входы и версии зависимостей не изменились. Повторный расчёт и новые вопросы модели не нужны.',
+                'DISPATCH_INVALIDATED':'Изменились входы задачи или результат, от которого она зависит. Старый результат сохранён в истории, но больше не разрешает завершить разбор.',
+                'DISPATCH_RECHECK':'Во время расчёта изменился уже использованный результат. Диспетчер повторно согласует задачу; смешение версий не допускается.',
+                'DISPATCH_MORPHOLOGY':'Чтения слов проверяются для этой области и её текущего родительского слота. Исходные словоформы сохранены.'}
+            explanation=explanations.get(r['kind'],'Состояние зависимой задачи изменилось.')
+            if r.get('reason')=='REJECTED_COMPOSITION_DISCARDED':
+                explanation='Неудачная попытка построения целиком отклонена. Следующая версия использует зависимости нового разбора; история прежних решений сохранена.'
+            out+=paragraph(explanation)
+            if r.get('token_refs'):out+=paragraph('Область: «'+' '.join(self.word(t) for t in r['token_refs'])+'».')
+            if r.get('revision'):out+=paragraph('Версия результата: '+str(r['revision'])+'.')
+            def task_label(ref,revision=None):
+                entry=self.dispatch_versions.get((ref,revision)) if revision else self.dispatch_tasks.get(ref)
+                if not entry:return 'Зависимая задача (описание не сохранено)'
+                row=entry.record
+                label=names.get(row.get('task_kind'),'Задача')
+                if row.get('token_refs'):label+=': «'+' '.join(self.word(t) for t in row['token_refs'])+'»'
+                elif entry.source_range:label+=': «'+self.excerpt(entry.source_range,120)+'»'
+                return self.link(entry.ref,label)
+            if r.get('changed_task_ref'):
+                out+='<p>Причина пересмотра: '+task_label(r['changed_task_ref'])+'.</p>'
+            if r.get('dependencies'):
+                out+=table(['Использованный результат','Версия'],[
+                    [task_label(d['task_ref'],d['revision']),str(d['revision'])] for d in r['dependencies']])
         elif c=='Трасса' and r.get('kind')=='MORPHOLOGY_DOMAIN_RESTRICTION':
             out+=paragraph('Для слова «'+self.word(r.get('token_ref'))+'» выбрано чтение: '+self.task_choice(r))
             out+=paragraph('Это чтение ещё проверяется вместе с ролями и согласованием всей конструкции. '
@@ -587,7 +632,7 @@ class ReadableInspection:
 
     def report(self,notes):
         body='<h1>Проверка формализации</h1><h2>Исходный текст</h2><pre style="white-space:pre-wrap">'+esc(self.index.text)+'</pre>'+self.overview()
-        entries=[e for e in self.index.entries if e.category in {'Решения','Границы условий','Диагностика','Привязки'} or e.category=='Трасса' and e.record.get('kind') in {'STRUCTURAL_TASK','STRUCTURAL_RELATION_COMPOSED','COMPOSITION_PRODUCERS','COMPOSITION_EQUIVALENT_SOURCES','STRUCTURAL_REVISION_STALLED','TEMPORAL_PREDICATE_EXCLUDED'}]
+        entries=[e for e in self.index.entries if e.category in {'Решения','Границы условий','Диагностика','Привязки'} or e.category=='Трасса' and e.record.get('kind') in {'STRUCTURAL_TASK','STRUCTURAL_RELATION_COMPOSED','COMPOSITION_PRODUCERS','COMPOSITION_EQUIVALENT_SOURCES','STRUCTURAL_REVISION_STALLED','TEMPORAL_PREDICATE_EXCLUDED','DISPATCH_INVALIDATED','DISPATCH_RECHECK','DISPATCH_MORPHOLOGY'}]
         for e in entries[:1000]:body+='<hr>'+self.explain(e)
         if len(entries)>1000:body+=paragraph('Отчёт ограничен первыми 1000 записями. Полный снимок сохраните отдельно для повторного открытия.')
         body+='<h2>Замечания проверяющего</h2>'+table(['Оценка','Фрагмент','Комментарий'],[[esc(n.get('verdict','')),esc(self.excerpt(n.get('source_range'))),esc(n.get('comment',''))] for n in notes])

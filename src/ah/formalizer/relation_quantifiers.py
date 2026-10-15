@@ -1,6 +1,7 @@
 """Nonnumeric binders selected from source tasks, sharing the binder compiler."""
 from .structural_tasks import choose,span
-from .composition_tree import expression
+from .composition_tree import expression,InputSlot
+from dataclasses import replace
 from .composition_children import select_child
 from .relation_composition import block,attach_tree,confirm_partition
 
@@ -19,7 +20,9 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child,opera
         [{'candidate_id':t.token_id,'head_ref':t.token_id,'label':'Bind the nominal «'+t.span+'» @'+str(t.start)} for t in heads],
         operator+': select the restricted variable mention. Its complete body remains indivisible; do not create a witness.')
     if not selected:return block(state,region)
-    frames=compose_child(owned,request)
+    slot=request or InputSlot()
+    slot=replace(slot,surrounding_relations=(*slot.surrounding_relations,operator))
+    frames=compose_child(owned,slot)
     root=select_child(state,release,selector,region,frames,operator+' body','Preserve every use of the variable in this whole child.')
     if root is None:return block(state,region,frames)
     rule={'operator':operator,'attachment_kinds':['QUANTIFIED_NOMINAL'],'variable_sort':'ENTITY',

@@ -13,7 +13,7 @@ import unicodedata
 
 
 RELATIONS={
-    'LEXICAL':'One lexical predication or nominal description; no dependent proposition, quotation, logical operator or quantifier',
+    'LEXICAL':'One lexical predication or nominal description; no logical operator or dependent clause inside the target. A separately supplied content slot may remain open',
     'NOT':'Negation of a proposition (not lexical opposition)',
     'POSSIBLE':'Possibility or ability; does not assert occurrence',
     'NECESSARY':'Necessity or obligation; preserve its scope',
@@ -25,7 +25,7 @@ RELATIONS={
     'BEFORE':'First event/proposition occurs before the second',
     'AFTER':'First event/proposition occurs after the second',
     'DURING':'First event/proposition occurs during the second',
-    'CONTENT':'A predicate has another clause as its content: reported speech, thought, quoted speech or a controlled infinitive',
+    'CONTENT':'The target contains BOTH a parent predicate AND its dependent content: speech, thought, quotation or a controlled infinitive',
     'FORALL':'Universal nonnumeric quantification over a restricted variable',
     'EXISTS':'Existential nonnumeric quantification; no particular witness identity',
     'QUERY':'A question about content; no assertion of the content',
@@ -185,7 +185,9 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child):
         if not partition:return block(state,region)
         frames=[];operands=[]
         for group in groups:
-            children,root=child(state,release,selector,region,group,cfg,compose_child,request,kind+' operand')
+            slot=request or InputSlot()
+            slot=replace(slot,surrounding_relations=(*slot.surrounding_relations,kind))
+            children,root=child(state,release,selector,region,group,cfg,compose_child,slot,kind+' operand')
             frames.extend(children)
             if root is None:return block(state,region,frames)
             operands.append(expression(root))
@@ -197,6 +199,7 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child):
         chosen=span(state,release,selector,region,tokens,cfg,'structural_introducer',
             kind+' ('+RELATIONS[kind]+'): select only the complete words expressing this outer relation. '
             'Include the full linking expression and any conjunction introducing its content. '
+            'Exclude words belonging to a different nested relation, even when adjacent to the outer marker. '
             'Exclude the content proposition, its subject and predicate. Separating commas may be included; '
             'do not end early just because the first word already signals the relation.')
         if not chosen:return block(state,region)
@@ -212,6 +215,7 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child):
         if not owned or not confirm_partition(state,release,selector,region,tokens,cfg,kind,[owned],proof):
             return block(state,region)
         slot=request or InputSlot()
+        slot=replace(slot,surrounding_relations=(*slot.surrounding_relations,kind))
         governors=[t for t in markers if any(v.pos=='ADJS' or v.pos=='VERB' and v.mood!='imperative' for v in t.variants)]
         if kind in {'POSSIBLE','NECESSARY'} and governors:
             selected=choose(state,release,selector,region,cfg,'structural_governor',

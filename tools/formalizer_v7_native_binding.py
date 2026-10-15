@@ -40,6 +40,8 @@ class _OracleMorphCache:
 
     def __init__(self, provider):
         self.analyze = lru_cache(maxsize=4096)(provider.analyze)
+        # Preserve the morphology protocol used by contextual agreement tasks.
+        if callable(getattr(provider,'inflect',None)):self.inflect=provider.inflect
 
 
 def _oracle_morph(config):

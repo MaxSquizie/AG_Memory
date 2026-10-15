@@ -71,6 +71,7 @@ class InputSlot:
     pending_proposition_roles: frozenset = frozenset()
     controller: object = None
     constraint_signature: str = ''
+    surrounding_relations: tuple = ()
 
 
 def slots(frame):

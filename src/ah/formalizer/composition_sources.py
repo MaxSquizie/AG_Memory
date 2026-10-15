@@ -69,6 +69,18 @@ class CompositionSources:
         return len(self.alternatives(tokens))==1
 
     def project_grammar(self,tokens):
+        from .composition_session import current
+        runtime=current(self.state)
+        if runtime is None:return self._project_grammar(tokens)
+        from .morphology_domain import clean
+        owner='grammar:'+digest([t.token_id for t in tokens])
+        return runtime.dispatcher.run(owner,
+            [[t.token_id,[clean(v) for v in t.variants]] for t in tokens],
+            lambda:self._project_grammar(tokens),kind='GRAMMAR',
+            source_range=(tokens[0].start,tokens[-1].end) if tokens else None,
+            token_refs=[t.token_id for t in tokens])
+
+    def _project_grammar(self,tokens):
         """Close the same released capture domains in an addressed child area.
 
         Source token IDs/readings are reused. No second tokenizer, grammar DSL
@@ -114,8 +126,12 @@ class CompositionSources:
         if attachment is not None or infinitive is not None:return None
         if request and (request.output_sort!='PROPOSITION' or request.head_ref or request.allowed_cases
                         or request.proposition_slots or request.agreement_source or request.pending_proposition_roles):return None
-        if not self.alternatives(tokens) and self.project_grammar(tokens) is False:return []
-        choices=self.alternatives(tokens)
+        if self.project_grammar(tokens) is False:return []
+        from .morphology_domain import clean
+        available={t.token_id:{digest(clean(v)) for v in t.variants} for t in tokens}
+        choices=[(cid,frames) for cid,frames in self.alternatives(tokens) if all(
+            tid not in available or digest(clean(reading)) in available[tid]
+            for frame in frames for tid,reading in frame.semantic.get('morph_bindings',{}).items())]
         if not choices:return None
         if len(choices)>1:
             combined=[]

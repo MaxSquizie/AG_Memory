@@ -663,7 +663,8 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
     if observation.get('structural_contract')=='region_probes':
         from .document_scopes import prepare as prepare_document_scopes
         prepare_document_scopes(state,release,selector,frozen_generation)
-    if not frozen_generation and observation.get('structural_contract')=='region_probes':
+    if (not frozen_generation and observation.get('structural_contract')=='region_probes'
+            and not release.entries('ProposalPolicy')[0].get('composition',{}).get('structural_tasks')):
         from .contextual_agreement import resolve as resolve_agreement
         resolve_agreement(state,release,selector,morph)
         from .contextual_oov import resolve
@@ -739,7 +740,7 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
             reject_entity_overlap(state,release,state.frames)
         if region_mode:
             from .components import compose
-            compose(state,release,selector,context_reader=context_reader)
+            compose(state,release,selector,context_reader=context_reader,morph=morph)
             if not state.frames and not state.logical_roots:
                 state.diag('STRUCTURE_NOT_COVERED','region generator has no licensed complete candidate')
         else:

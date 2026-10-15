@@ -3,10 +3,17 @@ from .component_policy import policy
 from .component_participants import prepare_implicit, resolve_implicit, add_memory_options
 
 
-def compose(state, release, selector, context_reader=None):
+def compose(state, release, selector, context_reader=None, morph=None):
     from .composition_session import session
-    with session(state,release,context_reader):
+    with session(state,release,context_reader,selector,morph) as runtime:
         _compose(state,release,selector)
+        for frame in state.frames:
+            task=frame.semantic.get('dispatch_task')
+            if task and not runtime.dispatcher.valid(task['task_ref'],task['revision']):
+                frame.semantic['structural_unresolved']=True
+                state.diag('COMPOSITION_DEPENDENCY_STALE',frame.frame_id)
+        from .composition_morphology import publish_recoveries
+        publish_recoveries(state,state.frames)
 
 
 def _compose(state, release, selector):

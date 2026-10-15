@@ -14,16 +14,16 @@ def distance(a,b):
     return row[-1]
 
 
-def resolve(state,release,selector,morph):
+def resolve(state,release,selector,morph,*,areas=None):
     cfg=policy(release) or {};rule=cfg.get('agreement_recovery')
     if not rule:return
     from .pipeline import MorphProvider
     provider=morph or MorphProvider()
     if not callable(getattr(provider,'inflect',None)):return
     by_id={e.token_id:e for e in state.evidence}
-    for region in state.region_forest.regions:
-        if region.kind!='SENTENCE':continue
-        tokens=[by_id[t] for t in region.token_refs]
+    if areas is None:
+        areas=[(r,[by_id[t] for t in r.token_refs]) for r in state.region_forest.regions if r.kind=='SENTENCE']
+    for region,tokens in areas:
         for i,token in enumerate(tokens):
             originals=[v for v in token.variants if v.pos=='ADJF' and v.origin=='DICTIONARY']
             if not originals:continue
@@ -42,19 +42,25 @@ def resolve(state,release,selector,morph):
                             cid=digest([surface,{k:x for k,x in _morph(v).items() if k!='score'}])
                             candidates[cid]=(surface,v)
             if not candidates:continue
-            key='agreement-recovery:'+token.token_id
+            from .morphology_domain import scope_fields,clean
+            scope=scope_fields(state)
+            key='agreement-recovery:'+token.token_id+(':'+scope['task_scope'] if scope else '')
             if len(candidates)+1>cfg['max_candidates'] or region.source_range[1]-region.source_range[0]>cfg['context_chars']:
                 state.diag('LEXICAL_RECOVERY_INCOMPLETE',key);continue
             choices=[{'candidate_id':'KEEP','label':'Keep «'+token.span+'» as written; no licensed correction established'}]
             choices += [{'candidate_id':cid,'label':'Explicit inflection correction «'+token.span+'» → «'+surface+'»; same dictionary lexeme; '+str({k:x for k,x in _morph(v).items() if k in {'lemma','pos','cases','number','gender'}})} for cid,(surface,v) in candidates.items()]
-            chosen=_probe(state,selector,release,key,'lexical_recovery',choices,state.text[slice(*region.source_range)],region.source_range,
-                question='Is a grammatical inflection error supported by this context? The proposed head is «'+head.span+'». '
+            from .component_source import view,probe_context
+            context,target=probe_context(state,region,cfg,view(state,region,tokens))
+            chosen=_probe(state,selector,release,key,'lexical_recovery',choices,context,region.source_range,
+                question=target+'Is a grammatical inflection error supported by this context? The proposed head is «'+head.span+'». '
                 'Edit distance merely proposes candidates, not proof. Keep the original if a legitimate uncorrected reading remains; answer ? if uncertain. Do not alter names or infer a new lexical meaning.')
-            state.syntax_trace.append({'kind':'AGREEMENT_RECOVERY','token_ref':token.token_id,'head_ref':head.token_id,
-                'original_variants':[_morph(v) for v in token.variants],'options':choices,'selected':chosen})
+            row={'kind':'AGREEMENT_RECOVERY',**scope,'token_ref':token.token_id,'head_ref':head.token_id,
+                'original_variants':[_morph(v) for v in token.variants],'options':choices,'selected':chosen}
+            state.syntax_trace.append(row)
             if chosen not in candidates:continue
             surface,v=candidates[chosen]
             token.lexical_recovery={'surface':surface,'source_surface':token.span,'decision_ref':key,
                 'original_variants':[_morph(x) for x in token.variants]}
             token.variants=(replace(v,origin='RECOVERED',evidence_refs=(*v.evidence_refs,head.token_id,key)),)
             token.lemma=v.lemma;token.pos=v.pos;token.cases=v.cases;token.lex_status='RECOVERY_SELECTED'
+            row.update(recovered_reading=clean(token.variants[0]),lexical_recovery=token.lexical_recovery)

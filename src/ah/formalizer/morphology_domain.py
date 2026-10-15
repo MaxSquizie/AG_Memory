@@ -19,12 +19,24 @@ def proposed(reading):
                 refs[0].startswith(('nominal-use:','usage-reading:')))
 
 
+def scope_fields(state):
+    from .composition_session import current
+    runtime=current(state)
+    scope=runtime.morphology_scope if runtime else None
+    return {'task_scope':scope} if scope else {}
+
+
+def in_scope(state,row):
+    scope=scope_fields(state).get('task_scope')
+    return not row.get('task_scope') or row.get('task_scope')==scope
+
+
 def offer(state,token,readings,source,anchors=()):
     result=[]
     for v in readings:
-        key='usage-reading:'+digest([token.token_id,source,clean(v),list(anchors)])
+        key='usage-reading:'+digest([token.token_id,source,clean(v),list(anchors),scope_fields(state)])
         value=replace(v,origin='CONTEXTUAL',evidence_refs=(key,token.token_id,*anchors))
-        row={'kind':'MORPHOLOGY_PROPOSAL','proposal_ref':key,'token_ref':token.token_id,
+        row={'kind':'MORPHOLOGY_PROPOSAL',**scope_fields(state),'proposal_ref':key,'token_ref':token.token_id,
              'source':source,'reading':clean(value),'source_reading':clean(v),'anchor_refs':list(anchors)}
         if row not in state.syntax_trace:state.syntax_trace.append(row)
         result.append(value)
@@ -35,13 +47,13 @@ def project(state,tokens):
     from .nominal_readings import variant
     by_token={};owned={t.token_id for t in tokens}
     for row in state.syntax_trace:
-        if row.get('kind')=='MORPHOLOGY_PROPOSAL' and set(row.get('anchor_refs',()))<=owned:
+        if row.get('kind')=='MORPHOLOGY_PROPOSAL' and in_scope(state,row) and set(row.get('anchor_refs',()))<=owned:
             by_token.setdefault(row['token_ref'],{})[digest(row['reading'])]=variant(row['reading'])
     result=[]
     for token in tokens:
         readings={digest(clean(v)):v for v in token.variants}
         readings.update(by_token.get(token.token_id,{}))
-        restrictions=[row for row in state.syntax_trace if row.get('kind')=='MORPHOLOGY_DOMAIN_RESTRICTION' and row['token_ref']==token.token_id]
+        restrictions=[row for row in state.syntax_trace if row.get('kind')=='MORPHOLOGY_DOMAIN_RESTRICTION' and in_scope(state,row) and row['token_ref']==token.token_id]
         if restrictions:
             row=restrictions[-1];decision=state.decisions.get(row['decision_ref'])
             if decision and decision.outcome=='RESOLVED' and row['candidate_id'] in decision.selected:

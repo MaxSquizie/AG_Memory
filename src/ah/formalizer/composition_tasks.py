@@ -14,25 +14,35 @@ class ChildFrames(list):
 
 
 class ChildTasks:
-    def __init__(self,state):
-        self.state=state;self.cache={};self.active=set();self.tasks={}
+    def __init__(self,state,dispatcher):
+        self.state=state;self.dispatcher=dispatcher;self.cache={};self.active=set();self.tasks={}
+        self.inputs={};self.areas={}
         self.feedback=None;self.attempted=set();self.reads=[]
 
-    def child(self,key,compute):
-        self.tasks.setdefault(key,compute)
+    def child(self,key,compute,inputs=None):
+        previous=self.feedback
+        if previous and previous.get('target_child',key)!=key:self.feedback=None
+        try:return self._child(key,compute,inputs)
+        finally:self.feedback=previous
+
+    def _child(self,key,compute,inputs=None):
+        self.tasks[key]=compute
+        if inputs is not None:self.inputs[key]=inputs
         feedback_key=digest(self.feedback) if self.feedback else None
         cache_key=(key,feedback_key)
-        base=self.cache.get((key,None))
-        # Completed descendants stay reusable. Parent feedback is requested
-        # only for unresolved domains, not a new interpretation version.
-        cached=self.cache.get(cache_key)
-        if cached is None and base and base['complete']:cached=base
-        if cached is not None:
+        task_ref='child:'+key
+        version=self.dispatcher.nodes.get(task_ref,{}).get('revision',0)
+        result=self.dispatcher.run(task_ref,[self.inputs.get(key),self.feedback],
+            lambda:self._compute(key,compute,cache_key),kind='COMPOSITION',**self.areas.get(key,{}))
+        if self.dispatcher.nodes[task_ref]['revision']==version:
+            cached=self.cache[cache_key]
             for reads in self.reads:
                 reads['probes'].update(cached['pending'])
                 reads['blocked'] |= cached['blocked']
             self.state.syntax_trace.append({'kind':'COMPOSITION_CHILD_REUSED','child_key':key})
-            return ChildFrames(deepcopy(cached['frames']),task_key=key)
+        return ChildFrames(result,task_key=key)
+
+    def _compute(self,key,compute,cache_key):
         if key in self.active:
             self.state.diag('COMPOSITION_CYCLE',key)
             return ChildFrames(task_key=key)
@@ -59,7 +69,7 @@ class ChildTasks:
     def resume(self,frames,contract,context,parent_ref):
         key=getattr(frames,'task_key',None)
         if key not in self.tasks:return False
-        feedback={'parent_ref':parent_ref,'contract':contract,'context':context}
+        feedback={'target_child':key,'parent_ref':parent_ref,'contract':contract,'context':context}
         attempt=(key,digest(feedback))
         base=self.cache.get((key,None))
         if not base or base['blocked'] or not base['pending'] or attempt in self.attempted:return False
@@ -68,6 +78,7 @@ class ChildTasks:
         try:result=self.child(key,self.tasks[key])
         finally:self.feedback=previous
         frames[:]=result
+        self.dispatcher.replace_read('child:'+key)
         from .composition_tree import roots
         selected=[f.frame_id for f in roots(result)]
         if len(selected)==1:
@@ -83,8 +94,6 @@ class ChildTasks:
 
     def question(self,key):
         if self.feedback is None:return ''
-        previous=self.state.decisions.get(key)
-        if previous and previous.outcome=='RESOLVED':return ''
         return ('\nParent slot constraint: '+self.feedback['contract']+'. '+self.feedback['context']+
                 ' This supplies interpretation context only. The need to fill a slot is not evidence; '
                 'do not guess a candidate or assert the child content.\n')

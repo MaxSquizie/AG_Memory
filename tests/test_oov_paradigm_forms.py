@@ -120,7 +120,7 @@ def test_selected_prediction_still_has_to_satisfy_agreement(tmp_path,monkeypatch
 
 def test_selected_lemma_keeps_negation_and_query_anchor(tmp_path,monkeypatch):
     result,_=run(tmp_path,monkeypatch,'Иван не глоркнул книгу.',
-        [predicted('глоркнул','глоркнуть')]+unary('NOT','не','не')+relation('LEXICAL'))
+        [predicted('глоркнул','глоркнуть')]+unary('NOT','не','не')+[predicted('глоркнул','глоркнуть')]+relation('LEXICAL'))
     tree=result['assertions']['ah'][0]
     assert tree['operator']=='NOT' and tree['operands'][0]['predicate']=='OPEN:глоркнуть'
     item=payload('Иван глоркнул книгу?','query','QUERY')
@@ -134,7 +134,7 @@ def test_selected_lemma_keeps_negation_and_query_anchor(tmp_path,monkeypatch):
         states.append(result[0])
         return result
     monkeypatch.setattr(binding,'interpret_full',capture)
-    answer,_=execute(session,item,[predicted('глоркнул','глоркнуть')]+unary('QUERY','?','?')+relation('LEXICAL'),monkeypatch)
+    answer,_=execute(session,item,[predicted('глоркнул','глоркнуть')]+unary('QUERY','?','?')+[predicted('глоркнул','глоркнуть')]+relation('LEXICAL'),monkeypatch)
     assert not answer['assertions']['ah']
     # The real query compiler sees the selected lemma, but never writes its S.
     assert not session.core.store.find_symbols_by_form('глоркнуть')

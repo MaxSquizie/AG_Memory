@@ -14,36 +14,110 @@ _current=ContextVar('formalizer_composition_session',default=None)
 
 
 class CompositionSession:
-    def __init__(self,state,release,reader=None):
+    def __init__(self,state,release,reader=None,selector=None,morph=None):
         self.state,self.release,self.reader=state,release,reader
         from .composition_tasks import ChildTasks
-        self.tasks=ChildTasks(state);self.context={}
+        from .composition_dispatcher import Dispatcher
+        from copy import deepcopy
+        rules=release.entries('ProposalPolicy')
+        self.dispatcher=Dispatcher(state,rules[0].get('max_rule_steps',20000) if rules else 20000)
+        self.tasks=ChildTasks(state,self.dispatcher);self.context={}
+        self.selector,self.morph=selector,morph
+        self.original={e.token_id:deepcopy(e) for e in state.evidence}
+        self.area_inputs=None;self.morphology_scope=None;self.domain_feedback=None
         from .composition_sources import CompositionSources
         self.sources=CompositionSources(state,release)
         self.evidence=sorted(state.evidence,key=lambda e:e.start)
         self.starts=[e.start for e in self.evidence]
 
-    def child(self,key,compute):
-        return self.tasks.child(key,compute)
+    def child(self,key,compute,inputs=None):
+        if self.area_inputs:
+            region,tokens,_=self.area_inputs
+            self.tasks.areas[key]={'source_range':region.source_range,'token_refs':[t.token_id for t in tokens]}
+        return self.tasks.child(key,compute,[inputs,self.context_signature()])
+
+    def context_signature(self):
+        # Attention ticks are not evidence revisions. The reader freezes the AH
+        # memory base and rejects concurrent writes itself.
+        return digest([getattr(self.reader,'base',{}).get('memory_hash'),
+                       getattr(self.state,'context_facts',())])
+
+    @contextmanager
+    def area(self,region,tokens,request):
+        previous=self.area_inputs,self.morphology_scope
+        self.area_inputs=(region,tokens,request)
+        try:yield
+        finally:self.area_inputs,self.morphology_scope=previous
+
+    @contextmanager
+    def morphology_feedback(self,text):
+        previous=self.domain_feedback;self.domain_feedback=text
+        try:yield
+        finally:self.domain_feedback=previous
+
+    def input_signature(self):
+        if not self.area_inputs:return None
+        from .composition_dispatcher import canonical
+        region,tokens,request=self.area_inputs
+        return digest(canonical([region.source_range,[t.token_id for t in tokens],request]))
+
+    def input_question(self):
+        if not self.area_inputs:return ''
+        region,tokens,request=self.area_inputs
+        from .composition_tree import InputSlot
+        request=request or InputSlot()
+        parts=[]
+        if self.domain_feedback:parts.append('Previous local composition: '+self.domain_feedback)
+        if request.surrounding_relations:
+            from .relation_composition import RELATIONS
+            parts.append('Already handled outside the target: '+'; '.join(RELATIONS[k] for k in request.surrounding_relations)+
+                '. Select another such relation only if the target words themselves express it.')
+        if request.output_sort=='EVENT_DESCRIPTION':parts.append('This area must describe an event or state.')
+        if request.allowed_cases:
+            from .probe_wording import reading
+            parts.append('The parent requires '+reading({'cases':sorted(request.allowed_cases)})+'.')
+        if request.head_ref:
+            head=self.original.get(request.head_ref)
+            if head:parts.append('The selected head is «'+head.span+'».')
+        if request.pending_proposition_roles:
+            parts.append('The dependent content has already been separated; its open slot is supplied by the parent. '
+                         'Classify only the remaining words. A predicate with that open slot can be one lexical predication.')
+        if request.agreement_source:
+            from .probe_wording import reading
+            from .component_policy import _morph as canonical_reading
+            governor=request.agreement_source
+            parts.append('Agreement governor: «'+governor.span+'»; '+
+                ' / '.join(reading(canonical_reading(v)) for v in governor.variants)+'.')
+        if request.controller:
+            from .control_arguments import members
+            from .probe_wording import reading,role
+            alias=request.controller
+            known=members(alias)
+            parts.append('The infinitive subject is the same '+role(alias['role'])+' of the parent: '+
+                ('; '.join('«'+self.original[m['token_ref']].span+'» ('+reading(m['morph'])+')' for m in known)
+                 if known else 'an omitted participant licensed by agreement')+'.')
+        if request.agreement_source or request.controller:
+            parts.append('An absent repeated subject is not a missing event.')
+        return ('\nCurrent parent requirements: '+' '.join(parts)+'\n') if parts else ''
+
 
     def memory(self,slot,options,source_range,cfg):
         if self.reader is None or len(options)<2:return ''
         # This reader returns the addressed active context, not a different
         # answer per candidate ordering. Reuse it throughout the same area.
         from .context_proofs import compile_goals
-        evidence=[e for e in self.evidence[bisect_left(self.starts,source_range[0]):bisect_left(self.starts,source_range[1])]
-                  if source_range[0]<=e.start and e.end<=source_range[1]]
+        available=self.area_inputs[1] if self.area_inputs else self.evidence[
+            bisect_left(self.starts,source_range[0]):bisect_left(self.starts,source_range[1])]
+        evidence=[e for e in available if source_range[0]<=e.start and e.end<=source_range[1]]
         try:goals=compile_goals(self.release,evidence,options,cfg['max_candidates'])
         except ValueError as exc:
             from .attention_context import ContextReadError
             raise ContextReadError('COMPOSITION_GOAL_SEARCH_INCOMPLETE') from exc
-        key=digest([source_range,goals,self.tasks.feedback])
+        key=digest([source_range,goals,self.tasks.feedback,self.input_signature(),self.context_signature()])
         if key not in self.context:
             request={'kind':'STRUCTURE','decision_ref':'composition-context:'+key,
                      'region_ref':'scope:'+digest(source_range),'source_range':source_range,
-                     'cue_token_refs':[e.token_id for e in self.evidence[
-                         bisect_left(self.starts,source_range[0]):bisect_left(self.starts,source_range[1])]
-                                       if source_range[0]<=e.start and e.end<=source_range[1]],
+                     'cue_token_refs':[e.token_id for e in evidence],
                      'slot':'COMPOSITION','proof_goals':goals}
             result=self.reader.read(self.state,request)
             if result.get('search_incomplete'):
@@ -72,13 +146,14 @@ class CompositionSession:
                 from .attention_context import ContextReadError
                 raise ContextReadError('COMPOSITION_CONTEXT_LIMIT')
             self.context[key]=text if rows or proofs else ''
-        text=self.context[key]
+        text=self.dispatcher.run('goal:'+key,[key,self.context[key]],lambda:self.context[key],kind='GOAL_CONTEXT',
+            source_range=source_range,token_refs=[e.token_id for e in evidence])
         return ('\nAddressed memory context (interpretation only; no implicit identity or factivity): '+text+'\n') if text else ''
 
 
 @contextmanager
-def session(state,release,reader=None):
-    token=_current.set(CompositionSession(state,release,reader))
+def session(state,release,reader=None,selector=None,morph=None):
+    token=_current.set(CompositionSession(state,release,reader,selector,morph))
     try:yield _current.get()
     finally:_current.reset(token)
 

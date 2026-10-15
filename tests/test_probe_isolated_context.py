@@ -56,7 +56,7 @@ def test_unknown_lookup_is_not_a_syntax_hint_but_proof_is_retained(monkeypatch,p
     item={'status':'PROVED' if proved else 'UNKNOWN','goal':{'template_ref':'known-template'}}
     if proved:item['proof']={'conclusion':{'template_ref':'known-template'},'premise_support_refs':['support'],'derivations':[]}
     reader=SimpleNamespace(read=lambda *args:{'rows':[],'proof_results':[item]})
-    session=CompositionSession(SimpleNamespace(evidence=[],frames=[]),SimpleNamespace(entries=lambda name:[]),reader)
+    session=CompositionSession(SimpleNamespace(evidence=[],frames=[],syntax_trace=[],diagnostics=[]),SimpleNamespace(entries=lambda name:[]),reader)
     text=session.memory('structural_relation',[{},{}],(0,1),{'max_candidates':16,'context_chars':2048})
     assert ('PROVED' in text)==proved
     assert 'UNKNOWN' not in text

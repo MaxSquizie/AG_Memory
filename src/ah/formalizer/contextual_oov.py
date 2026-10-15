@@ -4,14 +4,14 @@ from .component_policy import policy, _morph
 from .state import MorphVariant
 
 
-def resolve(state,release,selector):
+def resolve(state,release,selector,*,areas=None):
     cfg=policy(release) or {}
     if cfg.get('oov_morphology')!='CONTEXTUAL_NOMINAL_V1': return
     state.require_structures_open('CONTEXTUAL_OOV')
     by_id={e.token_id:e for e in state.evidence}
-    for region in state.region_forest.regions:
-        if region.kind!='SENTENCE': continue
-        tokens=[by_id[t] for t in region.token_refs]
+    if areas is None:
+        areas=[(r,[by_id[t] for t in r.token_refs]) for r in state.region_forest.regions if r.kind=='SENTENCE']
+    for region,tokens in areas:
         for index,token in enumerate(tokens):
             if not token.is_oov() or token.variants: continue
             # A licensed local agreement construction supplies linked features;
@@ -40,7 +40,7 @@ def resolve(state,release,selector):
                 for v in token.morph_guesses:
                     if v.pos and v.lemma:
                         options.setdefault(digest(_morph(v)),v)
-                from .morphology_domain import offer,license_use,clean
+                from .morphology_domain import offer,license_use,clean,scope_fields
                 from .probe_wording import reading as describe
                 readings=offer(state,token,options.values(),'OOV_FUNCTION')
                 originals=list(options.values())
@@ -58,7 +58,7 @@ def resolve(state,release,selector):
                 if selected:
                     value,proof=selected
                     license_use(state,token.token_id,value['reading'],proof['decision_ref'],value['candidate_id'])
-                    state.syntax_trace.append({'kind':'MORPHOLOGY_DOMAIN_RESTRICTION','token_ref':token.token_id,
+                    state.syntax_trace.append({'kind':'MORPHOLOGY_DOMAIN_RESTRICTION',**scope_fields(state),'token_ref':token.token_id,
                         'reading':clean(value['reading']),'predicted_lemma':value['predicted_lemma'],
                         'decision_ref':proof['decision_ref'],'candidate_id':value['candidate_id']})
                 else:state.diag('OOV_GRAMMAR_UNRESOLVED',token.token_id)

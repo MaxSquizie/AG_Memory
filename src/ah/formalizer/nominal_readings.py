@@ -63,6 +63,12 @@ def attested(state, token_ref, reading, _seen=frozenset()):
     from .morphology_domain import proposed, attested as nominal_use_attested
     if proposed(reading):return nominal_use_attested(state,token,reading)
     refs=reading.get('evidence_refs',())
+    if reading.get('origin')=='RECOVERED' and refs:
+        decision=state.decisions.get(refs[-1])
+        return bool(decision and decision.outcome=='RESOLVED' and any(
+            row.get('kind')=='AGREEMENT_RECOVERY' and row['token_ref']==token_ref
+            and row.get('selected') in decision.selected and row.get('recovered_reading')==clean(variant(reading))
+            for row in state.syntax_trace))
     decision=state.decisions.get(refs[0]) if refs else None
     if not decision or decision.outcome!='RESOLVED':return False
     if list(decision.selected)==['NOMINAL'] and list(refs)==[refs[0],token_ref]:

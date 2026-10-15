@@ -37,17 +37,34 @@ def compose_area(state, release, selector, region, tokens, cfg, depth=0, attachm
     from .composition_session import current, child_key
     runtime=current(state)
     from .morphology_domain import project
-    tokens=project(state,tokens)
     key=child_key(region,tokens,attachment,infinitive,request)
-    def compute():
-        frames=_compose_area(state,release,selector,region,tokens,cfg,depth,attachment,infinitive,request)
+    def calculate():
+        local=project(state,tokens)
+        if runtime:
+            from .composition_morphology import prepare
+            local=prepare(runtime,region,tokens,request,cfg)
+            runtime.area_inputs=(region,local,request)
+        frames=_compose_area(state,release,selector,region,local,cfg,depth,attachment,infinitive,request)
         from .scope_boundaries import retain
         try:retain(state,region,frames)
         except ValueError as exc:
             block(state,region,frames,str(exc))
-        if runtime:runtime.sources.retain(key,region,tokens,frames,request)
+        if runtime:runtime.sources.retain(key,region,local,frames,request)
         return frames
-    return runtime.child(key,compute) if runtime else compute()
+    def compute():
+        if not runtime:return calculate()
+        with runtime.area(region,tokens,request):return calculate()
+    if not runtime:return compute()
+    from .composition_dispatcher import DispatchBlocked
+    with runtime.area(region,tokens,request):
+        try:
+            result=runtime.child(key,compute,[tokens,request,cfg,attachment,infinitive])
+        except DispatchBlocked as exc:
+            return block(state,region,[],str(exc))
+        version=runtime.dispatcher.nodes['child:'+key]['revision']
+        for frame in result:
+            frame.semantic['dispatch_task']={'task_ref':'child:'+key,'revision':version}
+        return result
 
 
 def _compose_area(state, release, selector, region, tokens, cfg, depth=0, attachment=None, infinitive=None, request=None):
@@ -63,6 +80,14 @@ def _compose_area(state, release, selector, region, tokens, cfg, depth=0, attach
         retired=[];attempts=set()
         for revision in range(cfg.get('refinement',{}).get('max_depth',16)):
             begin=len(state.syntax_trace);diagnostics_begin=len(state.diagnostics)
+            if revision:
+                from .composition_session import current as current_session
+                runtime=current_session(state)
+                if runtime:
+                    runtime.dispatcher.discard_attempt()
+                    from .composition_morphology import prepare
+                    tokens=prepare(runtime,region,tokens,request,cfg)
+                    runtime.area_inputs=(region,tokens,request)
             # Feedback concerns this region. Child inputs carry their own typed
             # constraints; an ancestor's failed split is not child evidence.
             child_cfg={k:v for k,v in cfg.items() if k not in {'_task_constraints','_task_constraints_text'}}
