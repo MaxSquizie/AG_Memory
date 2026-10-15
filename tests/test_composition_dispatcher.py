@@ -140,6 +140,39 @@ def test_query_child_receives_handled_outer_relation(tmp_path,monkeypatch):
     assert result['generation']['observed_candidate_patterns'][0]['predicate']=='ENTER'
 
 
+@pytest.mark.parametrize('producer',['phrase','reference','dependency'])
+def test_nominal_producers_recheck_parent_requirements_through_common_cache(producer):
+    from ah.formalizer.composition_session import session
+    from ah.formalizer.component_nominal_questions import choose
+    from ah.formalizer.nominal_reference_groups import project
+    state,release,region,cfg=setup_morphology('Море волнует.' if producer=='dependency' else 'Эта книга.')
+    selector=First()
+    with session(state,release,selector=selector) as runtime:
+        def run(slot):
+            with runtime.area(region,state.evidence,slot):
+                if producer=='phrase':
+                    return choose(state,release,selector,region,'same-phrase',[
+                        {'candidate_id':'a','label':'First attachment'},
+                        {'candidate_id':'b','label':'Second attachment'}],'Which attachment fits?')
+                if producer=='dependency':
+                    from ah.formalizer.component_dependency_reduction import reduce
+                    predicate=state.evidence[1]
+                    roles=[{'role_id':'SUBJECT','allowed_cases':['nom']},
+                           {'role_id':'OBJECT','allowed_cases':['acc']}]
+                    result=reduce(state,release,selector,region,state.evidence,predicate,predicate.variants[0],
+                        roles,[state.evidence[0]],{},cfg)
+                    return tuple(r[0] for r in result['roots'].values())
+                return bool(project(state,release,selector,region,state.evidence,cfg)[1])
+        before=run(InputSlot());assert before
+        assert run(InputSlot())==before and len(selector.prompts)==1
+        selector.answer='2'
+        after=run(InputSlot(constraint_signature='new-parent',surrounding_relations=('QUERY',)))
+        assert after!=before and len(selector.prompts)==2
+        assert 'Already handled outside the target' in selector.prompts[-1]
+        assert run(InputSlot(constraint_signature='new-parent',surrounding_relations=('QUERY',)))==after
+        assert len(selector.prompts)==2
+
+
 def test_dispatcher_explanation_is_human_readable():
     from test_formalization_readable import sample,visible
     from ah.gui.formalization_inspection import Inspection

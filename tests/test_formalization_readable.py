@@ -27,6 +27,16 @@ def visible(html):
     return re.sub('<[^>]+>',' ',html)
 
 
+def test_nominal_predication_choices_are_explained_in_russian():
+    reader=ReadableInspection(Inspection(sample()))
+    clause=reader.task_choice({'candidate_id':'PROPOSITION','label':
+        'A complete clause: a predicate describes a participant, possibly without an explicit verb'})
+    assert 'Полное высказывание' in clause and 'глагол может отсутствовать' in clause
+    candidate=reader.choice_text('врач [NOUN]; SUBJECT=Мария; noun predicate: «врач» describes what «Мария» is')
+    assert 'Именное сказуемое «врач» характеризует «Мария»' in candidate
+    assert 'предложенный разбор' in candidate and 'NOUN' not in candidate
+
+
 def test_structural_tasks_explain_frontier_parts_and_limit_without_json():
     data=sample();data['state']['syntax_trace']=[
         {'kind':'STRUCTURAL_TASK','slot':'structural_partition','decision_ref':'partition',

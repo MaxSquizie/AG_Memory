@@ -216,9 +216,10 @@ def _compose_lexical_area(state, release, selector, region, tokens, cfg, depth=0
     boundary=select(state,release,selector,region,search_tokens,cfg) if cfg.get('refinement') else None
     if boundary is False: return block(state,region,[],'COMPONENT_REFINEMENT_UNRESOLVED')
     if boundary is None:
-        if attachment is None and infinitive is None and request is None:
+        if attachment is None and infinitive is None and (request is None or
+                request.output_sort=='PROPOSITION' and request.agreement_source is None):
             from .component_infinitives import compose as compose_infinitive
-            nested=compose_infinitive(state,release,selector,region,tokens,cfg,depth)
+            nested=compose_infinitive(state,release,selector,region,tokens,cfg,depth,request=request)
             if nested is not None:return nested
         if request is not None and request.output_sort=='EVENT_DESCRIPTION':
             predicates=[]
@@ -229,6 +230,8 @@ def _compose_lexical_area(state, release, selector, region, tokens, cfg, depth=0
         else:
             predicates=[t for t in tokens if any(v.pos=='VERB' and v.mood!='imperative' or
                 v.pos in cfg.get('quality_predicate_pos',()) for v in t.variants)]
+            from .component_predication import nominal_predicates
+            predicates.extend(t for t in nominal_predicates(tokens,cfg) if t not in predicates)
         nominal_groups=[]
         if connectives(state,release,region,tokens):
             from .component_nominal_groups import select as select_nominal_groups

@@ -5,7 +5,7 @@ TERMS = {
     'ADJF':'adjective', 'ADJS':'short adjective', 'ADVB':'adverb', 'PRED':'predicative',
     'PREP':'preposition', 'CONJ':'conjunction', 'PRCL':'particle',
     'nom':'nominative', 'gen':'genitive', 'dat':'dative', 'acc':'accusative',
-    'ins':'instrumental', 'loc':'prepositional', 'voc':'vocative',
+    'ins':'instrumental', 'abl':'instrumental', 'loc':'prepositional', 'voc':'vocative',
     'sing':'singular', 'plur':'plural', 'masc':'masculine', 'femn':'feminine', 'neut':'neuter',
     'perf':'perfective', 'impf':'imperfective', 'tran':'transitive', 'intr':'intransitive',
     'anim':'animate', 'inan':'inanimate', 'Name':'personal name',
@@ -18,7 +18,14 @@ ROLE_MEANINGS = {
     'LOCATION':'place or spatial endpoint of the situation',
     'SOURCE':'place or entity from which something comes',
     'EXPERIENCER':'participant experiencing the state',
+    'PURPOSE':'goal for which the parent action is performed',
 }
+
+
+def proposition_role(value):
+    return {'OBJECT':'content specifying what the parent predicate is about, including an action whose phase is described',
+            'CONTENT':'content specifying what the parent predicate is about',
+            'PURPOSE':'goal for which a separate parent action is performed; answers why that action is done'}.get(value,role(value))
 
 
 def role(value):

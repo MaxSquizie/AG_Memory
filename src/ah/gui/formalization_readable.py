@@ -40,7 +40,7 @@ QUESTIONS = {'composition_boundary': 'Что охватывает всё выр�
     'structural_governor':'Какой глагол задаёт согласование вложенного действия?',
     'structural_function_owner':'К внешней связи или к вложенной части относится служебное слово?',
     'structural_binder_head':'Какое имя связывает квантор?',
-    'structural_event_head':'Какое имя обозначает событие?',
+    'structural_event_head':'Это высказывание о предмете или название события?',
     'structural_refinement':'Где начинается и заканчивается описание имени?',
     'structural_marker_reading':'Какое целое морфологическое чтение имеет связующее слово?',
     'structural_oov_reading':'Какое морфологическое чтение подходит неизвестному слову?',
@@ -320,6 +320,9 @@ class ReadableInspection:
 
     def choice_text(self,text):
         # Translate known protocol labels only. Never infer a model rationale.
+        if text.startswith('A complete clause:'):return 'Полное высказывание: сказуемое описывает участника; явный глагол может отсутствовать.'
+        nominal=re.search(r'noun predicate: «(.*?)» describes what «(.*?)» is',text)
+        if nominal:return 'Именное сказуемое «'+nominal[1]+'» характеризует «'+nominal[2]+'». Это предложенный разбор; его соответствие тексту проверяется пробой.'
         if text.startswith('Revise the provisional'):return 'Пересмотреть предварительный тип связи и границы с учётом требований вложенных частей.'
         if text.startswith('Keep the whole area unresolved'):return 'Оставить весь фрагмент неразрешённым: подтверждённого исправления нет.'
         if text.startswith('No agreement governor'):return 'Вложенная часть имеет собственное сказуемое и самостоятельное согласование.'

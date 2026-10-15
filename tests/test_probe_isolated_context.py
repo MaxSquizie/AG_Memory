@@ -90,7 +90,8 @@ def test_partition_is_a_proposal_not_a_declared_fact(tmp_path,monkeypatch):
     _,script=run(tmp_path,monkeypatch,'Неверно, что Иван пришёл.',
         unary('NOT','Неверно','что')+relation('LEXICAL'))
     p=next(p for slot,p in script.calls if slot=='structural_partition')
-    assert 'Proposed split' in p and 'outer relation words: «Неверно что»' in p
+    assert 'Proposed split' in p and 'outer relation occurrences: «Неверно» @0, «что» @9' in p
+    assert 'parts are NOT asserted separately' in p
     assert 'punctuation outside parts: «, .»' in p
     assert 'answer 0 if' in p and 'Every remaining token belongs' not in p
     assert 'UNKNOWN' not in p and 'fixture:T:' not in p
@@ -119,10 +120,10 @@ def test_reserved_content_and_feedback_are_scoped_to_their_region(tmp_path,monke
     questions=[p for slot,p in script.calls if slot=='structural_relation']
     assert 'Earlier attempt:' in questions[1]
     parent,body=questions[2:]
-    assert 'content slot of this predicate is supplied separately' in parent
+    assert 'Only «сказала» @6 has separately supplied content (OBJECT)' in parent
     assert 'Context span: Мария сказала\n' in parent
     assert 'Earlier attempt:' not in parent and 'Earlier attempt:' not in body
-    assert 'supplied separately' not in body
+    assert 'has separately supplied content' not in body
     assert 'Surrounding source' in parent and 'Surrounding source' in body
     assert 'Resolve ONLY the target area «Мария сказала»' in parent
     assert 'Resolve ONLY the target area «Иван вошёл»' in body

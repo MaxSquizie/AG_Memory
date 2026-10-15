@@ -72,6 +72,11 @@ class InputSlot:
     controller: object = None
     constraint_signature: str = ''
     surrounding_relations: tuple = ()
+    pending_propositions: dict | None = None
+
+    def pending_for(self, predicate_ref):
+        """A separated proposition leaves a slot on its owner, not every verb."""
+        return self.pending_proposition_roles | frozenset((self.pending_propositions or {}).get(predicate_ref, ()))
 
 
 def slots(frame):

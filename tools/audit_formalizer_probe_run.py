@@ -17,7 +17,7 @@ SLOTS={
     'child_slot':'Дочерняя интерпретация', 'structural_partition':'Проверка разбиения',
     'structural_governor':'Управление модальным содержанием',
     'structural_function_owner':'Принадлежность служебного слова',
-    'structural_event_head':'Главное слово названия события',
+    'structural_event_head':'Высказывание или название события',
     'nominal_dependency':'Именная зависимость', 'nominal_coordination':'Однородные участники',
     'nominal_attachment':'Присоединение именной группы',
     'component_attachment':'Состав и чтение конструкции',
@@ -81,6 +81,16 @@ def selected_text(request):
     return label
 
 
+def differs_only_in_open_labels(expected,observed):
+    """Audit classification only: never changes gold checks or memory identity."""
+    def structure(value):
+        if isinstance(value,list):return [structure(v) for v in value]
+        if isinstance(value,dict):return {k:('OPEN:<label>' if k=='predicate' and
+            isinstance(v,str) and v.startswith('OPEN:') else structure(v)) for k,v in value.items()}
+        return value
+    return expected!=observed and structure(expected)==structure(observed)
+
+
 def render(path):
     rows,inputs,cases,steps,requests=read_run(path)
     completed=[r for rr in requests.values() for r in rr]
@@ -88,6 +98,8 @@ def render(path):
     for r in completed:slots[r['slot']].append(r)
     unknown_pass=[cid for cid,c in cases.items() if c['status']=='PASS' and any(r['response']=='?' for r in requests[cid])]
     nonempty=[cid for cid,c in cases.items() if any(e['path']=='/assertions/ah' and e.get('observed') for e in c.get('errors',()))]
+    open_labels=[cid for cid in nonempty if any(e['path']=='/assertions/ah' and e.get('observed') and
+        differs_only_in_open_labels(e.get('expected'),e['observed']) for e in cases[cid].get('errors',()))]
     genonly=[cid for cid,c in cases.items() if {e['path'] for e in c.get('errors',())}=={'/generation/gold_patterns'}]
     truncated=[r for r in completed if r['start'].get('prompt_truncated')]
     first_unknown=Counter(next((r['slot'] for r in requests[cid] if r['response']=='?'),'none')
@@ -101,6 +113,9 @@ def render(path):
         f'Обрезанных результатов шагов: {sum(bool(s.get("actual_truncated")) for s in steps.values())}.',
         f'PASS при наличии ответа ?: {len(unknown_pass)}. Непустая формула, не совпавшая с эталоном: {len(nonempty)}. '
         f'Несовпадение только генерации: {len(genonly)}.','',
+        f'Из непустых несовпадений в {len(open_labels)} различаются только текстовые метки OPEN-предикатов: '
+        'структура, роли, участники и операторы совпадают. Это отдельная категория аудита, '
+        'не исправление эталона и не доказательство тождества неизвестных слов.','',
         '## Все типы вызванных проб','',
         '| Вопрос | Вызовов | ? | 0 | Средняя длина промпта, символов | Обрезано |',
         '|---|---:|---:|---:|---:|---:|']
@@ -129,7 +144,8 @@ def render(path):
         lines+=['','Первая записанная диагностика: '+(issue.get('code') or issue.get('kind') or 'нет')+'.']
         paths=list(dict.fromkeys(e['path'] for e in c.get('errors',())))
         if paths:lines+=['Несовпавшие проверки: '+', '.join('`'+p+'`' for p in paths)+'.']
-        if cid in nonempty:lines+=['**Формула непустая, но отличается от эталона; это не простой отказ модели.**']
+        if cid in open_labels:lines+=['**Различаются только метки OPEN-предикатов; остальные записанные поля формулы совпадают.**']
+        elif cid in nonempty:lines+=['**Формула непустая, но отличается от эталона по структуре, ролям или значениям; это не простой отказ модели.**']
         lines.append('')
     unfinished=[cid for cid in inputs if cid not in cases]
     lines+=['## Незавершённые случаи','',', '.join(unfinished) or 'Нет.','']

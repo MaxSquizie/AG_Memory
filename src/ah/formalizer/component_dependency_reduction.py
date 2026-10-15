@@ -78,11 +78,8 @@ def reduce(state,release,selector,region,tokens,p,pv,roles,nominals,groups,cfg,*
             if descriptions:question+='Already fixed dependencies: '+'; '.join(descriptions)+'. '
             question+='Choose the attachment supported by this sentence; preserve ambiguity if evidence is insufficient.'
             probe_key=region.region_id+'|dependency:'+digest([p.token_id,pv.lemma,roles,tid,options,committed,context_range])
-            previous=state.decisions.get(probe_key)
-            cid=previous.selected[0] if previous and previous.outcome=='RESOLVED' and len(previous.selected)==1 else None
-            if cid is None:
-                cid=_probe(state,selector,release,probe_key,'nominal_dependency',options,
-                           state.text[slice(*context_range)],region.source_range,question=question)
+            cid=_probe(state,selector,release,probe_key,'nominal_dependency',options,
+                       state.text[slice(*context_range)],region.source_range,question=question)
             if cid is None:
                 decision=state.decisions.get(probe_key)
                 if decision and decision.selector_outcome=='NONE_FIT':

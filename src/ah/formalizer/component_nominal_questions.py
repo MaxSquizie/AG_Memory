@@ -7,9 +7,6 @@ from .component_probe import _probe
 def choose(state, release, selector, region, key, options, question):
     if len(options)==1: return options[0]['candidate_id']
     key=region.region_id+'|nominal:'+digest([key,options])
-    previous=state.decisions.get(key)
-    if previous and previous.outcome=='RESOLVED' and len(previous.selected)==1:
-        return previous.selected[0]
     return _probe(state,selector,release,key,'nominal_attachment',options,
         state.text[slice(*region.source_range)],region.source_range,question=question)
 

@@ -68,15 +68,18 @@ def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof
     description='; '.join(name+': '+part for name,part in zip(names,parts))
     option={'candidate_id':'PARTITION','relation':kind,'operands':[[t.token_id for t in g] for g in groups],
         'marker_refs':[t.token_id for t in markers],'relation_proof':proof,
-        'label':'Proposed split — '+description+'; outer relation words: «'+
-        ' '.join(t.span for t in links)+'»; punctuation outside parts: «'+
+        'label':'Proposed split — '+description+'; outer relation occurrences: '+
+        (', '.join('«'+t.span+'» @'+str(t.start) for t in links) or 'none')+'; punctuation outside parts: «'+
         ' '.join(t.span for t in punctuation)+'»'}
     result=choose(state,release,selector,region,cfg,'structural_partition',[option],
         'Does this split preserve the source meaning as: '+RELATIONS[kind]+'? '
         'Each part keeps its participants, predicate and inner negation, modality or quantifiers. '
         +('The parent intentionally has an open content slot: the second part fills it. '
           'The parent does not need to be a complete standalone sentence. ' if kind=='CONTENT' else '')+
-        'Each part will be interpreted separately. Words expressing the outer relation must be outside the parts, '
+        'The parts are NOT asserted separately: the selected outer relation is applied to them. '
+        'Moving words into that relation preserves their meaning; it does not delete negation, modality or a condition. '
+        'The listed outer occurrences need not be adjacent and do not form a new sentence. '
+        'Words expressing the outer relation must be outside the parts, '
         'including words introducing a condition or consequence. Punctuation may separate or enclose the parts. '
         'An implicit relation needs no linking word. Choose the split if it preserves the meaning; '
         'answer 0 if words have been assigned to the wrong part, and ? if the text does not decide.')
@@ -117,15 +120,19 @@ def child(state,release,selector,region,tokens,cfg,compose,request,contract):
     if not any(v.pos in {'VERB','INFN','ADJS'} for t in tokens for v in t.variants):
         heads=[t for t in tokens if any(v.pos in {'NOUN','NPRO'} for v in t.variants)]
         if heads:
-            opts=[{'candidate_id':t.token_id,'head':t.token_id,'label':'Nominal event head «'+t.span+'» @'+str(t.start)} for t in heads]
+            opts=[{'candidate_id':'PROPOSITION','label':'A complete clause: a predicate describes a participant, possibly without an explicit verb'}]
+            opts.extend({'candidate_id':t.token_id,'head':t.token_id,'label':'Nominal event head «'+t.span+'» @'+str(t.start)} for t in heads)
             result=choose(state,release,selector,region,cfg,'structural_event_head',opts,
                 contract+'. Target words: «'+' '.join(t.span for t in tokens)+'». '
-                'Which noun names the event or state described here? A person or object name is not an event. '
-                'If none does, answer 0.')
+                'Is this a complete clause, or a noun phrase naming an event/state? '
+                'For a complete clause choose the complete-clause option; its predicate will be selected next. '
+                'For an event noun phrase choose its head. A person or object name alone is not an event. '
+                'If none fits, answer 0.')
             if not result:return [],None
-            head=next(t for t in heads if t.token_id==result[0]['head'])
-            slot=replace(slot,output_sort='EVENT_DESCRIPTION',head_ref=head.token_id,
-                         allowed_cases=frozenset(c for v in head.variants for c in v.cases))
+            if result[0]['candidate_id']!='PROPOSITION':
+                head=next(t for t in heads if t.token_id==result[0]['head'])
+                slot=replace(slot,output_sort='EVENT_DESCRIPTION',head_ref=head.token_id,
+                             allowed_cases=frozenset(c for v in head.variants for c in v.cases))
     frames=compose(tokens,slot)
     root=select_child(state,release,selector,region,frames,contract,
         'Preserve all selected source tokens and parent constraints; child content is not independently asserted.')
@@ -135,13 +142,19 @@ def child(state,release,selector,region,tokens,cfg,compose,request,contract):
 def compose(state,release,selector,region,tokens,cfg,request,compose_child):
     if request and request.output_sort=='EVENT_DESCRIPTION':return None
     options=[{'candidate_id':k,'relation':k,'label':v} for k,v in RELATIONS.items()]
+    if request and request.surrounding_relations:
+        for option in options:
+            if option['relation'] in request.surrounding_relations:
+                option['label']='An additional relation INSIDE the target words: '+option['label']+'; not the already handled outer relation'
     supplied=''
     if request and request.pending_proposition_roles:
-        supplied=('A content slot of this predicate is supplied separately. Classify the displayed words with that slot left open. ')
+        supplied=('A dependent infinitive is supplied separately; other clauses still inside the target need analysis. ')
     if request and request.agreement_source:
         supplied+='An infinitive here can receive agreement from a separately handled governor. '
     result=choose(state,release,selector,region,cfg,'structural_relation',options,supplied+
-        'Which option describes the displayed text? Choose its outermost relation; inner relations are handled later. '
+        'Classify ONLY the target words. Context explains their meaning but is not part of this choice. '
+        'Choose the outermost relation expressed inside the target; inner relations are handled later. '
+        'Choose one lexical predication when these words describe one event or state, even if the surrounding text asks about it or makes it possible. '
         'The content option requires both the parent predicate and dependent content to be present in this text. '
         'Numeric quantification is deferred.')
     if not result:return block(state,region)
@@ -267,23 +280,29 @@ def content(state,release,selector,region,tokens,cfg,request,compose_child,proof
         role_registry &= {r['role_id'] for v in release.entries('R-V') if v['sense_id'] in senses
                           for r in v['roles'] if set(r.get('argument_types',())) & {'PROPOSITION','EVENT'}}
     choices=[]
+    from .probe_wording import proposition_role
     for role in sorted(role_registry):
         declared=[a for a in release.entries('AttitudeMap') if a['argument_role']==role and any(v.lemma==a['lemma'] for v in owner.variants)]
         attitudes=sorted({a['attitude'] for a in declared}) if declared else ['QUOTED','EMBEDDED','HYPOTHETICAL','UNKNOWN']
         for attitude in attitudes:
             choices.append({'candidate_id':role+':'+attitude,'owner_ref':owner.token_id,'role':role,'attitude':attitude,
                 'label':role+' of «'+owner.span+'»; attitude='+attitude+
+                '; '+proposition_role(role)+
                 ' (QUOTED=reported, EMBEDDED=mental content, HYPOTHETICAL=intended/possible, UNKNOWN=unspecified; none asserts the child)'})
     link=choose(state,release,selector,region,cfg,'structural_content_role',choices,
         'Choose the content role AND attitude supported by this source. No canonical lexical identity is inferred.')
     if not link:return block(state,region)
     relation,license=link
-    slot=replace(request or InputSlot(),pending_proposition_roles=frozenset({relation['role']}))
+    inherited=dict(request.pending_propositions or {}) if request else {}
+    pending=dict(inherited)
+    pending[owner.token_id]=frozenset(pending.get(owner.token_id,())) | {relation['role']}
+    slot=replace(request or InputSlot(),pending_propositions=pending)
     parents=compose_child(parent,slot)
     candidates=[f for f in parents if f.predicate_token_ref==owner.token_id and not f.semantic.get('structural_unresolved')]
     if len(candidates)!=1:return block(state,region,parents)
     target=candidates[0]
-    child_slot=InputSlot(inside_attitude=True)
+    child_slot=InputSlot(inside_attitude=True,
+        pending_propositions={ref:roles for ref,roles in inherited.items() if ref in body_ids})
     if any(v.pos=='INFN' for t in body for v in t.variants) and not any(v.pos=='VERB' for t in body for v in t.variants):
         from .control_arguments import controllers
         control=choose(state,release,selector,region,cfg,'structural_control',

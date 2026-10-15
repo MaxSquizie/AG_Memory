@@ -125,7 +125,8 @@ class CompositionSources:
     def reuse(self,region,tokens,attachment,infinitive,request):
         if attachment is not None or infinitive is not None:return None
         if request and (request.output_sort!='PROPOSITION' or request.head_ref or request.allowed_cases
-                        or request.proposition_slots or request.agreement_source or request.pending_proposition_roles):return None
+                        or request.proposition_slots or request.agreement_source or request.pending_proposition_roles
+                        or request.pending_propositions):return None
         if self.project_grammar(tokens) is False:return []
         from .morphology_domain import clean
         available={t.token_id:{digest(clean(v)) for v in t.variants} for t in tokens}

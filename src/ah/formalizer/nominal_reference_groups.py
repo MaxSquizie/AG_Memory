@@ -56,10 +56,9 @@ def project(state, release, selector, region, tokens, cfg):
         if not det:
             continue
         key = 'nominal-reference:'+digest([state.source_uid, marker.token_id, head.token_id])
-        previous = state.decisions.get(key)
-        choice = previous.selected[0] if previous and previous.outcome == 'RESOLVED' and len(previous.selected)==1 else None
+        choice = None
         raw = state.text[marker.start:head.end]
-        if previous is None and region.source_range[1]-region.source_range[0] <= cfg['context_chars']:
+        if region.source_range[1]-region.source_range[0] <= cfg['context_chars']:
             choice = _probe(state, selector, release, key, 'nominal_attachment', [
                 {'candidate_id':'REFERENCE', 'label':raw+': determiner identifies an antecedent of the noun'+
                  ('; modifier requires the SAME antecedent' if identity else '')},

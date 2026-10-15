@@ -80,8 +80,15 @@ class CompositionSession:
             head=self.original.get(request.head_ref)
             if head:parts.append('The selected head is «'+head.span+'».')
         if request.pending_proposition_roles:
-            parts.append('The dependent content has already been separated; its open slot is supplied by the parent. '
-                         'Classify only the remaining words. A predicate with that open slot can be one lexical predication.')
+            parts.append('A dependent infinitive is supplied separately; its owner is still to be selected. '
+                         'Other dependent clauses inside the target still need their own analysis.')
+        owned={t.token_id for t in tokens}
+        for ref,roles in (request.pending_propositions or {}).items():
+            if ref not in owned:continue
+            owner=self.original[ref]
+            parts.append('Only «'+owner.span+'» @'+str(owner.start)+' has separately supplied content ('+
+                         ', '.join(sorted(roles))+'). Leave that slot open. '
+                         'Any other parent predicate and dependent clause INSIDE the target must still be connected.')
         if request.agreement_source:
             from .probe_wording import reading
             from .component_policy import _morph as canonical_reading

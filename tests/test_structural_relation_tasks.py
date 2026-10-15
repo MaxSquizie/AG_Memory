@@ -135,6 +135,44 @@ def test_recursive_propositions_and_quotes(tmp_path,monkeypatch,quoted):
         'CONTENT':{'predicate':'THINK','roles':{'AGENT':{'entity':'petr'},'CONTENT':atom('ARRIVE','maria')}}}}]
 
 
+def test_inner_content_can_be_separated_before_its_ancestor(tmp_path,monkeypatch):
+    text='Иван сказал, что Пётр думал, что Мария пришла.'
+    # The first split leaves THINK's content open inside the still nested parent.
+    steps=content_steps('думал','Мария','пришла',attitude='EMBEDDED')[:-1]
+    steps+=content_steps('сказал','Пётр','думал')+relation('LEXICAL')+relation('LEXICAL')
+    result,script=run(tmp_path,monkeypatch,text,steps)
+    assert result['diagnostics']['codes']==[]
+    assert result['assertions']['ah']==[{'predicate':'SAY','roles':{'AGENT':{'entity':'ivan'},
+        'CONTENT':{'predicate':'THINK','roles':{'AGENT':{'entity':'petr'},'CONTENT':atom('ARRIVE','maria')}}}}]
+    prompts=[p for s,p in script.calls if s=='structural_relation']
+    assert 'Only «думал»' in prompts[1] and 'Only «сказал»' not in prompts[1]
+    assert 'Only «сказал»' in prompts[2] and 'Only «думал»' not in prompts[2]
+    assert 'Only «думал»' in prompts[3] and 'Only «сказал»' not in prompts[3]
+
+
+def test_nested_same_modal_relation_stays_selectable(tmp_path,monkeypatch):
+    steps=unary('POSSIBLE','Возможно',',')+[('structural_governor','INDEPENDENT')]
+    steps+=unary('POSSIBLE','может','может')+[('structural_governor','Agreement/controller anchor «может»')]+relation('LEXICAL')
+    result,script=run(tmp_path,monkeypatch,'Возможно, Иван может прийти.',steps)
+    assert result['diagnostics']['codes']==[]
+    assert result['assertions']['ah']==[{'operator':'POSSIBLE','operands':[
+        {'operator':'POSSIBLE','operands':[atom('ARRIVE','ivan')]}]}]
+    prompts=[p for s,p in script.calls if s=='structural_relation']
+    assert 'An additional relation INSIDE the target words: Possibility' in prompts[1]
+
+
+def test_infinitive_producer_remains_available_inside_reported_content(tmp_path,monkeypatch):
+    steps=content_steps('сказал','Мария','книгу')+relation('LEXICAL')+[
+        ('component_attachment','Infinitive area «читать книгу»')]+relation('LEXICAL')+[
+        ('component_attachment','«читать» fills OBJECT')]+relation('LEXICAL')
+    result,script=run(tmp_path,monkeypatch,'Иван сказал: «Мария хочет читать книгу».',steps)
+    assert result['diagnostics']['codes']==[]
+    assert result['assertions']['ah']==[{'predicate':'SAY','roles':{'AGENT':{'entity':'ivan'},
+        'CONTENT':{'predicate':'WANT','roles':{'AGENT':{'entity':'maria'},'CONTENT':{
+            'predicate':'READ','roles':{'AGENT':{'entity':'maria'},'THEME':{'entity':'book'}}}}}}}]
+    assert any('what the parent predicate is about' in p for s,p in script.calls if s=='component_attachment')
+
+
 def test_modal_control_inside_modal(tmp_path,monkeypatch):
     steps=unary('POSSIBLE','может','может')+[('structural_governor','Agreement/controller anchor «может»')]+content_steps(
         'хотеть','читать','книгу',attitude='HYPOTHETICAL')+[

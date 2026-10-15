@@ -22,8 +22,14 @@ def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nomin
         agreement=gv or pv
         if infinitive is not None and not controlled:continue
         quality = pv.pos in cfg.get('quality_predicate_pos', ())
+        from .component_predication import nominal_predicate
+        nominal=nominal_predicate(pv,cfg)
+        if nominal:
+            # A noun's lexical gender/number is not subject agreement.
+            from dataclasses import replace
+            agreement=replace(pv,gender=None,number=None,person=None)
         if attachment and projected is None: continue
-        if not projected and not controlled and not governed and not quality and (pv.pos != 'VERB' or pv.mood == 'imperative'): continue
+        if not projected and not controlled and not governed and not quality and not nominal and (pv.pos != 'VERB' or pv.mood == 'imperative'): continue
         if quality and pv.pos == 'ADJF' and 'nom' not in pv.cases: continue
         senses = [s for s in release.entries('R-S') if not p.is_oov() and s['lemma'] == pv.lemma and s['POS'] == pv.pos and not s.get('anchor_pattern')]
         vals = [v for v in release.entries('R-V') if v['sense_id'] in {s['sense_id'] for s in senses}]
@@ -41,7 +47,7 @@ def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nomin
                 (not set(r.get('argument_types',())) & {'PROPOSITION','EVENT'} if r['role_id'] in set(supplied)|reserved
                  else set(r.get('argument_types',())) != {'ENTITY'})
                 or r.get('cardinality',{}).get('max') != 1 for r in val['roles'])): continue
-            case_roles = {c:r for c,r in (projected['rule']['case_roles'] if projected else cfg['open_case_roles']).items() if not quality or (c == 'nom' and r == cfg['subject_role'])}
+            case_roles = {c:r for c,r in (projected['rule']['case_roles'] if projected else cfg['open_case_roles']).items() if not (quality or nominal) or (c == 'nom' and r == cfg['subject_role'])}
             roles = val['roles'] if val else [
                 {'role_id':r,'allowed_cases':[c for c,r2 in case_roles.items() if r2==r],
                  'cardinality':{'min':int(r==cfg['subject_role'] and (not projected or bool(projected.get('relative_marker')) and projected['rule']['host_role']!=r))}}
@@ -83,7 +89,7 @@ def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nomin
                 if not valid_roles({e.token_id:b[0] for e,b in assignments},nominal_groups):continue
                 if any(not set(g['cases']).intersection(*(set(b[1].cases) for e,b in assignments if e.token_id in g['member_refs'])) for g in nominal_groups):continue
                 missing={r['role_id'] for r in roles if r.get('cardinality',{}).get('min',0)>0}-set(rs)
-                gaps = licensed_gaps(roles,missing,agreement,cfg,quality=quality,valency=val)
+                gaps = licensed_gaps(roles,missing,agreement,cfg,quality=quality or nominal,valency=val)
                 if projected and 'pssv' in pv.features:
                     # Passive agreement describes the patient, never licenses
                     # an omitted agent with the patient's number/gender.
@@ -102,6 +108,14 @@ def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nomin
                         morph[group['token_ref']]=_morph(prep)
                 from .component_predication import consume_copula
                 copula = consume_copula(tokens, p, pv, cfg, used, morph) if quality else None
+                if nominal:
+                    subjects=[(e,mv) for e,(r,mv,_) in assignments if r==cfg['subject_role']]
+                    if len(subjects)!=1:continue
+                    subject,subject_reading=subjects[0]
+                    copula=consume_copula(tokens,p,subject_reading,cfg,used,morph)
+                    if 'nom' not in pv.cases and not copula:continue
+                    lo,hi=sorted((subject.start,p.start))
+                    used.update(t.token_id for t in tokens if lo<t.start<hi and t.span in {'—','–','-'})
                 deps=reduction['dependencies'] if reduction else []
                 used.update(d['head_ref'] for d in deps)
                 used.update(d['marker_ref'] for d in deps if d.get('marker_ref'))
@@ -128,8 +142,8 @@ def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nomin
                     'allowed_proposition_roles':sorted(reserved) if val else None,
                     'agreement_source_ref':agreement_source.token_id if agreement_source else None,
                     'preposition_bindings':preps,'missing_required_roles':unresolved_roles,
-                    'requires_attachment_probe':ambiguous or quality,
-                    'quality_predication':quality, 'copula_ref':copula,
+                    'requires_attachment_probe':ambiguous or quality or nominal,
+                    'quality_predication':quality, 'nominal_predication':nominal, 'copula_ref':copula,
                     'component_questions':questions,'uncovered_token_refs':uncovered,
                     'structural_unresolved':bool(uncovered or unresolved_roles),'component_region':region.region_id}
                 if reduction is not None:

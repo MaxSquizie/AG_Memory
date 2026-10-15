@@ -4,6 +4,21 @@ from .component_clause import build_clause
 from .component_probe import _probe
 
 
+def nominal_predicate(variant, cfg):
+    return (cfg.get('nominal_predication')=='NOUN_PREDICATE_V1' and variant.pos=='NOUN'
+            and bool(variant.cases & {'nom','abl'})
+            and not variant.features & {'Name','Surn','Patr','Geox','Orgn','Trad'})
+
+
+def nominal_predicates(tokens, cfg):
+    """Offer noun predication without treating arbitrary noun arguments as verbs."""
+    if any(t.variants and all(v.pos=='VERB' and v.lemma not in cfg.get('copula_lemmas',())
+            for v in t.variants) for t in tokens):return []
+    return [t for t in tokens if any(nominal_predicate(v,cfg) for v in t.variants)
+            and any(other.token_id!=t.token_id and any(v.pos in {'NOUN','NPRO'} and 'nom' in v.cases
+                for v in other.variants) for other in tokens)]
+
+
 def consume_copula(tokens, predicate, variant, cfg, used, morph):
     """A released copula is grammatical evidence, not a second world event."""
     choices = [(e, v) for e in tokens if e.token_id not in used for v in e.variants
@@ -43,7 +58,7 @@ def compose_alternatives(state, release, selector, region, tokens, predicates, c
         bases.extend(build_clause(state, release, selector, region, tokens, predicate, cfg, select=False, attachment=attachment, nominal_groups=nominal_groups,infinitive=infinitive,qualitative_groups=quantities,
             proposition_slots=(request.proposition_slots or {}).get(predicate.token_id,{}) if request else {},
             agreement_source=request.agreement_source if request else None,
-            pending_roles=request.pending_proposition_roles if request else ()))
+            pending_roles=request.pending_for(predicate.token_id) if request else ()))
     if attachment is None and infinitive is None:
         from .component_nominal_utterance import candidates as nominatives
         bases.extend(nominatives(state,release,region,tokens,cfg,request=request if request and request.output_sort=='EVENT_DESCRIPTION' else None,selector=selector,quantities=quantities))
@@ -84,6 +99,9 @@ def compose_alternatives(state, release, selector, region, tokens, predicates, c
                 m = f.semantic['morph_bindings'][f.predicate_token_ref]
                 roles = ', '.join(role+'='+evidence[tid].span for tid, role in f.semantic['proposed_roles'].items())
                 label = f.semantic.get('nominal_dependency_kind',m['lemma'])+' ['+m['pos']+']; '+roles
+                if f.semantic.get('nominal_predication'):
+                    subject=next(evidence[t].span for t,r in f.semantic['proposed_roles'].items() if r==cfg['subject_role'])
+                    label+='; noun predicate: «'+f.anchor_span+'» describes what «'+subject+'» is'
                 if cfg.get('modifier_composition')=='BOUNDED_FOREST_V1':
                     from .probe_wording import linked_readings
                     label += '; linked morphology='+linked_readings(f.semantic['morph_bindings'],evidence)
