@@ -21,7 +21,10 @@ def choose(state,release,selector,region,cfg,slot,options,question):
     from .component_source import view,probe_context
     owned=set(region.token_refs)
     local=view(state,region,[t for t in state.evidence if t.token_id in owned])
-    context,target=probe_context(state,region,cfg,local)
+    # A structure question classifies owned words. Reading the enclosing
+    # sentence here reintroduces operators already assigned to an ancestor.
+    target_only=slot.startswith('structural_')
+    context,target=probe_context(state,region,cfg,local,include_surrounding=not target_only)
     question=target+question
     if len(context)>cfg['context_chars']:
         state.diag('STRUCTURAL_TASK_SEARCH_INCOMPLETE',region.region_id)
@@ -52,6 +55,7 @@ def choose(state,release,selector,region,cfg,slot,options,question):
         decision=state.decisions.get(key)
         outcome=decision.selector_outcome if decision else None
         row={'kind':'STRUCTURAL_TASK','region_ref':region.region_id,'source_range':list(region.source_range),
+             'target_token_refs':list(region.token_refs),'context_policy':'OWNED_TARGET' if target_only else 'READING_CONTEXT',
              'slot':slot,'decision_ref':key,'page':page,'examined':examined,
              'alternatives':values,'selected':selected,'status':'SELECTED' if selected else 'PENDING',
              'reason':outcome or 'PROBE_BLOCKED','enumeration_complete':not has_more,

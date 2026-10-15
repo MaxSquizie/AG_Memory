@@ -76,7 +76,8 @@ def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof
         'Each part keeps its participants, predicate and inner negation, modality or quantifiers. '
         +('The parent intentionally has an open content slot: the second part fills it. '
           'The parent does not need to be a complete standalone sentence. ' if kind=='CONTENT' else '')+
-        'Outer relation words express the selected relation; punctuation may separate or enclose the parts. '
+        'Each part will be interpreted separately. Words expressing the outer relation must be outside the parts, '
+        'including words introducing a condition or consequence. Punctuation may separate or enclose the parts. '
         'An implicit relation needs no linking word. Choose the split if it preserves the meaning; '
         'answer 0 if words have been assigned to the wrong part, and ? if the text does not decide.')
     return (markers,result[1]) if result else None
@@ -92,14 +93,17 @@ def function_ownership(state,release,selector,region,cfg,kind,groups):
     while True:
         possible=[t for group in groups for t in group if any(v.pos in {'PRCL','CONJ'} for v in t.variants)]
         if not possible:return groups
-        options=[{'candidate_id':'KEEP_ALL','label':'Every listed function token stays inside its current child'}]
+        options=[{'candidate_id':'KEEP_ALL','label':'Keep all listed words inside their parts: '+
+            ', '.join('«'+t.span+'» @'+str(t.start) for t in possible)}]
         options.extend({'candidate_id':t.token_id,'token_ref':t.token_id,
-            'label':'Outer relation owns «'+t.span+'» @'+str(t.start)+'; retain its source address as connective material'} for t in possible)
+            'label':'Outer relation owns «'+t.span+'» @'+str(t.start)+'; remove this occurrence from its part'} for t in possible)
         selected=choose(state,release,selector,region,cfg,'structural_function_owner',options,
             kind+' ('+RELATIONS[kind]+'). Current parts: '+
             '; '.join(str(i+1)+': «'+' '.join(t.span for t in group)+'»' for i,group in enumerate(groups))+'. '+
-            'Does a listed connective/particle express the outer relation, or stay inside its current part? '
-            'Do not remove child negation, quantification or modality.')
+            'Which listed word expresses the relation BETWEEN these parts? Select that occurrence to move it out of its part. '
+            +('Words introducing the condition or consequence belong to this outer conditional relation. '
+              if kind in {'IMPLIES','COUNTERFACTUAL'} else '')+
+            'Keep all only if none expresses the outer relation. Negation, modality and quantification of an inner proposition stay inside it.')
         if not selected:return None
         if selected[0]['candidate_id']=='KEEP_ALL':return groups
         tid=selected[0]['token_ref']
@@ -133,13 +137,12 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child):
     options=[{'candidate_id':k,'relation':k,'label':v} for k,v in RELATIONS.items()]
     supplied=''
     if request and request.pending_proposition_roles:
-        supplied=('The dependent content outside this target has already been separated and will fill the parent predicate\'s content slot. '
-                  'Choose the structure of the remaining target only; do not extract that same content again. ')
+        supplied=('A content slot of this predicate is supplied separately. Classify the displayed words with that slot left open. ')
     if request and request.agreement_source:
-        supplied+='The outside word «'+request.agreement_source.span+'» supplies agreement for a dependent infinitive in this target. '
+        supplied+='An infinitive here can receive agreement from a separately handled governor. '
     result=choose(state,release,selector,region,cfg,'structural_relation',options,supplied+
-        'Which option describes the WHOLE target area? Choose the outermost relation; inner relations are handled later. '
-        'A verb with a dependent clause or quotation uses the content option, not the single-predication option. '
+        'Which option describes the displayed text? Choose its outermost relation; inner relations are handled later. '
+        'The content option requires both the parent predicate and dependent content to be present in this text. '
         'Numeric quantification is deferred.')
     if not result:return block(state,region)
     option,proof=result;kind=option['relation']

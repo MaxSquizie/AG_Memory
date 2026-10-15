@@ -11,6 +11,19 @@ TERMS = {
     'anim':'animate', 'inan':'inanimate', 'Name':'personal name',
 }
 
+ROLE_MEANINGS = {
+    'SUBJECT':'grammatical subject of the predicate',
+    'OBJECT':'direct object or content of the predicate',
+    'RECIPIENT':'recipient or addressee of the action',
+    'LOCATION':'place or spatial endpoint of the situation',
+    'SOURCE':'place or entity from which something comes',
+    'EXPERIENCER':'participant experiencing the state',
+}
+
+
+def role(value):
+    return ROLE_MEANINGS.get(value,value)
+
 
 def reading(value):
     parts=[]

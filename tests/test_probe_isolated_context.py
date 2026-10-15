@@ -67,10 +67,10 @@ def test_child_question_does_not_reassign_removed_outer_words(tmp_path,monkeypat
     result,script=run(tmp_path,monkeypatch,'Иван не пришёл.',
         unary('NOT','не','не')+relation('LEXICAL'))
     child=[p for slot,p in script.calls if slot=='structural_relation'][1]
-    target=child.split('Resolve ONLY the target area «',1)[1].split('»',1)[0]
+    target=child.split('Context span: ',1)[1].split('\nOptions:',1)[0]
     assert 'не' not in target and 'Иван' in target and 'пришёл' in target
     assert 'Context span: '+target in child
-    assert 'Surrounding source (reference only): Иван не пришёл.' in child
+    assert 'Surrounding source' not in child and 'Иван не пришёл' not in child
     assert result['assertions']['ah'][0]['operator']=='NOT'
     decisions=result['runtime']['ir']['decisions']
     decisions=decisions.values() if isinstance(decisions,dict) else decisions
@@ -118,10 +118,11 @@ def test_reserved_content_and_feedback_are_scoped_to_their_region(tmp_path,monke
     questions=[p for slot,p in script.calls if slot=='structural_relation']
     assert 'Earlier attempt:' in questions[1]
     parent,body=questions[2:]
-    assert 'already been separated' in parent
+    assert 'content slot of this predicate is supplied separately' in parent
     assert 'Context span: Мария сказала\n' in parent
     assert 'Earlier attempt:' not in parent and 'Earlier attempt:' not in body
-    assert 'already been separated' not in body
+    assert 'supplied separately' not in body
+    assert 'Иван вошёл' not in parent and 'Мария сказала' not in body
     partition=next(p for slot,p in script.calls if slot=='structural_partition')
     assert 'parent intentionally has an open content slot' in partition
     assert 'parent clause with a content slot: «Мария сказала»' in partition
@@ -161,3 +162,75 @@ def test_changed_partial_grammar_state_is_progress_even_with_same_outer_choice(m
     component_refinement._compose_area(state,release,None,region,[],{'refinement':{'max_depth':4}})
     assert len(calls)==3 and len(revisions)==2
     assert state.diagnostics[-1].code=='STRUCTURAL_REVISION_NO_PROGRESS'
+
+
+def test_inner_relation_stays_reachable_without_outer_sentence(tmp_path,monkeypatch):
+    result,script=run(tmp_path,monkeypatch,'Возможно, Иван не пришёл.',
+        unary('POSSIBLE','Возможно','Возможно')+[
+            ('structural_governor','INDEPENDENT')]+unary('NOT','не','не')+relation('LEXICAL'))
+    questions=[p for slot,p in script.calls if slot=='structural_relation']
+    inner=questions[1]
+    assert 'Context span: Иван не пришёл' in inner and 'Возможно' not in inner
+    assert {'NOT','POSSIBLE','CONTENT','FORALL'}<=set(inner.selection_audit['candidates'])
+    tree=result['assertions']['ah'][0]
+    assert tree['operator']=='POSSIBLE' and tree['operands'][0]['operator']=='NOT'
+    tasks=[r for r in result['runtime']['ir']['syntax_trace'] if r.get('slot')=='structural_relation']
+    assert all(r['context_policy']=='OWNED_TARGET' and r['target_token_refs'] for r in tasks)
+
+
+def test_grammatical_reading_still_has_surrounding_context():
+    from ah.formalizer.component_source import probe_context
+    parent=SimpleNamespace(region_id='sentence',parent_ref=None,kind='SENTENCE',source_range=(0,15))
+    child=SimpleNamespace(region_id='child',parent_ref='sentence',grounds=('MORPHOLOGICAL_REFINEMENT',))
+    state=SimpleNamespace(text='Иван не пришёл.',region_forest=SimpleNamespace(regions=[parent,child]))
+    local='Иван    пришёл'
+    context,question=probe_context(state,child,{'context_chars':2048},local)
+    assert 'Surrounding source (reference only): Иван не пришёл.' in context
+    assert local in question
+    target,question=probe_context(state,child,{'context_chars':2048},local,include_surrounding=False)
+    assert target==local and question==''
+
+
+def test_dependency_question_explains_roles_without_python_context_dump(tmp_path,monkeypatch):
+    from test_structural_relation_tasks import Script
+    from tools.formalizer_v7_native_binding import ChatBackend,execute_native
+    from tools.formalizer_v7_extended_binding import Session
+    script=Script(relation('LEXICAL'))
+    monkeypatch.setattr(ChatBackend,'generate',lambda self,prompt,**kw:script.generate(prompt,**kw))
+    text='Вчера марии Пётр передал книгу.'
+    payload={'raw_input':{'text':text,'source_id':'recipient-context','revision':1,
+        'range':[0,len(text)],'language':'ru','request_kind':'ASSERTION','batch_kind':'MESSAGE',
+        'source_timestamp':'2026-10-09T12:00:00+00:00'}}
+    result=execute_native(Session([payload],tmp_path/'journal'),payload,
+        {'provider':'lmstudio','model':'scripted-recipient','structure_mode':'region_probes'})
+    assert not script.steps and not script.errors
+    p=next(p for slot,p in script.calls if slot=='nominal_dependency' and 'attachment of «марии»' in p)
+    assert 'recipient or addressee of the action' in p
+    assert '«Пётр» is grammatical subject of the predicate «передал»' in p
+    assert "'dependent':" not in p and 'APPOSITION' not in p
+    assert result['assertions']['ah'][0]['roles']['RECIPIENT']=={'entity':'maria'}
+
+
+def test_conditional_function_question_names_keep_set_and_outer_contract(tmp_path,monkeypatch):
+    from test_structural_relation_tasks import bounds
+    steps=relation('IMPLIES')+bounds('structural_operand_1','Если','пришёл')+bounds('structural_operand_2','то','спит')+[
+        ('structural_function_owner','Outer relation owns «Если»'),
+        ('structural_function_owner','Outer relation owns «то»'),
+        ('structural_partition','PARTITION')]+relation('LEXICAL')+relation('LEXICAL')
+    result,script=run(tmp_path,monkeypatch,'Если Иван пришёл, то Мария спит.',steps)
+    p=next(p for slot,p in script.calls if slot=='structural_function_owner')
+    assert 'Keep all listed words inside their parts: «Если» @0, «то» @18' in p
+    assert 'Words introducing the condition or consequence' in p
+    assert result['assertions']['ah'][0]['operator']=='IMPLIES'
+
+
+def test_gui_explains_which_words_reached_the_structure_question():
+    from test_formalization_readable import sample,visible
+    from ah.gui.formalization_inspection import Inspection
+    from ah.gui.formalization_readable import ReadableInspection
+    data=sample();data['state']['syntax_trace']=[{'kind':'STRUCTURAL_TASK','slot':'structural_relation',
+        'source_range':[0,26],'context_policy':'OWNED_TARGET','target_token_refs':['student','read']}]
+    inspection=Inspection(data);reader=ReadableInspection(inspection)
+    explanation=visible(reader.explain(inspection.by_ref['trace:0']))
+    assert 'Текст этой структурной задачи: «студент читает»' in explanation
+    assert 'Слова внешних областей в вопрос не включены' in reader.report([])

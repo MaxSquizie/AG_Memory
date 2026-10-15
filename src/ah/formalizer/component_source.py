@@ -17,8 +17,10 @@ def frame_view(state, frame):
     return view(state, frame, [e for e in state.evidence if e.token_id in refs])
 
 
-def probe_context(state, region, cfg, local):
+def probe_context(state, region, cfg, local, *, include_surrounding=True):
     """Reading context may cross the area; token ownership never does."""
+    if not include_surrounding:
+        return local.strip(), ''
     if 'MORPHOLOGICAL_REFINEMENT' not in region.grounds:
         return local, ''
     regions={r.region_id:r for r in state.region_forest.regions}

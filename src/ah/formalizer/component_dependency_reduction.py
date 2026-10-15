@@ -48,10 +48,10 @@ def reduce(state,release,selector,region,tokens,p,pv,roles,nominals,groups,cfg,*
             if len(choices)>cfg['max_candidates'] or region.source_range[1]-region.source_range[0]>cfg['context_chars']:
                 state.diag('COMPONENT_SEARCH_INCOMPLETE',region.region_id);return None
             options=[]
-            from .probe_wording import reading as reading_text
+            from .probe_wording import reading as reading_text,role as role_text
             for cid,o in choices.items():
                 reading=o.get('morph',{})
-                if o['kind']=='ROOT': label='Direct role '+o['role']+' of predicate «'+p.span+'»'
+                if o['kind']=='ROOT': label='Direct role '+o['role']+' of predicate «'+p.span+'» ('+role_text(o['role'])+')'
                 elif o['kind']=='DEFER_PP':label='Prepositional phrase; defer its host to the PP attachment question'
                 else:label=o['kind']+' dependency on «'+evidence[o['host_ref']].span+'» at '+str(evidence[o['host_ref']].start)
                 if o.get('head_morph'):label+='; internal head reading: '+reading_text(o['head_morph'])
@@ -60,14 +60,23 @@ def reduce(state,release,selector,region,tokens,p,pv,roles,nominals,groups,cfg,*
             committed=[{'dependent':evidence[t].span,'attachment':o['kind'],
                         'host':evidence[o['host_ref']].span if 'host_ref' in o else o.get('role')} for t,o in fixed.items()]
             question='Choose the immediate grammatical attachment of «'+evidence[tid].span+'» at '+str(evidence[tid].start)+'. '
-            question+='GENITIVE and CASE_DEPENDENCY record nominal grammar, not ownership, command, identity or a guessed semantic relation. '
-            question+='CASE_DEPENDENCY is allowed only if the dependent completes that noun in this source, not merely because its case is compatible. '
-            question+='APPOSITION records an explanation, not entity identity. '
+            kinds={o['kind'] for o in choices.values()}
+            if 'GENITIVE' in kinds:
+                question+='GENITIVE means a noun in the genitive case modifying another noun; it does not establish ownership. '
+            if 'CASE_DEPENDENCY' in kinds:
+                question+='CASE_DEPENDENCY means a complement of the named noun, not an argument of the verb. Matching case alone is insufficient. '
+            if 'APPOSITION' in kinds:
+                question+='APPOSITION is an explanatory nominal description, not entity identity. '
             if needs_license and any(o.get(field,{}).get('evidence_refs',[''])[0].startswith('usage-reading:') for o in choices.values() for field in ('morph','head_morph') if o.get(field,{}).get('evidence_refs')):
                 question+='CONTEXTUAL readings are occurrence-local proposals: confirm the grammatical case together with this attachment. Preserve unknown surfaces; do not infer lexical meaning, name identity, gender, or silently correct spelling. '
             elif needs_license:
                 question+='SUBSTANTIVE is a proposed noun-like use of an adjective, not a dictionary fact: select it only if this occurrence independently denotes an entity in the selected slot. '
-            question+='Already fixed dependencies: '+str(committed)+'. Preserve ambiguity if evidence is insufficient.'
+            descriptions=['«'+evidence[t].span+'» is '+(
+                role_text(o['role'])+' «'+p.span+'»' if o['kind']=='ROOT' else
+                o['kind']+' attached to «'+evidence[o['host_ref']].span+'»' if 'host_ref' in o else
+                'a prepositional phrase with its attachment still to be decided') for t,o in fixed.items()]
+            if descriptions:question+='Already fixed dependencies: '+'; '.join(descriptions)+'. '
+            question+='Choose the attachment supported by this sentence; preserve ambiguity if evidence is insufficient.'
             probe_key=region.region_id+'|dependency:'+digest([p.token_id,pv.lemma,roles,tid,options,committed,context_range])
             previous=state.decisions.get(probe_key)
             cid=previous.selected[0] if previous and previous.outcome=='RESOLVED' and len(previous.selected)==1 else None

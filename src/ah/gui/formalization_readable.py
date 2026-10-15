@@ -516,6 +516,9 @@ class ReadableInspection:
                 'MULTIPLE_ADMISSIBLE':'Остались несколько допустимых вариантов.',
                 'PROBE_BLOCKED':'Подтверждённого ответа нет. Проверьте связанное решение и диагностику.'}
             out+=paragraph('Локальный выбор подтверждён; согласование дочерних частей проверяется отдельно.' if r.get('selected') else reasons.get(r.get('reason'),'Задача не завершена.'))
+            if r.get('context_policy')=='OWNED_TARGET':
+                out+=paragraph('Текст этой структурной задачи: «'+' '.join(self.word(t) for t in r.get('target_token_refs',()))+
+                    '». Слова внешних областей в вопрос не включены; ограничения входного слота переданы отдельно.')
             out+=paragraph('Порция: '+str(r.get('page',0)+1)+'. Рассмотрено вариантов: '+str(r.get('examined',0))+'.')
             if r.get('enumeration_complete') is False:out+=paragraph('Остались непоказанные варианты. Локальный выбор не означает полного перебора.')
             if r.get('alternatives'):out+=table(['Вариант','Выбор'],[[esc(self.task_choice(v)),'Выбран' if v.get('candidate_id')==r.get('selected') else 'Не выбран'] for v in r['alternatives']])
