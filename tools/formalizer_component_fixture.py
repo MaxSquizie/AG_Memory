@@ -26,6 +26,7 @@ def with_components(release, *, regional_probes=True, relative_time=False, predi
     if predication:
         policy['entries'][0]['composition'].update(quality_predicate_pos=['ADJF','ADJS'],
             nominal_predication='NOUN_PREDICATE_V1',
+            impersonal_predication='DATIVE_STATE_V1',
             copula_lemmas=['быть'], modifier_content_role='OBJECT',preposition_nominal_role='SURFACE_ARG')
     if modifier_forest:
         if not predication: raise ValueError('modifier_forest requires predication')

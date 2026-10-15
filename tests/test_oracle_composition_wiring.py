@@ -45,7 +45,7 @@ def test_oracle_cli_sends_closed_probes_and_replays_without_http(tmp_path):
     assert result.returncode == 1, result.stdout + result.stderr
     assert len(requests) == 2
     assert all(r['path'] == '/api/v1/chat' for r in requests)
-    assert all('SELECT_LABELS_V1' in r['body']['input'] for r in requests)
+    assert all('Reply with the number' in r['body']['input'] and 'SELECT_LABELS_V1' not in r['body']['input'] for r in requests)
     provenance = json.loads((live/'provenance.json').read_text())
     assert provenance['received_provider_calls'] == 2 and provenance['model_live_execution']
     assert 'tools/formalizer_component_fixture.py' in provenance['source_snapshot']
@@ -101,7 +101,8 @@ def test_invalid_component_reply_is_retained_for_manual_review(tmp_path, monkeyp
     failed = [d for d in decisions if any(h.get('kind')=='PROBE_FAILURE' for h in d['history'])]
     assert len(failed) == 1
     assert failed[0]['raw_response'] == 'ONE_SELECTED'
-    assert 'SELECT_LABELS_V1' in failed[0]['last_prompt']
+    assert 'SELECT_LABELS_V1' not in failed[0]['last_prompt']
+    assert any(h.get('protocol')=='SELECT_LABELS_V1' for h in failed[0]['history'])
     assert not failed[0]['selected'] and failed[0]['outcome'] == 'UNRESOLVED'
     assert result['assertions']['ah'] == []
 

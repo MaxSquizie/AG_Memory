@@ -10,6 +10,11 @@ def nominal_predicate(variant, cfg):
             and not variant.features & {'Name','Surn','Patr','Geox','Orgn','Trad'})
 
 
+def impersonal_predicate(variant,cfg):
+    return cfg.get('impersonal_predication')=='DATIVE_STATE_V1' and (
+        variant.pos=='PRED' or bool(variant.features & {'Impe','Prdx'}))
+
+
 def nominal_predicates(tokens, cfg):
     """Offer noun predication without treating arbitrary noun arguments as verbs."""
     if any(t.variants and all(v.pos=='VERB' and v.lemma not in cfg.get('copula_lemmas',())
@@ -102,6 +107,8 @@ def compose_alternatives(state, release, selector, region, tokens, predicates, c
                 if f.semantic.get('nominal_predication'):
                     subject=next(evidence[t].span for t,r in f.semantic['proposed_roles'].items() if r==cfg['subject_role'])
                     label+='; noun predicate: «'+f.anchor_span+'» describes what «'+subject+'» is'
+                if f.semantic.get('impersonal_predication'):
+                    label+='; impersonal state; dative participant experiences it; no separate grammatical subject'
                 if cfg.get('modifier_composition')=='BOUNDED_FOREST_V1':
                     from .probe_wording import linked_readings
                     label += '; linked morphology='+linked_readings(f.semantic['morph_bindings'],evidence)
@@ -156,6 +163,11 @@ def compose_alternatives(state, release, selector, region, tokens, predicates, c
         admissible=set(next((h['selected'] for h in reversed(decision.history)
                              if h.get('kind')=='CLOSED_PROBE_ALTERNATIVES'),()))
     labels={o['candidate_id']:o['label'] for o in options}
+    if chosen is not None:
+        # An empty dependency domain rejects that reading, not a different
+        # complete reading selected for the same area. Keep its source trace.
+        state.diagnostics[diagnostics_before:]=[d for d in state.diagnostics[diagnostics_before:]
+            if not (d.detail==region.region_id and d.code=='COMPONENT_DEPENDENCY_CONTRADICTION')]
     for bundle in complete:
         carrier=bundle[-1]
         if deferred and carrier.frame_id in admissible:

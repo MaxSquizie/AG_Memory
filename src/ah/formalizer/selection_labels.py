@@ -40,7 +40,6 @@ def selection_label_instructions(candidate_ids: Sequence[str]) -> str:
     """Reply grammar only; candidate IDs belong to the separate audit record."""
     ids = _closed_ids(candidate_ids)
     return (
-        f"Response protocol: {PROTOCOL_VERSION}\n"
         "Reply with the number of the supported option. "
         "If several options remain possible, list their numbers separated by commas. "
         "Insufficient context: ?\n"

@@ -137,7 +137,7 @@ def fixture(core, profile):
             if (pred,rid) in PREPOSITIONAL_VALENCIES:
                 r['allowed_preps']=list(PREPOSITIONAL_VALENCIES[pred,rid])
             # Optional roles remain explicitly optional, not made up by the model.
-            if rid in {'RECIPIENT','LOCATION'}: r['cardinality']['min']=0;r['optionality']=True
+            if rid in {'RECIPIENT','LOCATION','SOURCE'}: r['cardinality']['min']=0;r['optionality']=True
             rr.append(r)
         senses.append((pred,lemma,'NOUN' if pred in {'STUDENT','DOCTOR'} else 'VERB',rr,'EVENT' if mode in {'PROCESS','TRANSITION'} else mode))
         aliases['fixture:T:'+pred]=(pred,{rid:name for name,rid,_,_ in roles})
@@ -155,7 +155,7 @@ def fixture(core, profile):
         mapping['sense_id']=sense_id
         R['TemplateMap']['entries'].append(mapping)
     # Optional arguments require genuine T schemas for the retained role set.
-    # Omitting LOCATION/RECIPIENT cannot silently map to a T that requires it.
+    # Omitting LOCATION/RECIPIENT/SOURCE cannot map to a T that requires it.
     # This is a data-level combinator over the declared optional roles, not a
     # rule tied to an oracle sentence or its desired result.
     for valency in R['R-V']['entries']:
@@ -509,7 +509,7 @@ def native_candidate_patterns(session,state,release,limit=1024):
                 surface,lemma=selected_forms(frame,ev)
                 label=lemma or surface.casefold()
                 pred='OPEN:'+label
-                role_map={r:{'SUBJECT':'AGENT','OBJECT':'THEME'}.get(r,r) for r in role_ids}
+                role_map={r:open_role_alias(r,proposition=r in frame.semantic.get('proposition_args',{})) for r in role_ids}
             roles={};valid=True
             for tid,rid in spec['roles'].items():
                 value=entity(frame,tid)
@@ -762,6 +762,11 @@ def execute_native(session,p,config):
         'store':{**writes,'new_record_count':len(L.data['nodes'])+len(L.data['supports']), 'marker_count':len(L.data['markers']),
             'unregistered_functions':[n.get('function_id') for n in L.data['nodes'].values() if n.get('kind')=='G' and registered and n.get('function_id') not in registered]}}
 
+def open_role_alias(role,*,proposition=False):
+    """Observation vocabulary follows the actual argument type, never gold."""
+    return {'SUBJECT':'AGENT','OBJECT':'CONTENT' if proposition else 'THEME'}.get(role,role)
+
+
 def decode_native(session,uid):
     if isinstance(uid,Ref):uid=uid.uid
     if isinstance(uid,BoundVar):return {'bound_var':getattr(session,'native_variable_aliases',{}).get(uid.local_id,str(uid.local_id))}
@@ -780,8 +785,10 @@ def decode_native(session,uid):
                 # Read open isolation metadata rather than guessing a gold word.
                 symbol=session.core.store.get_symbol(session.core.store.get_template(obj.template.uid).predicate.uid)
                 label=sorted(symbol.forms)[0] if symbol.forms else obj.template.uid
-            pred='OPEN:'+str(label);role_map={r.value: {'SUBJECT':'AGENT','OBJECT':'THEME'}.get(r.value,r.value) for r in obj.actants}
-        return {'predicate':pred,'roles':{role_map.get(r.value,r.value):decode_native(session,v) for r,v in obj.actants.items()}}
+            pred='OPEN:'+str(label);role_map=None
+        decoded={r.value:decode_native(session,v) for r,v in obj.actants.items()}
+        return {'predicate':pred,'roles':{(role_map.get(r,r) if role_map is not None else
+            open_role_alias(r,proposition='predicate' in value or 'operator' in value)):value for r,value in decoded.items()}}
     if isinstance(obj,FunctionSymbol):
         operands=[decode_native(session,v) for v in obj.operands]
         if obj.function_id in {'AND','OR','XOR'}:operands.sort(key=lambda v:json.dumps(v,sort_keys=True))

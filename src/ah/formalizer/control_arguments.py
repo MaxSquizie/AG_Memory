@@ -47,7 +47,24 @@ def bind(semantic,alias,subject_role):
         semantic['lexical_units'][tid]=deepcopy(member['lexical_unit'])
     if alias.get('nominal_group'):
         semantic['nominal_groups']=[*semantic.get('nominal_groups',()),deepcopy(alias['nominal_group'])]
-    semantic['control_binding']=deepcopy(alias)
+    semantic['control_binding']={**deepcopy(alias),'child_role':subject_role}
+
+
+def inherited_role(frame,token_ref,parents):
+    """An established controller supplies identity, not a new surface case."""
+    binding=frame.semantic.get('control_binding') or {}
+    role=binding.get('child_role')
+    if not role or frame.construction!='COMPONENTS_V1':return None
+    if frame.semantic.get('morph_bindings',{}).get(frame.predicate_token_ref,{}).get('pos')!='INFN':return None
+    parent=(parents or {}).get(binding.get('frame_ref'))
+    if parent is None or parent.semantic.get('structural_unresolved'):return None
+    alias={k:v for k,v in binding.items() if k!='child_role'}
+    if not any(candidate==alias for candidate,_ in controllers(parent)):return None
+    member=next((m for m in members(alias) if m['token_ref']==token_ref),None)
+    if member is None or frame.semantic.get('proposed_roles',{}).get(token_ref)!=role:return None
+    if (frame.semantic.get('morph_bindings',{}).get(token_ref)!=member['morph'] or
+            frame.semantic.get('lexical_units',{}).get(token_ref)!=member['lexical_unit']):return None
+    return role
 
 
 def expose_mentions(candidate,alias,evidence):

@@ -134,6 +134,8 @@ def _compose_area(state, release, selector, region, tokens, cfg, depth=0, attach
             selected_descriptions=[v['label'] for r in tasks if r.get('selected')
                 for v in r.get('alternatives',()) if v['candidate_id']==r['selected']]
             uncovered={tid for f in result for tid in f.semantic.get('uncovered_token_refs',())}
+            uncovered.update(tid for r in state.syntax_trace[begin:] if r.get('kind')=='STRUCTURAL_PARTITION_COVERAGE'
+                             for tid in r.get('uncovered_token_refs',()))
             constraint_text='Tried: '+'; '.join(selected_descriptions)+'. No complete parse was built.'
             if uncovered:
                 constraint_text+=' Uncovered words: «'+' '.join(t.span for t in tokens if t.token_id in uncovered)+'».'
@@ -228,8 +230,9 @@ def _compose_lexical_area(state, release, selector, region, tokens, cfg, depth=0
         elif participial or infinitive:
             predicates=[tokens[0]]
         else:
+            from .component_predication import impersonal_predicate
             predicates=[t for t in tokens if any(v.pos=='VERB' and v.mood!='imperative' or
-                v.pos in cfg.get('quality_predicate_pos',()) for v in t.variants)]
+                v.pos in cfg.get('quality_predicate_pos',()) or impersonal_predicate(v,cfg) for v in t.variants)]
             from .component_predication import nominal_predicates
             predicates.extend(t for t in nominal_predicates(tokens,cfg) if t not in predicates)
         nominal_groups=[]

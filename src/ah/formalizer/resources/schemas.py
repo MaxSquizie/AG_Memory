@@ -145,6 +145,7 @@ RESOURCE_SCHEMAS = {
             'temporal_coordination':enum('NAMED_PERIOD_SCOPE_V1'),
             'quality_predicate_pos': array(enum('ADJF','ADJS')),
             'nominal_predication': enum('NOUN_PREDICATE_V1'),
+            'impersonal_predication': enum('DATIVE_STATE_V1'),
             'copula_lemmas': array(), 'modifier_content_role': S, 'preposition_nominal_role': S,
             'modifier_composition': enum('BOUNDED_FOREST_V1'),
             'modifier_scope': enum('SHARED_EVENT_V1'),

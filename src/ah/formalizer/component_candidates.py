@@ -22,14 +22,15 @@ def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nomin
         agreement=gv or pv
         if infinitive is not None and not controlled:continue
         quality = pv.pos in cfg.get('quality_predicate_pos', ())
-        from .component_predication import nominal_predicate
+        from .component_predication import nominal_predicate,impersonal_predicate
         nominal=nominal_predicate(pv,cfg)
+        impersonal=impersonal_predicate(pv,cfg)
         if nominal:
             # A noun's lexical gender/number is not subject agreement.
             from dataclasses import replace
             agreement=replace(pv,gender=None,number=None,person=None)
         if attachment and projected is None: continue
-        if not projected and not controlled and not governed and not quality and not nominal and (pv.pos != 'VERB' or pv.mood == 'imperative'): continue
+        if not projected and not controlled and not governed and not quality and not nominal and not impersonal and (pv.pos != 'VERB' or pv.mood == 'imperative'): continue
         if quality and pv.pos == 'ADJF' and 'nom' not in pv.cases: continue
         senses = [s for s in release.entries('R-S') if not p.is_oov() and s['lemma'] == pv.lemma and s['POS'] == pv.pos and not s.get('anchor_pattern')]
         vals = [v for v in release.entries('R-V') if v['sense_id'] in {s['sense_id'] for s in senses}]
@@ -48,10 +49,12 @@ def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nomin
                  else set(r.get('argument_types',())) != {'ENTITY'})
                 or r.get('cardinality',{}).get('max') != 1 for r in val['roles'])): continue
             case_roles = {c:r for c,r in (projected['rule']['case_roles'] if projected else cfg['open_case_roles']).items() if not (quality or nominal) or (c == 'nom' and r == cfg['subject_role'])}
+            if impersonal and not projected:case_roles={'dat':'EXPERIENCER'}
+            required_role='EXPERIENCER' if impersonal else cfg['subject_role']
             roles = val['roles'] if val else [
                 {'role_id':r,'allowed_cases':[c for c,r2 in case_roles.items() if r2==r],
-                 'cardinality':{'min':int(r==cfg['subject_role'] and (not projected or bool(projected.get('relative_marker')) and projected['rule']['host_role']!=r))}}
-                for r in sorted(set(case_roles.values()) | {cfg['subject_role']})]
+                 'cardinality':{'min':int(r==required_role and (not projected or bool(projected.get('relative_marker')) and projected['rule']['host_role']!=r))}}
+                for r in sorted(set(case_roles.values()) | {required_role})]
             if projected and projected.get('relative_marker') and val:
                 marker_cases=projected['marker_reading'].cases
                 if not any(r['role_id']==projected['rule']['host_role'] and marker_cases & set(r.get('allowed_cases',())) and not r.get('allowed_preps') for r in roles):
@@ -89,7 +92,7 @@ def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nomin
                 if not valid_roles({e.token_id:b[0] for e,b in assignments},nominal_groups):continue
                 if any(not set(g['cases']).intersection(*(set(b[1].cases) for e,b in assignments if e.token_id in g['member_refs'])) for g in nominal_groups):continue
                 missing={r['role_id'] for r in roles if r.get('cardinality',{}).get('min',0)>0}-set(rs)
-                gaps = licensed_gaps(roles,missing,agreement,cfg,quality=quality or nominal,valency=val)
+                gaps = licensed_gaps(roles,missing,agreement,cfg,quality=quality or nominal or impersonal,valency=val)
                 if projected and 'pssv' in pv.features:
                     # Passive agreement describes the patient, never licenses
                     # an omitted agent with the patient's number/gender.
@@ -142,7 +145,8 @@ def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nomin
                     'allowed_proposition_roles':sorted(reserved) if val else None,
                     'agreement_source_ref':agreement_source.token_id if agreement_source else None,
                     'preposition_bindings':preps,'missing_required_roles':unresolved_roles,
-                    'requires_attachment_probe':ambiguous or quality or nominal,
+                    'requires_attachment_probe':ambiguous or quality or nominal or impersonal,
+                    'impersonal_predication':impersonal,
                     'quality_predication':quality, 'nominal_predication':nominal, 'copula_ref':copula,
                     'component_questions':questions,'uncovered_token_refs':uncovered,
                     'structural_unresolved':bool(uncovered or unresolved_roles),'component_region':region.region_id}

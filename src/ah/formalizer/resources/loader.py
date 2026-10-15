@@ -130,6 +130,11 @@ class ResourceRelease:
                 from .dependency_release import validate_dependency_policy
                 validate_dependency_policy(self,composition)
             roles={r['role_id'] for r in self.entries('RoleRegistry')}
+            if composition.get('impersonal_predication'):
+                experiencer=next((r for r in self.entries('RoleRegistry') if r['role_id']=='EXPERIENCER'),None)
+                if experiencer is None or (experiencer.get('allowed_argument_kinds') and
+                        'ENTITY' not in experiencer['allowed_argument_kinds']):
+                    raise ResourceMissing('impersonal predication requires EXPERIENCER allowing ENTITY')
             if composition.get('infinitive_composition'):
                 if not composition.get('refinement'):raise ResourceMissing('infinitive composition requires recursive areas')
                 relations=composition['infinitive_composition']['relations']

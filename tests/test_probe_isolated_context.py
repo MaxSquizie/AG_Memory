@@ -225,7 +225,8 @@ def test_conditional_function_question_names_keep_set_and_outer_contract(tmp_pat
         ('structural_partition','PARTITION')]+relation('LEXICAL')+relation('LEXICAL')
     result,script=run(tmp_path,monkeypatch,'Если Иван пришёл, то Мария спит.',steps)
     p=next(p for slot,p in script.calls if slot=='structural_function_owner')
-    assert 'Keep all listed words inside their parts: «Если» @0, «то» @18' in p
+    assert 'Keep all listed words inside their parts; none expresses the chosen outer relation: «Если» @0, «то» @18' in p
+    assert 'including an occurrence at the beginning of either part' in p
     assert 'Words introducing the condition or consequence' in p
     assert result['assertions']['ah'][0]['operator']=='IMPLIES'
 

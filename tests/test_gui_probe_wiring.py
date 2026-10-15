@@ -56,7 +56,8 @@ def test_gui_service_document_route_reaches_real_backend_selector(tmp_path,monke
     if expected_calls:
         assert backend.calls[0][1]['role']=='formalizer'
         assert 'structural_relation' in backend.calls[0][0]
-        assert 'SELECT_LABELS_V1' in backend.calls[0][0]
+        assert 'Reply with the number' in backend.calls[0][0]
+        assert 'SELECT_LABELS_V1' not in backend.calls[0][0]
         snapshot=json.loads((tmp_path/'first/interpretation.json').read_text())
         assert snapshot['probe_activity']==result['probe_activity']
         assert any(d.get('raw_response')=='?' for d in snapshot['state']['decisions'].values())

@@ -69,7 +69,7 @@ def test_allowed_ids_gate_is_still_enforced(schema):
 @pytest.mark.parametrize("wire", [
     "", "ONE_SELECTED", "V1", "-1", "+1", "01", "1.0", "1,1", "1,2,1",
     "0,1", "1,0", "?1", "1,?", "4", "1,4", "1,", ",1", "1 2", "1, 2",
-    "1\n2", "1\nexplanation", "```\n1\n```", "[1]", "{\"selected\":[\"sense:14\"]}",
+    "1\n2", "SELECT_LABELS_V1\n2", "1\nexplanation", "```\n1\n```", "[1]", "{\"selected\":[\"sense:14\"]}",
     "１", "1e0", "9" * 10_000, None, 1, True,
 ])
 def test_invalid_wire_is_rejected_without_json_or_prose_fallback(schema, wire):
@@ -112,7 +112,8 @@ def test_prompt_preserves_declared_context_and_closed_candidate_mapping(schema):
         mentions={"X": "явное упоминание"}, schema=schema,
         contextual_statements=("declared C statement",), candidates=("sense:3", "sense:14"),
     )
-    assert PROTOCOL_VERSION in prompt
+    assert PROTOCOL_VERSION not in prompt
+    assert prompt.selection_audit['protocol']==PROTOCOL_VERSION
     assert "Текст входа" in prompt
     assert "явное упоминание" in prompt
     assert "declared C statement" in prompt

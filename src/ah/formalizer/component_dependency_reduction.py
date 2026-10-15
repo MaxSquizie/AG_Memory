@@ -42,7 +42,10 @@ def reduce(state,release,selector,region,tokens,p,pv,roles,nominals,groups,cfg,*
         choices=pool[tid]
         from .morphology_domain import proposed, license_use
         needs_license=any(proposed(o.get(field,{})) for o in choices.values() for field in ('morph','head_morph'))
-        if len(choices)==1 and not needs_license:
+        # Case compatibility and a nearby comma admit these attachments; they
+        # do not establish a noun complement or an explanatory description.
+        needs_attachment=any(o['kind'] in {'APPOSITION','CASE_DEPENDENCY'} for o in choices.values())
+        if len(choices)==1 and not needs_license and not needs_attachment:
             cid=next(iter(choices));ground='D'
         else:
             if len(choices)>cfg['max_candidates'] or region.source_range[1]-region.source_range[0]>cfg['context_chars']:

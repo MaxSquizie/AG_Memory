@@ -91,6 +91,7 @@ DIAGNOSTICS = {'COMPOSITION_SCOPE_BOUNDARY_CHANGED':'При объединени
     'COMPOSITION_DISPATCH_INCOMPLETE':'Диспетчер достиг предела согласования зависимостей. Разбор не завершён.',
     'COMPOSITION_CYCLE':'Задача требует собственный ещё не рассчитанный результат. Цикл не разрешает выбрать ответ.',
     'STRUCTURAL_TASK_UNRESOLVED':'Тип связи, границы или вложенные части ещё не согласованы. Отдельные части не записаны как самостоятельные факты.',
+    'STRUCTURAL_CONTENT_UNCOVERED':'Вне частей сообщения остались значимые слова. Они не имеют служебного чтения и не могут быть отброшены как вводящее выражение.',
     'STRUCTURAL_TASK_SEARCH_INCOMPLETE':'Достигнут предел поиска или размера контекста. Это не означает отсутствия подходящего разбора.',
     'STRUCTURAL_REVISION_NO_PROGRESS':'Пересмотр повторил те же варианты и ту же ошибку. Повторный поиск остановлен; разбор остаётся неразрешённым.',
     'COMPOSITION_PRODUCER_PENDING':'Один из источников разбора ещё не разрешён. Готовый вариант другого источника не признан единственным.',
@@ -323,6 +324,11 @@ class ReadableInspection:
         if text.startswith('A complete clause:'):return 'Полное высказывание: сказуемое описывает участника; явный глагол может отсутствовать.'
         nominal=re.search(r'noun predicate: «(.*?)» describes what «(.*?)» is',text)
         if nominal:return 'Именное сказуемое «'+nominal[1]+'» характеризует «'+nominal[2]+'». Это предложенный разбор; его соответствие тексту проверяется пробой.'
+        if '; impersonal state;' in text:
+            head=text.split('; impersonal state;')[0]
+            for k,v in ROLES.items():head=head.replace(k+'=',v+': ')
+            head=re.sub(r'\[(\w+)\]',lambda m:'('+MORPH.get(m[1],m[1])+')',head)
+            return head+'. Безличное состояние: участник в дательном падеже испытывает его. Отдельное подлежащее не добавляется. Это вариант для проверки пробой.'
         if text.startswith('Revise the provisional'):return 'Пересмотреть предварительный тип связи и границы с учётом требований вложенных частей.'
         if text.startswith('Keep the whole area unresolved'):return 'Оставить весь фрагмент неразрешённым: подтверждённого исправления нет.'
         if text.startswith('No agreement governor'):return 'Вложенная часть имеет собственное сказуемое и самостоятельное согласование.'
@@ -502,6 +508,11 @@ class ReadableInspection:
                     if f.get('predicate_token_ref')==r['source_ref']:out+='<p>'+self.link(fid,'Разбор «'+f.get('anchor_span','')+'»: роли и решения')+'</p>'
         elif c=='Фреймы':
             sem=r.get('semantic',{});out+=paragraph('Этот вариант не завершён и не должен считаться готовым фактом.' if sem.get('structural_unresolved') else 'Это промежуточный разбор действия или свойства. Фактическую запись смотрите в обзоре.')
+            if sem.get('impersonal_predication'):
+                out+=paragraph('Безличное состояние: участник в дательном падеже испытывает его. Отдельное подлежащее не добавляется.')
+            if sem.get('control_binding'):
+                binding=sem['control_binding']
+                out+='<p>Участник инфинитива взят из '+self.link(binding['frame_ref'],'родительского действия')+'. Его исходный падеж сохранён; роль в дочернем действии: '+esc(ROLES.get(binding.get('child_role'),binding.get('child_role','не указана')))+'.</p>'
             out+=table(['Роль','Участник','В тексте','Морфология'],self.frame_roles(r))
             for role in sem.get('missing_required_roles',()):out+=paragraph('Не заполнена обязательная роль: '+ROLES.get(role,role))
             for tree in sem.get('operator_forest',()):out+='<h3>Область действия</h3>'+self.formula(tree)
@@ -531,6 +542,14 @@ class ReadableInspection:
         elif c=='Привязки':out+=paragraph('Установленная ссылка: '+self.target(r.get('target')))
         elif c=='Трасса' and r.get('kind')=='DEFERRED_CLAUSE_BOUNDARY':
             out+=paragraph('Возможна вложенная часть высказывания. Разбиение на самостоятельные предложения отложено: сначала нужно подтвердить владельца и полные границы содержания отдельной пробой.')
+        elif c=='Трасса' and r.get('kind')=='STRUCTURAL_PARTITION_COVERAGE':
+            out+=paragraph('Разбиение потеряло значимые слова: «'+' '.join(self.word(t) for t in r.get('uncovered_token_refs',()))+
+                '». Они не могут исчезнуть во вводящем выражении. Нужно расширить родительскую часть или пересмотреть связь; запись вложенной части отдельно заблокирована.')
+        elif c=='Трасса' and r.get('kind')=='DEPENDENCY_REJECTED':
+            out+=paragraph('Этот вариант зависимостей слова «'+self.word(r.get('predicate_ref'))+'» отклонён: '+
+                ('проба не подтвердила ни одного прикрепления.' if r.get('reason')=='NO_LICENSED_ATTACHMENT' else
+                 'грамматические ограничения не оставили допустимых вариантов для «'+' '.join(self.word(t) for t in r.get('empty_domains',()))+'».')+
+                ' Это результат проверки отдельного варианта, а не вывод о невозможности разобрать всё предложение.')
         elif c=='Трасса' and r.get('kind')=='STRUCTURAL_TASK':
             out+=paragraph(QUESTIONS.get(r.get('slot'),'Выбор части разбора'))
             reasons={'CONTEXT_LIMIT':'Фрагмент превышает допустимый размер контекста. Проба не вызывалась.',

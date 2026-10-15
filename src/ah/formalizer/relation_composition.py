@@ -61,6 +61,19 @@ def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof
     punctuation=[t for t in markers if all(unicodedata.category(c).startswith('P') for c in t.span)]
     punctuation_refs={t.token_id for t in punctuation}
     links=[t for t in markers if t.token_id not in punctuation_refs]
+    if kind=='CONTENT':
+        # CONTENT already has a lexical owner inside the parent. Its separator
+        # cannot stand in for another discarded predicate or participant.
+        # Ambiguous function readings remain available; no spelling is a license.
+        unowned=[t for t in links if not any(v.pos in {'CONJ','PRCL','PREP','ADVB','INTJ'} for v in t.variants)]
+        if unowned:
+            state.syntax_trace.append({'kind':'STRUCTURAL_PARTITION_COVERAGE','region_ref':region.region_id,
+                'source_range':list(region.source_range),'relation':kind,
+                'uncovered_token_refs':[t.token_id for t in unowned],
+                'operands':[[t.token_id for t in g] for g in groups],
+                'reason':'LEXICAL_CONTENT_OUTSIDE_PARTS'})
+            state.diag('STRUCTURAL_CONTENT_UNCOVERED',region.region_id)
+            return None
     names=(['parent clause with a content slot', 'content filling that slot'] if kind=='CONTENT' else
            ['condition','consequence'] if kind in {'IMPLIES','COUNTERFACTUAL'} else
            ['restriction and whole body'] if kind in {'FORALL','EXISTS'} else
@@ -96,14 +109,15 @@ def function_ownership(state,release,selector,region,cfg,kind,groups):
     while True:
         possible=[t for group in groups for t in group if any(v.pos in {'PRCL','CONJ'} for v in t.variants)]
         if not possible:return groups
-        options=[{'candidate_id':'KEEP_ALL','label':'Keep all listed words inside their parts: '+
+        options=[{'candidate_id':'KEEP_ALL','label':'Keep all listed words inside their parts; none expresses the chosen outer relation: '+
             ', '.join('«'+t.span+'» @'+str(t.start) for t in possible)}]
         options.extend({'candidate_id':t.token_id,'token_ref':t.token_id,
             'label':'Outer relation owns «'+t.span+'» @'+str(t.start)+'; remove this occurrence from its part'} for t in possible)
         selected=choose(state,release,selector,region,cfg,'structural_function_owner',options,
             kind+' ('+RELATIONS[kind]+'). Current parts: '+
             '; '.join(str(i+1)+': «'+' '.join(t.span for t in group)+'»' for i,group in enumerate(groups))+'. '+
-            'Which listed word expresses the relation BETWEEN these parts? Select that occurrence to move it out of its part. '
+            'Which listed occurrence expresses the chosen OUTER relation, including an occurrence at the beginning of either part? '
+            'Select that occurrence to move it out of its part. '
             +('Words introducing the condition or consequence belong to this outer conditional relation. '
               if kind in {'IMPLIES','COUNTERFACTUAL'} else '')+
             'Keep all only if none expresses the outer relation. Negation, modality and quantification of an inner proposition stay inside it.')
@@ -264,7 +278,9 @@ def content(state,release,selector,region,tokens,cfg,request,compose_child,proof
     body=chosen[0];body_ids={t.token_id for t in body}
     rest=[t for t in tokens if t.token_id not in body_ids]
     parent_span=span(state,release,selector,region,rest,cfg,'structural_parent',
-        'Select the lexical parent clause, including its participants but excluding the content introducer.')
+        'Select ALL remaining parent content, including its participants and any still nested parent clauses. '
+        'Exclude only the content introducer and enclosing punctuation. '
+        'Do not omit an earlier speaker or predicate: it must remain in this part and be analysed recursively.')
     if not parent_span:return block(state,region)
     parent=parent_span[0]
     if not confirm_partition(state,release,selector,region,tokens,cfg,'CONTENT',[parent,body],proof):return block(state,region)

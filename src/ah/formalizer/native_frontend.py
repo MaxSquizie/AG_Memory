@@ -588,7 +588,7 @@ def _propose(state,selector,release):
     state.frames.extend(fs)
 
 
-def _bindings(frame,evidence,valency,extra_gaps=()):
+def _bindings(frame,evidence,valency,extra_gaps=(),*,parents=None):
     roles=valency.get('roles',())
     request=frame.semantic.get('query_request',{})
     gaps=set(request.get('requested_roles',())) | ({request['count_role']} if request.get('count_role') else set()) | set(extra_gaps)
@@ -610,6 +610,11 @@ def _bindings(frame,evidence,valency,extra_gaps=()):
         from .relative_pronoun import role_readings
         readings=role_readings(frame,tid,evidence,_frame_variants(frame,e))
         allowed=[r['role_id'] for r in roles if any(set(r.get('allowed_cases',())) & set(v.cases) for v in readings) and (not r.get('allowed_preps') or prep in r['allowed_preps'])]
+        from .control_arguments import inherited_role
+        controlled_role=inherited_role(frame,tid,parents)
+        if controlled_role:
+            allowed=[r['role_id'] for r in roles if r['role_id']==controlled_role and
+                     set(r.get('argument_types',()))=={'ENTITY'} and not r.get('allowed_preps')]
         from .quantifier_composition import restriction_role
         binder_role=restriction_role(frame,tid)
         if binder_role:
@@ -824,6 +829,7 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
     reference_slots=prepare_references(state,release)
     evidence={e.token_id:e for e in state.evidence}
     candidate_specs={}
+    parent_frames={f.frame_id:f for f in state.frames}
     for frame in state.frames:
         from .structural_tasks import licensed as task_licensed
         if any(child.get('structural_license') and not task_licensed(state,child['structural_license'],
@@ -911,7 +917,8 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
                 from .spatial_references import for_sense as spatial_slot
                 spatial=spatial_slot(frame,s['sense_id'])
                 spatial_roles=(spatial['rule']['role_id'],) if spatial else ()
-                try: bindings=_bindings(frame,evidence,v,(*extra,*implicit_roles,*spatial_roles))
+                try: bindings=_bindings(frame,evidence,v,(*extra,*implicit_roles,*spatial_roles),
+                                        parents=parent_frames)
                 except ValueError:
                     frame.semantic['binding_budget_exhausted']=True; state.diag('COMPUTATION_LIMIT',frame.frame_id); continue
                 for bs in bindings:

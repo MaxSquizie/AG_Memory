@@ -103,8 +103,9 @@ def test_optional_location_is_not_invented(tmp_path,monkeypatch):
 
 def test_temporal_words_cannot_become_quality_predicates(tmp_path,monkeypatch):
     result,_=run(tmp_path,monkeypatch,'Весь вчерашний день иван — врач.',
-        relation('LEXICAL')+[('structural_revision','DEFER')])
-    # Nominal predication is still unsupported here; no false OPEN:весь fact.
+        relation('LEXICAL'))
+    # The nominal predicate is reachable; the lower-case name is unresolved.
+    # Neither outcome licenses a false OPEN:весь fact.
     assert result['assertions']['ah']==[]
     frames=result['runtime']['ir']['frames']
     assert not any(f['anchor_span'].lower() in {'весь','вчерашний'} and

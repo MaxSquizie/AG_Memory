@@ -37,6 +37,22 @@ def test_nominal_predication_choices_are_explained_in_russian():
     assert 'предложенный разбор' in candidate and 'NOUN' not in candidate
 
 
+def test_lost_parent_and_impersonal_state_are_explained_without_machine_fields():
+    data=sample();data['state']['syntax_trace']=[
+        {'kind':'STRUCTURAL_PARTITION_COVERAGE','uncovered_token_refs':['student','read']},
+        {'kind':'DEPENDENCY_REJECTED','predicate_ref':'read','empty_domains':['student']}]
+    idx=Inspection(data);reader=ReadableInspection(idx)
+    html=reader.explain(idx.by_ref['trace:0'])
+    assert 'Разбиение потеряло значимые слова: «студент читает»' in html
+    assert 'запись вложенной части отдельно заблокирована' in html
+    assert 'uncovered_token_refs' not in html
+    rejected=reader.explain(idx.by_ref['trace:1'])
+    assert 'грамматические ограничения' in rejected and 'отдельного варианта' in rejected
+    label=reader.choice_text('холодно [ADVB]; EXPERIENCER=Мне; impersonal state; dative participant experiences it; no separate grammatical subject')
+    assert 'Безличное состояние' in label and 'дательном падеже' in label
+    assert 'ADVB' not in label and 'impersonal' not in label
+
+
 def test_structural_tasks_explain_frontier_parts_and_limit_without_json():
     data=sample();data['state']['syntax_trace']=[
         {'kind':'STRUCTURAL_TASK','slot':'structural_partition','decision_ref':'partition',
