@@ -56,13 +56,16 @@ def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nomin
             roles=[r for r in roles if r['role_id'] not in set(supplied)|reserved
                    and not (controlled and r['role_id']==cfg['subject_role'])]
             reduction=None
+            # Released time syntax owns its colon and numeric readings; these
+            # are not apposition markers or attributes of a nominal argument.
+            dependency_tokens=[e for e in tokens if e.token_id not in temporal]
             from .morphology_domain import proposed
             needs_reduction=any(proposed(_morph(v)) for e in nominals for v in e.variants) or bool(qualitative_groups) or len(nominals)>3 or cfg.get('dependency_reduction') and (any(
                 e.token_id not in groups and e.token_id not in grouped and any(v.pos in {'NOUN','NPRO'} and set(v.cases)&({'gen'}|set(cfg.get('nominal_dependency_cases',()))) for v in e.variants)
-                for e in nominals) or any(e.span in cfg.get('apposition_markers',()) for e in tokens))
+                for e in nominals) or any(e.span in cfg.get('apposition_markers',()) for e in dependency_tokens))
             if needs_reduction:
                 from .component_dependency_reduction import reduce
-                reduction=reduce(state,release,selector,region,tokens,p,agreement,roles,nominals,groups,cfg,quantities=qualitative_groups,nominal_groups=nominal_groups)
+                reduction=reduce(state,release,selector,region,dependency_tokens,p,agreement,roles,nominals,groups,cfg,quantities=qualitative_groups,nominal_groups=nominal_groups)
                 if reduction is None: continue
             variants = [role_choices(e,roles,agreement,cfg['subject_role'],groups.get(e.token_id),coordinated=e.token_id in grouped) for e in nominals]
             if reduction is not None:

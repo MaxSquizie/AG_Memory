@@ -30,7 +30,8 @@ def _live_probe(state, selector, release, key, slot, options, context, source_ra
         'If context cannot discriminate and no applicable declared preference is supplied, answer ?. '
         'An explicitly supplied preference may resolve ordinary pragmatic underspecification; '
         'it never overrides incompatible grammar, missing candidate coverage or a semantic scope barrier. '
-        'Do not invent context, identities or facts.\n'+
+        'Do not invent context, identities or facts. Interpret what the SOURCE SAYS, not whether it is true in memory. '
+        'An UNKNOWN memory lookup does not make explicit source syntax unknown.\n'+
         ((question+'\n\n') if question else '')+prompt)
     try:
         d.last_prompt = prompt

@@ -214,7 +214,9 @@ def test_all_producers_remain_reachable_for_complete_grammar(tmp_path,monkeypatc
     traces=result['runtime']['ir']['syntax_trace']
     both=[r for r in traces if r.get('kind')=='COMPOSITION_PRODUCERS']
     assert both and all(x['frames'] for x in both[-1]['sources'])
-    assert any(slot=='child_slot' for slot,_ in script.calls)
+    assert not any(slot=='child_slot' for slot,_ in script.calls)
+    equal=[r for r in traces if r.get('kind')=='COMPOSITION_EQUIVALENT_SOURCES']
+    assert equal and {s['source'] for s in equal[-1]['sources']}=={'GRAMMAR','COMPONENT'}
     assert result['assertions']['ah']==[atom('ARRIVE','ivan')]
 
 

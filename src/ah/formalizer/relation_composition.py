@@ -12,7 +12,7 @@ from .structural_tasks import choose,span
 
 
 RELATIONS={
-    'LEXICAL':'Ordinary lexical predication or nominal description; no enclosing logical relation',
+    'LEXICAL':'One lexical predication or nominal description; no dependent proposition, quotation, logical operator or quantifier',
     'NOT':'Negation of a proposition (not lexical opposition)',
     'POSSIBLE':'Possibility or ability; does not assert occurrence',
     'NECESSARY':'Necessity or obligation; preserve its scope',
@@ -24,7 +24,7 @@ RELATIONS={
     'BEFORE':'First event/proposition occurs before the second',
     'AFTER':'First event/proposition occurs after the second',
     'DURING':'First event/proposition occurs during the second',
-    'CONTENT':'A lexical parent has dependent propositional content, including controlled infinitives',
+    'CONTENT':'A predicate has another clause as its content: reported speech, thought, quoted speech or a controlled infinitive',
     'FORALL':'Universal nonnumeric quantification over a restricted variable',
     'EXISTS':'Existential nonnumeric quantification; no particular witness identity',
     'QUERY':'A question about content; no assertion of the content',
@@ -115,7 +115,8 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child):
     options=[{'candidate_id':k,'relation':k,'label':v} for k,v in RELATIONS.items()]
     result=choose(state,release,selector,region,cfg,'structural_relation',options,
         'Identify the OUTERMOST relation of this complete source area. Consider paraphrases and implicit relations, '
-        'not marker spelling. Ordinary lexical predicates remain LEXICAL. A selected type is provisional '
+        'not marker spelling. Use CONTENT when a predicate takes another proposition as content; '
+        'the fact that the parent itself is a lexical verb does not make the WHOLE area LEXICAL. A selected type is provisional '
         'until its source boundaries, slots, morphology and children agree. Numeric quantification is deferred.')
     if not result:return block(state,region)
     option,proof=result;kind=option['relation']
@@ -164,7 +165,10 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child):
         # Unary function material can be internal ("Ivan NOT arrived"). The
         # complement owns every remaining token, not just a following suffix.
         chosen=span(state,release,selector,region,tokens,cfg,'structural_introducer',
-            kind+': select only the complete function/introducer material of this outer relation.')
+            kind+': select only the complete function/introducer material of this outer relation. '
+            'Include the full linking expression and any conjunction introducing its content. '
+            'Exclude the content proposition, its subject and predicate. Separating commas may be included; '
+            'do not end early just because the first word already signals the relation.')
         if not chosen:return block(state,region)
         markers=chosen[0];marker_refs={t.token_id for t in markers}
         owned=[t for t in tokens if t.token_id not in marker_refs]
@@ -183,7 +187,10 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child):
             selected=choose(state,release,selector,region,cfg,'structural_governor',
                 [{'candidate_id':'INDEPENDENT','label':'No agreement governor: the child has independent predication'},
                  *[{'candidate_id':t.token_id,'token_ref':t.token_id,'label':'Agreement/controller anchor «'+t.span+'»'} for t in governors]],
-                'Select the finite morphological governor of this modal child; other modal layers belong to that child.')
+                'Select the finite morphological governor of this modal child; other modal layers belong to that child. '
+                'Choose INDEPENDENT when the content has its own finite predication and the outer modal expression '
+                'does not supply its subject agreement. A modal verb or short adjective governing an infinitive '
+                'can supply agreement; a possible morphological reading alone is not such a dependency.')
             if not selected:return block(state,region)
             if selected[0]['candidate_id']!='INDEPENDENT':
                 slot=replace(slot,agreement_source=next(t for t in governors if t.token_id==selected[0]['token_ref']))
@@ -203,7 +210,9 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child):
 
 def content(state,release,selector,region,tokens,cfg,request,compose_child,proof):
     chosen=span(state,release,selector,region,tokens,cfg,'structural_content',
-        'Select the complete dependent proposition, excluding its introducing function words and its parent predicate.')
+        'Select the complete dependent proposition: what is said, thought, intended or otherwise taken as content. '
+        'Exclude the parent predicate and its participants, the introducing conjunction, colon, and enclosing '
+        'quotation marks. Start at the first word INSIDE quoted content; retain any operators inside that content.')
     if not chosen:return block(state,region)
     body=chosen[0];body_ids={t.token_id for t in body}
     rest=[t for t in tokens if t.token_id not in body_ids]

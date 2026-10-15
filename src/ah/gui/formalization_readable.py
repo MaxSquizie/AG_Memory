@@ -66,6 +66,7 @@ TRACE = {'FEATURE_CHECK_BATCH':'Проверка грамматических п
     'STRUCTURAL_TASK':'Выбор связи или границы по исходному тексту',
     'STRUCTURAL_RELATION_COMPOSED':'Связь собрана из согласованных частей',
     'COMPOSITION_PRODUCERS':'Проверка всех источников разбора',
+    'COMPOSITION_EQUIVALENT_SOURCES':'Совпадающие результаты источников',
     'ATTITUDE_COMPOSITION':'Вложенное содержание высказывания',
     'DEFERRED_CLAUSE_BOUNDARY':'Разбиение отложено до проверки вложенности',
     'COMPOSITION_SOURCE_DOMAIN':'Источники вариантов разбора', 'SCOPE_DOMAIN':'Варианты области действия',
@@ -512,6 +513,12 @@ class ReadableInspection:
             out+=paragraph('Порция: '+str(r.get('page',0)+1)+'. Рассмотрено вариантов: '+str(r.get('examined',0))+'.')
             if r.get('enumeration_complete') is False:out+=paragraph('Остались непоказанные варианты. Локальный выбор не означает полного перебора.')
             if r.get('alternatives'):out+=table(['Вариант','Выбор'],[[esc(self.task_choice(v)),'Выбран' if v.get('candidate_id')==r.get('selected') else 'Не выбран'] for v in r['alternatives']])
+        elif c=='Трасса' and r.get('kind')=='COMPOSITION_EQUIVALENT_SOURCES':
+            out+=paragraph('Грамматический и компонентный разбор дали одну и ту же простую предикацию. '
+                           'Совпали исходные слова, роли, морфологические чтения и допустимые валентные привязки. '
+                           'Выбор источника не требует вопроса модели; происхождение обоих вариантов сохранено.')
+            out+=table(['Предикат','Роли'],[[esc(self.word(r.get('predicate_ref'))),
+                esc('; '.join(role+' = '+self.word(tid) for tid,role in r.get('roles',{}).items()))]])
         elif c=='Трасса' and r.get('kind')=='COMPOSITION_PRODUCERS':
             out+=paragraph('Проверены все применимые источники. Наличие грамматического разбора не отключает компонентный поиск.')
             out+=table(['Источник','Кандидатов'],[[{'GRAMMAR':'Грамматика','COMPONENT':'Компонентная композиция'}.get(x['source'],x['source']),str(x['frames'])] for x in r.get('sources',())])
@@ -550,7 +557,7 @@ class ReadableInspection:
 
     def report(self,notes):
         body='<h1>Проверка формализации</h1><h2>Исходный текст</h2><pre style="white-space:pre-wrap">'+esc(self.index.text)+'</pre>'+self.overview()
-        entries=[e for e in self.index.entries if e.category in {'Решения','Границы условий','Диагностика','Привязки'} or e.category=='Трасса' and e.record.get('kind') in {'STRUCTURAL_TASK','STRUCTURAL_RELATION_COMPOSED','COMPOSITION_PRODUCERS'}]
+        entries=[e for e in self.index.entries if e.category in {'Решения','Границы условий','Диагностика','Привязки'} or e.category=='Трасса' and e.record.get('kind') in {'STRUCTURAL_TASK','STRUCTURAL_RELATION_COMPOSED','COMPOSITION_PRODUCERS','COMPOSITION_EQUIVALENT_SOURCES'}]
         for e in entries[:1000]:body+='<hr>'+self.explain(e)
         if len(entries)>1000:body+=paragraph('Отчёт ограничен первыми 1000 записями. Полный снимок сохраните отдельно для повторного открытия.')
         body+='<h2>Замечания проверяющего</h2>'+table(['Оценка','Фрагмент','Комментарий'],[[esc(n.get('verdict','')),esc(self.excerpt(n.get('source_range'))),esc(n.get('comment',''))] for n in notes])

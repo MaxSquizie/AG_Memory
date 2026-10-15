@@ -17,7 +17,14 @@ def allowed(state, release, region, tokens, *, conjunction=False, inside_attitud
     protected = protected_intervals(state.text)
     if any(a <= t.start < b for t in tokens for a, b in protected
            if not (inside_attitude and a<=region.source_range[0] and region.source_range[1]<=b)): return False
-    if any(t.span in {'«', '»', '"', '(', ')', '?', ':'} for t in tokens): return False
+    from .clock_ranges import boundary_spans
+    temporal_spans=[(region.source_range[0]+a,region.source_range[0]+b)
+        for rule in release.entries('TemporalRules') for m in re.finditer(rule['pattern'],raw,re.I)
+        for a,b in boundary_spans(rule,m)]
+    # A colon owned by released clock syntax is not a speech/content boundary.
+    # Temporal validation still checks the value and anchoring downstream.
+    if any(t.span in {'«', '»', '"', '(', ')', '?', ':'} and
+           not (t.span==':' and any(a<=t.start and t.end<=b for a,b in temporal_spans)) for t in tokens): return False
     if literal_scope:return True
     clocks = consumed_scope_spans(raw, state.observation, release)
     return not any(not (conjunction and r.get('operator') == 'AND')

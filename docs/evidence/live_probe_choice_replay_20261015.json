@@ -1,0 +1,738 @@
+{
+  "kind": "CONTROLLED_REPLAY_NOT_LIVE_EVALUATION",
+  "cases": [
+    {
+      "case_id": "LANG-00-0-bare",
+      "text": "Иван вошёл.",
+      "matches_recorded_assertion_and_time_gold": true,
+      "old_calls": 2,
+      "new_calls": 1,
+      "unavailable_answers": [],
+      "diagnostics": []
+    },
+    {
+      "case_id": "LANG-00-0-before_point",
+      "text": "В 09:00 иван вошёл.",
+      "matches_recorded_assertion_and_time_gold": true,
+      "old_calls": 2,
+      "new_calls": 1,
+      "unavailable_answers": [],
+      "diagnostics": []
+    },
+    {
+      "case_id": "LANG-00-1-bare",
+      "text": "Пётр вошёл.",
+      "matches_recorded_assertion_and_time_gold": true,
+      "old_calls": 2,
+      "new_calls": 1,
+      "unavailable_answers": [],
+      "diagnostics": []
+    },
+    {
+      "case_id": "LANG-00-1-before_point",
+      "text": "В 09:00 пётр вошёл.",
+      "matches_recorded_assertion_and_time_gold": true,
+      "old_calls": 2,
+      "new_calls": 1,
+      "unavailable_answers": [],
+      "diagnostics": []
+    },
+    {
+      "case_id": "LANG-00-2-bare",
+      "text": "Сергей вошёл.",
+      "matches_recorded_assertion_and_time_gold": true,
+      "old_calls": 2,
+      "new_calls": 1,
+      "unavailable_answers": [],
+      "diagnostics": []
+    },
+    {
+      "case_id": "LANG-00-2-before_point",
+      "text": "В 09:00 сергей вошёл.",
+      "matches_recorded_assertion_and_time_gold": true,
+      "old_calls": 2,
+      "new_calls": 1,
+      "unavailable_answers": [],
+      "diagnostics": []
+    },
+    {
+      "case_id": "LANG-00-3-bare",
+      "text": "Алексей вошёл.",
+      "matches_recorded_assertion_and_time_gold": true,
+      "old_calls": 2,
+      "new_calls": 1,
+      "unavailable_answers": [],
+      "diagnostics": []
+    },
+    {
+      "case_id": "LANG-00-3-before_point",
+      "text": "В 09:00 алексей вошёл.",
+      "matches_recorded_assertion_and_time_gold": true,
+      "old_calls": 2,
+      "new_calls": 1,
+      "unavailable_answers": [],
+      "diagnostics": []
+    },
+    {
+      "case_id": "LANG-01-0-bare",
+      "text": "Вошёл Иван.",
+      "matches_recorded_assertion_and_time_gold": true,
+      "old_calls": 2,
+      "new_calls": 1,
+      "unavailable_answers": [],
+      "diagnostics": []
+    },
+    {
+      "case_id": "LANG-01-0-before_point",
+      "text": "В 09:00 вошёл Иван.",
+      "matches_recorded_assertion_and_time_gold": true,
+      "old_calls": 2,
+      "new_calls": 1,
+      "unavailable_answers": [],
+      "diagnostics": []
+    },
+    {
+      "case_id": "LANG-01-1-bare",
+      "text": "Вошёл Пётр.",
+      "matches_recorded_assertion_and_time_gold": true,
+      "old_calls": 2,
+      "new_calls": 1,
+      "unavailable_answers": [],
+      "diagnostics": []
+    },
+    {
+      "case_id": "LANG-01-1-before_point",
+      "text": "В 09:00 вошёл Пётр.",
+      "matches_recorded_assertion_and_time_gold": true,
+      "old_calls": 2,
+      "new_calls": 1,
+      "unavailable_answers": [],
+      "diagnostics": []
+    },
+    {
+      "case_id": "LANG-01-2-bare",
+      "text": "Вошёл Сергей.",
+      "matches_recorded_assertion_and_time_gold": true,
+      "old_calls": 2,
+      "new_calls": 1,
+      "unavailable_answers": [],
+      "diagnostics": []
+    },
+    {
+      "case_id": "LANG-01-2-before_point",
+      "text": "В 09:00 вошёл Сергей.",
+      "matches_recorded_assertion_and_time_gold": true,
+      "old_calls": 2,
+      "new_calls": 1,
+      "unavailable_answers": [],
+      "diagnostics": []
+    },
+    {
+      "case_id": "LANG-01-3-bare",
+      "text": "Вошёл Алексей.",
+      "matches_recorded_assertion_and_time_gold": true,
+      "old_calls": 2,
+      "new_calls": 1,
+      "unavailable_answers": [],
+      "diagnostics": []
+    },
+    {
+      "case_id": "LANG-01-3-before_point",
+      "text": "В 09:00 вошёл Алексей.",
+      "matches_recorded_assertion_and_time_gold": true,
+      "old_calls": 2,
+      "new_calls": 1,
+      "unavailable_answers": [],
+      "diagnostics": []
+    },
+    {
+      "case_id": "LANG-02-0-before_point",
+      "text": "В 09:00 иван читает книгу.",
+      "matches_recorded_assertion_and_time_gold": false,
+      "old_calls": 2,
+      "new_calls": 2,
+      "unavailable_answers": [
+        "nominal_dependency"
+      ],
+      "diagnostics": [
+        "COMPONENT_DEPENDENCY_UNRESOLVED",
+        "STRUCTURE_NOT_COVERED"
+      ]
+    },
+    {
+      "case_id": "LANG-02-1-before_point",
+      "text": "В 09:00 пётр читает книгу.",
+      "matches_recorded_assertion_and_time_gold": false,
+      "old_calls": 2,
+      "new_calls": 2,
+      "unavailable_answers": [
+        "nominal_dependency"
+      ],
+      "diagnostics": [
+        "COMPONENT_DEPENDENCY_UNRESOLVED",
+        "STRUCTURE_NOT_COVERED"
+      ]
+    },
+    {
+      "case_id": "LANG-02-2-before_point",
+      "text": "В 09:00 сергей читает книгу.",
+      "matches_recorded_assertion_and_time_gold": false,
+      "old_calls": 2,
+      "new_calls": 2,
+      "unavailable_answers": [
+        "nominal_dependency"
+      ],
+      "diagnostics": [
+        "COMPONENT_DEPENDENCY_UNRESOLVED",
+        "STRUCTURE_NOT_COVERED"
+      ]
+    },
+    {
+      "case_id": "LANG-02-3-before_point",
+      "text": "В 09:00 алексей читает книгу.",
+      "matches_recorded_assertion_and_time_gold": false,
+      "old_calls": 2,
+      "new_calls": 2,
+      "unavailable_answers": [
+        "nominal_dependency"
+      ],
+      "diagnostics": [
+        "COMPONENT_DEPENDENCY_UNRESOLVED",
+        "STRUCTURE_NOT_COVERED"
+      ]
+    },
+    {
+      "case_id": "LANG-03-0-before_point",
+      "text": "В 09:00 книгу читает Иван.",
+      "matches_recorded_assertion_and_time_gold": false,
+      "old_calls": 2,
+      "new_calls": 2,
+      "unavailable_answers": [
+        "nominal_dependency"
+      ],
+      "diagnostics": [
+        "COMPONENT_DEPENDENCY_UNRESOLVED",
+        "STRUCTURE_NOT_COVERED"
+      ]
+    },
+    {
+      "case_id": "LANG-03-1-before_point",
+      "text": "В 09:00 книгу читает Пётр.",
+      "matches_recorded_assertion_and_time_gold": false,
+      "old_calls": 2,
+      "new_calls": 2,
+      "unavailable_answers": [
+        "nominal_dependency"
+      ],
+      "diagnostics": [
+        "COMPONENT_DEPENDENCY_UNRESOLVED",
+        "STRUCTURE_NOT_COVERED"
+      ]
+    },
+    {
+      "case_id": "LANG-03-2-before_point",
+      "text": "В 09:00 книгу читает Сергей.",
+      "matches_recorded_assertion_and_time_gold": false,
+      "old_calls": 2,
+      "new_calls": 2,
+      "unavailable_answers": [
+        "nominal_dependency"
+      ],
+      "diagnostics": [
+        "COMPONENT_DEPENDENCY_UNRESOLVED",
+        "STRUCTURE_NOT_COVERED"
+      ]
+    },
+    {
+      "case_id": "LANG-03-3-before_point",
+      "text": "В 09:00 книгу читает Алексей.",
+      "matches_recorded_assertion_and_time_gold": false,
+      "old_calls": 2,
+      "new_calls": 2,
+      "unavailable_answers": [
+        "nominal_dependency"
+      ],
+      "diagnostics": [
+        "COMPONENT_DEPENDENCY_UNRESOLVED",
+        "STRUCTURE_NOT_COVERED"
+      ]
+    },
+    {
+      "case_id": "LANG-04-0-before_point",
+      "text": "В 09:00 иван передал книгу Марии.",
+      "matches_recorded_assertion_and_time_gold": false,
+      "old_calls": 2,
+      "new_calls": 3,
+      "unavailable_answers": [
+        "nominal_dependency",
+        "nominal_dependency"
+      ],
+      "diagnostics": [
+        "COMPONENT_DEPENDENCY_UNRESOLVED",
+        "STRUCTURE_NOT_COVERED"
+      ]
+    },
+    {
+      "case_id": "LANG-04-1-before_point",
+      "text": "В 09:00 пётр передал книгу Марии.",
+      "matches_recorded_assertion_and_time_gold": false,
+      "old_calls": 2,
+      "new_calls": 3,
+      "unavailable_answers": [
+        "nominal_dependency",
+        "nominal_dependency"
+      ],
+      "diagnostics": [
+        "COMPONENT_DEPENDENCY_UNRESOLVED",
+        "STRUCTURE_NOT_COVERED"
+      ]
+    },
+    {
+      "case_id": "LANG-04-2-before_point",
+      "text": "В 09:00 сергей передал книгу Марии.",
+      "matches_recorded_assertion_and_time_gold": false,
+      "old_calls": 2,
+      "new_calls": 3,
+      "unavailable_answers": [
+        "nominal_dependency",
+        "nominal_dependency"
+      ],
+      "diagnostics": [
+        "COMPONENT_DEPENDENCY_UNRESOLVED",
+        "STRUCTURE_NOT_COVERED"
+      ]
+    },
+    {
+      "case_id": "LANG-04-3-before_point",
+      "text": "В 09:00 алексей передал книгу Марии.",
+      "matches_recorded_assertion_and_time_gold": false,
+      "old_calls": 2,
+      "new_calls": 3,
+      "unavailable_answers": [
+        "nominal_dependency",
+        "nominal_dependency"
+      ],
+      "diagnostics": [
+        "COMPONENT_DEPENDENCY_UNRESOLVED",
+        "STRUCTURE_NOT_COVERED"
+      ]
+    },
+    {
+      "case_id": "LANG-05-0-before_point",
+      "text": "В 09:00 марии Иван передал книгу.",
+      "matches_recorded_assertion_and_time_gold": false,
+      "old_calls": 2,
+      "new_calls": 2,
+      "unavailable_answers": [
+        "nominal_attachment"
+      ],
+      "diagnostics": [
+        "QUALITATIVE_QUANTITY_UNRESOLVED",
+        "STRUCTURE_NOT_COVERED"
+      ]
+    },
+    {
+      "case_id": "LANG-05-1-before_point",
+      "text": "В 09:00 марии Пётр передал книгу.",
+      "matches_recorded_assertion_and_time_gold": false,
+      "old_calls": 2,
+      "new_calls": 2,
+      "unavailable_answers": [
+        "nominal_attachment"
+      ],
+      "diagnostics": [
+        "QUALITATIVE_QUANTITY_UNRESOLVED",
+        "STRUCTURE_NOT_COVERED"
+      ]
+    },
+    {
+      "case_id": "LANG-05-2-before_point",
+      "text": "В 09:00 марии Сергей передал книгу.",
+      "matches_recorded_assertion_and_time_gold": false,
+      "old_calls": 2,
+      "new_calls": 2,
+      "unavailable_answers": [
+        "nominal_attachment"
+      ],
+      "diagnostics": [
+        "QUALITATIVE_QUANTITY_UNRESOLVED",
+        "STRUCTURE_NOT_COVERED"
+      ]
+    },
+    {
+      "case_id": "LANG-05-3-before_point",
+      "text": "В 09:00 марии Алексей передал книгу.",
+      "matches_recorded_assertion_and_time_gold": false,
+      "old_calls": 2,
+      "new_calls": 2,
+      "unavailable_answers": [
+        "nominal_attachment"
+      ],
+      "diagnostics": [
+        "QUALITATIVE_QUANTITY_UNRESOLVED",
+        "STRUCTURE_NOT_COVERED"
+      ]
+    },
+    {
+      "case_id": "LANG-06-0-bare",
+      "text": "Иван — врач.",
+      "matches_recorded_assertion_and_time_gold": false,
+      "old_calls": 2,
+      "new_calls": 2,
+      "unavailable_answers": [],
+      "diagnostics": [
+        "STRUCTURAL_OPERAND_UNRESOLVED"
+      ]
+    },
+    {
+      "case_id": "LANG-06-0-before_point",
+      "text": "В 09:00 иван — врач.",
+      "matches_recorded_assertion_and_time_gold": false,
+      "old_calls": 2,
+      "new_calls": 2,
+      "unavailable_answers": [],
+      "diagnostics": [
+        "STRUCTURAL_OPERAND_UNRESOLVED"
+      ]
+    },
+    {
+      "case_id": "LANG-06-1-bare",
+      "text": "Пётр — врач.",
+      "matches_recorded_assertion_and_time_gold": false,
+      "old_calls": 2,
+      "new_calls": 2,
+      "unavailable_answers": [],
+      "diagnostics": [
+        "STRUCTURAL_OPERAND_UNRESOLVED"
+      ]
+    },
+    {
+      "case_id": "LANG-06-1-before_point",
+      "text": "В 09:00 пётр — врач.",
+      "matches_recorded_assertion_and_time_gold": false,
+      "old_calls": 2,
+      "new_calls": 2,
+      "unavailable_answers": [],
+      "diagnostics": [
+        "STRUCTURAL_OPERAND_UNRESOLVED"
+      ]
+    },
+    {
+      "case_id": "LANG-06-2-bare",
+      "text": "Сергей — врач.",
+      "matches_recorded_assertion_and_time_gold": false,
+      "old_calls": 2,
+      "new_calls": 2,
+      "unavailable_answers": [],
+      "diagnostics": [
+        "STRUCTURAL_OPERAND_UNRESOLVED"
+      ]
+    },
+    {
+      "case_id": "LANG-06-2-before_point",
+      "text": "В 09:00 сергей — врач.",
+      "matches_recorded_assertion_and_time_gold": false,
+      "old_calls": 2,
+      "new_calls": 2,
+      "unavailable_answers": [],
+      "diagnostics": [
+        "STRUCTURAL_OPERAND_UNRESOLVED"
+      ]
+    },
+    {
+      "case_id": "LANG-06-3-bare",
+      "text": "Алексей — врач.",
+      "matches_recorded_assertion_and_time_gold": false,
+      "old_calls": 2,
+      "new_calls": 2,
+      "unavailable_answers": [],
+      "diagnostics": [
+        "STRUCTURAL_OPERAND_UNRESOLVED"
+      ]
+    },
+    {
+      "case_id": "LANG-06-3-before_point",
+      "text": "В 09:00 алексей — врач.",
+      "matches_recorded_assertion_and_time_gold": false,
+      "old_calls": 2,
+      "new_calls": 2,
+      "unavailable_answers": [],
+      "diagnostics": [
+        "STRUCTURAL_OPERAND_UNRESOLVED"
+      ]
+    },
+    {
+      "case_id": "LANG-07-0-before_point",
+      "text": "В 09:00 иван устал.",
+      "matches_recorded_assertion_and_time_gold": false,
+      "old_calls": 2,
+      "new_calls": 2,
+      "unavailable_answers": [
+        "component_attachment"
+      ],
+      "diagnostics": [
+        "STRUCTURAL_OPERAND_UNRESOLVED"
+      ]
+    },
+    {
+      "case_id": "LANG-07-1-before_point",
+      "text": "В 09:00 пётр устал.",
+      "matches_recorded_assertion_and_time_gold": false,
+      "old_calls": 2,
+      "new_calls": 2,
+      "unavailable_answers": [
+        "component_attachment"
+      ],
+      "diagnostics": [
+        "STRUCTURAL_OPERAND_UNRESOLVED"
+      ]
+    },
+    {
+      "case_id": "LANG-07-2-before_point",
+      "text": "В 09:00 сергей устал.",
+      "matches_recorded_assertion_and_time_gold": false,
+      "old_calls": 2,
+      "new_calls": 2,
+      "unavailable_answers": [
+        "component_attachment"
+      ],
+      "diagnostics": [
+        "STRUCTURAL_OPERAND_UNRESOLVED"
+      ]
+    },
+    {
+      "case_id": "LANG-07-3-before_point",
+      "text": "В 09:00 алексей устал.",
+      "matches_recorded_assertion_and_time_gold": false,
+      "old_calls": 2,
+      "new_calls": 2,
+      "unavailable_answers": [
+        "component_attachment"
+      ],
+      "diagnostics": [
+        "STRUCTURAL_OPERAND_UNRESOLVED"
+      ]
+    },
+    {
+      "case_id": "LANG-08-0-before_point",
+      "text": "В 09:00 иван сидит на стуле.",
+      "matches_recorded_assertion_and_time_gold": false,
+      "old_calls": 2,
+      "new_calls": 2,
+      "unavailable_answers": [
+        "nominal_attachment"
+      ],
+      "diagnostics": [
+        "COMPONENT_NOMINAL_SELECTION_UNRESOLVED",
+        "STRUCTURAL_OPERAND_UNRESOLVED"
+      ]
+    },
+    {
+      "case_id": "LANG-08-1-before_point",
+      "text": "В 09:00 пётр сидит на стуле.",
+      "matches_recorded_assertion_and_time_gold": false,
+      "old_calls": 2,
+      "new_calls": 2,
+      "unavailable_answers": [
+        "nominal_attachment"
+      ],
+      "diagnostics": [
+        "COMPONENT_NOMINAL_SELECTION_UNRESOLVED",
+        "STRUCTURAL_OPERAND_UNRESOLVED"
+      ]
+    },
+    {
+      "case_id": "LANG-08-2-before_point",
+      "text": "В 09:00 сергей сидит на стуле.",
+      "matches_recorded_assertion_and_time_gold": false,
+      "old_calls": 2,
+      "new_calls": 2,
+      "unavailable_answers": [
+        "nominal_attachment"
+      ],
+      "diagnostics": [
+        "COMPONENT_NOMINAL_SELECTION_UNRESOLVED",
+        "STRUCTURAL_OPERAND_UNRESOLVED"
+      ]
+    },
+    {
+      "case_id": "LANG-08-3-before_point",
+      "text": "В 09:00 алексей сидит на стуле.",
+      "matches_recorded_assertion_and_time_gold": false,
+      "old_calls": 2,
+      "new_calls": 2,
+      "unavailable_answers": [
+        "nominal_attachment"
+      ],
+      "diagnostics": [
+        "COMPONENT_NOMINAL_SELECTION_UNRESOLVED",
+        "STRUCTURAL_OPERAND_UNRESOLVED"
+      ]
+    },
+    {
+      "case_id": "LANG-09-0-bare",
+      "text": "Иван работает.",
+      "matches_recorded_assertion_and_time_gold": true,
+      "old_calls": 2,
+      "new_calls": 1,
+      "unavailable_answers": [],
+      "diagnostics": []
+    },
+    {
+      "case_id": "LANG-09-0-before_point",
+      "text": "В 09:00 иван работает.",
+      "matches_recorded_assertion_and_time_gold": true,
+      "old_calls": 2,
+      "new_calls": 1,
+      "unavailable_answers": [],
+      "diagnostics": []
+    },
+    {
+      "case_id": "LANG-09-1-bare",
+      "text": "Пётр работает.",
+      "matches_recorded_assertion_and_time_gold": true,
+      "old_calls": 2,
+      "new_calls": 1,
+      "unavailable_answers": [],
+      "diagnostics": []
+    },
+    {
+      "case_id": "LANG-09-1-before_point",
+      "text": "В 09:00 пётр работает.",
+      "matches_recorded_assertion_and_time_gold": true,
+      "old_calls": 2,
+      "new_calls": 1,
+      "unavailable_answers": [],
+      "diagnostics": []
+    },
+    {
+      "case_id": "LANG-09-2-bare",
+      "text": "Сергей работает.",
+      "matches_recorded_assertion_and_time_gold": true,
+      "old_calls": 2,
+      "new_calls": 1,
+      "unavailable_answers": [],
+      "diagnostics": []
+    },
+    {
+      "case_id": "LANG-09-2-before_point",
+      "text": "В 09:00 сергей работает.",
+      "matches_recorded_assertion_and_time_gold": true,
+      "old_calls": 2,
+      "new_calls": 1,
+      "unavailable_answers": [],
+      "diagnostics": []
+    },
+    {
+      "case_id": "LANG-09-3-bare",
+      "text": "Алексей работает.",
+      "matches_recorded_assertion_and_time_gold": true,
+      "old_calls": 2,
+      "new_calls": 1,
+      "unavailable_answers": [],
+      "diagnostics": []
+    },
+    {
+      "case_id": "LANG-09-3-before_point",
+      "text": "В 09:00 алексей работает.",
+      "matches_recorded_assertion_and_time_gold": true,
+      "old_calls": 2,
+      "new_calls": 1,
+      "unavailable_answers": [],
+      "diagnostics": []
+    },
+    {
+      "case_id": "LANG-10-0-before_point",
+      "text": "В 09:00 иван открыл окно.",
+      "matches_recorded_assertion_and_time_gold": false,
+      "old_calls": 2,
+      "new_calls": 2,
+      "unavailable_answers": [
+        "nominal_dependency"
+      ],
+      "diagnostics": [
+        "COMPONENT_DEPENDENCY_UNRESOLVED",
+        "STRUCTURE_NOT_COVERED"
+      ]
+    },
+    {
+      "case_id": "LANG-10-1-before_point",
+      "text": "В 09:00 пётр открыл окно.",
+      "matches_recorded_assertion_and_time_gold": false,
+      "old_calls": 2,
+      "new_calls": 2,
+      "unavailable_answers": [
+        "nominal_dependency"
+      ],
+      "diagnostics": [
+        "COMPONENT_DEPENDENCY_UNRESOLVED",
+        "STRUCTURE_NOT_COVERED"
+      ]
+    },
+    {
+      "case_id": "LANG-10-2-before_point",
+      "text": "В 09:00 сергей открыл окно.",
+      "matches_recorded_assertion_and_time_gold": false,
+      "old_calls": 2,
+      "new_calls": 2,
+      "unavailable_answers": [
+        "nominal_dependency"
+      ],
+      "diagnostics": [
+        "COMPONENT_DEPENDENCY_UNRESOLVED",
+        "STRUCTURE_NOT_COVERED"
+      ]
+    },
+    {
+      "case_id": "LANG-10-3-before_point",
+      "text": "В 09:00 алексей открыл окно.",
+      "matches_recorded_assertion_and_time_gold": false,
+      "old_calls": 2,
+      "new_calls": 2,
+      "unavailable_answers": [
+        "nominal_dependency"
+      ],
+      "diagnostics": [
+        "COMPONENT_DEPENDENCY_UNRESOLVED",
+        "STRUCTURE_NOT_COVERED"
+      ]
+    },
+    {
+      "case_id": "LANG-11-0-before_point",
+      "text": "В 09:00 иван позвонил Марии.",
+      "matches_recorded_assertion_and_time_gold": false,
+      "old_calls": 2,
+      "new_calls": 2,
+      "unavailable_answers": [
+        "nominal_dependency"
+      ],
+      "diagnostics": [
+        "COMPONENT_DEPENDENCY_UNRESOLVED",
+        "STRUCTURE_NOT_COVERED"
+      ]
+    },
+    {
+      "case_id": "LANG-11-1-before_point",
+      "text": "В 09:00 пётр позвонил Марии.",
+      "matches_recorded_assertion_and_time_gold": false,
+      "old_calls": 2,
+      "new_calls": 2,
+      "unavailable_answers": [
+        "nominal_dependency"
+      ],
+      "diagnostics": [
+        "COMPONENT_DEPENDENCY_UNRESOLVED",
+        "STRUCTURE_NOT_COVERED"
+      ]
+    }
+  ],
+  "matched": 24,
+  "total": 62,
+  "old_calls": 124,
+  "new_calls": 104,
+  "input_sha256": "3eca0f215c120c6889701f9903fb33529135ed8a1f939d3bca14e0e0c6feaba7",
+  "selection": "Completed FAIL cases ending -bare or -before_point; first structural_relation reply LEXICAL; all original questions structural_relation, child_slot, structural_revision.",
+  "comparison": "Only assertions/ah and, when present in original errors, time_assertions/semantics. Not a full oracle rerun.",
+  "missing_answer_cases": 30,
+  "unresolved_with_recorded_answers": 8
+}

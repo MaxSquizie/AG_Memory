@@ -31,11 +31,14 @@ def merge(state,release,selector,region,tokens,cfg,grammar,components,diagnostic
         state.diag('COMPOSITION_PRODUCER_PENDING',region.region_id)
         return all_frames
     if not bundles:return all_frames
+    from .composition_equivalence import coalesce,describe
+    bundles,duplicates=coalesce(state,release,region,bundles)
+    all_frames=[f for f in all_frames if f.frame_id not in duplicates]
     key='source-union:'+digest([region.region_id,sorted(t.token_id for t in tokens)])
     for root,owned,label in bundles:
         source=root.semantic.get('composition_source','COMPONENT')
         root.semantic['composition_domain']={'decision_ref':key,'frame_refs':[f.frame_id for f in owned],
-            'label':source+': '+label}
+            'label':source+': '+describe(state,root,owned)}
         for f in owned:f.semantic['structural_unresolved']=True
     if len(bundles)==1:
         for f in bundles[0][1]:f.semantic['structural_unresolved']=False

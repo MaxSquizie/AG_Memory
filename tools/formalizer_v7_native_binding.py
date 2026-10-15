@@ -177,7 +177,7 @@ def fixture(core, profile):
         {'pattern':r'\bвесь\s+вчерашний\s+день\b','kind':'DAY_INTERVAL','day_offset':-1,'interval_semantics':'CONTINUOUS'},
         {'pattern':r'\bсегодня\b|(?<!весь\s)\bсегодняшний\s+день\b','kind':'DAY_INTERVAL','day_offset':0,'interval_semantics':'EXISTENTIAL'},
         {'pattern':r'\bвесь\s+сегодняшний\s+день\b','kind':'DAY_INTERVAL','day_offset':0,'interval_semantics':'CONTINUOUS'},
-        {'pattern':r'\b(?P<hour>\d{1,2}):(?P<minute>\d{2})\b','kind':'POINT_CLOCK'}]
+        {'pattern':r'\b(?:в\s+)?(?P<hour>\d{1,2}):(?P<minute>\d{2})\b','kind':'POINT_CLOCK'}]
     if profile=='known_mapping_broken':
         R['R-S']['entries']=[r for r in R['R-S']['entries'] if r['sense_id']!='SEND']+[{'lemma':'отправить','POS':'VERB','sense_id':'K_SEND'}]
         for r in R['R-V']['entries']:
