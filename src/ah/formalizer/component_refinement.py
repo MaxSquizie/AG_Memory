@@ -93,15 +93,21 @@ def _compose_area(state, release, selector, region, tokens, cfg, depth=0, attach
             constraints=json.dumps({'rejected_choices':[
                 {'slot':r['slot'],'value':next((v for v in r.get('alternatives',()) if v['candidate_id']==r.get('selected')),None)}
                 for r in tasks if r.get('selected')], 'failures':reasons},ensure_ascii=False,sort_keys=True)
+            selected_descriptions=[v['label'] for r in tasks if r.get('selected')
+                for v in r.get('alternatives',()) if v['candidate_id']==r['selected']]
+            uncovered={tid for f in result for tid in f.semantic.get('uncovered_token_refs',())}
+            constraint_text='Tried: '+'; '.join(selected_descriptions)+'. No complete parse was built.'
+            if uncovered:
+                constraint_text+=' Uncovered words: «'+' '.join(t.span for t in tokens if t.token_id in uncovered)+'».'
+            constraint_text+=' This may be a parser limitation; failure alone does not prove that the reading is wrong.'
             revision_choice=choose(state,release,selector,region,cfg,'structural_revision',[
-                {'candidate_id':'REVISE','label':'Revise the provisional relation/boundaries using the recorded child constraints'},
-                {'candidate_id':'DEFER','label':'Keep the whole area unresolved; no supported repair is available'}],
-                'The selected local choices do not close into a complete interpretation. '+constraints+
-                ' Is a different source-supported interpretation available? Do not retry merely to fill a slot.')
+                {'candidate_id':'REVISE','label':'The text supports a different relation or different boundaries; reconsider them'},
+                {'candidate_id':'DEFER','label':'No different reading is supported; leave the parse unresolved'}],
+                constraint_text+' Does the text support revising these choices?')
             if not revision_choice or revision_choice[0]['candidate_id']!='REVISE':return result
             retired.extend(r['decision_ref'] for r in tasks if r.get('decision_ref') and not r.get('selected'))
             del state.diagnostics[diagnostics_begin:]
-            cfg={**cfg,'_task_constraints':constraints}
+            cfg={**cfg,'_task_constraints':constraints,'_task_constraints_text':constraint_text}
         return block(state,region,result,'STRUCTURAL_TASK_SEARCH_INCOMPLETE')
     return _compose_lexical_area(state,release,selector,region,tokens,cfg,depth,attachment,infinitive,request)
 

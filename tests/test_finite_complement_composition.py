@@ -67,7 +67,7 @@ def test_unconfirmed_content_never_becomes_an_independent_fact(tmp_path,monkeypa
     result,prompts=run(tmp_path,monkeypatch,'Иван сказал, что Пётр пришёл.',answer)
     assert result['assertions']['ah']==[]
     assert 'ATTITUDE_SLOT_UNCLOSED' in result['diagnostics']['codes']
-    assert len(prompts)==1 and 'Decision slot: attitude_attachment ' in prompts[0]
+    assert len(prompts)==1 and 'Decision slot: attitude_attachment\n' in prompts[0]
 
 
 def test_missing_content_does_not_assert_parent_or_child(tmp_path,monkeypatch):

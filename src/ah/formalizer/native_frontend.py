@@ -986,7 +986,9 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
             state.budget.spend_llm(); raw=selector.select(prompt); reply=validate_selector_reply(selector,raw,schema,ids,allowed=frozenset(ids))
         except Exception as exc:
             d.outcome='UNRESOLVED'; state.diag(_failure_code(exc,'PROTOCOL_ERROR'),str(exc)); continue
-        d.last_prompt=prompt; d.raw_response=raw; d.selector_outcome=reply.outcome; d.selected=reply.selected; d.lifecycle='PROVISIONAL'
+        from .selection_prompt import record_prompt
+        record_prompt(d,prompt)
+        d.raw_response=raw; d.selector_outcome=reply.outcome; d.selected=reply.selected; d.lifecycle='PROVISIONAL'
         if reply.outcome=='ONE_SELECTED':
             d.grounds.append(Ground('M','bounded semantic selection',reply.selected[0])); d.outcome='RESOLVED'
         elif reply.outcome=='MULTIPLE_ADMISSIBLE':

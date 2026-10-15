@@ -347,6 +347,9 @@ class ReadableInspection:
         prompt=d.get('last_prompt') or ''
         labels={int(n):text.strip() for n,text in re.findall(r'^\s*(\d+)\. (.+)$',prompt,re.M)}
         mapping={}
+        for event in d.get('history',()):
+            if event.get('kind')=='SELECTION_LABEL_MAP':
+                mapping={ref:n for n,ref in enumerate(event['candidates'],1)}
         for n,encoded in re.findall(r'^\s*(\d+) = (".*")\s*$',prompt,re.M):
             import json
             try:mapping[json.loads(encoded)]=int(n)

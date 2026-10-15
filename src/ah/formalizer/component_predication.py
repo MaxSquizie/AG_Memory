@@ -85,8 +85,8 @@ def compose_alternatives(state, release, selector, region, tokens, predicates, c
                 roles = ', '.join(role+'='+evidence[tid].span for tid, role in f.semantic['proposed_roles'].items())
                 label = f.semantic.get('nominal_dependency_kind',m['lemma'])+' ['+m['pos']+']; '+roles
                 if cfg.get('modifier_composition')=='BOUNDED_FOREST_V1':
-                    label += '; linked morphology='+str({evidence[t].span:{k:v for k,v in morph.items()
-                        if k in {'lemma','pos','cases','gender','number','features'}} for t,morph in f.semantic['morph_bindings'].items()})
+                    from .probe_wording import linked_readings
+                    label += '; linked morphology='+linked_readings(f.semantic['morph_bindings'],evidence)
                 if f.semantic.get('nominal_groups'):
                     label += '; one coordinated slot per group='+str([
                         [evidence[t].span for t in g['member_refs']] for g in f.semantic['nominal_groups']])
@@ -127,7 +127,9 @@ def compose_alternatives(state, release, selector, region, tokens, predicates, c
         target_question += established_constraints(state,region)
         chosen = _probe(state, selector, release, region.region_id+'|composition',
                         'component_attachment', options, context, region.source_range,
-                        question=target_question+(local['question'] if local else ''))
+                        question=target_question+(local['question'] if local else
+                            'Which complete reading matches this clause? Compare the predicate, its participants '
+                            'and grammatical readings. If the wording allows several, keep those alternatives.'))
     decision=state.decisions.get(region.region_id+'|composition')
     deferred=chosen is None and decision is not None and decision.selector_outcome in {
         'MULTIPLE_ADMISSIBLE','INSUFFICIENT_CONTEXT'}

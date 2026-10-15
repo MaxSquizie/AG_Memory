@@ -311,7 +311,8 @@ class ChatBackend:
         started=time.perf_counter()
         _provider_progress('request_started',request_id=request_id,provider=mode,model=self.model,
                            role=role,endpoint=endpoint,prompt=str(prompt),system=str(system),
-                           enable_thinking=False)
+                           enable_thinking=False,
+                           **({'selection_audit':prompt.selection_audit} if hasattr(prompt,'selection_audit') else {}))
         text=None
         try:
             if mode=='lmstudio':

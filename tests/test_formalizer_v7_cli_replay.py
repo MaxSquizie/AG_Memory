@@ -11,7 +11,8 @@ from tools.run_formalizer_v7_oracle import main
 def test_cli_partial_http_history_replays_without_transport(tmp_path,provider):
     calls=[]
     from test_structural_relation_tasks import Script,relation
-    script=Script(relation('LEXICAL'))
+    from ah.formalizer.relation_composition import RELATIONS
+    script=Script([('structural_relation',RELATIONS['LEXICAL'])])
     class Handler(BaseHTTPRequestHandler):
         def log_message(self,*args): pass
         def do_POST(self):
@@ -23,6 +24,8 @@ def test_cli_partial_http_history_replays_without_transport(tmp_path,provider):
             else:
                 assert request['think'] is False and request['stream'] is False
                 prompt=request['messages'][-1]['content']
+            assert 'Audit mapping' not in prompt and 'fixture:T:' not in prompt
+            assert 'predicate value of frame' not in prompt
             reply=script.generate(prompt)
             response=({'output':[{'type':'message','content':reply}]}
                       if provider=='lmstudio' else

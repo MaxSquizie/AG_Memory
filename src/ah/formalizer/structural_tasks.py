@@ -15,10 +15,14 @@ def enabled(release):
 
 def choose(state,release,selector,region,cfg,slot,options,question):
     if cfg.get('_task_constraints'):
-        question+='\nEarlier complete interpretation was rejected under these linked constraints: '+cfg['_task_constraints']
+        question+='\nEarlier attempt: '+cfg.get('_task_constraints_text',cfg['_task_constraints'])
     iterator=iter(options);page=0;previous=[];examined=0
     limit=release.entries('ProposalPolicy')[0].get('max_rule_steps',20000)
-    context=state.text[slice(*region.source_range)]
+    from .component_source import view,probe_context
+    owned=set(region.token_refs)
+    local=view(state,region,[t for t in state.evidence if t.token_id in owned])
+    context,target=probe_context(state,region,cfg,local)
+    question=target+question
     if len(context)>cfg['context_chars']:
         state.diag('STRUCTURAL_TASK_SEARCH_INCOMPLETE',region.region_id)
         state.syntax_trace.append({'kind':'STRUCTURAL_TASK','region_ref':region.region_id,
@@ -44,10 +48,7 @@ def choose(state,release,selector,region,cfg,slot,options,question):
         choices=[{'candidate_id':v['candidate_id'],'label':v['label']} for v in values]
         key=region.region_id+'|task:'+digest([slot,choices,question,page])
         selected=_probe(state,selector,release,key,slot,choices,context,region.source_range,
-            question=question+' Choose only a positively supported source interpretation. '
-            'These are local provisional choices, not assertions. If no displayed option fits, answer 0: '
-            'that rejects this page and allows the remaining candidates to be examined. '
-            'If the source does not determine the choice, answer ?; do not choose the nearest option.')
+            question=question+(' More options remain on another page; 0 rejects only this page.' if has_more else ''))
         decision=state.decisions.get(key)
         outcome=decision.selector_outcome if decision else None
         row={'kind':'STRUCTURAL_TASK','region_ref':region.region_id,'source_range':list(region.source_range),
@@ -93,7 +94,7 @@ def span(state,release,selector,region,tokens,cfg,slot,question,*,exclude=()):
                 if tokens[b].token_id in forbidden:break
                 yield {'candidate_id':'end:'+tokens[b].token_id,'index':b+1,
                     'label':'End after «'+tokens[b].span+'» @'+str(tokens[b].end)+
-                            '; full content «'+state.text[tokens[a].start:tokens[b].end]+'»'}
+                            '; selected words «'+' '.join(t.span for t in tokens[a:b+1])+'»'}
         end=choose(state,release,selector,region,cfg,slot+'_end',ends(),
             question+' The start is «'+tokens[a].span+'» @'+str(tokens[a].start)+'. Select the LAST token.')
         if end:return tokens[a:end[0]['index']],(start[1],end[1])

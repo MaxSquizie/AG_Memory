@@ -37,6 +37,8 @@ _READABLE_SYSTEM = (
     "Use JSON only when the request explicitly requests a JSON response. Do not add markdown or explanations."
 )
 
+_SELECTION_SYSTEM = 'Answer the question using only the supplied text, context and numbered options. Follow the requested response format.'
+
 
 @dataclass
 class RealBackendSelector:
@@ -68,13 +70,17 @@ class RealBackendSelector:
             log=ProviderCallLog(self.journal),
             model_key=self.model_key or str(getattr(self.backend,"model",type(self.backend).__name__)),
             params_hash=digest({"system":self.system,"role":self.role,"generation":self.generation_settings,
+                "selection_system":_SELECTION_SYSTEM if self.system in {_SYSTEM,_READABLE_SYSTEM} else self.system,
                 "structure_reply_format":self.structure_reply_format,"selection_reply_format":self.selection_reply_format}),
             transport=self._transport,
             budget=self.budget or BudgetSnapshot(tp_calls=2, lexical_calls=2, max_nodes=64, max_edges=128, max_depth=16, token_limit=32768),
         )
 
     def _transport(self, prompt: str) -> str:
-        resp = self.backend.generate(prompt, system=self.system, role=self.role, override=self.generation_settings)
+        system=self.system
+        if getattr(prompt,'selection_audit',None) and system in {_SYSTEM,_READABLE_SYSTEM}:
+            system=_SELECTION_SYSTEM
+        resp = self.backend.generate(prompt, system=system, role=self.role, override=self.generation_settings)
         return resp if isinstance(resp, str) else getattr(resp, "text", "")
 
     def start_run(self, run_id):

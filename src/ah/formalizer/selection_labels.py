@@ -37,27 +37,16 @@ def _closed_ids(candidate_ids: Sequence[str]) -> tuple[str, ...]:
 
 
 def selection_label_instructions(candidate_ids: Sequence[str]) -> str:
-    """Declare the complete label-to-ID mapping and exact reply grammar.
-
-    The mapping is part of the logged prompt, so response replay never relies on
-    an unstored numbering choice. Callers must use the same ordered IDs to decode.
-    """
+    """Reply grammar only; candidate IDs belong to the separate audit record."""
     ids = _closed_ids(candidate_ids)
-    mapping = "\n".join(
-        f"{index} = {json.dumps(cid, ensure_ascii=False)}"
-        for index, cid in enumerate(ids, 1)
-    ) or "(empty candidate set)"
     return (
         f"Response protocol: {PROTOCOL_VERSION}\n"
-        f"Audit mapping (numeric label on the LEFT; internal ID on the RIGHT is never an answer):\n{mapping}\n"
-        "Reply with one line only. One admissible candidate: its numeric label alone. "
-        "Multiple admissible candidates: their distinct numeric labels separated by commas, without spaces. "
+        "Reply with the number of the supported option. "
+        "If several options remain possible, list their numbers separated by commas. "
         "Insufficient context: ?\n"
         "No candidate fits: 0\n"
-        "Do not output an outcome name or an internal ID. No JSON, prose, explanation or code fence.\n"
-        + ("Format examples only (not evidence for a choice): 1\n" if ids else "")
-        + ("To select both of the first two candidates: 1,2\n" if len(ids)>1 else "")
-        + "To abstain because context is insufficient: ?\nTo reject all candidates: 0"
+        "One line, no spaces. No JSON or explanation."
+        + ("\n(empty candidate set)" if not ids else "")
     )
 
 
@@ -88,19 +77,21 @@ def build_label_selection_prompt(
         for index, cid in enumerate(ids, 1)
     )
     context_block = (
-        "Declared contextual statements (C grounds):\n"
+        "Supplied context:\n"
         + "\n".join(f"  - {statement}" for statement in contextual_statements)
         if contextual_statements
-        else "Declared contextual statements: none"
+        else ""
     )
-    return (
-        f"Decision slot: {slot_id} — predicate value of frame {frame_id}\n"
+    from .selection_prompt import SelectionPrompt
+    return SelectionPrompt(
+        f"Decision slot: {slot_id}\n"
         f"Context span: {context_span}\n"
-        f"{context_block}\n"
-        f"Mentions and preliminary structural links:\n{mention_lines}\n"
-        f"Candidates (schema {schema.version}, closed set):\n{candidate_lines}\n"
-        "Task: select admissible candidates, or report no fit / insufficient context.\n"
-        + selection_label_instructions(ids)
+        + (context_block + '\n' if context_block else '')
+        + (f"Mentioned words:\n{mention_lines}\n" if mention_lines else '')
+        + f"Options:\n{candidate_lines}\n"
+        + selection_label_instructions(ids),
+        {'protocol': PROTOCOL_VERSION, 'slot': slot_id, 'frame_id': frame_id,
+         'schema': schema.version, 'candidates': list(ids)},
     )
 
 

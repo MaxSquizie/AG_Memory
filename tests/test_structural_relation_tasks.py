@@ -24,8 +24,20 @@ class Script:
             self.errors.append('Expected '+expected+', got '+slot);return '?'
         if value in {'?','0','ONE_SELECTED'}:
             self.steps.popleft();return value
-        mapping={json.loads(cid):n for n,cid in re.findall(r'^(\d+) = (".*")$',prompt,re.M)}
+        mapping={cid:str(n) for n,cid in enumerate(getattr(prompt,'selection_audit',{}).get('candidates',()),1)}
         labels=dict(re.findall(r'^(\d+)\. (.*)$',prompt,re.M))
+        # A real HTTP peer receives only model text, never the audit IDs.
+        # These aliases express this test's scripted choices using that text.
+        if not mapping:
+            from ah.formalizer.relation_composition import RELATIONS
+            if value in RELATIONS:value=RELATIONS[value]
+            elif value=='INDEPENDENT':value='No agreement governor:'
+            elif value=='PARTITION' and len(labels)==1:
+                value=next(iter(labels.values()))
+            elif slot=='structural_content_role' and ':' in value:
+                role,attitude=value.split(':',1)
+                value=next((label for label in labels.values()
+                    if label.startswith(role+' of ') and 'attitude='+attitude in label),value)
         number=mapping.get(value) or next((n for n,label in labels.items() if label.startswith(value)),None)
         if number:
             self.steps.popleft();return number

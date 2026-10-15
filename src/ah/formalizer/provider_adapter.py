@@ -131,7 +131,11 @@ class ProviderAdapter:
         if ordinal is None:
             ordinal = self._ordinals.get(run_id,0)+1
             self._ordinals[run_id] = ordinal
-        key = self._digest(prompt)
+        audit = getattr(prompt, 'selection_audit', None)
+        # The same displayed options can have different internal bindings.
+        # Replay must pin both, although only the text goes to the model.
+        from .canonical_ledger import digest
+        key = digest([str(prompt), audit]) if audit is not None else self._digest(prompt)
         params_hash=self._window_tokens.params_hash() if self._window_tokens is not None else self.params_hash
         old = self._log.lookup(run_id,ordinal)
         if old:
@@ -152,7 +156,7 @@ class ProviderAdapter:
                 self._consume_received(cost)
                 raise ProviderUnavailable(old.get('error','recorded provider failure'))
         self._check_tokens(max(1,len(prompt)//4))
-        cid = self._log.begin(self.name,key,run_id=run_id,ordinal=ordinal,model_key=self.model_key,params_hash=params_hash,prompt=prompt)
+        cid = self._log.begin(self.name,key,run_id=run_id,ordinal=ordinal,model_key=self.model_key,params_hash=params_hash,prompt=str(prompt),selection_audit=audit)
         started = time.monotonic()
         emit("probe_started", run_id=run_id, ordinal=ordinal, capability=capability, prompt_chars=len(prompt))
         try:

@@ -219,7 +219,11 @@ def resolve_references(state, slots, selector, release):
             try:
                 state.budget.spend_llm(); raw=selector.select(prompt)
                 reply=validate_selector_reply(selector,raw,schema,tuple(local_ids),allowed=frozenset(local_ids))
-                d.last_prompt=prompt; d.raw_response=raw; d.selector_outcome=reply.outcome; d.selected=tuple(local_ids[c] for c in reply.selected)
+                from .selection_prompt import record_prompt
+                record_prompt(d,prompt)
+                if getattr(prompt,'selection_audit',None):
+                    d.history[-1]['candidates']=[local_ids[c] for c in local_ids]
+                d.raw_response=raw; d.selector_outcome=reply.outcome; d.selected=tuple(local_ids[c] for c in reply.selected)
                 d.outcome='RESOLVED' if reply.outcome=='ONE_SELECTED' else 'AMBIGUOUS' if reply.outcome=='MULTIPLE_ADMISSIBLE' else 'INSUFFICIENT_CONTEXT' if reply.outcome=='INSUFFICIENT_CONTEXT' else 'UNRESOLVED'
                 if d.outcome=='RESOLVED': d.grounds.append(Ground('M','bounded antecedent selection',d.selected[0]))
             except IntegrityError:

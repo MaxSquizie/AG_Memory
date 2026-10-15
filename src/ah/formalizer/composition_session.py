@@ -56,6 +56,9 @@ class CompositionSession:
             rows=[{k:v for k,v in r.items() if k in keys} for r in result['rows']]
             proofs=[]
             for item in result.get('proof_results',[]):
+                # Failed fact lookup says nothing about explicit source syntax.
+                # Full results remain in state.context_reads / CONTEXT_READ WAL.
+                if item.get('status')!='PROVED':continue
                 projected={k:v for k,v in item.items() if k!='proof'}
                 if 'proof' in item:
                     proof=item['proof']

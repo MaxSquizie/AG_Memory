@@ -6,7 +6,10 @@ from ah.formalizer.structural_tasks import choose,span,licensed
 def setup(monkeypatch,answers,limit=100):
     state=t0('one two three');state.component_probe_records={};calls=[]
     release=SimpleNamespace(entries=lambda kind:[{'max_rule_steps':limit}])
-    region=SimpleNamespace(region_id='r',source_range=(0,len(state.text)))
+    from ah.formalizer.regions import TextRegion
+    state.evidence=[SimpleNamespace(token_id=str(i),span=word,start=a,end=b)
+        for i,(word,a,b) in enumerate([('one',0,3),('two',4,7),('three',8,13)])]
+    region=TextRegion('r','SENTENCE',(0,len(state.text)),tuple(t.token_id for t in state.evidence),None)
     cfg={'max_candidates':2,'context_chars':100}
     def probe(state,selector,release,key,slot,options,*args,**kwargs):
         answer=answers.pop(0);calls.append((slot,[o['candidate_id'] for o in options]))

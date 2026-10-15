@@ -48,14 +48,15 @@ def reduce(state,release,selector,region,tokens,p,pv,roles,nominals,groups,cfg,*
             if len(choices)>cfg['max_candidates'] or region.source_range[1]-region.source_range[0]>cfg['context_chars']:
                 state.diag('COMPONENT_SEARCH_INCOMPLETE',region.region_id);return None
             options=[]
+            from .probe_wording import reading as reading_text
             for cid,o in choices.items():
-                reading={k:v for k,v in o.get('morph',{}).items() if k in {'lemma','pos','cases','number','gender','features'}}
+                reading=o.get('morph',{})
                 if o['kind']=='ROOT': label='Direct role '+o['role']+' of predicate «'+p.span+'»'
                 elif o['kind']=='DEFER_PP':label='Prepositional phrase; defer its host to the PP attachment question'
                 else:label=o['kind']+' dependency on «'+evidence[o['host_ref']].span+'» at '+str(evidence[o['host_ref']].start)
-                if o.get('head_morph'):label+='; internal head reading='+str(o['head_morph'])
+                if o.get('head_morph'):label+='; internal head reading: '+reading_text(o['head_morph'])
                 if o.get('host_layer')=='HEAD':label+='; agrees with internal head of quantity group'
-                options.append({'candidate_id':cid,'label':label+'; whole reading='+str(reading)})
+                options.append({'candidate_id':cid,'label':label+'; '+reading_text(reading)})
             committed=[{'dependent':evidence[t].span,'attachment':o['kind'],
                         'host':evidence[o['host_ref']].span if 'host_ref' in o else o.get('role')} for t,o in fixed.items()]
             question='Choose the immediate grammatical attachment of «'+evidence[tid].span+'» at '+str(evidence[tid].start)+'. '

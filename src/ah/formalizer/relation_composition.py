@@ -59,12 +59,12 @@ def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof
     parts=['«'+' '.join(t.span for t in g)+'»' for g in groups]
     option={'candidate_id':'PARTITION','relation':kind,'operands':[[t.token_id for t in g] for g in groups],
         'marker_refs':[t.token_id for t in markers],'relation_proof':proof,
-        'label':kind+' with ordered parts '+str(parts)+'; remaining connective/function material «'+
-        ' '.join(t.span for t in markers)+'». Every remaining token belongs to this relation; '
-        'no omitted independent event, participant, negation, modifier or quantifier.'}
+        'label':kind+'; proposed content parts: '+'; '.join(parts)+'; proposed linking words/punctuation: «'+
+        ' '.join(t.span for t in markers)+'»'}
     result=choose(state,release,selector,region,cfg,'structural_partition',[option],
-        'Validate type, direction AND complete source partition together. Reject if any leftover token '
-        'contains content that must remain inside a child. Empty connective material is allowed for an implicit relation.')
+        RELATIONS[kind]+'. Check the proposed split. Are the content parts complete, and are the remaining words '
+        'only the outer link? Answer 0 if a participant or predicate was removed from content, or an outer linking '
+        'word remains inside it. Preserve inner negation, modality and quantifiers. For an implicit relation the link may be empty.')
     return (markers,result[1]) if result else None
 
 
@@ -82,7 +82,9 @@ def function_ownership(state,release,selector,region,cfg,kind,groups):
         options.extend({'candidate_id':t.token_id,'token_ref':t.token_id,
             'label':'Outer relation owns «'+t.span+'» @'+str(t.start)+'; retain its source address as connective material'} for t in possible)
         selected=choose(state,release,selector,region,cfg,'structural_function_owner',options,
-            kind+': determine whether a repeated connective/particle belongs to the outer relation or to a child. '
+            kind+' ('+RELATIONS[kind]+'). Current parts: '+
+            '; '.join(str(i+1)+': «'+' '.join(t.span for t in group)+'»' for i,group in enumerate(groups))+'. '+
+            'Does a listed connective/particle express the outer relation, or stay inside its current part? '
             'Do not remove child negation, quantification or modality.')
         if not selected:return None
         if selected[0]['candidate_id']=='KEEP_ALL':return groups
@@ -99,7 +101,9 @@ def child(state,release,selector,region,tokens,cfg,compose,request,contract):
         if heads:
             opts=[{'candidate_id':t.token_id,'head':t.token_id,'label':'Nominal event head «'+t.span+'» @'+str(t.start)} for t in heads]
             result=choose(state,release,selector,region,cfg,'structural_event_head',opts,
-                contract+'. Select its event-description head; do not invent occurrence or a named entity.')
+                contract+'. Target words: «'+' '.join(t.span for t in tokens)+'». '
+                'Which noun names the event or state described here? A person or object name is not an event. '
+                'If none does, answer 0.')
             if not result:return [],None
             head=next(t for t in heads if t.token_id==result[0]['head'])
             slot=replace(slot,output_sort='EVENT_DESCRIPTION',head_ref=head.token_id,
@@ -114,10 +118,9 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child):
     if request and request.output_sort=='EVENT_DESCRIPTION':return None
     options=[{'candidate_id':k,'relation':k,'label':v} for k,v in RELATIONS.items()]
     result=choose(state,release,selector,region,cfg,'structural_relation',options,
-        'Identify the OUTERMOST relation of this complete source area. Consider paraphrases and implicit relations, '
-        'not marker spelling. Use CONTENT when a predicate takes another proposition as content; '
-        'the fact that the parent itself is a lexical verb does not make the WHOLE area LEXICAL. A selected type is provisional '
-        'until its source boundaries, slots, morphology and children agree. Numeric quantification is deferred.')
+        'Which option describes the WHOLE target area? Choose the outermost relation; inner relations are handled later. '
+        'A verb with a dependent clause or quotation uses the content option, not the single-predication option. '
+        'Numeric quantification is deferred.')
     if not result:return block(state,region)
     option,proof=result;kind=option['relation']
     if kind=='LEXICAL':return None
@@ -145,7 +148,11 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child):
         for i in range(2):
             contract=('antecedent' if i==0 else 'consequent') if kind in {'IMPLIES','COUNTERFACTUAL'} else 'operand '+str(i+1)
             chosen=span(state,release,selector,region,tokens,cfg,'structural_operand_'+str(i+1),
-                kind+': select the complete '+contract+'. It may itself contain nested relations.',
+                kind+' ('+RELATIONS[kind]+'): select the complete '+contract+'. '+
+                ('This is the condition that is sufficient for the other part. ' if contract=='antecedent' else
+                 'This is the consequence when the condition holds. ' if contract=='consequent' else '')+
+                'Exclude words linking the two outer parts. Keep any relations nested inside this part.'+
+                (' Already selected part 1: «'+' '.join(t.span for t in groups[0])+'».' if groups else ''),
                 exclude=[t.token_id for g in groups for t in g])
             if not chosen:return block(state,region)
             groups.append(chosen[0])
@@ -165,7 +172,7 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child):
         # Unary function material can be internal ("Ivan NOT arrived"). The
         # complement owns every remaining token, not just a following suffix.
         chosen=span(state,release,selector,region,tokens,cfg,'structural_introducer',
-            kind+': select only the complete function/introducer material of this outer relation. '
+            kind+' ('+RELATIONS[kind]+'): select only the complete words expressing this outer relation. '
             'Include the full linking expression and any conjunction introducing its content. '
             'Exclude the content proposition, its subject and predicate. Separating commas may be included; '
             'do not end early just because the first word already signals the relation.')
@@ -187,10 +194,10 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child):
             selected=choose(state,release,selector,region,cfg,'structural_governor',
                 [{'candidate_id':'INDEPENDENT','label':'No agreement governor: the child has independent predication'},
                  *[{'candidate_id':t.token_id,'token_ref':t.token_id,'label':'Agreement/controller anchor «'+t.span+'»'} for t in governors]],
-                'Select the finite morphological governor of this modal child; other modal layers belong to that child. '
-                'Choose INDEPENDENT when the content has its own finite predication and the outer modal expression '
-                'does not supply its subject agreement. A modal verb or short adjective governing an infinitive '
-                'can supply agreement; a possible morphological reading alone is not such a dependency.')
+                'Modal words: «'+' '.join(t.span for t in markers)+'». Content: «'+' '.join(t.span for t in owned)+'». '
+                'Does a modal word supply person, number or gender agreement for a dependent infinitive? '
+                'If the content already has its own conjugated predicate, choose no governor. '
+                'A dictionary reading alone does not establish this connection.')
             if not selected:return block(state,region)
             if selected[0]['candidate_id']!='INDEPENDENT':
                 slot=replace(slot,agreement_source=next(t for t in governors if t.token_id==selected[0]['token_ref']))

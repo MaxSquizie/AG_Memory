@@ -635,7 +635,8 @@ def t3(
                     last = "protocol"
                     continue  # bounded retry if attempts remain
                 state.budget.spend_llm()  # successful call: exactly ONE charge (rev8)
-                dec.last_prompt = prompt      # rev8: recorded I/O — the run is replayable
+                from .selection_prompt import record_prompt
+                record_prompt(dec, prompt)
                 dec.raw_response = raw
                 return resp, "ok"
             return None, last

@@ -16,7 +16,7 @@ class ProviderCallLog:
                 if p.get('kind')!='prov_call': continue
                 previous=calls.get(p['id'])
                 if previous:
-                    identity=('provider','run_id','ordinal','attempt','request_digest','model_key','params_hash','prompt')
+                    identity=('provider','run_id','ordinal','attempt','request_digest','model_key','params_hash','prompt','selection_audit')
                     if any(p.get(k)!=previous.get(k) for k in identity): raise ValueError('INTEGRITY_ERROR: provider exchange identity changed')
                     if previous['state']!='PENDING' and p!=previous or p['state'] not in {'PENDING','RECEIVED','FAILED'}:
                         raise ValueError('INTEGRITY_ERROR: provider terminal rewrite')
@@ -29,7 +29,7 @@ class ProviderCallLog:
         values=[r for r in self._calls.values() if r.get('run_id')==run_id and r.get('ordinal')==ordinal]
         return max(values,key=lambda r:r['attempt']) if values else None
 
-    def begin(self,provider,request_digest,*,run_id='legacy',ordinal=None,model_key='',params_hash='',prompt=''):
+    def begin(self,provider,request_digest,*,run_id='legacy',ordinal=None,model_key='',params_hash='',prompt='',selection_audit=None):
         with self._lock,(self._journal.atomic() if self._journal else nullcontext()):
             self._reload()
             if ordinal is None:
@@ -40,6 +40,9 @@ class ProviderCallLog:
             attempt=(old['attempt']+1) if old else 1
             call_id=f'{run_id}:{provider}:{ordinal}:{attempt}'
             rec={'kind':'prov_call','id':call_id,'provider':provider,'run_id':run_id,'ordinal':ordinal,'attempt':attempt,'request_digest':request_digest,'model_key':model_key,'params_hash':params_hash,'prompt':prompt,'state':'PENDING'}
+            if selection_audit is not None:
+                from copy import deepcopy
+                rec['selection_audit'] = deepcopy(selection_audit)
             if self._journal: self._journal.append('provider',rec,run_id=run_id)
             self._calls[call_id]=rec
             return call_id

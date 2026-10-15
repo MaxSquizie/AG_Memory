@@ -25,16 +25,13 @@ def _live_probe(state, selector, release, key, slot, options, context, source_ra
     prompt = build_selector_prompt(selector, slot_id=slot, frame_id=key,
         context_span=context, mentions={}, schema=schema, candidates=ids,
         contextual_statements=())
-    prompt = ('Choose only interpretations positively supported by this source and supplied context. '
-        'Generated alternatives are not evidence. Multiple choices need support for EACH. '
-        'If context cannot discriminate and no applicable declared preference is supplied, answer ?. '
-        'An explicitly supplied preference may resolve ordinary pragmatic underspecification; '
-        'it never overrides incompatible grammar, missing candidate coverage or a semantic scope barrier. '
-        'Do not invent context, identities or facts. Interpret what the SOURCE SAYS, not whether it is true in memory. '
-        'An UNKNOWN memory lookup does not make explicit source syntax unknown.\n'+
+    prompt = ('Read the source and answer the question about its meaning or grammar. '
+        'Options are proposals, not facts. Use only the supplied text and context; '
+        'do not invent identities or events. You are interpreting what is said, not checking whether it happened.\n'+
         ((question+'\n\n') if question else '')+prompt)
     try:
-        d.last_prompt = prompt
+        from .selection_prompt import record_prompt
+        record_prompt(d, prompt)
         state.budget.spend_llm()
         raw = selector.select(prompt)
         d.raw_response = raw
