@@ -36,7 +36,14 @@ def atomic_signature(state,release,root,owned):
     data=deepcopy(sem)
     for key in _BOOKKEEPING:data.pop(key,None)
     questions=data.pop('component_questions',[])
-    if any(q!={'kind':'WHAT_EVENT','anchor_ref':root.predicate_token_ref} for q in questions):return None
+    for q in questions:
+        if q=={'kind':'WHAT_EVENT','anchor_ref':root.predicate_token_ref}:continue
+        # A completed direct-role reduction records how the same role was
+        # obtained. The resulting roles/readings are still compared below.
+        if (q.get('kind')=='FIXED_DEPENDENCY' and q.get('token_ref') in sem.get('proposed_roles',{})
+                and q.get('ground') in {'D','M'} and q.get('selected') in q.get('remaining_domain_ids',())):
+            continue
+        return None
     units=data.setdefault('lexical_units',{})
     for tid in (root.predicate_token_ref,*root.argument_token_refs):
         units.setdefault(tid,{'head_ref':tid,'anchor_refs':[tid],
@@ -65,6 +72,7 @@ def coalesce(state,release,region,bundles):
             'roles':deepcopy(root.semantic['proposed_roles']),
             'sources':[{'source':f.semantic.get('composition_source','COMPONENT'),
                         'frame_ref':f.frame_id,'pattern_ids':list(f.provenance.pattern_ids),
+                        'component_questions':deepcopy(f.semantic.get('component_questions',[])),
                         'resource_versions':dict(f.provenance.resource_versions)}
                        for f in (representative,root)],
             'reason':'SAME_EXPLICIT_ATOMIC_INTERPRETATION'})

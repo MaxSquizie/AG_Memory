@@ -78,3 +78,59 @@ def test_equivalent_source_trace_is_readable():
     assert 'Выбор источника не требует вопроса модели' in rendered
     assert 'читает' in rendered and 'студент' in rendered
     assert 'Выбор источника не требует вопроса модели' in reader.report([])
+
+
+@pytest.mark.parametrize('text,predicate,person,role,entity',[
+    ('Иван сидит на стуле.','SIT_STATE','ivan','LOCATION','chair'),
+    ('Пётр сидит в комнате.','SIT_STATE','petr','LOCATION',None),
+    ('Иван приехал в Москву.','ARRIVE_CITY','ivan','DESTINATION','moscow'),
+    ('Иван уехал из Москвы.','DEPART_CITY','ivan','SOURCE','moscow'),
+])
+def test_fixture_government_makes_prepositional_roles_reachable(tmp_path,monkeypatch,text,predicate,person,role,entity):
+    result,script=run(tmp_path,monkeypatch,text,relation('LEXICAL'))
+    facts=result['assertions']['ah']
+    assert len(facts)==1 and facts[0]['predicate']==predicate
+    assert role in facts[0]['roles']
+    if entity:assert facts[0]['roles'][role]=={'entity':entity}
+    assert not any(slot in {'nominal_attachment','modifier_scope','source_assertion'} for slot,_ in script.calls)
+    assert not result['diagnostics']['codes']
+
+
+def test_optional_location_is_not_invented(tmp_path,monkeypatch):
+    result,_=run(tmp_path,monkeypatch,'Иван сидит.',relation('LEXICAL'),default='?')
+    assert result['assertions']['ah']==[{'predicate':'SIT_STATE','roles':{'THEME':{'entity':'ivan'}}}]
+
+
+def test_temporal_words_cannot_become_quality_predicates(tmp_path,monkeypatch):
+    result,_=run(tmp_path,monkeypatch,'Весь вчерашний день иван — врач.',
+        relation('LEXICAL')+[('structural_revision','DEFER')])
+    # Nominal predication is still unsupported here; no false OPEN:весь fact.
+    assert result['assertions']['ah']==[]
+    frames=result['runtime']['ir']['frames']
+    assert not any(f['anchor_span'].lower() in {'весь','вчерашний'} and
+                   not f['semantic'].get('structural_unresolved') for f in frames)
+    assert any(r.get('kind')=='TEMPORAL_PREDICATE_EXCLUDED' for r in result['runtime']['ir']['syntax_trace'])
+
+
+@pytest.mark.parametrize('text,object_word',[('Иван читает книгу.','книгу'),('Пётр написал письмо.','письмо')])
+def test_completed_dependency_provenance_is_not_a_linguistic_choice(tmp_path,monkeypatch,text,object_word):
+    result,script=run(tmp_path,monkeypatch,text,relation('LEXICAL')+[
+        ('nominal_dependency','Direct role OBJECT')],default='?')
+    assert len(result['assertions']['ah'])==1
+    assert not any(slot=='child_slot' for slot,_ in script.calls)
+    rows=[r for r in result['runtime']['ir']['syntax_trace'] if r.get('kind')=='COMPOSITION_EQUIVALENT_SOURCES']
+    assert any(q['kind']=='FIXED_DEPENDENCY' for r in rows for s in r['sources'] for q in s['component_questions'])
+
+
+@pytest.mark.parametrize('kind,expected',[
+    ('STRUCTURAL_REVISION_STALLED','Повторены те же локальные решения'),
+    ('TEMPORAL_PREDICATE_EXCLUDED','распознанное временное выражение'),
+])
+def test_new_failure_paths_have_readable_gui_explanations(kind,expected):
+    from test_formalization_readable import sample,visible
+    from ah.gui.formalization_inspection import Inspection
+    from ah.gui.formalization_readable import ReadableInspection
+    data=sample();data['state']['syntax_trace']=[{'kind':kind,'source_range':[0,26],'predicate_ref':'read'}]
+    inspection=Inspection(data);reader=ReadableInspection(inspection)
+    assert expected in visible(reader.explain(inspection.by_ref['trace:0']))
+    assert expected in reader.report([])

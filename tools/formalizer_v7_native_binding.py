@@ -113,12 +113,27 @@ LEXICAL_MAPPINGS = (
     ('READ_PERFECTIVE', 'прочитать', 'READ', 'EVENT'),
 )
 
+# Government belongs to the lexical fixture, independently of oracle phrases.
+# A case alone licenses only a bare nominal, never a prepositional argument.
+PREPOSITIONAL_VALENCIES = {
+    ('PUT','LOCATION'):('в','на','под','за'),
+    ('LOCATIVE','LOCATION'):('в','на'),
+    ('LIE','LOCATION'):('в','на'),
+    ('GO','LOCATION'):('в','на'),
+    ('SIT_STATE','LOCATION'):('в','на'),
+    ('ARRIVE_CITY','LOCATION'):('в','на'),
+    ('DEPART_CITY','SOURCE'):('из','с','от'),
+    ('LIE_DOWN','LOCATION'):('в','на','под','за'),
+}
+
 def fixture(core, profile):
     senses=[]; aliases={}
     for pred,lemma,mode,roles in LEXICON:
         rr=[]
         for _,rid,case,typ in roles:
             r=role(rid,(case,));r['argument_types']=[typ]
+            if (pred,rid) in PREPOSITIONAL_VALENCIES:
+                r['allowed_preps']=list(PREPOSITIONAL_VALENCIES[pred,rid])
             # Optional roles remain explicitly optional, not made up by the model.
             if rid in {'RECIPIENT','LOCATION'}: r['cardinality']['min']=0;r['optionality']=True
             rr.append(r)

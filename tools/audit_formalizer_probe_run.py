@@ -22,9 +22,13 @@ SLOTS={
     'nominal_attachment':'Присоединение именной группы',
     'component_attachment':'Состав и чтение конструкции',
     'modifier_scope':'Область модификатора', 'source_assertion':'Утверждаемость содержания',
+    'structural_owner':'Предикат — владелец содержания',
+    'structural_content_role':'Роль и статус вложенного содержания',
+    'structural_oov_reading':'Грамматическое чтение неизвестного слова',
 }
 for key,label in [('structural_introducer','Вводящее выражение'),('structural_content','Вложенное содержание'),
-                  ('structural_operand_1','Первая часть'),('structural_operand_2','Вторая часть')]:
+                  ('structural_operand_1','Первая часть'),('structural_operand_2','Вторая часть'),
+                  ('structural_parent','Родительская часть'),('structural_quantifier','Квантор')]:
     SLOTS[key+'_start']=label+': начало'
     SLOTS[key+'_end']=label+': конец'
 

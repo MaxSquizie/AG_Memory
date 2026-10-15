@@ -23,6 +23,13 @@ def build_clause(state,release,selector,region,tokens,p,cfg, *, select=True, att
             for a,b in boundary_spans(rule,m):
                 lo,hi = region.source_range[0]+a,region.source_range[0]+b
                 temporal.update(e.token_id for e in tokens if lo <= e.start and e.end <= hi)
+    # The same released temporal ownership already excludes arguments below.
+    # It must also exclude a predicate inside the time expression.
+    if p.token_id in temporal:
+        state.syntax_trace.append({'kind':'TEMPORAL_PREDICATE_EXCLUDED','region_ref':region.region_id,
+            'source_range':list(region.source_range),'predicate_ref':p.token_id,
+            'temporal_refs':sorted(temporal)})
+        return []
     from .component_phrases import prepositional_groups
     groups=prepositional_groups(tokens,temporal)
     prep_markers={g['token_ref'] for g in groups.values()}

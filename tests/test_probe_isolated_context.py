@@ -69,7 +69,8 @@ def test_child_question_does_not_reassign_removed_outer_words(tmp_path,monkeypat
     child=[p for slot,p in script.calls if slot=='structural_relation'][1]
     target=child.split('Resolve ONLY the target area «',1)[1].split('»',1)[0]
     assert 'не' not in target and 'Иван' in target and 'пришёл' in target
-    assert 'Context span: Иван не пришёл.' in child
+    assert 'Context span: '+target in child
+    assert 'Surrounding source (reference only): Иван не пришёл.' in child
     assert result['assertions']['ah'][0]['operator']=='NOT'
     decisions=result['runtime']['ir']['decisions']
     decisions=decisions.values() if isinstance(decisions,dict) else decisions
@@ -88,8 +89,9 @@ def test_partition_is_a_proposal_not_a_declared_fact(tmp_path,monkeypatch):
     _,script=run(tmp_path,monkeypatch,'Неверно, что Иван пришёл.',
         unary('NOT','Неверно','что')+relation('LEXICAL'))
     p=next(p for slot,p in script.calls if slot=='structural_partition')
-    assert 'proposed content parts' in p and 'proposed linking words' in p
-    assert 'Answer 0 if' in p and 'Every remaining token belongs' not in p
+    assert 'Proposed split' in p and 'outer relation words: «Неверно что»' in p
+    assert 'punctuation outside parts: «, .»' in p
+    assert 'answer 0 if' in p and 'Every remaining token belongs' not in p
     assert 'UNKNOWN' not in p and 'fixture:T:' not in p
 
 
@@ -105,3 +107,57 @@ def test_readable_choices_use_separate_audit_after_serialization():
     reader=ReadableInspection(Inspection(sample()))
     rows=reader.choices(json.loads(json.dumps(asdict(d))))
     assert rows[0][1]=='first meaning' and rows[1][1]=='second meaning'
+
+
+def test_reserved_content_and_feedback_are_scoped_to_their_region(tmp_path,monkeypatch):
+    from test_structural_relation_tasks import content_steps
+    steps=content_steps('сказала','Иван','вошёл','Мария')
+    first=steps[:5]+[('structural_partition','0'),('structural_revision','REVISE')]
+    result,script=run(tmp_path,monkeypatch,'Мария сказала: «Иван вошёл».',
+        first+steps+relation('LEXICAL'))
+    questions=[p for slot,p in script.calls if slot=='structural_relation']
+    assert 'Earlier attempt:' in questions[1]
+    parent,body=questions[2:]
+    assert 'already been separated' in parent
+    assert 'Context span: Мария сказала\n' in parent
+    assert 'Earlier attempt:' not in parent and 'Earlier attempt:' not in body
+    assert 'already been separated' not in body
+    partition=next(p for slot,p in script.calls if slot=='structural_partition')
+    assert 'parent intentionally has an open content slot' in partition
+    assert 'parent clause with a content slot: «Мария сказала»' in partition
+    assert result['assertions']['ah'][0]['predicate']=='SAY'
+
+
+def test_repeated_failed_assignment_stops_without_another_revision_probe(tmp_path,monkeypatch):
+    first=binary('AND',('Иван','пришёл'),('Мария','спит'))[:5]+[('structural_partition','0')]
+    result,script=run(tmp_path,monkeypatch,'Иван пришёл и Мария спит.',
+        first+[('structural_revision','REVISE')]+first)
+    assert not result['assertions']['ah']
+    assert 'STRUCTURAL_REVISION_NO_PROGRESS' in result['diagnostics']['codes']
+    assert sum(slot=='structural_revision' for slot,_ in script.calls)==1
+
+
+def test_changed_partial_grammar_state_is_progress_even_with_same_outer_choice(monkeypatch):
+    from ah.formalizer import component_refinement,relation_composition,structural_tasks
+    from ah.formalizer.state import Diagnostic
+    state=SimpleNamespace(syntax_trace=[],diagnostics=[],decisions={},component_probe_records={})
+    state.diag=lambda code,detail:state.diagnostics.append(Diagnostic(code,detail))
+    region=SimpleNamespace(region_id='region:test',source_range=(0,1))
+    release=SimpleNamespace(entries=lambda name:[{'max_depth':10,'composition':{'structural_tasks':'CLOSED_RELATIONS_V1'}}])
+    calls=[];revisions=[]
+    def compose(*args):
+        calls.append(True)
+        state.syntax_trace.append({'kind':'STRUCTURAL_TASK','region_ref':region.region_id,
+            'slot':'structural_relation','selected':'LEXICAL','status':'SELECTED','reason':'ONE_SELECTED',
+            'alternatives':[{'candidate_id':'LEXICAL','label':'One predication'}]})
+        # Same outer type, different retained grammar domain on the second attempt.
+        role='OBJECT' if len(calls)==1 else 'LOCATION'
+        return [SimpleNamespace(frame_id='partial',semantic={'structural_unresolved':True,
+            'proposed_roles':{'word':role}})]
+    def revise(*args):
+        revisions.append(True);return {'candidate_id':'REVISE'},{}
+    monkeypatch.setattr(relation_composition,'compose',compose)
+    monkeypatch.setattr(structural_tasks,'choose',revise)
+    component_refinement._compose_area(state,release,None,region,[],{'refinement':{'max_depth':4}})
+    assert len(calls)==3 and len(revisions)==2
+    assert state.diagnostics[-1].code=='STRUCTURAL_REVISION_NO_PROGRESS'

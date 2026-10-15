@@ -30,5 +30,8 @@ def probe_context(state, region, cfg, local):
             break
         current=parent
         if current.kind=='SENTENCE': break
-    return state.text[slice(*current.source_range)], ('Resolve ONLY the target area «'+local.strip()+
-        '». The surrounding source is context for morphology/references, not additional arguments of this area. ')
+    surrounding=state.text[slice(*current.source_range)]
+    return local.strip()+'\nSurrounding source (reference only): '+surrounding, (
+        'Resolve ONLY the target area «'+local.strip()+
+        '». Words in the surrounding source but outside this target are not part of the current task. '
+        'Use them only to understand references and grammar. ')

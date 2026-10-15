@@ -67,6 +67,8 @@ TRACE = {'FEATURE_CHECK_BATCH':'Проверка грамматических п
     'STRUCTURAL_RELATION_COMPOSED':'Связь собрана из согласованных частей',
     'COMPOSITION_PRODUCERS':'Проверка всех источников разбора',
     'COMPOSITION_EQUIVALENT_SOURCES':'Совпадающие результаты источников',
+    'STRUCTURAL_REVISION_STALLED':'Пересмотр повторил тот же разбор',
+    'TEMPORAL_PREDICATE_EXCLUDED':'Слово временного выражения исключено из предикатов',
     'ATTITUDE_COMPOSITION':'Вложенное содержание высказывания',
     'DEFERRED_CLAUSE_BOUNDARY':'Разбиение отложено до проверки вложенности',
     'COMPOSITION_SOURCE_DOMAIN':'Источники вариантов разбора', 'SCOPE_DOMAIN':'Варианты области действия',
@@ -78,6 +80,7 @@ TRACE = {'FEATURE_CHECK_BATCH':'Проверка грамматических п
 DIAGNOSTICS = {'COMPOSITION_SCOPE_BOUNDARY_CHANGED':'При объединении изменилось содержимое цельного условия.',
     'STRUCTURAL_TASK_UNRESOLVED':'Тип связи, границы или вложенные части ещё не согласованы. Отдельные части не записаны как самостоятельные факты.',
     'STRUCTURAL_TASK_SEARCH_INCOMPLETE':'Достигнут предел поиска или размера контекста. Это не означает отсутствия подходящего разбора.',
+    'STRUCTURAL_REVISION_NO_PROGRESS':'Пересмотр повторил те же варианты и ту же ошибку. Повторный поиск остановлен; разбор остаётся неразрешённым.',
     'COMPOSITION_PRODUCER_PENDING':'Один из источников разбора ещё не разрешён. Готовый вариант другого источника не признан единственным.',
     'ARITHMETIC_QUANTIFIER_DEFERRED':'Числовой квантор отложен: арифметический движок не включён.',
     'ATTITUDE_SLOT_UNCLOSED':'Не подтверждены границы или владелец вложенного высказывания. Его содержание не записано как самостоятельный факт.',
@@ -516,6 +519,12 @@ class ReadableInspection:
             out+=paragraph('Порция: '+str(r.get('page',0)+1)+'. Рассмотрено вариантов: '+str(r.get('examined',0))+'.')
             if r.get('enumeration_complete') is False:out+=paragraph('Остались непоказанные варианты. Локальный выбор не означает полного перебора.')
             if r.get('alternatives'):out+=table(['Вариант','Выбор'],[[esc(self.task_choice(v)),'Выбран' if v.get('candidate_id')==r.get('selected') else 'Не выбран'] for v in r['alternatives']])
+        elif c=='Трасса' and r.get('kind')=='STRUCTURAL_REVISION_STALLED':
+            out+=paragraph('Повторены те же локальные решения без устранения ошибки. Нового различающего свидетельства нет. '
+                           'Разбор оставлен неразрешённым; одинаковые вопросы дальше не отправляются.')
+        elif c=='Трасса' and r.get('kind')=='TEMPORAL_PREDICATE_EXCLUDED':
+            out+=paragraph('Слово «'+self.word(r.get('predicate_ref'))+'» входит в распознанное временное выражение. '
+                           'Оно не может одновременно стать предикатом этой конструкции.')
         elif c=='Трасса' and r.get('kind')=='COMPOSITION_EQUIVALENT_SOURCES':
             out+=paragraph('Грамматический и компонентный разбор дали одну и ту же простую предикацию. '
                            'Совпали исходные слова, роли, морфологические чтения и допустимые валентные привязки. '
@@ -560,7 +569,7 @@ class ReadableInspection:
 
     def report(self,notes):
         body='<h1>Проверка формализации</h1><h2>Исходный текст</h2><pre style="white-space:pre-wrap">'+esc(self.index.text)+'</pre>'+self.overview()
-        entries=[e for e in self.index.entries if e.category in {'Решения','Границы условий','Диагностика','Привязки'} or e.category=='Трасса' and e.record.get('kind') in {'STRUCTURAL_TASK','STRUCTURAL_RELATION_COMPOSED','COMPOSITION_PRODUCERS','COMPOSITION_EQUIVALENT_SOURCES'}]
+        entries=[e for e in self.index.entries if e.category in {'Решения','Границы условий','Диагностика','Привязки'} or e.category=='Трасса' and e.record.get('kind') in {'STRUCTURAL_TASK','STRUCTURAL_RELATION_COMPOSED','COMPOSITION_PRODUCERS','COMPOSITION_EQUIVALENT_SOURCES','STRUCTURAL_REVISION_STALLED','TEMPORAL_PREDICATE_EXCLUDED'}]
         for e in entries[:1000]:body+='<hr>'+self.explain(e)
         if len(entries)>1000:body+=paragraph('Отчёт ограничен первыми 1000 записями. Полный снимок сохраните отдельно для повторного открытия.')
         body+='<h2>Замечания проверяющего</h2>'+table(['Оценка','Фрагмент','Комментарий'],[[esc(n.get('verdict','')),esc(self.excerpt(n.get('source_range'))),esc(n.get('comment',''))] for n in notes])

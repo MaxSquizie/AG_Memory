@@ -59,16 +59,17 @@ def _compose_area(state, release, selector, region, tokens, cfg, depth=0, attach
         from .structural_tasks import choose
         from .composition_tree import roots
         from .component_probe_replay import supersede
-        from dataclasses import replace
-        from .composition_tree import InputSlot
         import json
-        retired=[]
+        retired=[];attempts=set()
         for revision in range(cfg.get('refinement',{}).get('max_depth',16)):
             begin=len(state.syntax_trace);diagnostics_begin=len(state.diagnostics)
+            # Feedback concerns this region. Child inputs carry their own typed
+            # constraints; an ancestor's failed split is not child evidence.
+            child_cfg={k:v for k,v in cfg.items() if k not in {'_task_constraints','_task_constraints_text'}}
             result=compose(state,release,selector,region,tokens,cfg,request,
                 lambda owned,slot:compose_area(state,release,selector,region_for(state,region,owned,'RELATION_CHILD'),
-                    owned,cfg,depth+1,attachment=attachment,infinitive=(slot.controller if slot and slot.controller else infinitive),
-                    request=replace(slot or InputSlot(),constraint_signature=digest(cfg['_task_constraints'])) if cfg.get('_task_constraints') else slot))
+                    owned,child_cfg,depth+1,attachment=attachment,infinitive=(slot.controller if slot and slot.controller else infinitive),
+                    request=slot))
             if result is None:
                 result=_compose_lexical_area(state,release,selector,region,tokens,
                     {**cfg,'_literal_relation':True},depth,attachment,infinitive,request)
@@ -93,13 +94,25 @@ def _compose_area(state, release, selector, region, tokens, cfg, depth=0, attach
             constraints=json.dumps({'rejected_choices':[
                 {'slot':r['slot'],'value':next((v for v in r.get('alternatives',()) if v['candidate_id']==r.get('selected')),None)}
                 for r in tasks if r.get('selected')], 'failures':reasons},ensure_ascii=False,sort_keys=True)
+            local_regions={region.region_id,*(r.get('region_ref') for r in tasks)}
+            related=used if runtime else {k for k in state.decisions if any(k.startswith(r+'|') for r in local_regions if r)}
+            nonstructural=[(k,d.candidates,d.selected,d.selector_outcome) for k in sorted(related)
+                if (d:=state.decisions.get(k)) is not None and not d.slot_id.startswith('structural_')]
+            signature=digest([[(r.get('region_ref'),r['slot'],r.get('selected'),r.get('reason'),
+                [v['candidate_id'] for v in r.get('alternatives',())]) for r in tasks],sorted(set(reasons)),
+                nonstructural,[(f.frame_id,f.semantic) for f in result]])
+            if signature in attempts:
+                state.syntax_trace.append({'kind':'STRUCTURAL_REVISION_STALLED','region_ref':region.region_id,
+                    'source_range':list(region.source_range),'attempts':revision+1})
+                return block(state,region,result,'STRUCTURAL_REVISION_NO_PROGRESS')
+            attempts.add(signature)
             selected_descriptions=[v['label'] for r in tasks if r.get('selected')
                 for v in r.get('alternatives',()) if v['candidate_id']==r['selected']]
             uncovered={tid for f in result for tid in f.semantic.get('uncovered_token_refs',())}
             constraint_text='Tried: '+'; '.join(selected_descriptions)+'. No complete parse was built.'
             if uncovered:
                 constraint_text+=' Uncovered words: «'+' '.join(t.span for t in tokens if t.token_id in uncovered)+'».'
-            constraint_text+=' This may be a parser limitation; failure alone does not prove that the reading is wrong.'
+            constraint_text+=' This may be a parser limitation; failure alone does not prove that the reading is wrong. Repeating the same choices is not a revision.'
             revision_choice=choose(state,release,selector,region,cfg,'structural_revision',[
                 {'candidate_id':'REVISE','label':'The text supports a different relation or different boundaries; reconsider them'},
                 {'candidate_id':'DEFER','label':'No different reading is supported; leave the parse unresolved'}],

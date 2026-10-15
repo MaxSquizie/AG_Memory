@@ -9,6 +9,7 @@ from .canonical_ledger import digest
 from .composition_tree import InputSlot,expression,internalize,leaves
 from .composition_children import select_child
 from .structural_tasks import choose,span
+import unicodedata
 
 
 RELATIONS={
@@ -57,14 +58,27 @@ def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof
     if len(refs)!=len(set(refs)) or not refs:return None
     used=set(refs);markers=[t for t in tokens if t.token_id not in used]
     parts=['«'+' '.join(t.span for t in g)+'»' for g in groups]
+    punctuation=[t for t in markers if all(unicodedata.category(c).startswith('P') for c in t.span)]
+    punctuation_refs={t.token_id for t in punctuation}
+    links=[t for t in markers if t.token_id not in punctuation_refs]
+    names=(['parent clause with a content slot', 'content filling that slot'] if kind=='CONTENT' else
+           ['condition','consequence'] if kind in {'IMPLIES','COUNTERFACTUAL'} else
+           ['restriction and whole body'] if kind in {'FORALL','EXISTS'} else
+           ['part '+str(i+1) for i in range(len(groups))])
+    description='; '.join(name+': '+part for name,part in zip(names,parts))
     option={'candidate_id':'PARTITION','relation':kind,'operands':[[t.token_id for t in g] for g in groups],
         'marker_refs':[t.token_id for t in markers],'relation_proof':proof,
-        'label':kind+'; proposed content parts: '+'; '.join(parts)+'; proposed linking words/punctuation: «'+
-        ' '.join(t.span for t in markers)+'»'}
+        'label':'Proposed split — '+description+'; outer relation words: «'+
+        ' '.join(t.span for t in links)+'»; punctuation outside parts: «'+
+        ' '.join(t.span for t in punctuation)+'»'}
     result=choose(state,release,selector,region,cfg,'structural_partition',[option],
-        RELATIONS[kind]+'. Check the proposed split. Are the content parts complete, and are the remaining words '
-        'only the outer link? Answer 0 if a participant or predicate was removed from content, or an outer linking '
-        'word remains inside it. Preserve inner negation, modality and quantifiers. For an implicit relation the link may be empty.')
+        'Does this split preserve the source meaning as: '+RELATIONS[kind]+'? '
+        'Each part keeps its participants, predicate and inner negation, modality or quantifiers. '
+        +('The parent intentionally has an open content slot: the second part fills it. '
+          'The parent does not need to be a complete standalone sentence. ' if kind=='CONTENT' else '')+
+        'Outer relation words express the selected relation; punctuation may separate or enclose the parts. '
+        'An implicit relation needs no linking word. Choose the split if it preserves the meaning; '
+        'answer 0 if words have been assigned to the wrong part, and ? if the text does not decide.')
     return (markers,result[1]) if result else None
 
 
@@ -117,7 +131,13 @@ def child(state,release,selector,region,tokens,cfg,compose,request,contract):
 def compose(state,release,selector,region,tokens,cfg,request,compose_child):
     if request and request.output_sort=='EVENT_DESCRIPTION':return None
     options=[{'candidate_id':k,'relation':k,'label':v} for k,v in RELATIONS.items()]
-    result=choose(state,release,selector,region,cfg,'structural_relation',options,
+    supplied=''
+    if request and request.pending_proposition_roles:
+        supplied=('The dependent content outside this target has already been separated and will fill the parent predicate\'s content slot. '
+                  'Choose the structure of the remaining target only; do not extract that same content again. ')
+    if request and request.agreement_source:
+        supplied+='The outside word «'+request.agreement_source.span+'» supplies agreement for a dependent infinitive in this target. '
+    result=choose(state,release,selector,region,cfg,'structural_relation',options,supplied+
         'Which option describes the WHOLE target area? Choose the outermost relation; inner relations are handled later. '
         'A verb with a dependent clause or quotation uses the content option, not the single-predication option. '
         'Numeric quantification is deferred.')
