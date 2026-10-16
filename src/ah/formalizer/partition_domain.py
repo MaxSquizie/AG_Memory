@@ -22,6 +22,7 @@ class PartitionProposal:
     groups: list
     data: object = None
     shared_functions: tuple = ()
+    owner_choice: object = None
 
 
 class PartitionDomain:

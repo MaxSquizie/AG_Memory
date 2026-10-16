@@ -16,7 +16,7 @@ from tools.run_formalizer_v7_bound_oracle import coverage,dump,sha
 
 def main(argv=None):
     p=argparse.ArgumentParser(description=__doc__)
-    p.add_argument('--corpus',type=Path,default=ROOT/'data/formalizer_v7_oracle_v2')
+    p.add_argument('--corpus',type=Path,default=ROOT/'data/formalizer_v7_oracle_v3')
     p.add_argument('--out',type=Path,required=True)
     p.add_argument('--provider',choices=['disabled','lmstudio','ollama','openai','replay'],default='disabled')
     p.add_argument('--base-url',default=None)

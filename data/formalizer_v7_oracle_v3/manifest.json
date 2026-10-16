@@ -1,0 +1,56 @@
+{
+  "artifact_verifier_sha256": "9795b718b67bd2483fb851acc3f1aac7f7d84e9418c84077fdefa7b323468289",
+  "artifacts": {
+    "BASE_MIGRATION_V2.json": "39b0355e26e9c9cd8c843c6483d94e24a13b191a49c4961f72d5b3b79a72dd97",
+    "COVERAGE.md": "7dc5290ad95e35f07c9d1a1986c6ec4333e403a5f2f0db626495335239d6bc7d",
+    "MIGRATION.json": "c212becef5760786cef1170fc427adff9b2c341cc81cd59c5f25eda9e94875fd",
+    "README.md": "c6265cceff0ded6dee2de831ea6ae3186bde5450411f6f476fdabeeed0d78180",
+    "SPEC_NOTES.md": "eed24d3b513fa65f5f88621f22b557b26dbf7d2fea24c518a9129d29ffefbbba",
+    "actions.json": "5a0af5fb643760a5226c5b447e464f463c210b6b8d45697195402cc52270f780",
+    "cases.jsonl": "7c39da6ea14b223eca520dc9a926dc301e61462203e0b612268808719fedad10",
+    "coverage.json": "894f3c21802d1989118faa7be0cab016f052ca9c7abf00c830f73bdd4a410033",
+    "fixtures.json": "1db25e9cb635d569d03c19803434acebe018971f40e39749ebe077a5a1a81cba",
+    "mechanisms.json": "0ba3bf9afb598e87eea5696f8d2ac69295f79402f73242de720f4866b25628d0",
+    "oracle.schema.json": "7682fe50ad4df8999c5b8cab7faa14b5eb7b9652afa4e77c9c8a68bbc5775088",
+    "source_map.json": "7d6fc501fe94fcd24e934479f649c0df6e4af308fbdd69fec31838d5dd2cd62a"
+  },
+  "checker_sha256": "4d04d33a560260e1e1d7ee06a36c32a705c77bbe6869a082606cea1dd66104b0",
+  "gates": {
+    "G0": "NOT_EVALUATED",
+    "G1": "NOT_EVALUATED",
+    "G2": "NOT_EVALUATED",
+    "G3": "NOT_EVALUATED",
+    "G4": "NOT_EVALUATED",
+    "G5": "NOT_EVALUATED"
+  },
+  "generator_sha256": "8934e51bbfc0258e402d2f9b2c419cc76b72fd1591d9bb0056535f40b75d7fb9",
+  "gold_authoring": "independent normative symbolic fixtures; never SUT-derived",
+  "migration_tool_sha256": "de9de52bf077214231e73e252ef4f3adb0a1cb015e3395ee726dd68cc16163ae",
+  "observer_contract": "v7-observer-3",
+  "project_commit_reference": "ce80c890f30bf0559da03ea8d8bae4c257647bea",
+  "requires_adapter_binding": true,
+  "schema_version": "v7-oracle-manifest-1",
+  "source_document": {
+    "bytes": 567911,
+    "filename": "FORMALIZER_ARCHITECTURE_V7(2).md",
+    "sha256": "a334e8d11837255577dfddf0a37bf30c41c7cee47b16ed1995d05cab87e70948"
+  },
+  "stats": {
+    "acceptance_requirements": 39,
+    "cases": 2542,
+    "cases_by_tier": {
+      "component": 1831,
+      "durability": 71,
+      "pipeline": 640
+    },
+    "checks": 12899,
+    "dry_run_requirements": 31,
+    "g5_holdout_claim": false,
+    "language_pattern_families": 32,
+    "mechanisms": 118,
+    "steps": 2725,
+    "time_vectors": 15,
+    "unique_raw_inputs": 643
+  },
+  "status": "AUTHORED_NOT_EXECUTED"
+}

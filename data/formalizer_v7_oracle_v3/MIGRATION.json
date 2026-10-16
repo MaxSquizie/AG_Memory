@@ -1,0 +1,1174 @@
+{
+  "base_manifest_sha256": "64376b82318217f902a3bbe11429be6c02756591ed9efc3feba0b11584f81404",
+  "changes": [
+    {
+      "case_id": "A35",
+      "change": "OPEN core subject EXPERIENCER -> SUBJECT",
+      "reason": "overt subject of the parent predicate; architecture A35 requires scoped lexical content, not an EXPERIENCER label"
+    },
+    {
+      "case_id": "LANG-00-0-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "ENTER",
+        "roles": {
+          "AGENT": {
+            "entity": "ivan"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-00-1-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "ENTER",
+        "roles": {
+          "AGENT": {
+            "entity": "petr"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-00-2-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "ENTER",
+        "roles": {
+          "AGENT": {
+            "entity": "sergey"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-00-3-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "ENTER",
+        "roles": {
+          "AGENT": {
+            "entity": "alexey"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-01-0-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "ENTER",
+        "roles": {
+          "AGENT": {
+            "entity": "ivan"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-01-1-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "ENTER",
+        "roles": {
+          "AGENT": {
+            "entity": "petr"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-01-2-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "ENTER",
+        "roles": {
+          "AGENT": {
+            "entity": "sergey"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-01-3-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "ENTER",
+        "roles": {
+          "AGENT": {
+            "entity": "alexey"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-02-0-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "READ",
+        "roles": {
+          "AGENT": {
+            "entity": "ivan"
+          },
+          "THEME": {
+            "entity": "book"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-02-1-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "READ",
+        "roles": {
+          "AGENT": {
+            "entity": "petr"
+          },
+          "THEME": {
+            "entity": "book"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-02-2-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "READ",
+        "roles": {
+          "AGENT": {
+            "entity": "sergey"
+          },
+          "THEME": {
+            "entity": "book"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-02-3-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "READ",
+        "roles": {
+          "AGENT": {
+            "entity": "alexey"
+          },
+          "THEME": {
+            "entity": "book"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-03-0-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "READ",
+        "roles": {
+          "AGENT": {
+            "entity": "ivan"
+          },
+          "THEME": {
+            "entity": "book"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-03-1-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "READ",
+        "roles": {
+          "AGENT": {
+            "entity": "petr"
+          },
+          "THEME": {
+            "entity": "book"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-03-2-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "READ",
+        "roles": {
+          "AGENT": {
+            "entity": "sergey"
+          },
+          "THEME": {
+            "entity": "book"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-03-3-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "READ",
+        "roles": {
+          "AGENT": {
+            "entity": "alexey"
+          },
+          "THEME": {
+            "entity": "book"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-04-0-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "TRANSFER",
+        "roles": {
+          "AGENT": {
+            "entity": "ivan"
+          },
+          "RECIPIENT": {
+            "entity": "maria"
+          },
+          "THEME": {
+            "entity": "book"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-04-1-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "TRANSFER",
+        "roles": {
+          "AGENT": {
+            "entity": "petr"
+          },
+          "RECIPIENT": {
+            "entity": "maria"
+          },
+          "THEME": {
+            "entity": "book"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-04-2-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "TRANSFER",
+        "roles": {
+          "AGENT": {
+            "entity": "sergey"
+          },
+          "RECIPIENT": {
+            "entity": "maria"
+          },
+          "THEME": {
+            "entity": "book"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-04-3-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "TRANSFER",
+        "roles": {
+          "AGENT": {
+            "entity": "alexey"
+          },
+          "RECIPIENT": {
+            "entity": "maria"
+          },
+          "THEME": {
+            "entity": "book"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-05-0-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "TRANSFER",
+        "roles": {
+          "AGENT": {
+            "entity": "ivan"
+          },
+          "RECIPIENT": {
+            "entity": "maria"
+          },
+          "THEME": {
+            "entity": "book"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-05-1-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "TRANSFER",
+        "roles": {
+          "AGENT": {
+            "entity": "petr"
+          },
+          "RECIPIENT": {
+            "entity": "maria"
+          },
+          "THEME": {
+            "entity": "book"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-05-2-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "TRANSFER",
+        "roles": {
+          "AGENT": {
+            "entity": "sergey"
+          },
+          "RECIPIENT": {
+            "entity": "maria"
+          },
+          "THEME": {
+            "entity": "book"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-05-3-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "TRANSFER",
+        "roles": {
+          "AGENT": {
+            "entity": "alexey"
+          },
+          "RECIPIENT": {
+            "entity": "maria"
+          },
+          "THEME": {
+            "entity": "book"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-06-0-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "DOCTOR",
+        "roles": {
+          "THEME": {
+            "entity": "ivan"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-06-1-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "DOCTOR",
+        "roles": {
+          "THEME": {
+            "entity": "petr"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-06-2-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "DOCTOR",
+        "roles": {
+          "THEME": {
+            "entity": "sergey"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-06-3-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "DOCTOR",
+        "roles": {
+          "THEME": {
+            "entity": "alexey"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-07-0-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "TIRED",
+        "roles": {
+          "EXPERIENCER": {
+            "entity": "ivan"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-07-1-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "TIRED",
+        "roles": {
+          "EXPERIENCER": {
+            "entity": "petr"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-07-2-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "TIRED",
+        "roles": {
+          "EXPERIENCER": {
+            "entity": "sergey"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-07-3-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "TIRED",
+        "roles": {
+          "EXPERIENCER": {
+            "entity": "alexey"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-08-0-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "SIT_STATE",
+        "roles": {
+          "LOCATION": {
+            "entity": "chair"
+          },
+          "THEME": {
+            "entity": "ivan"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-08-1-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "SIT_STATE",
+        "roles": {
+          "LOCATION": {
+            "entity": "chair"
+          },
+          "THEME": {
+            "entity": "petr"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-08-2-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "SIT_STATE",
+        "roles": {
+          "LOCATION": {
+            "entity": "chair"
+          },
+          "THEME": {
+            "entity": "sergey"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-08-3-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "SIT_STATE",
+        "roles": {
+          "LOCATION": {
+            "entity": "chair"
+          },
+          "THEME": {
+            "entity": "alexey"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-09-0-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "WORK",
+        "roles": {
+          "AGENT": {
+            "entity": "ivan"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-09-1-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "WORK",
+        "roles": {
+          "AGENT": {
+            "entity": "petr"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-09-2-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "WORK",
+        "roles": {
+          "AGENT": {
+            "entity": "sergey"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-09-3-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "WORK",
+        "roles": {
+          "AGENT": {
+            "entity": "alexey"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-10-0-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "OPEN",
+        "roles": {
+          "AGENT": {
+            "entity": "ivan"
+          },
+          "THEME": {
+            "entity": "window"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-10-1-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "OPEN",
+        "roles": {
+          "AGENT": {
+            "entity": "petr"
+          },
+          "THEME": {
+            "entity": "window"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-10-2-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "OPEN",
+        "roles": {
+          "AGENT": {
+            "entity": "sergey"
+          },
+          "THEME": {
+            "entity": "window"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-10-3-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "OPEN",
+        "roles": {
+          "AGENT": {
+            "entity": "alexey"
+          },
+          "THEME": {
+            "entity": "window"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-11-0-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "CALL",
+        "roles": {
+          "AGENT": {
+            "entity": "ivan"
+          },
+          "RECIPIENT": {
+            "entity": "maria"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-11-1-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "CALL",
+        "roles": {
+          "AGENT": {
+            "entity": "petr"
+          },
+          "RECIPIENT": {
+            "entity": "maria"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-11-2-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "CALL",
+        "roles": {
+          "AGENT": {
+            "entity": "sergey"
+          },
+          "RECIPIENT": {
+            "entity": "maria"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-11-3-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "CALL",
+        "roles": {
+          "AGENT": {
+            "entity": "alexey"
+          },
+          "RECIPIENT": {
+            "entity": "maria"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-12-0-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "WRITE",
+        "roles": {
+          "AGENT": {
+            "entity": "ivan"
+          },
+          "THEME": {
+            "entity": "letter"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-12-1-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "WRITE",
+        "roles": {
+          "AGENT": {
+            "entity": "petr"
+          },
+          "THEME": {
+            "entity": "letter"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-12-2-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "WRITE",
+        "roles": {
+          "AGENT": {
+            "entity": "sergey"
+          },
+          "THEME": {
+            "entity": "letter"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-12-3-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "WRITE",
+        "roles": {
+          "AGENT": {
+            "entity": "alexey"
+          },
+          "THEME": {
+            "entity": "letter"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-13-0-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "MEET",
+        "roles": {
+          "AGENT": {
+            "entity": "ivan"
+          },
+          "THEME": {
+            "entity": "courier"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-13-1-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "MEET",
+        "roles": {
+          "AGENT": {
+            "entity": "petr"
+          },
+          "THEME": {
+            "entity": "courier"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-13-2-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "MEET",
+        "roles": {
+          "AGENT": {
+            "entity": "sergey"
+          },
+          "THEME": {
+            "entity": "courier"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-13-3-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "MEET",
+        "roles": {
+          "AGENT": {
+            "entity": "alexey"
+          },
+          "THEME": {
+            "entity": "courier"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-14-0-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "ARRIVE_CITY",
+        "roles": {
+          "AGENT": {
+            "entity": "ivan"
+          },
+          "DESTINATION": {
+            "entity": "moscow"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-14-1-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "ARRIVE_CITY",
+        "roles": {
+          "AGENT": {
+            "entity": "petr"
+          },
+          "DESTINATION": {
+            "entity": "moscow"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-14-2-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "ARRIVE_CITY",
+        "roles": {
+          "AGENT": {
+            "entity": "sergey"
+          },
+          "DESTINATION": {
+            "entity": "moscow"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-14-3-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "ARRIVE_CITY",
+        "roles": {
+          "AGENT": {
+            "entity": "alexey"
+          },
+          "DESTINATION": {
+            "entity": "moscow"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-15-0-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "DEPART_CITY",
+        "roles": {
+          "AGENT": {
+            "entity": "ivan"
+          },
+          "SOURCE": {
+            "entity": "moscow"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-15-1-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "DEPART_CITY",
+        "roles": {
+          "AGENT": {
+            "entity": "petr"
+          },
+          "SOURCE": {
+            "entity": "moscow"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-15-2-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "DEPART_CITY",
+        "roles": {
+          "AGENT": {
+            "entity": "sergey"
+          },
+          "SOURCE": {
+            "entity": "moscow"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "LANG-15-3-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "DEPART_CITY",
+        "roles": {
+          "AGENT": {
+            "entity": "alexey"
+          },
+          "SOURCE": {
+            "entity": "moscow"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "NONFINITE-00-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "WANT",
+        "roles": {
+          "CONTENT": {
+            "predicate": "READ",
+            "roles": {
+              "AGENT": {
+                "entity": "ivan"
+              },
+              "THEME": {
+                "entity": "book"
+              }
+            }
+          },
+          "EXPERIENCER": {
+            "entity": "ivan"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "NONFINITE-01-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "DECIDE",
+        "roles": {
+          "AGENT": {
+            "entity": "ivan"
+          },
+          "CONTENT": {
+            "predicate": "OPEN",
+            "roles": {
+              "AGENT": {
+                "entity": "ivan"
+              },
+              "THEME": {
+                "entity": "window"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "case_id": "NONFINITE-02-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "INTEND",
+        "roles": {
+          "AGENT": {
+            "entity": "petr"
+          },
+          "CONTENT": {
+            "predicate": "DEPART",
+            "roles": {
+              "AGENT": {
+                "entity": "petr"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "case_id": "NONFINITE-03-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "REQUEST",
+        "roles": {
+          "ADDRESSEE": {
+            "entity": "ivan"
+          },
+          "AGENT": {
+            "entity": "maria"
+          },
+          "CONTENT": {
+            "predicate": "BRING",
+            "roles": {
+              "AGENT": {
+                "entity": "ivan"
+              },
+              "THEME": {
+                "entity": "book"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "case_id": "NONFINITE-04-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "DESIRE",
+        "roles": {
+          "CONTENT": {
+            "predicate": "SLEEP",
+            "roles": {
+              "AGENT": {
+                "entity": "speaker"
+              }
+            }
+          },
+          "EXPERIENCER": {
+            "entity": "speaker"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "NONFINITE-05-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "predicate": "HOPE",
+        "roles": {
+          "CONTENT": {
+            "predicate": "RETURN",
+            "roles": {
+              "AGENT": {
+                "entity": "ivan"
+              }
+            }
+          },
+          "EXPERIENCER": {
+            "entity": "ivan"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "NONFINITE-06-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "operands": [
+          {
+            "predicate": "READ",
+            "roles": {
+              "THEME": {
+                "entity": "book"
+              }
+            }
+          }
+        ],
+        "operator": "POSSIBLE"
+      }
+    },
+    {
+      "case_id": "NONFINITE-07-question",
+      "change": "require compiled query and exact accepted root",
+      "reason": "maximal tree of existing authored gold, preserving all nested scopes and roles",
+      "root": {
+        "operands": [
+          {
+            "predicate": "OPEN",
+            "roles": {
+              "THEME": {
+                "entity": "window"
+              }
+            }
+          }
+        ],
+        "operator": "NECESSARY"
+      }
+    }
+  ],
+  "observer_contract": "v7-observer-3",
+  "prior_migration": "BASE_MIGRATION_V2.json"
+}

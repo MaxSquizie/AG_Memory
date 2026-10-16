@@ -1,7 +1,55 @@
 """Versioned observations; no lexical guessing or access to expected answers."""
 from ah.formalizer.canonical_ledger import digest, region, region_data
 
-CONTRACT = 'v7-observer-2'
+CONTRACT = 'v7-observer-3'
+
+
+def modern(session):
+    return getattr(session,'observer_contract','v7-observer-1') in {'v7-observer-2','v7-observer-3'}
+
+
+def queries(session,state,release,coverage):
+    """Observe the production query compiler, not the generator's candidate set."""
+    if discourse(state)['modus'] not in {'QUERY','MIXED'}:
+        return {'status':'NOT_APPLICABLE','formulas':[],'records':[],'blockers':[]}
+    from ah.formalizer.native_queries import project_native_queries,compile_native_queries,Pattern,QueryVar
+    from ah.agent import InteractionContext
+    from tools.formalizer_v7_native_binding import decode_native
+    import json
+    roots=project_native_queries(state,release)
+    context=InteractionContext()
+    for name in ('user_ref','self_ref'):
+        ref=state.observation.get(name)
+        if ref:setattr(context,name,session.core.ref(ref))
+    built=compile_native_queries(session.core,roots,context)
+    def decode(value):
+        if isinstance(value,QueryVar):return {'query_var':value.name,'sort':value.sort.value}
+        if not isinstance(value,Pattern):return decode_native(session,value)
+        if value.operator:
+            children=[decode(v) for v in value.members]
+            if value.operator in {'AND','OR','XOR'}:children.sort(key=lambda v:json.dumps(v,sort_keys=True))
+            return {'operator':value.operator,'operands':children}
+        if value.lexical_anchor:
+            predicate=open_predicate(value.source_refs);roles={r.value:r.value for r,v in value.actants}
+        else:predicate,roles=session.native_aliases[value.template_ref]
+        return {'predicate':predicate,'roles':{roles.get(r.value,r.value):decode(v) for r,v in value.actants}}
+    records=[];formulas=[];blockers=[]
+    for root,result in zip(roots,built):
+        row={'tree':root.tree,'request':root.request,'temporal':root.temporal,'diagnostics':list(result.diagnostics),
+             'compiled':result.goal is not None}
+        if result.goal is not None:
+            target=result.goal.goal.target
+            pattern=getattr(target,'pattern',None)
+            if pattern is None:
+                row['compiled']=False;blockers.append('QUERY_OBSERVATION_TARGET_UNSUPPORTED')
+            else:
+                row['formula']=decode(pattern);formulas.append(row['formula'])
+        else:blockers.extend(result.diagnostics)
+        records.append(row)
+    if not roots:blockers.append('QUERY_ROOT_MISSING')
+    if coverage['level'] not in {'FULL_CANONICAL','OPEN_LEXICAL'}:blockers.append('QUERY_SOURCE_INCOMPLETE')
+    return {'status':'COMPILED' if roots and not blockers else 'BLOCKED','formulas':session.unique(formulas),
+            'records':records,'blockers':sorted(set(blockers))}
 
 
 def open_predicate(source_refs):

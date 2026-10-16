@@ -7,6 +7,7 @@ from copy import deepcopy
 from dataclasses import asdict
 from functools import lru_cache
 from pathlib import Path
+from tools.formalizer_v7_observer import modern
 import http.client
 import itertools, json, math, os, time, uuid
 from urllib.parse import urlparse
@@ -551,8 +552,8 @@ def native_candidate_patterns(session,state,release,limit=1024):
                 surface,lemma=selected_forms(frame,ev)
                 label=lemma or surface.casefold()
                 pred=({'open_source':list(frame.semantic.get('lexical_units',{}).get(frame.predicate_token_ref,{}).get('anchor_refs') or [frame.predicate_token_ref])}
-                      if getattr(session,'observer_contract','v7-observer-1')=='v7-observer-2' else 'OPEN:'+label)
-                role_map={r:(r if getattr(session,'observer_contract','v7-observer-1')=='v7-observer-2' else open_role_alias(r,proposition=r in frame.semantic.get('proposition_args',{}))) for r in role_ids}
+                      if modern(session) else 'OPEN:'+label)
+                role_map={r:(r if modern(session) else open_role_alias(r,proposition=r in frame.semantic.get('proposition_args',{}))) for r in role_ids}
             roles={};valid=True
             for tid,rid in spec['roles'].items():
                 value=entity(frame,tid)
@@ -736,7 +737,7 @@ def execute_native(session,p,config):
     structural=session.unique([decode_native(session,uid) for uid in L.s_accessible()-visible])
     open_nodes=[n for n in L.data['nodes'].values() if n.get('semantic_status')=='UNLINKED']
     source=[a for a in L.data['assertions'].values() if a['provenance']['source']['kind']=='OBSERVATION']
-    from tools.formalizer_v7_observer import discourse, temporal
+    from tools.formalizer_v7_observer import discourse, temporal, queries
     discourse_observation=discourse(state)
     modus=discourse_observation['modus']
     from ah.logic.function_registry import FunctionRegistry
@@ -751,6 +752,7 @@ def execute_native(session,p,config):
                       candidate_pattern_sources=pattern_sources,pattern_export_truncated=truncated)
     groups=[f for f in facts if any(isinstance(v,dict) and 'group' in v for v in f.get('roles',{}).values())]
     if groups:generation['coordination_kind']='NOMINAL_GROUP'
+    query_observation=queries(session,state,release,coverage) if getattr(session,'observer_contract',None)=='v7-observer-3' else None
     decisions=[{'frame_id':d.frame_id,'slot_id':d.slot_id,'outcome':d.outcome,
                 'selected':list(d.selected),'candidate_ids':list(d.candidates)} for d in state.decisions.values()]
     predicate_decisions=[d for d in decisions if d['slot_id']=='predicate_value']
@@ -769,6 +771,7 @@ def execute_native(session,p,config):
         'audit':{'raw_input_retained':state.text==text},
         'observer':{'contract':getattr(session,'observer_contract','v7-observer-1')},
         'discourse':discourse_observation,
+        **({'query':query_observation} if query_observation is not None else {}),
         'modus':modus,
         'goal':{'non_factive':not facts and modus in {'COMMAND','QUERY','AMBIGUOUS','UNKNOWN'}},
         'open':{'semantic_status':open_nodes[0]['semantic_status'] if open_nodes else None,
@@ -814,7 +817,7 @@ def decode_native(session,uid):
                 # Read open isolation metadata rather than guessing a gold word.
                 symbol=session.core.store.get_symbol(session.core.store.get_template(obj.template.uid).predicate.uid)
                 label=sorted(symbol.forms)[0] if symbol.forms else obj.template.uid
-            if getattr(session,'observer_contract','v7-observer-1')=='v7-observer-2':
+            if modern(session):
                 from tools.formalizer_v7_observer import open_predicate
                 pred=open_predicate(spec.get('lexical_source_refs',()))
                 role_map={r.value:r.value for r in obj.actants}

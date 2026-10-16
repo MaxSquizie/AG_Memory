@@ -5,7 +5,7 @@ produce UNKNOWN; query compilation never manufactures a canonical proposition.
 Only registered OR_ELIMINATION/FORALL_INST may write through the goal channel.
 """
 from __future__ import annotations
-from dataclasses import dataclass,replace
+from dataclasses import dataclass,replace,field
 from itertools import product,islice
 import re
 from ah.model import ActantRole,Ref,RefKind,BoundVar,TimeLiteral,VariableSort,CountLiteral
@@ -39,6 +39,7 @@ class Pattern:
     temporal: dict | None=None
     query_owner: bool=False  # runtime intent attachment; never part of content identity
     occurrence_ref: str | None=None  # pin one already canonical event for aggregate verification
+    source_refs: tuple=field(default=(),compare=False,repr=False)  # provenance, not identity
 
 
 @dataclass(frozen=True)
@@ -49,6 +50,9 @@ class QueryVar:
 
 def project_native_queries(state,release):
     """Project validated syntax, with explicit intent supplied by host or rules."""
+    if not state.structural_closed:
+        state.diag('QUERY_STRUCTURE_NOT_SEALED','query projection requires the structural seal')
+        return ()
     from .composition_tree import leaves, forests, slots, roots
     evidence={e.token_id:e for e in state.evidence}; atoms={}; trees=forests(state.frames,state.logical_roots)
     frames={f.frame_id:f for f in state.frames}
@@ -91,7 +95,9 @@ def project_native_queries(state,release):
         from .lexical_forms import selected_forms
         surface,lemma=selected_forms(f,evidence[f.predicate_token_ref])
         atoms[f.frame_id]={'template_ref':mapping[0]['template_ref'] if len(mapping)==1 else None,
-            'roles':roles,'query_existential_roles':selected.get('query_existential_roles',()),'temporal':f.semantic.get('region'),'lexical_anchor':(lemma or surface).casefold() if selected['sense_kind']=='OPEN_LEXICAL' else None}
+            'roles':roles,'query_existential_roles':selected.get('query_existential_roles',()),'temporal':f.semantic.get('region'),
+            'source_refs':tuple(f.semantic.get('lexical_units',{}).get(f.predicate_token_ref,{}).get('anchor_refs') or [f.predicate_token_ref]),
+            'lexical_anchor':(lemma or surface).casefold() if selected['sense_kind']=='OPEN_LEXICAL' else None}
     structural=set().union(*(leaves(t) for t in trees))
     for f in roots(state.frames):
         if f.frame_id in structural or f.frame_id in embedded: continue
@@ -106,6 +112,15 @@ def project_native_queries(state,release):
         query=state.observation.get('request_kind')=='QUERY' or 'QUERY' in acts
         if acts & {None,'UNKNOWN','COMMAND'} or state.observation.get('request_kind') in {'COMMAND','UNKNOWN','STATEMENT'}:continue
         if not query: continue
+        def closed(tree,seen=frozenset()):
+            if 'frame_ref' not in tree:
+                return all(closed(child,seen) for child in tree.get('operands',()))
+            fid=tree['frame_ref']
+            if fid in seen or fid not in atoms:return False
+            return all(closed(slot.tree,seen|{fid}) for slot in slots(frames[fid]))
+        if not closed(tree):
+            state.diag('QUERY_STRUCTURE_UNRESOLVED','query tree contains an unaccepted lexical frame')
+            continue
         def qualified(fid,seen=None):
             seen=set() if seen is None else seen
             if fid in seen: return False
@@ -202,7 +217,7 @@ def compile_native_queries(core,roots,context,attention_refs=()):
                     actants.append((ActantRole(role),variable)); implicit.append(variable)
                 visited.remove(fid)
                 if len({r for r,v in actants})!=len(actants): raise ValueError('QUERY_ARGUMENT_GROUP_UNBOUND')
-                atom_pattern=Pattern(template_ref=atom['template_ref'],actants=tuple(actants),lexical_anchor=atom['lexical_anchor'],temporal=atom['temporal'],query_owner=fid==root.owner_frame_ref)
+                atom_pattern=Pattern(template_ref=atom['template_ref'],actants=tuple(actants),lexical_anchor=atom['lexical_anchor'],temporal=atom['temporal'],query_owner=fid==root.owner_frame_ref,source_refs=tuple(atom.get('source_refs',())))
                 for variable in reversed(implicit): atom_pattern=Pattern('EXISTS',(variable,atom_pattern))
                 return atom_pattern
             pattern=compile_tree(root.tree)

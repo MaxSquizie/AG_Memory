@@ -17,12 +17,12 @@ def prepare(state, release, selector, region, tokens, cfg):
         result = choose(state, release, selector, region, cfg, 'temporal_function', [
             *[{'candidate_id':'time:'+t.token_id,'index':i,'token_ref':t.token_id,
                'label':'A time expression starts at «'+t.span+'» @'+str(t.start)}
-              for i,t in enumerate(remaining)],
-            {'candidate_id':'NONE','label':'None of these words specifies when, for how long, or how often the event/state holds'}],
+              for i,t in enumerate(remaining)]],
             'Locate the FIRST remaining expression that specifies when, for how long, or how often this event/state holds. '
-            'Select its first word, or NONE. Relative dates count as time. A word mentioned as a name/title is not a time use. '
+            'Select its first word if present. Relative dates count as time. A word mentioned as a name/title is not a time use. '
             'Target words: «' +
-            ' '.join(t.span for t in remaining) + '».')
+            ' '.join(t.span for t in remaining) + '».',
+            empty={'candidate_id':'NONE','label':'no remaining time expression'})
         if not result:
             return False
         if result[0]['candidate_id'] == 'NONE':

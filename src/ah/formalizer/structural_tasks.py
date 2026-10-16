@@ -13,7 +13,12 @@ def enabled(release):
     return release.entries('ProposalPolicy')[0].get('composition',{}).get('structural_tasks')=='CLOSED_RELATIONS_V1'
 
 
-def choose(state,release,selector,region,cfg,slot,options,question):
+def choose(state,release,selector,region,cfg,slot,options,question,*,empty=None):
+    """Optional searches declare a typed completion outside the model domain.
+
+    NONE_FIT closes only one page. EMPTY is licensed only after every page was
+    examined and rejected; unknown, ambiguity and budget stops never close it.
+    """
     if cfg.get('_task_constraints'):
         question+='\nEarlier attempt: '+cfg.get('_task_constraints_text',cfg['_task_constraints'])
     iterator=iter(options);page=0;previous=[];examined=0
@@ -25,6 +30,24 @@ def choose(state,release,selector,region,cfg,slot,options,question):
     # Ownership limits the answer, not the evidence available for understanding it.
     context,target=probe_context(state,region,cfg,local)
     question=target+question
+    if empty is not None:
+        question+=' Optional search: select only matching positive options. If none matches, reject this page. After ALL pages have no match, the result is: '+empty['label']+'. Unknown is not an empty result.'
+    def complete_empty():
+        from .state import Decision,Ground
+        key='task-empty:'+digest([region.region_id,slot,question,sorted(seen),previous,empty])
+        cid=empty['candidate_id']
+        if cid in seen:raise ValueError('EMPTY_COMPLETION_IN_POSITIVE_DOMAIN')
+        state.decisions[key]=Decision(slot,key,tuple(sorted(seen))+ (cid,),selected=(cid,),
+            outcome='RESOLVED',search_complete=True,
+            grounds=[Ground('D','complete optional domain has no supported occurrence',cid)])
+        state.decisions[key].history.append({'kind':'EMPTY_DOMAIN','page_refs':list(previous),
+            'positive_candidates':sorted(seen),'completion':empty})
+        state.syntax_trace.append({'kind':'STRUCTURAL_TASK','region_ref':region.region_id,'slot':slot,
+            'status':'SELECTED','decision_ref':key,'enumeration_complete':True,
+            'alternatives':[empty],'selected':cid,'task_outcome':'EMPTY','page_refs':list(previous)})
+        from .component_probe_replay import supersede
+        for rejected in previous:supersede(state,rejected,key)
+        return empty,{'decision_ref':key,'candidate_id':cid,'domain_ref':key}
     if len(context)>cfg['context_chars']:
         state.diag('STRUCTURAL_TASK_SEARCH_INCOMPLETE',region.region_id)
         state.syntax_trace.append({'kind':'STRUCTURAL_TASK','region_ref':region.region_id,
@@ -36,6 +59,7 @@ def choose(state,release,selector,region,cfg,slot,options,question):
         if has_more:
             iterator=chain(values[-1:],iterator);values=values[:-1]
         if not values:
+            if empty is not None and not supported:return complete_empty()
             state.syntax_trace.append({'kind':'STRUCTURAL_TASK','region_ref':region.region_id,
                 'slot':slot,'status':'EXHAUSTED','reason':'NO_REMAINING_CANDIDATES','examined':examined})
             return None
@@ -118,6 +142,7 @@ def choose(state,release,selector,region,cfg,slot,options,question):
                 'status':'PENDING','reason':'MULTIPLE_ADMISSIBLE','decision_ref':domain_ref,
                 'enumeration_complete':True,'alternatives':[v for v,_ in supported],'selected':None})
         else:
+            if empty is not None:return complete_empty()
             state.syntax_trace.append({'kind':'STRUCTURAL_TASK','region_ref':region.region_id,'slot':slot,
                 'status':'EXHAUSTED','reason':'NO_REMAINING_CANDIDATES','examined':examined,
                 'enumeration_complete':True,'domain_ref':domain_ref})
@@ -200,11 +225,11 @@ def extend_source_set(state,release,selector,region,tokens,cfg,slot,question,sel
         remaining=[t for t in tokens if t.token_id not in used|forbidden]
         if not remaining:break
         more=choose(state,release,selector,region,cfg,slot+'_continue',[
-            {'candidate_id':'DONE','label':'Complete: no further source words belong to this part'},
             *[{'candidate_id':t.token_id,'token_ref':t.token_id,
                'label':'Another piece starts at «'+t.span+'» @'+str(t.start)} for t in remaining]],
             question+' Already included: «'+' '.join(t.span for t in selected)+'». '
-            'Select the start of the next piece, or complete. Intervening words retain their own meaning.')
+            'Select the start of another piece if one exists. Intervening words retain their own meaning.',
+            empty={'candidate_id':'DONE','label':'no further source words belong to this part'})
         if not more:return None
         proofs.append(more[1])
         if more[0]['candidate_id']=='DONE':break

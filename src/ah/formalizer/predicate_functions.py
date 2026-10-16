@@ -39,11 +39,13 @@ def binding(state,release,selector,region,tokens,predicate,nominals,groups,cfg,p
         # A catch-all role is an explicit last option, not a semantic prior.
         roles=[r for r in roles if r!='SURFACE_ARG']+(['SURFACE_ARG'] if 'SURFACE_ARG' in roles else [])
         selected=choose(state,release,selector,region,cfg,'predicate_argument_role',[
-            *[{'candidate_id':r,'label':{'SUBJECT':'Actor or bearer of the state/property (not the passive patient)',
-                'OBJECT':'Affected participant, theme or content (including the passive patient)'}.get(r,role_text(r))} for r in roles if r not in forbidden],
+            *[{'candidate_id':r,'label':role_text(r)} for r in roles if r not in forbidden],
             {'candidate_id':'NO_DIRECT_ROLE','label':'This occurrence belongs to another nominal or lexical child, not directly to this predicate'}],
             'What role does «'+token.span+'» @'+str(token.start)+' have in predicate «'+predicate.span+'»? '
-            'Choose the semantic role after accounting for voice. Case is a cue, not proof. ')
+            'Choose the released valency slot, not every semantic description of the participant. '
+            'SUBJECT/OBJECT are core slots after voice projection; a grammatical subject stays SUBJECT even if it feels something. '
+            'EXPERIENCER is an oblique/impersonal state participant outside those core slots. Case alone is not proof. '
+            'Use SURFACE_ARG only when no more specific role is established.')
         if not selected:return None
         role=selected[0]['candidate_id']
         if role=='NO_DIRECT_ROLE':result.append((None,None,None));continue
@@ -52,7 +54,7 @@ def binding(state,release,selector,region,tokens,predicate,nominals,groups,cfg,p
         else:
             reading=choose(state,release,selector,region,cfg,'predicate_argument_reading',[
                 {'candidate_id':cid,'label':reading_text(_morph(v))} for cid,v in unique.items()],
-                'Which whole reading of «'+token.span+'» fits its selected role '+role_text(role)+'? Preserve unknown features.')
+                'Predicate «'+predicate.span+'»: which whole reading of «'+token.span+'» fits its selected role '+role_text(role)+'? Preserve unknown features.')
             if not reading:return None
             variant=unique[reading[0]['candidate_id']]
         result.append((role,variant,None))

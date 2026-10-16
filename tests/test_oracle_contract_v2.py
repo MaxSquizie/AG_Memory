@@ -43,8 +43,8 @@ def test_open_observer_preserves_occurrence_and_real_roles(tmp_path,monkeypatch)
     result,_=run(tmp_path,monkeypatch,'Алексей флукнул книгу.',[
         ('structural_oov_function','VERB')]+relation('LEXICAL')+[
         ('predicate_function','Predicate occurrence «флукнул»'),
-        ('predicate_argument_role','Actor or bearer'),
-        ('predicate_argument_role','Affected participant')],observer_contract='v7-observer-2')
+        ('predicate_argument_role','core subject:'),
+        ('predicate_argument_role','core object:')],observer_contract='v7-observer-2')
     assert result['assertions']['ah']==[{'predicate':{'open_source':['tok:8:15']},
         'roles':{'SUBJECT':{'entity':'alexey'},'OBJECT':{'entity':'book'}}}]
 

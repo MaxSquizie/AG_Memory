@@ -116,8 +116,8 @@ def test_budget_counts_system_text_and_prevents_extra_transport():
 def test_multiword_relation_reaches_native_plan_with_exact_source(tmp_path,monkeypatch):
     from test_structural_relation_tasks import run,relation,bounds
     steps=relation('LEXICAL')+[
-        ('nominal_function','An adposition'),('nominal_function_head','Nominal head «домом»')]
-    steps+=bounds('nominal_function_source','рядом','с')+[('nominal_function','No further')]
+        ('nominal_function','An adposition')]
+    steps+=bounds('nominal_function_source','рядом','с')+[('nominal_function_head','Nominal head «домом»'),('nominal_function','No further')]
     result,_=run(tmp_path,monkeypatch,'Иван спит рядом с домом.',steps)
     assert result['diagnostics']['codes']==[] and result['assertions']['ah']
     units=[u for f in result['runtime']['ir']['frames'] if not f['semantic'].get('structural_unresolved')

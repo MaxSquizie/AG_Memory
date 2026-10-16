@@ -92,7 +92,7 @@ def build_oracle_command(
         raise ValueError("unsupported GUI oracle provider")
     if provider != "disabled" and not model.strip():
         raise ValueError("a loaded model must be selected")
-    corpus = repo_root / "data" / "formalizer_v7_oracle_v2"
+    corpus = repo_root / "data" / "formalizer_v7_oracle_v3"
     runner = repo_root / "tools" / "run_formalizer_v7_oracle.py"
     argv = [
         str(runner),

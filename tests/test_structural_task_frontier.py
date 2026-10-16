@@ -41,6 +41,24 @@ def test_unknown_keeps_unexamined_frontier(monkeypatch):
     assert len(calls)==1 and row['status']=='PENDING' and not row['enumeration_complete']
 
 
+def test_optional_empty_requires_all_pages_and_has_checked_proof(monkeypatch):
+    state,release,region,cfg,calls=setup(monkeypatch,['NONE_FIT','NONE_FIT'])
+    result=choose(state,release,None,region,cfg,'inventory',
+        [{'candidate_id':str(i),'label':str(i)} for i in range(3)],'Find occurrences',
+        empty={'candidate_id':'DONE','label':'no remaining occurrences'})
+    assert result[0]['candidate_id']=='DONE' and len(calls)==2
+    assert all('DONE' not in ids for _,ids in calls)
+    assert licensed(state,result[1]) and not state.clarification_candidates
+
+
+def test_optional_unknown_does_not_mean_empty(monkeypatch):
+    state,release,region,cfg,calls=setup(monkeypatch,['NONE_FIT','INSUFFICIENT_CONTEXT'])
+    assert choose(state,release,None,region,cfg,'inventory',
+        [{'candidate_id':str(i),'label':str(i)} for i in range(3)],'Find occurrences',
+        empty={'candidate_id':'DONE','label':'no remaining occurrences'}) is None
+    assert not any(r.get('task_outcome')=='EMPTY' for r in state.syntax_trace)
+
+
 def test_budget_is_shared_and_is_not_none_fit(monkeypatch):
     state,release,region,cfg,calls=setup(monkeypatch,['first'],limit=2)
     options=[{'candidate_id':str(i),'label':str(i)} for i in range(2)]

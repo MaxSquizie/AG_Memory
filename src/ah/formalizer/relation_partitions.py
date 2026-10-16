@@ -54,7 +54,7 @@ def binary(domain):
 
 
 def content(domain):
-    from .relation_composition import function_ownership
+    from .relation_composition import function_ownership,content_owner
     state,release,selector,region,tokens,cfg,kind=inputs(domain)
     chosen=domain.span(tokens,'structural_content',
         'Select the complete dependent proposition: what is said, thought, intended or otherwise taken as content. '
@@ -71,13 +71,17 @@ def content(domain):
         'Boundary punctuation may stay; punctuation and connecting words are checked separately.',covered=body_ids)
     if not parent_span:return None
     parent=parent_span[0]
+    owner=content_owner(state,release,selector,region,cfg,parent,body)
+    if not owner:return None
     groups=function_ownership(state,release,selector,region,cfg,'CONTENT',[parent,body],
-        eligible_refs={t.token_id for t in parent})
+        eligible_refs={t.token_id for t in parent},
+        protected_refs=domain.required|{owner[0]['owner_ref']},owner_ref=owner[0]['owner_ref'])
     if groups is None:return None
     parent,body=groups
     from .content_separators import separate
     parent,separators=separate(state,region,tokens,parent,body)
-    return PartitionProposal([parent,body],separators)
+    if owner[0]['owner_ref'] not in {t.token_id for t in parent}:raise ValueError('CONTENT_OWNER_LOST')
+    return PartitionProposal([parent,body],separators,owner_choice=owner)
 
 
 def group(domain):

@@ -452,7 +452,7 @@ def run_case(case,fixtures):
         payloads=[s['payload'] for s in case['steps']]
         if any(s['action']=='check_simultaneity' for s in case['steps']):payloads.extend([ATOM,OTHER])
         session=Session(payloads,path)
-        session.observer_contract='v7-observer-2' if case['schema_version']=='v7-symbolic-oracle-2' else 'v7-observer-1'
+        session.observer_contract={'v7-symbolic-oracle-1':'v7-observer-1','v7-symbolic-oracle-2':'v7-observer-2','v7-symbolic-oracle-3':'v7-observer-3'}[case['schema_version']]
         cps=[]
         for index,s in enumerate(case['steps'],1):
             with progress.context(step_id=s['id'],action=s['action'],step_index=index,step_total=len(case['steps'])):

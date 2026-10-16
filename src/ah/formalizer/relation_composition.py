@@ -105,7 +105,7 @@ def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof
     return ([t for t in tokens if t in markers or t.token_id in shared_refs],result[1]) if result else None
 
 
-def function_ownership(state,release,selector,region,cfg,kind,groups,*,eligible_refs=None):
+def function_ownership(state,release,selector,region,cfg,kind,groups,*,eligible_refs=None,protected_refs=(),owner_ref=None):
     """Repeated/discontinuous function tokens can belong to the outer edge.
 
     Morphology proposes them; no particle spelling determines its scope.
@@ -115,14 +115,14 @@ def function_ownership(state,release,selector,region,cfg,kind,groups,*,eligible_
     while True:
         possible=[t for group in groups for t in group if
             (eligible_refs is None or t.token_id in eligible_refs) and
+            t.token_id not in protected_refs and
             any(c.isalnum() for c in t.span)]
         if not possible:return groups
-        options=[{'candidate_id':'KEEP_ALL','label':'Keep all listed words inside their parts; none expresses the chosen outer relation: '+
-            ', '.join('«'+t.span+'» @'+str(t.start) for t in possible)}]
-        options.extend({'candidate_id':t.token_id,'token_ref':t.token_id,
+        options=[{'candidate_id':t.token_id,'token_ref':t.token_id,
             'label':'Outer relation owns «'+t.span+'» @'+str(t.start)+'; '+
-                ('this word introduces the selected content «'+' '.join(x.span for x in groups[1])+'»; '
-                 if kind=='CONTENT' else '')+'remove this occurrence from its part'} for t in possible)
+                ('this is connective wording, not a predicate or participant, introducing «'+' '.join(x.span for x in groups[1])+'»; '
+                 if kind=='CONTENT' else '')+'remove this occurrence from its part'} for t in possible]
+        owner=next((t for g in groups for t in g if t.token_id==owner_ref),None)
         selected=choose(state,release,selector,region,cfg,'structural_function_owner',options,
             kind+' ('+RELATIONS[kind]+'). Current parts: '+
             '; '.join(str(i+1)+': «'+' '.join(t.span for t in group)+'»' for i,group in enumerate(groups))+'. '+
@@ -130,10 +130,11 @@ def function_ownership(state,release,selector,region,cfg,kind,groups,*,eligible_
             'Select that occurrence to move it out of its part. '
             +('Words introducing the condition or consequence belong to this outer conditional relation. '
               if kind in {'IMPLIES','COUNTERFACTUAL'} else '')+
-            ('Part 1 is the parent, part 2 is its selected content. The precise question is whether the word introduces «'+
+            ('Part 1 is the parent, part 2 is its selected content. Parent predicate «'+(owner.span if owner else '')+'» is content and must remain. Select only grammatical connective wording introducing «'+
              ' '.join(t.span for t in groups[1])+'». Move only an introducer of THIS content; '
              'a conjunction introducing a different clause still inside the parent must stay there. ' if kind=='CONTENT' else '')+
-            'Keep all only if none expresses the outer relation. Negation, modality and quantification of an inner proposition stay inside it.')
+            'Predicates and participants remain content. Negation, modality and quantification of an inner proposition stay inside it.',
+            empty={'candidate_id':'KEEP_ALL','label':'keep all listed words in their parts'})
         if not selected:return None
         if selected[0]['candidate_id']=='KEEP_ALL':return groups
         tid=selected[0]['token_ref']
@@ -286,23 +287,30 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child):
     return frames
 
 
-def content(state,release,selector,region,tokens,cfg,request,compose_child,proof):
-    from .relation_partitions import content as propose,content_checked
-    selected=PartitionDomain(state,release,selector,region,tokens,cfg,'CONTENT',proof).resolve(propose,content_checked)
-    if not selected:return block(state,region)
-    proposal,partition=selected;parent,body=proposal.groups
+def content_owner(state,release,selector,region,cfg,parent,body):
+    """Select the slot's lexical owner before assigning connective material."""
     body_text=' '.join(t.span for t in body)
-    body_ids={t.token_id for t in body}
-    owners=[t for t in parent if any(v.pos in {'VERB','INFN','ADJF','ADJS','NOUN'} for v in t.variants)]
+    owners=[t for t in parent if any(c.isalnum() for c in t.span)]
     source_parts={'content_refs':[t.token_id for t in body],'parent_refs':[t.token_id for t in parent]}
-    owner_choice=choose(state,release,selector,region,cfg,'structural_owner',
+    return choose(state,release,selector,region,cfg,'structural_owner',
         [{'candidate_id':t.token_id,'owner_ref':t.token_id,**source_parts,
           'label':'Content belongs to predicate «'+t.span+'» @'+str(t.start)} for t in owners],
         'Selected dependent content: «'+body_text+'». Remaining parent: «'+' '.join(t.span for t in parent)+'». '
         'Which predicate takes THIS content as what is said, thought, intended or otherwise described? '
         'Other parent predicates may own a different clause. Position alone is not evidence.')
-    if not owner_choice:return block(state,region)
-    owner=next(t for t in owners if t.token_id==owner_choice[0]['owner_ref'])
+
+
+def content(state,release,selector,region,tokens,cfg,request,compose_child,proof):
+    from .relation_partitions import content as propose,content_checked
+    selected=PartitionDomain(state,release,selector,region,tokens,cfg,'CONTENT',proof).resolve(propose,content_checked)
+    if not selected:return block(state,region)
+    proposal,partition=selected;parent,body=proposal.groups
+    body_text=' '.join(t.span for t in body);body_ids={t.token_id for t in body}
+    owner_choice=proposal.owner_choice
+    from .structural_tasks import licensed
+    if not owner_choice or not licensed(state,owner_choice[1],owner_ref=owner_choice[0]['owner_ref']):return block(state,region)
+    owner=next(t for t in parent if t.token_id==owner_choice[0]['owner_ref'])
+    source_parts={'content_refs':[t.token_id for t in body],'parent_refs':[t.token_id for t in parent]}
     role_registry={r['role_id'] for r in release.entries('RoleRegistry') if not r.get('allowed_argument_kinds') or set(r['allowed_argument_kinds']) & {'PROPOSITION','EVENT'}}
     senses={s['sense_id'] for s in release.entries('R-S') if any(s['lemma']==v.lemma and s['POS']==v.pos for v in owner.variants)}
     if senses:
@@ -316,12 +324,13 @@ def content(state,release,selector,region,tokens,cfg,request,compose_child,proof
         for attitude in attitudes:
             choices.append({'candidate_id':role+':'+attitude,'owner_ref':owner.token_id,'role':role,'attitude':attitude,**source_parts,
                 'label':role+' of «'+owner.span+'»; attitude='+attitude+
-                '; '+proposition_role(role)+
-                ' (QUOTED=reported, EMBEDDED=mental content, HYPOTHETICAL=intended/possible, UNKNOWN=unspecified; none asserts the child)'})
+                '; '+proposition_role(role)})
     link=choose(state,release,selector,region,cfg,'structural_content_role',choices,
         'Selected owner: «'+owner.span+'» @'+str(owner.start)+'. Selected dependent content: «'+body_text+'». '
         'Remaining parent: «'+' '.join(t.span for t in parent)+'». '
-        'Choose the role and status of THIS content for THIS predicate. No canonical lexical identity is inferred.')
+        'Choose the role and status of THIS content for THIS predicate. '
+        'QUOTED=reported; EMBEDDED=mental content; HYPOTHETICAL=intended/possible; UNKNOWN=unspecified. '
+        'None asserts the child. No canonical lexical identity is inferred.')
     if not link:return block(state,region)
     relation,license=link
     inherited=dict(request.pending_propositions or {}) if request else {}

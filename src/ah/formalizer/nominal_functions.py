@@ -32,12 +32,12 @@ def prepare(state,release,selector,region,tokens,cfg):
     used=set();relation_heads=set()
     while True:
         selected=choose(state,release,selector,region,cfg,'nominal_function',[
-            {'candidate_id':'DONE','label':'No further nominal relation, referential determiner or quantity expression'},
             {'candidate_id':'RELATION','label':'An adposition or multiword relational unit links a nominal to another participant or event'},
             {'candidate_id':'REFERENCE','label':'An expression identifies a nominal by referring to context or a previous mention'},
             {'candidate_id':'QUANTITY','label':'An expression specifies a nominal group quantity; retain it symbolically'}],
             'Which remaining nominal function occurs here? Ordinary names and descriptive adjectives alone do not need these slots. '
-            'Already assigned function words: «'+' '.join(t.span for t in tokens if t.token_id in used)+'».')
+            'Already assigned function words: «'+' '.join(t.span for t in tokens if t.token_id in used)+'».',
+            empty={'candidate_id':'DONE','label':'no further nominal relation, referential determiner or quantity expression'})
         if not selected:return False
         kind=selected[0]['candidate_id']
         if kind=='DONE':
@@ -45,20 +45,25 @@ def prepare(state,release,selector,region,tokens,cfg):
                 'decision_ref':selected[1]['decision_ref'],'search_complete':True,**inventory})
             complete(state,inventory)
             return True
+        material=source_set(state,release,selector,region,tokens,cfg,'nominal_function_source',
+            kind+': select ONLY the connecting/determining/quantity expression. '
+            'Do not include the noun or pronoun it applies to, other participants, or ordinary descriptive modifiers.',exclude=used)
+        if not material:return False
+        owned,proofs=material;refs=[t.token_id for t in owned]
+        expression=' '.join(t.span for t in owned)
         head=choose(state,release,selector,region,cfg,'nominal_function_head',[
             {'candidate_id':t.token_id,'head_ref':t.token_id,'label':'Nominal head «'+t.span+'» @'+str(t.start)}
-            for t in tokens if t.token_id not in used and any(c.isalnum() for c in t.span)],
-            kind+': which occurrence is the nominal head receiving this function?')
+            for t in tokens if t.token_id not in used|set(refs) and any(c.isalnum() for c in t.span)],
+            kind+': selected function expression is «'+expression+'». '
+            +('Which noun/pronoun is its complement: the entity/place introduced BY this expression, not the outside predicate or participant it attaches to? '
+              if kind=='RELATION' else 'Which noun/pronoun is determined or counted by this expression? ')+
+            'Select the head of that nominal; the expression itself is excluded.')
         if not head:return False
         hid=head[0]['head_ref']
         if kind=='RELATION' and hid in relation_heads:
             state.diag('NOMINAL_RELATION_MULTIPLE_EDGES_UNRESOLVED',region.region_id)
             return False
         if kind=='RELATION':relation_heads.add(hid)
-        material=source_set(state,release,selector,region,tokens,cfg,'nominal_function_source',
-            kind+': select the function expression only, excluding the nominal head and ordinary descriptive modifiers.',exclude=used|{hid})
-        if not material:return False
-        owned,proofs=material;refs=[t.token_id for t in owned]
         allrefs=[t.token_id for t in tokens if t.token_id in {*refs,hid}]
         row={**inventory,'kind':'NOMINAL_FUNCTION','unit_ref':'nominal-function:'+digest([region.region_id,kind,hid,refs]),
              'function':kind,'head_ref':hid,'function_refs':refs,'anchor_refs':allrefs,

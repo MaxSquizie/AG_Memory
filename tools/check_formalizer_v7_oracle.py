@@ -80,8 +80,11 @@ def validate(root):
     known=set(mechanisms);required=['schema_version','case_id','title','tier','mechanisms','norm_refs','acceptance_refs','dry_run_refs','fixture_profile','tags','description','initial_state','steps']
     for c in cases:
         strictkeys(c,required)
-        if c['schema_version'] not in {'v7-symbolic-oracle-1','v7-symbolic-oracle-2'}:raise OracleError('case schema version')
-        expected_version='v7-symbolic-oracle-2' if manifest.get('observer_contract')=='v7-observer-2' else 'v7-symbolic-oracle-1'
+        versions={'v7-observer-1':'v7-symbolic-oracle-1','v7-observer-2':'v7-symbolic-oracle-2','v7-observer-3':'v7-symbolic-oracle-3'}
+        if c['schema_version'] not in versions.values():raise OracleError('case schema version')
+        contract=manifest.get('observer_contract','v7-observer-1')
+        if contract not in versions:raise OracleError('unknown observer contract')
+        expected_version=versions[contract]
         if c['schema_version']!=expected_version:raise OracleError('case/manifest contract mismatch '+c['case_id'])
         if not c['mechanisms'] or set(c['mechanisms'])-known:raise OracleError('unknown/empty mechanisms '+c['case_id'])
         if len(c['mechanisms'])!=len(set(c['mechanisms'])):raise OracleError('duplicate mechanism '+c['case_id'])
@@ -92,9 +95,13 @@ def validate(root):
             strictkeys(s,['id','action','payload','checks'])
             if s['id'] in seen:raise OracleError('duplicate step id')
             if not isinstance(s['payload'],dict):raise OracleError('payload not object')
-            if c['schema_version']=='v7-symbolic-oracle-2' and c['tier']=='pipeline':
-                guard={'op':'eq','path':'/observer/contract','value':'v7-observer-2'}
+            if contract!='v7-observer-1' and c['tier']=='pipeline':
+                guard={'op':'eq','path':'/observer/contract','value':contract}
                 if guard not in s['checks']:raise OracleError('missing observer contract guard '+c['case_id'])
+                if contract=='v7-observer-3' and s['payload'].get('raw_input',{}).get('request_kind')=='QUERY':
+                    if {'op':'eq','path':'/query/status','value':'COMPILED'} not in s['checks'] or not any(
+                            ck['path']=='/query/formulas' and ck['op']=='set_eq' and ck.get('value') for ck in s['checks']):
+                        raise OracleError('missing accepted query checks '+c['case_id'])
             for ck in s['checks']:
                 checkcount+=1
                 if ck['op']=='same_as':

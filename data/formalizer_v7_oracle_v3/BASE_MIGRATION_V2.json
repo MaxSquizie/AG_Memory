@@ -1,0 +1,6384 @@
+{
+  "authored_open_surfaces": {
+    "бронкнуть": [
+      "бронкнул"
+    ],
+    "глоркнуть": [
+      "глоркнул"
+    ],
+    "зумбировать": [
+      "зумбировал"
+    ],
+    "квелировать": [
+      "квелировал"
+    ],
+    "начать": [
+      "начал"
+    ],
+    "переадресовать": [
+      "переадресовал"
+    ],
+    "перестать": [
+      "перестала",
+      "перестал"
+    ],
+    "снова-мочь": [
+      "снова смог"
+    ],
+    "траверсировать": [
+      "траверсировал"
+    ],
+    "флукнуть": [
+      "флукнул"
+    ],
+    "холодно": [
+      "холодно"
+    ],
+    "шарпировать": [
+      "шарпировал"
+    ]
+  },
+  "base_manifest_sha256": "9cf951cad2cee963c036ab8be451a6d424079d47ac33c0091622cdf64c835754",
+  "changes": [
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "A01",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "A02",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "A03",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "A06",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "A11",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "A12",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "A13",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "A14",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "A31",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "A33",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "A35",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "A38-NOT",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "A38-QUOTED",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-00-0-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-00-0-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-00-0-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-00-0-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-00-0-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-00-0-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-00-0-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-00-1-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-00-1-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-00-1-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-00-1-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-00-1-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-00-1-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-00-1-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-00-2-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-00-2-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-00-2-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-00-2-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-00-2-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-00-2-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-00-2-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-00-3-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-00-3-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-00-3-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-00-3-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-00-3-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-00-3-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-00-3-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-01-0-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-01-0-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-01-0-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-01-0-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-01-0-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-01-0-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-01-0-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-01-1-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-01-1-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-01-1-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-01-1-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-01-1-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-01-1-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-01-1-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-01-2-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-01-2-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-01-2-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-01-2-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-01-2-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-01-2-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-01-2-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-01-3-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-01-3-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-01-3-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-01-3-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-01-3-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-01-3-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-01-3-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-02-0-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-02-0-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-02-0-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-02-0-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-02-0-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-02-0-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-02-0-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-02-1-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-02-1-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-02-1-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-02-1-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-02-1-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-02-1-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-02-1-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-02-2-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-02-2-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-02-2-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-02-2-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-02-2-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-02-2-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-02-2-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-02-3-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-02-3-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-02-3-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-02-3-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-02-3-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-02-3-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-02-3-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-03-0-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-03-0-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-03-0-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-03-0-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-03-0-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-03-0-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-03-0-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-03-1-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-03-1-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-03-1-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-03-1-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-03-1-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-03-1-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-03-1-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-03-2-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-03-2-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-03-2-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-03-2-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-03-2-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-03-2-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-03-2-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-03-3-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-03-3-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-03-3-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-03-3-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-03-3-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-03-3-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-03-3-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-04-0-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-04-0-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-04-0-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-04-0-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-04-0-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-04-0-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-04-0-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-04-1-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-04-1-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-04-1-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-04-1-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-04-1-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-04-1-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-04-1-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-04-2-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-04-2-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-04-2-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-04-2-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-04-2-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-04-2-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-04-2-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-04-3-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-04-3-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-04-3-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-04-3-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-04-3-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-04-3-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-04-3-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-05-0-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-05-0-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-05-0-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-05-0-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-05-0-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-05-0-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-05-0-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-05-1-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-05-1-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-05-1-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-05-1-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-05-1-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-05-1-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-05-1-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-05-2-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-05-2-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-05-2-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-05-2-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-05-2-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-05-2-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-05-2-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-05-3-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-05-3-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-05-3-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-05-3-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-05-3-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-05-3-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-05-3-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-06-0-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-06-0-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-06-0-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-06-0-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-06-0-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-06-0-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-06-0-continuous",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-06-0-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-06-1-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-06-1-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-06-1-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-06-1-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-06-1-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-06-1-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-06-1-continuous",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-06-1-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-06-2-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-06-2-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-06-2-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-06-2-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-06-2-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-06-2-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-06-2-continuous",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-06-2-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-06-3-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-06-3-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-06-3-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-06-3-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-06-3-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-06-3-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-06-3-continuous",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-06-3-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-07-0-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-07-0-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-07-0-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-07-0-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-07-0-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-07-0-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-07-0-continuous",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-07-0-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-07-1-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-07-1-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-07-1-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-07-1-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-07-1-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-07-1-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-07-1-continuous",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-07-1-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-07-2-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-07-2-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-07-2-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-07-2-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-07-2-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-07-2-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-07-2-continuous",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-07-2-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-07-3-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-07-3-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-07-3-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-07-3-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-07-3-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-07-3-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-07-3-continuous",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-07-3-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-08-0-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-08-0-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-08-0-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-08-0-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-08-0-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-08-0-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-08-0-continuous",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-08-0-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-08-1-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-08-1-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-08-1-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-08-1-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-08-1-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-08-1-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-08-1-continuous",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-08-1-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-08-2-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-08-2-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-08-2-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-08-2-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-08-2-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-08-2-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-08-2-continuous",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-08-2-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-08-3-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-08-3-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-08-3-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-08-3-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-08-3-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-08-3-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-08-3-continuous",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-08-3-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-09-0-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-09-0-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-09-0-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-09-0-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-09-0-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-09-0-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-09-0-continuous",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-09-0-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-09-1-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-09-1-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-09-1-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-09-1-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-09-1-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-09-1-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-09-1-continuous",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-09-1-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-09-2-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-09-2-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-09-2-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-09-2-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-09-2-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-09-2-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-09-2-continuous",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-09-2-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-09-3-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-09-3-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-09-3-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-09-3-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-09-3-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-09-3-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-09-3-continuous",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-09-3-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-10-0-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-10-0-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-10-0-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-10-0-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-10-0-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-10-0-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-10-0-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-10-1-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-10-1-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-10-1-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-10-1-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-10-1-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-10-1-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-10-1-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-10-2-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-10-2-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-10-2-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-10-2-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-10-2-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-10-2-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-10-2-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-10-3-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-10-3-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-10-3-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-10-3-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-10-3-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-10-3-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-10-3-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-11-0-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-11-0-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-11-0-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-11-0-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-11-0-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-11-0-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-11-0-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-11-1-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-11-1-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-11-1-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-11-1-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-11-1-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-11-1-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-11-1-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-11-2-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-11-2-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-11-2-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-11-2-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-11-2-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-11-2-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-11-2-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-11-3-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-11-3-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-11-3-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-11-3-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-11-3-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-11-3-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-11-3-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-12-0-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-12-0-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-12-0-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-12-0-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-12-0-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-12-0-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-12-0-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-12-1-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-12-1-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-12-1-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-12-1-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-12-1-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-12-1-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-12-1-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-12-2-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-12-2-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-12-2-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-12-2-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-12-2-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-12-2-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-12-2-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-12-3-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-12-3-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-12-3-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-12-3-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-12-3-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-12-3-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-12-3-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-13-0-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-13-0-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-13-0-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-13-0-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-13-0-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-13-0-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-13-0-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-13-1-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-13-1-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-13-1-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-13-1-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-13-1-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-13-1-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-13-1-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-13-2-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-13-2-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-13-2-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-13-2-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-13-2-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-13-2-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-13-2-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-13-3-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-13-3-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-13-3-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-13-3-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-13-3-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-13-3-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-13-3-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-14-0-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-14-0-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-14-0-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-14-0-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-14-0-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-14-0-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-14-0-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-14-1-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-14-1-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-14-1-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-14-1-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-14-1-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-14-1-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-14-1-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-14-2-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-14-2-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-14-2-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-14-2-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-14-2-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-14-2-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-14-2-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-14-3-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-14-3-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-14-3-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-14-3-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-14-3-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-14-3-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-14-3-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-15-0-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-15-0-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-15-0-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-15-0-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-15-0-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-15-0-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-15-0-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-15-1-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-15-1-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-15-1-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-15-1-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-15-1-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-15-1-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-15-1-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-15-2-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-15-2-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-15-2-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-15-2-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-15-2-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-15-2-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-15-2-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-15-3-bare",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-15-3-not",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-15-3-possible",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-15-3-quoted",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-15-3-before_point",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "LANG-15-3-yesterday",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals"
+      ],
+      "case_id": "LANG-15-3-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "NONFINITE-00-base",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "NONFINITE-00-quote",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "NONFINITE-00-nested_quote",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "NONFINITE-00-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "NONFINITE-01-base",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "NONFINITE-01-quote",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "NONFINITE-01-nested_quote",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "NONFINITE-01-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "NONFINITE-02-base",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "NONFINITE-02-quote",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "NONFINITE-02-nested_quote",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "NONFINITE-02-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "NONFINITE-03-base",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "NONFINITE-03-quote",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "NONFINITE-03-nested_quote",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "NONFINITE-03-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "NONFINITE-04-base",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "NONFINITE-04-quote",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "NONFINITE-04-nested_quote",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "NONFINITE-04-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "NONFINITE-05-base",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "NONFINITE-05-quote",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "NONFINITE-05-nested_quote",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "NONFINITE-05-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "NONFINITE-06-base",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "NONFINITE-06-quote",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "NONFINITE-06-nested_quote",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "NONFINITE-06-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "NONFINITE-07-base",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "NONFINITE-07-quote",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "NONFINITE-07-nested_quote",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "NONFINITE-07-question",
+      "open_projection_changed": false,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-00-0-asserted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-00-0-not",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-00-0-quoted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-00-0-or",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-00-1-asserted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-00-1-not",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-00-1-quoted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-00-1-or",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-00-2-asserted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-00-2-not",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-00-2-quoted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-00-2-or",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-00-3-asserted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-00-3-not",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-00-3-quoted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-00-3-or",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-01-0-asserted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-01-0-not",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-01-0-quoted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-01-0-or",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-01-1-asserted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-01-1-not",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-01-1-quoted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-01-1-or",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-01-2-asserted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-01-2-not",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-01-2-quoted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-01-2-or",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-01-3-asserted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-01-3-not",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-01-3-quoted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-01-3-or",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-02-0-asserted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-02-0-not",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-02-0-quoted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-02-0-or",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-02-1-asserted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-02-1-not",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-02-1-quoted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-02-1-or",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-02-2-asserted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-02-2-not",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-02-2-quoted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-02-2-or",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-02-3-asserted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-02-3-not",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-02-3-quoted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-02-3-or",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-03-0-asserted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-03-0-not",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-03-0-quoted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-03-0-or",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-03-1-asserted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-03-1-not",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-03-1-quoted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-03-1-or",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-03-2-asserted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-03-2-not",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-03-2-quoted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-03-2-or",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-03-3-asserted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-03-3-not",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-03-3-quoted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-03-3-or",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-04-0-asserted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-04-0-not",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-04-0-quoted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-04-0-or",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-04-1-asserted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-04-1-not",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-04-1-quoted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-04-1-or",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-04-2-asserted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-04-2-not",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-04-2-quoted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-04-2-or",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-04-3-asserted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-04-3-not",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-04-3-quoted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-04-3-or",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-05-0-asserted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-05-0-not",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-05-0-quoted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-05-0-or",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-05-1-asserted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-05-1-not",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-05-1-quoted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-05-1-or",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-05-2-asserted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-05-2-not",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-05-2-quoted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-05-2-or",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-05-3-asserted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-05-3-not",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-05-3-quoted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-05-3-or",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-06-0-asserted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-06-0-not",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-06-0-quoted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-06-0-or",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-06-1-asserted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-06-1-not",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-06-1-quoted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-06-1-or",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-06-2-asserted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-06-2-not",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-06-2-quoted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-06-2-or",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-06-3-asserted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-06-3-not",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-06-3-quoted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-06-3-or",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-07-0-asserted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-07-0-not",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-07-0-quoted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-07-0-or",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-07-1-asserted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-07-1-not",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-07-1-quoted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-07-1-or",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-07-2-asserted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-07-2-not",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-07-2-quoted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-07-2-or",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-07-3-asserted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-07-3-not",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-07-3-quoted",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/time/invented_past_intervals",
+        "/modus"
+      ],
+      "case_id": "OPEN-07-3-or",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/modus"
+      ],
+      "case_id": "LEXICAL-SCOPE-начать",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/modus"
+      ],
+      "case_id": "LEXICAL-SCOPE-перестать",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    },
+    {
+      "added_guards": [
+        "/observer/contract",
+        "/modus"
+      ],
+      "case_id": "LEXICAL-SCOPE-снова-мочь",
+      "open_projection_changed": true,
+      "step_id": "ingest"
+    }
+  ],
+  "observer_contract": "v7-observer-2",
+  "open_role_namespace": {
+    "AGENT": "SUBJECT",
+    "CONTENT": "OBJECT",
+    "THEME": "OBJECT"
+  },
+  "reason": "Source occurrence identity replaces mandatory OOV lemmatization. Open roles retain runtime IDs; semantic names require a known template. Modus/time guards are now checked."
+}

@@ -3,3 +3,4 @@ data/formalizer_v7_oracle/** text eol=lf
 *.py text eol=lf
 
 data/formalizer_v7_oracle_v2/** text eol=lf
+data/formalizer_v7_oracle_v3/** text eol=lf

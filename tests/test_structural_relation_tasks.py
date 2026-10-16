@@ -16,11 +16,7 @@ class Script:
     def generate(self,prompt,**kwargs):
         slot=re.search(r'Decision slot: (\S+)',prompt).group(1)
         self.calls.append((slot,prompt))
-        if slot=='temporal_function' and (not self.steps or self.steps[0][0]!=slot):
-            return next(n for n,label in re.findall(r'^(\d+)\. (.*)$',prompt,re.M)
-                        if label.startswith('None of these words'))
-        if (slot.endswith('_continue') or slot=='structural_function_owner') and (not self.steps or self.steps[0][0]!=slot):
-            return '1'  # Explicit DONE / KEEP_ALL in this scripted continuous partition.
+        if 'Optional search:' in prompt and (not self.steps or self.steps[0][0]!=slot):return '0'
         if slot==self.selected_slot and (not self.steps or self.steps[0][0]!=slot):return '0'
         if not slot.startswith('structural_') and (not self.steps or self.steps[0][0]!=slot):return self.default
         if not self.steps:
@@ -28,6 +24,8 @@ class Script:
         expected,value=self.steps[0]
         if slot!=expected:
             self.errors.append('Expected '+expected+', got '+slot);return '?'
+        if 'Optional search:' in prompt and value in {'DONE','NONE','KEEP_ALL','No further'}:
+            self.steps.popleft();return '0'
         if value in {'?','0','ONE_SELECTED'}:
             self.steps.popleft();return value
         mapping={cid:str(n) for n,cid in enumerate(getattr(prompt,'selection_audit',{}).get('candidates',()),1)}
@@ -117,7 +115,7 @@ def test_unlisted_unary_phrases_reach_same_compiler(tmp_path,monkeypatch,text,op
 def test_proposition_owner_does_not_require_a_lemma_whitelist(tmp_path,monkeypatch,verb):
     text='Иван '+verb+', что Пётр пришёл.'
     steps=relation('CONTENT')+bounds('structural_content','Пётр','пришёл')+bounds('structural_parent','Иван',verb)+[
-        ('structural_partition','PARTITION'),('structural_owner','Content belongs to predicate «'+verb+'»'),
+        ('structural_owner','Content belongs to predicate «'+verb+'»'),('structural_partition','PARTITION'),
         ('structural_content_role','OBJECT:'+('HYPOTHETICAL' if verb=='предположил' else 'QUOTED'))]+relation('LEXICAL')+relation('LEXICAL')
     result,_=run(tmp_path,monkeypatch,text,steps)
     facts=result['assertions']['ah']
@@ -128,7 +126,7 @@ def test_proposition_owner_does_not_require_a_lemma_whitelist(tmp_path,monkeypat
 
 def content_steps(owner,first,last,parent_first='Иван',attitude='QUOTED'):
     return relation('CONTENT')+bounds('structural_content',first,last)+bounds('structural_parent',parent_first,owner)+[
-        ('structural_partition','PARTITION'),('structural_owner','Content belongs to predicate «'+owner+'»'),
+        ('structural_owner','Content belongs to predicate «'+owner+'»'),('structural_partition','PARTITION'),
         ('structural_content_role','OBJECT:'+attitude)]+relation('LEXICAL')
 
 
@@ -146,7 +144,7 @@ def test_inner_content_can_be_separated_before_its_ancestor(tmp_path,monkeypatch
     text='Иван сказал, что Пётр думал, что Мария пришла.'
     # The first split leaves THINK's content open inside the still nested parent.
     steps=content_steps('думал','Мария','пришла',attitude='EMBEDDED')[:-1]
-    steps.insert(5,('structural_function_owner','KEEP_ALL'))
+    steps.insert(6,('structural_function_owner','KEEP_ALL'))
     steps+=content_steps('сказал','Пётр','думал')+relation('LEXICAL')+relation('LEXICAL')
     result,script=run(tmp_path,monkeypatch,text,steps)
     assert result['diagnostics']['codes']==[]
@@ -260,7 +258,7 @@ def test_arithmetic_quantifier_remains_deferred(tmp_path,monkeypatch):
 
 def test_unlisted_owner_after_content_uses_same_contract(tmp_path,monkeypatch):
     steps=relation('CONTENT')+bounds('structural_content','Пётр','пришёл')+bounds('structural_parent','сообщил','Иван')+[
-        ('structural_partition','PARTITION'),('structural_owner','Content belongs to predicate «сообщил»'),
+        ('structural_owner','Content belongs to predicate «сообщил»'),('structural_partition','PARTITION'),
         ('structural_content_role','OBJECT:QUOTED')]+relation('LEXICAL')+relation('LEXICAL')
     result,_=run(tmp_path,monkeypatch,'Пётр пришёл, как сообщил Иван.',steps)
     assert result['diagnostics']['codes']==[]

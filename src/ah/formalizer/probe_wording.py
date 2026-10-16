@@ -13,13 +13,24 @@ TERMS = {
 }
 
 ROLE_MEANINGS = {
-    'SUBJECT':'grammatical subject of the predicate',
-    'OBJECT':'direct object or content of the predicate',
+    'SUBJECT':'core subject: grammatical subject in active voice, or actor projected from passive voice; not an oblique experiencer',
+    'OBJECT':'core object: direct object or propositional content in active voice, or patient projected from passive voice',
     'RECIPIENT':'recipient or addressee of the action',
     'LOCATION':'place or spatial endpoint of the situation',
     'SOURCE':'place or entity from which something comes',
-    'EXPERIENCER':'participant experiencing the state',
+    'EXPERIENCER':'oblique or impersonal participant experiencing a state, outside the core SUBJECT/OBJECT slots',
     'PURPOSE':'goal for which the parent action is performed',
+    'AUXILLIARY':'secondary participant assisting the action',
+    'ABSENTEE':'participant whose absence is expressed',
+    'STATE':'state attributed to a participant',
+    'TIME':'time when the situation holds',
+    'DURATION':'length of time for which the situation holds',
+    'CAUSE':'situation or reason causing this situation',
+    'TOOL':'instrument used to perform the action',
+    'MATERIAL':'material consumed or transformed by the action',
+    'AMOUNT':'quantity or amount involved',
+    'HOW-TO':'manner or method of performing the action',
+    'SURFACE_ARG':'source participant whose more specific role is not established',
 }
 
 
