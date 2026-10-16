@@ -1,0 +1,55 @@
+{
+  "artifact_verifier_sha256": "9795b718b67bd2483fb851acc3f1aac7f7d84e9418c84077fdefa7b323468289",
+  "artifacts": {
+    "COVERAGE.md": "7dc5290ad95e35f07c9d1a1986c6ec4333e403a5f2f0db626495335239d6bc7d",
+    "MIGRATION.json": "39b0355e26e9c9cd8c843c6483d94e24a13b191a49c4961f72d5b3b79a72dd97",
+    "README.md": "1eafa66d1b5da6e90cefacac10102674eb07072ba82f24664ac747b184dd82ba",
+    "SPEC_NOTES.md": "eed24d3b513fa65f5f88621f22b557b26dbf7d2fea24c518a9129d29ffefbbba",
+    "actions.json": "5a0af5fb643760a5226c5b447e464f463c210b6b8d45697195402cc52270f780",
+    "cases.jsonl": "6647f2454c34d9ed1cb1784f556f86bcf6a270f3e3baf5dbf46353d6ae6e09c3",
+    "coverage.json": "f6a75b7e37c8dabb5dc893ba9757268d08880697e52dbdbc313cbf5c991db0c6",
+    "fixtures.json": "1db25e9cb635d569d03c19803434acebe018971f40e39749ebe077a5a1a81cba",
+    "mechanisms.json": "0ba3bf9afb598e87eea5696f8d2ac69295f79402f73242de720f4866b25628d0",
+    "oracle.schema.json": "e5ac00c3fe12d59f3304c072b6cdec3a115ef33603be118c8534a3b85fd62be6",
+    "source_map.json": "7d6fc501fe94fcd24e934479f649c0df6e4af308fbdd69fec31838d5dd2cd62a"
+  },
+  "checker_sha256": "f6c70948cd19dc148dab78409900d1e9efd612c42f79f36b81ccfb14ea57367e",
+  "gates": {
+    "G0": "NOT_EVALUATED",
+    "G1": "NOT_EVALUATED",
+    "G2": "NOT_EVALUATED",
+    "G3": "NOT_EVALUATED",
+    "G4": "NOT_EVALUATED",
+    "G5": "NOT_EVALUATED"
+  },
+  "generator_sha256": "8934e51bbfc0258e402d2f9b2c419cc76b72fd1591d9bb0056535f40b75d7fb9",
+  "gold_authoring": "independent normative symbolic fixtures; never SUT-derived",
+  "migration_tool_sha256": "c90afadd56cc934b65dd8cc85fd216f10c06d56a52293ab3d4afcb8c4072f0ed",
+  "observer_contract": "v7-observer-2",
+  "project_commit_reference": "ce80c890f30bf0559da03ea8d8bae4c257647bea",
+  "requires_adapter_binding": true,
+  "schema_version": "v7-oracle-manifest-1",
+  "source_document": {
+    "bytes": 567911,
+    "filename": "FORMALIZER_ARCHITECTURE_V7(2).md",
+    "sha256": "a334e8d11837255577dfddf0a37bf30c41c7cee47b16ed1995d05cab87e70948"
+  },
+  "stats": {
+    "acceptance_requirements": 39,
+    "cases": 2542,
+    "cases_by_tier": {
+      "component": 1831,
+      "durability": 71,
+      "pipeline": 640
+    },
+    "checks": 12755,
+    "dry_run_requirements": 31,
+    "g5_holdout_claim": false,
+    "language_pattern_families": 32,
+    "mechanisms": 118,
+    "steps": 2725,
+    "time_vectors": 15,
+    "unique_raw_inputs": 643
+  },
+  "status": "AUTHORED_NOT_EXECUTED"
+}

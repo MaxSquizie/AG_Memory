@@ -36,6 +36,8 @@ def binding(state,release,selector,region,tokens,predicate,nominals,groups,cfg,p
         if not choices:return None
         priorities=[cfg['open_case_roles'][c] for v in choices for c in sorted(v.cases) if c in cfg['open_case_roles']]
         roles=list(dict.fromkeys([*priorities,*registry]))
+        # A catch-all role is an explicit last option, not a semantic prior.
+        roles=[r for r in roles if r!='SURFACE_ARG']+(['SURFACE_ARG'] if 'SURFACE_ARG' in roles else [])
         selected=choose(state,release,selector,region,cfg,'predicate_argument_role',[
             *[{'candidate_id':r,'label':{'SUBJECT':'Actor or bearer of the state/property (not the passive patient)',
                 'OBJECT':'Affected participant, theme or content (including the passive patient)'}.get(r,role_text(r))} for r in roles if r not in forbidden],

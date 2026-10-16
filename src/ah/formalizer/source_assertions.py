@@ -104,6 +104,8 @@ def roots(state,release):
         if key not in seen:
             result.append(('source-asserted:'+key,deepcopy(child)));seen.add(key)
         project(child)
-    for tree in composition_forests(state.frames,state.logical_roots):project(tree)
+    from .discourse_scopes import for_tree
+    for tree in composition_forests(state.frames,state.logical_roots):
+        if for_tree(state,tree).get('speech_act')=='ASSERTION':project(tree)
     for _,tree in list(result):project(tree)
     return result

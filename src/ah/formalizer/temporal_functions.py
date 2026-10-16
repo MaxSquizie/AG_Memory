@@ -15,10 +15,13 @@ def prepare(state, release, selector, region, tokens, cfg):
     remaining = list(tokens)
     while remaining:
         result = choose(state, release, selector, region, cfg, 'temporal_function', [
-            {'candidate_id': 'NONE', 'label': 'No remaining words specify calendar time, duration or clock time'},
-            {'candidate_id': 'TIME', 'label': 'Remaining words specify calendar time, duration or clock time'}],
-            'Classify the function in this clause, not the spelling. A name, title, quantity or quoted word is not time. '
-            'Event-to-event relations have already been handled. Remaining words: «' +
+            *[{'candidate_id':'time:'+t.token_id,'index':i,'token_ref':t.token_id,
+               'label':'A time expression starts at «'+t.span+'» @'+str(t.start)}
+              for i,t in enumerate(remaining)],
+            {'candidate_id':'NONE','label':'None of these words specifies when, for how long, or how often the event/state holds'}],
+            'Locate the FIRST remaining expression that specifies when, for how long, or how often this event/state holds. '
+            'Select its first word, or NONE. Relative dates count as time. A word mentioned as a name/title is not a time use. '
+            'Target words: «' +
             ' '.join(t.span for t in remaining) + '».')
         if not result:
             return False
@@ -26,7 +29,7 @@ def prepare(state, release, selector, region, tokens, cfg):
             complete(state,inventory)
             return True
         selected = source_set(state, release, selector, region, remaining, cfg, 'temporal_source',
-                              'Select one whole temporal expression, including its qualifiers.')
+                              'Select one whole temporal expression, including its qualifiers.',initial=result)
         if not selected:
             return False
         owned, proofs = selected
@@ -34,7 +37,7 @@ def prepare(state, release, selector, region, tokens, cfg):
         key = 'time-use:' + digest([region.region_id, refs])
         state.syntax_trace.append({**inventory,'kind': 'TEMPORAL_FUNCTION', 'unit_ref': key,
             'region_ref': region.region_id, 'source_range': [owned[0].start, owned[-1].end],
-            'token_refs': refs, 'proofs': [result[1], *proofs]})
+            'token_refs': refs, 'proofs': proofs})
         remaining = [t for t in remaining if t.token_id not in refs]
     complete(state,inventory)
     return True

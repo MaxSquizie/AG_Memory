@@ -16,6 +16,9 @@ class Script:
     def generate(self,prompt,**kwargs):
         slot=re.search(r'Decision slot: (\S+)',prompt).group(1)
         self.calls.append((slot,prompt))
+        if slot=='temporal_function' and (not self.steps or self.steps[0][0]!=slot):
+            return next(n for n,label in re.findall(r'^(\d+)\. (.*)$',prompt,re.M)
+                        if label.startswith('None of these words'))
         if (slot.endswith('_continue') or slot=='structural_function_owner') and (not self.steps or self.steps[0][0]!=slot):
             return '1'  # Explicit DONE / KEEP_ALL in this scripted continuous partition.
         if slot==self.selected_slot and (not self.steps or self.steps[0][0]!=slot):return '0'
@@ -47,12 +50,13 @@ class Script:
         return '0' if slot.startswith('structural_') else self.default
 
 
-def run(tmp_path,monkeypatch,text,steps,kind='ASSERTION',default='1'):
+def run(tmp_path,monkeypatch,text,steps,kind='ASSERTION',default='1',observer_contract='v7-observer-1',raw_extra=None):
     script=Script(steps,default)
     monkeypatch.setattr(ChatBackend,'generate',lambda self,prompt,**kw:script.generate(prompt,**kw))
     payload={'raw_input':{'text':text,'source_id':'structural-task-test','revision':1,
-        'range':[0,len(text)],'language':'ru','request_kind':kind,'batch_kind':'MESSAGE'}}
-    result=execute_native(Session([payload],tmp_path/'journal.log'),payload,
+        'range':[0,len(text)],'language':'ru','request_kind':kind,'batch_kind':'MESSAGE',**(raw_extra or {})}}
+    session=Session([payload],tmp_path/'journal.log');session.observer_contract=observer_contract
+    result=execute_native(session,payload,
         {'provider':'lmstudio','model':'scripted-source-selection','structure_mode':'region_probes'})
     assert not script.errors,script.errors
     assert not script.steps,list(script.steps)

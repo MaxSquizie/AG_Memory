@@ -1,3 +1,5 @@
 # Signed and hashed text artifacts must have identical bytes on Windows/Linux.
 data/formalizer_v7_oracle/** text eol=lf
 *.py text eol=lf
+
+data/formalizer_v7_oracle_v2/** text eol=lf

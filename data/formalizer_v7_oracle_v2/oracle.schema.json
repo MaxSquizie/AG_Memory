@@ -1,0 +1,174 @@
+{
+  "$id": "urn:ag-memory:v7-symbolic-oracle:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "acceptance_refs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "case_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "dry_run_refs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "fixture_profile": {
+      "enum": [
+        "known",
+        "open",
+        "known_mapping_broken",
+        "release_validation"
+      ]
+    },
+    "initial_state": {
+      "const": "EMPTY"
+    },
+    "mechanisms": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "norm_refs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "schema_version": {
+      "const": "v7-symbolic-oracle-2"
+    },
+    "steps": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "checks": {
+            "items": {
+              "oneOf": [
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "op": {
+                      "enum": [
+                        "eq",
+                        "set_eq",
+                        "multiset_eq",
+                        "contains",
+                        "excludes",
+                        "count"
+                      ]
+                    },
+                    "path": {
+                      "pattern": "^/",
+                      "type": "string"
+                    },
+                    "value": {}
+                  },
+                  "required": [
+                    "op",
+                    "path",
+                    "value"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "checkpoint": {
+                      "type": "string"
+                    },
+                    "op": {
+                      "const": "same_as"
+                    },
+                    "path": {
+                      "pattern": "^/",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "op",
+                    "path",
+                    "checkpoint"
+                  ],
+                  "type": "object"
+                }
+              ]
+            },
+            "type": "array"
+          },
+          "id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "payload": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "id",
+          "action",
+          "payload",
+          "checks"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "tags": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "tier": {
+      "enum": [
+        "pipeline",
+        "component",
+        "durability",
+        "metamorphic",
+        "resource",
+        "query"
+      ]
+    },
+    "title": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "case_id",
+    "title",
+    "tier",
+    "mechanisms",
+    "norm_refs",
+    "acceptance_refs",
+    "dry_run_refs",
+    "fixture_profile",
+    "tags",
+    "description",
+    "initial_state",
+    "steps"
+  ],
+  "type": "object"
+}

@@ -980,7 +980,7 @@ def _interpret_state(state,text,selector,release,observation,morph,context_reade
                     implicit=tuple(r for r in extra if r not in bs.values())
                     cid=s['sense_id']+':'+digest([bs,v,implicit])[:16] if implicit else s['sense_id']+':'+digest([bs,v])[:16]
                     if implicit_roles and not set(implicit_roles)<={r['role_id'] for r in v['roles']}: continue
-                    specs.append({'candidate_id':cid,'sense_id':s['sense_id'],'label':s.get('label',s['sense_id']),'sense_kind':'KNOWN','roles':bs,'implicit_roles':list(implicit_roles),'spatial_roles':list(spatial_roles),'state_class':mode,'valency_ref':v.get('construction_id',digest(v)),
+                    specs.append({'candidate_id':cid,'sense_id':s['sense_id'],'label':s.get('label',s['sense_id'])+'; lexical entry «'+s.get('lemma',e.span)+'»'+('; '+s['meaning_en'] if s.get('meaning_en') else ''),'sense_kind':'KNOWN','roles':bs,'implicit_roles':list(implicit_roles),'spatial_roles':list(spatial_roles),'state_class':mode,'valency_ref':v.get('construction_id',digest(v)),
                                   **({'description_roles':list(description_roles)} if frame.semantic.get('action_description') else {}),
                                   **({'query_existential_roles':list(implicit)} if implicit else {})})
         open_spec=None
@@ -1075,7 +1075,7 @@ def _interpret_state(state,text,selector,release,observation,morph,context_reade
         _probe(state,selector,release,f.frame_id+'|predicate_value','predicate_value',options,
             text[slice(*f.source_range)],f.source_range,
             question='Which lexical use applies to this occurrence in its selected structure? '
-            'A catalog entry must fit the source meaning. An unlisted use preserves the literal meaning without canonical equivalence.')
+            'Choose a catalog entry when its lexical meaning fits. Tense, date, negation and modality are handled by the structure, not new lexical senses. Choose an unlisted use only when no listed meaning fits; use ? when uncertain.')
         d=state.decisions[f.frame_id+'|predicate_value'];d.source_traces=f.semantic.get('source_traces',())
         state.component_probe_records[f.frame_id+'|predicate_value']['decision']=asdict(d)
     from .clarifications import offer

@@ -137,7 +137,7 @@ def licensed(state,proof,**expected):
     return False
 
 
-def span(state,release,selector,region,tokens,cfg,slot,question,*,exclude=(),record_remainder=False,admissible=None):
+def span(state,release,selector,region,tokens,cfg,slot,question,*,exclude=(),record_remainder=False,admissible=None,initial=None):
     """Every source token boundary is reachable; no punctuation whitelist."""
     forbidden=set(exclude)
     eligible=[(i,t) for i,t in enumerate(tokens) if t.token_id not in forbidden]
@@ -149,12 +149,15 @@ def span(state,release,selector,region,tokens,cfg,slot,question,*,exclude=(),rec
             if admissible is None or admissible(tokens[a:b+1]):yield b
     if admissible is not None:
         eligible=[(i,t) for i,t in eligible if next(endpoints(i),None) is not None]
+    if initial is not None and not any(initial[0].get('index')==i and initial[0].get('token_ref')==t.token_id for i,t in eligible):
+        raise ValueError('INITIAL_SOURCE_BOUNDARY_OUTSIDE_DOMAIN')
     rejected=set()
     while len(rejected)<len(eligible):
         starts=({'candidate_id':'start:'+t.token_id,'label':'Start at «'+t.span+'» @'+str(t.start),
                  'index':i,'token_ref':t.token_id} for i,t in eligible if i not in rejected)
-        start=choose(state,release,selector,region,cfg,slot+'_start',starts,question+' Select the FIRST token.'+
+        start=initial or choose(state,release,selector,region,cfg,slot+'_start',starts,question+' Select the FIRST token.'+
             (' Earlier starts have no accepted endpoint: '+str(sorted(rejected))+'.' if rejected else ''))
+        initial=None
         if start is None:return None
         a=start[0]['index']
         def ends():
@@ -176,7 +179,7 @@ def span(state,release,selector,region,tokens,cfg,slot,question,*,exclude=(),rec
     return None
 
 
-def source_set(state,release,selector,region,tokens,cfg,slot,question,*,exclude=(),record_remainder=False,admissible=None):
+def source_set(state,release,selector,region,tokens,cfg,slot,question,*,exclude=(),record_remainder=False,admissible=None,initial=None):
     """Select a finite union of source intervals without enumerating 2**n sets.
 
     Every step either closes the set or adds an occurrence. The final whole
@@ -184,7 +187,7 @@ def source_set(state,release,selector,region,tokens,cfg,slot,question,*,exclude=
     """
     chosen=span(state,release,selector,region,tokens,cfg,slot,
         question+' Select the first continuous piece; other pieces can be added next.',exclude=exclude,
-        record_remainder=record_remainder)
+        record_remainder=record_remainder,initial=initial)
     if not chosen:return None
     return extend_source_set(state,release,selector,region,tokens,cfg,slot,question,
                              chosen[0],chosen[1],exclude=exclude,admissible=admissible)

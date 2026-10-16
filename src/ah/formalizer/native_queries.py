@@ -101,7 +101,8 @@ def project_native_queries(state,release):
     for tree in trees:
         refs=leaves(tree); fs=[frames[f] for f in refs]
         if refs&embedded or any(f.semantic.get('quoted') for f in fs): continue
-        acts={f.semantic.get('discourse_scope',{}).get('speech_act') for f in fs}
+        from .discourse_scopes import for_tree
+        acts={for_tree(state,tree).get('speech_act')}
         query=state.observation.get('request_kind')=='QUERY' or 'QUERY' in acts
         if acts & {None,'UNKNOWN','COMMAND'} or state.observation.get('request_kind') in {'COMMAND','UNKNOWN','STATEMENT'}:continue
         if not query: continue

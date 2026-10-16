@@ -9,47 +9,86 @@ from .regions import delimiter_scopes
 
 
 def prepare(state,release=None,selector=None):
-    from .composition_tree import leaves
+    from .composition_tree import leaves, slots
     frames={f.frame_id:f for f in state.frames}
     parents={}
     for parent in state.frames:
         if parent.semantic.get('structural_unresolved'):continue
-        for role,edge in parent.semantic.get('proposition_args',{}).items():
-            refs=leaves(edge['tree']) if edge.get('tree') else {edge.get('frame_ref')}
+        for slot in slots(parent):
+            role,edge=slot.name,slot.metadata
+            refs=leaves(slot.tree)
             for ref in refs:
                 if ref in frames:
                     parents.setdefault(ref,[]).append((parent,role,edge))
     quotes=[s for s in delimiter_scopes(state.text) if s['opening'] in {'«','“','„','"'}]
     evidence={e.token_id:e for e in state.evidence}
-    acts={}
+    # A speech act belongs to a complete expression, including its operators.
+    # Its lexical leaves are not separate assertions of the operand contents.
+    from .composition_tree import forests, embedded
+    from .component_policy import rejected
+    trees=forests(state.frames,state.logical_roots)
+    children=embedded(state.frames,trees)
+    trees += [{'frame_ref':f.frame_id} for f in state.frames if f.frame_id not in children
+              and not f.semantic.get('coordination_owner') and not rejected(state,f)
+              and not f.semantic.get('structural_unresolved')]
+    scopes={}; memberships={}
+    def source(tree,active=frozenset()):
+        refs=[];spans=[]
+        for tid in (*tree.get('anchor_refs',()),*tree.get('alignment_refs',())):
+            if tid in evidence:spans.append((evidence[tid].start,evidence[tid].end))
+        fid=tree.get('frame_ref')
+        if fid:
+            if fid in active or fid not in frames:return [],[]
+            f=frames[fid];refs.append(fid);spans.append(tuple(f.source_range))
+            children=[slot.tree for slot in slots(f)];active=active|{fid}
+        else:children=tree.get('operands',())
+        for child in children:
+            childrefs,childspans=source(child,active);refs.extend(childrefs);spans.extend(childspans)
+        return refs,spans
+    for tree in trees:
+        refs,spans=source(tree)
+        if not refs or not spans:continue
+        direct=leaves(tree)
+        bounds=(min(x[0] for x in spans),max(x[1] for x in spans))
+        key='speech-act:'+digest([state.source_uid,tree,bounds])
+        explicit={('QUERY' if frames[r].semantic.get('query_request') else
+                   'COMMAND' if frames[r].semantic.get('command_request') else None) for r in direct}
+        explicit.discard(None)
+        requested=state.observation.get('request_kind')
+        if requested in {'QUERY','COMMAND','UNKNOWN'}:explicit={requested}
+        act=next(iter(explicit)) if len(explicit)==1 else 'UNKNOWN'
+        proof=None
+        if not explicit and release is not None and selector is not None and all(
+                not frames[r].semantic.get('structural_unresolved') for r in refs):
+            from .component_probe import _probe
+            act=_probe(state,selector,release,key,'speech_act',[
+                {'candidate_id':'ASSERTION','label':'The speaker asserts the WHOLE statement, including its negation, modality or condition'},
+                {'candidate_id':'QUERY','label':'The speaker asks for information or confirmation'},
+                {'candidate_id':'COMMAND','label':'The speaker requests or directs an action'},
+                {'candidate_id':'CONTENT','label':'Only quoted or mentioned content; no assertion of the WHOLE statement'}],
+                state.text[slice(*bounds)],bounds,
+                question='What does the speaker do with this WHOLE statement? Asserting a negative or possible statement does not assert its inner event. Choose the speech act of the whole, not of an operand.') or 'UNKNOWN'
+            proof=key
+        scope={'scope_ref':'discourse-root:'+digest([state.source_uid,tree]),'source_range':list(bounds),
+               'speech_act':act,'act_decision_ref':proof,'tree':tree,'frame_refs':sorted(set(refs))}
+        scopes[digest(tree)]=scope
+        for fid in direct:memberships.setdefault(fid,[]).append(scope)
+    state.observation['discourse_roots']=list(scopes.values())
     for frame in state.frames:
         anchor=evidence.get(getattr(frame,'predicate_token_ref',None))
         physical=[q for q in quotes if anchor and q['source_range'][0]<=anchor.start<q['source_range'][1]]
         edges=parents.get(frame.frame_id,[])
         quoted=[row for row in edges if row[2].get('attitude')=='QUOTED']
-        act='QUERY' if frame.semantic.get('query_request') else 'COMMAND' if frame.semantic.get('command_request') else None
-        act_proof=None
-        if not act and edges:act='CONTENT'
-        if not act and release is not None and selector is not None and not frame.semantic.get('structural_unresolved'):
-            bounds=tuple(frame.source_range)
-            if bounds not in acts:
-                from .component_probe import _probe
-                key='speech-act:'+digest([state.source_uid,bounds])
-                chosen=_probe(state,selector,release,key,'speech_act',[
-                    {'candidate_id':'ASSERTION','label':'The speaker presents this content as holding'},
-                    {'candidate_id':'QUERY','label':'The speaker asks for information or confirmation'},
-                    {'candidate_id':'COMMAND','label':'The speaker requests or directs an action'},
-                    {'candidate_id':'CONTENT','label':'A mention, quotation or description without an assertion that it holds'}],
-                    state.text[slice(*bounds)],bounds,
-                    question='What act does the source perform with this whole content? Classify its use, including indirect requests. Punctuation alone does not decide.')
-                acts[bounds]=(chosen or 'UNKNOWN',key)
-            act,act_proof=acts[bounds]
+        owners=memberships.get(frame.frame_id,[])
+        owner=owners[0] if owners and len({x['scope_ref'] for x in owners})==1 else None
+        act='CONTENT' if edges else owner['speech_act'] if owner else 'UNKNOWN'
+        act_proof=owner['act_decision_ref'] if owner else None
         act=act or 'UNKNOWN'
         if act=='UNKNOWN' and not frame.semantic.get('structural_unresolved'):
             frame.semantic['structural_unresolved']=True
             state.diag('SPEECH_ACT_UNRESOLVED',frame.frame_id)
         scope={'scope_ref':'discourse:'+digest([state.source_uid,frame.frame_id,[(p.frame_id,r) for p,r,_ in edges]]),
-               'source_range':list(frame.source_range),'parent_refs':[p.frame_id for p,_,_ in edges],
+               'source_range':list(frame.source_range),'root_scope_ref':owner['scope_ref'] if owner else None,'parent_refs':[p.frame_id for p,_,_ in edges],
                'speech_act':act,'act_decision_ref':act_proof,
                'quoted':bool(quoted or physical),'speaker_mention':None,'addressee_mention':None}
         if len(quoted)==1:
@@ -79,3 +118,15 @@ def for_mention(state,tid):
     candidates=nested or scopes
     signature=lambda s:(s.get('quoted'),s.get('speaker_mention'),s.get('addressee_mention'))
     return candidates[0] if candidates and all(signature(s)==signature(candidates[0]) for s in candidates) else None
+
+
+def for_tree(state,tree):
+    """Read the accepted whole-expression act; never infer it from spelling."""
+    scopes=state.observation.get('discourse_roots',())
+    exact=[s for s in scopes if s['tree']==tree]
+    if len(exact)==1:return exact[0]
+    fid=tree.get('frame_ref')
+    if fid:
+        f=next((f for f in state.frames if f.frame_id==fid),None)
+        if f:return f.semantic.get('discourse_scope',{})
+    return {'speech_act':'UNKNOWN'}

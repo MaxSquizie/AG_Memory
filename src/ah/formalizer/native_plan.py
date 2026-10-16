@@ -148,7 +148,9 @@ def build_plan(state,release,store):
         nid='N:'+digest(identity)
         emit('ENSURE_NODE',{'uid':nid,'template_ref':tid,'actants':roles,'semantic_status':'UNLINKED' if open_ else 'KNOWN','temporal_mode':mode,'identity_key':identity,'content_key':ck,'polarity':True,'proposition':content,'source_tag':tag,'source_ref':f.predicate_token_ref,
             **({'action_description':{'unassigned_roles':selected.get('description_roles',[])}} if f.semantic.get('action_description') else {}),
-            **({'lexical_anchor':predicate_lemma or predicate_surface.casefold()} if open_ else {})},frag)
+            **({'lexical_anchor':predicate_lemma or predicate_surface.casefold(),
+                'lexical_source_refs':list(f.semantic.get('lexical_units',{}).get(f.predicate_token_ref,{}).get('anchor_refs') or [f.predicate_token_ref]),
+                'lexical_surface':predicate_surface,'lexical_lemma':predicate_lemma} if open_ else {})},frag)
         for role,child in f.semantic.get('proposition_args',{}).items():
             target=roles[role]
             qualification=content_time(frames[child['frame_ref']],target,tag) if child.get('frame_ref') else {}
@@ -264,15 +266,20 @@ def build_plan(state,release,store):
     roots=[(f.frame_id,{'frame_ref':f.frame_id}) for f in state.frames if f.frame_id not in structural_leaves and not f.semantic.get('coordination_owner') and not rejected(state,f)]
     roots += [('logical:'+digest(t)[:16],t) for t in forests]
     from .source_assertions import roots as source_asserted_roots
-    roots += source_asserted_roots(state,release)
+    asserted_roots=source_asserted_roots(state,release)
+    roots += asserted_roots
     for frag,t in roots:
         refs=leaf_refs(t); fs=[frames[f] for f in sorted(refs)]
         if any(f.semantic.get('temporal_unresolved') for f in fs):
             diagnostics.append('WAITING_CONTEXT:'+frag); continue
         # Speech act and attitudes are structural guards; they do not confirm content.
-        is_query=any(f.semantic.get('query_request') or f.semantic.get('discourse_scope',{}).get('speech_act')=='QUERY' for f in fs)
-        is_command=any(f.semantic.get('discourse_scope',{}).get('speech_act')=='COMMAND' for f in fs)
-        if any(f.semantic.get('discourse_scope',{}).get('speech_act') in {None,'UNKNOWN'} for f in fs):
+        from .discourse_scopes import for_tree
+        act=for_tree(state,t).get('speech_act')
+        # Explicit source projections carry their own checked assertion licence.
+        if (frag,t) in asserted_roots and act in {'CONTENT','UNKNOWN'}:act='ASSERTION'
+        is_query=act=='QUERY'
+        is_command=act=='COMMAND'
+        if act in {None,'UNKNOWN'}:
             diagnostics.append('SPEECH_ACT_UNRESOLVED:'+frag);continue
         quoted=any(f.semantic.get('quoted') for f in fs)
         requested=state.observation.get('request_kind')
@@ -280,7 +287,7 @@ def build_plan(state,release,store):
             diagnostics.append(('MODUS_UNKNOWN' if requested=='UNKNOWN' else 'SPEECH_ACT_'+requested)+':'+frag); continue
         if requested is not None and requested not in {'ASSERTION','STATEMENT','MIXED'}:
             diagnostics.append('INPUT_REJECTED:unknown request_kind:'+frag); continue
-        quoted=quoted or any(f.semantic.get('discourse_scope',{}).get('speech_act')=='CONTENT' and not f.semantic.get('component_child') for f in fs)
+        quoted=quoted or act=='CONTENT'
         if is_query or is_command or quoted:
             diagnostics.append(('SPEECH_ACT_QUERY' if is_query else 'SPEECH_ACT_COMMAND' if is_command else 'QUOTED_CONTENT')+':'+frag); continue
         regions=[f.semantic.get('region') for f in fs]

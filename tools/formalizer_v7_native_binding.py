@@ -550,8 +550,9 @@ def native_candidate_patterns(session,state,release,limit=1024):
                 from ah.formalizer.lexical_forms import selected_forms
                 surface,lemma=selected_forms(frame,ev)
                 label=lemma or surface.casefold()
-                pred='OPEN:'+label
-                role_map={r:open_role_alias(r,proposition=r in frame.semantic.get('proposition_args',{})) for r in role_ids}
+                pred=({'open_source':list(frame.semantic.get('lexical_units',{}).get(frame.predicate_token_ref,{}).get('anchor_refs') or [frame.predicate_token_ref])}
+                      if getattr(session,'observer_contract','v7-observer-1')=='v7-observer-2' else 'OPEN:'+label)
+                role_map={r:(r if getattr(session,'observer_contract','v7-observer-1')=='v7-observer-2' else open_role_alias(r,proposition=r in frame.semantic.get('proposition_args',{}))) for r in role_ids}
             roles={};valid=True
             for tid,rid in spec['roles'].items():
                 value=entity(frame,tid)
@@ -735,12 +736,10 @@ def execute_native(session,p,config):
     structural=session.unique([decode_native(session,uid) for uid in L.s_accessible()-visible])
     open_nodes=[n for n in L.data['nodes'].values() if n.get('semantic_status')=='UNLINKED']
     source=[a for a in L.data['assertions'].values() if a['provenance']['source']['kind']=='OBSERVATION']
-    from ah.formalizer.speech_act import detect_speech_act
+    from tools.formalizer_v7_observer import discourse, temporal
+    discourse_observation=discourse(state)
+    modus=discourse_observation['modus']
     from ah.logic.function_registry import FunctionRegistry
-    readings=detect_speech_act(text,tuple(raw.get('context_facts',())))
-    requested=raw.get('request_kind')
-    imperative=any(v.mood=='imperative' for e in state.evidence for v in e.variants)
-    modus=requested if requested in {'QUERY','COMMAND','UNKNOWN'} else 'AMBIGUOUS' if len(readings)>1 else 'COMMAND' if imperative else readings[0].kind
     derived=[s for s in L.data['supports'].values() if s['kind']=='DERIVED']
     semantics=[a['region'].get('kind') for a in source]
     registry=FunctionRegistry()
@@ -756,21 +755,7 @@ def execute_native(session,p,config):
                 'selected':list(d.selected),'candidate_ids':list(d.candidates)} for d in state.decisions.values()]
     predicate_decisions=[d for d in decisions if d['slot_id']=='predicate_value']
     decision_outcomes={d['outcome'] for d in predicate_decisions}
-    # Match observation-source assertions against the temporal parser output,
-    # not merely the presence of a timestamp. A source timestamp alone is never
-    # permission to invent an interval from tense or an infinitive.
-    from ah.formalizer.native_frontend import _temporal
-    parsed_regions=[]
-    for frame in state.frames:
-        start,end=frame.source_range
-        parsed,codes=_temporal(state.text[start:end],state.observation,release)
-        if parsed is not None and not codes and parsed not in parsed_regions:parsed_regions.append(parsed)
-    parsed,codes=_temporal(state.text,state.observation,release)
-    if parsed is not None and not codes and parsed not in parsed_regions:parsed_regions.append(parsed)
-    from ah.formalizer.canonical_ledger import region,region_data
-    allowed_regions={digest(region_data(region(value))) for value in parsed_regions}
-    invented=[a for a in source if a['provenance']['source'].get('source_tag')==[state.source_uid,state.interpretation_version]
-              and digest(region_data(region(a['region']))) not in allowed_regions]
+    time_observation=temporal(state,release,source)
     writes,bindings_observed=native_write_observations(session,state,entities_before)
     from ah.formalizer.inference_policy import node_inference_policy
     return {'assertions':{'ah':facts,'ir':session.unique([decode_native(session,u) for u in admitted]),
@@ -782,6 +767,8 @@ def execute_native(session,p,config):
         'coverage':{'status':coverage['level'],**coverage,
             'opaque_full_claim':bool(coverage['level'] in {'FULL_CANONICAL','OPEN_LEXICAL'} and not generation['structural_candidates'] and not generation['operator_forest'])},
         'audit':{'raw_input_retained':state.text==text},
+        'observer':{'contract':getattr(session,'observer_contract','v7-observer-1')},
+        'discourse':discourse_observation,
         'modus':modus,
         'goal':{'non_factive':not facts and modus in {'COMMAND','QUERY','AMBIGUOUS','UNKNOWN'}},
         'open':{'semantic_status':open_nodes[0]['semantic_status'] if open_nodes else None,
@@ -799,7 +786,7 @@ def execute_native(session,p,config):
             'variable_bindings':{str(k):v for k,v in session.native_variable_aliases.items()},
             'provider_call_count':len([r for r in rows if r['payload'].get('kind')=='prov_call' and r['payload'].get('state')=='RECEIVED'])},
         'generation':generation,
-        'time':{'invented_past_intervals':invented,'clock_default_used':False},
+        'time':time_observation,
         'time_assertions':{'count':len(source),'records':source,'semantics':semantics},
         'store':{**writes,'new_record_count':len(L.data['nodes'])+len(L.data['supports']), 'marker_count':len(L.data['markers']),
             'unregistered_functions':[n.get('function_id') for n in L.data['nodes'].values() if n.get('kind')=='G' and registered and n.get('function_id') not in registered]}}
@@ -827,7 +814,11 @@ def decode_native(session,uid):
                 # Read open isolation metadata rather than guessing a gold word.
                 symbol=session.core.store.get_symbol(session.core.store.get_template(obj.template.uid).predicate.uid)
                 label=sorted(symbol.forms)[0] if symbol.forms else obj.template.uid
-            pred='OPEN:'+str(label);role_map=None
+            if getattr(session,'observer_contract','v7-observer-1')=='v7-observer-2':
+                from tools.formalizer_v7_observer import open_predicate
+                pred=open_predicate(spec.get('lexical_source_refs',()))
+                role_map={r.value:r.value for r in obj.actants}
+            else:pred='OPEN:'+str(label);role_map=None
         decoded={r.value:decode_native(session,v) for r,v in obj.actants.items()}
         return {'predicate':pred,'roles':{(role_map.get(r,r) if role_map is not None else
             open_role_alias(r,proposition='predicate' in value or 'operator' in value)):value for r,value in decoded.items()}}

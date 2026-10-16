@@ -80,7 +80,9 @@ def validate(root):
     known=set(mechanisms);required=['schema_version','case_id','title','tier','mechanisms','norm_refs','acceptance_refs','dry_run_refs','fixture_profile','tags','description','initial_state','steps']
     for c in cases:
         strictkeys(c,required)
-        if c['schema_version']!='v7-symbolic-oracle-1':raise OracleError('case schema version')
+        if c['schema_version'] not in {'v7-symbolic-oracle-1','v7-symbolic-oracle-2'}:raise OracleError('case schema version')
+        expected_version='v7-symbolic-oracle-2' if manifest.get('observer_contract')=='v7-observer-2' else 'v7-symbolic-oracle-1'
+        if c['schema_version']!=expected_version:raise OracleError('case/manifest contract mismatch '+c['case_id'])
         if not c['mechanisms'] or set(c['mechanisms'])-known:raise OracleError('unknown/empty mechanisms '+c['case_id'])
         if len(c['mechanisms'])!=len(set(c['mechanisms'])):raise OracleError('duplicate mechanism '+c['case_id'])
         if c['fixture_profile'] not in fixtures['profiles']:raise OracleError('unknown fixture')
@@ -90,6 +92,9 @@ def validate(root):
             strictkeys(s,['id','action','payload','checks'])
             if s['id'] in seen:raise OracleError('duplicate step id')
             if not isinstance(s['payload'],dict):raise OracleError('payload not object')
+            if c['schema_version']=='v7-symbolic-oracle-2' and c['tier']=='pipeline':
+                guard={'op':'eq','path':'/observer/contract','value':'v7-observer-2'}
+                if guard not in s['checks']:raise OracleError('missing observer contract guard '+c['case_id'])
             for ck in s['checks']:
                 checkcount+=1
                 if ck['op']=='same_as':
