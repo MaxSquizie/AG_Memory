@@ -290,6 +290,10 @@ class ReadableInspection:
         return out+'<ul>'+''.join(items)+'</ul>'
 
     def task_choice(self,value):
+        if value.get('boundary_end_ref') and 'remainder_refs' in value:
+            return ('Конец после «'+self.word(value['boundary_end_ref'])+'». Слова связи: «'+
+                    ' '.join(self.word(t) for t in value.get('selected_refs',()))+
+                    '». Во вложенном содержании останется: «'+' '.join(self.word(t) for t in value['remainder_refs'])+'».')
         content=(' Содержание: «'+' '.join(self.word(t) for t in value['content_refs'])+'».'
                  if value.get('content_refs') else '')
         if value.get('independent_content'):

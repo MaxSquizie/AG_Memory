@@ -63,13 +63,17 @@ def test_unresolved_control_does_not_guess_a_speaker(tmp_path,monkeypatch,answer
     assert not result['assertions']['ah'] and not result['assertions']['journal']
 
 
-def test_boundary_options_show_remaining_content_before_the_choice(tmp_path,monkeypatch):
+def test_boundary_remainder_is_recorded_for_gui_without_changing_the_model_options(tmp_path,monkeypatch):
     steps=unary('NOT','не','не')+relation('LEXICAL')
     result,script=run(tmp_path,monkeypatch,'Иван не прочитал книгу.',steps)
     assert result['diagnostics']['codes']==[]
     prompt=next(p for s,p in script.calls if s=='structural_introducer_end')
-    assert 'selected words «не»; content left for this relation: «Иван прочитал книгу .»' in prompt
-    assert 'selected words «не прочитал»; content left for this relation: «Иван книгу .»' in prompt
+    assert 'content left for this relation' not in prompt and 'beside each endpoint' not in prompt
+    trace=next(r for r in result['runtime']['ir']['syntax_trace']
+               if r.get('kind')=='STRUCTURAL_TASK' and r.get('slot')=='structural_introducer_end')
+    selected=next(v for v in trace['alternatives'] if v['candidate_id']==trace['selected'])
+    assert selected['selected_refs']==['tok:5:7']
+    assert selected['remainder_refs']==['tok:0:4','tok:8:16','tok:17:22','tok:22:23']
 
 
 def test_marker_question_is_about_one_word_and_keeps_a_rejection(tmp_path,monkeypatch):

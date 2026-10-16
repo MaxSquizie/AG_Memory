@@ -238,8 +238,7 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child):
             'Include the full linking expression and any conjunction introducing its content. '
             'Exclude words belonging to a different nested relation, even when adjacent to the outer marker. '
             'Exclude the content proposition, its subject and predicate. Separating commas may be included; '
-            'The content shown beside each endpoint is what remains under this relation; '
-            'it must still contain the action/state and all its participants.',show_remainder=True)
+            'do not end early just because the first word already signals the relation.',record_remainder=True)
         if not chosen:return block(state,region)
         markers=chosen[0];marker_refs={t.token_id for t in markers}
         owned=[t for t in tokens if t.token_id not in marker_refs]

@@ -1,0 +1,30 @@
+[
+  {
+    "case_id": "LANG-00-0-question",
+    "text": "Верно ли, что иван вошёл?",
+    "prompts": [
+      {
+        "slot": "structural_introducer_start",
+        "prompt": "Read the source and answer the question about its meaning or grammar. Options are proposals, not facts. Use only the supplied text and context; do not invent identities or events. You are interpreting what is said, not checking whether it happened.\nQUERY (A question about content; no assertion of the content): select only the complete words expressing this outer relation. Include the full linking expression and any conjunction introducing its content. Exclude words belonging to a different nested relation, even when adjacent to the outer marker. Exclude the content proposition, its subject and predicate. Separating commas may be included; do not end early just because the first word already signals the relation. Select the FIRST token.\n\nDecision slot: structural_introducer_start\nContext span: Верно ли, что иван вошёл?\nOptions:\n1. Start at «Верно» @0\n2. Start at «ли» @6\n3. Start at «,» @8\n4. Start at «что» @10\n5. Start at «иван» @14\n6. Start at «вошёл» @19\n7. Start at «?» @24\nReply with the number of the supported option. If several options remain possible, list their numbers separated by commas. Insufficient context: ?\nNo candidate fits: 0\nOne line, no spaces. No JSON or explanation."
+      },
+      {
+        "slot": "structural_introducer_end",
+        "prompt": "Read the source and answer the question about its meaning or grammar. Options are proposals, not facts. Use only the supplied text and context; do not invent identities or events. You are interpreting what is said, not checking whether it happened.\nQUERY (A question about content; no assertion of the content): select only the complete words expressing this outer relation. Include the full linking expression and any conjunction introducing its content. Exclude words belonging to a different nested relation, even when adjacent to the outer marker. Exclude the content proposition, its subject and predicate. Separating commas may be included; do not end early just because the first word already signals the relation. The start is «Верно» @0. Select the LAST token.\n\nDecision slot: structural_introducer_end\nContext span: Верно ли, что иван вошёл?\nOptions:\n1. End after «Верно» @5; selected words «Верно»\n2. End after «ли» @8; selected words «Верно ли»\n3. End after «,» @9; selected words «Верно ли ,»\n4. End after «что» @13; selected words «Верно ли , что»\n5. End after «иван» @18; selected words «Верно ли , что иван»\n6. End after «вошёл» @24; selected words «Верно ли , что иван вошёл»\n7. End after «?» @25; selected words «Верно ли , что иван вошёл ?»\nReply with the number of the supported option. If several options remain possible, list their numbers separated by commas. Insufficient context: ?\nNo candidate fits: 0\nOne line, no spaces. No JSON or explanation."
+      }
+    ]
+  },
+  {
+    "case_id": "LANG-00-1-question",
+    "text": "Верно ли, что пётр вошёл?",
+    "prompts": [
+      {
+        "slot": "structural_introducer_start",
+        "prompt": "Read the source and answer the question about its meaning or grammar. Options are proposals, not facts. Use only the supplied text and context; do not invent identities or events. You are interpreting what is said, not checking whether it happened.\nQUERY (A question about content; no assertion of the content): select only the complete words expressing this outer relation. Include the full linking expression and any conjunction introducing its content. Exclude words belonging to a different nested relation, even when adjacent to the outer marker. Exclude the content proposition, its subject and predicate. Separating commas may be included; do not end early just because the first word already signals the relation. Select the FIRST token.\n\nDecision slot: structural_introducer_start\nContext span: Верно ли, что пётр вошёл?\nOptions:\n1. Start at «Верно» @0\n2. Start at «ли» @6\n3. Start at «,» @8\n4. Start at «что» @10\n5. Start at «пётр» @14\n6. Start at «вошёл» @19\n7. Start at «?» @24\nReply with the number of the supported option. If several options remain possible, list their numbers separated by commas. Insufficient context: ?\nNo candidate fits: 0\nOne line, no spaces. No JSON or explanation."
+      },
+      {
+        "slot": "structural_introducer_end",
+        "prompt": "Read the source and answer the question about its meaning or grammar. Options are proposals, not facts. Use only the supplied text and context; do not invent identities or events. You are interpreting what is said, not checking whether it happened.\nQUERY (A question about content; no assertion of the content): select only the complete words expressing this outer relation. Include the full linking expression and any conjunction introducing its content. Exclude words belonging to a different nested relation, even when adjacent to the outer marker. Exclude the content proposition, its subject and predicate. Separating commas may be included; do not end early just because the first word already signals the relation. The start is «Верно» @0. Select the LAST token.\n\nDecision slot: structural_introducer_end\nContext span: Верно ли, что пётр вошёл?\nOptions:\n1. End after «Верно» @5; selected words «Верно»\n2. End after «ли» @8; selected words «Верно ли»\n3. End after «,» @9; selected words «Верно ли ,»\n4. End after «что» @13; selected words «Верно ли , что»\n5. End after «пётр» @18; selected words «Верно ли , что пётр»\n6. End after «вошёл» @24; selected words «Верно ли , что пётр вошёл»\n7. End after «?» @25; selected words «Верно ли , что пётр вошёл ?»\nReply with the number of the supported option. If several options remain possible, list their numbers separated by commas. Insufficient context: ?\nNo candidate fits: 0\nOne line, no spaces. No JSON or explanation."
+      }
+    ]
+  }
+]
