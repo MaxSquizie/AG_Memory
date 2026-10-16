@@ -37,18 +37,38 @@ def _failure_code(exc,default):
 
 
 def _temporal(text, observation, release, *, source_start=0):
-    from .named_periods import resolve as resolve_period
-    period_result=resolve_period(text,observation,release,source_start=source_start)
-    if period_result is not None: return period_result
-    from .clock_ranges import resolve as resolve_range
-    range_result=resolve_range(text,observation,release,source_start=source_start)
-    if range_result is not None: return range_result
-    from .symbolic_temporal_bounds import resolve as resolve_bound
-    bound_result=resolve_bound(text,observation,release,source_start=source_start)
-    if bound_result is not None: return bound_result
-    from .clock_expressions import resolve
-    clock_result=resolve(text,observation,release,source_start=source_start)
-    if clock_result is not None: return clock_result
+    """Normalize one selected expression using complete released grammars.
+
+    Rule order is not semantic precedence. Only full-cover grammars are
+    applicable; incompatible normalizations remain unresolved.
+    """
+    from .named_periods import resolve as period
+    from .clock_ranges import resolve as interval
+    from .symbolic_temporal_bounds import resolve as bound
+    from .clock_expressions import resolve as clock
+    compilers={'NAMED_PERIOD':period,'CLOCK_RANGE':interval,'TEMPORAL_BOUND':bound,'WORD_CLOCK':clock}
+    class RuleView:
+        def __init__(self,rule):self.rule=rule
+        def __getattr__(self,name):return getattr(release,name)
+        def entries(self,kind):return [self.rule] if kind=='TemporalRules' else release.entries(kind)
+    applicable=[r for r in release.entries('TemporalRules') if re.fullmatch(r['pattern'],text.strip(),re.I)]
+    results=[]
+    for rule in applicable:
+        local=RuleView(rule)
+        compiler=compilers.get(rule['kind'],_calendar_temporal)
+        result=compiler(text,observation,local,source_start=source_start)
+        if result is not None:results.append(result)
+    if not results:return None,[]
+    successful={digest(value):value for value,errors in results if value is not None}
+    if len(successful)>1:return None,['TEMPORAL_SCOPE_UNRESOLVED']
+    if not successful:return None,sorted({code for _,errors in results for code in errors})
+    # An incompatible applicable rule cannot be erased by a successful peer.
+    if any(value is None for value,_ in results):return None,['TEMPORAL_SCOPE_UNRESOLVED']
+    value=next(iter(successful.values()))
+    return value,sorted({code for _,errors in results for code in errors})
+
+
+def _calendar_temporal(text, observation, release, *, source_start=0):
     def clock(day,hour,minute):
         if not 0<=hour<24 or not 0<=minute<60: raise ValueError('TEMPORAL_EXPRESSION_INVALID')
         local=day.replace(hour=hour,minute=minute)
@@ -56,10 +76,7 @@ def _temporal(text, observation, release, *, source_start=0):
             raise ValueError('REFERENCE_UNKNOWN')  # ambiguous/nonexistent civil time
         return local.timestamp()
     matched=[]
-    resources=release.resources.get('TemporalRules')
-    if resources is None:
-        return None,[]
-    for rule in resources['entries']:
+    for rule in release.entries('TemporalRules'):
         m=re.search(rule['pattern'],text,flags=re.I)
         if not m: continue
         anchor=observation.get('time_anchor')
@@ -645,6 +662,14 @@ def _bindings(frame,evidence,valency,extra_gaps=(),*,parents=None):
 
 
 def run_native(text,selector,release,observation,morph=None,context_reader=None):
+    from .kernel import BoundedExecutor,ProbeLimits
+    bounded=selector if isinstance(selector,BoundedExecutor) else BoundedExecutor(selector,ProbeLimits(**observation.get('probe_limits',{})))
+    state=_run_native(text,bounded,release,observation,morph,context_reader)
+    state.observation['probe_metrics']={'calls':bounded.calls,'input_chars':bounded.input_chars}
+    return state
+
+
+def _run_native(text,selector,release,observation,morph=None,context_reader=None):
     from .telemetry import emit
     emit("stage", stage="T0_T1", source_chars=len(text))
     release.assert_integrity()
@@ -658,6 +683,15 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
     state.region_forest=build_regions(text,state.evidence,state.source_uid)
     from .probe_windows import configure, enter as enter_probe_window
     configure(state,selector,release)
+    from .composition_session import session
+    with session(state,release,context_reader,selector,morph):
+        return _interpret_state(state,text,selector,release,observation,morph,context_reader)
+
+
+def _interpret_state(state,text,selector,release,observation,morph,context_reader):
+    from .telemetry import emit
+    from .regions import reference_goal
+    from .probe_windows import enter as enter_probe_window
     # R-X is ordering experience only; it never adds/removes dictionary parses.
     rx1=[x for rec in observation.get('rx_reads',{}).get('T1',()) for x in rec['payload'].get('morphological_priors',())]
     for ev in state.evidence:
@@ -754,7 +788,7 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
         from .coordination_clarifications import apply as apply_coordination_choices
         apply_coordination_choices(state,release)
     from .spatial_references import prepare as prepare_spatial
-    prepare_spatial(state,release)
+    prepare_spatial(state,release,selector)
     from .lexical_snapshot import freeze as freeze_lexical
     state.generation_snapshot={'resource_snapshot':release.sha256,
         'document_scopes':deepcopy(state.document_scopes),
@@ -783,6 +817,8 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
     state.frames.sort(key=lambda f:(f.construction not in preferred_shapes,f.source_range,f.frame_id))
     state.region_forest.attach_frames(state.frames)
     from .components import prepare_implicit, resolve_implicit, add_memory_options
+    from .discourse_scopes import prepare as prepare_discourse
+    prepare_discourse(state,release,selector)
     prepare_implicit(state,release)
     emit("stage", stage="CONTEXT", frames=len(state.frames))
     if context_reader is not None:
@@ -846,7 +882,6 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
             candidate_specs[frame.frame_id]=[]
             continue
         e=evidence[frame.predicate_token_ref]
-        frame.semantic['quoted']=state.text[:e.start].count('«')>state.text[:e.start].count('»') or state.text[:e.start].count('\"')%2==1
         if frame.semantic.get('nominal_dependency_kind'):
             from .component_dependency_materialization import prepare_candidate
             candidate_specs[frame.frame_id]=prepare_candidate(frame,state,release)
@@ -949,16 +984,24 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
                                   **({'description_roles':list(description_roles)} if frame.semantic.get('action_description') else {}),
                                   **({'query_existential_roles':list(implicit)} if implicit else {})})
         open_spec=None
-        if not senses:
+        complete_valencies=all(any(v['sense_id']==sense['sense_id'] for v in release.entries('R-V')) for sense in senses)
+        if complete_valencies:
             policy=release.entries('OpenTemplatePolicy')
             if policy and policy[0].get('allow',False):
                 bs=frame.semantic.get('proposed_roles') or {tid:'SURFACE_ARG' for tid in frame.argument_token_refs}
-                open_spec={'candidate_id':'open:'+digest([state.source_uid,frame.frame_id]),'label':lexical.get('surface',e.span),'sense_kind':'OPEN_LEXICAL','roles':bs,'implicit_roles':list(implicit_frame_roles(frame)),'state_class':'UNKNOWN'}
+                open_spec={'candidate_id':'open:'+digest([state.source_uid,frame.frame_id]),'label':'Unlisted lexical use of «'+lexical.get('surface',e.span)+'»; preserve literal structure without canonical equivalence','sense_kind':'OPEN_LEXICAL','roles':bs,'implicit_roles':list(implicit_frame_roles(frame)),'state_class':'UNKNOWN'}
                 if frame.semantic.get('action_description'):
                     open_spec['description_roles']=list(frame.semantic['action_description']['unassigned_roles'])
+                generic_place=next((s for s in frame.semantic.get('spatial_slots',{}).values() if s['rule'].get('generic')),None)
+                if generic_place:open_spec['spatial_roles']=[generic_place['rule']['role_id']]
                 specs.append(open_spec)
         if senses and not specs and not frame.semantic.get('structural_unresolved'): state.diag('VALENCY_UNKNOWN',frame.frame_id)
         known_specs=[s for s in specs if s['sense_kind']=='KNOWN']
+        from .action_descriptions import schema_roles as mapped_roles
+        broken_mapping=any(not any(m['sense_id']==s['sense_id'] and set(m.get('roles',()))==mapped_roles(s,
+            set(s['roles'].values())|set(frame.semantic.get('proposition_args',{}))|set(s.get('implicit_roles',()))|set(s.get('spatial_roles',())))
+            for m in release.entries('TemplateMap')) for s in known_specs)
+        if broken_mapping:state.diag('CANONICAL_MAPPING_MISSING',frame.frame_id)
         schema_ids=[s['candidate_id'] for s in known_specs if s['sense_id'] in declared_ids]
         missing_valencies={x for x in priors|context_senses if not any(v['sense_id']==x for v in release.entries('R-V'))}
         for source,values in ((3,priors),(4,context_senses)):
@@ -970,15 +1013,22 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
             state.syntax_trace.append({'kind':'SEMANTIC_PRIOR_EXCLUDED','frame_ref':frame.frame_id,
                 'predicate_ref':frame.predicate_token_ref,'sense_ids':sorted(incompatible),'reason':'VALENCY_INCOMPATIBLE'})
         traces=build_source_traces(frame.frame_id,'predicate_value',schema_candidates=schema_ids,rs_senses=[s['candidate_id'] for s in known_specs],rx3_prior=[s['candidate_id'] for s in known_specs if s['sense_id'] in priors],wc_reads=[s['candidate_id'] for s in known_specs if s['sense_id'] in context_senses],rx3_applicable=True,wc_applicable=True,open_candidate=open_spec['candidate_id'] if open_spec else None,open_path_verified=True,resource_versions=(release.sha256,),blocked=blocked,blocked_reasons=blocked_reasons)
-        frame.semantic['source_blocked']=bool(blocked) or frame.semantic.get('binding_budget_exhausted',False)
+        frame.semantic['source_blocked']=bool(blocked) or not complete_valencies or broken_mapping or frame.semantic.get('binding_budget_exhausted',False)
         frame.semantic['candidate_specs']={s['candidate_id']:s for s in specs}
         frame.semantic['source_traces']=traces
         # Context and prior may rank, but never invent a canonical semantic value.
         if 'explicit_region' in frame.semantic:
             frame.semantic['region'],temporal_diag=frame.semantic['explicit_region'],[]
         else:
-            from .component_source import frame_view
-            frame.semantic['region'],temporal_diag=_temporal(frame_view(state,frame),observation,release,source_start=frame.source_range[0])
+            from .temporal_functions import units,normalize
+            owned=frame.semantic.get('owned_token_refs') or [e.token_id for e in state.evidence
+                if frame.source_range[0]<=e.start and e.end<=frame.source_range[1]]
+            selected_times=frame.semantic.get('temporal_functions',units(state,owned))
+            values=[normalize(state,release,u) for u in selected_times]
+            temporal_diag=[code for _,errors in values for code in errors]
+            distinct={digest(value):value for value,_ in values if value is not None}
+            if len(distinct)>1:temporal_diag.append('TEMPORAL_SCOPE_UNRESOLVED')
+            frame.semantic['region']=next(iter(distinct.values())) if len(distinct)==1 else None
         from .document_scopes import inherit as inherit_document_scope
         frame.semantic['region'],temporal_diag=inherit_document_scope(state,frame,frame.semantic['region'],temporal_diag,release)
         for code in temporal_diag: state.diag(code,frame.frame_id)
@@ -989,13 +1039,15 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
     emit("stage", stage="T4_RESOLUTION", frames=len(state.frames))
     # The clarification snapshot includes the full prepared gap inventory.
     state.generation_snapshot['frames']=[asdict(f) for f in state.frames]
+    state.generation_snapshot['syntax_trace']=deepcopy(state.syntax_trace)
+    state.generation_snapshot['component_probe_records']=deepcopy(state.component_probe_records)
     structural_seal(state)
     resolve_references(state,reference_slots,selector,release)
     resolve_implicit(state,release,selector)
     for f in state.frames:
         enter_probe_window(state,selector,f.source_range)
         specs=candidate_specs[f.frame_id]; ids=tuple(s['candidate_id'] for s in specs)
-        d=Decision('predicate_value',f.frame_id,ids); d.source_traces=f.semantic['source_traces']; state.decisions[f.frame_id+'|predicate_value']=d
+        d=Decision('predicate_value',f.frame_id,ids); d.source_traces=f.semantic.get('source_traces',()); state.decisions[f.frame_id+'|predicate_value']=d
         if f.semantic.get('structural_unresolved') or f.semantic.get('structural_rejection'):
             d.outcome='UNRESOLVED'
             continue  # No semantic probe can repair an uncovered structural dependency.
@@ -1010,29 +1062,22 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
             d.selected=(selected_by_speaker,); d.lifecycle='PROVISIONAL'; d.outcome='RESOLVED'
             d.grounds.append(Ground('C', 'durable explicit speaker disambiguation: '+state.observation['clarification_selection_ref'], selected_by_speaker))
             continue
-        if len(specs)==1 and not f.semantic.get('structural_unresolved'):
+        if len(specs)==1 and specs[0]['sense_kind']=='OPEN_LEXICAL' and not f.semantic.get('structural_unresolved'):
             d.selected=ids; d.lifecycle='PROVISIONAL'; d.outcome='RESOLVED'
             d.grounds.append(Ground('R' if specs[0]['sense_kind']=='KNOWN' else 'D','one compatible released sense/valency or validated literal open structure',ids[0]))
             continue
         if state.budget.llm_exhausted:
             d.outcome='COMPUTATION_LIMIT'; state.diag('COMPUTATION_LIMIT',f.frame_id); continue
-        relations={s['candidate_id']:Relation(s['candidate_id'],s['label'],len(s['roles']),tuple(s['roles'].values()),s['label']+'; frame temporal mode: '+s['state_class']+'; token-to-role mapping: '+json.dumps(s['roles'],ensure_ascii=False,sort_keys=True)) for s in specs}
-        schema=DecisionSchema(release.sha256,relations)
-        prompt=build_selector_prompt(selector,slot_id=d.slot_id,frame_id=f.frame_id,context_span=text[f.source_range[0]:f.source_range[1]],mentions={tid:evidence[tid].span for tid in f.argument_token_refs},schema=schema,candidates=ids,contextual_statements=state.context_facts)
-        try:
-            state.budget.spend_llm(); raw=selector.select(prompt); reply=validate_selector_reply(selector,raw,schema,ids,allowed=frozenset(ids))
-        except Exception as exc:
-            d.outcome='UNRESOLVED'; state.diag(_failure_code(exc,'PROTOCOL_ERROR'),str(exc)); continue
-        from .selection_prompt import record_prompt
-        record_prompt(d,prompt)
-        d.raw_response=raw; d.selector_outcome=reply.outcome; d.selected=reply.selected; d.lifecycle='PROVISIONAL'
-        if reply.outcome=='ONE_SELECTED':
-            d.grounds.append(Ground('M','bounded semantic selection',reply.selected[0])); d.outcome='RESOLVED'
-        elif reply.outcome=='MULTIPLE_ADMISSIBLE':
-            d.outcome='UNRESOLVED'; state.diag('NO_GROUNDED_CANDIDATE',f.frame_id)
-        elif reply.outcome=='INSUFFICIENT_CONTEXT': d.outcome='INSUFFICIENT_CONTEXT'
-        else:
-            d.outcome='UNRESOLVED'; state.diag('NO_GROUNDED_CANDIDATE','found candidates rejected; source is not exhausted')
+        from .component_probe import _probe
+        options=[{'candidate_id':spec['candidate_id'],'label':spec['label']+'; '+
+            ', '.join(role+'=«'+evidence[tid].span+'»' for tid,role in spec['roles'].items())+
+            '; temporal class='+spec['state_class']} for spec in specs]
+        _probe(state,selector,release,f.frame_id+'|predicate_value','predicate_value',options,
+            text[slice(*f.source_range)],f.source_range,
+            question='Which lexical use applies to this occurrence in its selected structure? '
+            'A catalog entry must fit the source meaning. An unlisted use preserves the literal meaning without canonical equivalence.')
+        d=state.decisions[f.frame_id+'|predicate_value'];d.source_traces=f.semantic.get('source_traces',())
+        state.component_probe_records[f.frame_id+'|predicate_value']['decision']=asdict(d)
     from .clarifications import offer
     for f in state.frames:
         d = state.decisions.get(f.frame_id+'|predicate_value')

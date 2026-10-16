@@ -8,13 +8,30 @@ def compose(state,release,selector,region,body,owner,host,reading,rule,cfg,depth
     from .component_refinement import compose_area,region_for,root,accepted
     marker=body[0]; options={}
     for mv in marker.variants:
-        if mv.lemma!=rule['lemma'] or mv.pos!=rule['POS'] or not compatible(_features(mv),_features(reading)):continue
+        if (not rule.get('general') and (mv.lemma!=rule['lemma'] or mv.pos!=rule['POS'])) or not rule.get('general') and not compatible(_features(mv),_features(reading)):continue
         for case in sorted(mv.cases):
             role=cfg['open_case_roles'].get(case)
             if not role:continue
             morph={k:v for k,v in _morph(mv).items() if k!='score'}
             options[digest([marker.token_id,morph,role])]={'marker':marker,'marker_reading':mv,
                 'host':host,'reading':reading,'host_role':role,'kind':'RELATIVE_PRONOUN'}
+    if rule.get('general'):
+        from .structural_tasks import choose
+        from .probe_wording import reading as describe,role as role_text
+        role=choose(state,release,selector,region,cfg,'relative_argument_role',[
+            {'candidate_id':r['role_id'],'label':r['role_id']+': '+role_text(r['role_id'])} for r in release.entries('RoleRegistry')],
+            'Which semantic role does «'+marker.span+'» fill inside the description? Its antecedent is «'+host.span+'». '
+            'Account for passive voice; neither the antecedent case nor the pronoun case alone decides the role.')
+        if not role:return [],None
+        variants={digest(_morph(m)):m for m in marker.variants}
+        selected=choose(state,release,selector,region,cfg,'relative_marker_reading',[
+            {'candidate_id':cid,'label':describe(_morph(m))} for cid,m in variants.items()],
+            'Which whole reading of «'+marker.span+'» fits this use? Do not copy the antecedent case.')
+        if not selected:return [],None
+        mv=variants[selected[0]['candidate_id']]
+        options={'general:'+digest([marker.token_id,role[0],selected[0]]):{'marker':marker,'marker_reading':mv,
+            'host':host,'reading':reading,'host_role':role[0]['candidate_id'],'kind':'RELATIVE_PRONOUN','general':True,
+            'function_proofs':[role[1],selected[1]]}}
     if not options or len(options)>cfg['max_candidates']:
         state.diag('RELATIVE_PRONOUN_ROLE_UNRESOLVED',marker.token_id);return [],None
     key=region.region_id+'|relative-pronoun-role:'+marker.token_id
@@ -22,7 +39,7 @@ def compose(state,release,selector,region,body,owner,host,reading,rule,cfg,depth
         '» and fills '+spec['host_role']+' inside its relative clause; whole reading='+str(
         {k:v for k,v in _morph(spec['marker_reading']).items() if k in {'lemma','pos','cases','number','gender'}})}
         for cid,spec in options.items()]
-    chosen=_probe(state,selector,release,key,'relative_pronoun_role',choices,
+    chosen=next(iter(options)) if rule.get('general') else _probe(state,selector,release,key,'relative_pronoun_role',choices,
         state.text[slice(*region.source_range)],region.source_range,
         question='Select the relative pronoun grammatical role inside the description. Its antecedent is already selected. '
         'The antecedent case in the parent does not determine its role here. Do not create another person or assert the description independently.')
@@ -43,8 +60,7 @@ def compose(state,release,selector,region,body,owner,host,reading,rule,cfg,depth
 
 
 def projection(pv,attachment,cfg):
-    if pv.pos!='VERB' or pv.mood=='imperative':return None
-    if attachment['host_role']==cfg['subject_role'] and not compatible(_features(pv),_features(attachment['marker_reading'])):return None
+    if not attachment.get('general') and attachment['host_role']==cfg['subject_role'] and not compatible(_features(pv),_features(attachment['marker_reading'])):return None
     return {**attachment,'relative_marker':attachment['marker'],
         'rule':{'host_role':attachment['host_role'],'case_roles':
             {c:r for c,r in cfg['open_case_roles'].items() if r!=attachment['host_role']}}}

@@ -11,9 +11,8 @@ def scope(state,frame,cfg):
         start=max(bounds[0],frame.source_range[0]-cfg['context_chars']//2)
         bounds=(start,min(bounds[1],start+cfg['context_chars']))
         if frame.source_range[1]>bounds[1]:return None
-    anchor=next(e for e in state.evidence if e.token_id==frame.predicate_token_ref)
-    prefix=state.text[:anchor.start]
-    if prefix.count('«')>prefix.count('»') or prefix.count(chr(34))%2:return None
+    discourse=frame.semantic.get('discourse_scope',{})
+    if not discourse or discourse.get('quoted') or discourse.get('parent_refs') or discourse.get('speech_act')!='ASSERTION':return None
     if any(c.get('frame_ref')==frame.frame_id and c.get('attitude') in {'QUOTED','HYPOTHETICAL','EMBEDDED'}
            for f in state.frames for c in f.semantic.get('proposition_args',{}).values()):return None
     source=state.observation.get('source_id') or state.source_uid

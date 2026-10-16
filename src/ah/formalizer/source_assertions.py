@@ -37,9 +37,7 @@ def resolve(state,release,selector):
         f=frames[fid];sem=f.semantic;d=state.decisions.get(fid+'|predicate_value')
         from .component_policy import rejected
         if not d or d.outcome!='RESOLVED' or rejected(state,f) or sem.get('structural_unresolved') or sem.get('source_blocked') or sem.get('quoted') or sem.get('query_request'):return
-        from .native_frontend import _frame_variants
-        ev=next(e for e in state.evidence if e.token_id==f.predicate_token_ref)
-        if any(v.mood=='imperative' for v in _frame_variants(f,ev)):return
+        if sem.get('discourse_scope',{}).get('speech_act')!='ASSERTION':return
         for role,arg in sem.get('proposition_args',{}).items():
             # No implicit upgrade of known report/hypothetical scope.
             if arg.get('attitude')!='UNKNOWN':continue
@@ -55,7 +53,7 @@ def resolve(state,release,selector):
             # Operator scope is controlled by walk(), not by finding NOT in
             # the text of a sibling or a quoted child. Question/command source
             # acts remain guarded here and by the ordinary T5 boundary.
-            if '?' in context or state.observation.get('request_kind') in {'QUERY','COMMAND'}:continue
+            if f.semantic.get('discourse_scope',{}).get('speech_act') in {'QUERY','COMMAND'} or state.observation.get('request_kind') in {'QUERY','COMMAND'}:continue
             choice=_probe(state,selector,release,key,'source_assertion',[
                 {'candidate_id':'SOURCE_ASSERTED','label':'The source itself asserts '+label(target)+' as occurring/holding, independently of the descriptive modifier.'},
                 {'candidate_id':'EMBEDDED','label':'The content is only possible, intended, reported, questioned, denied or otherwise not asserted by the source.'}],

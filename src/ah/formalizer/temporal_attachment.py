@@ -7,8 +7,12 @@ from .scope_assignment import assign, expanded_leaves, positions
 
 def attach(state, release, selector, region, selected, frames, tree, cfg):
     raw = state.text[slice(*region.source_range)]
-    from .temporal_sources import components, symbolic_only
-    matches = components(raw, release, region.source_range[0])
+    from .temporal_sources import symbolic_only
+    from .temporal_functions import units, normalize
+    snapshots=[u for f in frames if not f.semantic.get('structural_unresolved')
+               for u in f.semantic.get('temporal_functions',())]
+    matches=list({u['unit_ref']:u for u in snapshots}.values())
+    if not any('temporal_functions' in f.semantic for f in frames):matches=units(state,region.token_refs)
     if not matches:
         return tree
     by_id = {f.frame_id:f for f in frames}
@@ -18,13 +22,14 @@ def attach(state, release, selector, region, selected, frames, tree, cfg):
     lexical_contents={fid:slot.tree for fid,slot in transparent.items()}
     origins=[expanded_leaves(expression(f),lexical_contents) for f in selected]
     readings = []
-    for bounds in matches:
+    for unit in matches:
+        bounds=unit['source_range']
         text = state.text[slice(*bounds)]
         local_refs = [{fid for fid in refs if
             by_id[fid].source_range[0] <= bounds[0] < bounds[1] <= by_id[fid].source_range[1]}
             for refs in origins]
         owners = [i for i,refs in enumerate(local_refs) if refs]
-        value, errors = _temporal(text, state.observation, release, source_start=bounds[0])
+        value, errors = normalize(state, release, unit)
         if len(owners) != 1 or value is None or errors and not symbolic_only(value, errors):
             state.diag('COMPONENT_TEMPORAL_SCOPE_UNRESOLVED', region.region_id)
             state.syntax_trace.append({'kind':'TEMPORAL_SOURCE_UNRESOLVED','source_range':list(bounds),

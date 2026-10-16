@@ -29,7 +29,7 @@ def test_unresolved_is_resolution_only(native):
     assert native[0]._journal.scan_unprocessed(0,'resolution_log')
 
 def test_synthetic_state_without_observation_cannot_invent_o(native):
-    state,_=invoke(native,NativeSelector(unresolved=True))
+    state,_=invoke(native)
     for d in state.decisions.values():
         if d.candidates:
             d.selected=d.candidates[:1];d.outcome='RESOLVED'

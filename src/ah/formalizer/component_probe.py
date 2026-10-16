@@ -32,6 +32,10 @@ def _live_probe(state, selector, release, key, slot, options, context, source_ra
     try:
         from .selection_prompt import record_prompt
         record_prompt(d, prompt)
+        limits=state.observation.get('probe_limits',{})
+        maximum=getattr(getattr(selector,'limits',None),'max_prompt_chars',limits.get('max_prompt_chars',8192))
+        if type(maximum) is not int or maximum<1:raise ValueError('PROBE_LIMIT_INVALID')
+        if len(prompt)>maximum:raise BudgetExceeded('COMPUTATION_LIMIT')
         state.budget.spend_llm()
         raw = selector.select(prompt)
         d.raw_response = raw
@@ -82,9 +86,25 @@ def _probe(state, selector, release, key, slot, options, context, source_range, 
     if runtime is not None:
         runtime.tasks.record_probe(key)
         from .component_policy import policy
-        memory=runtime.memory(slot,options,source_range,policy(release))
+        memory=runtime.memory(slot,options,source_range,policy(release)) if not state.structural_closed else ''
         question=(question or '')+memory+runtime.tasks.question(key)+runtime.input_question()
         dependency_signature=digest([dependency_signature,runtime.input_signature(),question])
     from .component_probe_replay import execute
-    return execute(_live_probe,state,selector,release,key,slot,options,context,source_range,
-                   equivalent_targets=equivalent_targets,question=question,dependency_signature=dependency_signature)
+    def run():
+        before=len(state.diagnostics)
+        value=execute(_live_probe,state,selector,release,key,slot,options,context,source_range,
+                      equivalent_targets=equivalent_targets,question=question,dependency_signature=dependency_signature)
+        from .task_contracts import TaskResult,TaskOutcome
+        d=state.decisions[key]
+        outcome={'ONE_SELECTED':TaskOutcome.SUPPORTED,'MULTIPLE_ADMISSIBLE':TaskOutcome.MULTIPLE,
+                 'INSUFFICIENT_CONTEXT':TaskOutcome.UNKNOWN,'NONE_FIT':TaskOutcome.NONE_FIT}.get(d.selector_outcome)
+        if outcome is None:
+            codes={x.code for x in state.diagnostics[before:]}
+            outcome=(TaskOutcome.SUPPORTED if d.outcome=='RESOLVED' else
+                     TaskOutcome.INCOMPLETE if any('LIMIT' in c or 'INCOMPLETE' in c for c in codes) else TaskOutcome.BLOCKED)
+        return TaskResult(value,outcome,outcome not in {TaskOutcome.INCOMPLETE,TaskOutcome.BLOCKED},
+                          outcome!=TaskOutcome.BLOCKED,tuple(d.selected))
+    if runtime is None:return run().value
+    from .task_contracts import probe_contract
+    return runtime.dispatcher.run('probe:'+key,[dependency_signature,state.observation.get('clarification_choices',{}).get(key)],
+        run,kind='PROBE',source_range=source_range,contract=probe_contract(slot,state.structural_closed))

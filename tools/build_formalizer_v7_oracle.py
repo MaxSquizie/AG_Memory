@@ -859,8 +859,9 @@ SPEC_NOTES='''# Границы и замечания к источнику
 9. Кейсы с invalid protocol/schema, budgets, migration и crash требуют fault injection на реальной границе. Запись заранее ожидаемого outcome адаптером запрещена. Корпус не предоставляет альтернативную реализацию формализатора.
 '''
 
-def generate(architecture):
+def _generate(architecture, OUT):
     OUT.mkdir(parents=True,exist_ok=True)
+    for mechanism in MECHANISMS.values():mechanism['case_ids']=[]
     source=pathlib.Path(architecture); data=source.read_bytes();text=data.decode('utf-8-sig')
     ids=[c['case_id'] for c in CASES]
     if len(ids)!=len(set(ids)):raise ValueError('duplicate case id')
@@ -882,23 +883,47 @@ def generate(architecture):
        d=actions.setdefault(s['action'],{'payload_fields':set(),'case_ids':[]});d['payload_fields'].update(s['payload']);d['case_ids'].append(c['case_id'])
     actions={k:{'payload_fields':sorted(d['payload_fields']),'case_ids':sorted(set(d['case_ids']))} for k,d in sorted(actions.items())}
     def write(name,obj):
-        (OUT/name).write_text(json.dumps(obj,ensure_ascii=False,indent=2,allow_nan=False)+'\n',encoding='utf-8')
-    (OUT/'cases.jsonl').write_text(''.join(canonical(c)+'\n' for c in CASES),encoding='utf-8')
+        (OUT/name).write_text(json.dumps(obj,ensure_ascii=False,indent=2,allow_nan=False)+'\n',encoding='utf-8',newline='\n')
+    (OUT/'cases.jsonl').write_text(''.join(canonical(c)+'\n' for c in CASES),encoding='utf-8',newline='\n')
     write('fixtures.json',FIXTURES);write('oracle.schema.json',SCHEMA);write('mechanisms.json',MECHANISMS)
     write('coverage.json',{'mechanisms':{m:d['case_ids'] for m,d in MECHANISMS.items()},'acceptance':accepts,'dry_runs':drs,'stats':stats})
     write('source_map.json',source_map);write('actions.json',actions)
-    (OUT/'README.md').write_text(README,encoding='utf-8');(OUT/'SPEC_NOTES.md').write_text(SPEC_NOTES,encoding='utf-8')
+    (OUT/'README.md').write_text(README,encoding='utf-8',newline='\n');(OUT/'SPEC_NOTES.md').write_text(SPEC_NOTES,encoding='utf-8',newline='\n')
     md=['# Покрытие oracle\n',f"Кейсов: **{len(CASES)}**. Механизмов: **{len(MECHANISMS)}**. A01–A39 и DR1–DR31 связаны с кейсами.\n",'Это проектные gold-сценарии; результаты исполнения и статусы G0–G5 не утверждаются.\n','| Механизм | Норма | Кейсов | Первые примеры |','|---|---|---:|---|']
     for m,d in MECHANISMS.items():md.append(f"| `{m}` — {d['title']} | {' '.join(d['norm_refs'])} | {len(d['case_ids'])} | {', '.join(d['case_ids'][:4])} |")
     md+=['\n## Acceptance\n','| Требование | Кейсы |','|---|---|']
     md += [f"| {a} | {', '.join(v[:12])}{' …' if len(v)>12 else ''} |" for a,v in accepts.items()]
     md+=['\n## Dry-runs\n','| Трасса | Кейсов | Примеры ветвей |','|---|---:|---|']
     md += [f"| {d} | {len(v)} | {', '.join(v[:6])} |" for d,v in drs.items()]
-    (OUT/'COVERAGE.md').write_text('\n'.join(md)+'\n',encoding='utf-8')
+    (OUT/'COVERAGE.md').write_text('\n'.join(md)+'\n',encoding='utf-8',newline='\n')
     artifact_hashes={p.name:sha(p.read_bytes()) for p in sorted(OUT.iterdir()) if p.is_file() and p.name!='manifest.json'}
     manifest={'schema_version':'v7-oracle-manifest-1','source_document':{'filename':source.name,'sha256':sha(data),'bytes':len(data)},'gold_authoring':'independent normative symbolic fixtures; never SUT-derived','status':'AUTHORED_NOT_EXECUTED','gates':{f'G{i}':'NOT_EVALUATED' for i in range(6)},'requires_adapter_binding':True,'project_commit_reference':'ce80c890f30bf0559da03ea8d8bae4c257647bea','stats':stats,'generator_sha256':sha(pathlib.Path(__file__).read_bytes()),'checker_sha256':sha((ROOT/'tools/check_formalizer_v7_oracle.py').read_bytes()),'artifact_verifier_sha256':sha((ROOT/'tools/verify_formalizer_v7_oracle_artifacts.py').read_bytes()),'artifacts':artifact_hashes}
     write('manifest.json',manifest)
     print(canonical(stats)); print('document_sha256='+sha(data))
 
+def generate(architecture,output=None):
+    """Publish a complete immutable corpus directory on the same filesystem.
+
+    Existing gold is never overwritten. Use --out for a new reviewed revision;
+    consumers switch to it only after validation. A failed build leaves no
+    partially updated cases/manifest pair at the published path.
+    """
+    import tempfile,os,shutil
+    target=pathlib.Path(output) if output is not None else OUT
+    if target.exists():raise ValueError('CORPUS_ALREADY_EXISTS: choose --out for a new corpus revision')
+    target.parent.mkdir(parents=True,exist_ok=True)
+    staging=pathlib.Path(tempfile.mkdtemp(prefix=target.name+'.building-',dir=target.parent))
+    try:
+        _generate(architecture,staging)
+        from tools.check_formalizer_v7_oracle import validate
+        validate(staging)
+        if target.exists():raise ValueError('CORPUS_ALREADY_EXISTS')
+        os.rename(staging,target)
+    finally:
+        if staging.exists():shutil.rmtree(staging)
+
+
 if __name__=='__main__':
-    parser=argparse.ArgumentParser();parser.add_argument('--architecture',required=True);generate(parser.parse_args().architecture)
+    parser=argparse.ArgumentParser();parser.add_argument('--architecture',required=True)
+    parser.add_argument('--out',type=pathlib.Path,help='New immutable corpus directory; an existing directory is never overwritten')
+    args=parser.parse_args();generate(args.architecture,args.out)

@@ -10,7 +10,7 @@ from .composition_tree import internalize
 
 def region_for(state, parent, tokens, label):
     child = TextRegion('region:'+digest([parent.region_id,label,[t.token_id for t in tokens]]),
-        'CLAUSE',(tokens[0].start,tokens[-1].end),tuple(t.token_id for t in tokens),parent.region_id,
+        'CLAUSE',(min(t.start for t in tokens),max(t.end for t in tokens)),tuple(t.token_id for t in tokens),parent.region_id,
         grounds=('MORPHOLOGICAL_REFINEMENT',))
     if not any(r.region_id==child.region_id for r in state.region_forest.regions):
         state.region_forest.regions.append(child)
@@ -91,7 +91,7 @@ def _compose_area(state, release, selector, region, tokens, cfg, depth=0, attach
             # Feedback concerns this region. Child inputs carry their own typed
             # constraints; an ancestor's failed split is not child evidence.
             child_cfg={k:v for k,v in cfg.items() if k not in {'_task_constraints','_task_constraints_text'}}
-            result=compose(state,release,selector,region,tokens,cfg,request,
+            result=compose(state,release,selector,region,tokens,{**cfg,'_depth':depth},request,
                 lambda owned,slot:compose_area(state,release,selector,region_for(state,region,owned,'RELATION_CHILD'),
                     owned,child_cfg,depth+1,attachment=attachment,
                     infinitive=(None if slot and slot.independent_subject else slot.controller if slot and slot.controller else infinitive),
@@ -116,6 +116,9 @@ def _compose_area(state, release, selector, region, tokens, cfg, depth=0, attach
                     or pending_context or any(r.get('status') in {'PENDING','BLOCKED'} for r in tasks)
                     or any('INCOMPLETE' in c or c in {'RESOURCE_MISSING','ARITHMETIC_QUANTIFIER_DEFERRED',
                         'COMPONENT_PROBE_FAILED','COMPUTATION_LIMIT','COMPOSITION_PRODUCER_PENDING','VALENCY_UNKNOWN','INTEGRITY_ERROR'} for c in reasons)):
+                return result
+            if not any('CONTRADICTION' in code for code in reasons):
+                state.diag('STRUCTURAL_IMPLEMENTATION_GAP',region.region_id)
                 return result
             constraints=json.dumps({'rejected_choices':[
                 {'slot':r['slot'],'value':next((v for v in r.get('alternatives',()) if v['candidate_id']==r.get('selected')),None)}
@@ -216,12 +219,15 @@ def _compose_lexical_area(state, release, selector, region, tokens, cfg, depth=0
     # A participating head is already owned by this area, not a nested start.
     participial=isinstance(attachment,tuple)
     search_tokens=tokens[1:] if participial else tokens
-    boundary=select(state,release,selector,region,search_tokens,cfg) if cfg.get('refinement') else None
+    boundary=cfg.get('_selected_refinement')
+    cfg={k:v for k,v in cfg.items() if k!='_selected_refinement'}
+    if boundary is None and not cfg.get('_literal_relation'):
+        boundary=select(state,release,selector,region,search_tokens,cfg) if cfg.get('refinement') else None
     if boundary is False: return block(state,region,[],'COMPONENT_REFINEMENT_UNRESOLVED')
     if boundary is None:
         from .action_descriptions import passive_rule
         descriptive=bool(request and request.description_context)
-        passive_heads=[t for t in tokens if any(passive_rule(v,cfg) for v in t.variants)] if descriptive else []
+        passive_heads=[t for t in tokens if any(passive_rule(v,cfg) for v in t.variants)]
         # A dependent infinitive requires a possible lexical parent. With no
         # parent, retain the whole area as a predication candidate instead of
         # requiring its object to become a fictitious parent clause.
@@ -243,7 +249,7 @@ def _compose_lexical_area(state, release, selector, region, tokens, cfg, depth=0
             predicates=[t for t in tokens if any(v.pos=='VERB' and v.mood!='imperative' or
                 v.pos in cfg.get('quality_predicate_pos',()) or impersonal_predicate(v,cfg) for v in t.variants)]
             from .component_predication import nominal_predicates
-            predicates.extend(t for t in nominal_predicates(tokens,cfg) if t not in predicates)
+            predicates.extend(t for t in [*nominal_predicates(tokens,cfg),*passive_heads] if t not in predicates)
             if descriptive:
                 predicates.extend(t for t in tokens if t not in predicates and
                     (t in passive_heads or any(v.pos=='INFN' for v in t.variants)))
@@ -263,9 +269,17 @@ def _compose_lexical_area(state, release, selector, region, tokens, cfg, depth=0
             f.semantic['owned_token_refs']=[t.token_id for t in tokens]
         return frames
     offset=int(participial)
-    a,b=boundary['start']+offset,boundary['end']+offset
-    body=tokens[a:b]
-    parent=[*tokens[:a],*tokens[b:]]
+    if 'body_refs' in boundary:
+        body=[t for t in tokens if t.token_id in boundary['body_refs']]
+        parent=[t for t in tokens if t.token_id not in boundary['body_refs']]
+        a,b=tokens.index(body[0]),tokens.index(body[-1])+1
+        if boundary.get('marker_ref'):
+            marker=next(t for t in body if t.token_id==boundary['marker_ref'])
+            body=[marker,*[t for t in body if t is not marker]]
+    else:
+        a,b=boundary['start']+offset,boundary['end']+offset
+        body=tokens[a:b]
+        parent=[*tokens[:a],*tokens[b:]]
     # Consume boundary separators only. Internal punctuation is never erased.
     separators=[]
     while parent and parent[-1].span in {',','.'}:
@@ -323,7 +337,7 @@ def _compose_lexical_area(state, release, selector, region, tokens, cfg, depth=0
     if chosen is None: return block(state,region,frames,'COMPONENT_REFINEMENT_HOST_UNRESOLVED')
     selected_group=group_hosts.get(chosen)
     owner,host,reading=selected_group[:3] if selected_group else hosts[chosen]
-    if boundary['kind']=='RELATIVE' and boundary['rule']['POS']=='ADJF':
+    if boundary['kind']=='RELATIVE_PRONOUN' or boundary['kind']=='RELATIVE' and boundary['rule'].get('POS')=='ADJF':
         from .relative_pronoun import compose as compose_relative
         children,host_frame=compose_relative(state,release,selector,region,body,owner,host,reading,boundary['rule'],cfg,depth)
         description=select_child(state,release,selector,region,children,'NOMINAL_DESCRIPTION',
@@ -332,7 +346,8 @@ def _compose_lexical_area(state, release, selector, region, tokens, cfg, depth=0
             return block(state,region,[*frames,*children],'COMPONENT_REFINEMENT_CHILD_UNRESOLVED')
         host_role=host_frame.semantic['refinement_binding']['host_role']
     elif boundary['kind']=='RELATIVE':
-        marker=body[0]; child_tokens=body[1:]
+        marker=body[0];link_refs=boundary.get('marker_refs') or [marker.token_id]
+        child_tokens=[t for t in body if t.token_id not in link_refs]
         if not child_tokens: return block(state,region,frames,'COMPONENT_REFINEMENT_UNRESOLVED')
         cr=region_for(state,region,child_tokens,'RELATIVE')
         children=compose_area(state,release,selector,cr,child_tokens,cfg,depth+1)
@@ -340,7 +355,7 @@ def _compose_lexical_area(state, release, selector, region, tokens, cfg, depth=0
             'This area is linked to the established nominal «'+host.span+'» by «'+marker.span+'».')
         if content is None: return block(state,region,[*frames,*children],'COMPONENT_REFINEMENT_CHILD_UNRESOLVED')
         rule=boundary['rule']
-        variants=[v for v in marker.variants if v.pos==rule['POS'] and v.lemma==rule['lemma']]
+        variants=[v for v in marker.variants if rule.get('general') or v.pos==rule['POS'] and v.lemma==rule['lemma']]
         # Non-equivalent whole readings are not silently selected.
         unique={digest({k:v for k,v in _morph(m).items() if k!='score'}):m for m in variants}
         if len(unique)!=1:
@@ -358,7 +373,9 @@ def _compose_lexical_area(state, release, selector, region, tokens, cfg, depth=0
             lexical_units={chosen:deepcopy(owner.semantic['lexical_units'].get(chosen,{'head_ref':chosen,'anchor_refs':[chosen],'surface':host.span,'mention_ref':chosen}))},
             proposition_args={cfg['modifier_content_role']:argument(content,'UNKNOWN')},
             structural_unresolved=False,missing_required_roles=[],uncovered_token_refs=[],component_questions=[],
-            preposition_bindings={},relative_temporal=[],requires_attachment_probe=False,owned_token_refs=[marker.token_id],nominal_description=True)
+            preposition_bindings={},relative_temporal=[],requires_attachment_probe=False,owned_token_refs=list(link_refs),nominal_description=True)
+        sem['lexical_units'][marker.token_id]={'head_ref':marker.token_id,'anchor_refs':list(link_refs),
+            'surface':' '.join(evidence[r].span for r in link_refs),'mention_ref':'relation:'+digest(link_refs)}
         description=FrameCandidate('component-relative:'+digest([marker.token_id,chosen,content.frame_id]),'FLAT',marker.span,
             (marker.span,host.span),(host.span,),construction='COMPONENTS_V1',predicate_token_ref=marker.token_id,
             argument_token_refs=(chosen,),source_range=(marker.start,body[-1].end),semantic=sem,provenance=owner.provenance)
@@ -367,7 +384,16 @@ def _compose_lexical_area(state, release, selector, region, tokens, cfg, depth=0
         host_role=cfg['nominal_host_role']
     else:
         cr=region_for(state,region,body,'PARTICIPLE')
-        children=compose_area(state,release,selector,cr,body,cfg,depth+1,(host,reading,*([selected_group[3]] if selected_group else [])))
+        binding=(host,reading,*([selected_group[3]] if selected_group else []))
+        if boundary['kind']=='BOUND_DESCRIPTION':
+            from .structural_tasks import choose
+            selected_role=choose(state,release,selector,region,cfg,'structural_description_role',[
+                {'candidate_id':r['role_id'],'label':r['role_id']} for r in release.entries('RoleRegistry')],
+                'Which participant role does «'+host.span+'» fill inside «'+' '.join(t.span for t in body)+'»?')
+            if not selected_role:return block(state,region,frames,'COMPONENT_REFINEMENT_HOST_UNRESOLVED')
+            binding={'kind':'BOUND_DESCRIPTION','host':host,'reading':reading,
+                     'host_role':selected_role[0]['candidate_id'],'proof':selected_role[1]}
+        children=compose_area(state,release,selector,cr,body,cfg,depth+1,binding)
         description=select_child(state,release,selector,region,children,'NOMINAL_DESCRIPTION',
             'This area describes the established nominal «'+host.span+'»; preserve its selected morphology and reference.')
         candidates=[f for f in accepted(children) if f.semantic.get('refinement_binding',{}).get('host_token_ref')==chosen]

@@ -3,14 +3,7 @@ from .structural_tasks import choose
 
 
 def confirm(state,release,selector,region,cfg,kind,links,groups):
-    functions={'CONJ','PRCL','PREP','ADVB','INTJ','PRED'}
-    # A function-word reading is not evidence that this occurrence belongs to
-    # the selected operator. In a compound marker even a particle may express
-    # a nested relation (e.g. modality followed by negation). Check lexical
-    # words first, then the remaining occurrences; neither class is exempt.
-    lexical=[t for t in links if not any(v.pos in functions for v in t.variants) and
-        any(v.pos=='INFN' or len(links)>1 and v.pos in {'VERB','NOUN','ADJF','ADJS','PRTF','PRTS'} for v in t.variants)]
-    if len(links)>1:lexical.extend(t for t in links if t not in lexical)
+    lexical=list(links)
     if not lexical:return True
     from .relation_composition import RELATIONS
     content='; '.join('«'+' '.join(t.span for t in g)+'»' for g in groups)

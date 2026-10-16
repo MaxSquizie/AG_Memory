@@ -26,13 +26,14 @@ def prepare(state, release, selector, frozen=None):
             if raw and not any(a<end and start<b for a,b in protected):
                 matches=[(r,date) for r in policy['rules'] if (date:=parse(raw,r)) is not None]
                 if len(matches)>1:
-                    state.diag('DOCUMENT_SCOPE_UNRESOLVED',str((start,end))); return
-                if matches:
+                    candidates.append({'raw':raw,'source_range':[start,end],
+                        'header_range':[offset,offset+len(line)],'calendar':None,'rule_id':None})
+                elif matches:
                     rule,date=matches[0]
                     candidates.append({'raw':raw,'source_range':[start,end],
                         'header_range':[offset,offset+len(line)],'calendar':date,'rule_id':rule['rule_id']})
             offset+=len(line)
-        accepted=[]
+        accepted=[];barriers=[]
         for i,row in enumerate(candidates):
             end=candidates[i+1]['header_range'][0] if i+1<len(candidates) else len(state.text)
             row['scope_range']=[row['header_range'][0],end]
@@ -45,10 +46,21 @@ def prepare(state, release, selector, frozen=None):
                 {'candidate_id':'INLINE','label':'Ordinary text; does not establish a temporal area over the following entry.'}],
                 context,tuple(row['source_range']),question='Classify the source line «'+row['raw']+
                 '». Layout alone is not evidence of date scope. Do not infer a year, timezone or clock boundaries. Proposed area: '+str(row['scope_range']))
-            if chosen!='HEADER':
-                # Do not silently extend a prior header across an unresolved peer.
-                state.diag('DOCUMENT_SCOPE_UNRESOLVED',row['decision_ref']); return
+            state.syntax_trace.append({'kind':'DOCUMENT_HEADER_DECISION','source_range':row['source_range'],
+                'decision_ref':row['decision_ref'],'task_outcome':'SUPPORTED' if chosen in {'HEADER','INLINE'} else 'UNKNOWN',
+                'function':chosen})
+            if chosen=='INLINE':continue
+            barriers.append(row['header_range'][0])
+            if chosen!='HEADER' or row['calendar'] is None:
+                state.diag('DOCUMENT_SCOPE_UNRESOLVED',row['decision_ref'])
+                continue
             accepted.append(row)
+        # Only established headers and unresolved candidates delimit scopes.
+        # INLINE carries negative evidence about this candidate, not uncertainty.
+        for row in accepted:
+            end=next((start for start in barriers if start>row['header_range'][0]),len(state.text))
+            row['scope_range']=[row['header_range'][0],end]
+            row['scope_ref']='region:'+digest([state.source_uid,'TEMPORAL_SCOPE',row['scope_range'],row['calendar']])
         state.document_scopes=accepted
     state.region_forest=build_regions(state.text,state.evidence,state.source_uid,document_scopes=state.document_scopes)
     state.syntax_trace.extend({'kind':'DOCUMENT_TEMPORAL_SCOPE',**row} for row in state.document_scopes)

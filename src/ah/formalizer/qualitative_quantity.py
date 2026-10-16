@@ -25,6 +25,8 @@ def agrees(predicate):
 
 def resolve(state, release, selector, region, tokens, cfg):
     if not cfg.get('nominal_host_role'):return tokens, []
+    from .nominal_functions import prepared,rows
+    if prepared(state,tokens):return general_groups(state,release,tokens,rows(state,tokens,'QUANTITY'))
     state.require_structures_open('QUANTITY_COMPOSITION')
     from .quantity_phrases import candidates
     proposals=[]
@@ -73,6 +75,39 @@ def resolve(state, release, selector, region, tokens, cfg):
             features=frozenset({'NOUN','QUALITATIVE_GROUP'}),origin='CONTEXTUAL',
             evidence_refs=(key,marker.token_id,head.token_id)) for c in cases)
         state.syntax_trace.append({'kind':'QUANTITY_COMPOSITION',**row,'external_cases':cases})
+    return [replace(t,variants=readings[t.token_id]) if t.token_id in readings else t for t in tokens],groups
+
+
+def general_groups(state,release,tokens,sources):
+    """Compile source-selected quantities without a word/adjacency gate."""
+    from .morphology_domain import offer,license_use
+    evidence={t.token_id:t for t in tokens};groups=[];readings={}
+    for source in sources:
+        head=evidence[source['head_ref']];refs=source['function_refs'];marker=evidence[refs[0]]
+        nouns=[v for v in head.variants if v.pos in {'NOUN','NPRO'}]
+        if not nouns:
+            state.diag('QUANTITY_HEAD_READING_UNRESOLVED',head.token_id);return None,[]
+        case=source['external_case'];key=source['case_proof']['decision_ref']
+        lo,hi=source['source_range']
+        leaves=[{'kind':'LEXICAL','raw':evidence[ref].span,'source_range':[evidence[ref].start,evidence[ref].end],
+                 'token_refs':[ref]} for ref in refs]
+        expression=leaves[0] if len(leaves)==1 else {'kind':'SEQUENCE','children':leaves}
+        # This contextual NUMR is the selected quantity-unit function. It
+        # does not claim a dictionary lemma, cardinal value, gender or number.
+        variants=offer(state,marker,[MorphVariant(marker.span,'NUMR',frozenset({case}),origin='CONTEXTUAL')],
+                       'QUANTITY_FUNCTION',refs)
+        for v in variants:license_use(state,marker.token_id,_morph(v),key,case)
+        internals=[_morph(v) for v in nouns]
+        row={'head_ref':head.token_id,'marker_ref':marker.token_id,'decision_ref':key,
+            'rule_id':'SOURCE_QUANTITY_FUNCTION_V1','resource_sha256':release.sha256,
+            'marker_variants':[_morph(v) for v in variants],'internal_readings':internals,
+            'internal_by_case':{case:internals},'external_cases':[case],
+            'raw':state.text[lo:hi],'source_range':[lo,hi],'quantity_token_refs':refs,
+            'quantity_surface':' '.join(evidence[r].span for r in refs),'quantity_expression':expression}
+        external=[MorphVariant(v.lemma,'NOUN',frozenset({case}),features=frozenset({'NOUN','QUALITATIVE_GROUP'}),
+                              origin='CONTEXTUAL',evidence_refs=(key,marker.token_id,head.token_id)) for v in nouns]
+        readings[head.token_id]=tuple({digest(_morph(v)):v for v in external}.values())
+        groups.append(row);state.syntax_trace.append({'kind':'QUANTITY_COMPOSITION',**row})
     return [replace(t,variants=readings[t.token_id]) if t.token_id in readings else t for t in tokens],groups
 
 

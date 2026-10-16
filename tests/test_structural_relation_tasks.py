@@ -11,11 +11,14 @@ from tools.formalizer_v7_extended_binding import Session
 
 class Script:
     def __init__(self,steps,default='1'):
-        self.steps=deque(steps);self.default=default;self.calls=[];self.errors=[]
+        self.steps=deque(steps);self.default=default;self.calls=[];self.errors=[];self.selected_slot=None
 
     def generate(self,prompt,**kwargs):
         slot=re.search(r'Decision slot: (\S+)',prompt).group(1)
         self.calls.append((slot,prompt))
+        if (slot.endswith('_continue') or slot=='structural_function_owner') and (not self.steps or self.steps[0][0]!=slot):
+            return '1'  # Explicit DONE / KEEP_ALL in this scripted continuous partition.
+        if slot==self.selected_slot and (not self.steps or self.steps[0][0]!=slot):return '0'
         if not slot.startswith('structural_') and (not self.steps or self.steps[0][0]!=slot):return self.default
         if not self.steps:
             self.errors.append('Unexpected '+slot);return '?'
@@ -40,8 +43,8 @@ class Script:
                     if label.startswith(role+' of ') and 'attitude='+attitude in label),value)
         number=mapping.get(value) or next((n for n,label in labels.items() if label.startswith(value)),None)
         if number:
-            self.steps.popleft();return number
-        return '0'  # reject only this page, retaining the intended source choice
+            self.steps.popleft();self.selected_slot=slot;return number
+        return '0' if slot.startswith('structural_') else self.default
 
 
 def run(tmp_path,monkeypatch,text,steps,kind='ASSERTION',default='1'):
@@ -188,8 +191,8 @@ def test_relative_clause_is_quantifier_restriction(tmp_path,monkeypatch):
     text='Каждый студент, который прочитал книгу, может сдать экзамен.'
     steps=relation('FORALL')+bounds('structural_quantifier','Каждый','Каждый')+[
         ('structural_partition','PARTITION'),('structural_binder_head','Bind the nominal «студент»')]+unary('POSSIBLE','может','может')+[
-        ('structural_governor','Agreement/controller anchor «может»')]+relation('LEXICAL')+[
-        ('structural_refinement','RELATIVE description «который прочитал книгу»')]+relation('LEXICAL')+relation('LEXICAL')
+        ('structural_governor','Agreement/controller anchor «может»')]+relation('NOMINAL_DESCRIPTION')+bounds('structural_description','который','книгу')+[
+        ('structural_description_binding','An explicit relative expression'),('structural_description_marker','«который»')]+relation('LEXICAL')+relation('LEXICAL')
     result,_=run(tmp_path,monkeypatch,text,steps)
     assert result['diagnostics']['codes']==[]
     assert len(result['assertions']['ah'])==1 and result['assertions']['ah'][0]['operator']=='FORALL'
@@ -212,7 +215,7 @@ def test_temporal_relations_accept_finite_and_nominal_children(tmp_path,monkeypa
 
 
 def test_oov_role_is_explicitly_licensed(tmp_path,monkeypatch):
-    steps=[('structural_oov_reading','Source «Флырка»: NOUN; cases=[\'nom\']')]+relation('LEXICAL')
+    steps=[('structural_oov_function','NOUN:')]+relation('LEXICAL')
     result,_=run(tmp_path,monkeypatch,'Флырка пришла.',steps)
     assert result['diagnostics']['codes']==['OOV_KEEP_AS_IS']
     assert result['assertions']['ah'] and result['assertions']['ah'][0]['predicate']=='ARRIVE'
@@ -271,18 +274,18 @@ def test_all_producers_remain_reachable_for_complete_grammar(tmp_path,monkeypatc
     assert result['assertions']['ah']==[atom('ARRIVE','ivan')]
 
 
-def test_partition_conflict_reopens_relation_and_boundaries(tmp_path,monkeypatch):
-    first=binary('OR',('Иван','пришёл'),('Мария','спит'))[:5]+[
-        ('structural_partition','0'),('structural_revision','REVISE')]
-    steps=first+binary('IMPLIES',('Мария','спит'),('Иван','пришёл'))
-    result,_=run(tmp_path,monkeypatch,'Иван пришёл при условии, что Мария спит.',steps)
-    assert result['diagnostics']['codes']==[]
-    assert result['assertions']['ah']==[{'operator':'IMPLIES','operands':[atom('SLEEP','maria'),atom('ARRIVE','ivan')]}]
+def test_unimplemented_partition_does_not_reinterpret_the_source(tmp_path,monkeypatch):
+    steps=binary('OR',('Иван','пришёл'),('Мария','спит'))[:5]+[('structural_partition','0')]
+    result,script=run(tmp_path,monkeypatch,'Иван пришёл при условии, что Мария спит.',steps)
+    assert result['assertions']['ah']==[]
+    assert not any(slot=='structural_revision' for slot,_ in script.calls)
+    assert result['diagnostics']['codes']
 
 
 def test_description_can_precede_its_nominal_host(tmp_path,monkeypatch):
-    steps=relation('LEXICAL')+[
-        ('structural_refinement','PARTICIPLE description «Прочитавший книгу»')]+relation('LEXICAL')+relation('LEXICAL')
+    steps=relation('NOMINAL_DESCRIPTION')+bounds('structural_description','Прочитавший','книгу')+[
+        ('structural_description_binding','The nominal host fills')]+relation('LEXICAL')+[
+        ('structural_description_role','SUBJECT')]+relation('LEXICAL')
     result,_=run(tmp_path,monkeypatch,'Прочитавший книгу студент спит.',steps)
     assert result['diagnostics']['codes']==[]
     traces=result['runtime']['ir']['syntax_trace']
@@ -292,7 +295,7 @@ def test_description_can_precede_its_nominal_host(tmp_path,monkeypatch):
 
 
 def test_oov_verb_keeps_surface_instead_of_guessing_known_sense(tmp_path,monkeypatch):
-    steps=[('structural_oov_reading','Source «флыркает»: VERB;')]+relation('LEXICAL')
+    steps=[('structural_oov_function','VERB:')]+relation('LEXICAL')
     result,_=run(tmp_path,monkeypatch,'Иван флыркает.',steps)
     assert result['diagnostics']['codes']==['OOV_KEEP_AS_IS']
     assert len(result['assertions']['ah'])==1
@@ -301,7 +304,7 @@ def test_oov_verb_keeps_surface_instead_of_guessing_known_sense(tmp_path,monkeyp
 
 @pytest.mark.parametrize('answer',['?','0','ONE_SELECTED'])
 def test_unresolved_outer_task_never_asserts_a_child(tmp_path,monkeypatch,answer):
-    result,_=run(tmp_path,monkeypatch,'Иван сообщил, что Пётр пришёл.',relation(answer)*(2 if answer=='0' else 1))
+    result,_=run(tmp_path,monkeypatch,'Иван сообщил, что Пётр пришёл.',relation(answer))
     assert result['assertions']['ah']==[]
     assert 'STRUCTURAL_TASK_UNRESOLVED' in result['diagnostics']['codes']
 

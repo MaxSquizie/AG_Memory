@@ -28,6 +28,22 @@ def validate(cfg):
 
 
 def project(state, release, selector, region, tokens, cfg):
+    from .nominal_functions import prepared,rows
+    if prepared(state,tokens):
+        groups=[];selected={};evidence={t.token_id:t for t in tokens}
+        for source in rows(state,tokens,'REFERENCE'):
+            lo,hi=source['source_range'];key=source['decision_ref']
+            row={'head_ref':source['head_ref'],'anchor_refs':source['anchor_refs'],
+                'function_refs':source['function_refs'],'source_range':[lo,hi],
+                'raw':state.text[lo:hi],'identity_constraint':source['identity_constraint'],
+                'decision_ref':key,'resource_sha256':release.sha256,'rule_ids':['SOURCE_FUNCTION_V1'],
+                'internal_readings':{ref:[_morph(v) for v in evidence[ref].variants] for ref in source['function_refs']}}
+            groups.append(row)
+            for ref in source['function_refs']:
+                selected[ref]=tuple(replace(v,features=v.features|{MARK},origin='CONTEXTUAL',
+                    evidence_refs=(*v.evidence_refs,key)) for v in evidence[ref].variants)
+            state.syntax_trace.append({'kind':'NOMINAL_REFERENCE_GROUP',**row})
+        return [replace(t,variants=selected[t.token_id]) if t.token_id in selected else t for t in tokens],groups
     policy = cfg.get('nominal_references')
     if not policy:
         return tokens, []

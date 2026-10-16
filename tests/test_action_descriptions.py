@@ -13,6 +13,8 @@ def test_unassigned_actor_is_not_an_entity_or_a_fact(tmp_path,monkeypatch,text,k
     steps=unary(kind,marker,marker)
     if governor:steps+=[('structural_governor',governor)]
     steps+=relation('LEXICAL')
+    if 'прочитана' in text:steps+=[('predicate_function','Predicate occurrence «прочитана»')]
+    elif 'открыто' in text:steps+=[('predicate_function','Predicate occurrence «открыто»')]
     if predicate=='OPEN' and 'открыто' in text:
         steps+=[('component_attachment','открыть [PRTS]')]
     result,script=run(tmp_path,monkeypatch,text,steps)
@@ -47,6 +49,8 @@ def test_explicit_actor_is_retained_without_patient_agreement(tmp_path,monkeypat
     steps=unary('POSSIBLE',marker,marker)
     if governor:steps+=[('structural_governor',governor)]
     steps+=relation('LEXICAL')
+    if 'прочитана' in text:steps+=[('predicate_function','Predicate occurrence «прочитана»')]
+    elif 'открыто' in text:steps+=[('predicate_function','Predicate occurrence «открыто»')]
     if selection:steps+=[('component_attachment',selection)]
     result,_=run(tmp_path,monkeypatch,text,steps)
     action=result['assertions']['ah'][0]['operands'][0]
@@ -93,7 +97,7 @@ def test_active_and_passive_query_the_same_property_without_asserting_occurrence
     assert set(node['actants'])=={'OBJECT'}
     assert session.core.store.get_hypernode(node['uid']).meta['action_description']=={'unassigned_roles':['SUBJECT']}
     query,result=ingest(session,monkeypatch,'Книга может быть прочитана?',
-        unary('QUERY','?','?')+unary('POSSIBLE','может','может')+[('structural_governor','Agreement/controller anchor «может»')]+relation('LEXICAL'),'query','QUERY')
+        unary('QUERY','?','?')+unary('POSSIBLE','может','может')+[('structural_governor','Agreement/controller anchor «может»')]+relation('LEXICAL')+[('predicate_function','Predicate occurrence «прочитана»')],'query','QUERY')
     assert len(session.store.ledger.f_visible())==1
     compiled=compile_native_queries(session.core,project_native_queries(query,session.release),
         SimpleNamespace(user_ref=None,self_ref=None))
@@ -146,6 +150,7 @@ def test_action_without_named_participants_does_not_introduce_any(tmp_path,monke
 def test_nominative_syncretism_keeps_the_whole_infinitive_option(tmp_path,monkeypatch):
     steps=unary('POSSIBLE','можно','можно')+relation('LEXICAL')+[
         ('component_attachment','Whole target is one infinitive action description'),
+        ('predicate_function','Predicate occurrence «прочитать»'),
         ('nominal_dependency','ATTRIBUTE dependency on «роман»')]
     result,_=run(tmp_path,monkeypatch,'Старый роман можно прочитать.',steps)
     assert result['diagnostics']['codes']==[]
@@ -156,7 +161,8 @@ def test_nominative_syncretism_keeps_the_whole_infinitive_option(tmp_path,monkey
 @pytest.mark.parametrize('answer',['?','ONE_SELECTED'])
 def test_unresolved_description_selection_does_not_materialize_a_fact(tmp_path,monkeypatch,answer):
     steps=unary('POSSIBLE','можно','можно')+relation('LEXICAL')+[('component_attachment',answer)]
-    result,_=run(tmp_path,monkeypatch,'Книгу можно прочитать.',steps,default='?')
+    if answer=='?':steps+=[('child_slot','?')]
+    result,_=run(tmp_path,monkeypatch,'Книгу можно прочитать.',steps)
     assert not result['assertions']['ah'] and not result['assertions']['journal']
 
 
@@ -189,7 +195,7 @@ def test_experience_retains_only_the_selected_morphological_reading(tmp_path,mon
     session=Session([],tmp_path/'experience.log')
     state,result=ingest(session,monkeypatch,'Окно может быть открыто.',unary('POSSIBLE','может','может')+[
         ('structural_governor','Agreement/controller anchor «может»')]+relation('LEXICAL')+[
-        ('component_attachment','открыть [PRTS]')],'experience')
+        ('predicate_function','Predicate occurrence «открыто»'),('component_attachment','открыть [PRTS]')],'experience')
     assert result['diagnostics']['codes']==[]
     stages=[row['stages'] for row in session.store.ledger.data['rx_cache'].values()]
     assert stages
@@ -208,5 +214,5 @@ def test_partial_description_cannot_bypass_a_missing_known_template(tmp_path,mon
     state,result=ingest(session,monkeypatch,'Письмо можно отправить.',
         unary('POSSIBLE','можно','можно')+relation('LEXICAL'),'missing')
     assert not result['assertions']['ah']
-    assert any('CANONICAL_MAPPING_MISSING' in d for d in result['runtime']['report']['diagnostics'])
+    assert 'CANONICAL_MAPPING_MISSING' in result['diagnostics']['codes']
     assert not any(n.get('semantic_status')=='UNLINKED' for n in session.store.ledger.data['nodes'].values())

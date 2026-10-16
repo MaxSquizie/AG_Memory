@@ -183,7 +183,7 @@ RESOURCE_SCHEMAS = {
                     'feature':enum('actv','pssv'),'host_role':S,
                     'case_roles':{'type':'object','additionalProperties':S}}))}),
             'open_case_roles': {'type':'object','additionalProperties':S},
-            'max_candidates': {'type':'integer','minimum':2,'maximum':16},
+            'max_candidates': {'type':'integer','minimum':2,'maximum':32},
             'context_chars': {'type':'integer','minimum':128,'maximum':4096}})}),
     'IncompatibilityRules': obj(('kind', 'rule_id', 'sense_id', 'role_id', 'key_roles'), {
         'kind': enum('ROLE_EXCLUSIVE'), 'rule_id': S, 'sense_id': S, 'role_id': S, 'key_roles': array()}),

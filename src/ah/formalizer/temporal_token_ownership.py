@@ -4,13 +4,9 @@ from .clock_ranges import boundary_spans
 
 
 def reject_entity_overlap(state,release,frames):
-    evidence={e.token_id:e for e in state.evidence}
+    from .temporal_functions import owned_refs
+    temporal=owned_refs(state)
     for frame in frames:
-        lo,hi=frame.source_range;raw=state.text[lo:hi];temporal=set()
-        for rule in release.entries('TemporalRules'):
-            for m in re.finditer(rule['pattern'],raw,re.I):
-                for a,b in boundary_spans(rule,m):
-                    temporal.update(e.token_id for e in evidence.values() if lo+a<=e.start and e.end<=lo+b)
         overlap=temporal & set(frame.argument_token_refs)
         if overlap:
             frame.semantic['structural_unresolved']=True

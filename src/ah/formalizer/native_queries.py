@@ -64,11 +64,20 @@ def project_native_queries(state,release):
         selected=f.semantic['candidate_specs'][d.selected[0]]
         roles=[]
         for token,role in selected['roles'].items():
-            if token in f.semantic.get('bound_arguments',{}): value={'bound_var':f.semantic['bound_arguments'][token],'sort':'ENTITY'}
+            from .bound_references import resolved as resolved_bound
+            bound=f.semantic.get('bound_arguments',{}).get(token)
+            if bound is None:bound=resolved_bound(state,f,token)
+            if bound is not None: value={'bound_var':bound,'sort':'ENTITY'}
             else:
                 unit=f.semantic.get('lexical_units',{}).get(token,{})
                 value={'mention':unit.get('surface',evidence[token].span),'entity_ref':state.observation.get('entity_bindings',{}).get(unit.get('mention_ref',token))}
                 mention_ref=unit.get('mention_ref',token)
+                group=state.observation.get('group_reference_bindings',{}).get(mention_ref)
+                if group:
+                    decision=state.decisions.get(mention_ref+'|reference')
+                    if not decision or decision.outcome!='RESOLVED' or tuple(decision.selected)!=(group['entity_ref'],):
+                        raise ValueError('GROUP_REFERENCE_UNGROUNDED')
+                    value={'entity_ref':group['entity_ref'],'member_refs':group['member_refs']}
                 if mention_ref in state.observation.get('event_bindings',{}):
                     value={'event_ref':state.observation['event_bindings'][mention_ref],
                            'premise_support_refs':state.observation.get('entity_binding_grounds',{}).get(mention_ref,[])}
@@ -92,13 +101,9 @@ def project_native_queries(state,release):
     for tree in trees:
         refs=leaves(tree); fs=[frames[f] for f in refs]
         if refs&embedded or any(f.semantic.get('quoted') for f in fs): continue
-        positions=[evidence[f.predicate_token_ref].start for f in fs] or [evidence[a].start for a in tree.get('anchor_refs',())]
-        query=state.observation.get('request_kind')=='QUERY' or any(f.semantic.get('query_request') for f in fs)
-        if state.observation.get('request_kind') in {'COMMAND','UNKNOWN','STATEMENT'}: continue
-        for pos in positions:
-            ends=[state.text.find(c,pos) for c in '.!?;' if state.text.find(c,pos)>=0]
-            hi=min(ends) if ends else len(state.text)
-            query |= hi<len(state.text) and state.text[hi]=='?'
+        acts={f.semantic.get('discourse_scope',{}).get('speech_act') for f in fs}
+        query=state.observation.get('request_kind')=='QUERY' or 'QUERY' in acts
+        if acts & {None,'UNKNOWN','COMMAND'} or state.observation.get('request_kind') in {'COMMAND','UNKNOWN','STATEMENT'}:continue
         if not query: continue
         def qualified(fid,seen=None):
             seen=set() if seen is None else seen

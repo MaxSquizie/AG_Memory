@@ -15,11 +15,13 @@ def nominal_variants(tokens, group, limit):
     """Keep linked adjective/head readings, never select the first parse."""
     by_id={e.token_id:e for e in tokens}
     anchors=[by_id[t] for t in group['anchor_refs']]
-    prep, head=anchors[0],anchors[-1]
+    prep=by_id[group['token_ref']]
+    head=by_id[group.get('head_ref',anchors[-1].token_id)]
     from .nominal_reference_groups import functional
-    modifiers=[a for a in anchors[1:-1] if not functional(a)]
+    function_refs=set(group.get('function_refs',[prep.token_id]))
+    modifiers=[a for a in anchors if a.token_id not in function_refs|{head.token_id} and not functional(a)]
     out=[]
-    for pv in unique(v for v in prep.variants if v.pos=='PREP'):
+    for pv in unique(group['variants']):
         for nv in unique(v for v in head.variants if v.pos in {'NOUN','NPRO'}):
             adjectives=[unique(v for v in a.variants if v.pos in {'ADJF','PRTF'} and
                 compatible(_features(v),_features(nv)) and set(v.cases)&set(nv.cases))
@@ -28,6 +30,6 @@ def nominal_variants(tokens, group, limit):
             for av in product(*adjectives):
                 out.append({'token':prep,'variant':pv,'entities':[(head,nv)],
                     'adjectives':list(zip(modifiers,av)),
-                    'refs':tuple(group['anchor_refs'])})
+                    'refs':tuple(group['anchor_refs']),'function_refs':tuple(group.get('function_refs',[prep.token_id]))})
     return out
 

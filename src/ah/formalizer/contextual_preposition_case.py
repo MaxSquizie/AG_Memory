@@ -21,7 +21,7 @@ def overlay(state, release, selector, region, tokens, cfg):
     from .component_phrases import prepositional_groups
     rules={r['lemma']:r for r in policy['rules']}
     evidence={t.token_id:t for t in tokens}; result=list(tokens)
-    for head_ref,group in prepositional_groups(tokens).items():
+    for head_ref,group in prepositional_groups(tokens,state=state).items():
         head=evidence[head_ref]; prep=evidence[group['token_ref']]
         names=[v for v in head.variants if v.pos=='NOUN' and
                v.features & {'Name','Surn','Patr','Geox'}]

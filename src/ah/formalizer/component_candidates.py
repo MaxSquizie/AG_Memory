@@ -17,7 +17,7 @@ def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nomin
         from .participial_roles import projection
         projected = projection(pv, attachment, cfg)
         from .action_descriptions import passive_rule, surface_roles, unassigned
-        passive=passive_rule(pv,cfg) if description_context and not attachment else None
+        passive=passive_rule(pv,cfg) if not attachment else None
         controlled=infinitive is not None and pv.pos=='INFN'
         governed=gv is not None and (pv.pos=='INFN' or passive)
         descriptive=bool(description_context and (passive or pv.pos=='INFN' and not controlled and not governed))
@@ -36,15 +36,22 @@ def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nomin
             from dataclasses import replace
             agreement=replace(pv,gender=None,number=None,person=None)
         if attachment and projected is None: continue
-        if not projected and not controlled and not governed and not descriptive and not quality and not nominal and not impersonal and (pv.pos != 'VERB' or pv.mood == 'imperative'): continue
-        if quality and pv.pos == 'ADJF' and 'nom' not in pv.cases: continue
+        general=bool(cfg.get('_predicate_function'))
+        if not general and not projected and not controlled and not governed and not passive and not descriptive and not quality and not nominal and not impersonal and (pv.pos != 'VERB' or pv.mood == 'imperative'): continue
+        if not general and quality and pv.pos == 'ADJF' and 'nom' not in pv.cases: continue
         senses = [s for s in release.entries('R-S') if not p.is_oov() and s['lemma'] == pv.lemma and s['POS'] == pv.pos and not s.get('anchor_pattern')]
         vals = [v for v in release.entries('R-V') if v['sense_id'] in {s['sense_id'] for s in senses}]
         if senses and not vals:
             state.diag('VALENCY_UNKNOWN', p.token_id); continue
         if not senses and not release.entries('OpenTemplatePolicy')[0]['allow']: continue
-        shapes = vals if senses else [None]
+        shapes = [*vals,*([None] if release.entries('OpenTemplatePolicy')[0]['allow'] else [])]
         for val in shapes:
+            generic_binding=None
+            if val is None and general:
+                from .predicate_functions import binding
+                generic_binding=binding(state,release,selector,region,tokens,p,nominals,groups,cfg,projected)
+                if generic_binding is None:
+                    state.diag('PREDICATE_ARGUMENT_DOMAIN_UNRESOLVED',region.region_id);continue
             supplied=deepcopy(proposition_slots or {})
             reserved=set(pending_roles)
             if val:reserved &= {r['role_id'] for r in val['roles'] if set(r.get('argument_types',())) & {'PROPOSITION','EVENT'}}
@@ -65,8 +72,11 @@ def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nomin
             if descriptive and not passive:
                 from .action_descriptions import independent_roles
                 roles=independent_roles(roles,cfg)
+            if generic_binding is not None:
+                roles=[{'role_id':r,'allowed_cases':sorted({c for _,v,_ in generic_binding if v for c in v.cases}),
+                        'cardinality':{'min':0}} for r in sorted({r for r,_,_ in generic_binding if r})]
             agreement_role=passive['host_role'] if passive else cfg['subject_role']
-            if projected and projected.get('relative_marker') and val:
+            if projected and projected.get('relative_marker') and not projected.get('general') and val:
                 marker_cases=projected['marker_reading'].cases
                 if not any(r['role_id']==projected['rule']['host_role'] and marker_cases & set(r.get('allowed_cases',())) and not r.get('allowed_preps') for r in roles):
                     continue
@@ -83,7 +93,7 @@ def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nomin
             needs_reduction=any(proposed(_morph(v)) for e in nominals for v in e.variants) or bool(qualitative_groups) or len(nominals)>3 or cfg.get('dependency_reduction') and (any(
                 e.token_id not in groups and e.token_id not in grouped and any(v.pos in {'NOUN','NPRO'} and set(v.cases)&({'gen'}|set(cfg.get('nominal_dependency_cases',()))) for v in e.variants)
                 for e in nominals) or any(e.span in cfg.get('apposition_markers',()) for e in dependency_tokens))
-            if needs_reduction:
+            if needs_reduction and generic_binding is None:
                 from .component_dependency_reduction import reduce
                 reduction=reduce(state,release,selector,region,dependency_tokens,p,agreement,roles,nominals,groups,
                     {**cfg,'subject_role':agreement_role} if passive else cfg,quantities=qualitative_groups,nominal_groups=nominal_groups)
@@ -91,6 +101,7 @@ def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nomin
             variants = [role_choices(e,roles,agreement,agreement_role,groups.get(e.token_id),coordinated=e.token_id in grouped) for e in nominals]
             if reduction is not None:
                 variants=[[reduction['roots'].get(e.token_id,(None,None,None))] for e in nominals]
+            if generic_binding is not None:variants=[[b] for b in generic_binding]
             count = 1
             for choices in variants: count *= len(choices)
             if count > cfg['max_candidates']:
@@ -133,12 +144,17 @@ def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nomin
                         used.add(copula);morph[copula]=_morph(cv)
                 if nominal:
                     subjects=[(e,mv) for e,(r,mv,_) in assignments if r==cfg['subject_role']]
-                    if len(subjects)!=1:continue
-                    subject,subject_reading=subjects[0]
-                    copula=consume_copula(tokens,p,subject_reading,cfg,used,morph)
-                    if 'nom' not in pv.cases and not copula:continue
-                    lo,hi=sorted((subject.start,p.start))
-                    used.update(t.token_id for t in tokens if lo<t.start<hi and t.span in {'—','–','-'})
+                    if projected and projected['rule']['host_role']==cfg['subject_role']:
+                        subjects=[(projected['host'],projected['reading'])]
+                    if len(subjects)!=1:
+                        if generic_binding is None:continue
+                        subjects=[]
+                    if subjects:
+                        subject,subject_reading=subjects[0]
+                        copula=consume_copula(tokens,p,subject_reading,cfg,used,morph)
+                        if not general and 'nom' not in pv.cases and not copula:continue
+                        lo,hi=sorted((subject.start,p.start))
+                        used.update(t.token_id for t in tokens if lo<t.start<hi and t.span in {'—','–','-'})
                 deps=reduction['dependencies'] if reduction else []
                 used.update(d['head_ref'] for d in deps)
                 used.update(d['marker_ref'] for d in deps if d.get('marker_ref'))
@@ -166,7 +182,7 @@ def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nomin
                     'allowed_proposition_roles':sorted(reserved) if val else None,
                     'agreement_source_ref':agreement_source.token_id if agreement_source else None,
                     'preposition_bindings':preps,'missing_required_roles':unresolved_roles,
-                    'requires_attachment_probe':ambiguous or quality or nominal or impersonal or descriptive,
+                    'requires_attachment_probe':general or ambiguous or quality or nominal or impersonal or descriptive or bool(passive),
                     'impersonal_predication':impersonal,
                     'quality_predication':quality, 'nominal_predication':nominal, 'copula_ref':copula,
                     'component_questions':questions,'uncovered_token_refs':uncovered,

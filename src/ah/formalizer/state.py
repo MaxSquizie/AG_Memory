@@ -293,6 +293,8 @@ class Budget:
     llm_calls: int = 0
     llm_failed: int = 0
     search_steps: int = 0
+    task_candidate_pages: dict[str, int] = field(default_factory=dict)
+    task_candidates_examined: int = 0
 
     probe_window_starts: list[int] = field(default_factory=list)
     probe_scope_limits: dict[str, int] = field(default_factory=dict)

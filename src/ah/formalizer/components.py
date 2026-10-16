@@ -4,8 +4,9 @@ from .component_participants import prepare_implicit, resolve_implicit, add_memo
 
 
 def compose(state, release, selector, context_reader=None, morph=None):
-    from .composition_session import session
-    with session(state,release,context_reader,selector,morph) as runtime:
+    from .composition_session import session,current
+    from contextlib import nullcontext
+    with (nullcontext(current(state)) if current(state) else session(state,release,context_reader,selector,morph)) as runtime:
         _compose(state,release,selector)
         for frame in state.frames:
             task=frame.semantic.get('dispatch_task')
@@ -44,8 +45,17 @@ def _compose(state, release, selector):
     from bisect import bisect_left
     grammar_frames=sorted(state.frames,key=lambda f:f.source_range[0])
     starts=[f.source_range[0] for f in grammar_frames]
-    for region in list(state.region_forest.regions):
-        if region.kind != 'SENTENCE':continue
+    if joint:
+        from .source_areas import areas as source_areas
+        reading_areas=source_areas(state,release,selector,cfg)
+    else:reading_areas=[(r,False) for r in state.region_forest.regions if r.kind=='SENTENCE']
+    for region,pending in reading_areas:
+        if pending:
+            state.diag('SOURCE_AREA_UNRESOLVED',region.region_id)
+            for frame in grammar_frames:
+                if region.source_range[0]<=frame.source_range[0]<region.source_range[1]:
+                    frame.semantic['structural_unresolved']=True
+            continue
         tokens = [evidence[t] for t in region.token_refs]
         existing=[f for f in grammar_frames[bisect_left(starts,region.source_range[0]):bisect_left(starts,region.source_range[1])]
                   if not f.semantic.get('structural_rejection') and f.source_range[1]<=region.source_range[1]]

@@ -8,24 +8,50 @@ def policy(release):
     return release.entries('ProposalPolicy')[0].get('spatial_references')
 
 
-def prepare(state, release):
+def prepare(state, release, selector=None):
     cfg = policy(release)
     if not cfg: return
     state.require_structures_open('SPATIAL_REFERENCE_CANDIDATES')
-    from .regions import protected_intervals
-    protected = protected_intervals(state.text)
     evidence = {e.token_id:e for e in state.evidence}
     anchors = {}
     for frame in state.frames:
         if frame.semantic.get('structural_unresolved'): continue
         ev = evidence[frame.predicate_token_ref]
-        if any(a <= ev.start < b for a,b in protected): continue
         morph = frame.semantic.get('morph_bindings',{}).get(ev.token_id)
         forms = {(morph['lemma'],morph['pos'])} if morph else {(v.lemma,v.pos) for v in ev.variants}
         slots = frame.semantic['spatial_slots'] = {}
-        for rule in cfg['rules']:
-            if (rule['lemma'],rule['POS']) not in forms: continue
-            if rule['role_id'] in frame.semantic.get('proposed_roles',{}).values():continue
+        rules=[r for r in cfg['rules'] if (r['lemma'],r['POS']) in forms]
+        if selector is not None:
+            key=frame.frame_id+'|spatial-function'
+            choice=_probe(state,selector,release,key,'spatial_function',[
+                {'candidate_id':'NONE','label':'No separate contextual place slot is expressed by this lexical occurrence'},
+                {'candidate_id':'LOCATION','label':'An unspecified relative location is introduced'},
+                {'candidate_id':'DESTINATION','label':'An unspecified relative destination is introduced'},
+                {'candidate_id':'ORIGIN','label':'An unspecified relative origin is introduced'},
+                {'candidate_id':'REFERENCE','label':'The occurrence refers to a place supplied by context'}],
+                state.text[slice(*frame.source_range)],frame.source_range,
+                question='What spatial function, if any, does «'+ev.span+'» have? Preserve its surrounding scope, including quotation. No coordinates can be inferred.')
+            if choice is None:
+                frame.semantic['structural_unresolved']=True;state.diag('SPATIAL_FUNCTION_UNRESOLVED',frame.frame_id);continue
+            if choice=='NONE':continue
+            selected_kind='REFERENCE' if choice=='REFERENCE' else 'ANCHOR'
+            matching=[r for r in rules if r['kind']==selected_kind and (choice=='REFERENCE' or r.get('location_kind')==choice)]
+            role=None
+            if not matching:
+                role=_probe(state,selector,release,key+'|role','spatial_role',[
+                    {'candidate_id':r['role_id'],'label':r['role_id']} for r in release.entries('RoleRegistry')],
+                    state.text[slice(*frame.source_range)],frame.source_range,
+                    question='Which role does this '+choice+' place fill in «'+ev.span+'»?')
+                if role is None:
+                    frame.semantic['structural_unresolved']=True;state.diag('SPATIAL_FUNCTION_UNRESOLVED',frame.frame_id);continue
+            rules=matching or [{'rule_id':'SOURCE_SPATIAL_FUNCTION_V1','sense_id':None,'role_id':role,
+                               'kind':selected_kind,'generic':True,**({'location_kind':choice} if selected_kind=='ANCHOR' else {})}]
+        for rule in rules:
+            if rule['role_id'] in frame.semantic.get('proposed_roles',{}).values():
+                if selector is not None:
+                    frame.semantic['structural_unresolved']=True
+                    state.diag('SPATIAL_ROLE_CONFLICT',frame.frame_id)
+                continue
             slot = {'rule':deepcopy(rule), 'mention_ref':ev.token_id,
                     'decision_ref':frame.frame_id+'|spatial:'+rule['rule_id']}
             if rule['kind']=='ANCHOR':
@@ -57,7 +83,7 @@ def prepare(state, release):
 
 def for_sense(frame, sense_id):
     return next((s for s in frame.semantic.get('spatial_slots',{}).values()
-                 if s['rule']['sense_id']==sense_id), None)
+                 if s['rule']['sense_id']==sense_id or s['rule'].get('generic')), None)
 
 
 def resolve(state, release, selector):

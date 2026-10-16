@@ -7,7 +7,7 @@ unknown answers and failed child parsing cannot.
 """
 from dataclasses import dataclass
 from .canonical_ledger import digest
-from .structural_tasks import span
+from .structural_tasks import source_set as span
 
 
 @dataclass(frozen=True)
@@ -21,6 +21,7 @@ class ContentRequired:
 class PartitionProposal:
     groups: list
     data: object = None
+    shared_functions: tuple = ()
 
 
 class PartitionDomain:
@@ -35,7 +36,7 @@ class PartitionDomain:
         return {ref for c in self.constraints for ref in c.token_refs}
 
     def span(self,tokens,slot,question,*,marker=False,covered=(),remaining_parts=0,
-             remaining_contiguous=True,**kwargs):
+             remaining_contiguous=False,**kwargs):
         required=self.required-set(covered)
         admissible=None
         if required:
@@ -83,7 +84,7 @@ class PartitionDomain:
                     self.state.diag('INTEGRITY_ERROR','partition producer lost required content')
                     return None
                 result=confirm_partition(self.state,self.release,self.selector,self.region,
-                    self.tokens,self.cfg,self.kind,proposal.groups,self.proof)
+                    self.tokens,self.cfg,self.kind,proposal.groups,self.proof,shared_functions=proposal.shared_functions)
                 if on_check:on_check(proposal,result)
                 return proposal,result
             if runtime:

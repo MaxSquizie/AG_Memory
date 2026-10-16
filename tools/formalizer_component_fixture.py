@@ -21,7 +21,7 @@ def with_components(release, *, regional_probes=True, relative_time=False, predi
     policy['entries'][0]['composition']={
         'version':'COMPONENTS_V1','subject_role':'SUBJECT','coordination_operators':['AND'],
         'open_case_roles':{'nom':'SUBJECT','acc':'OBJECT','dat':'RECIPIENT'},
-        'max_candidates':16,'context_chars':2048}
+        'max_candidates':32,'context_chars':2048}
     if structural_tasks:policy['entries'][0]['composition']['structural_tasks']='CLOSED_RELATIONS_V1'
     if predication:
         policy['entries'][0]['composition'].update(quality_predicate_pos=['ADJF','ADJS'],

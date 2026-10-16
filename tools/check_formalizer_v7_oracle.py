@@ -57,7 +57,14 @@ def load_corpus(root):
     manifest=readjson(root/'manifest.json')
     for filename,expected in manifest['artifacts'].items():
         p=root/filename
-        if not p.is_file() or digest(p)!=expected:raise OracleError('artifact hash mismatch '+filename)
+        if not p.is_file():raise OracleError('artifact missing '+str(p))
+        actual=digest(p)
+        if actual!=expected:
+            raw=p.read_bytes()
+            normalized=hashlib.sha256(raw.replace(b'\r\n',b'\n')).hexdigest()
+            hint=('; CRLF conversion detected: restore the LF artifact from the pinned corpus'
+                  if normalized==expected else '; bytes differ from manifest: restore the pinned corpus or rebuild it deliberately')
+            raise OracleError('artifact hash mismatch '+filename+' expected='+expected+' actual='+actual+hint)
     cases=[]
     with (root/'cases.jsonl').open(encoding='utf-8') as f:
         for n,line in enumerate(f,1):

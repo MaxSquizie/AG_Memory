@@ -16,12 +16,23 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child,opera
         if any(v.pos=='NUMR' or 'Anum' in v.features for t in anchors for v in t.variants):
             state.diag('ARITHMETIC_QUANTIFIER_DEFERRED',region.region_id)
             return None
-        return PartitionProposal([owned],anchors)
+        binding=choose(state,release,selector,region,cfg,'quantifier_source_functions',[
+            {'candidate_id':'SEPARATE','shared':False,'label':'The quantified mention is separate from these quantifier words'},
+            *[{'candidate_id':t.token_id,'head_ref':t.token_id,'shared':True,
+               'label':'«'+t.span+'» simultaneously expresses quantification and the bound participant'} for t in anchors]],
+            'Does this quantifier contain its own participant mention? The same occurrence can have both functions.')
+        if not binding:return None
+        shared=()
+        if binding[0]['shared']:
+            head=next(t for t in anchors if t.token_id==binding[0]['head_ref'])
+            owned=sorted([*owned,head],key=lambda t:t.start)
+            shared=({'token_ref':head.token_id,'functions':['QUANTIFIER','BOUND_MENTION'],'proof':binding[1]},)
+        return PartitionProposal([owned],{'anchors':anchors,'binding':binding},shared)
     selected=PartitionDomain(state,release,selector,region,tokens,cfg,operator,proof).resolve(propose)
     if not selected:return block(state,region)
-    proposal,partition=selected;owned=proposal.groups[0];anchors=proposal.data
+    proposal,partition=selected;owned=proposal.groups[0];anchors=proposal.data['anchors']
     heads=[t for t in owned if any(v.pos in {'NOUN','NPRO'} for v in t.variants)]
-    selected=choose(state,release,selector,region,cfg,'structural_binder_head',
+    selected=proposal.data['binding'] if proposal.shared_functions else choose(state,release,selector,region,cfg,'structural_binder_head',
         [{'candidate_id':t.token_id,'head_ref':t.token_id,'label':'Bind the nominal «'+t.span+'» @'+str(t.start)} for t in heads],
         operator+': select the restricted variable mention. Its complete body remains indivisible; do not create a witness.')
     if not selected:return block(state,region)

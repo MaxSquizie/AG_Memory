@@ -53,6 +53,12 @@ def project(state,tokens):
     for token in tokens:
         readings={digest(clean(v)):v for v in token.variants}
         readings.update(by_token.get(token.token_id,{}))
+        functions=[row for row in state.syntax_trace if row.get('kind')=='MORPHOLOGY_FUNCTION_RESTRICTION'
+                   and in_scope(state,row) and row['token_ref']==token.token_id]
+        if functions:
+            row=functions[-1];decision=state.decisions.get(row['decision_ref'])
+            if decision and decision.outcome=='RESOLVED' and row['POS'] in decision.selected:
+                readings={k:v for k,v in readings.items() if v.pos==row['POS']}
         restrictions=[row for row in state.syntax_trace if row.get('kind')=='MORPHOLOGY_DOMAIN_RESTRICTION' and in_scope(state,row) and row['token_ref']==token.token_id]
         if restrictions:
             row=restrictions[-1];decision=state.decisions.get(row['decision_ref'])

@@ -71,7 +71,8 @@ class RealBackendSelector:
             model_key=self.model_key or str(getattr(self.backend,"model",type(self.backend).__name__)),
             params_hash=digest({"system":self.system,"role":self.role,"generation":self.generation_settings,
                 "selection_system":_SELECTION_SYSTEM if self.system in {_SYSTEM,_READABLE_SYSTEM} else self.system,
-                "structure_reply_format":self.structure_reply_format,"selection_reply_format":self.selection_reply_format}),
+                "structure_reply_format":self.structure_reply_format,"selection_reply_format":self.selection_reply_format,
+                "selection_output_budget":"LABELS_24_PLUS_4_PER_OPTION_V1"}),
             transport=self._transport,
             budget=self.budget or BudgetSnapshot(tp_calls=2, lexical_calls=2, max_nodes=64, max_edges=128, max_depth=16, token_limit=32768),
         )
@@ -80,7 +81,12 @@ class RealBackendSelector:
         system=self.system
         if getattr(prompt,'selection_audit',None) and system in {_SYSTEM,_READABLE_SYSTEM}:
             system=_SELECTION_SYSTEM
-        resp = self.backend.generate(prompt, system=system, role=self.role, override=self.generation_settings)
+        settings=dict(self.generation_settings)
+        audit=getattr(prompt,'selection_audit',None)
+        if audit and self.selection_reply_format=='SELECT_LABELS_V1':
+            # The closed label protocol needs only a bounded list of ordinals.
+            settings['max_new_tokens']=min(settings.get('max_new_tokens',4096),24+4*len(audit['candidates']))
+        resp = self.backend.generate(prompt, system=system, role=self.role, override=settings)
         return resp if isinstance(resp, str) else getattr(resp, "text", "")
 
     def start_run(self, run_id):
@@ -107,6 +113,10 @@ class RealBackendSelector:
 
     def select(self, prompt: str) -> str:
         return self._adapter.select(prompt, self.run_id)
+
+    def prompt_size(self,prompt):
+        system=_SELECTION_SYSTEM if getattr(prompt,'selection_audit',None) and self.system in {_SYSTEM,_READABLE_SYSTEM} else self.system
+        return len(prompt)+len(system or '')
 
 
 def selector_from_config(config, journal=None, *, backend=None):

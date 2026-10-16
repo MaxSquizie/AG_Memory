@@ -66,13 +66,15 @@ class Dispatcher:
             reads.clear()
             self.trace('DISPATCH_RECHECK',key,reason='REJECTED_COMPOSITION_DISCARDED')
 
-    def run(self,key,inputs,compute,*,kind,source_range=None,token_refs=()):
+    def run(self,key,inputs,compute,*,kind,source_range=None,token_refs=(),contract=None):
         if any(ref==key for ref,_ in self.stack):
             self.state.diag('COMPOSITION_CYCLE',key)
             raise DispatchBlocked('COMPOSITION_CYCLE')
         signature=digest(canonical(inputs));node=self.nodes.get(key)
         if node is None:
             node={'kind':kind,'signature':signature,'revision':0,'reads':{},'dirty':True}
+            from .task_contracts import CONTRACTS,ProducerContract
+            node['contract']=asdict(contract or CONTRACTS.get(kind,ProducerContract(kind,'CALLER_DECLARED','CALLER_INPUT','CALLER_RESULT','caller-defined domain','explicit completion')))
             self.nodes[key]=node
         elif node['signature']!=signature:
             self.invalidate(key,'INPUT_CHANGED');node['signature']=signature
@@ -106,8 +108,13 @@ class Dispatcher:
                 for ref in reads:self.consumers.setdefault(ref,set()).add(key)
                 nested={id(d) for ref,n in self.nodes.items() if ref!=key for d in n.get('diagnostics',())}
                 node['diagnostics']=[d for d in self.state.diagnostics[before:] if id(d) not in nested]
+                from .task_contracts import produced
+                receipt=produced(kind,result,node['diagnostics']);result=receipt.value
+                node['receipt']={'task_outcome':receipt.outcome.value,'search_complete':receipt.search_complete,
+                                 'source_complete':receipt.source_complete,'alternatives':list(receipt.alternatives)}
                 node.update(result=deepcopy(result),reads=reads,dirty=False,revision=node['revision']+1)
                 self.trace('DISPATCH_COMPLETED',key,revision=node['revision'],
+                    contract=node['contract'],**node['receipt'],
                     dependencies=[{'task_ref':ref,'revision':v} for ref,v in reads.items()])
                 break
         if self.stack:self.stack[-1][1].setdefault(key,node['revision'])

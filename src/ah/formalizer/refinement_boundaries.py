@@ -4,6 +4,38 @@ from .canonical_ledger import digest
 from .component_probe import _probe
 
 
+def general_boundary(state,release,selector,region,tokens,cfg):
+    from .structural_tasks import choose,source_set
+    selected=source_set(state,release,selector,region,tokens,cfg,'structural_description',
+        'Select the dependent description of a nominal. Keep the parent clause outside it.')
+    if not selected:return None
+    body,proofs=selected
+    if len(body)==len(tokens):return None
+    mode=choose(state,release,selector,region,cfg,'structural_description_binding',[
+        {'candidate_id':'RELATIVE_PRONOUN','label':'An explicit relative expression fills a participant role inside this description'},
+        {'candidate_id':'RELATIVE','label':'An explicit connector relates this description to its nominal host'},
+        {'candidate_id':'BOUND_DESCRIPTION','label':'The nominal host fills an unexpressed participant role in this description'}],
+        'How does «'+' '.join(t.span for t in body)+'» refer to its host? Choose the grammatical relation, independent of wording or punctuation.')
+    if not mode:return None
+    kind=mode[0]['candidate_id']
+    marker=None;marker_refs=[]
+    if kind!='BOUND_DESCRIPTION':
+        result=choose(state,release,selector,region,cfg,'structural_description_marker',[
+            {'candidate_id':t.token_id,'label':'«'+t.span+'» @'+str(t.start)} for t in body],
+            'Which occurrence links the description to its host?')
+        if not result:return None
+        marker=result[0]['candidate_id'];marker_refs=[marker];proofs=(*proofs,result[1])
+        if kind=='RELATIVE':
+            from .structural_tasks import extend_source_set
+            expanded=extend_source_set(state,release,selector,region,body,cfg,'structural_description_link',
+                'Select every piece of the linking expression; keep the described proposition outside it.',
+                [next(t for t in body if t.token_id==marker)],[result[1]])
+            if not expanded:return None
+            marker_refs=[t.token_id for t in expanded[0]];proofs=(*proofs,*expanded[1])
+    return {'kind':kind,'body_refs':[t.token_id for t in body],'marker_ref':marker,'marker_refs':marker_refs,
+            'proofs':[*proofs,mode[1]],'rule':{'general':True}}
+
+
 def agreeing(host, participle):
     return (host.pos in {'NOUN', 'NPRO'} and bool(host.cases & participle.cases)
             and compatible(_features(host), _features(participle)))

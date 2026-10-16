@@ -6,8 +6,7 @@ from .component_probe import _probe
 
 def nominal_predicate(variant, cfg):
     return (cfg.get('nominal_predication')=='NOUN_PREDICATE_V1' and variant.pos=='NOUN'
-            and bool(variant.cases & {'nom','abl'})
-            and not variant.features & {'Name','Surn','Patr','Geox','Orgn','Trad'})
+            and bool(variant.cases & {'nom','abl'}))
 
 
 def impersonal_predicate(variant,cfg):
@@ -17,8 +16,6 @@ def impersonal_predicate(variant,cfg):
 
 def nominal_predicates(tokens, cfg):
     """Offer noun predication without treating arbitrary noun arguments as verbs."""
-    if any(t.variants and all(v.pos=='VERB' and v.lemma not in cfg.get('copula_lemmas',())
-            for v in t.variants) for t in tokens):return []
     return [t for t in tokens if any(nominal_predicate(v,cfg) for v in t.variants)
             and any(other.token_id!=t.token_id and any(v.pos in {'NOUN','NPRO'} and 'nom' in v.cases
                 for v in other.variants) for other in tokens)]
@@ -41,6 +38,21 @@ def consume_copula(tokens, predicate, variant, cfg, used, morph):
 
 
 def compose_alternatives(state, release, selector, region, tokens, predicates, cfg, *, attachment=None, nominal_groups=(), infinitive=None, request=None):
+    from .nominal_functions import prepare as nominal_functions
+    if not nominal_functions(state,release,selector,region,tokens,cfg):
+        state.diag('NOMINAL_FUNCTION_UNRESOLVED',region.region_id)
+        return []
+    from .temporal_functions import prepare as temporal_functions
+    if not temporal_functions(state,release,selector,region,tokens,cfg):
+        state.diag('TEMPORAL_FUNCTION_UNRESOLVED',region.region_id)
+        return []
+    from .predicate_functions import head as select_head
+    selected_head=(False,None) if request and request.output_sort=='EVENT_DESCRIPTION' else select_head(state,release,selector,region,tokens,predicates,cfg)
+    if selected_head is None:
+        state.diag('PREDICATE_FUNCTION_UNRESOLVED',region.region_id);return []
+    predicate,proof=selected_head
+    predicates=[predicate] if predicate else []
+    cfg={**cfg,'_predicate_function':proof if predicate else None}
     from .contextual_name_case import overlay as coordinated_readings
     from .contextual_preposition_case import overlay as governed_readings
     tokens=governed_readings(state,release,selector,region,coordinated_readings(tokens,nominal_groups),cfg)
@@ -74,12 +86,19 @@ def compose_alternatives(state, release, selector, region, tokens, predicates, c
             bundles.extend(nominal_bundles(state,release,selector,region,tokens,frame,cfg))
         else:
             bundles.append([frame])
+    from copy import deepcopy
+    from .temporal_functions import units as time_units
+    selected_times=time_units(state,[t.token_id for t in tokens])
+    for bundle in bundles:
+        for f in bundle:f.semantic['temporal_functions']=[]
+        if bundle:bundle[-1].semantic['temporal_functions']=deepcopy(selected_times)
     frames = [f for bundle in bundles for f in bundle]
     attach_references(frames,references)
     complete = [b for b in bundles if all(not f.semantic['structural_unresolved'] for f in b)]
     local_diagnostics=[d for d in state.diagnostics[diagnostics_before:] if d.detail==region.region_id]
     incomplete_search=any(d.code=='COMPONENT_SEARCH_INCOMPLETE' for d in local_diagnostics)
     pending_search=any(d.code in {'COMPONENT_NOMINAL_SELECTION_UNRESOLVED',
+        'PREDICATE_ARGUMENT_DOMAIN_UNRESOLVED',
         'COMPONENT_DEPENDENCY_UNRESOLVED','COMPONENT_NOMINAL_SEGMENTATION_UNRESOLVED',
         'COMPONENT_NOMINAL_CYCLE','COMPONENT_NOMINAL_HOST_UNRESOLVED'} for d in local_diagnostics)
     if pending_search and not incomplete_search:
@@ -106,7 +125,7 @@ def compose_alternatives(state, release, selector, region, tokens, predicates, c
                 roles = ', '.join(role+'='+evidence[tid].span for tid, role in f.semantic['proposed_roles'].items())
                 label = f.semantic.get('nominal_dependency_kind',m['lemma'])+' ['+m['pos']+']; '+roles
                 if f.semantic.get('nominal_predication'):
-                    subject=next(evidence[t].span for t,r in f.semantic['proposed_roles'].items() if r==cfg['subject_role'])
+                    subject=next((evidence[t].span for t,r in f.semantic['proposed_roles'].items() if r==cfg['subject_role']),'the selected participant')
                     label+='; noun predicate: «'+f.anchor_span+'» describes what «'+subject+'» is'
                 if f.semantic.get('impersonal_predication'):
                     label+='; impersonal state; dative participant experiences it; no separate grammatical subject'
@@ -133,11 +152,6 @@ def compose_alternatives(state, release, selector, region, tokens, predicates, c
                 if f.semantic.get('relative_temporal'):
                     label += '; relative anchors='+str(f.semantic['relative_temporal'])
                 labels.append(label)
-            if any(r['kind'] in {'WORD_CLOCK','CLOCK_RANGE'} for r in release.entries('TemporalRules')):
-                from .native_frontend import _temporal
-                clock=_temporal(raw,state.observation,release,source_start=region.source_range[0])
-                if clock and clock[0] and clock[0].get('expressions'):
-                    labels.append('clock expression attaches to this clause: '+str(clock[0]['expressions'][0]['raw']))
             options.append({'candidate_id':bundle[-1].frame_id, 'label':' -> '.join(labels)
                 + ('; event modifiers wrap propositions; nominal descriptions attach ONLY to their named entity hosts'
                    if cfg.get('nominal_composition') else

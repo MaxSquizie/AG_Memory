@@ -4,6 +4,9 @@ from .component_policy import _morph
 
 
 def projection(variant, attachment, cfg):
+    if isinstance(attachment,dict) and attachment.get('kind')=='BOUND_DESCRIPTION':
+        return {**attachment,'rule':{'host_role':attachment['host_role'],
+            'case_roles':{c:r for c,r in cfg['open_case_roles'].items() if r!=attachment['host_role']}}}
     if isinstance(attachment,dict) and attachment.get('kind')=='RELATIVE_PRONOUN':
         from .relative_pronoun import projection as relative_projection
         return relative_projection(variant,attachment,cfg)
@@ -32,12 +35,12 @@ def add_host(frame, projected):
     frame.semantic['lexical_units'][tid] = {'head_ref':tid, 'anchor_refs':[tid],
         'surface':host.span, 'mention_ref':tid}
     frame.argument_token_refs = (*frame.argument_token_refs, tid)
-    frame.semantic['refinement_binding'] = {'kind':'RELATIVE_PRONOUN' if projected.get('relative_marker') else 'PARTICIPLE', 'host_token_ref':tid,
+    frame.semantic['refinement_binding'] = {'kind':'RELATIVE_PRONOUN' if projected.get('relative_marker') else projected.get('kind','PARTICIPLE'), 'host_token_ref':tid,
         'host_role':rule['host_role'], 'voice_feature':rule.get('feature'),
         'predicate_ref':frame.predicate_token_ref}
     if projected.get('relative_marker'):
         marker=projected['relative_marker']
         frame.semantic['morph_bindings'][marker.token_id]=_morph(projected['marker_reading'])
         frame.semantic['refinement_binding']['marker_ref']=marker.token_id
-    frame.semantic['component_questions'].append({'kind':'PARTICIPLE_HOST',
+    frame.semantic['component_questions'].append({'kind':'DESCRIPTION_HOST',
         **frame.semantic['refinement_binding']})

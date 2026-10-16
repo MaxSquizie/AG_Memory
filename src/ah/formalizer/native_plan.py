@@ -42,9 +42,16 @@ def build_plan(state,release,store):
                   if len(mappings)==1 and m['template_ref']==mappings[0]['template_ref'] and m.get('literal_syntax')]
         for tid,role in selected['roles'].items():
             if tid in state.observation.get('unresolved_references',()): raise ValueError('REFERENCE_UNKNOWN')
-            if tid in f.semantic.get('bound_arguments',{}):
-                roles[role]={'bound_var':f.semantic['bound_arguments'][tid],'sort':'ENTITY'}
+            from .bound_references import resolved as resolved_bound
+            bound=f.semantic.get('bound_arguments',{}).get(tid)
+            if bound is None:bound=resolved_bound(state,f,tid)
+            if bound is not None:
+                roles[role]={'bound_var':bound,'sort':'ENTITY'}
                 continue
+            from .group_references import emit as emit_group_reference
+            group_ref=emit_group_reference(state,tid,tag,frag,emit)
+            if group_ref:
+                roles[role]=group_ref;continue
             ev=evidence[tid]
             unit=f.semantic.get('lexical_units',{}).get(tid,{})
             mention_ref=unit.get('mention_ref',tid)
@@ -263,27 +270,17 @@ def build_plan(state,release,store):
         if any(f.semantic.get('temporal_unresolved') for f in fs):
             diagnostics.append('WAITING_CONTEXT:'+frag); continue
         # Speech act and attitudes are structural guards; they do not confirm content.
-        ranges=[f.source_range for f in fs]
-        local=state.text[min(lo for lo,hi in ranges):max(hi for lo,hi in ranges)] if ranges else state.text
-        if len(fs)==1 and fs[0].semantic.get('owned_token_refs') is not None:
-            from .component_source import frame_view
-            local=frame_view(state,fs[0])
-        entire=state.text
-        positions=[evidence[f.predicate_token_ref].start for f in fs] or [evidence[a].start for a in t.get('anchor_refs',())]
-        is_query=any(f.semantic.get('query_request') for f in fs)
-        for pos in positions:
-            lo=max([entire.rfind(c,0,pos) for c in '.!?;'])+1
-            ends=[entire.find(c,pos) for c in '.!?;' if entire.find(c,pos)>=0]
-            hi=min(ends) if ends else len(entire)
-            is_query |= hi<len(entire) and entire[hi]=='?'
-        from .native_frontend import _frame_variants
-        is_command=any(any(v.mood=='imperative' for v in _frame_variants(f,evidence[f.predicate_token_ref])) for f in fs)
+        is_query=any(f.semantic.get('query_request') or f.semantic.get('discourse_scope',{}).get('speech_act')=='QUERY' for f in fs)
+        is_command=any(f.semantic.get('discourse_scope',{}).get('speech_act')=='COMMAND' for f in fs)
+        if any(f.semantic.get('discourse_scope',{}).get('speech_act') in {None,'UNKNOWN'} for f in fs):
+            diagnostics.append('SPEECH_ACT_UNRESOLVED:'+frag);continue
         quoted=any(f.semantic.get('quoted') for f in fs)
         requested=state.observation.get('request_kind')
         if requested in {'QUERY','COMMAND','UNKNOWN'}:
             diagnostics.append(('MODUS_UNKNOWN' if requested=='UNKNOWN' else 'SPEECH_ACT_'+requested)+':'+frag); continue
         if requested is not None and requested not in {'ASSERTION','STATEMENT','MIXED'}:
             diagnostics.append('INPUT_REJECTED:unknown request_kind:'+frag); continue
+        quoted=quoted or any(f.semantic.get('discourse_scope',{}).get('speech_act')=='CONTENT' and not f.semantic.get('component_child') for f in fs)
         if is_query or is_command or quoted:
             diagnostics.append(('SPEECH_ACT_QUERY' if is_query else 'SPEECH_ACT_COMMAND' if is_command else 'QUOTED_CONTENT')+':'+frag); continue
         regions=[f.semantic.get('region') for f in fs]

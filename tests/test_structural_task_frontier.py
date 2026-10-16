@@ -50,7 +50,7 @@ def test_budget_is_shared_and_is_not_none_fit(monkeypatch):
 
 
 def test_endpoint_rejection_reopens_start_domain(monkeypatch):
-    state,release,region,cfg,calls=setup(monkeypatch,['first','NONE_FIT','NONE_FIT','first','first'])
+    state,release,region,cfg,calls=setup(monkeypatch,['first','NONE_FIT','NONE_FIT','NONE_FIT','first','first'])
     tokens=[SimpleNamespace(token_id=str(i),span=word,start=a,end=b)
         for i,(word,a,b) in enumerate([('one',0,3),('two',4,7),('three',8,13)])]
     result=span(state,release,None,region,tokens,cfg,'bounds','whole area')

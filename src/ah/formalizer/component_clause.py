@@ -16,13 +16,8 @@ def build_clause(state,release,selector,region,tokens,p,cfg, *, select=True, att
     raw=view(state,region,tokens)
     # Relative event anchors are typed children of the common composer.
     # This layer owns only lexical calendar/clock expressions.
-    temporal = set()
-    for rule in release.entries('TemporalRules'):
-        for m in re.finditer(rule['pattern'],raw,re.I):
-            from .clock_ranges import boundary_spans
-            for a,b in boundary_spans(rule,m):
-                lo,hi = region.source_range[0]+a,region.source_range[0]+b
-                temporal.update(e.token_id for e in tokens if lo <= e.start and e.end <= hi)
+    from .temporal_functions import owned_refs
+    temporal = owned_refs(state,tokens)
     # The same released temporal ownership already excludes arguments below.
     # It must also exclude a predicate inside the time expression.
     if p.token_id in temporal:
@@ -31,8 +26,8 @@ def build_clause(state,release,selector,region,tokens,p,cfg, *, select=True, att
             'temporal_refs':sorted(temporal)})
         return []
     from .component_phrases import prepositional_groups
-    groups=prepositional_groups(tokens,temporal)
-    prep_markers={g['token_ref'] for g in groups.values()}
+    groups=prepositional_groups(tokens,temporal,state=state)
+    prep_markers={r for g in groups.values() for r in g.get('function_refs',[g['token_ref']])}
     allowed_cases=set(cfg['open_case_roles']) | {c for val in release.entries('R-V') for role in val['roles'] for c in role.get('allowed_cases',())}
     if attachment:
         allowed_cases.update(c for rule in cfg['refinement']['participle_voices'] for c in rule['case_roles'])
@@ -41,7 +36,7 @@ def build_clause(state,release,selector,region,tokens,p,cfg, *, select=True, att
     nominal_connectors={t for g in nominal_groups for t in g['marker_refs']}
     quantity_markers={t for g in qualitative_groups for t in g.get('quantity_token_refs',[g['marker_ref']])}
     nominals = [e for e in tokens if e.token_id not in temporal|prep_markers|nominal_connectors|quantity_markers and e != p
-                and (e.token_id in groups or any(v.pos in {'NOUN','NPRO'} and set(v.cases)&allowed_cases for v in e.variants))]
+                and (e.token_id in groups or any(v.pos in {'NOUN','NPRO'} and (set(v.cases)&allowed_cases or v.origin=='CONTEXTUAL' and not v.cases) for v in e.variants))]
     # The number of nominals is not a grammatical exclusion. Large domains
     # go through constraint reduction, under the same released search budget.
     candidates=enumerate_candidates(state,release,cfg,region,tokens,p,temporal,nominals,groups,selector=selector,attachment=attachment,nominal_groups=nominal_groups,infinitive=infinitive,proposition_slots=proposition_slots,agreement_source=agreement_source,pending_roles=pending_roles,qualitative_groups=qualitative_groups,description_context=description_context)

@@ -102,10 +102,21 @@ def _bind(state,release,selector,region,frames,matches,cfg,spend):
         key=region.region_id+'|quantifier-head:'+digest([mid,options])
         from .component_probe_replay import supersede
         supersede(state,questions.get(mid),key);questions[mid]=key
-        chosen=_probe(state,selector,release,key,'nominal_attachment',options,
-            state.text[slice(*region.source_range)],region.source_range,
-            question='Choose the existing nominal bound by this quantifier. Its scope is a separate linked slot. '
-                     'Do not introduce a named entity, an existential witness or an implicit lexical restriction.')
+        rule=specs[mid][2]
+        if len(options)==1 and rule.get('head_license'):
+            from .structural_tasks import licensed as task_licensed
+            from .state import Decision,Ground
+            if not task_licensed(state,rule['head_license'],head_ref=options[0]['head_ref']):return None
+            chosen=options[0]['candidate_id']
+            decision=Decision('nominal_attachment',key,(chosen,),selected=(chosen,),outcome='RESOLVED',
+                lifecycle='PROVISIONAL',search_complete=True)
+            decision.grounds.append(Ground('D','Selected binder head and its single compatible whole reading; source proof '+rule['head_license']['decision_ref'],chosen))
+            state.decisions[key]=decision
+        else:
+            chosen=_probe(state,selector,release,key,'nominal_attachment',options,
+                state.text[slice(*region.source_range)],region.source_range,
+                question='The bound nominal is already selected when supplied. Select only its remaining compatible whole reading. '
+                         'Do not introduce a named entity, an existential witness or an implicit lexical restriction.')
         if chosen not in graph.domains[mid]:continue
         selected[mid]=(graph.domains[mid][chosen],key)
         graph.restrict(mid,[chosen],'RESOLVED_BINDER_HEAD')

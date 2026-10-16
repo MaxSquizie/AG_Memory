@@ -15,6 +15,7 @@ import unicodedata
 
 RELATIONS={
     'LEXICAL':'One lexical predication or nominal description; no logical operator or dependent clause inside the target. A separately supplied content slot may remain open',
+    'NOMINAL_DESCRIPTION':'A parent clause contains a nominal described by another clause or predicative phrase inside this target',
     'NOT':'Negation of a proposition (not lexical opposition)',
     'POSSIBLE':'Possibility or ability; does not assert occurrence',
     'NECESSARY':'Necessity or obligation; preserve its scope',
@@ -54,31 +55,25 @@ def attach_tree(frames,tree,region):
     return frames
 
 
-def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof):
+def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof,*,shared_functions=()):
     refs=[t.token_id for group in groups for t in group]
     if len(refs)!=len(set(refs)):return None
     used=set(refs);markers=[t for t in tokens if t.token_id not in used]
+    from .structural_tasks import licensed
+    for shared in shared_functions:
+        if (kind not in {'FORALL','EXISTS'} or shared.get('functions')!=['QUANTIFIER','BOUND_MENTION']
+                or shared.get('token_ref') not in used
+                or not licensed(state,shared.get('proof'),head_ref=shared['token_ref'],shared=True)):
+            return None
+    shared_refs={x['token_ref'] for x in shared_functions}
     parts=['«'+' '.join(t.span for t in g)+'»' for g in groups]
     punctuation=[t for t in markers if all(unicodedata.category(c).startswith('P') for c in t.span)]
     punctuation_refs={t.token_id for t in punctuation}
     links=[t for t in markers if t.token_id not in punctuation_refs]
-    if kind=='CONTENT':
-        # CONTENT already has a lexical owner inside the parent. Its separator
-        # cannot stand in for another discarded predicate or participant.
-        # Ambiguous function readings remain available; no spelling is a license.
-        unowned=[t for t in links if not any(v.pos in {'CONJ','PRCL','PREP','ADVB','INTJ'} for v in t.variants)]
-        if unowned:
-            state.syntax_trace.append({'kind':'STRUCTURAL_PARTITION_COVERAGE','region_ref':region.region_id,
-                'source_range':list(region.source_range),'relation':kind,
-                'uncovered_token_refs':[t.token_id for t in unowned],
-                'operands':[[t.token_id for t in g] for g in groups],
-                'reason':'LEXICAL_CONTENT_OUTSIDE_PARTS'})
-            return ContentRequired(tuple(t.token_id for t in unowned),'LEXICAL_CONTENT_OUTSIDE_PARTS')
-    else:
-        from .relation_markers import confirm
-        checked=confirm(state,release,selector,region,cfg,kind,links,groups)
-        if isinstance(checked,ContentRequired):return checked
-        if not checked:return None
+    from .relation_markers import confirm
+    checked=confirm(state,release,selector,region,cfg,kind,links,groups)
+    if isinstance(checked,ContentRequired):return checked
+    if not checked:return None
     # Coverage checks may refine an incomplete proposal. Completion still
     # requires nonempty operands; no probe can license an empty proposition.
     if not groups or any(not group for group in groups):return None
@@ -88,7 +83,8 @@ def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof
            ['part '+str(i+1) for i in range(len(groups))])
     description='; '.join(name+': '+part for name,part in zip(names,parts))
     option={'candidate_id':'PARTITION','relation':kind,'operands':[[t.token_id for t in g] for g in groups],
-        'marker_refs':[t.token_id for t in markers],'relation_proof':proof,
+        'marker_refs':[t.token_id for t in tokens if t in markers or t.token_id in shared_refs],
+        'shared_functions':list(shared_functions),'relation_proof':proof,
         'label':'Proposed split — '+description+'; outer relation occurrences: '+
         (', '.join('«'+t.span+'» @'+str(t.start) for t in links) or 'none')+'; punctuation outside parts: «'+
         ' '.join(t.span for t in punctuation)+'»'}
@@ -99,12 +95,14 @@ def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof
           'The parent does not need to be a complete standalone sentence. ' if kind=='CONTENT' else '')+
         'The parts are NOT asserted separately: the selected outer relation is applied to them. '
         'Moving words into that relation preserves their meaning; it does not delete negation, modality or a condition. '
-        'The listed outer occurrences need not be adjacent and do not form a new sentence. '
-        'Words expressing the outer relation must be outside the parts, '
+        'The listed outer occurrences need not be adjacent and do not form a new sentence. '+
+        ('The licensed occurrence has BOTH a quantifier function and a bound-mention function: '+
+         ', '.join(t.span for t in tokens if t.token_id in shared_refs)+'. Preserve both functions; do not create a witness. ' if shared_refs else '')+
+        'Other words expressing the outer relation must be outside the parts, '
         'including words introducing a condition or consequence. Punctuation may separate or enclose the parts. '
         'An implicit relation needs no linking word. Choose the split if it preserves the meaning; '
         'answer 0 if words have been assigned to the wrong part, and ? if the text does not decide.')
-    return (markers,result[1]) if result else None
+    return ([t for t in tokens if t in markers or t.token_id in shared_refs],result[1]) if result else None
 
 
 def function_ownership(state,release,selector,region,cfg,kind,groups,*,eligible_refs=None):
@@ -117,7 +115,7 @@ def function_ownership(state,release,selector,region,cfg,kind,groups,*,eligible_
     while True:
         possible=[t for group in groups for t in group if
             (eligible_refs is None or t.token_id in eligible_refs) and
-            any(v.pos in {'PRCL','CONJ'} for v in t.variants)]
+            any(c.isalnum() for c in t.span)]
         if not possible:return groups
         options=[{'candidate_id':'KEEP_ALL','label':'Keep all listed words inside their parts; none expresses the chosen outer relation: '+
             ', '.join('«'+t.span+'» @'+str(t.start) for t in possible)}]
@@ -189,6 +187,15 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child):
     if not result:return block(state,region)
     option,proof=result;kind=option['relation']
     if kind=='LEXICAL':return None
+    if kind=='NOMINAL_DESCRIPTION':
+        from .refinement_boundaries import general_boundary
+        from .component_refinement import _compose_lexical_area
+        boundary=general_boundary(state,release,selector,region,tokens,cfg)
+        if not boundary:return block(state,region,reason='COMPONENT_REFINEMENT_UNRESOLVED')
+        # The relation choice supplies applicability. An ordinary lexical area
+        # never has to accept a relative-clause hypothesis from a word list.
+        return _compose_lexical_area(state,release,selector,region,tokens,
+            {**cfg,'_literal_relation':True,'_selected_refinement':boundary,'_skip_reuse':True},depth=cfg.get('_depth',0),request=request)
     if kind=='CONTENT':return content(state,release,selector,region,tokens,cfg,request,compose_child,proof)
     if kind=='GROUP':
         from .relation_partitions import group as propose

@@ -4,13 +4,16 @@ from .component_policy import _features, compatible
 from .nominal_reference_groups import functional
 
 
-def prepositional_groups(tokens, excluded=()):
+def prepositional_groups(tokens, excluded=(), *, state=None):
     """Recognize PREP plus a typed nominal group, retaining whole PREP readings.
 
     Grounded determiner/identity-function tokens stay inside the group.
     A token with another POS reading requires a closed attachment probe. Multiword
     prepositions and coordination are not flattened by this local constructor.
     """
+    if state is not None:
+        from .nominal_functions import prepared,prepositions
+        if prepared(state,tokens):return prepositions(state,tokens,excluded)
     result={}
     for i, prep in enumerate(tokens):
         variants=[v for v in prep.variants if v.pos=='PREP']
@@ -38,7 +41,8 @@ def role_choices(token, roles, predicate, subject_role, group=None, *, coordinat
     for mv in token.variants:
         if mv.pos not in {'NOUN','NPRO'}: continue
         for role in roles:
-            if not set(mv.cases)&set(role.get('allowed_cases',())): continue
+            if mv.cases and not set(mv.cases)&set(role.get('allowed_cases',())): continue
+            if not mv.cases and mv.origin!='CONTEXTUAL':continue
             if role['role_id']==subject_role and 'QUALITATIVE_GROUP' in mv.features:
                 from .qualitative_quantity import agrees
                 if not agrees(predicate): continue
@@ -58,15 +62,14 @@ def role_choices(token, roles, predicate, subject_role, group=None, *, coordinat
 def nominal_units(state, tokens, assignments, used):
     units={}
     for e,(_,mv,_) in assignments:
-        refs=[e.token_id]; idx=tokens.index(e)-1
-        while idx>=0:
-            adj=tokens[idx]
-            if adj.token_id in used or not (functional(adj) or any(av.pos=='ADJF' and compatible(_features(av),_features(mv))
-                    and set(av.cases)&set(mv.cases) for av in adj.variants)): break
-            used.add(adj.token_id); refs.insert(0,adj.token_id); idx-=1
+        refs=[e.token_id]
+        from .nominal_functions import rows
+        for row in rows(state,tokens,'REFERENCE'):
+            if row['head_ref']==e.token_id:
+                refs=list(row['anchor_refs']);used.update(row['function_refs'])
         start=next(t.start for t in tokens if t.token_id==refs[0])
         units[e.token_id]={'head_ref':e.token_id,'anchor_refs':refs,
-            'surface':state.text[start:e.end],
+            'surface':' '.join(t.span for t in tokens if t.token_id in refs),
             'mention_ref':e.token_id if len(refs)==1 else 'mention:'+digest(refs)}
     return units
 

@@ -35,8 +35,16 @@ def freeze_context(store, release, source_tags, *, active_refs=None):
                             and s.get('source_tag')==binding.get('source_tag'))
             if not supports: continue
             uid=binding['target_ref']
-            if not store._store.has_uid(uid) or store._store.kind_of(uid).value!='M': continue
+            if not store._store.has_uid(uid) or store._store.kind_of(uid).value not in {'M','K'}: continue
             entity=store._store.get_element_any_domain(uid)
+            if store._store.kind_of(uid).value=='K':
+                members=sorted(m.uid for m in entity.members)
+                if uid!='K:'+digest(members) or len(members)<2:continue
+                rows.append({'entity_ref':uid,'reference_kind':'GROUP','binding_ref':bid,
+                    'source_tag':binding['source_tag'],'premise_support_refs':supports,
+                    'features':[{'number':'plur'}],'member_refs':members,'label':'Previously established group '+uid})
+                if len(rows)>256:raise ValueError('COREF_CANDIDATE_LIMIT')
+                continue
             if entity.meta.get('relative_place') is not None:
                 continue  # Typed places are not untyped actor/person candidates.
             name=entity.properties.get('name')
@@ -91,6 +99,7 @@ def mention_features(evidence):
 def prepare_references(state, release):
     policies=release.resources.get('CorefPolicy',{}).get('entries',())
     policy=policies[0] if len(policies)==1 else None
+    from .discourse_scopes import for_mention
     context=state.observation.get('coreference_context',[])
     explicit=state.observation.get('entity_bindings',{})
     evidence={e.token_id:e for e in state.evidence}; slots={}; local_targets={}
@@ -116,19 +125,40 @@ def prepare_references(state, release):
         candidates={}; rejected=[]
         persons={v.person for v in ev.variants if v.pos=='NPRO'}
         contextual='user_ref' if persons=={'1st'} else 'self_ref' if persons=={'2nd'} else None
-        contextual_ref=state.observation.get('context_snapshot',{}).get(contextual) if contextual else None
+        scope=for_mention(state,tid)
+        from .regions import delimiter_scopes
+        quoted=bool(scope and scope.get('quoted')) or any(q['opening'] in {'«','“','„','"'} and
+            q['source_range'][0]<=ev.start<q['source_range'][1] for q in delimiter_scopes(state.text))
+        speaker=scope.get('speaker_mention' if contextual=='user_ref' else 'addressee_mention') if scope and contextual else None
+        contextual_ref=None
+        discourse_binding=None
+        if speaker:
+            units=[f.semantic.get('lexical_units',{}).get(speaker,{}) for f in state.frames if speaker in f.argument_token_refs]
+            unit=units[0] if units else {};mention=unit.get('mention_ref',speaker)
+            contextual_ref=explicit.get(mention) or 'M:'+digest([state.source_uid,mention])
+            if any(v.pos=='NPRO' for v in evidence[speaker].variants) and mention not in explicit:
+                # A speaker slot is established, its identity is not. Defer
+                # the deictic binding until that slot resolves; never create
+                # a fresh person from the speaker's unresolved pronoun.
+                state.observation.setdefault('deictic_dependencies',{})[tid]=speaker
+                contextual_ref=None
+            if contextual_ref:local_targets.setdefault(contextual_ref,{'mention_ref':mention,'label':unit.get('surface',evidence[speaker].span)})
+            discourse_binding={'local_anchor_ref':speaker,'source_scope_ref':scope['scope_ref']}
+        elif contextual and not quoted and not (scope and scope.get('parent_refs')) and state.observation.get('batch_kind')!='DOCUMENT':
+            contextual_ref=state.observation.get('context_snapshot',{}).get(contextual)
         if contextual_ref:
             candidates[contextual_ref]=[{'entity_ref':contextual_ref,'binding_ref':'context:'+contextual,
-                'source_kind':'CONTEXT','premise_support_refs':[],'features':mention_features(ev),'label':contextual_ref}]
-        if policy and not contextual_ref:
+                'source_kind':'CONTEXT','premise_support_refs':[],'features':mention_features(ev),'label':contextual_ref,
+                **(discourse_binding or {})}]
+        if policy and not contextual_ref and not contextual:
             event_rules=[r for r in policy['event_anaphora_rules'] if re.fullmatch(r['pattern'],ev.span,re.I)]
             roles={f.semantic.get('proposed_roles',{}).get(tid) for f in state.frames if tid in f.argument_token_refs}
             event_rules=[r for r in event_rules if set(r['role_ids']) & roles]
             local=[]
             for antecedent in sorted(arguments,key=lambda t:evidence[t].start):
                 a=evidence[antecedent]
-                if a.start>=ev.start or not any(v.pos=='NOUN' for v in a.variants) or any(v.pos=='NPRO' for v in a.variants): continue
-                if sum(1 for x in state.evidence if a.start<=x.start<ev.start)>policy['window_size']: continue
+                if a.token_id==tid or not any(v.pos=='NOUN' for v in a.variants) or any(v.pos=='NPRO' for v in a.variants): continue
+                if sum(1 for x in state.evidence if min(a.start,ev.start)<=x.start<max(a.start,ev.start))>policy['window_size']: continue
                 units=[f.semantic.get('lexical_units',{}).get(antecedent,{}) for f in state.frames if antecedent in f.argument_token_refs]
                 unit=units[0] if units else {}
                 mention=unit.get('mention_ref',antecedent)
@@ -139,9 +169,11 @@ def prepare_references(state, release):
                     'premise_support_refs':list(state.observation.get('entity_binding_grounds',{}).get(mention,[])),
                     'features':mention_features(a),'label':unit.get('surface',a.span),
                     'local_anchor_ref':antecedent})
-            for candidate in [*context,*local]:
+            from .bound_references import candidates as bound_candidates
+            from .group_references import candidates as group_candidates
+            for candidate in [*context,*local,*bound_candidates(state,tid),*group_candidates(state,tid,policy['window_size'])]:
                 if candidate.get('reference_kind')=='EVENT':
-                    if not any((not r.get('template_refs') or candidate['template_ref'] in r['template_refs'])
+                    if event_rules and not any((not r.get('template_refs') or candidate['template_ref'] in r['template_refs'])
                                and (not r.get('temporal_modes') or candidate['temporal_mode'] in r['temporal_modes']) for r in event_rules):
                         continue
                 elif event_rules:
@@ -152,8 +184,8 @@ def prepare_references(state, release):
                 if not _compatible(mention_features(ev),candidate['features'],policy['hard_features']):
                     rejected.append({'entity_ref':uid,'reason':'HARD_FEATURE_CONFLICT'}); continue
                 candidates.setdefault(uid,[]).append(candidate)
-        elif not contextual_ref:
-            state.diag('RESOURCE_MISSING','CorefPolicy: '+tid)
+        elif not contextual_ref and tid not in state.observation.get('deictic_dependencies',{}):
+            state.diag('DEICTIC_REFERENCE_UNKNOWN' if contextual else 'RESOURCE_MISSING','CorefPolicy: '+tid)
         def rank(uid):
             rows=candidates[uid]; criteria=[]
             for criterion in policy.get('ranking_criteria',()) if policy else ():
@@ -178,14 +210,30 @@ def resolve_references(state, slots, selector, release):
     explicit=dict(state.observation.get('entity_bindings',{}))
     grounds=deepcopy(state.observation.get('entity_binding_grounds',{})); unresolved=[]
     evidence={e.token_id:e for e in state.evidence}
-    for tid,candidates in slots.items():
+    dependencies=state.observation.get('deictic_dependencies',{})
+    ordered=[];visiting=set();done=set()
+    def visit(tid):
+        if tid in done:return
+        if tid in visiting:return  # Cycles remain unresolved; they provide no ground.
+        visiting.add(tid)
+        if dependencies.get(tid) in slots:visit(dependencies[tid])
+        visiting.remove(tid);done.add(tid);ordered.append(tid)
+    for tid in slots:visit(tid)
+    for tid in ordered:
+        candidates=slots[tid]
+        parent=dependencies.get(tid)
+        if parent in explicit:
+            uid=explicit[parent]
+            candidates={uid:[{'entity_ref':uid,'binding_ref':'discourse:'+parent,'source_kind':'CONTEXT',
+                'features':mention_features(evidence[tid]),'label':'Selected speaker/addressee',
+                'premise_support_refs':grounds.get(parent,[])}]}
         from .probe_windows import enter
         enter(state,selector,(evidence[tid].start,evidence[tid].end))
         ids=tuple(candidates); d=Decision('reference',tid,ids)
         state.decisions[tid+'|reference']=d
         for uid,rows in candidates.items():
             if any(r.get('source_kind')=='CONTEXT' for r in rows):
-                d.grounds.append(Ground('D','explicit interaction-context speaker/addressee Ref',uid))
+                d.grounds.append(Ground('D','explicit discourse or interaction-context participant binding',uid))
             elif any(r.get('local_anchor_ref') for r in rows):
                 d.grounds.append(Ground('D','same-observation antecedent anchors: '+json.dumps(sorted(r['local_anchor_ref'] for r in rows if r.get('local_anchor_ref'))),uid))
             else:
@@ -195,43 +243,23 @@ def resolve_references(state, slots, selector, release):
         if selected_by_speaker is not None:
             d.selected=(selected_by_speaker,); d.outcome='RESOLVED'
             d.grounds.append(Ground('C','durable explicit speaker disambiguation: '+state.observation['clarification_selection_ref'], selected_by_speaker))
-        elif len(ids)==1 and (tid not in state.observation.get('coreference_context_by_mention',{})
-                             or any(r.get('source_kind')=='CONTEXT' for r in candidates[ids[0]])):
-            d.selected=ids; d.outcome='RESOLVED'; d.grounds.append(Ground('D','one compatible grounded antecedent',ids[0]))
+        elif len(ids)==1 and any(r.get('source_kind')=='CONTEXT' for r in candidates[ids[0]]):
+            d.selected=ids; d.outcome='RESOLVED'; d.grounds.append(Ground('D','explicit discourse speaker/addressee binding',ids[0]))
         elif ids and not state.budget.llm_exhausted:
-            local_ids={'reference:'+str(i):uid for i,uid in enumerate(ids)}
-            relations={cid:Relation(cid,candidates[uid][0]['label'],1,('REFERENT',),
-                       json.dumps({'features':[r['features'] for r in candidates[uid]],
-                                   'reference_kind':candidates[uid][0].get('reference_kind','ENTITY')},ensure_ascii=False))
-                       for cid,uid in local_ids.items()}
-            schema=DecisionSchema(release.sha256,relations)
-            context_span=state.text
-            if state.region_forest is not None:
-                from .regions import reference_goal
-                start,end=reference_goal(state,tid)['source_range']
-                context_span=state.text[start:end]
-            if len(context_span)>2048 or len(ids)>32:
-                d.outcome='UNRESOLVED'; state.diag('COREF_PROBE_LIMIT',tid)
-                unresolved.append(tid)
-                continue
-            prompt=build_selector_prompt(selector,slot_id='reference',frame_id=tid,context_span=context_span,
-                mentions={tid:evidence[tid].span},schema=schema,candidates=tuple(local_ids),contextual_statements=state.context_facts)
-            try:
-                state.budget.spend_llm(); raw=selector.select(prompt)
-                reply=validate_selector_reply(selector,raw,schema,tuple(local_ids),allowed=frozenset(local_ids))
-                from .selection_prompt import record_prompt
-                record_prompt(d,prompt)
-                if getattr(prompt,'selection_audit',None):
-                    d.history[-1]['candidates']=[local_ids[c] for c in local_ids]
-                d.raw_response=raw; d.selector_outcome=reply.outcome; d.selected=tuple(local_ids[c] for c in reply.selected)
-                d.outcome='RESOLVED' if reply.outcome=='ONE_SELECTED' else 'AMBIGUOUS' if reply.outcome=='MULTIPLE_ADMISSIBLE' else 'INSUFFICIENT_CONTEXT' if reply.outcome=='INSUFFICIENT_CONTEXT' else 'UNRESOLVED'
-                if d.outcome=='RESOLVED': d.grounds.append(Ground('M','bounded antecedent selection',d.selected[0]))
-            except IntegrityError:
-                raise
-            except BudgetExceeded as exc:
-                d.outcome='UNRESOLVED'; state.diag(exc.code,tid)
-            except Exception as exc:
-                d.outcome='UNRESOLVED'; state.diag('COREF_SELECTION_FAILED',type(exc).__name__)
+            from .component_probe import _probe
+            from .regions import reference_goal
+            bounds=reference_goal(state,tid)['source_range'] if state.region_forest is not None else (0,len(state.text))
+            if bounds[1]-bounds[0]>2048 or len(ids)>32:
+                d.outcome='UNRESOLVED';state.diag('COREF_PROBE_LIMIT',tid)
+                unresolved.append(tid);continue
+            prior_grounds=list(d.grounds)
+            options=[{'candidate_id':uid,'label':rows[0]['label']+'; type='+rows[0].get('reference_kind','ENTITY')}
+                     for uid,rows in candidates.items()]
+            _probe(state,selector,release,tid+'|reference','reference',options,
+                state.text[slice(*bounds)],bounds,
+                question='What does «'+evidence[tid].span+'» @'+str(evidence[tid].start)+' refer to? '
+                'A sole candidate in this bounded window is not proof. Choose only a source-supported reference; otherwise use ?.')
+            d=state.decisions[tid+'|reference'];d.grounds[:0]=prior_grounds
         else:
             d.outcome='UNRESOLVED'
         if d.outcome=='RESOLVED':
@@ -239,7 +267,11 @@ def resolve_references(state, slots, selector, release):
             # One concrete grounding path suffices; independent alternatives
             # remain separate candidate evidence, not an all-of dependency.
             row=min(candidates[uid],key=lambda r:(tuple(r['premise_support_refs']),r['binding_ref']))
-            if row.get('reference_kind')=='EVENT':
+            if row.get('reference_kind')=='GROUP':
+                state.observation.setdefault('group_reference_bindings',{})[tid]=deepcopy(row)
+            elif row.get('reference_kind')=='BOUND_VARIABLE':
+                state.observation.setdefault('bound_reference_bindings',{})[tid]=deepcopy(row)
+            elif row.get('reference_kind')=='EVENT':
                 state.observation.setdefault('event_bindings',{})[tid]=uid
             else:
                 explicit[tid]=uid

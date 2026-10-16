@@ -18,7 +18,9 @@ def bundles(state,release,selector,region,tokens,frame,cfg):
     if missing or deps: frame.semantic['structural_unresolved']=True  # must discharge every pending description
     try:
         from .nominal_prefix_descriptions import units as prefix_units
-        units=list(prefix_units(tokens,missing,frame)) if cfg.get('nominal_host_role') else []
+        # All hosts compete; an adjacent prefix must not suppress the same
+        # description's attachment to a different nominal.
+        units=[]
         from .nominal_residual_descriptions import units as residual_units
         if cfg.get('nominal_host_role'):units.extend(list(residual_units(tokens,missing,frame,units)))
         from .implicit_descriptions import units as implicit_units
@@ -27,7 +29,7 @@ def bundles(state,release,selector,region,tokens,frame,cfg):
         quantities=list(quantity_units(tokens,missing,frame))
         units.extend(quantities)
         quantity_refs={t for u in quantities for t in u['refs']}
-        for group in prepositional_groups(tokens).values():
+        for group in prepositional_groups(tokens,state=state).values():
             if set(group['anchor_refs'])<=missing: units.extend(nominal_variants(tokens,group,limit))
         for e in tokens:
             if e.token_id in missing and e.token_id not in quantity_refs:
@@ -129,11 +131,19 @@ def materialize(state,region,tokens,original,units,hosts,order,cfg,*,shape=None)
         head=u['entities'][0][0].token_id;host=hosts[head]
         if host!='EVENT':
             f=describe(u['token'],u['variant'],{host:cfg['nominal_host_role'],head:cfg['preposition_nominal_role']})
+            if u.get('function_refs'):
+                refs=u['function_refs'];tid=u['token'].token_id
+                f.semantic['lexical_units'][tid]={'head_ref':tid,'anchor_refs':list(refs),
+                    'surface':' '.join(evidence[r].span for r in refs),'mention_ref':'relation:'+digest(refs)}
             owners[head]=f;pending.append((host,f))
     root=base
     def apply(unit,inner,content=None):
         outer=wrap(inner,region,unit['token'],unit['variant'],cfg['modifier_content_role'],
             entities=unit['entities'],nominal_role=unit.get('nominal_role',cfg['preposition_nominal_role']) if unit['entities'] else None)[-1]
+        if unit.get('function_refs'):
+            refs=unit['function_refs'];tid=unit['token'].token_id
+            outer.semantic['lexical_units'][tid]={'head_ref':tid,'anchor_refs':list(refs),
+                'surface':' '.join(evidence[r].span for r in refs),'mention_ref':'relation:'+digest(refs)}
         if content is not None:
             outer.semantic['proposition_args'][cfg['modifier_content_role']]={'tree':content,'attitude':'UNKNOWN'}
         for e,v in unit['entities']:
