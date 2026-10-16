@@ -1,0 +1,98 @@
+"""Boundary proposals, separate from child composition and ownership validation."""
+from .partition_domain import PartitionProposal,ContentRequired
+
+
+def inputs(domain):
+    return domain.state,domain.release,domain.selector,domain.region,domain.tokens,domain.cfg,domain.kind
+
+
+def unary(domain):
+    from .relation_composition import RELATIONS
+    state,release,selector,region,tokens,cfg,kind=inputs(domain)
+    # Unary function material can be internal ("Ivan NOT arrived"). The
+    # complement owns every remaining token, not just a following suffix.
+    chosen=domain.span(tokens,'structural_introducer',
+        kind+' ('+RELATIONS[kind]+'): select only the complete words expressing this outer relation. '
+        'Include the full linking expression and any conjunction introducing its content. '
+        'Exclude words belonging to a different nested relation, even when adjacent to the outer marker. '
+        'Exclude the content proposition, its subject and predicate. Separating commas may be included; '
+        'do not end early just because the first word already signals the relation.',record_remainder=True,marker=True)
+    if not chosen:return None
+    markers=chosen[0];marker_refs={t.token_id for t in markers}
+    owned=[t for t in tokens if t.token_id not in marker_refs]
+    if kind=='QUERY':
+        markers.extend(t for t in owned if t.span=='?')
+        owned=[t for t in owned if t.span!='?']
+    # Separator ownership is confirmed with the entire partition below.
+    # Quotes, parentheses and question marks are not generic separators.
+    while owned and owned[0].span in {',','.'}:markers.append(owned.pop(0))
+    while owned and owned[-1].span in {',','.'}:markers.append(owned.pop())
+    return PartitionProposal([owned]) if owned else None
+
+
+def binary(domain):
+    from .relation_composition import RELATIONS,function_ownership
+    state,release,selector,region,tokens,cfg,kind=inputs(domain)
+    groups=[]
+    for i in range(2):
+        contract=('antecedent' if i==0 else 'consequent') if kind in {'IMPLIES','COUNTERFACTUAL'} else 'operand '+str(i+1)
+        chosen=domain.span(tokens,'structural_operand_'+str(i+1),
+            kind+' ('+RELATIONS[kind]+'): select the complete '+contract+'. '+
+            ('This is the condition that is sufficient for the other part. ' if contract=='antecedent' else
+             'This is the consequence when the condition holds. ' if contract=='consequent' else '')+
+            'Exclude words linking the two outer parts. Keep any relations nested inside this part.'+
+            (' Already selected part 1: «'+' '.join(t.span for t in groups[0])+'».' if groups else ''),
+            exclude=[t.token_id for g in groups for t in g],
+            covered=[t.token_id for g in groups for t in g],remaining_parts=1-i)
+        if not chosen:return None
+        groups.append(chosen[0])
+    groups=function_ownership(state,release,selector,region,cfg,kind,groups)
+    if groups is None:return None
+    return PartitionProposal(groups)
+
+
+def content(domain):
+    from .relation_composition import function_ownership
+    state,release,selector,region,tokens,cfg,kind=inputs(domain)
+    chosen=domain.span(tokens,'structural_content',
+        'Select the complete dependent proposition: what is said, thought, intended or otherwise taken as content. '
+        'Exclude the parent predicate and its participants, the introducing conjunction, colon, and enclosing '
+        'quotation marks. Start at the first word INSIDE quoted content; retain any operators inside that content.',
+        remaining_parts=1,remaining_contiguous=False)
+    if not chosen:return None
+    body=chosen[0];body_ids={t.token_id for t in body}
+    body_text=' '.join(t.span for t in body)
+    rest=[t for t in tokens if t.token_id not in body_ids]
+    parent_span=domain.span(rest,'structural_parent',
+        'Select the parent predicate with its participants and any other clauses still attached to that parent. '
+        'Selected dependent content: «'+body_text+'». It is already removed from this list. '
+        'Stop at the last parent word, not at the quotation marks or punctuation surrounding the removed content. '
+        'An earlier speaker or predicate must remain in the parent; exclude the introducer of THIS content.',covered=body_ids)
+    if not parent_span:return None
+    parent=parent_span[0]
+    groups=function_ownership(state,release,selector,region,cfg,'CONTENT',[parent,body],
+        eligible_refs={t.token_id for t in parent})
+    if groups is None:return None
+    parent,body=groups
+    from .content_separators import separate
+    parent,separators=separate(state,region,tokens,parent,body)
+    if not parent:return None
+    return PartitionProposal([parent,body],separators)
+
+
+def group(domain):
+    state,release,selector,region,tokens,cfg,kind=inputs(domain)
+    chosen=domain.span(tokens,'structural_group',
+        'Select the complete parenthesized proposition, excluding the outer delimiters.')
+    if not chosen:return None
+    body=chosen[0];refs={t.token_id for t in body};markers=[t for t in tokens if t.token_id not in refs]
+    if [t.span for t in markers if t.span not in {',','.'}]!=['(',')']:
+        return None
+    return PartitionProposal([body])
+
+
+def content_checked(proposal,partition):
+    if proposal.data:
+        accepted=partition and not isinstance(partition,ContentRequired)
+        proposal.data['status']='CONFIRMED' if accepted else 'UNCONFIRMED'
+        if accepted:proposal.data['decision_ref']=partition[1]['decision_ref']

@@ -11,9 +11,10 @@ from test_structural_relation_tasks import run,relation,bounds,content_steps,ato
 def test_content_partition_cannot_discard_an_outer_speaker(tmp_path,monkeypatch,revise):
     text='Иван сказал, что Пётр думал: «Мария пришла».'
     bad=relation('CONTENT')+bounds('structural_content','Мария','пришла')+bounds('structural_parent','Пётр','думал')
-    steps=bad+[('structural_revision','REVISE' if revise else 'DEFER')]
+    steps=bad
     if revise:
-        steps+=content_steps('сказал','Пётр','пришла')+content_steps('думал','Мария','пришла','Пётр','EMBEDDED')+relation('LEXICAL')
+        steps+=content_steps('сказал','Пётр','пришла')[1:]+content_steps('думал','Мария','пришла','Пётр','EMBEDDED')+relation('LEXICAL')
+    else:steps+=[('structural_content_start','?')]
     result,script=run(tmp_path,monkeypatch,text,steps)
     conflicts=[r for r in result['runtime']['ir']['syntax_trace'] if r.get('kind')=='STRUCTURAL_PARTITION_COVERAGE']
     assert conflicts and conflicts[0]['uncovered_token_refs']==['tok:0:4','tok:5:11']
@@ -25,8 +26,9 @@ def test_content_partition_cannot_discard_an_outer_speaker(tmp_path,monkeypatch,
         assert not result['assertions']['ah'] and not result['assertions']['journal']
         assert 'STRUCTURAL_CONTENT_UNCOVERED' in result['diagnostics']['codes']
         assert not any(slot=='structural_partition' for slot,_ in script.calls)
-    revision=next(p for s,p in script.calls if s=='structural_revision')
-    assert 'Uncovered words: «Иван сказал»' in revision
+    assert not any(s=='structural_revision' for s,_ in script.calls)
+    revised=[p for s,p in script.calls if s=='structural_content_start'][1]
+    assert 'local ownership check keeps «Иван» @0, «сказал» @5 in the content' in revised
 
 
 @pytest.mark.parametrize('text,owner,attitude,parent,person',[

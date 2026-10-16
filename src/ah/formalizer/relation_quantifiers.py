@@ -1,20 +1,25 @@
 """Nonnumeric binders selected from source tasks, sharing the binder compiler."""
-from .structural_tasks import choose,span
+from .structural_tasks import choose
 from .composition_tree import expression,InputSlot
 from dataclasses import replace
 from .composition_children import select_child
-from .relation_composition import block,attach_tree,confirm_partition
+from .relation_composition import block,attach_tree
+from .partition_domain import PartitionDomain,PartitionProposal
 
 
 def compose(state,release,selector,region,tokens,cfg,request,compose_child,operator,proof):
-    marker=span(state,release,selector,region,tokens,cfg,'structural_quantifier',
-        operator+': select the nonnumeric quantifier expression only, excluding its nominal restriction.')
-    if not marker:return block(state,region)
-    anchors=marker[0];ids={t.token_id for t in anchors};owned=[t for t in tokens if t.token_id not in ids]
-    if any(v.pos=='NUMR' or 'Anum' in v.features for t in anchors for v in t.variants):
-        return block(state,region,reason='ARITHMETIC_QUANTIFIER_DEFERRED')
-    partition=confirm_partition(state,release,selector,region,tokens,cfg,operator,[owned],proof) if owned else None
-    if not partition:return block(state,region)
+    def propose(domain):
+        marker=domain.span(tokens,'structural_quantifier',
+            operator+': select the nonnumeric quantifier expression only, excluding its nominal restriction.',marker=True)
+        if not marker:return None
+        anchors=marker[0];ids={t.token_id for t in anchors};owned=[t for t in tokens if t.token_id not in ids]
+        if any(v.pos=='NUMR' or 'Anum' in v.features for t in anchors for v in t.variants):
+            state.diag('ARITHMETIC_QUANTIFIER_DEFERRED',region.region_id)
+            return None
+        return PartitionProposal([owned],anchors) if owned else None
+    selected=PartitionDomain(state,release,selector,region,tokens,cfg,operator,proof).resolve(propose)
+    if not selected:return block(state,region)
+    proposal,partition=selected;owned=proposal.groups[0];anchors=proposal.data
     heads=[t for t in owned if any(v.pos in {'NOUN','NPRO'} for v in t.variants)]
     selected=choose(state,release,selector,region,cfg,'structural_binder_head',
         [{'candidate_id':t.token_id,'head_ref':t.token_id,'label':'Bind the nominal «'+t.span+'» @'+str(t.start)} for t in heads],

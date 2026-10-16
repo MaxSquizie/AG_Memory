@@ -69,6 +69,7 @@ MORPH = {'NOUN':'существительное','VERB':'глагол','INFN':'�
 TRACE = {'FEATURE_CHECK_BATCH':'Проверка грамматических признаков',
     'CONTENT_SEPARATOR_OWNERSHIP':'Пунктуация, связывающая родителя с содержанием',
     'STRUCTURAL_PARTITION_COVERAGE':'Слова, оставшиеся без содержательной роли',
+    'STRUCTURAL_BOUNDARY_DOMAIN':'Согласование границ с принадлежностью слов',
     'MORPHOLOGY_DOMAIN_RESTRICTION':'Выбранное морфологическое чтение слова',
     'DISPATCH_COMPLETED':'Диспетчер: задача пересчитана',
     'DISPATCH_REUSED':'Диспетчер: результат сохранён',
@@ -570,6 +571,20 @@ class ReadableInspection:
             out+=paragraph('Разбиение потеряло значимые слова: «'+' '.join(self.word(t) for t in r.get('uncovered_token_refs',()))+
                 ('». Они не могут исчезнуть во вводящем выражении. Нужно расширить родительскую часть или пересмотреть связь; запись вложенной части отдельно заблокирована.' if r.get('relation') in {None,'CONTENT'} else
                  '». Проба отнесла их к описываемому событию или состоянию. Нужно пересмотреть границы содержания; запись неполного выражения заблокирована.'))
+            if r.get('status')=='REPAIRED':
+                out+=paragraph('Это противоречие прежнего разбиения устранено: новые границы сохраняют перечисленные слова в содержании.')
+                out+='<p>'+self.link(r['replacement_decision_ref'],'Проверка исправленного разбиения')+'</p>'
+        elif c=='Трасса' and r.get('kind')=='STRUCTURAL_BOUNDARY_DOMAIN':
+            words=' '.join(self.word(t) for t in r.get('required_content_refs',()))
+            out+=paragraph('В текущем варианте внешней связи «'+OPERATORS.get(r.get('relation'),r.get('relation',''))+'»'+
+                (' слова «'+words+'» должны остаться в содержании.' if words else ' выбраны границы частей.'))
+            out+=paragraph({'RESTRICTED':'Несовместимые границы исключены. Контур запрашивает новые границы, сохраняя выбранную внешнюю связь.',
+                'RESOLVED':'Новое полное разбиение подтверждено. Дочерние части ещё должны пройти собственный разбор.',
+                'PENDING':'Совместимое разбиение не подтверждено. Факт не записывается.',
+                'SELECTED':'Полное разбиение подтверждено; дочерние части проверяются отдельно.'}.get(r.get('status'),'Разбор не завершён.'))
+            out+=paragraph('Это условие только текущего варианта разбора. Оно не становится правилом для слова и не переносится в другую область или связь.')
+            for proof in r.get('constraint_proofs',()):
+                out+='<p>'+self.link(proof['decision_ref'],'Почему слово должно остаться в содержании')+'</p>'
         elif c=='Трасса' and r.get('kind')=='CONTENT_SEPARATOR_OWNERSHIP':
             out+=paragraph('Предложено отнести к связи с вложенным содержанием знаки «'+
                 ' '.join(self.word(t) for t in r.get('separator_refs',()))+'». Родительская часть после этого: «'+
@@ -604,6 +619,7 @@ class ReadableInspection:
             if r.get('alternatives'):out+=table(['Вариант','Выбор'],[[esc(self.task_choice(v)),'Выбран' if v.get('candidate_id')==r.get('selected') else 'Не выбран'] for v in r['alternatives']])
         elif c=='Трасса' and r.get('kind','').startswith('DISPATCH_'):
             names={'COMPOSITION':'Согласование структуры', 'AGREEMENT':'Проверка согласования слов',
+                   'PARTITION':'Согласование границ и принадлежности слов',
                    'MORPHOLOGY':'Выбор морфологических чтений', 'GRAMMAR':'Грамматические варианты',
                    'GOAL_CONTEXT':'Контекст и проверка логических целей'}
             out+=paragraph(names.get(r.get('task_kind'),'Морфология текущей области'))

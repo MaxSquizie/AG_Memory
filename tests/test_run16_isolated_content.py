@@ -78,7 +78,7 @@ def test_boundary_remainder_is_recorded_for_gui_without_changing_the_model_optio
 
 def test_marker_question_is_about_one_word_and_keeps_a_rejection(tmp_path,monkeypatch):
     steps=relation('NOT')+bounds('structural_introducer','Не','не')+[
-        ('relation_marker_role','«каждый»'),('structural_revision','DEFER')]
+        ('relation_marker_role','«каждый»'),('structural_introducer_start','?')]
     result,script=run(tmp_path,monkeypatch,'Не каждый студент мог не сдать экзамен.',steps)
     assert not result['assertions']['ah']
     prompt=next(p for s,p in script.calls if s=='relation_marker_role')

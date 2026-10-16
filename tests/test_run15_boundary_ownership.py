@@ -80,7 +80,7 @@ def test_delimiters_are_not_consumed_when_body_leaves_other_scope_material(text,
 def test_modal_marker_cannot_discard_an_action_after_probe_rejects_its_role(tmp_path,monkeypatch,answer):
     steps=relation('POSSIBLE')+bounds('structural_introducer','можно','прочитать')+[
         ('relation_marker_role',answer)]
-    if answer!='?':steps+=[('structural_revision','DEFER')]
+    if answer!='?':steps+=[('structural_introducer_start','?')]
     result,script=run(tmp_path,monkeypatch,'Книгу можно прочитать.',steps)
     assert not result['assertions']['ah'] and not result['assertions']['journal']
     assert not any(s=='structural_event_head' for s,_ in script.calls)
@@ -101,12 +101,14 @@ def test_infinitive_can_still_express_a_relation_when_its_role_is_confirmed(tmp_
 
 def test_revising_a_marker_restores_the_action_under_negation(tmp_path,monkeypatch):
     steps=relation('NOT')+bounds('structural_introducer','не','прочитал')+[
-        ('relation_marker_role','«прочитал»'),('structural_revision','REVISE')]
-    steps+=relation('NOT')+bounds('structural_introducer','не','не')+[
+        ('relation_marker_role','«прочитал»')]
+    steps+=bounds('structural_introducer','не','не')+[
         ('structural_partition','PARTITION')]+relation('LEXICAL')
     result,script=run(tmp_path,monkeypatch,'Иван не прочитал книгу.',steps)
     assert result['diagnostics']['codes']==[]
     assert result['assertions']['ah']==[{'operator':'NOT','operands':[{
         'predicate':'READ','roles':{'AGENT':{'entity':'ivan'},'THEME':{'entity':'book'}}}]}]
-    revision=next(p for s,p in script.calls if s=='structural_revision')
-    assert 'Uncovered words: «прочитал»' in revision
+    assert not any(s=='structural_revision' for s,_ in script.calls)
+    revised=[p for s,p in script.calls if s=='structural_introducer_start'][1]
+    assert 'local ownership check keeps «прочитал» @8 in the content' in revised
+    assert 'Start at «прочитал»' not in revised

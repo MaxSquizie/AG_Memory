@@ -31,6 +31,6 @@ def confirm(state,release,selector,region,cfg,kind,links,groups):
                 'source_range':list(region.source_range),'relation':kind,'uncovered_token_refs':[ref],
                 'operands':[[t.token_id for t in g] for g in groups],'reason':'CONTENT_INSIDE_RELATION_MARKER',
                 'decision_ref':result[1]['decision_ref']})
-            state.diag('STRUCTURAL_MARKER_CONTENT',region.region_id)
-            return False
+            from .partition_domain import ContentRequired
+            return ContentRequired((ref,),'CONTENT_INSIDE_RELATION_MARKER',result[1])
     return True

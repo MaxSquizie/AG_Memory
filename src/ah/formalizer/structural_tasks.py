@@ -79,10 +79,18 @@ def licensed(state,proof,**expected):
     return False
 
 
-def span(state,release,selector,region,tokens,cfg,slot,question,*,exclude=(),record_remainder=False):
+def span(state,release,selector,region,tokens,cfg,slot,question,*,exclude=(),record_remainder=False,admissible=None):
     """Every source token boundary is reachable; no punctuation whitelist."""
     forbidden=set(exclude)
     eligible=[(i,t) for i,t in enumerate(tokens) if t.token_id not in forbidden]
+    # A caller may propagate a proven, branch-local ownership requirement.
+    # Remove a start only when every endpoint violates that requirement.
+    def endpoints(a):
+        for b in range(a,len(tokens)):
+            if tokens[b].token_id in forbidden:break
+            if admissible is None or admissible(tokens[a:b+1]):yield b
+    if admissible is not None:
+        eligible=[(i,t) for i,t in eligible if next(endpoints(i),None) is not None]
     rejected=set()
     while len(rejected)<len(eligible):
         starts=({'candidate_id':'start:'+t.token_id,'label':'Start at «'+t.span+'» @'+str(t.start),
@@ -92,8 +100,7 @@ def span(state,release,selector,region,tokens,cfg,slot,question,*,exclude=(),rec
         if start is None:return None
         a=start[0]['index']
         def ends():
-            for b in range(a,len(tokens)):
-                if tokens[b].token_id in forbidden:break
+            for b in endpoints(a):
                 yield {'candidate_id':'end:'+tokens[b].token_id,'index':b+1,
                     **({'boundary_end_ref':tokens[b].token_id,
                         'selected_refs':[t.token_id for t in tokens[a:b+1]],

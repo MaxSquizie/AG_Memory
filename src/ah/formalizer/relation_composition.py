@@ -8,7 +8,8 @@ from dataclasses import replace
 from .canonical_ledger import digest
 from .composition_tree import InputSlot,expression,internalize,leaves
 from .composition_children import select_child
-from .structural_tasks import choose,span
+from .structural_tasks import choose
+from .partition_domain import ContentRequired,PartitionDomain
 import unicodedata
 
 
@@ -72,11 +73,12 @@ def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof
                 'uncovered_token_refs':[t.token_id for t in unowned],
                 'operands':[[t.token_id for t in g] for g in groups],
                 'reason':'LEXICAL_CONTENT_OUTSIDE_PARTS'})
-            state.diag('STRUCTURAL_CONTENT_UNCOVERED',region.region_id)
-            return None
+            return ContentRequired(tuple(t.token_id for t in unowned),'LEXICAL_CONTENT_OUTSIDE_PARTS')
     else:
         from .relation_markers import confirm
-        if not confirm(state,release,selector,region,cfg,kind,links,groups):return None
+        checked=confirm(state,release,selector,region,cfg,kind,links,groups)
+        if isinstance(checked,ContentRequired):return checked
+        if not checked:return None
     names=(['parent clause with a content slot', 'content filling that slot'] if kind=='CONTENT' else
            ['condition','consequence'] if kind in {'IMPLIES','COUNTERFACTUAL'} else
            ['restriction and whole body'] if kind in {'FORALL','EXISTS'} else
@@ -186,13 +188,10 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child):
     if kind=='LEXICAL':return None
     if kind=='CONTENT':return content(state,release,selector,region,tokens,cfg,request,compose_child,proof)
     if kind=='GROUP':
-        chosen=span(state,release,selector,region,tokens,cfg,'structural_group',
-            'Select the complete parenthesized proposition, excluding the outer delimiters.')
-        if not chosen:return block(state,region)
-        body=chosen[0];refs={t.token_id for t in body};markers=[t for t in tokens if t.token_id not in refs]
-        if [t.span for t in markers if t.span not in {',','.'}]!=['(',')']:
-            return block(state,region)
-        if not confirm_partition(state,release,selector,region,tokens,cfg,kind,[body],proof):return block(state,region)
+        from .relation_partitions import group as propose
+        selected=PartitionDomain(state,release,selector,region,tokens,cfg,kind,proof).resolve(propose)
+        if not selected:return block(state,region)
+        body=selected[0].groups[0]
         frames,root=child(state,release,selector,region,body,cfg,compose_child,
             replace(request or InputSlot(),inside_attitude=True),'GROUP content')
         if root is None:return block(state,region,frames)
@@ -204,22 +203,10 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child):
         from .relation_quantifiers import compose as quantified
         return quantified(state,release,selector,region,tokens,cfg,request,compose_child,kind,proof)
     if kind in BINARY:
-        groups=[]
-        for i in range(2):
-            contract=('antecedent' if i==0 else 'consequent') if kind in {'IMPLIES','COUNTERFACTUAL'} else 'operand '+str(i+1)
-            chosen=span(state,release,selector,region,tokens,cfg,'structural_operand_'+str(i+1),
-                kind+' ('+RELATIONS[kind]+'): select the complete '+contract+'. '+
-                ('This is the condition that is sufficient for the other part. ' if contract=='antecedent' else
-                 'This is the consequence when the condition holds. ' if contract=='consequent' else '')+
-                'Exclude words linking the two outer parts. Keep any relations nested inside this part.'+
-                (' Already selected part 1: «'+' '.join(t.span for t in groups[0])+'».' if groups else ''),
-                exclude=[t.token_id for g in groups for t in g])
-            if not chosen:return block(state,region)
-            groups.append(chosen[0])
-        groups=function_ownership(state,release,selector,region,cfg,kind,groups)
-        if groups is None:return block(state,region)
-        partition=confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof)
-        if not partition:return block(state,region)
+        from .relation_partitions import binary as propose
+        selected=PartitionDomain(state,release,selector,region,tokens,cfg,kind,proof).resolve(propose)
+        if not selected:return block(state,region)
+        proposal,partition=selected;groups=proposal.groups
         frames=[];operands=[]
         for group in groups:
             slot=request or InputSlot()
@@ -231,26 +218,10 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child):
         tree={'operator':kind,'operands':operands,'anchor_refs':[t.token_id for t in partition[0]]}
         attach_tree(frames,tree,region)
     else:
-        # Unary function material can be internal ("Ivan NOT arrived"). The
-        # complement owns every remaining token, not just a following suffix.
-        chosen=span(state,release,selector,region,tokens,cfg,'structural_introducer',
-            kind+' ('+RELATIONS[kind]+'): select only the complete words expressing this outer relation. '
-            'Include the full linking expression and any conjunction introducing its content. '
-            'Exclude words belonging to a different nested relation, even when adjacent to the outer marker. '
-            'Exclude the content proposition, its subject and predicate. Separating commas may be included; '
-            'do not end early just because the first word already signals the relation.',record_remainder=True)
-        if not chosen:return block(state,region)
-        markers=chosen[0];marker_refs={t.token_id for t in markers}
-        owned=[t for t in tokens if t.token_id not in marker_refs]
-        if kind=='QUERY':
-            markers.extend(t for t in owned if t.span=='?')
-            owned=[t for t in owned if t.span!='?']
-        # Separator ownership is confirmed with the entire partition below.
-        # Quotes, parentheses and question marks are not generic separators.
-        while owned and owned[0].span in {',','.'}:markers.append(owned.pop(0))
-        while owned and owned[-1].span in {',','.'}:markers.append(owned.pop())
-        if not owned or not confirm_partition(state,release,selector,region,tokens,cfg,kind,[owned],proof):
-            return block(state,region)
+        from .relation_partitions import unary as propose
+        selected=PartitionDomain(state,release,selector,region,tokens,cfg,kind,proof).resolve(propose)
+        if not selected:return block(state,region)
+        proposal,partition=selected;owned=proposal.groups[0];markers=partition[0]
         slot=request or InputSlot()
         slot=replace(slot,surrounding_relations=(*slot.surrounding_relations,kind))
         governors=[t for t in markers if any(v.pos=='ADJS' or v.pos=='VERB' and v.mood!='imperative' for v in t.variants)]
@@ -280,33 +251,12 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child):
 
 
 def content(state,release,selector,region,tokens,cfg,request,compose_child,proof):
-    chosen=span(state,release,selector,region,tokens,cfg,'structural_content',
-        'Select the complete dependent proposition: what is said, thought, intended or otherwise taken as content. '
-        'Exclude the parent predicate and its participants, the introducing conjunction, colon, and enclosing '
-        'quotation marks. Start at the first word INSIDE quoted content; retain any operators inside that content.')
-    if not chosen:return block(state,region)
-    body=chosen[0];body_ids={t.token_id for t in body}
+    from .relation_partitions import content as propose,content_checked
+    selected=PartitionDomain(state,release,selector,region,tokens,cfg,'CONTENT',proof).resolve(propose,content_checked)
+    if not selected:return block(state,region)
+    proposal,partition=selected;parent,body=proposal.groups
     body_text=' '.join(t.span for t in body)
-    rest=[t for t in tokens if t.token_id not in body_ids]
-    parent_span=span(state,release,selector,region,rest,cfg,'structural_parent',
-        'Select the parent predicate with its participants and any other clauses still attached to that parent. '
-        'Selected dependent content: «'+body_text+'». It is already removed from this list. '
-        'Stop at the last parent word, not at the quotation marks or punctuation surrounding the removed content. '
-        'An earlier speaker or predicate must remain in the parent; exclude the introducer of THIS content.')
-    if not parent_span:return block(state,region)
-    parent=parent_span[0]
-    groups=function_ownership(state,release,selector,region,cfg,'CONTENT',[parent,body],
-        eligible_refs={t.token_id for t in parent})
-    if groups is None:return block(state,region)
-    parent,body=groups
-    from .content_separators import separate
-    parent,separators=separate(state,region,tokens,parent,body)
-    if not parent:return block(state,region)
-    partition=confirm_partition(state,release,selector,region,tokens,cfg,'CONTENT',[parent,body],proof)
-    if separators:
-        separators['status']='CONFIRMED' if partition else 'UNCONFIRMED'
-        if partition:separators['decision_ref']=partition[1]['decision_ref']
-    if not partition:return block(state,region)
+    body_ids={t.token_id for t in body}
     owners=[t for t in parent if any(v.pos in {'VERB','INFN','ADJF','ADJS','NOUN'} for v in t.variants)]
     source_parts={'content_refs':[t.token_id for t in body],'parent_refs':[t.token_id for t in parent]}
     owner_choice=choose(state,release,selector,region,cfg,'structural_owner',
