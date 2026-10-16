@@ -1,0 +1,750 @@
+{
+  "baseline": "606f96e6a535e0ef5b0f3c3084b32449526e227e",
+  "current_capture": {
+    "method": "temporary wrapper of _live_probe; existing scripted tests; no live model",
+    "pytest_nodes": [
+      "tests/test_structural_relation_tasks.py::test_recursive_propositions_and_quotes",
+      "tests/test_structural_relation_tasks.py::test_oov_role_is_explicitly_licensed",
+      "tests/test_structural_relation_tasks.py::test_temporal_relations_accept_finite_and_nominal_children"
+    ],
+    "result": "5 passed in 4.22s",
+    "calls": 164,
+    "slots": 30,
+    "calls_with_identical_labels": 1,
+    "selected_examples": [
+      {
+        "source": "Флырка пришла.",
+        "slot": "structural_oov_function",
+        "key": "region:e81628831290a46e2f63a9f334d80cc651dcd1144e0449debbd873958c23ab2d|task:a2719b8ec712987f00da1181070c72c2d9890270cbd4e694b26803281a3aea1e",
+        "context": "Флырка пришла.",
+        "question": "Which grammatical function does unknown source word «Флырка» have in the current relation? Choose only its function. The consuming relation will resolve features if they matter. Select every supported option on THIS page; 0 rejects this page, ? means unknown.",
+        "options": [
+          {
+            "candidate_id": "NOUN",
+            "label": "NOUN: grammatical function; unknown lemma and features stay unknown"
+          },
+          {
+            "candidate_id": "NPRO",
+            "label": "NPRO: grammatical function; unknown lemma and features stay unknown"
+          },
+          {
+            "candidate_id": "ADJF",
+            "label": "ADJF: grammatical function; unknown lemma and features stay unknown"
+          },
+          {
+            "candidate_id": "ADJS",
+            "label": "ADJS: grammatical function; unknown lemma and features stay unknown"
+          },
+          {
+            "candidate_id": "COMP",
+            "label": "COMP: grammatical function; unknown lemma and features stay unknown"
+          },
+          {
+            "candidate_id": "VERB",
+            "label": "VERB: grammatical function; unknown lemma and features stay unknown"
+          },
+          {
+            "candidate_id": "INFN",
+            "label": "INFN: grammatical function; unknown lemma and features stay unknown"
+          },
+          {
+            "candidate_id": "PRTF",
+            "label": "PRTF: grammatical function; unknown lemma and features stay unknown"
+          },
+          {
+            "candidate_id": "PRTS",
+            "label": "PRTS: grammatical function; unknown lemma and features stay unknown"
+          },
+          {
+            "candidate_id": "GRND",
+            "label": "GRND: grammatical function; unknown lemma and features stay unknown"
+          },
+          {
+            "candidate_id": "NUMR",
+            "label": "NUMR: grammatical function; unknown lemma and features stay unknown"
+          },
+          {
+            "candidate_id": "ADVB",
+            "label": "ADVB: grammatical function; unknown lemma and features stay unknown"
+          },
+          {
+            "candidate_id": "PRED",
+            "label": "PRED: grammatical function; unknown lemma and features stay unknown"
+          },
+          {
+            "candidate_id": "PREP",
+            "label": "PREP: grammatical function; unknown lemma and features stay unknown"
+          },
+          {
+            "candidate_id": "CONJ",
+            "label": "CONJ: grammatical function; unknown lemma and features stay unknown"
+          },
+          {
+            "candidate_id": "PRCL",
+            "label": "PRCL: grammatical function; unknown lemma and features stay unknown"
+          },
+          {
+            "candidate_id": "INTJ",
+            "label": "INTJ: grammatical function; unknown lemma and features stay unknown"
+          }
+        ],
+        "prompt": "Read the source and answer the question about its meaning or grammar. Options are proposals, not facts. Use only the supplied text and context; do not invent identities or events. You are interpreting what is said, not checking whether it happened.\nWhich grammatical function does unknown source word «Флырка» have in the current relation? Choose only its function. The consuming relation will resolve features if they matter. Select every supported option on THIS page; 0 rejects this page, ? means unknown.\n\nDecision slot: structural_oov_function\nContext span: Флырка пришла.\nOptions:\n1. NOUN: grammatical function; unknown lemma and features stay unknown\n2. NPRO: grammatical function; unknown lemma and features stay unknown\n3. ADJF: grammatical function; unknown lemma and features stay unknown\n4. ADJS: grammatical function; unknown lemma and features stay unknown\n5. COMP: grammatical function; unknown lemma and features stay unknown\n6. VERB: grammatical function; unknown lemma and features stay unknown\n7. INFN: grammatical function; unknown lemma and features stay unknown\n8. PRTF: grammatical function; unknown lemma and features stay unknown\n9. PRTS: grammatical function; unknown lemma and features stay unknown\n10. GRND: grammatical function; unknown lemma and features stay unknown\n11. NUMR: grammatical function; unknown lemma and features stay unknown\n12. ADVB: grammatical function; unknown lemma and features stay unknown\n13. PRED: grammatical function; unknown lemma and features stay unknown\n14. PREP: grammatical function; unknown lemma and features stay unknown\n15. CONJ: grammatical function; unknown lemma and features stay unknown\n16. PRCL: grammatical function; unknown lemma and features stay unknown\n17. INTJ: grammatical function; unknown lemma and features stay unknown\nReply with the number of the supported option. If several options remain possible, list their numbers separated by commas. Insufficient context: ?\nNo candidate fits: 0\nOne line, no spaces. No JSON or explanation.",
+        "selected": "NOUN"
+      },
+      {
+        "source": "Иван сказал, что Пётр думал, что Мария пришла.",
+        "slot": "structural_relation",
+        "key": "region:821ba0d5a7af9080bac4de4af1f8f923f4def6952b8c69f3980aa9d5517137e8|task:86bffa9efe984a435883f7f2fab1590d0e6165265be12be4b9e76b6c7999cd53",
+        "context": "Иван сказал, что Пётр думал, что Мария пришла.",
+        "question": "Classify ONLY the target words. Context explains their meaning but is not part of this choice. Choose the outermost relation expressed inside the target; inner relations are handled later. Choose one lexical predication when these words describe one event or state, even if the surrounding text asks about it or makes it possible. The content option requires both the parent predicate and dependent content to be present in this text. Numeric quantification is deferred. Select every supported option on THIS page; 0 rejects this page, ? means unknown.",
+        "options": [
+          {
+            "candidate_id": "LEXICAL",
+            "label": "One lexical predication or nominal description; no logical operator or dependent clause inside the target. A separately supplied content slot may remain open"
+          },
+          {
+            "candidate_id": "NOMINAL_DESCRIPTION",
+            "label": "A parent clause contains a nominal described by another clause or predicative phrase inside this target"
+          },
+          {
+            "candidate_id": "NOT",
+            "label": "Negation of a proposition (not lexical opposition)"
+          },
+          {
+            "candidate_id": "POSSIBLE",
+            "label": "Possibility or ability; does not assert occurrence"
+          },
+          {
+            "candidate_id": "NECESSARY",
+            "label": "Necessity or obligation; preserve its scope"
+          },
+          {
+            "candidate_id": "AND",
+            "label": "Both propositions hold"
+          },
+          {
+            "candidate_id": "OR",
+            "label": "At least one proposition holds; inclusive alternative"
+          },
+          {
+            "candidate_id": "XOR",
+            "label": "Exactly one alternative holds"
+          },
+          {
+            "candidate_id": "IMPLIES",
+            "label": "Conditional: antecedent implies consequent; direction must be selected"
+          },
+          {
+            "candidate_id": "COUNTERFACTUAL",
+            "label": "Counterfactual condition and its consequence; not material implication"
+          },
+          {
+            "candidate_id": "BEFORE",
+            "label": "First event/proposition occurs before the second"
+          },
+          {
+            "candidate_id": "AFTER",
+            "label": "First event/proposition occurs after the second"
+          },
+          {
+            "candidate_id": "DURING",
+            "label": "First event/proposition occurs during the second"
+          },
+          {
+            "candidate_id": "CONTENT",
+            "label": "The target contains BOTH a parent predicate AND its dependent content: speech, thought, quotation or a controlled infinitive"
+          },
+          {
+            "candidate_id": "FORALL",
+            "label": "Universal nonnumeric quantification over a restricted variable"
+          },
+          {
+            "candidate_id": "EXISTS",
+            "label": "Existential nonnumeric quantification; no particular witness identity"
+          },
+          {
+            "candidate_id": "QUERY",
+            "label": "A question about content; no assertion of the content"
+          },
+          {
+            "candidate_id": "GROUP",
+            "label": "Parentheses group an entire proposition without changing its logical meaning"
+          }
+        ],
+        "prompt": "Read the source and answer the question about its meaning or grammar. Options are proposals, not facts. Use only the supplied text and context; do not invent identities or events. You are interpreting what is said, not checking whether it happened.\nClassify ONLY the target words. Context explains their meaning but is not part of this choice. Choose the outermost relation expressed inside the target; inner relations are handled later. Choose one lexical predication when these words describe one event or state, even if the surrounding text asks about it or makes it possible. The content option requires both the parent predicate and dependent content to be present in this text. Numeric quantification is deferred. Select every supported option on THIS page; 0 rejects this page, ? means unknown.\n\nDecision slot: structural_relation\nContext span: Иван сказал, что Пётр думал, что Мария пришла.\nOptions:\n1. One lexical predication or nominal description; no logical operator or dependent clause inside the target. A separately supplied content slot may remain open\n2. A parent clause contains a nominal described by another clause or predicative phrase inside this target\n3. Negation of a proposition (not lexical opposition)\n4. Possibility or ability; does not assert occurrence\n5. Necessity or obligation; preserve its scope\n6. Both propositions hold\n7. At least one proposition holds; inclusive alternative\n8. Exactly one alternative holds\n9. Conditional: antecedent implies consequent; direction must be selected\n10. Counterfactual condition and its consequence; not material implication\n11. First event/proposition occurs before the second\n12. First event/proposition occurs after the second\n13. First event/proposition occurs during the second\n14. The target contains BOTH a parent predicate AND its dependent content: speech, thought, quotation or a controlled infinitive\n15. Universal nonnumeric quantification over a restricted variable\n16. Existential nonnumeric quantification; no particular witness identity\n17. A question about content; no assertion of the content\n18. Parentheses group an entire proposition without changing its logical meaning\nReply with the number of the supported option. If several options remain possible, list their numbers separated by commas. Insufficient context: ?\nNo candidate fits: 0\nOne line, no spaces. No JSON or explanation.",
+        "selected": "CONTENT"
+      },
+      {
+        "source": "Иван сказал, что Пётр думал, что Мария пришла.",
+        "slot": "structural_partition",
+        "key": "region:821ba0d5a7af9080bac4de4af1f8f923f4def6952b8c69f3980aa9d5517137e8|task:cde7f34b96390b41684ead719142ba071cf1a300b122119fc1e8a1c57be9206a",
+        "context": "Иван сказал, что Пётр думал, что Мария пришла.",
+        "question": "Does this split preserve the source meaning as: The target contains BOTH a parent predicate AND its dependent content: speech, thought, quotation or a controlled infinitive? Each part keeps its participants, predicate and inner negation, modality or quantifiers. The parent intentionally has an open content slot: the second part fills it. The parent does not need to be a complete standalone sentence. The parts are NOT asserted separately: the selected outer relation is applied to them. Moving words into that relation preserves their meaning; it does not delete negation, modality or a condition. The listed outer occurrences need not be adjacent and do not form a new sentence. Other words expressing the outer relation must be outside the parts, including words introducing a condition or consequence. Punctuation may separate or enclose the parts. An implicit relation needs no linking word. Choose the split if it preserves the meaning; answer 0 if words have been assigned to the wrong part, and ? if the text does not decide. Select every supported option on THIS page; 0 rejects this page, ? means unknown.",
+        "options": [
+          {
+            "candidate_id": "PARTITION",
+            "label": "Proposed split — parent clause with a content slot: «Иван сказал»; content filling that slot: «Пётр думал , что Мария пришла»; outer relation occurrences: «что» @13; punctuation outside parts: «, .»"
+          }
+        ],
+        "prompt": "Read the source and answer the question about its meaning or grammar. Options are proposals, not facts. Use only the supplied text and context; do not invent identities or events. You are interpreting what is said, not checking whether it happened.\nDoes this split preserve the source meaning as: The target contains BOTH a parent predicate AND its dependent content: speech, thought, quotation or a controlled infinitive? Each part keeps its participants, predicate and inner negation, modality or quantifiers. The parent intentionally has an open content slot: the second part fills it. The parent does not need to be a complete standalone sentence. The parts are NOT asserted separately: the selected outer relation is applied to them. Moving words into that relation preserves their meaning; it does not delete negation, modality or a condition. The listed outer occurrences need not be adjacent and do not form a new sentence. Other words expressing the outer relation must be outside the parts, including words introducing a condition or consequence. Punctuation may separate or enclose the parts. An implicit relation needs no linking word. Choose the split if it preserves the meaning; answer 0 if words have been assigned to the wrong part, and ? if the text does not decide. Select every supported option on THIS page; 0 rejects this page, ? means unknown.\n\nDecision slot: structural_partition\nContext span: Иван сказал, что Пётр думал, что Мария пришла.\nOptions:\n1. Proposed split — parent clause with a content slot: «Иван сказал»; content filling that slot: «Пётр думал , что Мария пришла»; outer relation occurrences: «что» @13; punctuation outside parts: «, .»\nReply with the number of the supported option. If several options remain possible, list their numbers separated by commas. Insufficient context: ?\nNo candidate fits: 0\nOne line, no spaces. No JSON or explanation.",
+        "selected": "PARTITION"
+      },
+      {
+        "source": "Иван сказал, что Пётр думал, что Мария пришла.",
+        "slot": "structural_content_start",
+        "key": "region:821ba0d5a7af9080bac4de4af1f8f923f4def6952b8c69f3980aa9d5517137e8|task:da34d2502b4a6ed9703419e8e543629e43e9a8aa785dadbeab84b6a310f17b50",
+        "context": "Иван сказал, что Пётр думал, что Мария пришла.",
+        "question": "Select the complete dependent proposition: what is said, thought, intended or otherwise taken as content. Exclude the parent predicate and its participants, the introducing conjunction, colon, and enclosing quotation marks. Start at the first word INSIDE quoted content; retain any operators inside that content. Select the first continuous piece; other pieces can be added next. Select the FIRST token. Select every supported option on THIS page; 0 rejects this page, ? means unknown.",
+        "options": [
+          {
+            "candidate_id": "start:tok:0:4",
+            "label": "Start at «Иван» @0"
+          },
+          {
+            "candidate_id": "start:tok:5:11",
+            "label": "Start at «сказал» @5"
+          },
+          {
+            "candidate_id": "start:tok:11:12",
+            "label": "Start at «,» @11"
+          },
+          {
+            "candidate_id": "start:tok:13:16",
+            "label": "Start at «что» @13"
+          },
+          {
+            "candidate_id": "start:tok:17:21",
+            "label": "Start at «Пётр» @17"
+          },
+          {
+            "candidate_id": "start:tok:22:27",
+            "label": "Start at «думал» @22"
+          },
+          {
+            "candidate_id": "start:tok:27:28",
+            "label": "Start at «,» @27"
+          },
+          {
+            "candidate_id": "start:tok:29:32",
+            "label": "Start at «что» @29"
+          },
+          {
+            "candidate_id": "start:tok:33:38",
+            "label": "Start at «Мария» @33"
+          },
+          {
+            "candidate_id": "start:tok:39:45",
+            "label": "Start at «пришла» @39"
+          },
+          {
+            "candidate_id": "start:tok:45:46",
+            "label": "Start at «.» @45"
+          }
+        ],
+        "prompt": "Read the source and answer the question about its meaning or grammar. Options are proposals, not facts. Use only the supplied text and context; do not invent identities or events. You are interpreting what is said, not checking whether it happened.\nSelect the complete dependent proposition: what is said, thought, intended or otherwise taken as content. Exclude the parent predicate and its participants, the introducing conjunction, colon, and enclosing quotation marks. Start at the first word INSIDE quoted content; retain any operators inside that content. Select the first continuous piece; other pieces can be added next. Select the FIRST token. Select every supported option on THIS page; 0 rejects this page, ? means unknown.\n\nDecision slot: structural_content_start\nContext span: Иван сказал, что Пётр думал, что Мария пришла.\nOptions:\n1. Start at «Иван» @0\n2. Start at «сказал» @5\n3. Start at «,» @11\n4. Start at «что» @13\n5. Start at «Пётр» @17\n6. Start at «думал» @22\n7. Start at «,» @27\n8. Start at «что» @29\n9. Start at «Мария» @33\n10. Start at «пришла» @39\n11. Start at «.» @45\nReply with the number of the supported option. If several options remain possible, list their numbers separated by commas. Insufficient context: ?\nNo candidate fits: 0\nOne line, no spaces. No JSON or explanation.",
+        "selected": "start:tok:17:21"
+      },
+      {
+        "source": "Иван сказал, что Пётр думал, что Мария пришла.",
+        "slot": "structural_content_continue",
+        "key": "region:821ba0d5a7af9080bac4de4af1f8f923f4def6952b8c69f3980aa9d5517137e8|task:152b18f6bcd45b8c1a83291941fc0f277e6becf2e90dd4b6d5aee5b29983a32d",
+        "context": "Иван сказал, что Пётр думал, что Мария пришла.",
+        "question": "Select the complete dependent proposition: what is said, thought, intended or otherwise taken as content. Exclude the parent predicate and its participants, the introducing conjunction, colon, and enclosing quotation marks. Start at the first word INSIDE quoted content; retain any operators inside that content. Already included: «Пётр думал , что Мария пришла». Select the start of another piece if one exists. Intervening words retain their own meaning. Optional search: select only matching positive options. If none matches, reject this page. After ALL pages have no match, the result is: no further source words belong to this part. Unknown is not an empty result. Select every supported option on THIS page; 0 rejects this page, ? means unknown.",
+        "options": [
+          {
+            "candidate_id": "tok:0:4",
+            "label": "Another piece starts at «Иван» @0"
+          },
+          {
+            "candidate_id": "tok:5:11",
+            "label": "Another piece starts at «сказал» @5"
+          },
+          {
+            "candidate_id": "tok:11:12",
+            "label": "Another piece starts at «,» @11"
+          },
+          {
+            "candidate_id": "tok:13:16",
+            "label": "Another piece starts at «что» @13"
+          },
+          {
+            "candidate_id": "tok:45:46",
+            "label": "Another piece starts at «.» @45"
+          }
+        ],
+        "prompt": "Read the source and answer the question about its meaning or grammar. Options are proposals, not facts. Use only the supplied text and context; do not invent identities or events. You are interpreting what is said, not checking whether it happened.\nSelect the complete dependent proposition: what is said, thought, intended or otherwise taken as content. Exclude the parent predicate and its participants, the introducing conjunction, colon, and enclosing quotation marks. Start at the first word INSIDE quoted content; retain any operators inside that content. Already included: «Пётр думал , что Мария пришла». Select the start of another piece if one exists. Intervening words retain their own meaning. Optional search: select only matching positive options. If none matches, reject this page. After ALL pages have no match, the result is: no further source words belong to this part. Unknown is not an empty result. Select every supported option on THIS page; 0 rejects this page, ? means unknown.\n\nDecision slot: structural_content_continue\nContext span: Иван сказал, что Пётр думал, что Мария пришла.\nOptions:\n1. Another piece starts at «Иван» @0\n2. Another piece starts at «сказал» @5\n3. Another piece starts at «,» @11\n4. Another piece starts at «что» @13\n5. Another piece starts at «.» @45\nReply with the number of the supported option. If several options remain possible, list their numbers separated by commas. Insufficient context: ?\nNo candidate fits: 0\nOne line, no spaces. No JSON or explanation.",
+        "selected": null
+      },
+      {
+        "source": "Иван сказал, что Пётр думал, что Мария пришла.",
+        "slot": "predicate_argument_role",
+        "key": "region:e1540cb958ea4d53eabcb1a1b2d13b1f0ff0701e07caf912b4aee1a969721937|task:1139dec1c0c43ca4c073d6dc610a0eedad81b5d99ae15e21683b39f21412f877",
+        "context": "Иван сказал\nSurrounding source (reference only): Иван сказал, что Пётр думал, что Мария пришла.",
+        "question": "Resolve only Context span; surrounding source supplies evidence, not additional target words. What role does «Иван» @0 have in predicate «сказал»? Choose the released valency slot, not every semantic description of the participant. SUBJECT/OBJECT are core slots after voice projection; a grammatical subject stays SUBJECT even if it feels something. EXPERIENCER is an oblique/impersonal state participant outside those core slots. Case alone is not proof. Use SURFACE_ARG only when no more specific role is established. Select every supported option on THIS page; 0 rejects this page, ? means unknown.\nCurrent parent requirements: Only «сказал» @5 has separately supplied content (OBJECT) — «Пётр думал , что Мария пришла». Leave that slot open. Any other parent predicate and dependent clause INSIDE the target must still be connected.\n",
+        "options": [
+          {
+            "candidate_id": "SUBJECT",
+            "label": "core subject: grammatical subject in active voice, or actor projected from passive voice; not an oblique experiencer"
+          },
+          {
+            "candidate_id": "EXPERIENCER",
+            "label": "oblique or impersonal participant experiencing a state, outside the core SUBJECT/OBJECT slots"
+          },
+          {
+            "candidate_id": "OBJECT",
+            "label": "core object: direct object or propositional content in active voice, or patient projected from passive voice"
+          },
+          {
+            "candidate_id": "AUXILLIARY",
+            "label": "secondary participant assisting the action"
+          },
+          {
+            "candidate_id": "RECIPIENT",
+            "label": "recipient or addressee of the action"
+          },
+          {
+            "candidate_id": "SOURCE",
+            "label": "place or entity from which something comes"
+          },
+          {
+            "candidate_id": "ABSENTEE",
+            "label": "participant whose absence is expressed"
+          },
+          {
+            "candidate_id": "LOCATION",
+            "label": "place or spatial endpoint of the situation"
+          },
+          {
+            "candidate_id": "STATE",
+            "label": "state attributed to a participant"
+          },
+          {
+            "candidate_id": "TIME",
+            "label": "time when the situation holds"
+          },
+          {
+            "candidate_id": "DURATION",
+            "label": "length of time for which the situation holds"
+          },
+          {
+            "candidate_id": "CAUSE",
+            "label": "situation or reason causing this situation"
+          },
+          {
+            "candidate_id": "PURPOSE",
+            "label": "goal for which the parent action is performed"
+          },
+          {
+            "candidate_id": "TOOL",
+            "label": "instrument used to perform the action"
+          },
+          {
+            "candidate_id": "MATERIAL",
+            "label": "material consumed or transformed by the action"
+          },
+          {
+            "candidate_id": "AMOUNT",
+            "label": "quantity or amount involved"
+          },
+          {
+            "candidate_id": "HOW-TO",
+            "label": "manner or method of performing the action"
+          },
+          {
+            "candidate_id": "SURFACE_ARG",
+            "label": "source participant whose more specific role is not established"
+          },
+          {
+            "candidate_id": "NO_DIRECT_ROLE",
+            "label": "This occurrence belongs to another nominal or lexical child, not directly to this predicate"
+          }
+        ],
+        "prompt": "Read the source and answer the question about its meaning or grammar. Options are proposals, not facts. Use only the supplied text and context; do not invent identities or events. You are interpreting what is said, not checking whether it happened.\nResolve only Context span; surrounding source supplies evidence, not additional target words. What role does «Иван» @0 have in predicate «сказал»? Choose the released valency slot, not every semantic description of the participant. SUBJECT/OBJECT are core slots after voice projection; a grammatical subject stays SUBJECT even if it feels something. EXPERIENCER is an oblique/impersonal state participant outside those core slots. Case alone is not proof. Use SURFACE_ARG only when no more specific role is established. Select every supported option on THIS page; 0 rejects this page, ? means unknown.\nCurrent parent requirements: Only «сказал» @5 has separately supplied content (OBJECT) — «Пётр думал , что Мария пришла». Leave that slot open. Any other parent predicate and dependent clause INSIDE the target must still be connected.\n\n\nDecision slot: predicate_argument_role\nContext span: Иван сказал\nSurrounding source (reference only): Иван сказал, что Пётр думал, что Мария пришла.\nOptions:\n1. core subject: grammatical subject in active voice, or actor projected from passive voice; not an oblique experiencer\n2. oblique or impersonal participant experiencing a state, outside the core SUBJECT/OBJECT slots\n3. core object: direct object or propositional content in active voice, or patient projected from passive voice\n4. secondary participant assisting the action\n5. recipient or addressee of the action\n6. place or entity from which something comes\n7. participant whose absence is expressed\n8. place or spatial endpoint of the situation\n9. state attributed to a participant\n10. time when the situation holds\n11. length of time for which the situation holds\n12. situation or reason causing this situation\n13. goal for which the parent action is performed\n14. instrument used to perform the action\n15. material consumed or transformed by the action\n16. quantity or amount involved\n17. manner or method of performing the action\n18. source participant whose more specific role is not established\n19. This occurrence belongs to another nominal or lexical child, not directly to this predicate\nReply with the number of the supported option. If several options remain possible, list their numbers separated by commas. Insufficient context: ?\nNo candidate fits: 0\nOne line, no spaces. No JSON or explanation.",
+        "selected": "SUBJECT"
+      },
+      {
+        "source": "Иван сказал, что Пётр думал, что Мария пришла.",
+        "slot": "predicate_value",
+        "key": "component:1d2042aebdc4d790c679436e8705ff6853d8609b4ac46ea3dfb735c392743386|predicate_value",
+        "context": "Иван сказал",
+        "question": "Which lexical use applies to this occurrence in its selected structure? Choose a catalog entry when its lexical meaning fits. Tense, date, negation and modality are handled by the structure, not new lexical senses. Choose an unlisted use only when no listed meaning fits; use ? when uncertain.",
+        "options": [
+          {
+            "candidate_id": "SAY:94b84e47dd0dd880",
+            "label": "SAY; lexical entry «сказать»; SUBJECT=«Иван»; temporal class=EVENT"
+          },
+          {
+            "candidate_id": "open:5ab1350b52832fd8bf1ba6ad86291bb768d41c9d3f335a8575c13e56a61d7844",
+            "label": "Unlisted lexical use of «сказал»; preserve literal structure without canonical equivalence; SUBJECT=«Иван»; temporal class=UNKNOWN"
+          }
+        ],
+        "prompt": "Read the source and answer the question about its meaning or grammar. Options are proposals, not facts. Use only the supplied text and context; do not invent identities or events. You are interpreting what is said, not checking whether it happened.\nWhich lexical use applies to this occurrence in its selected structure? Choose a catalog entry when its lexical meaning fits. Tense, date, negation and modality are handled by the structure, not new lexical senses. Choose an unlisted use only when no listed meaning fits; use ? when uncertain.\n\nDecision slot: predicate_value\nContext span: Иван сказал\nOptions:\n1. SAY; lexical entry «сказать»; SUBJECT=«Иван»; temporal class=EVENT\n2. Unlisted lexical use of «сказал»; preserve literal structure without canonical equivalence; SUBJECT=«Иван»; temporal class=UNKNOWN\nReply with the number of the supported option. If several options remain possible, list their numbers separated by commas. Insufficient context: ?\nNo candidate fits: 0\nOne line, no spaces. No JSON or explanation.",
+        "selected": "SAY:94b84e47dd0dd880"
+      },
+      {
+        "source": "Мария спит после прихода Ивана.",
+        "slot": "nominal_function",
+        "key": "region:a37e85febef1e093cc7c0c6760c9317d5fd12666d68c4809eca5505900f82ab0|task:af14fb44c31b5e1cd248ddb2c284504a3d39b10191404228787537315cc61e1f",
+        "context": "прихода Ивана\nSurrounding source (reference only): Мария спит после прихода Ивана.",
+        "question": "Resolve only Context span; surrounding source supplies evidence, not additional target words. Look for words in THIS target that introduce or specify a noun/pronoun. A preposition connecting a place to a verb counts as RELATION, even when the verb already has a place role. Choose the function of the FIRST remaining such expression, not all functions anywhere in the sentence. A name by itself or an ordinary descriptive adjective does not count. Already assigned function words: «». Optional search: select only matching positive options. If none matches, reject this page. After ALL pages have no match, the result is: no further nominal relation, referential determiner or quantity expression. Unknown is not an empty result. Select every supported option on THIS page; 0 rejects this page, ? means unknown.\nCurrent parent requirements: Already handled outside the target: First event/proposition occurs after the second. Select another such relation only if the target words themselves express it. This area must describe an event or state. The parent requires cases: genitive. The selected head is «прихода».\n",
+        "options": [
+          {
+            "candidate_id": "RELATION",
+            "label": "An adposition or multiword relational unit: words introducing a noun/pronoun and linking it to an action or another noun (place, destination, origin, instrument, possession or another relation)"
+          },
+          {
+            "candidate_id": "REFERENCE",
+            "label": "An expression points to which person/thing is meant, using context or an earlier mention"
+          },
+          {
+            "candidate_id": "QUANTITY",
+            "label": "An expression says how many or how much of a noun group; keep its wording"
+          }
+        ],
+        "prompt": "Read the source and answer the question about its meaning or grammar. Options are proposals, not facts. Use only the supplied text and context; do not invent identities or events. You are interpreting what is said, not checking whether it happened.\nResolve only Context span; surrounding source supplies evidence, not additional target words. Look for words in THIS target that introduce or specify a noun/pronoun. A preposition connecting a place to a verb counts as RELATION, even when the verb already has a place role. Choose the function of the FIRST remaining such expression, not all functions anywhere in the sentence. A name by itself or an ordinary descriptive adjective does not count. Already assigned function words: «». Optional search: select only matching positive options. If none matches, reject this page. After ALL pages have no match, the result is: no further nominal relation, referential determiner or quantity expression. Unknown is not an empty result. Select every supported option on THIS page; 0 rejects this page, ? means unknown.\nCurrent parent requirements: Already handled outside the target: First event/proposition occurs after the second. Select another such relation only if the target words themselves express it. This area must describe an event or state. The parent requires cases: genitive. The selected head is «прихода».\n\n\nDecision slot: nominal_function\nContext span: прихода Ивана\nSurrounding source (reference only): Мария спит после прихода Ивана.\nOptions:\n1. An adposition or multiword relational unit: words introducing a noun/pronoun and linking it to an action or another noun (place, destination, origin, instrument, possession or another relation)\n2. An expression points to which person/thing is meant, using context or an earlier mention\n3. An expression says how many or how much of a noun group; keep its wording\nReply with the number of the supported option. If several options remain possible, list their numbers separated by commas. Insufficient context: ?\nNo candidate fits: 0\nOne line, no spaces. No JSON or explanation.",
+        "selected": null
+      },
+      {
+        "source": "Флырка пришла.",
+        "slot": "component_attachment",
+        "key": "region:e81628831290a46e2f63a9f334d80cc651dcd1144e0449debbd873958c23ab2d|composition",
+        "context": "Флырка пришла.",
+        "question": "Which complete reading matches this clause? Compare the predicate, its participants and grammatical readings. If the wording allows several, keep those alternatives.",
+        "options": [
+          {
+            "candidate_id": "component:664466cd1c3addba72d26f6347e1bf921ba6d543bbdb4a6c44b485f05ca0b904",
+            "label": "прийти [VERB]; SUBJECT=Флырка; linked morphology=«пришла» @7: lemma: прийти; pos: conjugated verb; number: singular; gender: feminine; tense: past; mood: indicative; features: intransitive, perfective | «Флырка» @0: lemma unknown; pos: noun; cases: nominative; event modifiers wrap propositions; nominal descriptions attach ONLY to their named entity hosts"
+          },
+          {
+            "candidate_id": "component:8044034de60498e862be91ba1dfccbcf4c830ef4a76f543a94ee3340f1f8f3c5",
+            "label": "прийти [VERB]; SUBJECT=Флырка; linked morphology=«пришла» @7: lemma: прийти; pos: conjugated verb; number: singular; gender: feminine; tense: past; mood: indicative; features: intransitive, perfective | «Флырка» @0: lemma unknown; pos: noun; cases: nominative; event modifiers wrap propositions; nominal descriptions attach ONLY to their named entity hosts"
+          }
+        ],
+        "prompt": "Read the source and answer the question about its meaning or grammar. Options are proposals, not facts. Use only the supplied text and context; do not invent identities or events. You are interpreting what is said, not checking whether it happened.\nWhich complete reading matches this clause? Compare the predicate, its participants and grammatical readings. If the wording allows several, keep those alternatives.\n\nDecision slot: component_attachment\nContext span: Флырка пришла.\nOptions:\n1. прийти [VERB]; SUBJECT=Флырка; linked morphology=«пришла» @7: lemma: прийти; pos: conjugated verb; number: singular; gender: feminine; tense: past; mood: indicative; features: intransitive, perfective | «Флырка» @0: lemma unknown; pos: noun; cases: nominative; event modifiers wrap propositions; nominal descriptions attach ONLY to their named entity hosts\n2. прийти [VERB]; SUBJECT=Флырка; linked morphology=«пришла» @7: lemma: прийти; pos: conjugated verb; number: singular; gender: feminine; tense: past; mood: indicative; features: intransitive, perfective | «Флырка» @0: lemma unknown; pos: noun; cases: nominative; event modifiers wrap propositions; nominal descriptions attach ONLY to their named entity hosts\nReply with the number of the supported option. If several options remain possible, list their numbers separated by commas. Insufficient context: ?\nNo candidate fits: 0\nOne line, no spaces. No JSON or explanation.",
+        "selected": "component:664466cd1c3addba72d26f6347e1bf921ba6d543bbdb4a6c44b485f05ca0b904"
+      }
+    ]
+  },
+  "historical": {
+    "baseline": "f8213c9",
+    "input": "actual.jsonl(2).gz",
+    "calls": 10206,
+    "slots": 50,
+    "calls_with_identical_labels": 251,
+    "example": {
+      "case_id": "LANG-02-0-bare",
+      "source": "Иван читает книгу.",
+      "slot": "component_attachment",
+      "key": "region:1573f594320366bf19c88f1499f5755f23008d273fd2947379cf91fbbc73d5b3|composition",
+      "prompt": "Read the source and answer the question about its meaning or grammar. Options are proposals, not facts. Use only the supplied text and context; do not invent identities or events. You are interpreting what is said, not checking whether it happened.\nWhich complete reading matches this clause? Compare the predicate, its participants and grammatical readings. If the wording allows several, keep those alternatives.\n\nDecision slot: component_attachment\nContext span: Иван читает книгу.\nOptions:\n1. читать [VERB]; SUBJECT=Иван, OBJECT=книгу; linked morphology=«читает» @5: lemma: читать; pos: conjugated verb; number: singular; tense: present; person: 3rd; mood: indicative; features: imperfective, transitive | «Иван» @0: lemma: иван; pos: noun; cases: nominative; number: singular; gender: masculine; features: personal name, animate | «книгу» @12: lemma: книга; pos: noun; cases: accusative; number: singular; gender: feminine; features: inanimate; event modifiers wrap propositions; nominal descriptions attach ONLY to their named entity hosts\n2. читать [VERB]; SUBJECT=Иван, OBJECT=книгу; linked morphology=«читает» @5: lemma: читать; pos: conjugated verb; number: singular; tense: present; person: 3rd; mood: indicative; features: imperfective, transitive | «Иван» @0: lemma: иван; pos: noun; cases: nominative; number: singular; gender: masculine; features: personal name, animate | «книгу» @12: lemma: книга; pos: noun; cases: accusative; number: singular; gender: feminine; features: inanimate; event modifiers wrap propositions; nominal descriptions attach ONLY to their named entity hosts\nReply with the number of the supported option. If several options remain possible, list their numbers separated by commas. Insufficient context: ?\nNo candidate fits: 0\nOne line, no spaces. No JSON or explanation.",
+      "response": "1",
+      "chars": 1810,
+      "options": 2,
+      "duplicate_labels": [
+        "читать [VERB]; SUBJECT=Иван, OBJECT=книгу; linked morphology=«читает» @5: lemma: читать; pos: conjugated verb; number: singular; tense: present; person: 3rd; mood: indicative; features: imperfective, transitive | «Иван» @0: lemma: иван; pos: noun; cases: nominative; number: singular; gender: masculine; features: personal name, animate | «книгу» @12: lemma: книга; pos: noun; cases: accusative; number: singular; gender: feminine; features: inanimate; event modifiers wrap propositions; nominal descriptions attach ONLY to their named entity hosts"
+      ]
+    },
+    "stats": {
+      "predicate_value": {
+        "n": 437,
+        "median_chars": 1062,
+        "max_chars": 1134,
+        "max_options": 2
+      },
+      "spatial_function": {
+        "n": 509,
+        "median_chars": 958,
+        "max_chars": 975,
+        "max_options": 5
+      },
+      "relation_marker_role": {
+        "n": 481,
+        "median_chars": 1475,
+        "max_chars": 1976,
+        "max_options": 2
+      },
+      "structural_parent_end": {
+        "n": 114,
+        "median_chars": 1401.0,
+        "max_chars": 1750,
+        "max_options": 10
+      },
+      "structural_parent_continue": {
+        "n": 43,
+        "median_chars": 1370,
+        "max_chars": 1469,
+        "max_options": 4
+      },
+      "structural_parent_piece_end": {
+        "n": 33,
+        "median_chars": 1041,
+        "max_chars": 1095,
+        "max_options": 3
+      },
+      "structural_partition": {
+        "n": 321,
+        "median_chars": 1603,
+        "max_chars": 2237,
+        "max_options": 1
+      },
+      "structural_function_owner": {
+        "n": 111,
+        "median_chars": 1838,
+        "max_chars": 2388,
+        "max_options": 6
+      },
+      "structural_content_role": {
+        "n": 108,
+        "median_chars": 1130.0,
+        "max_chars": 1505,
+        "max_options": 1
+      },
+      "structural_content_continue": {
+        "n": 116,
+        "median_chars": 1531.0,
+        "max_chars": 1796,
+        "max_options": 10
+      },
+      "structural_content_start": {
+        "n": 116,
+        "median_chars": 1255.0,
+        "max_chars": 1557,
+        "max_options": 15
+      },
+      "structural_content_end": {
+        "n": 116,
+        "median_chars": 1378.0,
+        "max_chars": 1775,
+        "max_options": 7
+      },
+      "structural_owner": {
+        "n": 109,
+        "median_chars": 1001,
+        "max_chars": 1408,
+        "max_options": 5
+      },
+      "structural_parent_start": {
+        "n": 114,
+        "median_chars": 1168.0,
+        "max_chars": 1478,
+        "max_options": 10
+      },
+      "structural_relation": {
+        "n": 1075,
+        "median_chars": 2368,
+        "max_chars": 3274,
+        "max_options": 18
+      },
+      "component_attachment": {
+        "n": 572,
+        "median_chars": 1818.0,
+        "max_chars": 3266,
+        "max_options": 4
+      },
+      "temporal_function": {
+        "n": 795,
+        "median_chars": 1420,
+        "max_chars": 2017,
+        "max_options": 9
+      },
+      "nominal_function": {
+        "n": 662,
+        "median_chars": 1613.0,
+        "max_chars": 2035,
+        "max_options": 3
+      },
+      "predicate_argument_role": {
+        "n": 1071,
+        "median_chars": 2334,
+        "max_chars": 2817,
+        "max_options": 19
+      },
+      "predicate_function": {
+        "n": 629,
+        "median_chars": 1279,
+        "max_chars": 1686,
+        "max_options": 6
+      },
+      "speech_act": {
+        "n": 381,
+        "median_chars": 982,
+        "max_chars": 998,
+        "max_options": 4
+      },
+      "nominal_coordination": {
+        "n": 1,
+        "median_chars": 850,
+        "max_chars": 850,
+        "max_options": 2
+      },
+      "structural_operand_1_continue": {
+        "n": 124,
+        "median_chars": 1295.0,
+        "max_chars": 1452,
+        "max_options": 5
+      },
+      "structural_operand_1_end": {
+        "n": 35,
+        "median_chars": 1433,
+        "max_chars": 1604,
+        "max_options": 9
+      },
+      "structural_operand_1_piece_end": {
+        "n": 99,
+        "median_chars": 932,
+        "max_chars": 1066,
+        "max_options": 4
+      },
+      "structural_operand_1_start": {
+        "n": 35,
+        "median_chars": 1085,
+        "max_chars": 1206,
+        "max_options": 9
+      },
+      "nominal_function_source_continue": {
+        "n": 12,
+        "median_chars": 1291.0,
+        "max_chars": 1557,
+        "max_options": 7
+      },
+      "nominal_function_source_end": {
+        "n": 16,
+        "median_chars": 1384.5,
+        "max_chars": 1523,
+        "max_options": 8
+      },
+      "nominal_function_source_piece_end": {
+        "n": 7,
+        "median_chars": 966,
+        "max_chars": 1253,
+        "max_options": 5
+      },
+      "nominal_function_source_start": {
+        "n": 16,
+        "median_chars": 1174.5,
+        "max_chars": 1359,
+        "max_options": 8
+      },
+      "structural_introducer_continue": {
+        "n": 283,
+        "median_chars": 1614,
+        "max_chars": 2047,
+        "max_options": 8
+      },
+      "structural_introducer_start": {
+        "n": 280,
+        "median_chars": 1366.0,
+        "max_chars": 1795,
+        "max_options": 10
+      },
+      "structural_introducer_end": {
+        "n": 279,
+        "median_chars": 1634,
+        "max_chars": 1955,
+        "max_options": 10
+      },
+      "lexical_recovery": {
+        "n": 1,
+        "median_chars": 1048,
+        "max_chars": 1048,
+        "max_options": 2
+      },
+      "structural_operand_2_continue": {
+        "n": 1,
+        "median_chars": 1353,
+        "max_chars": 1353,
+        "max_options": 2
+      },
+      "structural_operand_2_end": {
+        "n": 2,
+        "median_chars": 1164.5,
+        "max_chars": 1209,
+        "max_options": 3
+      },
+      "structural_operand_2_start": {
+        "n": 26,
+        "median_chars": 1009.0,
+        "max_chars": 1127,
+        "max_options": 4
+      },
+      "predicate_argument_reading": {
+        "n": 223,
+        "median_chars": 1397,
+        "max_chars": 2759,
+        "max_options": 12
+      },
+      "temporal_source_end": {
+        "n": 146,
+        "median_chars": 1191.0,
+        "max_chars": 1730,
+        "max_options": 9
+      },
+      "temporal_source_continue": {
+        "n": 144,
+        "median_chars": 1189.0,
+        "max_chars": 1836,
+        "max_options": 5
+      },
+      "nominal_dependency": {
+        "n": 393,
+        "median_chars": 1597,
+        "max_chars": 3191,
+        "max_options": 10
+      },
+      "structural_introducer_piece_end": {
+        "n": 12,
+        "median_chars": 1320.0,
+        "max_chars": 1464,
+        "max_options": 6
+      },
+      "nominal_identity_function": {
+        "n": 1,
+        "median_chars": 1044,
+        "max_chars": 1044,
+        "max_options": 2
+      },
+      "nominal_function_head": {
+        "n": 3,
+        "median_chars": 946,
+        "max_chars": 1078,
+        "max_options": 3
+      },
+      "child_slot": {
+        "n": 7,
+        "median_chars": 2054,
+        "max_chars": 2653,
+        "max_options": 3
+      },
+      "structural_event_head": {
+        "n": 15,
+        "median_chars": 1113,
+        "max_chars": 1127,
+        "max_options": 3
+      },
+      "structural_control": {
+        "n": 4,
+        "median_chars": 1188.0,
+        "max_chars": 1585,
+        "max_options": 3
+      },
+      "structural_content_piece_end": {
+        "n": 1,
+        "median_chars": 1120,
+        "max_chars": 1120,
+        "max_options": 4
+      },
+      "structural_governor": {
+        "n": 3,
+        "median_chars": 1345,
+        "max_chars": 1805,
+        "max_options": 2
+      },
+      "structural_oov_function": {
+        "n": 124,
+        "median_chars": 2039.5,
+        "max_chars": 2386,
+        "max_options": 17
+      }
+    }
+  }
+}
