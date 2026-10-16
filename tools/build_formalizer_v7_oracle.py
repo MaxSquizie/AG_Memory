@@ -389,8 +389,8 @@ NF=[
  ('Мария просит Ивана принести книгу.',pred('REQUEST',AGENT=MARIA,ADDRESSEE=IVAN,CONTENT=pred('BRING',AGENT=IVAN,THEME=BOOK)),pred('BRING',AGENT=IVAN,THEME=BOOK)),
  ('Мне хочется спать.',pred('DESIRE',EXPERIENCER=ent('speaker'),CONTENT=pred('SLEEP',AGENT=ent('speaker'))),pred('SLEEP',AGENT=ent('speaker'))),
  ('Иван надеется вернуться.',pred('HOPE',EXPERIENCER=IVAN,CONTENT=pred('RETURN',AGENT=IVAN)),pred('RETURN',AGENT=IVAN)),
- ('Книгу можно прочитать.',pred('PERMITTED_LEXICAL',CONTENT=pred('READ',THEME=BOOK)),pred('READ',THEME=BOOK)),
- ('Нужно открыть окно.',pred('NEED_LEXICAL',CONTENT=pred('OPEN',THEME=ent('window'))),pred('OPEN',THEME=ent('window'))),
+ ('Книгу можно прочитать.',g('POSSIBLE',pred('READ',THEME=BOOK)),pred('READ',THEME=BOOK)),
+ ('Нужно открыть окно.',g('NECESSARY',pred('OPEN',THEME=ent('window'))),pred('OPEN',THEME=ent('window'))),
 ]
 for i,(text,parent,child) in enumerate(NF):
  for variant in ['base','quote','nested_quote','question']:

@@ -431,7 +431,8 @@ def native_coverage(state,release,store):
         selected=frame.semantic.get('candidate_specs',{}).get(decision.selected[0]) if decision and len(decision.selected)==1 else None
         closed=bool(selected and decision.outcome=='RESOLVED' and not frame.semantic.get('structural_unresolved'))
         if selected and selected['sense_kind']=='KNOWN':
-            roles=set(selected['roles'].values())|set(frame.semantic.get('proposition_args',{}))
+            from ah.formalizer.action_descriptions import schema_roles
+            roles=schema_roles(selected,set(selected['roles'].values())|set(frame.semantic.get('proposition_args',{})))
             mappings=[m for m in release.entries('TemplateMap') if m['sense_id']==selected['sense_id'] and set(m['roles'])==roles]
             closed &= bool(len(mappings)==1 and store.has_uid(mappings[0]['template_ref'])
                            and {r.value for r in store._store.get_template(mappings[0]['template_ref']).roles}==roles)
@@ -442,7 +443,29 @@ def native_coverage(state,release,store):
             open_lexical |= selected['sense_kind']=='OPEN_LEXICAL'
             surface_roles += sum(r=='SURFACE_ARG' for r in selected['roles'].values())
         else:blocked_frames.append(frame.frame_id)
-    for root in state.logical_roots:covered.update(root.get('alignment_refs',()))
+    # Operators and question wording belong to the accepted structure too.
+    # Count their anchors only when every referenced lexical/typed child is
+    # closed; an unfinished outer composition must not claim full coverage.
+    from ah.formalizer.composition_tree import forests, slots
+    by_id={f.frame_id:f for f in state.frames};closed_ids=set(closed_frames)
+    def anchors(tree,active=frozenset()):
+        refs=set(tree.get('anchor_refs',()))|set(tree.get('alignment_refs',()))
+        fid=tree.get('frame_ref')
+        if fid is not None:
+            if fid in active or fid not in closed_ids:return None
+            frame=by_id[fid];active=active|{fid}
+            refs.update(frame.semantic.get('query_anchor_refs',()))
+            children=[slot.tree for slot in slots(frame)]
+        else:children=tree.get('operands',())
+        for child in children:
+            owned=anchors(child,active)
+            if owned is None:return None
+            refs.update(owned)
+        return refs
+    for tree in [*forests(state.frames,state.logical_roots),
+                 *({'frame_ref':f.frame_id} for f in state.frames)]:
+        owned=anchors(tree)
+        if owned is not None:covered.update(owned)
     relevant={e.token_id for e in state.evidence if e.span.strip()
               and not (e.variants and all(v.pos=='PNCT' or 'PNCT' in v.features for v in e.variants))}
     unresolved=relevant-covered
@@ -516,7 +539,8 @@ def native_candidate_patterns(session,state,release,limit=1024):
         if fid in active:return []
         frame=frames[fid];active=active|{fid};results=[]
         for candidate_id,spec in sorted(frame.semantic.get('candidate_specs',{}).items()):
-            role_ids=set(spec['roles'].values())|set(frame.semantic.get('proposition_args',{}))
+            from ah.formalizer.action_descriptions import schema_roles
+            role_ids=schema_roles(spec,set(spec['roles'].values())|set(frame.semantic.get('proposition_args',{})))
             if spec['sense_kind']=='KNOWN':
                 mappings=[m for m in release.entries('TemplateMap') if m['sense_id']==spec['sense_id'] and set(m['roles'])==role_ids]
                 if len(mappings)!=1 or mappings[0]['template_ref'] not in session.native_aliases:continue

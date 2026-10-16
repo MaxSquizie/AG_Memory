@@ -56,8 +56,8 @@ def test_parent_question_distinguishes_predicate_from_connecting_conjunction(tmp
     for slot in ('structural_parent_start','structural_parent_end'):
         prompt=next(p for s,p in script.calls if s==slot)
         assert 'Selected dependent content: «Иван пришёл»' in prompt
-        assert 'Keep the predicate that takes this content' in prompt
-        assert 'Exclude only the conjunction and punctuation' in prompt
+        assert 'the predicate that takes this content, its participants and other attached clauses' in prompt
+        assert 'Boundary punctuation may stay' in prompt
         assert 'introducer of THIS content' not in prompt
 
 

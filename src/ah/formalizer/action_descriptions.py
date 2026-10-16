@@ -31,6 +31,15 @@ def unassigned(roles, assigned):
                   and set(r.get('argument_types',('ENTITY',)))=={'ENTITY'})
 
 
+def schema_roles(spec, assigned):
+    """Template roles include open description slots; actants do not.
+
+    Writers, queries and observers must use the same distinction. This adds
+    no participant and grants no license to bind an unspecified role.
+    """
+    return set(assigned)|set(spec.get('description_roles',()))
+
+
 def independent_roles(roles, cfg):
     """Infinitival subject case is a released construction, not finite agreement."""
     cases=cfg.get('infinitive_composition',{}).get('independent_subject_cases')

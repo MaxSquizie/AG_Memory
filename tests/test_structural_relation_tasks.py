@@ -100,7 +100,7 @@ def test_binary_relation_uses_shared_source_slots(tmp_path,monkeypatch,text,oper
     ('Иван не пришёл.','NOT','не','не'),
 ])
 def test_unlisted_unary_phrases_reach_same_compiler(tmp_path,monkeypatch,text,operator,first,last):
-    steps=unary(operator,first,last)+([('structural_governor','INDEPENDENT')] if operator=='POSSIBLE' else [])+relation('LEXICAL')
+    steps=unary(operator,first,last)+relation('LEXICAL')
     result,_=run(tmp_path,monkeypatch,text,steps)
     assert result['assertions']['ah']==[{'operator':operator,'operands':[atom('ARRIVE','ivan')]}]
     assert result['diagnostics']['codes']==[]

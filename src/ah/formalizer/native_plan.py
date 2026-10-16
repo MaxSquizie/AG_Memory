@@ -5,6 +5,7 @@ from .canonical_ledger import digest
 from .store_interface import StoreOp
 from .t5_batch import FragmentT5Input,evaluate_fragment
 from .structural_content_time import payload as content_time
+from .action_descriptions import schema_roles as description_schema_roles
 
 
 def build_plan(state,release,store):
@@ -35,7 +36,7 @@ def build_plan(state,release,store):
         if not selected or d is None or d.outcome!='RESOLVED': raise ValueError('STRUCTURAL_OPERAND_UNRESOLVED')
         e=evidence[f.predicate_token_ref]
         roles={}; mention_roles={}; mention_entities={}; mention_bindings={}
-        selected_roles=set(selected['roles'].values())|set(f.semantic.get('proposition_args',{}))|set(selected.get('implicit_roles',()))|set(selected.get('spatial_roles',()))|set(selected.get('description_roles',()))
+        selected_roles=description_schema_roles(selected,set(selected['roles'].values())|set(f.semantic.get('proposition_args',{}))|set(selected.get('implicit_roles',()))|set(selected.get('spatial_roles',())))
         mappings=[m for m in release.entries('TemplateMap') if m['sense_id']==selected.get('sense_id') and set(m.get('roles',()))==selected_roles]
         measures=[m for m in release.resources.get('MeasureSchema',{}).get('entries',())
                   if len(mappings)==1 and m['template_ref']==mappings[0]['template_ref'] and m.get('literal_syntax')]
@@ -122,7 +123,7 @@ def build_plan(state,release,store):
                 'source_ref':token_ref,'source_tag':tag},frag)
         predicate_surface,predicate_lemma=selected_forms(f,e)
         if selected['sense_kind']=='KNOWN':
-            schema_roles=set(roles)|set(selected.get('description_roles',()))
+            schema_roles=description_schema_roles(selected,roles)
             mapping=next((m for m in release.entries('TemplateMap') if m['sense_id']==sense and set(m.get('roles',()))==schema_roles),None)
             if mapping is None or not store.has_uid(mapping['template_ref']) or store._store.kind_of(mapping['template_ref']).value!='T': raise ValueError('CANONICAL_MAPPING_MISSING')
             if {r.value for r in store._store.get_template(mapping['template_ref']).roles}!=schema_roles: raise ValueError('CANONICAL_MAPPING_MISSING')
@@ -131,7 +132,7 @@ def build_plan(state,release,store):
             tid='T:open:'+digest([state.source_uid,f.predicate_token_ref,selected['candidate_id'],roles])
             emit('ENSURE_TEMPLATE',{'uid':tid,'predicate_form':predicate_surface,
                 **({'predicate_lemma':predicate_lemma} if predicate_lemma else {}),
-                'roles':sorted(set(roles)|set(selected.get('description_roles',()))),'semantic_status':'UNLINKED','source_ref':f.predicate_token_ref,'source_tag':tag},frag)
+                'roles':sorted(description_schema_roles(selected,roles)),'semantic_status':'UNLINKED','source_ref':f.predicate_token_ref,'source_tag':tag},frag)
         content={'predicate':sense or tid,'actants':roles}
         ck=digest(content); mode=selected['state_class']; open_=selected['sense_kind']=='OPEN_LEXICAL'
         identity=[ck]

@@ -184,9 +184,9 @@ def test_selected_content_and_independent_control_have_readable_source_links():
     assert 'не переносится в инфинитив' in independent and 'Содержание: «студент читает»' in independent
     assert 'independent_content' not in independent
     role=reader.task_choice({'marker_content_ref':'read'})
-    assert '«читает» называет часть' in role and 'сохранить в содержании' in role
+    assert '«читает» относится к содержанию' in role and 'сохранить в содержании' in role
     wording=reader.task_choice({'marker_relation_ref':'read'})
-    assert '«читает» выражает только внешнюю связь' in wording
+    assert '«читает» входит в выражение внешней связи' in wording
     boundary=reader.choice_text('End after «не» @7; selected words «не»; content left for this relation: «Иван прочитал книгу .»')
     assert 'Слова связи: «не»' in boundary and 'останется: «Иван прочитал книгу .»' in boundary
     assert 'content left' not in boundary

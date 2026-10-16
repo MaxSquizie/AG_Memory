@@ -4,8 +4,13 @@ from .structural_tasks import choose
 
 def confirm(state,release,selector,region,cfg,kind,links,groups):
     functions={'CONJ','PRCL','PREP','ADVB','INTJ','PRED'}
+    # A function-word reading is not evidence that this occurrence belongs to
+    # the selected operator. In a compound marker even a particle may express
+    # a nested relation (e.g. modality followed by negation). Check lexical
+    # words first, then the remaining occurrences; neither class is exempt.
     lexical=[t for t in links if not any(v.pos in functions for v in t.variants) and
         any(v.pos=='INFN' or len(links)>1 and v.pos in {'VERB','NOUN','ADJF','ADJS','PRTF','PRTS'} for v in t.variants)]
+    if len(links)>1:lexical.extend(t for t in links if t not in lexical)
     if not lexical:return True
     from .relation_composition import RELATIONS
     content='; '.join('«'+' '.join(t.span for t in g)+'»' for g in groups)
@@ -14,15 +19,15 @@ def confirm(state,release,selector,region,cfg,kind,links,groups):
     # over an abstract split or remember the preceding boundary choice.
     for token in lexical:
         options=[{'candidate_id':'RELATION_ONLY','marker_relation_ref':token.token_id,'label':
-            'Relation wording «'+token.span+'» only expresses '+RELATIONS[kind]+
+            'Relation wording «'+token.span+'» contributes to this outer relation together with the other assigned words'+
             ('; '+content+' already names what this relation applies to' if not empty else '')},
             {'candidate_id':token.token_id,'marker_content_ref':token.token_id,'label':
-            '«'+token.span+'» names an action, state or participant that this relation applies to; keep its meaning in the content'}]
+            '«'+token.span+'» belongs inside the content: a participant, action, state or nested relation; keep its meaning there'}]
         result=choose(state,release,selector,region,cfg,'relation_marker_role',options,
             'Outer relation: '+kind+' ('+RELATIONS[kind]+'). Words assigned to it: «'+
             ' '.join(t.span for t in links)+'». Content parts: '+('none retained' if empty else content)+'. '
             'Question about ONE source word: «'+token.span+'» @'+str(token.start)+'. '
-            'Does it express the relation itself, or name what is negated, possible, necessary, related or asked about? '
+            'Is it part of this outer wording, or does it belong to the content, including a nested negation, modality or quantifier? '
             'The current split removes this word from the content. Judge its meaning in the original source. '
             'An action remains content even when it is negated or has not happened. '
             'Choose its role, not whether the whole sentence expresses the outer relation.')

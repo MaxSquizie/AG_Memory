@@ -100,7 +100,7 @@ def test_native_export_reads_selected_modes_decisions_and_real_time(monkeypatch,
     assert not actual['runtime']['coverage_evidence']['blocked_frame_ids']
 
 
-def test_native_open_quote_exports_unasserted_entities_and_dictionary_lemma(monkeypatch,tmp_path):
+def test_native_open_quote_exports_unasserted_entities_without_forcing_a_lemma(monkeypatch,tmp_path):
     bounded_reply(monkeypatch,[('PREDICATE','сказал'),('ENTITY','Иван'),
         ('PREDICATE','переадресовал'),('ENTITY','Курьер'),('ENTITY','письмо')],
         [{'kind':'ARGUMENT','from':0,'to':1,'role_id':'SUBJECT'},
@@ -112,7 +112,9 @@ def test_native_open_quote_exports_unasserted_entities_and_dictionary_lemma(monk
     actual=execute_native(session,payload,CONFIG)
     assert actual['coverage']['status']=='OPEN_LEXICAL'
     assert actual['structural']['entity_aliases']==['courier','letter']
-    assert actual['structural']['formulas'][0]['predicate']=='OPEN:переадресовать'
+    # This legacy proposal supplies no selected morphological reading.
+    # A dictionary prediction alone must not replace the observed word.
+    assert actual['structural']['formulas'][0]['predicate']=='OPEN:переадресовал'
     assert [f['predicate'] for f in actual['assertions']['ah']]==['SAY']
     assert actual['supports']['root_count']==1
     assert actual['aliases']==[]

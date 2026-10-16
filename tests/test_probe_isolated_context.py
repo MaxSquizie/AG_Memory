@@ -170,8 +170,7 @@ def test_changed_partial_grammar_state_is_progress_even_with_same_outer_choice(m
 
 def test_inner_relation_stays_reachable_with_separate_outer_context(tmp_path,monkeypatch):
     result,script=run(tmp_path,monkeypatch,'Возможно, Иван не пришёл.',
-        unary('POSSIBLE','Возможно','Возможно')+[
-            ('structural_governor','INDEPENDENT')]+unary('NOT','не','не')+relation('LEXICAL'))
+        unary('POSSIBLE','Возможно','Возможно')+unary('NOT','не','не')+relation('LEXICAL'))
     questions=[p for slot,p in script.calls if slot=='structural_relation']
     inner=questions[1]
     assert 'Context span: Иван не пришёл' in inner

@@ -68,7 +68,7 @@ def test_oracle_cli_sends_closed_probes_and_replays_without_http(tmp_path):
 def test_operator_introducers_and_finite_content_pass_existing_oracle_checks(tmp_path):
     from test_structural_relation_tasks import Script,content_steps,unary,relation
     script=Script(content_steps('сказал','Пётр','пришёл')+relation('LEXICAL')+
-        unary('POSSIBLE','Возможно','Возможно')+[('structural_governor','INDEPENDENT')]+relation('LEXICAL')+
+        unary('POSSIBLE','Возможно','Возможно')+relation('LEXICAL')+
         unary('NOT','Неверно','что')+relation('LEXICAL'))
     with local_server(lambda body:{'output':[{'type':'message','content':script.generate(body['input'])}]}) as (url, requests):
         result = subprocess.run([sys.executable, str(ROOT/'tools/run_formalizer_v7_oracle.py'),
@@ -116,7 +116,7 @@ def test_declared_introducer_owns_only_its_tokens(tmp_path, monkeypatch, text, o
     from test_structural_relation_tasks import Script,unary,relation
     first=text.split(',')[0].split()[0]
     script=Script(unary(operator,first,'что' if 'что' in text else first)+
-        ([('structural_governor','INDEPENDENT')] if operator=='POSSIBLE' else [])+relation('LEXICAL'))
+        relation('LEXICAL'))
     monkeypatch.setattr(ChatBackend, 'generate', lambda self,prompt,**kwargs:script.generate(prompt,**kwargs))
     payload = {'raw_input': {'text': text, 'source_id': 'intro', 'revision': 1,
         'range': [0, len(text)], 'language': 'ru', 'request_kind': 'ASSERTION', 'batch_kind': 'MESSAGE'}}

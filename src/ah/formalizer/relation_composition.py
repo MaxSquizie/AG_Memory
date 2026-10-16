@@ -230,6 +230,13 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child):
         if kind in {'POSSIBLE','NECESSARY'}:
             slot=replace(slot,description_context=True)
         governors=[t for t in markers if any(v.pos=='ADJS' or v.pos=='VERB' and v.mood!='imperative' for v in t.variants)]
+        if kind in {'POSSIBLE','NECESSARY'}:
+            from .action_descriptions import passive_rule
+            dependent=any(v.pos=='INFN' or passive_rule(v,cfg) for t in owned for v in t.variants)
+            if not dependent:
+                # No child reading can consume this agreement. Do not offer
+                # an impossible control link or inherit one from an ancestor.
+                governors=[];slot=replace(slot,agreement_source=None)
         if kind in {'POSSIBLE','NECESSARY'} and governors:
             from .component_policy import _morph
             from .probe_wording import reading as reading_text
@@ -262,6 +269,7 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child):
         if kind=='QUERY':
             root.semantic['query_request']={'mode':'FORMULA'}
             root.semantic['query_intent_refs']=[proof['decision_ref']]
+            root.semantic['query_anchor_refs']=[t.token_id for t in markers]
             tree=expression(root)
         else:
             tree={'operator':kind,'operands':[expression(root)],'anchor_refs':[t.token_id for t in markers]}

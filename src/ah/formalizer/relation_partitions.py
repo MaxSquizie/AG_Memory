@@ -66,10 +66,9 @@ def content(domain):
     body_text=' '.join(t.span for t in body)
     rest=[t for t in tokens if t.token_id not in body_ids]
     parent_span=domain.span(rest,'structural_parent',
-        'Select the parent predicate with its participants and any other clauses still attached to that parent. '
-        'Selected dependent content: «'+body_text+'». It is already removed from this list. '
-        'Keep the predicate that takes this content and any earlier speaker or predicate. '
-        'Exclude only the conjunction and punctuation connecting or enclosing THIS selected content.',covered=body_ids)
+        'Selected dependent content: «'+body_text+'». It has been removed from the choices below. '
+        'Select the remaining parent text: the predicate that takes this content, its participants and other attached clauses. '
+        'Boundary punctuation may stay; punctuation and connecting words are checked separately.',covered=body_ids)
     if not parent_span:return None
     parent=parent_span[0]
     groups=function_ownership(state,release,selector,region,cfg,'CONTENT',[parent,body],
