@@ -269,6 +269,8 @@ def ensure_node(core,p):
         return uid
     actants={ActantRole(k):native_operand(core,v) for k,v in p['actants'].items()}
     meta={'semantic_status':p.get('semantic_status','KNOWN'),'identity_key':p.get('identity_key'), 'temporal_mode':p.get('temporal_mode','UNKNOWN'),'source_tag':p.get('source_tag')}
+    if p.get('action_description'):
+        meta['action_description']=p['action_description']
     if any(isinstance(v, BoundVar) for v in actants.values()):
         meta['semantic_scope']='QUANTIFIED'
     core.add_hypernode(Domain(p.get('domain','C')),core.ref(p['template_ref']),actants,float(p.get('weight',0.5)),meta=meta,uid=uid,deduplicate=False,count_occurrence=False)

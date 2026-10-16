@@ -3,6 +3,7 @@
 TERMS = {
     'NOUN':'noun', 'NPRO':'pronoun', 'VERB':'conjugated verb', 'INFN':'infinitive',
     'ADJF':'adjective', 'ADJS':'short adjective', 'ADVB':'adverb', 'PRED':'predicative',
+    'PRTS':'short participle', 'PRTF':'participle', 'pssv':'passive voice', 'actv':'active voice',
     'PREP':'preposition', 'CONJ':'conjunction', 'PRCL':'particle',
     'nom':'nominative', 'gen':'genitive', 'dat':'dative', 'acc':'accusative',
     'ins':'instrumental', 'abl':'instrumental', 'loc':'prepositional', 'voc':'vocative',

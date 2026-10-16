@@ -49,7 +49,7 @@ class QueryVar:
 
 def project_native_queries(state,release):
     """Project validated syntax, with explicit intent supplied by host or rules."""
-    from .composition_tree import leaves, forests, slots
+    from .composition_tree import leaves, forests, slots, roots
     evidence={e.token_id:e for e in state.evidence}; atoms={}; trees=forests(state.frames,state.logical_roots)
     frames={f.frame_id:f for f in state.frames}
     embedded=set()
@@ -76,14 +76,14 @@ def project_native_queries(state,release):
         for role,child in f.semantic.get('proposition_args',{}).items():
             roles.append((role,{'proposition':child.get('tree') or {'frame_ref':child['frame_ref']}}))
         request=f.semantic.get('query_request',{})
-        all_roles={r for r,v in roles}|set(request.get('requested_roles',()))|({request['count_role']} if request.get('count_role') else set())|set(selected.get('query_existential_roles',()))
+        all_roles={r for r,v in roles}|set(request.get('requested_roles',()))|({request['count_role']} if request.get('count_role') else set())|set(selected.get('query_existential_roles',()))|set(selected.get('description_roles',()))
         mapping=[m for m in release.entries('TemplateMap') if m['sense_id']==selected.get('sense_id') and set(m.get('roles',()))==all_roles]
         from .lexical_forms import selected_forms
         surface,lemma=selected_forms(f,evidence[f.predicate_token_ref])
         atoms[f.frame_id]={'template_ref':mapping[0]['template_ref'] if len(mapping)==1 else None,
             'roles':roles,'query_existential_roles':selected.get('query_existential_roles',()),'temporal':f.semantic.get('region'),'lexical_anchor':(lemma or surface).casefold() if selected['sense_kind']=='OPEN_LEXICAL' else None}
     structural=set().union(*(leaves(t) for t in trees))
-    for f in state.frames:
+    for f in roots(state.frames):
         if f.frame_id in structural or f.frame_id in embedded: continue
         tree={'frame_ref':f.frame_id}
         trees.append(tree)

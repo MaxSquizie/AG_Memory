@@ -266,6 +266,9 @@ class FormalizerAdapter:
                 if frame.semantic.get('proposition_args') or frame.semantic.get('nominal_args'):
                     notes.append('NATIVE_PROPOSITION_SCOPE_OWNED '+frame.frame_id)
                     continue
+                if frame.semantic.get('action_description'):
+                    notes.append('NATIVE_ACTION_DESCRIPTION_SCOPE_OWNED '+frame.frame_id)
+                    continue
                 actant_pairs = self._assign_roles(frame, state)
                 roles = tuple(role for role, _ in actant_pairs)
                 if len(set(roles))!=len(roles):

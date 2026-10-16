@@ -71,6 +71,7 @@ class InputSlot:
     pending_proposition_roles: frozenset = frozenset()
     controller: object = None
     independent_subject: bool = False
+    description_context: bool = False
     constraint_signature: str = ''
     surrounding_relations: tuple = ()
     pending_propositions: dict | None = None

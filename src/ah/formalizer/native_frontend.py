@@ -853,12 +853,22 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
             continue
         predicate_variants=_frame_variants(frame,e)
         lemmas={v.lemma for v in predicate_variants}
-        schema_entries=[x for x in release.entries('PredicateSchema') if x['lemma'] in lemmas]
+        schema_entries=[x for x in release.entries('PredicateSchema') if any(
+            x['lemma']==v.lemma and x.get('POS') in {None,v.pos} for v in predicate_variants)]
         declared_ids={sid for x in schema_entries for sid in x.get('value_ids',())}
         for x in schema_entries:
             for expansion in x.get('value_expansions',()): declared_ids.update(expansion['value_ids'])
         priors={x['sense_id'] for x in release.entries('R-X3') if x['lemma'] in lemmas}
         priors.update(x['sense_id'] for rec in observation.get('rx_reads',{}).get('T3',()) for x in rec['payload'].get('semantic_priors',()) if x['lemma'] in lemmas)
+        # R-X ranks compatible readings; a previous occurrence cannot reopen
+        # a POS already resolved in the current morphology domain.
+        compatible_prior_ids={s['sense_id'] for s in release.entries('R-S') if any(
+            s['lemma']==v.lemma and s['POS']==v.pos for v in predicate_variants)}
+        if priors-compatible_prior_ids:
+            state.syntax_trace.append({'kind':'SEMANTIC_PRIOR_EXCLUDED','frame_ref':frame.frame_id,
+                'predicate_ref':frame.predicate_token_ref,'sense_ids':sorted(priors-compatible_prior_ids),
+                'reason':'MORPHOLOGY_INCOMPATIBLE'})
+        priors &= compatible_prior_ids
         context_senses=set(); blocked=set(); blocked_reasons={}
         for read in release.entries('DeclaredReads'):
             if read['lemma'] not in lemmas: continue
@@ -917,7 +927,15 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
                 from .spatial_references import for_sense as spatial_slot
                 spatial=spatial_slot(frame,s['sense_id'])
                 spatial_roles=(spatial['rule']['role_id'],) if spatial else ()
-                try: bindings=_bindings(frame,evidence,v,(*extra,*implicit_roles,*spatial_roles),
+                from .action_descriptions import licensed_roles
+                description_roles=licensed_roles(frame,v) if frame.semantic.get('action_description') else ()
+                if description_roles is None:continue
+                binding_valency=v
+                if frame.semantic.get('action_description') and not frame.semantic.get('passive_predication'):
+                    from .action_descriptions import independent_roles
+                    from .component_policy import policy
+                    binding_valency={**v,'roles':independent_roles(v['roles'],policy(release) or {})}
+                try: bindings=_bindings(frame,evidence,binding_valency,(*extra,*implicit_roles,*spatial_roles,*description_roles),
                                         parents=parent_frames)
                 except ValueError:
                     frame.semantic['binding_budget_exhausted']=True; state.diag('COMPUTATION_LIMIT',frame.frame_id); continue
@@ -928,6 +946,7 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
                     cid=s['sense_id']+':'+digest([bs,v,implicit])[:16] if implicit else s['sense_id']+':'+digest([bs,v])[:16]
                     if implicit_roles and not set(implicit_roles)<={r['role_id'] for r in v['roles']}: continue
                     specs.append({'candidate_id':cid,'sense_id':s['sense_id'],'label':s.get('label',s['sense_id']),'sense_kind':'KNOWN','roles':bs,'implicit_roles':list(implicit_roles),'spatial_roles':list(spatial_roles),'state_class':mode,'valency_ref':v.get('construction_id',digest(v)),
+                                  **({'description_roles':list(description_roles)} if frame.semantic.get('action_description') else {}),
                                   **({'query_existential_roles':list(implicit)} if implicit else {})})
         open_spec=None
         if not senses:
@@ -935,15 +954,23 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
             if policy and policy[0].get('allow',False):
                 bs=frame.semantic.get('proposed_roles') or {tid:'SURFACE_ARG' for tid in frame.argument_token_refs}
                 open_spec={'candidate_id':'open:'+digest([state.source_uid,frame.frame_id]),'label':lexical.get('surface',e.span),'sense_kind':'OPEN_LEXICAL','roles':bs,'implicit_roles':list(implicit_frame_roles(frame)),'state_class':'UNKNOWN'}
+                if frame.semantic.get('action_description'):
+                    open_spec['description_roles']=list(frame.semantic['action_description']['unassigned_roles'])
                 specs.append(open_spec)
         if senses and not specs and not frame.semantic.get('structural_unresolved'): state.diag('VALENCY_UNKNOWN',frame.frame_id)
         known_specs=[s for s in specs if s['sense_kind']=='KNOWN']
         schema_ids=[s['candidate_id'] for s in known_specs if s['sense_id'] in declared_ids]
+        missing_valencies={x for x in priors|context_senses if not any(v['sense_id']==x for v in release.entries('R-V'))}
+        for source,values in ((3,priors),(4,context_senses)):
+            if missing_valencies & values:
+                blocked.add(source);blocked_reasons[source]='candidate source has sense without released R-V'
+        if missing_valencies:state.diag('VALENCY_UNKNOWN','candidate source has sense without released R-V:'+frame.frame_id)
+        incompatible=priors-missing_valencies-{s['sense_id'] for s in known_specs}
+        if incompatible:
+            state.syntax_trace.append({'kind':'SEMANTIC_PRIOR_EXCLUDED','frame_ref':frame.frame_id,
+                'predicate_ref':frame.predicate_token_ref,'sense_ids':sorted(incompatible),'reason':'VALENCY_INCOMPATIBLE'})
         traces=build_source_traces(frame.frame_id,'predicate_value',schema_candidates=schema_ids,rs_senses=[s['candidate_id'] for s in known_specs],rx3_prior=[s['candidate_id'] for s in known_specs if s['sense_id'] in priors],wc_reads=[s['candidate_id'] for s in known_specs if s['sense_id'] in context_senses],rx3_applicable=True,wc_applicable=True,open_candidate=open_spec['candidate_id'] if open_spec else None,open_path_verified=True,resource_versions=(release.sha256,),blocked=blocked,blocked_reasons=blocked_reasons)
         frame.semantic['source_blocked']=bool(blocked) or frame.semantic.get('binding_budget_exhausted',False)
-        if any(x in priors|context_senses and not any(s['sense_id']==x for s in known_specs) for x in priors|context_senses):
-            frame.semantic['source_blocked']=True
-            state.diag('VALENCY_UNKNOWN','candidate source has sense without closed R-V:'+frame.frame_id)
         frame.semantic['candidate_specs']={s['candidate_id']:s for s in specs}
         frame.semantic['source_traces']=traces
         # Context and prior may rank, but never invent a canonical semantic value.

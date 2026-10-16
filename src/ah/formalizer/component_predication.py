@@ -63,6 +63,7 @@ def compose_alternatives(state, release, selector, region, tokens, predicates, c
         bases.extend(build_clause(state, release, selector, region, tokens, predicate, cfg, select=False, attachment=attachment, nominal_groups=nominal_groups,infinitive=infinitive,qualitative_groups=quantities,
             proposition_slots=(request.proposition_slots or {}).get(predicate.token_id,{}) if request else {},
             agreement_source=request.agreement_source if request else None,
+            description_context=bool(request and request.description_context),
             pending_roles=request.pending_for(predicate.token_id) if request else ()))
     if attachment is None and infinitive is None:
         from .component_nominal_utterance import candidates as nominatives
@@ -109,6 +110,10 @@ def compose_alternatives(state, release, selector, region, tokens, predicates, c
                     label+='; noun predicate: «'+f.anchor_span+'» describes what «'+subject+'» is'
                 if f.semantic.get('impersonal_predication'):
                     label+='; impersonal state; dative participant experiences it; no separate grammatical subject'
+                if f.semantic.get('action_description'):
+                    label+='; action description; occurrence is NOT asserted; unassigned roles='+', '.join(f.semantic['action_description']['unassigned_roles'])+'; no participant identity is supplied for them'
+                if f.semantic.get('passive_predication'):
+                    label+='; passive: the nominative participant receives the action, not performs it'
                 if cfg.get('modifier_composition')=='BOUNDED_FOREST_V1':
                     from .probe_wording import linked_readings
                     label += '; linked morphology='+linked_readings(f.semantic['morph_bindings'],evidence)

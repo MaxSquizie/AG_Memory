@@ -47,6 +47,8 @@ def compose(state, release, selector, region, tokens, cfg, child_composer, reque
     if len(governors)>1 or governors and not any(v.pos=='INFN' for t in owned for v in t.variants):
         state.diag('OPERATOR_CONTROL_UNRESOLVED',region.region_id);return []
     child_request=replace(request or InputSlot(),agreement_source=next(iter(governors.values()))) if governors else request
+    if any(key[2] in {'POSSIBLE','NECESSARY'} for key in matches):
+        child_request=replace(child_request or InputSlot(),description_context=True)
     frames = child_composer(owned,child_request)
     from .composition_children import select_child
     root=select_child(state,release,selector,region,frames,'PROPOSITION under '+str([k[2] for k in matches]),

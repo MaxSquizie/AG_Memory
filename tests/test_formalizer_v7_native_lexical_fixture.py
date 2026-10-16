@@ -48,15 +48,15 @@ def test_every_declared_finite_verb_has_explicit_infinitive_resources(tmp_path):
     release.validate_store(session.core.store)
 
 
-def test_broken_mapping_profile_stays_broken_for_both_verb_forms(tmp_path):
+def test_broken_mapping_profile_stays_broken_for_all_verb_forms(tmp_path):
     session = Session([], tmp_path / 'broken.log')
     release, _ = fixture(session.core, 'known_mapping_broken')
     send = [s for s in release.entries('R-S') if s['lemma'] == 'отправить']
     assert {(s['POS'], s['sense_id']) for s in send} == {
-        ('VERB', 'K_SEND'), ('INFN', 'K_SEND_INFN')}
+        ('VERB', 'K_SEND'), ('INFN', 'K_SEND_INFN'), ('PRTS', 'K_SEND_PRTS')}
     assert {v['sense_id'] for v in release.entries('R-V') if v['sense_id'].startswith('K_SEND')} == {
-        'K_SEND', 'K_SEND_INFN'}
-    assert not any(m['sense_id'] in {'K_SEND', 'K_SEND_INFN'}
+        'K_SEND', 'K_SEND_INFN', 'K_SEND_PRTS'}
+    assert not any(m['sense_id'] in {'K_SEND', 'K_SEND_INFN', 'K_SEND_PRTS'}
                    for m in release.entries('TemplateMap'))
 
 

@@ -19,7 +19,7 @@ class TestTraceConstruction(unittest.TestCase):
         self.assertEqual([t.source_id for t in tr], [1, 2, 3, 4, 5])
         by = {t.source_id: t.status for t in tr}
         self.assertEqual(by[1], FOUND)                 # schema value_ids present
-        self.assertEqual(tr[0].candidate_ids, ("HAVE", "HAS_PART"))
+        self.assertEqual(tr[0].candidate_ids, ("HAS_PART", "HAVE"))  # canonical sorted IDs
         self.assertEqual(by[2], CHECKED_EMPTY)         # R-S read, none (default applicable)
         self.assertEqual(by[3], NOT_APPLICABLE)       # no R-X3 store wired (Phase 1 default)
         self.assertEqual(by[4], CHECKED_EMPTY)        # declared reads -> C-grounds only

@@ -67,6 +67,7 @@ MORPH = {'NOUN':'существительное','VERB':'глагол','INFN':'�
     'abl':'творительный','present':'настоящее время','future':'будущее время',
     'indicative':'изъявительное наклонение','imperative':'повелительное наклонение'}
 TRACE = {'FEATURE_CHECK_BATCH':'Проверка грамматических признаков',
+    'SEMANTIC_PRIOR_EXCLUDED':'Прежний разбор не подходит текущей форме слова',
     'CONTENT_SEPARATOR_OWNERSHIP':'Пунктуация, связывающая родителя с содержанием',
     'STRUCTURAL_PARTITION_COVERAGE':'Слова, оставшиеся без содержательной роли',
     'STRUCTURAL_BOUNDARY_DOMAIN':'Согласование границ с принадлежностью слов',
@@ -91,6 +92,7 @@ TRACE = {'FEATURE_CHECK_BATCH':'Проверка грамматических п
     'QUANTIFIER_BINDING_DOMAIN':'Варианты связывания квантора','OPERATOR_COMPOSITION':'Вложенность операторов',
     'COMPOSITION_CLOSED':'Объединение частей завершено','COMPOSITION_EMPTY':'Допустимый разбор не построен'}
 DIAGNOSTICS = {'COMPOSITION_SCOPE_BOUNDARY_CHANGED':'При объединении изменилось содержимое цельного условия.',
+    'ACTION_DESCRIPTION_WITHOUT_SCOPE':'Описание действия не утверждает его совершения. Для записи нужна внешняя модальность или вложенное содержание.',
     'COMPOSITION_DEPENDENCY_NO_PROGRESS':'Зависимости повторяют те же несовместимые состояния. Разбор остановлен без принудительного выбора.',
     'COMPOSITION_DEPENDENCY_STALE':'Связанный результат изменился после расчёта. Устаревший разбор не допущен к записи.',
     'COMPOSITION_DISPATCH_INCOMPLETE':'Диспетчер достиг предела согласования зависимостей. Разбор не завершён.',
@@ -251,6 +253,8 @@ class ReadableInspection:
         for role,gap in sem.get('implicit_arguments',{}).items():
             binding=self.implicit.get(gap['gap_id'])
             rows.append([esc(ROLES.get(role,role)),esc(self.target(binding) if binding else 'Не определён'),self.link(gap['gap_id'],'Пропущен в тексте; открыть выбор') if gap['gap_id'] in self.index.by_ref else 'Пропущен в тексте',esc(self.morphology(gap.get('features',{})))])
+        for role in sem.get('action_description',{}).get('unassigned_roles',()):
+            rows.append([esc(ROLES.get(role,role)),'Не указан в описании действия','Сущность не создаётся','Признаки не заданы'])
         return rows
 
     def formula(self,node,depth=0,seen=frozenset(),budget=None):
@@ -273,6 +277,9 @@ class ReadableInspection:
             out=self.link(ref,'«'+label+'»') if ref else esc(label)
             if node.get('polarity') is False:out='Неверно, что: '+out
             out+=table(['Роль','Участник'],[[esc(ROLES.get(k,k)),esc(self.target(v))] for k,v in node['actants'].items()])
+            if node.get('action_description'):
+                out+=paragraph('Описание действия: его совершение отдельно не утверждается. Не указаны: '+
+                    ', '.join(ROLES.get(r,r) for r in node['action_description']['unassigned_roles'])+'.')
             if node.get('semantic_status') in {'UNLINKED','OPEN_LEXICAL'}:out+=paragraph('Словарный смысл этого слова не установлен. Сохранены исходное слово и связи.')
             return out
         op=node.get('operator',node.get('function_id'));children=list(node.get('operands',()))
@@ -339,6 +346,13 @@ class ReadableInspection:
 
     def choice_text(self,text):
         # Translate known protocol labels only. Never infer a model rationale.
+        if text.startswith('Whole target is one infinitive action description'):
+            return 'Весь фрагмент описывает одно действие в инфинитиве с его участниками и определениями; отдельного родительского сказуемого нет.'
+        text=re.sub(r'; action description; occurrence is NOT asserted; unassigned roles=([^;]*); no participant identity is supplied for them',
+            lambda m:'; Описание действия без утверждения о совершении; не указаны: '+
+            (', '.join(ROLES.get(r.strip(),r.strip()) for r in m[1].split(',') if r.strip()) or 'нет таких ролей')+'; сущности не создаются',text)
+        text=text.replace('; passive: the nominative participant receives the action, not performs it',
+            '; Страдательный залог: участник в именительном падеже является объектом действия')
         boundary=re.fullmatch(r'End after «(.*?)» @(\d+); selected words «(.*?)»; content left for this relation: «(.*?)»',text,re.S)
         if boundary:return ('Конец после «'+boundary[1]+'», позиция '+boundary[2]+'. Слова связи: «'+boundary[3]+
                             '». Во вложенном содержании останется: «'+boundary[4]+'».')
@@ -356,7 +370,7 @@ class ReadableInspection:
             return head+'. Безличное состояние: участник в дательном падеже испытывает его. Отдельное подлежащее не добавляется. Это вариант для проверки пробой.'
         if text.startswith('Revise the provisional'):return 'Пересмотреть предварительный тип связи и границы с учётом требований вложенных частей.'
         if text.startswith('Keep the whole area unresolved'):return 'Оставить весь фрагмент неразрешённым: подтверждённого исправления нет.'
-        if text.startswith('No agreement governor'):return 'Вложенная часть имеет собственное сказуемое и самостоятельное согласование.'
+        if text.startswith('No agreement governor'):return 'Согласование с внешним словом не переносится. Вложенная часть сама определяет участников; безличное описание может не называть исполнителя.'
         match=re.match(r'Start at «(.*?)» @(\d+)',text)
         if match:return 'Начало перед «'+match[1]+'», позиция '+match[2]+'.'
         match=re.match(r'End after «(.*?)» @(\d+); full content «(.*)»',text,re.S)
@@ -535,6 +549,10 @@ class ReadableInspection:
             sem=r.get('semantic',{});out+=paragraph('Этот вариант не завершён и не должен считаться готовым фактом.' if sem.get('structural_unresolved') else 'Это промежуточный разбор действия или свойства. Фактическую запись смотрите в обзоре.')
             if sem.get('impersonal_predication'):
                 out+=paragraph('Безличное состояние: участник в дательном падеже испытывает его. Отдельное подлежащее не добавляется.')
+            if sem.get('action_description'):
+                out+=paragraph('Это описание действия, а не факт его совершения. Указанные участники сохранены; для остальных ролей сущности и тождества не придуманы. Внешняя связь задаёт возможность, необходимость или статус вложенного содержания.')
+            if sem.get('passive_predication'):
+                out+=paragraph('Страдательный залог: участник в именительном падеже является объектом действия. Согласование описывает его, а не исполнителя.')
             if sem.get('control_binding'):
                 binding=sem['control_binding']
                 out+='<p>Участник инфинитива взят из '+self.link(binding['frame_ref'],'родительского действия')+'. Его исходный падеж сохранён; роль в дочернем действии: '+esc(ROLES.get(binding.get('child_role'),binding.get('child_role','не указана')))+'.</p>'
@@ -567,6 +585,11 @@ class ReadableInspection:
         elif c=='Привязки':out+=paragraph('Установленная ссылка: '+self.target(r.get('target')))
         elif c=='Трасса' and r.get('kind')=='DEFERRED_CLAUSE_BOUNDARY':
             out+=paragraph('Возможна вложенная часть высказывания. Разбиение на самостоятельные предложения отложено: сначала нужно подтвердить владельца и полные границы содержания отдельной пробой.')
+        elif c=='Трасса' and r.get('kind')=='SEMANTIC_PRIOR_EXCLUDED':
+            out+=paragraph('Прежний смысловой разбор слова «'+self.word(r.get('predicate_ref',''))+'» не применяется: '+
+                ('его часть речи не соответствует выбранному чтению.' if r.get('reason')=='MORPHOLOGY_INCOMPATIBLE' else
+                 'его роли несовместимы с текущим разбором, хотя ресурс проверен.')+
+                ' Опыт не меняет грамматику текущего фрагмента и не делает поиск незавершённым.')
         elif c=='Трасса' and r.get('kind')=='STRUCTURAL_PARTITION_COVERAGE':
             out+=paragraph('Разбиение потеряло значимые слова: «'+' '.join(self.word(t) for t in r.get('uncovered_token_refs',()))+
                 ('». Они не могут исчезнуть во вводящем выражении. Нужно расширить родительскую часть или пересмотреть связь; запись вложенной части отдельно заблокирована.' if r.get('relation') in {None,'CONTENT'} else

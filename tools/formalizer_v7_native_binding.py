@@ -221,6 +221,24 @@ def fixture(core, profile):
                 infinitive_mapping=deepcopy(mapping)
                 infinitive_mapping['sense_id']=infinitive_id
                 R['TemplateMap']['entries'].append(infinitive_mapping)
+    # Passive short participles declare their own POS and surface government.
+    # The canonical roles stay unchanged; no runtime lexical alias is inferred.
+    for finite in tuple(R['R-S']['entries']):
+        if finite['POS']!='VERB':continue
+        vals=[v for v in R['R-V']['entries'] if v['sense_id']==finite['sense_id'] and
+              any(r['role_id']=='OBJECT' and r['argument_types']==['ENTITY'] and
+                  'acc' in r.get('allowed_cases',()) and not r.get('allowed_preps') for r in v['roles'])]
+        if not vals:continue
+        sid=finite['sense_id']+'_PRTS'
+        R['R-S']['entries'].append({**finite,'POS':'PRTS','sense_id':sid})
+        for val in vals:
+            val=deepcopy(val);val['sense_id']=sid
+            for role_ in val['roles']:
+                if role_['role_id']=='SUBJECT':role_['allowed_cases']=['abl','ins']
+                elif role_['role_id']=='OBJECT':role_['allowed_cases']=['nom']
+            R['R-V']['entries'].append(val)
+        R['TemplateMap']['entries'].extend({**mapping,'sense_id':sid} for mapping in tuple(R['TemplateMap']['entries'])
+                                          if mapping['sense_id']==finite['sense_id'])
     # Independently declared TEST_ONLY grammar, derived from the finalized
     # released dictionary/valencies. A rule must cover its entire sentence;
     # complex or ambiguous structures still take the ordinary bounded TP path.

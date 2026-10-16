@@ -227,18 +227,36 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child):
         proposal,partition=selected;owned=proposal.groups[0];markers=partition[0]
         slot=request or InputSlot()
         slot=replace(slot,surrounding_relations=(*slot.surrounding_relations,kind))
+        if kind in {'POSSIBLE','NECESSARY'}:
+            slot=replace(slot,description_context=True)
         governors=[t for t in markers if any(v.pos=='ADJS' or v.pos=='VERB' and v.mood!='imperative' for v in t.variants)]
         if kind in {'POSSIBLE','NECESSARY'} and governors:
+            from .component_policy import _morph
+            from .probe_wording import reading as reading_text
+            governor_options=[{'candidate_id':t.token_id+':'+digest(_morph(v)),
+                'token_ref':t.token_id,'agreement_reading':_morph(v),
+                'label':'Agreement/controller anchor «'+t.span+'»; personal agreement with a participant: '+reading_text(_morph(v))}
+                for t in governors for v in t.variants if
+                (v.pos=='ADJS' or v.pos=='VERB' and v.mood!='imperative') and not v.features & {'Impe','Prdx'}]
             selected=choose(state,release,selector,region,cfg,'structural_governor',
                 [{'candidate_id':'INDEPENDENT','label':'No agreement governor: the child has independent predication'},
-                 *[{'candidate_id':t.token_id,'token_ref':t.token_id,'label':'Agreement/controller anchor «'+t.span+'»'} for t in governors]],
+                 *governor_options],
                 'Modal words: «'+' '.join(t.span for t in markers)+'». Content: «'+' '.join(t.span for t in owned)+'». '
                 'Does a modal word supply person, number or gender agreement for a dependent infinitive? '
                 'If the content already has its own conjugated predicate, choose no governor. '
+                'Impersonal necessity or permission has no subject agreement: choose no governor. '
+                'A passive predicate agrees with its patient, not its performer. '
                 'A dictionary reading alone does not establish this connection.')
             if not selected:return block(state,region)
             if selected[0]['candidate_id']!='INDEPENDENT':
-                slot=replace(slot,agreement_source=next(t for t in governors if t.token_id==selected[0]['token_ref']))
+                source=next(t for t in governors if t.token_id==selected[0]['token_ref'])
+                reading=selected[0]['agreement_reading']
+                source=replace(source,variants=tuple(v for v in source.variants if _morph(v)==reading))
+                slot=replace(slot,agreement_source=source)
+            else:
+                # Explicit independence supersedes an inherited agreement
+                # source. Absence of a new governor task may still inherit it.
+                slot=replace(slot,agreement_source=None)
         frames,root=child(state,release,selector,region,owned,cfg,compose_child,slot,kind+' content')
         if root is None:return block(state,region,frames)
         if kind=='QUERY':
@@ -301,7 +319,7 @@ def content(state,release,selector,region,tokens,cfg,request,compose_child,proof
     candidates=[f for f in parents if f.predicate_token_ref==owner.token_id and not f.semantic.get('structural_unresolved')]
     if len(candidates)!=1:return block(state,region,parents)
     target=candidates[0]
-    child_slot=InputSlot(inside_attitude=True,
+    child_slot=InputSlot(inside_attitude=True,description_context=True,
         pending_propositions={ref:roles for ref,roles in inherited.items() if ref in body_ids},
         pending_proposition_sources={ref:refs for ref,refs in sources.items() if ref in body_ids})
     if any(v.pos=='INFN' for t in body for v in t.variants) and not any(v.pos=='VERB' for t in body for v in t.variants):

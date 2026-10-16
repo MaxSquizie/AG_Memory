@@ -141,6 +141,7 @@ RESOURCE_SCHEMAS = {
             'coordination_operators': array(enum('AND')),
             'infinitive_composition': obj(('version','relations'), {
                 'version':enum('DEPENDENT_INFINITIVE_V1'),
+                'independent_subject_cases':array(enum('nom','dat'),minimum=1),
                 'relations':array(obj(('role','attitude'),{'role':S,'attitude':enum('HYPOTHETICAL','UNKNOWN')}),minimum=1)}),
             'temporal_coordination':enum('NAMED_PERIOD_SCOPE_V1'),
             'quality_predicate_pos': array(enum('ADJF','ADJS')),

@@ -21,12 +21,19 @@ def compose(state, release, selector, region, tokens, cfg, depth,request=None):
         return block(state,region,[],'COMPONENT_INFINITIVE_SEARCH_INCOMPLETE')
     choices=[{'candidate_id':cid,'label':'Infinitive area «'+state.text[tokens[a].start:tokens[b-1].end]+
         '»; remaining parent «'+' '.join(t.span for t in [*tokens[:a],*tokens[b:]])+'»'} for cid,(a,b) in options.items()]
+    standalone=bool(request and request.description_context and not any(
+        v.pos=='VERB' and v.lemma not in cfg.get('copula_lemmas',()) for t in tokens for v in t.variants))
+    if standalone:
+        choices.append({'candidate_id':'WHOLE_ACTION_DESCRIPTION','label':
+            'Whole target is one infinitive action description with its participants and attributes; no separate parent predicate'})
     key=region.region_id+'|infinitive-boundary'
     chosen=_probe(state,selector,release,key,'component_attachment',choices,state.text[slice(*region.source_range)],region.source_range,
         question='Select the full dependent infinitive area including its complements; the remaining parent must remain a clause. '
+        +('Or select the whole-target description if there is no separate parent predicate. ' if standalone else '')+
         'A boundary does not establish the relation, the controller or occurrence of the infinitive event.')
     state.syntax_trace.append({'kind':'INFINITIVE_BOUNDARY','decision_ref':key,'options':options,'selected':chosen})
     if chosen is None:return block(state,region,[],'COMPONENT_INFINITIVE_UNRESOLVED')
+    if chosen=='WHOLE_ACTION_DESCRIPTION':return None
     a,b=options[chosen]; body=tokens[a:b];parent=[*tokens[:a],*tokens[b:]]
     if not parent:return block(state,region,[],'COMPONENT_INFINITIVE_UNRESOLVED')
     pr=region_for(state,region,parent,'INFINITIVE_PARENT')
@@ -61,7 +68,7 @@ def compose(state, release, selector, region, tokens, cfg, depth,request=None):
     if chosen is None:return block(state,region,frames,'COMPONENT_INFINITIVE_CONTROL_UNRESOLVED')
     owner,relation,alias,label=links[chosen]
     cr=region_for(state,region,body,'INFINITIVE')
-    child_slot=InputSlot(inside_attitude=True,controller=alias,
+    child_slot=InputSlot(inside_attitude=True,controller=alias,description_context=True,
         pending_propositions={ref:roles for ref,roles in (request.pending_propositions or {}).items()
             if ref in {t.token_id for t in body}} if request else None,
         pending_proposition_sources={ref:refs for ref,refs in (request.pending_proposition_sources or {}).items()

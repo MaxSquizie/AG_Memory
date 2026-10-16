@@ -93,7 +93,7 @@ def compose(state,release,selector,region,tokens,cfg,request,child_composer):
     if selected not in options:
         state.diag('ATTITUDE_SLOT_UNCLOSED',region.region_id);return []
     owner,rule,body,parent,scope,separators=options[selected]
-    children=child_composer(body,InputSlot(inside_attitude=True))
+    children=child_composer(body,InputSlot(inside_attitude=True,description_context=True))
     child=select_child(state,release,selector,region,children,rule['attitude']+' PROPOSITION',
                        'This is the released parent proposition slot; its content is not independently asserted.')
     if child is None:

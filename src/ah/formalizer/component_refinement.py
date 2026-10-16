@@ -219,7 +219,15 @@ def _compose_lexical_area(state, release, selector, region, tokens, cfg, depth=0
     boundary=select(state,release,selector,region,search_tokens,cfg) if cfg.get('refinement') else None
     if boundary is False: return block(state,region,[],'COMPONENT_REFINEMENT_UNRESOLVED')
     if boundary is None:
-        if attachment is None and infinitive is None and (request is None or
+        from .action_descriptions import passive_rule
+        descriptive=bool(request and request.description_context)
+        passive_heads=[t for t in tokens if any(passive_rule(v,cfg) for v in t.variants)] if descriptive else []
+        # A dependent infinitive requires a possible lexical parent. With no
+        # parent, retain the whole area as a predication candidate instead of
+        # requiring its object to become a fictitious parent clause.
+        has_parent=any(v.pos in {'VERB','ADJS','PRED'} or v.pos=='ADJF' and 'nom' in v.cases
+                       for t in tokens for v in t.variants)
+        if not passive_heads and has_parent and attachment is None and infinitive is None and (request is None or
                 request.output_sort=='PROPOSITION' and request.agreement_source is None):
             from .component_infinitives import compose as compose_infinitive
             nested=compose_infinitive(state,release,selector,region,tokens,cfg,depth,request=request)
@@ -227,7 +235,7 @@ def _compose_lexical_area(state, release, selector, region, tokens, cfg, depth=0
         if request is not None and request.output_sort=='EVENT_DESCRIPTION':
             predicates=[]
         elif request is not None and request.agreement_source is not None:
-            predicates=[t for t in tokens if any(v.pos=='INFN' for v in t.variants)]
+            predicates=[t for t in tokens if any(v.pos=='INFN' for v in t.variants)] + passive_heads
         elif participial or infinitive:
             predicates=[tokens[0]]
         else:
@@ -236,6 +244,9 @@ def _compose_lexical_area(state, release, selector, region, tokens, cfg, depth=0
                 v.pos in cfg.get('quality_predicate_pos',()) or impersonal_predicate(v,cfg) for v in t.variants)]
             from .component_predication import nominal_predicates
             predicates.extend(t for t in nominal_predicates(tokens,cfg) if t not in predicates)
+            if descriptive:
+                predicates.extend(t for t in tokens if t not in predicates and
+                    (t in passive_heads or any(v.pos=='INFN' for v in t.variants)))
         nominal_groups=[]
         if connectives(state,release,region,tokens):
             from .component_nominal_groups import select as select_nominal_groups

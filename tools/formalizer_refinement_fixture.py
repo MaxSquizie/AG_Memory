@@ -4,7 +4,7 @@
 def extend(cfg):
     cfg['contextual_nominal_case']='PROPER_NAME_COORDINATION_V1'
     cfg['soft_clause_boundaries']='FINITE_SUBJECT_HINT_V2'
-    cfg['infinitive_composition']={'version':'DEPENDENT_INFINITIVE_V1','relations':[
+    cfg['infinitive_composition']={'version':'DEPENDENT_INFINITIVE_V1','independent_subject_cases':['dat'],'relations':[
         {'role':'PURPOSE','attitude':'HYPOTHETICAL'}, {'role':'OBJECT','attitude':'UNKNOWN'}]}
     cfg['refinement']={'version':'POSTNOMINAL_AREAS_V1','max_depth':8,
         'ambiguity_policy':'ASK_THEN_MINIMAL_MEMBER_SET_V1',

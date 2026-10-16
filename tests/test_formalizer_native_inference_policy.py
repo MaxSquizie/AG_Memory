@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 from dataclasses import replace
-import json
 
 import pytest
 
@@ -15,9 +14,10 @@ from ah.inference.engine import InferenceEngine
 from ah.model import ActantRole
 from tools.formalizer_v7_extended_binding import Session
 from tools.formalizer_v7_native_binding import ChatBackend, execute_native
+from test_structural_relation_tasks import Script, relation, unary, binary
 
 
-CONFIG = {"provider": "lmstudio", "base_url": "http://unused-test-endpoint", "model": "bounded-policy-test"}
+CONFIG = {"provider": "lmstudio", "base_url": "http://unused-test-endpoint", "model": "bounded-policy-test", "structure_mode": "region_probes"}
 
 
 def ingest_open(monkeypatch, tmp_path, scope=None):
@@ -25,30 +25,23 @@ def ingest_open(monkeypatch, tmp_path, scope=None):
     # store, support paths and provider WAL are the actual runtime machinery.
     text = {None: "Иван глоркнул книгу.", "NOT": "Иван не глоркнул книгу.",
             "OR": "Иван глоркнул книгу или Мария уснула."}[scope]
-    def generate(self, prompt, **kwargs):
-        tokens = json.loads(prompt)["tokens"]
-        anchors = {token["text"]: token["id"] for token in tokens}
-        nodes = [{"kind": kind, "anchor_spans": [anchors[word]]} for kind, word in (
-            ("PREDICATE", "глоркнул"), ("ENTITY", "Иван"), ("ENTITY", "книгу"))]
-        edges = [{"kind": "ARGUMENT", "from": 0, "to": 1, "role_id": "SUBJECT"},
-                 {"kind": "ARGUMENT", "from": 0, "to": 2, "role_id": "OBJECT"}]
-        if scope == "NOT":
-            nodes.append({"kind": "NOT", "anchor_spans": [anchors["не"]]})
-            edges.append({"kind": "OPERAND", "from": 3, "to": 0})
-        elif scope == "OR":
-            nodes.extend([{"kind": kind, "anchor_spans": [anchors[word]]} for kind, word in (
-                ("OR", "или"), ("PREDICATE", "уснула"), ("ENTITY", "Мария"))])
-            edges.extend([{"kind": "OPERAND", "from": 3, "to": 0},
-                          {"kind": "OPERAND", "from": 3, "to": 4},
-                          {"kind": "ARGUMENT", "from": 4, "to": 5, "role_id": "SUBJECT"}])
-        return json.dumps({"hypotheses": [{"local_id": "policy-test", "nodes": nodes,
-            "edges": edges, "alignment": [token["id"] for token in tokens]}]}, ensure_ascii=False)
-    monkeypatch.setattr(ChatBackend, "generate", generate)
+    # Explicitly retain an unknown lemma: morphology does not invent a sense.
+    oov = [('structural_oov_reading', 'Source «глоркнул»: VERB;')]
+    steps = oov + relation('LEXICAL')
+    if scope == 'NOT':
+        steps = oov + unary('NOT', 'не', 'не') + oov + relation('LEXICAL')
+    elif scope == 'OR':
+        parts = binary('OR', ('Иван', 'книгу'), ('Мария', 'уснула'))
+        steps = oov + parts[:-2] + oov + parts[-2:]
+    script = Script(steps)
+    monkeypatch.setattr(ChatBackend, 'generate', lambda self, prompt, **kw: script.generate(prompt, **kw))
     payload = {"raw_input": {"text": text, "source_id": "policy:" + str(scope), "revision": 1,
         "range": [0, len(text)], "language": "ru", "request_kind": "ASSERTION", "batch_kind": "MESSAGE",
         "source_timestamp": "2026-10-09T12:00:00+00:00"}}
     session = Session([payload], tmp_path / "native-policy.log")
-    return session, execute_native(session, payload, CONFIG)
+    result = execute_native(session, payload, CONFIG)
+    assert not script.errors and not script.steps, (script.errors, list(script.steps))
+    return session, result
 
 
 @pytest.mark.parametrize("scope", [None, "NOT", "OR"])
@@ -57,7 +50,7 @@ def test_native_export_reports_effective_open_capability_without_optional_metada
     assert actual["runtime"]["report"]["terminal"] == "APPLIED"
     assert actual["open"] == {"semantic_status": "UNLINKED", "capabilities": ["EXACT_ATTESTATION"]}
     assert actual["aliases"] == []
-    assert actual["diagnostics"]["codes"] == []
+    assert actual["diagnostics"]["codes"] == ["OOV_KEEP_AS_IS"]  # valid unknown lemma, no error
     open_records = [node for node in session.store.ledger.data["nodes"].values()
                     if node.get("semantic_status") == "UNLINKED"]
     assert len(open_records) == 1

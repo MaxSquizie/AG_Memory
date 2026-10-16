@@ -100,6 +100,7 @@ def describe(state,root,owned):
         args.extend(role+'='+tree(slot.get('tree') or {'frame_ref':slot.get('frame_ref')},seen)+
                     ' ['+slot.get('attitude','UNKNOWN')+']' for role,slot in sem.get('proposition_args',{}).items())
         args.extend(role+'=omitted, identity unresolved' for role in sem.get('implicit_arguments',{}))
+        args.extend(role+'=unspecified in action description' for role in sem.get('action_description',{}).get('unassigned_roles',()))
         args.extend(word(tid)+'=bound variable '+str(var) for tid,var in sem.get('bound_arguments',{}).items())
         args.extend('preposition '+pp['lemma']+' for '+word(tid) for tid,pp in sem.get('preposition_bindings',{}).items())
         senses=sorted({str(spec.get('sense_id') or spec.get('label')) for spec in sem.get('candidate_specs',{}).values()})

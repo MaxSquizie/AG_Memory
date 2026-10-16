@@ -4,7 +4,7 @@ from .component_probe import _probe
 from .component_candidates import enumerate_candidates
 
 
-def build_clause(state,release,selector,region,tokens,p,cfg, *, select=True, attachment=None, nominal_groups=(), infinitive=None,qualitative_groups=(),proposition_slots=None,agreement_source=None,pending_roles=()):
+def build_clause(state,release,selector,region,tokens,p,cfg, *, select=True, attachment=None, nominal_groups=(), infinitive=None,qualitative_groups=(),proposition_slots=None,agreement_source=None,pending_roles=(),description_context=False):
     from .contextual_name_case import overlay
     tokens=overlay(tokens,nominal_groups)
     if select:
@@ -44,7 +44,7 @@ def build_clause(state,release,selector,region,tokens,p,cfg, *, select=True, att
                 and (e.token_id in groups or any(v.pos in {'NOUN','NPRO'} and set(v.cases)&allowed_cases for v in e.variants))]
     # The number of nominals is not a grammatical exclusion. Large domains
     # go through constraint reduction, under the same released search budget.
-    candidates=enumerate_candidates(state,release,cfg,region,tokens,p,temporal,nominals,groups,selector=selector,attachment=attachment,nominal_groups=nominal_groups,infinitive=infinitive,proposition_slots=proposition_slots,agreement_source=agreement_source,pending_roles=pending_roles,qualitative_groups=qualitative_groups)
+    candidates=enumerate_candidates(state,release,cfg,region,tokens,p,temporal,nominals,groups,selector=selector,attachment=attachment,nominal_groups=nominal_groups,infinitive=infinitive,proposition_slots=proposition_slots,agreement_source=agreement_source,pending_roles=pending_roles,qualitative_groups=qualitative_groups,description_context=description_context)
     for f in candidates:
         from .nominal_readings import attach_groups
         attach_groups(f,qualitative_groups)

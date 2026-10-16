@@ -35,7 +35,7 @@ def build_plan(state,release,store):
         if not selected or d is None or d.outcome!='RESOLVED': raise ValueError('STRUCTURAL_OPERAND_UNRESOLVED')
         e=evidence[f.predicate_token_ref]
         roles={}; mention_roles={}; mention_entities={}; mention_bindings={}
-        selected_roles=set(selected['roles'].values())|set(f.semantic.get('proposition_args',{}))|set(selected.get('implicit_roles',()))|set(selected.get('spatial_roles',()))
+        selected_roles=set(selected['roles'].values())|set(f.semantic.get('proposition_args',{}))|set(selected.get('implicit_roles',()))|set(selected.get('spatial_roles',()))|set(selected.get('description_roles',()))
         mappings=[m for m in release.entries('TemplateMap') if m['sense_id']==selected.get('sense_id') and set(m.get('roles',()))==selected_roles]
         measures=[m for m in release.resources.get('MeasureSchema',{}).get('entries',())
                   if len(mappings)==1 and m['template_ref']==mappings[0]['template_ref'] and m.get('literal_syntax')]
@@ -122,15 +122,16 @@ def build_plan(state,release,store):
                 'source_ref':token_ref,'source_tag':tag},frag)
         predicate_surface,predicate_lemma=selected_forms(f,e)
         if selected['sense_kind']=='KNOWN':
-            mapping=next((m for m in release.entries('TemplateMap') if m['sense_id']==sense and tuple(sorted(m.get('roles',())))==tuple(sorted(roles))),None)
+            schema_roles=set(roles)|set(selected.get('description_roles',()))
+            mapping=next((m for m in release.entries('TemplateMap') if m['sense_id']==sense and set(m.get('roles',()))==schema_roles),None)
             if mapping is None or not store.has_uid(mapping['template_ref']) or store._store.kind_of(mapping['template_ref']).value!='T': raise ValueError('CANONICAL_MAPPING_MISSING')
-            if {r.value for r in store._store.get_template(mapping['template_ref']).roles}!=set(roles): raise ValueError('CANONICAL_MAPPING_MISSING')
+            if {r.value for r in store._store.get_template(mapping['template_ref']).roles}!=schema_roles: raise ValueError('CANONICAL_MAPPING_MISSING')
             tid=mapping['template_ref']
         else:
             tid='T:open:'+digest([state.source_uid,f.predicate_token_ref,selected['candidate_id'],roles])
             emit('ENSURE_TEMPLATE',{'uid':tid,'predicate_form':predicate_surface,
                 **({'predicate_lemma':predicate_lemma} if predicate_lemma else {}),
-                'roles':sorted(roles),'semantic_status':'UNLINKED','source_ref':f.predicate_token_ref,'source_tag':tag},frag)
+                'roles':sorted(set(roles)|set(selected.get('description_roles',()))),'semantic_status':'UNLINKED','source_ref':f.predicate_token_ref,'source_tag':tag},frag)
         content={'predicate':sense or tid,'actants':roles}
         ck=digest(content); mode=selected['state_class']; open_=selected['sense_kind']=='OPEN_LEXICAL'
         identity=[ck]
@@ -138,6 +139,7 @@ def build_plan(state,release,store):
         elif mode!='STATE' and not structural: identity.extend([state.source_uid,state.interpretation_version,fid])
         nid='N:'+digest(identity)
         emit('ENSURE_NODE',{'uid':nid,'template_ref':tid,'actants':roles,'semantic_status':'UNLINKED' if open_ else 'KNOWN','temporal_mode':mode,'identity_key':identity,'content_key':ck,'polarity':True,'proposition':content,'source_tag':tag,'source_ref':f.predicate_token_ref,
+            **({'action_description':{'unassigned_roles':selected.get('description_roles',[])}} if f.semantic.get('action_description') else {}),
             **({'lexical_anchor':predicate_lemma or predicate_surface.casefold()} if open_ else {})},frag)
         for role,child in f.semantic.get('proposition_args',{}).items():
             target=roles[role]
@@ -233,13 +235,15 @@ def build_plan(state,release,store):
                 selected=frame.semantic.get('candidate_specs',{}).get(dec.selected[0]) if dec and len(dec.selected)==1 else None
                 if not selected: continue
                 ev=evidence[frame.predicate_token_ref]
-                morphology.append({'surface':ev.span,'variants':[{'lemma':v.lemma,'POS':v.pos} for v in ev.variants]})
+                from .native_frontend import _frame_variants
+                readings=_frame_variants(frame,ev)
+                morphology.append({'surface':ev.span,'variants':[{'lemma':v.lemma,'POS':v.pos} for v in readings]})
                 shapes.append({'construction':frame.construction,'role_ids':sorted(set(selected['roles'].values()))})
                 # A grammatical constructor is not a lexical sense of the noun
                 # serving as its source anchor. Never learn that false R-X prior.
                 if (not frame.semantic.get('nominal_dependency_kind') and selected.get('sense_id')
                         and len(frame.semantic.get('lexical_units',{}).get(frame.predicate_token_ref,{}).get('anchor_refs',()))<=1):
-                    rows.extend({'lemma':v.lemma,'sense_id':selected['sense_id']} for v in ev.variants if v.lemma)
+                    rows.extend({'lemma':v.lemma,'POS':v.pos,'sense_id':selected['sense_id']} for v in readings if v.lemma)
             emit('WRITE_COMMITTED_RX',{'record_id':'rx:'+digest([tag,frag,sid]),'source_tag':tag,
                 'support_record_id':sid,'resource_snapshot':state.resource_snapshot,
                 'stages':{'T1':{'morphological_priors':morphology},'T2':{'structural_priors':shapes},'T3':{'semantic_priors':rows}}},frag)
@@ -287,6 +291,8 @@ def build_plan(state,release,store):
         before=dict(op_by_id)
         nominal_before=len(nominal_links)
         try:
+            from .action_descriptions import validate_scope
+            validate_scope(t,frames)
             if 'frame_ref' in t:
                 f=frames[t['frame_ref']]
                 # Scope belongs to the sealed tree. The writer must never

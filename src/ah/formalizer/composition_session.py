@@ -73,6 +73,9 @@ class CompositionSession:
             parts.append('Already handled outside the target: '+'; '.join(RELATIONS[k] for k in request.surrounding_relations)+
                 '. Select another such relation only if the target words themselves express it.')
         if request.output_sort=='EVENT_DESCRIPTION':parts.append('This area must describe an event or state.')
+        if request.description_context and not request.controller and any(v.pos in {'INFN','PRTS'} for t in tokens for v in t.variants):
+            parts.append('This content is not independently asserted. An action description may leave participants unspecified; '
+                         'do not invent a performer or copy agreement from an impersonal modal word.')
         if request.independent_subject:
             parts.append('No subject is inherited from the surrounding predicate. Determine participants from this content itself; '
                          'do not copy a speaker or an ancestor controller into it.')
