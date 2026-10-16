@@ -56,7 +56,7 @@ def attach_tree(frames,tree,region):
 
 def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof):
     refs=[t.token_id for group in groups for t in group]
-    if len(refs)!=len(set(refs)) or not refs:return None
+    if len(refs)!=len(set(refs)):return None
     used=set(refs);markers=[t for t in tokens if t.token_id not in used]
     parts=['«'+' '.join(t.span for t in g)+'»' for g in groups]
     punctuation=[t for t in markers if all(unicodedata.category(c).startswith('P') for c in t.span)]
@@ -79,6 +79,9 @@ def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof
         checked=confirm(state,release,selector,region,cfg,kind,links,groups)
         if isinstance(checked,ContentRequired):return checked
         if not checked:return None
+    # Coverage checks may refine an incomplete proposal. Completion still
+    # requires nonempty operands; no probe can license an empty proposition.
+    if not groups or any(not group for group in groups):return None
     names=(['parent clause with a content slot', 'content filling that slot'] if kind=='CONTENT' else
            ['condition','consequence'] if kind in {'IMPLIES','COUNTERFACTUAL'} else
            ['restriction and whole body'] if kind in {'FORALL','EXISTS'} else

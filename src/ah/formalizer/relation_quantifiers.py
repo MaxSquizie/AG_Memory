@@ -16,7 +16,7 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child,opera
         if any(v.pos=='NUMR' or 'Anum' in v.features for t in anchors for v in t.variants):
             state.diag('ARITHMETIC_QUANTIFIER_DEFERRED',region.region_id)
             return None
-        return PartitionProposal([owned],anchors) if owned else None
+        return PartitionProposal([owned],anchors)
     selected=PartitionDomain(state,release,selector,region,tokens,cfg,operator,proof).resolve(propose)
     if not selected:return block(state,region)
     proposal,partition=selected;owned=proposal.groups[0];anchors=proposal.data

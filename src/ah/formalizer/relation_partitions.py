@@ -27,7 +27,9 @@ def unary(domain):
     # Quotes, parentheses and question marks are not generic separators.
     while owned and owned[0].span in {',','.'}:markers.append(owned.pop(0))
     while owned and owned[-1].span in {',','.'}:markers.append(owned.pop())
-    return PartitionProposal([owned]) if owned else None
+    # Empty content is an incomplete proposal, not a reason to skip ownership
+    # checks: those checks can return the words swallowed by the marker.
+    return PartitionProposal([owned])
 
 
 def binary(domain):
@@ -66,8 +68,8 @@ def content(domain):
     parent_span=domain.span(rest,'structural_parent',
         'Select the parent predicate with its participants and any other clauses still attached to that parent. '
         'Selected dependent content: «'+body_text+'». It is already removed from this list. '
-        'Stop at the last parent word, not at the quotation marks or punctuation surrounding the removed content. '
-        'An earlier speaker or predicate must remain in the parent; exclude the introducer of THIS content.',covered=body_ids)
+        'Keep the predicate that takes this content and any earlier speaker or predicate. '
+        'Exclude only the conjunction and punctuation connecting or enclosing THIS selected content.',covered=body_ids)
     if not parent_span:return None
     parent=parent_span[0]
     groups=function_ownership(state,release,selector,region,cfg,'CONTENT',[parent,body],
@@ -76,7 +78,6 @@ def content(domain):
     parent,body=groups
     from .content_separators import separate
     parent,separators=separate(state,region,tokens,parent,body)
-    if not parent:return None
     return PartitionProposal([parent,body],separators)
 
 

@@ -71,6 +71,8 @@ def selected_text(request):
     response=request['response'];value=request['value'];label=request['label']
     if response=='?':return 'Недостаточно контекста (?)'
     if response=='0':return 'Ни один показанный вариант не подошёл (0)'
+    if not re.fullmatch(r'[0-9]+(?:,[0-9]+)*',response):
+        return 'Ответ не соответствует формату выбора. Начало ответа: '+response[:180].replace('\n',' ').rstrip()
     if request['slot']=='structural_relation':return RELATIONS.get(value,label)
     if request['slot'].endswith('_start'):
         return label.replace('Start at','Начать с')
@@ -103,15 +105,19 @@ def render(path):
         differs_only_in_open_labels(e.get('expected'),e['observed']) for e in cases[cid].get('errors',()))]
     genonly=[cid for cid,c in cases.items() if {e['path'] for e in c.get('errors',())}=={'/generation/gold_patterns'}]
     truncated=[r for r in completed if r['start'].get('prompt_truncated')]
+    reply_truncated=[r for r in completed if r['end'].get('response_truncated')]
     first_unknown=Counter(next((r['slot'] for r in requests[cid] if r['response']=='?'),'none')
         for cid,c in cases.items() if c['status']=='FAIL')
-    lines=['# Инвентаризация проб: 15 октября 2026','',
+    lines=['# Инвентаризация проб','',
         'Получено из всех доступных записей выгрузки. «Первый ?» — наблюдаемая остановка, **не доказанная первопричина**. '
         'Этот документ не восстанавливает обрезанные части и не оценивает качество новых промптов.','',
         f'Источник: `{path.name}`. SHA-256: `{hashlib.sha256(path.read_bytes()).hexdigest()}`.','',
         f'Завершённых случаев: {len(cases)}; '+', '.join(f'{k}: {v}' for k,v in Counter(c['status'] for c in cases.values()).items())+'.',
         f'Полученных ответов: {len(completed)}. Обрезанных промптов: {len(truncated)}. '
+        f'Обрезанных ответов модели: {len(reply_truncated)}. '
         f'Обрезанных результатов шагов: {sum(bool(s.get("actual_truncated")) for s in steps.values())}.',
+        'При обрезанном ответе доступен только сохранённый префикс. Его повтор не доказывает '
+        'побайтного совпадения полного исходного ответа. Хвост ответа не восстанавливается из рассуждений модели.','',
         f'PASS при наличии ответа ?: {len(unknown_pass)}. Непустая формула, не совпавшая с эталоном: {len(nonempty)}. '
         f'Несовпадение только генерации: {len(genonly)}.','',
         f'Из непустых несовпадений в {len(open_labels)} различаются только текстовые метки OPEN-предикатов: '
@@ -140,7 +146,8 @@ def render(path):
         for r in requests[cid]:
             lines.append(f'- Строки {r["start"]["_line"]} → {r["end"]["_line"]}. '
                 f'{SLOTS.get(r["slot"],r["slot"])}: {selected_text(r)}'+
-                (' **Промпт обрезан.**' if r['start'].get('prompt_truncated') else ''))
+                (' **Промпт обрезан.**' if r['start'].get('prompt_truncated') else '')+
+                (' **Ответ модели обрезан в выгрузке.**' if r['end'].get('response_truncated') else ''))
         issue=c.get('first_observed_issue') or {}
         lines+=['','Первая записанная диагностика: '+(issue.get('code') or issue.get('kind') or 'нет')+'.']
         paths=list(dict.fromkeys(e['path'] for e in c.get('errors',())))

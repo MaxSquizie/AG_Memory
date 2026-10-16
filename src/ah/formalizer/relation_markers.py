@@ -9,16 +9,18 @@ def confirm(state,release,selector,region,cfg,kind,links,groups):
     if not lexical:return True
     from .relation_composition import RELATIONS
     content='; '.join('«'+' '.join(t.span for t in g)+'»' for g in groups)
+    empty=not any(groups)
     # One occurrence per question: the peer need not perform a universal check
     # over an abstract split or remember the preceding boundary choice.
     for token in lexical:
         options=[{'candidate_id':'RELATION_ONLY','marker_relation_ref':token.token_id,'label':
-            'Relation wording «'+token.span+'» only expresses '+RELATIONS[kind]+'; '+content+' already names what this relation applies to'},
+            'Relation wording «'+token.span+'» only expresses '+RELATIONS[kind]+
+            ('; '+content+' already names what this relation applies to' if not empty else '')},
             {'candidate_id':token.token_id,'marker_content_ref':token.token_id,'label':
             '«'+token.span+'» names an action, state or participant that this relation applies to; keep its meaning in the content'}]
         result=choose(state,release,selector,region,cfg,'relation_marker_role',options,
             'Outer relation: '+kind+' ('+RELATIONS[kind]+'). Words assigned to it: «'+
-            ' '.join(t.span for t in links)+'». Content parts: '+content+'. '
+            ' '.join(t.span for t in links)+'». Content parts: '+('none retained' if empty else content)+'. '
             'Question about ONE source word: «'+token.span+'» @'+str(token.start)+'. '
             'Does it express the relation itself, or name what is negated, possible, necessary, related or asked about? '
             'The current split removes this word from the content. Judge its meaning in the original source. '
