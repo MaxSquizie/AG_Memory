@@ -1072,6 +1072,8 @@ def _interpret_state(state,text,selector,release,observation,morph,context_reade
         options=[{'candidate_id':spec['candidate_id'],'label':spec['label']+'; '+
             ', '.join(role+'=«'+evidence[tid].span+'»' for tid,role in spec['roles'].items())+
             '; temporal class='+spec['state_class']} for spec in specs]
+        from .lexical_embedding import order as embedding_order
+        options=embedding_order(state,selector,release,f,options,text[slice(*f.source_range)])
         _probe(state,selector,release,f.frame_id+'|predicate_value','predicate_value',options,
             text[slice(*f.source_range)],f.source_range,
             question='Which lexical use applies to this occurrence in its selected structure? '

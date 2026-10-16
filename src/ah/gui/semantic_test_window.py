@@ -170,7 +170,8 @@ class MainWindow(_BaseMainWindow):
         repo_root = Path(__file__).resolve().parents[3]
         out_dir = repo_root / ".kripl" / "oracle_v7" / ("gui_" + time.strftime("%Y%m%d_%H%M%S") + "_" + uuid4().hex[:8])
         timeout = float(getattr(self.services.config.llm, "request_timeout_seconds", 240.0))
-        argv = build_oracle_command(repo_root, base_url, model, out_dir, provider=provider, tiers=suite.tiers, timeout=timeout)
+        argv = build_oracle_command(repo_root, base_url, model, out_dir, provider=provider, tiers=suite.tiers, timeout=timeout,
+            embedding_model=getattr(self.services.config.llm,'perception_embedding_model',''))
         process = QProcess(self)
         process.setProcessChannelMode(QProcess.ProcessChannelMode.MergedChannels)
         process.setWorkingDirectory(str(repo_root))

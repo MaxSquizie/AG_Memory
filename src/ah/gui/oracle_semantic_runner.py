@@ -86,6 +86,7 @@ def build_oracle_command(
     max_tokens: int = 4096,
     provider: str = "lmstudio",
     tiers: tuple[str, ...] = ("pipeline",),
+    embedding_model: str = "",
 ) -> list[str]:
     """argv after the interpreter; the GUI consumes flushed progress events."""
     if provider not in {"disabled", "lmstudio", "ollama", "openai"}:
@@ -107,6 +108,7 @@ def build_oracle_command(
     ]
     for tier in tiers:
         argv += ["--tier", tier]
+    if embedding_model.strip():argv += ["--embedding-model",embedding_model.strip()]
     return argv
 
 

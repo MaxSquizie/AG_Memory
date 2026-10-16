@@ -12,7 +12,7 @@ import http.client
 import itertools, json, math, os, time, uuid
 from urllib.parse import urlparse
 from ah.llm.lmstudio_client import LMStudioClient
-from ah.llm.ollama_client import OllamaClientError
+from ah.llm.ollama_client import OllamaClient,OllamaClientError
 from ah.formalizer.canonical_ledger import digest
 from ah.formalizer.real_backend import RealBackendSelector
 from ah.formalizer.run_binding import InterpretationRunBinding
@@ -329,6 +329,31 @@ class _OracleHTTPClient(LMStudioClient):
             return data
         finally:
             conn.close()
+
+
+class OracleEmbeddingClient:
+    def __init__(self,config):self.config=dict(config)
+
+    def embed(self,texts):
+        mode=self.config.get('provider');model=self.config['embedding_model']
+        if mode not in {'lmstudio','ollama','openai'}:raise RuntimeError('EMBEDDING_NETWORK_DISABLED')
+        client=_OracleHTTPClient(self.config);request_id=uuid.uuid4().hex;started=time.perf_counter()
+        endpoint='/api/embed' if mode=='ollama' else '/v1/embeddings'
+        _provider_progress('request_started',request_id=request_id,provider=mode,model=model,
+                           role='lexical_embedding',endpoint=client.base_url+endpoint,input_count=len(texts))
+        try:
+            if mode=='ollama':
+                data=client._request('POST',endpoint,OllamaClient.embed_request_body(model=model,texts=texts))
+                vectors=OllamaClient.parse_embed_response(data)
+                if len(vectors)!=len(texts):raise ValueError('embedding count mismatch')
+            else:vectors=client.embed(model=model,texts=texts)
+        except Exception as exc:
+            _provider_progress('request_finished',request_id=request_id,status='ERROR',provider=mode,model=model,
+                role='lexical_embedding',elapsed_seconds=time.perf_counter()-started,error=str(exc))
+            raise
+        _provider_progress('request_finished',request_id=request_id,status='SUCCESS',provider=mode,model=model,
+            role='lexical_embedding',elapsed_seconds=time.perf_counter()-started,input_count=len(texts))
+        return vectors
 
 
 class ChatBackend:
@@ -691,6 +716,14 @@ def execute_native(session,p,config):
         model_key=config.get('model') or 'disabled',generation_settings={'temperature':0.0,'top_p':1.0,'max_new_tokens':config.get('max_tokens',4096),'enable_thinking':False},
         structure_reply_format=config.get('structure_reply_format','TP-C2'),
         selection_reply_format=config.get('selection_reply_format','SELECT_LABELS_V1'))
+    if config.get('embedding_model'):
+        from ah.formalizer.lexical_embedding import LexicalEmbeddingRanker
+        model_key=':'.join((config.get('embedding_provider',config['provider']),config['base_url'],config['embedding_model']))
+        identity=(model_key,config['provider'])
+        if getattr(session,'lexical_ranker_identity',None)!=identity:
+            session.lexical_ranker=LexicalEmbeddingRanker(OracleEmbeddingClient(config),model_key)
+            session.lexical_ranker_identity=identity
+        selector.lexical_ranker=session.lexical_ranker
     entities_before=native_entity_refs(session)
     structure_mode=config.get('structure_mode','legacy_proposal')
     ignition=None
@@ -787,6 +820,10 @@ def execute_native(session,p,config):
                 'release_sha256':release.sha256},
             'coverage_evidence':coverage_evidence,
             'variable_bindings':{str(k):v for k,v in session.native_variable_aliases.items()},
+            'language_probe_call_count':len([r for r in rows if r['payload'].get('kind')=='prov_call'
+                and r['payload'].get('state')=='RECEIVED' and r['payload'].get('provider')!='LexicalEmbeddingRanking']),
+            'embedding_ranking_receipt_count':len([r for r in rows if r['payload'].get('kind')=='prov_call'
+                and r['payload'].get('state')=='RECEIVED' and r['payload'].get('provider')=='LexicalEmbeddingRanking']),
             'provider_call_count':len([r for r in rows if r['payload'].get('kind')=='prov_call' and r['payload'].get('state')=='RECEIVED'])},
         'generation':generation,
         'time':time_observation,

@@ -21,6 +21,7 @@ def main(argv=None):
     p.add_argument('--provider',choices=['disabled','lmstudio','ollama','openai','replay'],default='disabled')
     p.add_argument('--base-url',default=None)
     p.add_argument('--model',default='')
+    p.add_argument('--embedding-model',default='',help='Optional explicit embedding model for lexical ranking; no automatic sense acceptance')
     p.add_argument('--timeout',type=float,default=120)
     p.add_argument('--max-tokens',type=int,default=4096)
     p.add_argument('--structure-mode',choices=['region_probes','legacy_proposal'],default='region_probes',
@@ -58,7 +59,7 @@ def main(argv=None):
     if a.list:
         print('\n'.join(c['case_id'] for c in selected));return 0
     config={'provider':a.provider,'model':a.model,'base_url':a.base_url,'timeout':a.timeout,'max_tokens':a.max_tokens,
-            'structure_mode':a.structure_mode,
+            'structure_mode':a.structure_mode,'embedding_model':a.embedding_model,'embedding_provider':a.provider,
             'structure_reply_format':'TP-C2','selection_reply_format':'SELECT_LABELS_V1'}
     # A new directory means a new execution, never silent reuse of another model's WAL.
     if a.out.exists() and any(a.out.iterdir()):p.error('output directory is not empty; choose a new --out')

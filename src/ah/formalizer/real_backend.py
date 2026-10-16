@@ -56,6 +56,7 @@ class RealBackendSelector:
     model_key: str = ""
     structure_reply_format: str = "TP-C2"
     selection_reply_format: str = "SELECT_LABELS_V1"
+    lexical_ranker: object = None
 
     def __post_init__(self):
         from .provider_call_log import ProviderCallLog
@@ -129,7 +130,23 @@ def selector_from_config(config, journal=None, *, backend=None):
     if backend is None:
         return None
     model=str(getattr(config.llm,config.llm.backend.lower()+'_model',getattr(config.llm,'model_dir','')))
-    return RealBackendSelector(backend, role="formalizer", journal=journal,model_key=type(backend).__name__+':'+model)
+    ranker=None
+    embedding_model=config.llm.perception_embedding_model.strip()
+    if embedding_model and config.llm.backend.lower() in {'lmstudio','ollama'}:
+        from .lexical_embedding import LexicalEmbeddingRanker
+        from ah.llm.embeddings import LMStudioEmbeddingClient,OllamaEmbeddingClient
+        from ah.llm.lmstudio_client import LMStudioClient
+        from ah.llm.ollama_client import OllamaClient
+        if config.llm.backend.lower()=='lmstudio':
+            url=config.llm.lmstudio_base_url
+            client=LMStudioEmbeddingClient(LMStudioClient(url,timeout_seconds=config.llm.request_timeout_seconds,
+                api_key=config.llm.lmstudio_api_key),embedding_model)
+        else:
+            url=config.llm.ollama_base_url
+            client=OllamaEmbeddingClient(OllamaClient(url,timeout_seconds=config.llm.request_timeout_seconds),embedding_model)
+        ranker=LexicalEmbeddingRanker(client,config.llm.backend+':'+url+':'+embedding_model)
+    return RealBackendSelector(backend, role="formalizer", journal=journal,model_key=type(backend).__name__+':'+model,
+                               lexical_ranker=ranker)
 
 
 # --------------------------------------------------------------------------- #
