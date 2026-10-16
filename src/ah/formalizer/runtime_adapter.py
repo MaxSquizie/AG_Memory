@@ -344,7 +344,8 @@ class FormalizerAdapter:
                 if var.pos in {"VERB", "INFN", "PRED", "ADJS", "ADJF", "NOUN", "PRTF", "PRTS", "GRND"}:
                     return PredicateCandidate(
                         surface=frame.semantic.get('lexical_units',{}).get(ev.token_id,{}).get('surface',ev.span),
-                        normalized_hint=var.lemma if len(frame.semantic.get('lexical_units',{}).get(ev.token_id,{}).get('anchor_refs',()))<=1 else None,
+                        normalized_hint=var.lemma if (len(frame.semantic.get('lexical_units',{}).get(ev.token_id,{}).get('anchor_refs',()))<=1
+                            and not (var.origin=='CONTEXTUAL' and var.lemma==ev.span.casefold())) else None,
                         evidence=EvidenceSpan(text=frame.semantic.get('lexical_units',{}).get(ev.token_id,{}).get('surface',ev.span)),
                         template_candidate=template, template_selection=selection,
                     )

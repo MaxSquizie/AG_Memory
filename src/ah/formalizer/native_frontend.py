@@ -932,8 +932,8 @@ def _interpret_state(state,text,selector,release,observation,morph,context_reade
             declared_ids &= allowed; priors &= allowed; context_senses &= allowed
         else:
             # A phrase sense is not licensed by an isolated matching head.
-            # Productive OOV morphology establishes a possible paradigm, not a
-            # dictionary sense, even if its predicted lemma happens to match R-S.
+            # An OOV function reading preserves the source form, not a released
+            # dictionary sense. Analyzer predictions are diagnostic only.
             senses=[s for s in senses if not e.is_oov() and not s.get('anchor_pattern')]
             allowed={s['sense_id'] for s in senses}
             declared_ids &= allowed; priors &= allowed; context_senses &= allowed

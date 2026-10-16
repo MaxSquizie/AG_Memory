@@ -21,6 +21,9 @@ def choose(state,release,selector,region,cfg,slot,options,question,*,empty=None)
     """
     if cfg.get('_task_constraints'):
         question+='\nEarlier attempt: '+cfg.get('_task_constraints_text',cfg['_task_constraints'])
+    from .composition_session import current
+    runtime=current(state)
+    task_scope=runtime.input_signature() if runtime else None
     iterator=iter(options);page=0;previous=[];examined=0
     supported=[];pages=[];seen=set()
     limit=release.entries('ProposalPolicy')[0].get('max_rule_steps',20000)
@@ -34,7 +37,7 @@ def choose(state,release,selector,region,cfg,slot,options,question,*,empty=None)
         question+=' Optional search: select only matching positive options. If none matches, reject this page. After ALL pages have no match, the result is: '+empty['label']+'. Unknown is not an empty result.'
     def complete_empty():
         from .state import Decision,Ground
-        key='task-empty:'+digest([region.region_id,slot,question,sorted(seen),previous,empty])
+        key='task-empty:'+digest([region.region_id,task_scope,slot,question,sorted(seen),previous,empty])
         cid=empty['candidate_id']
         if cid in seen:raise ValueError('EMPTY_COMPLETION_IN_POSITIVE_DOMAIN')
         state.decisions[key]=Decision(slot,key,tuple(sorted(seen))+ (cid,),selected=(cid,),
@@ -65,7 +68,7 @@ def choose(state,release,selector,region,cfg,slot,options,question,*,empty=None)
             return None
         examined+=len(values)
         choices=[{'candidate_id':v['candidate_id'],'label':v['label']} for v in values]
-        key=region.region_id+'|task:'+digest([slot,choices,question,page])
+        key=region.region_id+'|task:'+digest([task_scope,slot,choices,question,page])
         fresh=0 if key in state.budget.task_candidate_pages else len(values)
         if examined>limit or state.budget.task_candidates_examined+fresh>limit:
             state.diag('STRUCTURAL_TASK_SEARCH_INCOMPLETE',region.region_id)
@@ -102,7 +105,7 @@ def choose(state,release,selector,region,cfg,slot,options,question,*,empty=None)
         if has_more:page+=1;continue
         from .task_contracts import SelectionReceipt
         receipt=SelectionReceipt(tuple(sorted(seen)),tuple(sorted(v['candidate_id'] for v,_ in supported)),True)
-        domain_ref='task-domain:'+digest([region.region_id,slot,question,receipt.candidates])
+        domain_ref='task-domain:'+digest([region.region_id,task_scope,slot,question,receipt.candidates])
         state.syntax_trace.append({'kind':'TASK_DOMAIN','task_ref':domain_ref,'level':'T2_TP',
             'slot':slot,'source_range':list(region.source_range),'token_refs':list(region.token_refs),
             'page_refs':[p['decision_ref'] for p in pages],**receipt.record()})
@@ -204,7 +207,7 @@ def span(state,release,selector,region,tokens,cfg,slot,question,*,exclude=(),rec
     return None
 
 
-def source_set(state,release,selector,region,tokens,cfg,slot,question,*,exclude=(),record_remainder=False,admissible=None,initial=None):
+def source_set(state,release,selector,region,tokens,cfg,slot,question,*,exclude=(),record_remainder=False,admissible=None,partial_admissible=None,initial=None):
     """Select a finite union of source intervals without enumerating 2**n sets.
 
     Every step either closes the set or adds an occurrence. The final whole
@@ -212,31 +215,36 @@ def source_set(state,release,selector,region,tokens,cfg,slot,question,*,exclude=
     """
     chosen=span(state,release,selector,region,tokens,cfg,slot,
         question+' Select the first continuous piece; other pieces can be added next.',exclude=exclude,
-        record_remainder=record_remainder,initial=initial)
+        record_remainder=record_remainder,initial=initial,admissible=partial_admissible)
     if not chosen:return None
     return extend_source_set(state,release,selector,region,tokens,cfg,slot,question,
-                             chosen[0],chosen[1],exclude=exclude,admissible=admissible)
+                             chosen[0],chosen[1],exclude=exclude,admissible=admissible,partial_admissible=partial_admissible)
 
 
-def extend_source_set(state,release,selector,region,tokens,cfg,slot,question,selected,proofs,*,exclude=(),admissible=None):
+def extend_source_set(state,release,selector,region,tokens,cfg,slot,question,selected,proofs,*,exclude=(),admissible=None,partial_admissible=None):
     selected,proofs=list(selected),list(proofs);forbidden=set(exclude)
     while True:
         used={t.token_id for t in selected}
         remaining=[t for t in tokens if t.token_id not in used|forbidden]
         if not remaining:break
+        def ends(a):
+            for b in range(a,len(tokens)):
+                if tokens[b].token_id in used|forbidden:break
+                if partial_admissible is None or partial_admissible([*selected,*tokens[a:b+1]]):yield b
+        reachable={tokens[a].token_id for a in range(len(tokens)) if next(ends(a),None) is not None}
+        can_finish=admissible is None or admissible(selected)
         more=choose(state,release,selector,region,cfg,slot+'_continue',[
             *[{'candidate_id':t.token_id,'token_ref':t.token_id,
-               'label':'Another piece starts at «'+t.span+'» @'+str(t.start)} for t in remaining]],
+               'label':'Another piece starts at «'+t.span+'» @'+str(t.start)} for t in remaining if t.token_id in reachable]],
             question+' Already included: «'+' '.join(t.span for t in selected)+'». '
             'Select the start of another piece if one exists. Intervening words retain their own meaning.',
-            empty={'candidate_id':'DONE','label':'no further source words belong to this part'})
+            empty={'candidate_id':'DONE','label':'no further source words belong to this part'} if can_finish else None)
         if not more:return None
         proofs.append(more[1])
         if more[0]['candidate_id']=='DONE':break
         a=next(i for i,t in enumerate(tokens) if t.token_id==more[0]['token_ref'])
         choices=[]
-        for b in range(a,len(tokens)):
-            if tokens[b].token_id in used|forbidden:break
+        for b in ends(a):
             choices.append({'candidate_id':tokens[b].token_id,'end':b+1,
                 'label':'End after «'+tokens[b].span+'» @'+str(tokens[b].end)})
         end=choose(state,release,selector,region,cfg,slot+'_piece_end',choices,

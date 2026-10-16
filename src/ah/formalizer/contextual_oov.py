@@ -30,19 +30,14 @@ def resolve(state,release,selector,*,areas=None):
             key='oov-reading:'+token.token_id
             from .structural_tasks import enabled,choose
             if enabled(release):
-                # Keep a reading without a lemma available even when the analyzer
-                # can predict a paradigm. Predictions are proposals, not evidence
-                # of a dictionary sense or a spelling correction.
+                # Productive analyzer guesses stay in diagnostic evidence only.
+                # Neither a function choice nor a later structure choice may
+                # promote a guessed lemma/paradigm to a lexical reading.
                 for pos in ('NOUN','NPRO','ADJF','ADJS','COMP','VERB','INFN','PRTF','PRTS','GRND','NUMR','ADVB','PRED','PREP','CONJ','PRCL','INTJ'):
                     v=MorphVariant(token.span.casefold(),pos,origin='CONTEXTUAL')
                     options.setdefault(digest(_morph(v)),v)
-                for v in token.morph_guesses:
-                    if v.pos and v.lemma:
-                        options.setdefault(digest(_morph(v)),v)
-                from .morphology_domain import offer,license_use,clean,scope_fields
-                from .probe_wording import reading as describe
+                from .morphology_domain import offer,license_use,scope_fields
                 readings=offer(state,token,options.values(),'OOV_FUNCTION')
-                originals=list(options.values())
                 functions=list(dict.fromkeys(v.pos for v in readings))
                 selected=choose(state,release,selector,region,cfg,'structural_oov_function',
                     [{'candidate_id':pos,'label':pos+': grammatical function; unknown lemma and features stay unknown'} for pos in functions],

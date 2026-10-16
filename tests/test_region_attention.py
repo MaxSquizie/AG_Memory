@@ -104,6 +104,23 @@ def read_request(state):
             'region_ref':'root','cue_token_refs':[e.token_id for e in state.evidence]}
 
 
+def test_predicted_lemma_cannot_activate_memory_even_as_a_retrieval_hint(tmp_path,monkeypatch):
+    from ah.formalizer.state import MorphVariant
+    store,binding,release=native_fixture(tmp_path/'journal')
+    source=store._core.add_abstract_symbol({'глоркнул'})
+    predicted=store._core.add_abstract_symbol({'глоркнуть'})
+    e=engine(store._core)
+    reader=AttentionContextReader(store,release,e,'no-guesses',freeze_attention_base(store,e))
+    state=t0('глоркнул');state.observation={}
+    state.evidence[0].morph_guesses=(MorphVariant('глоркнуть','VERB',origin='PREDICTED'),)
+    seeded=[];seed=reader.engine.seed
+    def record(ref,weight):
+        seeded.append(ref.uid);return seed(ref,weight)
+    monkeypatch.setattr(reader.engine,'seed',record)
+    reader.read(state,read_request(state))
+    assert source.uid in seeded and predicted.uid not in seeded
+
+
 def test_receipt_replay_repairs_focus_projection_without_double_ticks(tmp_path, monkeypatch):
     store,binding,release=native_fixture(tmp_path/'journal')
     e=engine(store._core)

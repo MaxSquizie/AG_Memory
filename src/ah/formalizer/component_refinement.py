@@ -49,6 +49,12 @@ def compose_area(state, release, selector, region, tokens, cfg, depth=0, attachm
         try:retain(state,region,frames)
         except ValueError as exc:
             block(state,region,frames,str(exc))
+        from .composition_tree import roots
+        selected_roots=roots(frames)
+        if len(selected_roots)==1:
+            # Retain the accepted construction's source envelope, including
+            # connectors/delimiters which do not belong to lexical child frames.
+            selected_roots[0].semantic['composition_source_range']=list(region.source_range)
         if runtime:runtime.sources.retain(key,region,local,frames,request)
         return frames
     def compute():

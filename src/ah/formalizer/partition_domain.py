@@ -39,31 +39,42 @@ class PartitionDomain:
     def span(self,tokens,slot,question,*,marker=False,covered=(),remaining_parts=0,
              remaining_contiguous=False,**kwargs):
         required=self.required-set(covered)
-        admissible=None
+        excluded=set(kwargs.get('exclude',()))
+        if marker:
+            # A proved content occurrence cannot be proposed as a marker again.
+            # This is branch-local ownership, never a spelling/POS blacklist.
+            excluded.update(required)
+            kwargs['exclude']=excluded
         if required:
             words=', '.join('«'+t.span+'» @'+str(t.start) for t in self.tokens if t.token_id in self.required)
             question+=' For this '+self.kind+' reading, the local ownership check keeps '+words+' in the content. Select boundaries consistent with that choice.'
-            excluded=set(kwargs.get('exclude',()))
-            def admissible(part):
-                selected={t.token_id for t in part}
-                if marker:return not (required & selected)
-                missing=required-selected
-                if not remaining_parts:return not missing
-                if not remaining_contiguous:
-                    rest={t.token_id for t in tokens}-selected-excluded
-                    return bool(rest) and missing<=rest
-                # These producers have two parts. The remaining one must be
-                # a nonempty span that can own every still required token.
-                # No meaning or preferred boundary is inferred here.
-                run=set()
+        def partial(part):
+            selected={t.token_id for t in part}
+            if selected & excluded:return False
+            rest={t.token_id for t in tokens}-selected-excluded
+            if not marker and not required <= selected|rest:return False
+            if remaining_parts:
+                # Each explicit operand needs source content. Punctuation alone
+                # cannot fill a proposition. Do not choose the remaining split.
+                if sum(t.token_id in rest and any(c.isalnum() for c in t.span)
+                       for t in tokens)<remaining_parts:return False
+            return True
+        def complete(part):
+            if not partial(part):return False
+            selected={t.token_id for t in part}
+            if remaining_parts and remaining_contiguous:
+                # Check the remaining continuous operand only at completion:
+                # further pieces of this operand may still consume required words.
+                missing=required-selected;run=set()
                 for token in tokens:
-                    if token.token_id in selected or token.token_id in excluded:
+                    if token.token_id in selected|excluded:
                         if run and missing<=run:return True
                         run=set()
                     else:run.add(token.token_id)
                 return bool(run) and missing<=run
+            return bool(marker or remaining_parts or required<=selected)
         return span(self.state,self.release,self.selector,self.region,tokens,self.cfg,slot,question,
-                    admissible=admissible,**kwargs)
+                    admissible=complete,partial_admissible=partial,**kwargs)
 
     def resolve(self,propose,on_check=None):
         from .relation_composition import confirm_partition

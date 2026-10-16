@@ -32,10 +32,13 @@ def prepare(state,release,selector,region,tokens,cfg):
     used=set();relation_heads=set()
     while True:
         selected=choose(state,release,selector,region,cfg,'nominal_function',[
-            {'candidate_id':'RELATION','label':'An adposition or multiword relational unit links a nominal to another participant or event'},
-            {'candidate_id':'REFERENCE','label':'An expression identifies a nominal by referring to context or a previous mention'},
-            {'candidate_id':'QUANTITY','label':'An expression specifies a nominal group quantity; retain it symbolically'}],
-            'Which remaining nominal function occurs here? Ordinary names and descriptive adjectives alone do not need these slots. '
+            {'candidate_id':'RELATION','label':'An adposition or multiword relational unit: words introducing a noun/pronoun and linking it to an action or another noun (place, destination, origin, instrument, possession or another relation)'},
+            {'candidate_id':'REFERENCE','label':'An expression points to which person/thing is meant, using context or an earlier mention'},
+            {'candidate_id':'QUANTITY','label':'An expression says how many or how much of a noun group; keep its wording'}],
+            'Look for words in THIS target that introduce or specify a noun/pronoun. '
+            'A preposition connecting a place to a verb counts as RELATION, even when the verb already has a place role. '
+            'Choose the function of the FIRST remaining such expression, not all functions anywhere in the sentence. '
+            'A name by itself or an ordinary descriptive adjective does not count. '
             'Already assigned function words: «'+' '.join(t.span for t in tokens if t.token_id in used)+'».',
             empty={'candidate_id':'DONE','label':'no further nominal relation, referential determiner or quantity expression'})
         if not selected:return False

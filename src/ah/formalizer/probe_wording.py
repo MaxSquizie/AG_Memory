@@ -56,5 +56,9 @@ def reading(value):
 
 
 def linked_readings(bindings,evidence):
-    return ' | '.join('«'+evidence[tid].span+'» @'+str(evidence[tid].start)+': '+reading(morph)
+    def describe(tid,morph):
+        if morph.get('origin')=='CONTEXTUAL' and (morph.get('lemma') or '').casefold()==evidence[tid].span.casefold():
+            return 'lemma unknown; '+reading({k:v for k,v in morph.items() if k!='lemma'})
+        return reading(morph)
+    return ' | '.join('«'+evidence[tid].span+'» @'+str(evidence[tid].start)+': '+describe(tid,morph)
                      for tid,morph in bindings.items())

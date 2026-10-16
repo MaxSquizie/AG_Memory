@@ -39,7 +39,8 @@ def prepare(state,release=None,selector=None):
         fid=tree.get('frame_ref')
         if fid:
             if fid in active or fid not in frames:return [],[]
-            f=frames[fid];refs.append(fid);spans.append(tuple(f.source_range))
+            f=frames[fid];refs.append(fid)
+            spans.append(tuple(f.semantic.get('composition_source_range',f.source_range)))
             children=[slot.tree for slot in slots(f)];active=active|{fid}
         else:children=tree.get('operands',())
         for child in children:
@@ -61,13 +62,24 @@ def prepare(state,release=None,selector=None):
         if not explicit and release is not None and selector is not None and all(
                 not frames[r].semantic.get('structural_unresolved') for r in refs):
             from .component_probe import _probe
+            content_links=[]
+            for fid in sorted(direct):
+                parent=frames[fid]
+                anchor=evidence.get(parent.predicate_token_ref)
+                label='«'+(anchor.span if anchor else parent.anchor_span)+'»'
+                for slot in slots(parent):
+                    content_links.append(label+' has separately parsed '+slot.name+' content')
             act=_probe(state,selector,release,key,'speech_act',[
-                {'candidate_id':'ASSERTION','label':'The speaker asserts the WHOLE statement, including its negation, modality or condition'},
+                {'candidate_id':'ASSERTION','label':'The speaker asserts the WHOLE statement, including a report that someone said/thought something; the reported content need not be true'},
                 {'candidate_id':'QUERY','label':'The speaker asks for information or confirmation'},
                 {'candidate_id':'COMMAND','label':'The speaker requests or directs an action'},
-                {'candidate_id':'CONTENT','label':'Only quoted or mentioned content; no assertion of the WHOLE statement'}],
+                {'candidate_id':'CONTENT','label':'The ENTIRE target is merely quoted/mentioned, with no assertion about it; not just a quote nested inside an asserted report'}],
                 state.text[slice(*bounds)],bounds,
-                question='What does the speaker do with this WHOLE statement? Asserting a negative or possible statement does not assert its inner event. Choose the speech act of the whole, not of an operand.') or 'UNKNOWN'
+                question='What does the current speaker do with the WHOLE target? '
+                'An assertion that someone said something is an assertion about that speech, not an assertion of its content. '
+                'Likewise, asserting negation, possibility or a condition does not assert the inner event. '
+                'Preserve the accepted internal structure; decide only the act at its outermost level. '+
+                ('Accepted syntax: '+'; '.join(content_links)+'. ' if content_links else '')) or 'UNKNOWN'
             proof=key
         scope={'scope_ref':'discourse-root:'+digest([state.source_uid,tree]),'source_range':list(bounds),
                'speech_act':act,'act_decision_ref':proof,'tree':tree,'frame_refs':sorted(set(refs))}

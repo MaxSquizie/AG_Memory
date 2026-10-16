@@ -82,7 +82,8 @@ def test_constraint_does_not_leak_into_a_nested_modal_with_lexical_wording(tmp_p
     steps=relation('NOT')+bounds('structural_introducer','Неверно','предположить')+[
         ('relation_marker_role','«предположить»')]+bounds('structural_introducer','Неверно','что')+[
         ('structural_partition','PARTITION')]+relation('POSSIBLE')+bounds('structural_introducer','можно',':')+[
-        ('relation_marker_role','RELATION_ONLY'),('structural_partition','PARTITION')]+relation('LEXICAL')
+        ('relation_marker_role','RELATION_ONLY'),('relation_marker_role','RELATION_ONLY'),
+        ('structural_partition','PARTITION')]+relation('LEXICAL')
     result,script=run(tmp_path,monkeypatch,'Неверно, что можно предположить: Иван пришёл.',steps)
     assert result['diagnostics']['codes']==[]
     assert result['assertions']['ah']==[{'operator':'NOT','operands':[{'operator':'POSSIBLE','operands':[atom('ARRIVE','ivan')]}]}]
@@ -90,14 +91,13 @@ def test_constraint_does_not_leak_into_a_nested_modal_with_lexical_wording(tmp_p
     assert 'local ownership check' not in child
 
 
-def test_changed_relation_drops_the_previous_conditional_ownership(tmp_path,monkeypatch):
+def test_exhausted_boundary_does_not_reclassify_the_relation_without_evidence(tmp_path,monkeypatch):
     steps=relation('NOT')+bounds('structural_introducer','Можно',':')+[
-        ('relation_marker_role','«предположить»'),('structural_introducer_start','0'),
-        ('structural_revision','REVISE')]+relation('POSSIBLE')+bounds('structural_introducer','Можно',':')+[
-        ('relation_marker_role','RELATION_ONLY'),('structural_partition','PARTITION')]+relation('LEXICAL')
-    result,_=run(tmp_path,monkeypatch,'Можно предположить: Иван пришёл.',steps)
-    assert result['diagnostics']['codes']==[]
-    assert result['assertions']['ah']==[{'operator':'POSSIBLE','operands':[atom('ARRIVE','ivan')]}]
+        ('relation_marker_role','«предположить»'),('structural_introducer_start','0')]
+    result,script=run(tmp_path,monkeypatch,'Можно предположить: Иван пришёл.',steps)
+    assert not result['assertions']['ah'] and not result['assertions']['journal']
+    assert len([s for s,p in script.calls if s=='structural_relation'])==1
+    assert not any(s=='structural_revision' for s,p in script.calls)
 
 
 def test_gui_explains_conditional_constraint_and_repaired_conflict():
@@ -167,11 +167,13 @@ def test_lookahead_keeps_exactly_the_completable_two_part_boundaries(monkeypatch
     from ah.formalizer.partition_domain import PartitionDomain,ContentRequired
     from ah.formalizer import structural_tasks
     tokens=[SimpleNamespace(token_id=str(i),span=str(i),start=i,end=i+1) for i in range(5)]
-    state=SimpleNamespace(syntax_trace=[])
-    domain=PartitionDomain(state,None,None,None,tokens,{},'CONTENT',{})
+    state=SimpleNamespace(syntax_trace=[],diag=lambda *args:None)
+    region=SimpleNamespace(region_id='topology',source_range=(0,5))
+    domain=PartitionDomain(state,None,None,region,tokens,{},'CONTENT',{})
     domain.constraints=[ContentRequired(('0','4'),'test')]
     wanted=[]
-    def choose(*args):
+    def choose(*args,empty=None):
+        if not wanted:return (empty,{}) if empty is not None else None
         options=list(args[-2]);candidate=wanted.pop(0)
         found=next((v for v in options if v['candidate_id']==candidate),None)
         if found:return found,{}

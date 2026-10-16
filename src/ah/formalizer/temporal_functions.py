@@ -18,8 +18,12 @@ def prepare(state, release, selector, region, tokens, cfg):
             *[{'candidate_id':'time:'+t.token_id,'index':i,'token_ref':t.token_id,
                'label':'A time expression starts at «'+t.span+'» @'+str(t.start)}
               for i,t in enumerate(remaining)]],
-            'Locate the FIRST remaining expression that specifies when, for how long, or how often this event/state holds. '
-            'Select its first word if present. Relative dates count as time. A word mentioned as a name/title is not a time use. '
+            'Find separate words that answer WHEN, FOR HOW LONG or HOW OFTEN the target event/state holds. '
+            'Select the first word of the FIRST such expression. Verb tense alone is not a separate time expression. '
+            'If the target only names participants and an action, with no time wording, answer 0. '
+            'The actual date need not be known to recognize relative time wording. '
+            'Use ? only if you cannot decide the function of words actually present; missing event date is not a reason for ?. '
+            'A word mentioned as a name/title is not a time use. '
             'Target words: «' +
             ' '.join(t.span for t in remaining) + '».',
             empty={'candidate_id':'NONE','label':'no remaining time expression'})

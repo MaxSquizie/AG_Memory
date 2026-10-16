@@ -36,6 +36,7 @@ class Script:
             from ah.formalizer.relation_composition import RELATIONS
             if value in RELATIONS:value=RELATIONS[value]
             elif value=='INDEPENDENT':value='No agreement governor:'
+            elif value=='RELATION_ONLY':value='Relation wording «'
             elif value=='PARTITION' and len(labels)==1:
                 value=next(iter(labels.values()))
             elif slot=='structural_content_role' and ':' in value:
@@ -132,12 +133,26 @@ def content_steps(owner,first,last,parent_first='Иван',attitude='QUOTED'):
 
 @pytest.mark.parametrize('quoted',[False,True])
 def test_recursive_propositions_and_quotes(tmp_path,monkeypatch,quoted):
+    from ah.formalizer import component_probe
+    probe=component_probe._probe;sealed=[]
+    def checked(state,selector,release,key,slot,*args,**kwargs):
+        if slot=='predicate_value':
+            assert state.structural_closed
+            sealed.append(key)
+        return probe(state,selector,release,key,slot,*args,**kwargs)
+    monkeypatch.setattr(component_probe,'_probe',checked)
     text='Иван сказал'+(': «' if quoted else ', что ')+'Пётр думал, что Мария пришла'+('».' if quoted else '.')
     steps=content_steps('сказал','Пётр','пришла')+content_steps('думал','Мария','пришла','Пётр','EMBEDDED')+relation('LEXICAL')
-    result,_=run(tmp_path,monkeypatch,text,steps)
+    result,script=run(tmp_path,monkeypatch,text,steps)
     assert result['diagnostics']['codes']==[]
     assert result['assertions']['ah']==[{'predicate':'SAY','roles':{'AGENT':{'entity':'ivan'},
         'CONTENT':{'predicate':'THINK','roles':{'AGENT':{'entity':'petr'},'CONTENT':atom('ARRIVE','maria')}}}}]
+
+    assert len(sealed)==3
+    calls=[s for s,p in script.calls]
+    assert max(i for i,s in enumerate(calls) if s.startswith('structural_'))<calls.index('predicate_value')
+    prompt=next(p for s,p in script.calls if s=='speech_act')
+    assert text in prompt and 'separately parsed' in prompt
 
 
 def test_inner_content_can_be_separated_before_its_ancestor(tmp_path,monkeypatch):
