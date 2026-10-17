@@ -61,22 +61,23 @@ class CompositionSession:
         region,tokens,request=self.area_inputs
         return digest(canonical([region.source_range,[t.token_id for t in tokens],request]))
 
-    def input_question(self):
+    def input_question(self,slot=None):
         if not self.area_inputs:return ''
         region,tokens,request=self.area_inputs
         from .composition_tree import InputSlot
         request=request or InputSlot()
         parts=[]
-        if self.domain_feedback:parts.append('Previous local composition: '+self.domain_feedback)
-        if request.surrounding_relations:
+        morphology=slot in {'structural_oov_function','predicate_argument_reading','relative_marker_reading','structural_marker_reading','nominal_external_case'}
+        if self.domain_feedback and not morphology:parts.append('Previous local composition: '+self.domain_feedback)
+        if request.surrounding_relations and not morphology:
             from .relation_composition import RELATIONS
             parts.append('Already handled outside the target: '+'; '.join(RELATIONS[k] for k in request.surrounding_relations)+
                 '. Select another such relation only if the target words themselves express it.')
-        if request.output_sort=='EVENT_DESCRIPTION':parts.append('This area must describe an event or state.')
-        if request.description_context and not request.controller and any(v.pos in {'INFN','PRTS'} for t in tokens for v in t.variants):
+        if request.output_sort=='EVENT_DESCRIPTION' and not morphology:parts.append('This area must describe an event or state.')
+        if not morphology and request.description_context and not request.controller and any(v.pos in {'INFN','PRTS'} for t in tokens for v in t.variants):
             parts.append('This content is not independently asserted. An action description may leave participants unspecified; '
                          'do not invent a performer or copy agreement from an impersonal modal word.')
-        if request.independent_subject:
+        if request.independent_subject and not morphology:
             parts.append('No subject is inherited from the surrounding predicate. Determine participants from this content itself; '
                          'do not copy a speaker or an ancestor controller into it.')
         if request.allowed_cases:
@@ -85,17 +86,17 @@ class CompositionSession:
         if request.head_ref:
             head=self.original.get(request.head_ref)
             if head:parts.append('The selected head is «'+head.span+'».')
-        if request.pending_proposition_roles:
+        if request.pending_proposition_roles and not morphology:
             parts.append('A dependent infinitive is supplied separately; its owner is still to be selected. '
                          'Other dependent clauses inside the target still need their own analysis.')
         owned={t.token_id for t in tokens}
         for ref,roles in (request.pending_propositions or {}).items():
-            if ref not in owned:continue
+            if ref not in owned or morphology:continue
             owner=self.original[ref]
             supplied=[self.original[t].span for t in (request.pending_proposition_sources or {}).get(ref,())
                       if t in self.original]
             parts.append('Only «'+owner.span+'» @'+str(owner.start)+' has separately supplied content ('+
-                         ', '.join(sorted(roles))+')'+(' — «'+' '.join(supplied)+'»' if supplied else '')+'. Leave that slot open. '
+                         ', '.join(sorted(roles))+')'+(' — separately parsed child' if supplied else '')+'. Leave that slot open. '
                          'Any other parent predicate and dependent clause INSIDE the target must still be connected.')
         if request.agreement_source:
             from .probe_wording import reading
@@ -111,7 +112,7 @@ class CompositionSession:
             parts.append('The infinitive subject is the same '+role(alias['role'])+' of the parent: '+
                 ('; '.join('«'+self.original[m['token_ref']].span+'» ('+reading(m['morph'])+')' for m in known)
                  if known else 'an omitted participant licensed by agreement')+'.')
-        if request.agreement_source or request.controller:
+        if (request.agreement_source or request.controller) and not morphology:
             parts.append('An absent repeated subject is not a missing event.')
         return ('\nCurrent parent requirements: '+' '.join(parts)+'\n') if parts else ''
 
@@ -155,8 +156,8 @@ class CompositionSession:
                         'premise_support_refs':proof['premise_support_refs'],
                         'rules':[step['request']['rule_id'] for step in proof['derivations']]}
                 proofs.append(projected)
-            payload={'context':rows,'proofs':proofs} if proofs else rows
-            text=json.dumps(payload,ensure_ascii=False,sort_keys=True)
+            from .probe_presentation import readable_memory
+            text=readable_memory(rows,proofs)
             if len(text)>cfg['context_chars']:
                 from .attention_context import ContextReadError
                 raise ContextReadError('COMPOSITION_CONTEXT_LIMIT')

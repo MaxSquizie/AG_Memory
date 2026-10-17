@@ -64,7 +64,7 @@ def compose(state, release, selector, region, tokens, cfg, depth,request=None):
         question='Select a source-supported infinitive relation AND subject control. '
         'Distinguish what the parent predicate is about (OBJECT) from why a separate parent action is performed (PURPOSE). '
         'UNKNOWN leaves the status unspecified; HYPOTHETICAL presents the child as intended or possible. '
-        'A complement may have a different controller: if no candidate represents the source, answer 0 or ?. Do not assign identity from proximity.')
+        'A complement may have a different controller: answer 0 if no candidate represents the source, or ? if the evidence is insufficient. Do not assign identity from proximity.')
     if chosen is None:return block(state,region,frames,'COMPONENT_INFINITIVE_CONTROL_UNRESOLVED')
     owner,relation,alias,label=links[chosen]
     cr=region_for(state,region,body,'INFINITIVE')

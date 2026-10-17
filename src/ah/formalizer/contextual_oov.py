@@ -2,6 +2,7 @@
 from .canonical_ledger import digest
 from .component_policy import policy, _morph
 from .state import MorphVariant
+from .probe_wording import pos_description
 
 
 def resolve(state,release,selector,*,areas=None):
@@ -40,9 +41,9 @@ def resolve(state,release,selector,*,areas=None):
                 readings=offer(state,token,options.values(),'OOV_FUNCTION')
                 functions=list(dict.fromkeys(v.pos for v in readings))
                 selected=choose(state,release,selector,region,cfg,'structural_oov_function',
-                    [{'candidate_id':pos,'label':pos+': grammatical function; unknown lemma and features stay unknown'} for pos in functions],
-                    'Which grammatical function does unknown source word «'+token.span+'» have in the current relation? '
-                    'Choose only its function. The consuming relation will resolve features if they matter.')
+                    [{'candidate_id':pos,'label':pos_description(pos)} for pos in functions],
+                    'Which part of speech does «'+token.span+'» have in THIS use? '
+                    'Choose its function in the sentence; no lemma, case or identity is established by this answer.')
                 if selected:
                     value,proof=selected;pos=value['candidate_id']
                     state.syntax_trace.append({'kind':'MORPHOLOGY_FUNCTION_RESTRICTION',**scope_fields(state),

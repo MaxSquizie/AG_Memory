@@ -232,7 +232,7 @@ def test_temporal_relations_accept_finite_and_nominal_children(tmp_path,monkeypa
 
 
 def test_oov_role_is_explicitly_licensed(tmp_path,monkeypatch):
-    steps=[('structural_oov_function','NOUN:')]+relation('LEXICAL')
+    steps=[('structural_oov_function','noun:')]+relation('LEXICAL')
     result,_=run(tmp_path,monkeypatch,'Флырка пришла.',steps)
     assert result['diagnostics']['codes']==['OOV_KEEP_AS_IS']
     assert result['assertions']['ah'] and result['assertions']['ah'][0]['predicate']=='ARRIVE'
@@ -312,7 +312,7 @@ def test_description_can_precede_its_nominal_host(tmp_path,monkeypatch):
 
 
 def test_oov_verb_keeps_surface_instead_of_guessing_known_sense(tmp_path,monkeypatch):
-    steps=[('structural_oov_function','VERB:')]+relation('LEXICAL')
+    steps=[('structural_oov_function','finite verb:')]+relation('LEXICAL')
     result,_=run(tmp_path,monkeypatch,'Иван флыркает.',steps)
     assert result['diagnostics']['codes']==['OOV_KEEP_AS_IS']
     assert len(result['assertions']['ah'])==1

@@ -148,7 +148,8 @@ def fixture(core, profile):
     for entry in R['R-V']['entries']:
         if modes[entry['sense_id']] in {'PROCESS','TRANSITION'}:entry['temporal_mode_hint']=modes[entry['sense_id']]
     for sense_id, lemma, target_sense, mode in LEXICAL_MAPPINGS:
-        R['R-S']['entries'].append({'lemma':lemma,'POS':'VERB','sense_id':sense_id})
+        from tools.formalizer_lexical_definitions import MEANINGS
+        R['R-S']['entries'].append({'lemma':lemma,'POS':'VERB','sense_id':sense_id,'meaning_en':MEANINGS[sense_id]})
         valency=deepcopy(next(v for v in R['R-V']['entries'] if v['sense_id']==target_sense))
         valency.update(sense_id=sense_id,state_class='EVENT',temporal_mode_hint=mode)
         R['R-V']['entries'].append(valency)
@@ -197,7 +198,7 @@ def fixture(core, profile):
         {'pattern':r'\bвесь\s+сегодняшний\s+день\b','kind':'DAY_INTERVAL','day_offset':0,'interval_semantics':'CONTINUOUS'},
         {'pattern':r'\b(?:в\s+)?(?P<hour>\d{1,2}):(?P<minute>\d{2})\b','kind':'POINT_CLOCK'}]
     if profile=='known_mapping_broken':
-        R['R-S']['entries']=[r for r in R['R-S']['entries'] if r['sense_id']!='SEND']+[{'lemma':'отправить','POS':'VERB','sense_id':'K_SEND'}]
+        R['R-S']['entries']=[r for r in R['R-S']['entries'] if r['sense_id']!='SEND']+[{'lemma':'отправить','POS':'VERB','sense_id':'K_SEND','meaning_en':'SUBJECT dispatches OBJECT to RECIPIENT.'}]
         for r in R['R-V']['entries']:
             if r['sense_id']=='SEND':r['sense_id']='K_SEND'
         R['TemplateMap']['entries']=[r for r in R['TemplateMap']['entries'] if r['sense_id']!='SEND']

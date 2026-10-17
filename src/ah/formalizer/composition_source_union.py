@@ -30,23 +30,35 @@ def merge(state,release,selector,region,tokens,cfg,grammar,components,diagnostic
         for f in all_frames:f.semantic['structural_unresolved']=True
         state.diag('COMPOSITION_PRODUCER_PENDING',region.region_id)
         return all_frames
+    from .component_constraints import compatible_bundle,preserves_nominal_functions
+    retained=[]
+    for root,owned,label in bundles:
+        if compatible_bundle(state,region,owned) and preserves_nominal_functions(state,tokens,owned):
+            retained.append((root,owned,label))
+        else:
+            for f in owned:
+                f.semantic['structural_unresolved']=True
+                f.semantic['structural_rejection']='ESTABLISHED_SOURCE_CONSTRAINT_CONFLICT'
+                f.semantic.pop('composition_domain',None)
+            state.syntax_trace.append({'kind':'ESTABLISHED_SOURCE_CONSTRAINT_REJECTION',
+                'region_ref':region.region_id,'frame_refs':[f.frame_id for f in owned]})
+    bundles=retained
     if not bundles:return all_frames
     from .composition_equivalence import coalesce,describe
     bundles,duplicates=coalesce(state,release,region,bundles)
     all_frames=[f for f in all_frames if f.frame_id not in duplicates]
     key='source-union:'+digest([region.region_id,sorted(t.token_id for t in tokens)])
     for root,owned,label in bundles:
-        source=root.semantic.get('composition_source','COMPONENT')
         root.semantic['composition_domain']={'decision_ref':key,'frame_refs':[f.frame_id for f in owned],
-            'label':source+': '+describe(state,root,owned)}
+            'label':describe(state,root,owned)}
         for f in owned:f.semantic['structural_unresolved']=True
     if len(bundles)==1:
         for f in bundles[0][1]:f.semantic['structural_unresolved']=False
     else:
         from .composition_children import select_child
         select_child(state,release,selector,region,all_frames,'ALL_SOURCE_PRODUCERS',
-            'Compare complete alternatives from ALL applicable producers. A grammar match does not suppress '
-            'component alternatives. Preserve whole linked morphology, source coverage, roles and scopes.')
+            'Which remaining interpretation fits the source? Preserve established roles, nominal functions, '
+            'linked morphology and child scopes; decide only the remaining difference.')
     # Local dead ends belong to a producer trace, not to the accepted alternative.
     if roots(all_frames):del state.diagnostics[diagnostics_before:]
     return all_frames

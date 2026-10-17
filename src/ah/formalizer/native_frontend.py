@@ -564,27 +564,14 @@ def _propose(state,selector,release):
         if state.budget.llm_exhausted:
             offer(state, structure_key, 'STRUCTURE', state.text, options)
             state.diag('COMPUTATION_LIMIT','TP hypothesis selection'); return
-        ids=tuple(h.local_id for h,fs in accepted)
-        relations={cid:Relation(cid,cid,0,(),json.dumps(asdict(h),ensure_ascii=False)) for h,fs in accepted for cid in [h.local_id]}
-        schema=DecisionSchema(release.sha256,relations)
-        prompt=json.dumps({'task':'select one grounded local hypothesis, MULTIPLE_ADMISSIBLE or INSUFFICIENT_CONTEXT; return outcome, selected and optional note',
-                           'text':state.text,'candidates':[{'candidate_id':h.local_id,'structure':asdict(h)} for h,fs in accepted]},ensure_ascii=False)
-        if selection_wire(selector)==LABEL_SELECTION_PROTOCOL:
-            prompt=json.dumps({'task':'select grounded local hypotheses or report no fit / insufficient context',
-                'text':state.text,'candidates':[{'label':i,'structure':asdict(h)} for i,(h,fs) in enumerate(accepted,1)]},
-                ensure_ascii=False,separators=(',',':'))+'\n'+selection_label_instructions(ids)
-        try:
-            state.budget.spend_llm(); raw=selector.select(prompt)
-            reply=validate_selector_reply(selector,raw,schema,ids,allowed=frozenset(ids))
-            state.syntax_trace.append({'stage':'TP','event':'STRUCTURE_SELECTION','candidates':sorted(ids),
-                                       'outcome':reply.outcome,'selected':list(reply.selected)})
-            if reply.outcome!='ONE_SELECTED':
-                offer(state, structure_key, 'STRUCTURE', state.text, options)
-                state.diag('STRUCTURE_UNRESOLVED','TP alternatives retained'); return
-            chosen=reply.selected[0]
-        except Exception as exc:
-            offer(state, structure_key, 'STRUCTURE', state.text, options)
-            state.diag(_failure_code(exc,'PROTOCOL_ERROR'),str(exc)); return
+        from .component_probe import _probe
+        from .probe_structure_view import describe as describe_hypothesis
+        options=[{'candidate_id':h.local_id,'label':describe_hypothesis(state,h)} for h,_ in accepted]
+        chosen=_probe(state,selector,release,structure_key,'structure_attachment',options,state.text,(0,len(state.text)),
+            question='Which proposed arrangement of the source occurrences fits the text? Compare the displayed links and readings; do not infer world truth.')
+        if chosen is None:
+            offer(state,structure_key,'STRUCTURE',state.text,options)
+            state.diag('STRUCTURE_UNRESOLVED','TP alternatives retained');return
         for h,fs in accepted:
             if h.local_id!=chosen: state.reject(h.local_id,'TP_SELECTION','different validated hypothesis selected: '+chosen,tp_provenance)
         accepted=[pair for pair in accepted if pair[0].local_id==chosen]
@@ -980,7 +967,7 @@ def _interpret_state(state,text,selector,release,observation,morph,context_reade
                     implicit=tuple(r for r in extra if r not in bs.values())
                     cid=s['sense_id']+':'+digest([bs,v,implicit])[:16] if implicit else s['sense_id']+':'+digest([bs,v])[:16]
                     if implicit_roles and not set(implicit_roles)<={r['role_id'] for r in v['roles']}: continue
-                    specs.append({'candidate_id':cid,'sense_id':s['sense_id'],'label':s.get('label',s['sense_id'])+'; lexical entry «'+s.get('lemma',e.span)+'»'+('; '+s['meaning_en'] if s.get('meaning_en') else ''),'sense_kind':'KNOWN','roles':bs,'implicit_roles':list(implicit_roles),'spatial_roles':list(spatial_roles),'state_class':mode,'valency_ref':v.get('construction_id',digest(v)),
+                    specs.append({'candidate_id':cid,'sense_id':s['sense_id'],'label':s.get('label',s['sense_id'])+'; lexical entry «'+s.get('lemma',e.span)+'»'+('; '+s['meaning_en'] if s.get('meaning_en') else ''),'sense_kind':'KNOWN','meaning_en':s.get('meaning_en',''),'roles':bs,'implicit_roles':list(implicit_roles),'spatial_roles':list(spatial_roles),'state_class':mode,'valency_ref':v.get('construction_id',digest(v)),
                                   **({'description_roles':list(description_roles)} if frame.semantic.get('action_description') else {}),
                                   **({'query_existential_roles':list(implicit)} if implicit else {})})
         open_spec=None
@@ -1069,15 +1056,18 @@ def _interpret_state(state,text,selector,release,observation,morph,context_reade
         if state.budget.llm_exhausted:
             d.outcome='COMPUTATION_LIMIT'; state.diag('COMPUTATION_LIMIT',f.frame_id); continue
         from .component_probe import _probe
+        if any(spec['sense_kind']=='KNOWN' and not spec.get('meaning_en','').strip() for spec in specs):
+            d.outcome='UNRESOLVED';state.diag('LEXICAL_DEFINITION_MISSING',f.frame_id);continue
         options=[{'candidate_id':spec['candidate_id'],'label':spec['label']+'; '+
             ', '.join(role+'=«'+evidence[tid].span+'»' for tid,role in spec['roles'].items())+
             '; temporal class='+spec['state_class']} for spec in specs]
         from .lexical_embedding import order as embedding_order
         options=embedding_order(state,selector,release,f,options,text[slice(*f.source_range)])
+        from .lexical_probe_context import build as lexical_context
+        context,established=lexical_context(state,f)
         _probe(state,selector,release,f.frame_id+'|predicate_value','predicate_value',options,
-            text[slice(*f.source_range)],f.source_range,
-            question='Which lexical use applies to this occurrence in its selected structure? '
-            'Choose a catalog entry when its lexical meaning fits. Tense, date, negation and modality are handled by the structure, not new lexical senses. Choose an unlisted use only when no listed meaning fits; use ? when uncertain.')
+            context,f.source_range,
+            question='Which lexical use applies to this occurrence in its selected structure? '+established+'Choose a catalog entry when its lexical meaning fits. Tense, date, negation and modality are handled by the structure, not new lexical senses. Choose an unlisted use only when no listed meaning fits; use ? when uncertain.')
         d=state.decisions[f.frame_id+'|predicate_value'];d.source_traces=f.semantic.get('source_traces',())
         state.component_probe_records[f.frame_id+'|predicate_value']['decision']=asdict(d)
     from .clarifications import offer

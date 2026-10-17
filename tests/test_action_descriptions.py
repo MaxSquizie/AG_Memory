@@ -15,8 +15,10 @@ def test_unassigned_actor_is_not_an_entity_or_a_fact(tmp_path,monkeypatch,text,k
     steps+=relation('LEXICAL')
     if 'прочитана' in text:steps+=[('predicate_function','Predicate occurrence «прочитана»')]
     elif 'открыто' in text:steps+=[('predicate_function','Predicate occurrence «открыто»')]
+    if 'прочитана' in text or 'открыто' in text:
+        steps+=[('predicate_argument_role','core object')]
     if predicate=='OPEN' and 'открыто' in text:
-        steps+=[('component_attachment','открыть [PRTS]')]
+        steps+=[('predicate_argument_reading','cases: nominative'),('component_attachment','unassigned participant slots: core subject')]
     result,script=run(tmp_path,monkeypatch,text,steps)
     expected={'operator':kind,'operands':[{'predicate':predicate,'roles':{'THEME':{'entity':theme}}}]}
     assert result['assertions']=={'ah':[expected],'ir':[expected],'journal':[expected]},result['diagnostics']
@@ -42,7 +44,7 @@ def test_quoted_description_does_not_inherit_the_speaker(tmp_path,monkeypatch):
 @pytest.mark.parametrize('text,governor,selection',[
     ('Ивану можно прочитать книгу.',None,None),
     ('Книга может быть прочитана Иваном.','Agreement/controller anchor «может»',None),
-    ('Окно может быть открыто Марией.','Agreement/controller anchor «может»','открыть [PRTS]'),
+    ('Окно может быть открыто Марией.','Agreement/controller anchor «может»','открыть [short participle]'),
 ])
 def test_explicit_actor_is_retained_without_patient_agreement(tmp_path,monkeypatch,text,governor,selection):
     marker='может' if governor else 'можно'
@@ -51,6 +53,11 @@ def test_explicit_actor_is_retained_without_patient_agreement(tmp_path,monkeypat
     steps+=relation('LEXICAL')
     if 'прочитана' in text:steps+=[('predicate_function','Predicate occurrence «прочитана»')]
     elif 'открыто' in text:steps+=[('predicate_function','Predicate occurrence «открыто»')]
+    if governor:
+        steps += [('predicate_argument_role','core object')]
+        if 'открыто' in text:steps += [('predicate_argument_reading','cases: nominative')]
+        steps += [('predicate_argument_role','core subject')]
+    else:steps += [('predicate_argument_role','core subject'),('predicate_argument_role','core object')]
     if selection:steps+=[('component_attachment',selection)]
     result,_=run(tmp_path,monkeypatch,text,steps)
     action=result['assertions']['ah'][0]['operands'][0]
@@ -97,7 +104,7 @@ def test_active_and_passive_query_the_same_property_without_asserting_occurrence
     assert set(node['actants'])=={'OBJECT'}
     assert session.core.store.get_hypernode(node['uid']).meta['action_description']=={'unassigned_roles':['SUBJECT']}
     query,result=ingest(session,monkeypatch,'Книга может быть прочитана?',
-        unary('QUERY','?','?')+unary('POSSIBLE','может','может')+[('structural_governor','Agreement/controller anchor «может»')]+relation('LEXICAL')+[('predicate_function','Predicate occurrence «прочитана»')],'query','QUERY')
+        unary('QUERY','?','?')+unary('POSSIBLE','может','может')+[('structural_governor','Agreement/controller anchor «может»')]+relation('LEXICAL')+[('predicate_function','Predicate occurrence «прочитана»'),('predicate_argument_role','core object')],'query','QUERY')
     assert len(session.store.ledger.f_visible())==1
     compiled=compile_native_queries(session.core,project_native_queries(query,session.release),
         SimpleNamespace(user_ref=None,self_ref=None))
@@ -151,7 +158,10 @@ def test_nominative_syncretism_keeps_the_whole_infinitive_option(tmp_path,monkey
     steps=unary('POSSIBLE','можно','можно')+relation('LEXICAL')+[
         ('component_attachment','Whole target is one infinitive action description'),
         ('predicate_function','Predicate occurrence «прочитать»'),
-        ('nominal_dependency','ATTRIBUTE dependency on «роман»')]
+        ('nominal_dependency','ATTRIBUTE dependency on «роман»'),
+        ('predicate_argument_role','This occurrence belongs to another nominal'),
+        ('predicate_argument_role','core object'),
+        ('predicate_argument_reading','lemma: роман; pos: noun; cases: accusative')]
     result,_=run(tmp_path,monkeypatch,'Старый роман можно прочитать.',steps)
     assert result['diagnostics']['codes']==[]
     action=result['assertions']['ah'][0]['operands'][0]
@@ -172,7 +182,7 @@ def test_description_gui_names_unassigned_roles_without_raw_json(tmp_path,monkey
     result,_=run(tmp_path,monkeypatch,'Книгу можно прочитать.',unary('POSSIBLE','можно','можно')+relation('LEXICAL'))
     data={'source_text':'Книгу можно прочитать.','state':result['runtime']['ir']}
     idx=Inspection(data);reader=ReadableInspection(idx)
-    frame=next(f for f in data['state']['frames'] if f['semantic'].get('action_description'))
+    frame=next(f for f in data['state']['frames'] if f['semantic'].get('action_description') and not f['semantic'].get('structural_unresolved'))
     html=reader.explain(idx.by_ref[frame['frame_id']])
     assert 'не факт его совершения' in html and 'Сущность не создаётся' in html
     assert 'action_description' not in html and 'unassigned_roles' not in html
@@ -195,7 +205,7 @@ def test_experience_retains_only_the_selected_morphological_reading(tmp_path,mon
     session=Session([],tmp_path/'experience.log')
     state,result=ingest(session,monkeypatch,'Окно может быть открыто.',unary('POSSIBLE','может','может')+[
         ('structural_governor','Agreement/controller anchor «может»')]+relation('LEXICAL')+[
-        ('predicate_function','Predicate occurrence «открыто»'),('component_attachment','открыть [PRTS]')],'experience')
+        ('predicate_function','Predicate occurrence «открыто»'),('predicate_argument_role','core object'),('predicate_argument_reading','cases: nominative'),('component_attachment','unassigned participant slots: core subject')],'experience')
     assert result['diagnostics']['codes']==[]
     stages=[row['stages'] for row in session.store.ledger.data['rx_cache'].values()]
     assert stages

@@ -1,13 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Numeral extraction — declared seed resource + bounded LLM probe (variant C).
-
-Part A exercises the deterministic SEED layer on synthetic tokens (no probe): a single numeral maps to its
-resource value, adjacent numerals compose additively, and an unknown non-numeral token terminates the run.
-Part B exercises the BOUNDED-PROBE fallback: table hits short-circuit without probing; an OOV NUMR token is
-resolved by the model (and tagged M); a refusal or provider failure contributes nothing (never guessed); the
-call budget is honored; and provenance distinguishes seed ('table') from model judgment ('probe').
-Part C drives the real pipeline: 'Минимум пять перьев выпало.' yields an AT_LEAST_N node with threshold=5.
-"""
+"""Whole selected quantity interpretation: deterministic literals, contextual compounds, no partial sums."""
 
 from __future__ import annotations
 
@@ -30,7 +22,7 @@ from ah.formalizer.pipeline import MorphProvider, run
 from ah.formalizer.selection_protocol import load_decision_schema
 
 
-class _Tok:  # minimal stand-in for the deterministic layer (no POS -> probe never triggers)
+class _Tok:  # minimal stand-in for a caller-selected quantity
     def __init__(self, lemma):
         self.lemma = lemma
         self.pos = None
@@ -41,7 +33,7 @@ def _toks(*lemmas) -> list[_Tok]:
     return [_Tok(l) for l in lemmas]
 
 
-class _NumTok:  # carries POS so the bounded-probe candidate gate can fire
+class _NumTok:  # carries optional morphology; no POS whitelist gates the probe
     def __init__(self, lemma, pos="NUMR"):
         self.lemma = lemma
         self.pos = pos
@@ -68,18 +60,18 @@ class TestSeedLayer(unittest.TestCase):
         self.assertEqual(extract_cardinal_value(_toks("пять")), 5)
         self.assertEqual(extract_cardinal_value(_toks("двадцать")), 20)
 
-    def test_compound_composes_additively(self):
-        self.assertEqual(extract_cardinal_value(_toks("двадцать", "три")), 23)
-        self.assertEqual(extract_cardinal_value(_toks("сто", "пять")), 105)
+    def test_compound_requires_whole_expression_evidence(self):
+        self.assertIsNone(extract_cardinal_value(_toks("двадцать", "три")))
+        self.assertIsNone(extract_cardinal_value(_toks("сто", "пять")))
 
-    def test_skips_leading_non_numeral_tokens(self):
+    def test_does_not_strip_bounds_from_the_selected_expression(self):
         # tokens carry their LEMMA/normal form (as TokenEvidence does: 'трёх' -> lemma 'три')
-        self.assertEqual(extract_cardinal_value(_toks("не", "менее", "три")), 3)
+        self.assertIsNone(extract_cardinal_value(_toks("не", "менее", "три")))
 
     def test_unknown_lemma_is_never_assigned_a_value(self):
         self.assertIsNone(extract_cardinal_value(_toks("хрен")))
         # an unknown token terminates the run; a following numeral is not reached across it
-        self.assertEqual(extract_cardinal_value(_toks("пять", "хрен", "три")), 5)
+        self.assertIsNone(extract_cardinal_value(_toks("пять", "хрен", "три")))
 
     def test_resource_is_a_declared_mapping_not_logic(self):
         for lemma, value in {"ноль": 0, "один": 1, "десять": 10, "сто": 100, "тысяча": 1000}.items():
@@ -101,9 +93,9 @@ class TestDigitLiterals(unittest.TestCase):
         self.assertEqual(extract_cardinal_value([_SpanTok("52")], sources=sources), 52)
         self.assertEqual(sources, [("digits", 52)])
 
-    def test_grouped_thousands_read_directly(self):
-        self.assertEqual(extract_cardinal_value([_SpanTok("1 000")]), 1000)
-        self.assertEqual(extract_cardinal_value([_SpanTok("1.000")]), 1000)
+    def test_separators_require_context(self):
+        self.assertIsNone(extract_cardinal_value([_SpanTok("1 000")]))
+        self.assertIsNone(extract_cardinal_value([_SpanTok("1.000")]))
 
     def test_decimal_and_ordinal_are_not_cardinal_literals(self):
         self.assertIsNone(extract_cardinal_value([_SpanTok("3,5")]))   # decimal -> not a clean count
@@ -143,11 +135,10 @@ class TestBoundedProbe(unittest.TestCase):
         self.assertIsNone(extract_cardinal_value(toks, probe=NumeralProbe(sel)))
 
     def test_call_budget_is_bounded(self):
-        sel = FakeSelect({"a": json.dumps({"value": 1}), "b": json.dumps({"value": 2}),
-                          "c": json.dumps({"value": 3})})
+        sel = FakeSelect({"a b c": json.dumps({"value": 123})})
         toks = [_NumTok("a"), _NumTok("b"), _NumTok("c")]
-        # budget of 1: only the first NUMR miss is probed; the run ends there (no value for b/c)
-        self.assertEqual(extract_cardinal_value(toks, probe=NumeralProbe(sel), max_probes=1), 1)
+        # One call interprets the entire selected expression; it cannot return a prefix sum.
+        self.assertEqual(extract_cardinal_value(toks, probe=NumeralProbe(sel), max_probes=1), 123)
         self.assertEqual(len(sel.calls), 1)
 
     def test_parse_contract_rejects_malformed(self):
@@ -167,9 +158,9 @@ class TestAtLeastNIntegration(unittest.TestCase):
 
     def _ir(self, text):
         st = run(text, self.schema, FakeSelector(), morph=self.morph)
-        return assemble_ir(st), st
+        return assemble_ir(st,numeral_probe=NumeralProbe(FakeSelect({"пять перьев": '{"value":5}'}))), st
 
-    def test_minimum_trigger_extracts_threshold_from_seed(self):
+    def test_minimum_window_passes_complete_quantity_to_probe(self):
         ir, _ = self._ir("Минимум пять перьев выпало.")
         at_least = [n for t in ir.operator_trees for n in t.nodes if n.operator_type == "AT_LEAST_N"]
         self.assertTrue(at_least, "the declared 'минимум' trigger must yield an AT_LEAST_N scope")
@@ -213,11 +204,10 @@ class TestProbeEndToEnd(unittest.TestCase):
         self.assertTrue(at_least)
         self.assertIsNone(at_least[0].threshold)  # honest incompleteness, never a guess
 
-    def test_digit_literal_threshold_flows_end_to_end_without_a_model(self):
-        """'Минимум 52 перья выпало.' — the digit is OOV to pymorphy3 (POS None), yet it reads straight to
-        its integer through t1->composition. No selector answer is needed for the numeral itself."""
+    def test_quantity_with_noun_flows_end_to_end_with_context(self):
+        """The legacy caller supplies the whole quantity window, including its noun."""
         st = run("Минимум 52 перья выпало.", load_decision_schema(), FakeSelector(), morph=MorphProvider())
-        ir = assemble_ir(st)
+        ir = assemble_ir(st,numeral_probe=NumeralProbe(FakeSelect({"52 перья": '{"value":52}'})))
         at_least = [n for t in ir.operator_trees for n in t.nodes if n.operator_type == "AT_LEAST_N"]
         self.assertTrue(at_least, "the declared 'минимум' trigger must yield an AT_LEAST_N scope")
         self.assertEqual(at_least[0].threshold, 52)

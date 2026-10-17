@@ -38,8 +38,12 @@ def project(state, release, selector, region, tokens, cfg):
                 'raw':state.text[lo:hi],'identity_constraint':source['identity_constraint'],
                 'decision_ref':key,'resource_sha256':release.sha256,'rule_ids':['SOURCE_FUNCTION_V1'],
                 'internal_readings':{ref:[_morph(v) for v in evidence[ref].variants] for ref in source['function_refs']}}
+            if source.get('shared_function'):
+                from .nominal_functions import shared_nominal_readings
+                selected[source['head_ref']]=shared_nominal_readings(state,evidence[source['head_ref']],source)
             groups.append(row)
             for ref in source['function_refs']:
+                if ref==source['head_ref']:continue  # shared bearer remains a nominal, not a detachable determiner
                 selected[ref]=tuple(replace(v,features=v.features|{MARK},origin='CONTEXTUAL',
                     evidence_refs=(*v.evidence_refs,key)) for v in evidence[ref].variants)
             state.syntax_trace.append({'kind':'NOMINAL_REFERENCE_GROUP',**row})

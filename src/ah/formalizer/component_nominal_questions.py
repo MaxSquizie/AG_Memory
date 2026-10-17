@@ -26,7 +26,7 @@ def select_units(state, release, selector, region, covers, frame, cfg):
             state.diag('COMPONENT_SEARCH_INCOMPLETE',region.region_id);return None
         chosen=choose(state,release,selector,region,['segmentation',frame.frame_id],options,
             'Choose the phrase boundaries under the existing predicate and nominal slots. '
-            'Preserve every source token; do not merge competing covers. If no boundary is supported, answer ?.')
+            'Preserve every source token; do not merge competing covers. If none of the proposed boundaries fits, answer 0; use ? only when evidence is insufficient.')
         if chosen is None:
             state.diag('COMPONENT_NOMINAL_SEGMENTATION_UNRESOLVED',region.region_id);return None
         grouped={signature:values for signature,values in grouped.items() if digest(signature)==chosen}
@@ -52,11 +52,11 @@ def select_units(state, release, selector, region, covers, frame, cfg):
         units={digest([_morph(u['variant']),u.get('bound_host'),u.get('implicit_host_role'),[(e.token_id,_morph(v)) for e,v in
                 [*u['entities'],*u['adjectives']]]]):u for u in (c[index] for c in alternatives)}
         units={k:u for k,u in units.items() if k in graph.domains[str(index)]}
-        options=[{'candidate_id':k,'label':'Whole phrase readings: '+str({e.span:
-            {a:b for a,b in _morph(v).items() if a in {'lemma','pos','cases','number','gender','features'}}
-            for e,v in [(u['token'],u['variant']),*u['adjectives'],*u['entities']]})+
-            ('; description host: '+next(e.span for e in state.evidence if e.token_id==u['bound_host'])+
-             '; host_ref='+u['bound_host'] if u.get('bound_host') else '')+
+        from .probe_wording import linked_readings
+        options=[{'candidate_id':k,'label':'Whole phrase readings: '+linked_readings(
+            {e.token_id:_morph(v) for e,v in [(u['token'],u['variant']),*u['adjectives'],*u['entities']]},
+            {e.token_id:e for e in state.evidence})+
+            ('; description host: «'+next(e.span+'» @'+str(e.start) for e in state.evidence if e.token_id==u['bound_host']) if u.get('bound_host') else '')+
             ('; description host: the omitted '+u['implicit_host_role']+' of «'+frame.anchor_span+'» (same slot, identity unresolved)'
              if u.get('implicit_host_role') else '')}
             for k,u in units.items()]

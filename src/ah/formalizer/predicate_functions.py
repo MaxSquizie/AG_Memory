@@ -11,7 +11,7 @@ from .structural_tasks import choose
 def head(state,release,selector,region,tokens,preferred,cfg):
     from .temporal_functions import owned_refs
     from .nominal_functions import rows
-    excluded=owned_refs(state,tokens)|{r for row in rows(state,tokens) for r in row['function_refs']}
+    excluded=owned_refs(state,tokens)|{r for row in rows(state,tokens) for r in row['function_refs'] if r!=row['head_ref']}
     ordered=list(dict.fromkeys([t.token_id for t in preferred]+[t.token_id for t in tokens]))
     evidence={t.token_id:t for t in tokens}
     options=[{'candidate_id':ref,'head_ref':ref,'label':'Predicate occurrence «'+evidence[ref].span+'» @'+str(evidence[ref].start)}
@@ -48,7 +48,10 @@ def binding(state,release,selector,region,tokens,predicate,nominals,groups,cfg,p
             'Use SURFACE_ARG only when no more specific role is established.')
         if not selected:return None
         role=selected[0]['candidate_id']
-        if role=='NO_DIRECT_ROLE':result.append((None,None,None));continue
+        from .component_constraints import retain_role
+        if role=='NO_DIRECT_ROLE':
+            retain_role(state,region,predicate,token,selected)
+            result.append((None,None,None));continue
         unique={digest({k:v for k,v in _morph(m).items() if k!='score'}):m for m in choices}
         if len(unique)==1:variant=next(iter(unique.values()))
         else:
@@ -57,5 +60,6 @@ def binding(state,release,selector,region,tokens,predicate,nominals,groups,cfg,p
                 'Predicate «'+predicate.span+'»: which whole reading of «'+token.span+'» fits its selected role '+role_text(role)+'? Preserve unknown features.')
             if not reading:return None
             variant=unique[reading[0]['candidate_id']]
+        retain_role(state,region,predicate,token,selected,_morph(variant))
         result.append((role,variant,None))
     return result

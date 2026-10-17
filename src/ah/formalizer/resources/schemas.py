@@ -76,6 +76,7 @@ RESOURCE_SCHEMAS = {
     'NumeralRules': obj(('lemma','value'), {'lemma':S,'value':{'type':'integer','minimum':0,'maximum':10**12},'evidence_rule_id':S}),
     'R-S': obj(('lemma', 'POS', 'sense_id'), {'lemma': S, 'POS': S, 'sense_id': S,
         'predicate_schema_id': S, 'semantic_types': array(), 'paraphrase_group': S,
+        'label': S, 'meaning_en': S,
         'evidence_rule_id': S, 'anchor_pattern': array(obj((), {'lemma': S, 'POS': S}), minimum=2)}),
     'R-V': obj(('sense_id', 'roles'), {'sense_id': S, 'lemma': S, 'POS': S, 'aspect': S,
         'construction_id': S, 'roles': array(ROLE), 'state_class': enum('STATE', 'EVENT', None),

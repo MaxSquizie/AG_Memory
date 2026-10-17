@@ -34,7 +34,7 @@ def choose(state,release,selector,region,cfg,slot,options,question,*,empty=None)
     context,target=probe_context(state,region,cfg,local)
     question=target+question
     if empty is not None:
-        question+=' Optional search: select only matching positive options. If none matches, reject this page. After ALL pages have no match, the result is: '+empty['label']+'. Unknown is not an empty result.'
+        question+=' Optional search: examine the listed candidates; 0 means none of THESE fits, not missing context.'
     def complete_empty():
         from .state import Decision,Ground
         key='task-empty:'+digest([region.region_id,task_scope,slot,question,sorted(seen),previous,empty])
@@ -82,7 +82,7 @@ def choose(state,release,selector,region,cfg,slot,options,question,*,empty=None)
         state.budget.task_candidate_pages[key]=len(values)
         state.budget.task_candidates_examined+=fresh
         selected=_probe(state,selector,release,key,slot,choices,context,region.source_range,
-            question=question+' Select every supported option on THIS page; 0 rejects this page, ? means unknown.' )
+            question=question+' Evaluate the stated choice on this page. Multiple numbers mean alternative readings of that choice, not different tasks.' )
         decision=state.decisions.get(key)
         outcome=('ONE_SELECTED' if decision and selected is not None and decision.outcome=='RESOLVED'
                  else decision.selector_outcome if decision else None)
@@ -237,7 +237,7 @@ def extend_source_set(state,release,selector,region,tokens,cfg,slot,question,sel
             *[{'candidate_id':t.token_id,'token_ref':t.token_id,
                'label':'Another piece starts at «'+t.span+'» @'+str(t.start)} for t in remaining if t.token_id in reachable]],
             question+' Already included: «'+' '.join(t.span for t in selected)+'». '
-            'Select the start of another piece if one exists. Intervening words retain their own meaning.',
+            'Select the FIRST remaining piece in source order, if one exists. Do not select the already included words again.',
             empty={'candidate_id':'DONE','label':'no further source words belong to this part'} if can_finish else None)
         if not more:return None
         proofs.append(more[1])
@@ -248,7 +248,7 @@ def extend_source_set(state,release,selector,region,tokens,cfg,slot,question,sel
             choices.append({'candidate_id':tokens[b].token_id,'end':b+1,
                 'label':'End after «'+tokens[b].span+'» @'+str(tokens[b].end)})
         end=choose(state,release,selector,region,cfg,slot+'_piece_end',choices,
-            question+' Next piece starts at «'+tokens[a].span+'». Select its last word.')
+            'Expression being collected: '+question+' Already included: «'+' '.join(t.span for t in selected)+'». Next piece starts at «'+tokens[a].span+'». Select ONLY its last word.')
         if not end:return None
         selected.extend(tokens[a:end[0]['end']]);proofs.append(end[1])
     selected.sort(key=lambda t:t.start)

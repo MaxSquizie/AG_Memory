@@ -84,7 +84,8 @@ def general_groups(state,release,tokens,sources):
     evidence={t.token_id:t for t in tokens};groups=[];readings={}
     for source in sources:
         head=evidence[source['head_ref']];refs=source['function_refs'];marker=evidence[refs[0]]
-        nouns=[v for v in head.variants if v.pos in {'NOUN','NPRO'}]
+        from .nominal_functions import shared_nominal_readings
+        nouns=list(shared_nominal_readings(state,head,source)) if source.get('shared_function') else [v for v in head.variants if v.pos in {'NOUN','NPRO'}]
         if not nouns:
             state.diag('QUANTITY_HEAD_READING_UNRESOLVED',head.token_id);return None,[]
         case=source['external_case'];key=source['case_proof']['decision_ref']

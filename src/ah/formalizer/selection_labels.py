@@ -41,7 +41,7 @@ def selection_label_instructions(candidate_ids: Sequence[str]) -> str:
     ids = _closed_ids(candidate_ids)
     return (
         "Reply with the number of the supported option. "
-        "If several options remain possible, list their numbers separated by commas. "
+        "If multiple interpretations remain supported, list their numbers separated by commas. "
         "Insufficient context: ?\n"
         "No candidate fits: 0\n"
         "One line, no spaces. No JSON or explanation."

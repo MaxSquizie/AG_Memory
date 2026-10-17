@@ -76,7 +76,8 @@ def compose_alternatives(state, release, selector, region, tokens, predicates, c
             proposition_slots=(request.proposition_slots or {}).get(predicate.token_id,{}) if request else {},
             agreement_source=request.agreement_source if request else None,
             description_context=bool(request and request.description_context),
-            pending_roles=request.pending_for(predicate.token_id) if request else ()))
+            pending_roles=request.pending_for(predicate.token_id) if request else (),
+            required_pending_roles=(request.pending_propositions or {}).get(predicate.token_id,()) if request else ()))
     if attachment is None and infinitive is None:
         from .component_nominal_utterance import candidates as nominatives
         bases.extend(nominatives(state,release,region,tokens,cfg,request=request if request and request.output_sort=='EVENT_DESCRIPTION' else None,selector=selector,quantities=quantities))
@@ -94,7 +95,18 @@ def compose_alternatives(state, release, selector, region, tokens, predicates, c
         if bundle:bundle[-1].semantic['temporal_functions']=deepcopy(selected_times)
     frames = [f for bundle in bundles for f in bundle]
     attach_references(frames,references)
+    from .component_constraints import compatible_bundle
+    for b in bundles:
+        if not compatible_bundle(state,region,b):
+            for f in b:f.semantic['structural_unresolved']=True
+            state.syntax_trace.append({'kind':'ESTABLISHED_ROLE_CONSTRAINT_REJECTION','region_ref':region.region_id,'frame_refs':[f.frame_id for f in b]})
     complete = [b for b in bundles if all(not f.semantic['structural_unresolved'] for f in b)]
+    # Producer provenance is not a language ambiguity. Compare interpretations,
+    # never labels, before offering the component domain to a model.
+    from .composition_equivalence import coalesce_components
+    complete,duplicates=coalesce_components(state,region,complete)
+    bundles=[b for b in bundles if b[-1].frame_id not in duplicates]
+    frames=[f for b in bundles for f in b]
     local_diagnostics=[d for d in state.diagnostics[diagnostics_before:] if d.detail==region.region_id]
     incomplete_search=any(d.code=='COMPONENT_SEARCH_INCOMPLETE' for d in local_diagnostics)
     pending_search=any(d.code in {'COMPONENT_NOMINAL_SELECTION_UNRESOLVED',
@@ -118,19 +130,20 @@ def compose_alternatives(state, release, selector, region, tokens, predicates, c
     options = []
     if complete and needs_probe and len(raw) <= cfg['context_chars']:
         evidence = {e.token_id:e for e in state.evidence}
+        from .probe_wording import role as role_text,TERMS
         for bundle in complete:
             labels = []
             for f in bundle:
                 m = f.semantic['morph_bindings'][f.predicate_token_ref]
-                roles = ', '.join(role+'='+evidence[tid].span for tid, role in f.semantic['proposed_roles'].items())
-                label = f.semantic.get('nominal_dependency_kind',m['lemma'])+' ['+m['pos']+']; '+roles
+                roles = ', '.join(role_text(role)+'=«'+evidence[tid].span+'» @'+str(evidence[tid].start) for tid, role in f.semantic['proposed_roles'].items())
+                label = f.semantic.get('nominal_dependency_kind',m['lemma'])+' ['+TERMS.get(m['pos'],m['pos'])+']; '+roles
                 if f.semantic.get('nominal_predication'):
                     subject=next((evidence[t].span for t,r in f.semantic['proposed_roles'].items() if r==cfg['subject_role']),'the selected participant')
                     label+='; noun predicate: «'+f.anchor_span+'» describes what «'+subject+'» is'
                 if f.semantic.get('impersonal_predication'):
                     label+='; impersonal state; dative participant experiences it; no separate grammatical subject'
                 if f.semantic.get('action_description'):
-                    label+='; action description; occurrence is NOT asserted; unassigned roles='+', '.join(f.semantic['action_description']['unassigned_roles'])+'; no participant identity is supplied for them'
+                    label+='; action description; occurrence is NOT asserted; unassigned participant slots: '+(', '.join(role_text(r) for r in f.semantic['action_description']['unassigned_roles']) or 'none proposed')+'; no participant identity is supplied for them'
                 if f.semantic.get('passive_predication'):
                     label+='; passive: the nominative participant receives the action, not performs it'
                 if cfg.get('modifier_composition')=='BOUNDED_FOREST_V1':
@@ -172,8 +185,8 @@ def compose_alternatives(state, release, selector, region, tokens, predicates, c
         chosen = _probe(state, selector, release, region.region_id+'|composition',
                         'component_attachment', options, context, region.source_range,
                         question=target_question+(local['question'] if local else
-                            'Which complete reading matches this clause? Compare the predicate, its participants '
-                            'and grammatical readings. If the wording allows several, keep those alternatives.'))
+                            'Which remaining interpretation fits the target? Previously selected roles, readings and attachments '
+                            'are constraints, not questions to reopen. Retain alternatives when the text does not distinguish them.'))
     decision=state.decisions.get(region.region_id+'|composition')
     deferred=chosen is None and decision is not None and decision.selector_outcome in {
         'MULTIPLE_ADMISSIBLE','INSUFFICIENT_CONTEXT'}

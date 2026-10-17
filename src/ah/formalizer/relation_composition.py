@@ -19,9 +19,9 @@ RELATIONS={
     'NOT':'Negation of a proposition (not lexical opposition)',
     'POSSIBLE':'Possibility or ability; does not assert occurrence',
     'NECESSARY':'Necessity or obligation; preserve its scope',
-    'AND':'Both propositions hold',
-    'OR':'At least one proposition holds; inclusive alternative',
-    'XOR':'Exactly one alternative holds',
+    'AND':'Conjunction: the text connects both propositions together within the current scope',
+    'OR':'Inclusive alternative between propositions; the text permits both',
+    'XOR':'Exclusive alternative: the text presents exactly one of the propositions',
     'IMPLIES':'Conditional: antecedent implies consequent; direction must be selected',
     'COUNTERFACTUAL':'Counterfactual condition and its consequence; not material implication',
     'BEFORE':'First event/proposition occurs before the second',
@@ -126,7 +126,7 @@ def function_ownership(state,release,selector,region,cfg,kind,groups,*,eligible_
         selected=choose(state,release,selector,region,cfg,'structural_function_owner',options,
             kind+' ('+RELATIONS[kind]+'). Current parts: '+
             '; '.join(str(i+1)+': «'+' '.join(t.span for t in group)+'»' for i,group in enumerate(groups))+'. '+
-            'Which listed occurrence expresses the chosen OUTER relation, including an occurrence at the beginning of either part? '
+            'Which is the FIRST remaining occurrence in source order expressing this OUTER relation? '
             'Select that occurrence to move it out of its part. '
             +('Words introducing the condition or consequence belong to this outer conditional relation. '
               if kind in {'IMPLIES','COUNTERFACTUAL'} else '')+
@@ -182,7 +182,8 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child):
     result=choose(state,release,selector,region,cfg,'structural_relation',options,supplied+
         'Classify ONLY the target words. Context explains their meaning but is not part of this choice. '
         'Choose the outermost relation expressed inside the target; inner relations are handled later. '
-        'Choose one lexical predication when these words describe one event or state, even if the surrounding text asks about it or makes it possible. '
+        'Choose one lexical predication only when TARGET itself contains no further outer relation; '
+        'an outer relation already supplied by CONTEXT must not be selected again. '
         'The content option requires both the parent predicate and dependent content to be present in this text. '
         'Numeric quantification is deferred.')
     if not result:return block(state,region)
@@ -354,7 +355,8 @@ def content(state,release,selector,region,tokens,cfg,request,compose_child,proof
              *[{'candidate_id':'controller:'+digest(alias),'controller':alias,**source_parts,'label':'Same '+label+' of «'+owner.span+'»'}
                for alias,label in controllers(target)]],
             'Parent: «'+' '.join(t.span for t in parent)+'». Content: «'+body_text+'». '
-            'Does «'+owner.span+'» establish who performs the infinitive action in THIS content? '
+            'Which participant, if any, is understood as the grammatical subject of THIS infinitive content? '
+            'A passive subject receives the action; it need not perform it. '
             'A quoted or impersonal statement can have its own subject interpretation. '
             'Choose independent content if this connection is absent; the child will determine its own participants. '
             'Select a shared participant only when the source establishes that identity. Use ? if undecidable.')

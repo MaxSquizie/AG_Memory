@@ -1,4 +1,5 @@
 """Released relative-place slots and bounded source/memory anaphora choices."""
+from .probe_wording import role as role_text
 from copy import deepcopy
 from .canonical_ledger import digest
 from .component_probe import _probe
@@ -39,7 +40,7 @@ def prepare(state, release, selector=None):
             role=None
             if not matching:
                 role=_probe(state,selector,release,key+'|role','spatial_role',[
-                    {'candidate_id':r['role_id'],'label':r['role_id']} for r in release.entries('RoleRegistry')],
+                    {'candidate_id':r['role_id'],'label':r['role_id']+': '+role_text(r['role_id'])} for r in release.entries('RoleRegistry')],
                     state.text[slice(*frame.source_range)],frame.source_range,
                     question='Which role does this '+choice+' place fill in «'+ev.span+'»?')
                 if role is None:
@@ -128,7 +129,7 @@ def resolve(state, release, selector):
                           state.text[slice(*slot['target_range'])]+
                           '? Select only a source-supported antecedent. Direction and location are not synonyms; '
                           'a directed movement can introduce its relative destination. No coordinates are required. '
-                          'If none of the supplied antecedents is established, answer ?. This is a bounded context read, not a global search.')
+                          'If none of the supplied antecedents fits, answer 0; use ? when evidence is insufficient to assess them. This is a bounded context read, not a global search.')
         if selected:
             slot['selected_place'] = deepcopy(next(a for a in slot['options'] if a['entity_ref']==selected))
             chosen=slot['selected_place']

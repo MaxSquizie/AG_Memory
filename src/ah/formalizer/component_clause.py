@@ -4,7 +4,7 @@ from .component_probe import _probe
 from .component_candidates import enumerate_candidates
 
 
-def build_clause(state,release,selector,region,tokens,p,cfg, *, select=True, attachment=None, nominal_groups=(), infinitive=None,qualitative_groups=(),proposition_slots=None,agreement_source=None,pending_roles=(),description_context=False):
+def build_clause(state,release,selector,region,tokens,p,cfg, *, select=True, attachment=None, nominal_groups=(), infinitive=None,qualitative_groups=(),proposition_slots=None,agreement_source=None,pending_roles=(),description_context=False,required_pending_roles=()):
     from .contextual_name_case import overlay
     tokens=overlay(tokens,nominal_groups)
     if select:
@@ -34,12 +34,12 @@ def build_clause(state,release,selector,region,tokens,p,cfg, *, select=True, att
     if cfg.get('dependency_reduction'):
         allowed_cases.update({'gen','nom'})  # nominal dependencies need not fill a predicate role
     nominal_connectors={t for g in nominal_groups for t in g['marker_refs']}
-    quantity_markers={t for g in qualitative_groups for t in g.get('quantity_token_refs',[g['marker_ref']])}
+    quantity_markers={t for g in qualitative_groups for t in g.get('quantity_token_refs',[g['marker_ref']]) if t!=g['head_ref']}
     nominals = [e for e in tokens if e.token_id not in temporal|prep_markers|nominal_connectors|quantity_markers and e != p
                 and (e.token_id in groups or any(v.pos in {'NOUN','NPRO'} and (set(v.cases)&allowed_cases or v.origin=='CONTEXTUAL' and not v.cases) for v in e.variants))]
     # The number of nominals is not a grammatical exclusion. Large domains
     # go through constraint reduction, under the same released search budget.
-    candidates=enumerate_candidates(state,release,cfg,region,tokens,p,temporal,nominals,groups,selector=selector,attachment=attachment,nominal_groups=nominal_groups,infinitive=infinitive,proposition_slots=proposition_slots,agreement_source=agreement_source,pending_roles=pending_roles,qualitative_groups=qualitative_groups,description_context=description_context)
+    candidates=enumerate_candidates(state,release,cfg,region,tokens,p,temporal,nominals,groups,selector=selector,attachment=attachment,nominal_groups=nominal_groups,infinitive=infinitive,proposition_slots=proposition_slots,agreement_source=agreement_source,pending_roles=pending_roles,qualitative_groups=qualitative_groups,description_context=description_context,required_pending_roles=required_pending_roles)
     for f in candidates:
         from .nominal_readings import attach_groups
         attach_groups(f,qualitative_groups)

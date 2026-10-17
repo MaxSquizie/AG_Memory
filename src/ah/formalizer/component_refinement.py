@@ -1,4 +1,6 @@
 """Refine an already selected nominal slot with a recursively composed area."""
+from .probe_wording import reading as describe_reading
+from .probe_wording import role as role_text
 from copy import deepcopy
 from .canonical_ledger import digest
 from .component_policy import _morph
@@ -368,7 +370,7 @@ def _compose_lexical_area(state, release, selector, region, tokens, cfg, depth=0
             if not cfg.get('_literal_relation'):return block(state,region,[*frames,*children],'COMPONENT_REFINEMENT_MARKER_UNRESOLVED')
             from .structural_tasks import choose
             selected=choose(state,release,selector,region,cfg,'structural_marker_reading',
-                [{'candidate_id':cid,'reading':_morph(v),'label':str(_morph(v))} for cid,v in unique.items()],
+                [{'candidate_id':cid,'reading':_morph(v),'label':describe_reading(_morph(v))} for cid,v in unique.items()],
                 'Choose the whole reading of the source connector under the selected host and child constraints.')
             if not selected:return block(state,region,[*frames,*children],'COMPONENT_REFINEMENT_MARKER_UNRESOLVED')
             unique={selected[0]['candidate_id']:unique[selected[0]['candidate_id']]}
@@ -394,7 +396,7 @@ def _compose_lexical_area(state, release, selector, region, tokens, cfg, depth=0
         if boundary['kind']=='BOUND_DESCRIPTION':
             from .structural_tasks import choose
             selected_role=choose(state,release,selector,region,cfg,'structural_description_role',[
-                {'candidate_id':r['role_id'],'label':r['role_id']} for r in release.entries('RoleRegistry')],
+                {'candidate_id':r['role_id'],'label':r['role_id']+': '+role_text(r['role_id'])} for r in release.entries('RoleRegistry')],
                 'Which participant role does «'+host.span+'» fill inside «'+' '.join(t.span for t in body)+'»?')
             if not selected_role:return block(state,region,frames,'COMPONENT_REFINEMENT_HOST_UNRESOLVED')
             binding={'kind':'BOUND_DESCRIPTION','host':host,'reading':reading,

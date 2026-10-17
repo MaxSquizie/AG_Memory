@@ -82,6 +82,7 @@ def coalesce(state,release,region,bundles):
 def describe(state,root,owned):
     """Expose semantic distinctions instead of asking a model to pick code paths."""
     evidence={e.token_id:e for e in state.evidence};by_id={f.frame_id:f for f in owned}
+    from .probe_wording import role as role_text,reading as reading_text
     def word(tid):
         e=evidence.get(tid)
         return '«'+e.span+'» @'+str(e.start) if e else str(tid)
@@ -96,8 +97,8 @@ def describe(state,root,owned):
         return str(node)
     def frame(f,seen):
         sem=f.semantic
-        args=[role+'='+word(tid) for tid,role in sorted(sem.get('proposed_roles',{}).items())]
-        args.extend(role+'='+tree(slot.get('tree') or {'frame_ref':slot.get('frame_ref')},seen)+
+        args=[role_text(role)+'='+word(tid) for tid,role in sorted(sem.get('proposed_roles',{}).items())]
+        args.extend(role_text(role)+'='+tree(slot.get('tree') or {'frame_ref':slot.get('frame_ref')},seen)+
                     ' ['+slot.get('attitude','UNKNOWN')+']' for role,slot in sem.get('proposition_args',{}).items())
         args.extend(role+'=omitted, identity unresolved' for role in sem.get('implicit_arguments',{}))
         args.extend(role+'=unspecified in action description' for role in sem.get('action_description',{}).get('unassigned_roles',()))
@@ -111,7 +112,84 @@ def describe(state,root,owned):
     readings=[]
     for f in owned:
         for tid,m in sorted(f.semantic.get('morph_bindings',{}).items()):
-            value=word(tid)+': '+str(m.get('lemma'))+' / '+str(m.get('pos'))
-            features=[k+'='+str(m[k]) for k in ('cases','number','gender','person','tense','mood') if m.get(k)]
-            readings.append(value+(' ('+', '.join(features)+')' if features else ''))
+            readings.append(word(tid)+': '+reading_text(m))
     return text+'; linked readings: '+'; '.join(dict.fromkeys(readings))
+
+
+_EMPTY_COMPONENT_FIELDS={'pp_readings':{},'group_readings':{},
+                         'nominal_dependencies':[],'attribute_constraints':[]}
+
+
+def component_signature(bundle):
+    """Exact alpha-renaming of a complete component graph, not logical inference.
+
+    Unknown fields participate in equality. Only declared administrative fields,
+    checked proof annotations and known empty defaults are normalized away.
+    """
+    from dataclasses import asdict
+    refs={f.frame_id:'frame:'+str(i) for i,f in enumerate(bundle)}
+    if len(refs)!=len(bundle):return None
+    for i,f in enumerate(bundle):
+        for role,gap in f.semantic.get('implicit_arguments',{}).items():
+            refs[gap['gap_id']]='frame:'+str(i)+'|gap:'+role
+    def normalize(value):
+        if isinstance(value,str):return refs.get(value,value)
+        if isinstance(value,dict):return {refs.get(k,k):normalize(v) for k,v in value.items()}
+        if isinstance(value,(list,tuple)):return [normalize(v) for v in value]
+        return value
+    result=[]
+    for f in bundle:
+        row=asdict(f);sem=row['semantic']
+        # The original frame/provenance records are retained in the receipt.
+        row.pop('provenance',None);row.pop('rank',None)
+        for key in _BOOKKEEPING:sem.pop(key,None)
+        # Future producer admission is a union of capabilities, not a reading
+        # of this source. coalesce_components preserves that union below.
+        sem.pop('allowed_proposition_roles',None)
+        if sem.get('action_description') is not None:
+            # Licensing provenance differs between a released and an open
+            # producer of the same explicit action/role arrangement.
+            sem['action_description'].pop('valency_digest',None)
+            sem['action_description'].pop('valency_digests',None)
+        for key,empty in _EMPTY_COMPONENT_FIELDS.items():
+            if sem.get(key) is None or sem.get(key)==empty:sem.pop(key,None)
+        questions=[]
+        for q in sem.get('component_questions',[]):
+            if (q.get('kind')=='FIXED_DEPENDENCY' and q.get('token_ref') in sem.get('proposed_roles',{})
+                    and q.get('ground') in {'D','M'} and q.get('selected') in q.get('remaining_domain_ids',())):continue
+            questions.append(q)
+        sem['component_questions']=questions
+        result.append(normalize(row))
+    return digest(result)
+
+
+def coalesce_components(state,region,bundles):
+    from dataclasses import asdict
+    seen={};retained=[];duplicates=set()
+    for bundle in bundles:
+        signature=component_signature(bundle)
+        if signature is None or signature not in seen:
+            retained.append(bundle)
+            if signature is not None:seen[signature]=bundle
+            continue
+        representative=seen[signature]
+        duplicates.add(bundle[-1].frame_id)
+        capabilities=[]
+        for target,other in zip(representative,bundle):
+            a=target.semantic.get('allowed_proposition_roles');b=other.semantic.get('allowed_proposition_roles')
+            joined=None if a is None or b is None else sorted(set(a)|set(b))
+            capabilities.append({'frame_ref':target.frame_id,'producer_domains':[a,b],'union':joined})
+            target.semantic['allowed_proposition_roles']=joined
+            if target.semantic.get('action_description') is not None:
+                def licences(frame):
+                    description=frame.semantic['action_description']
+                    return set(description.get('valency_digests',()))|{description.get('valency_digest')}
+                domains=[licences(target),licences(other)]
+                joined_digests=sorted((domains[0]|domains[1])-{None})
+                target.semantic['action_description']['valency_digests']=joined_digests
+                capabilities[-1]['action_valency_domains']=[sorted(d-{None}) for d in domains]
+                capabilities[-1]['action_valency_union']=joined_digests
+        state.syntax_trace.append({'kind':'COMPONENT_EQUIVALENT_INTERPRETATIONS','region_ref':region.region_id,
+            'signature':signature,'representative_ref':representative[-1].frame_id,
+            'equivalent_ref':bundle[-1].frame_id,'capability_union':capabilities,'proof_frames':[asdict(f) for f in bundle]})
+    return retained,duplicates

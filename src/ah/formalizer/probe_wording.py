@@ -5,6 +5,7 @@ TERMS = {
     'ADJF':'adjective', 'ADJS':'short adjective', 'ADVB':'adverb', 'PRED':'predicative',
     'PRTS':'short participle', 'PRTF':'participle', 'pssv':'passive voice', 'actv':'active voice',
     'PREP':'preposition', 'CONJ':'conjunction', 'PRCL':'particle',
+    'COMP':'comparative form', 'GRND':'verbal adverb (gerund)', 'NUMR':'numeral', 'INTJ':'interjection',
     'nom':'nominative', 'gen':'genitive', 'dat':'dative', 'acc':'accusative',
     'ins':'instrumental', 'abl':'instrumental', 'loc':'prepositional', 'voc':'vocative',
     'sing':'singular', 'plur':'plural', 'masc':'masculine', 'femn':'feminine', 'neut':'neuter',
@@ -30,6 +31,7 @@ ROLE_MEANINGS = {
     'MATERIAL':'material consumed or transformed by the action',
     'AMOUNT':'quantity or amount involved',
     'HOW-TO':'manner or method of performing the action',
+    'CONTENT':'dependent proposition: what is said, thought or otherwise taken as content',
     'SURFACE_ARG':'source participant whose more specific role is not established',
 }
 
@@ -62,3 +64,28 @@ def linked_readings(bindings,evidence):
         return reading(morph)
     return ' | '.join('«'+evidence[tid].span+'» @'+str(evidence[tid].start)+': '+describe(tid,morph)
                      for tid,morph in bindings.items())
+
+
+POS_FUNCTIONS = {
+    'NOUN':'noun: names an entity, substance or concept',
+    'NPRO':'pronoun: stands for a participant rather than naming it',
+    'ADJF':'full adjective: describes a nominal and agrees with it',
+    'ADJS':'short adjective: attributes a property to a subject',
+    'COMP':'comparative: expresses a greater or lesser degree',
+    'VERB':'finite verb: predicates an action or state with tense/person or imperative form',
+    'INFN':'infinitive: names an action or state without finite person/tense',
+    'PRTF':'full participle: describes a nominal through an action',
+    'PRTS':'short participle: predicates an action-related state of a subject',
+    'GRND':'verbal adverb: a secondary action linked to the main predicate',
+    'NUMR':'numeral: expresses a number or quantity',
+    'ADVB':'adverb: modifies an action, property or degree without nominal agreement',
+    'PRED':'impersonal predicative: expresses a state without a nominative subject',
+    'PREP':'adposition: links a nominal complement to another part of the sentence',
+    'CONJ':'conjunction: connects clauses or coordinated units',
+    'PRCL':'particle: adds grammatical or discourse meaning to its scope',
+    'INTJ':'interjection: an independent expressive utterance',
+}
+
+
+def pos_description(value):
+    return POS_FUNCTIONS[value]

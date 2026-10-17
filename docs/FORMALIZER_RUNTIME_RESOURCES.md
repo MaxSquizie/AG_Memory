@@ -30,7 +30,7 @@ Manifest: `kind=FORMALIZER_RESOURCE_RELEASE`, `version`, `schema_version=v7`, `e
 
 | Вид | Поддержанный payload |
 |---|---|
-| R-S | `lemma`, `POS`, `sense_id`, optional `label`, `anchor_pattern:[{lemma?,POS?},…]` для многословной единицы; sense IDs уникальны |
+| R-S | `lemma`, `POS`, `sense_id`, optional `label`, `meaning_en`, `anchor_pattern:[{lemma?,POS?},…]` для многословной единицы; sense IDs уникальны. Для LLM-выбора KNOWN нужно непустое `meaning_en`: отличительное определение смысла и его ролевых позиций; без него — `LEXICAL_DEFINITION_MISSING`, а не угадывание ID |
 | R-V | `sense_id`, optional `construction_id`, `temporal_mode_hint` (STATE/EVENT/PROCESS/TRANSITION), `roles[]`; роль: `role_id`, `allowed_cases[]`, `allowed_preps[]`, `argument_types[]`, `cardinality{min,max}`. Legacy `state_class` STATE/EVENT — только hint |
 | TemplateMap | `sense_id`, реальные `template_ref`, `roles[]`; known mapping должен ссылаться на T текущей AH, open fallback запрещён |
 | PredicateSchema | `lemma`, `value_ids[]`, optional `value_expansions[{rule_id,value_ids[]}]`; expansion считается один раз |

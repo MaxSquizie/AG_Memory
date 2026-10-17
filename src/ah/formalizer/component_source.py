@@ -33,5 +33,5 @@ def probe_context(state, region, cfg, local, *, include_surrounding=True):
         current=parent
         if current.kind=='SENTENCE': break
     surrounding=state.text[slice(*current.source_range)]
-    return local.strip()+'\nSurrounding source (reference only): '+surrounding, (
-        'Resolve only Context span; surrounding source supplies evidence, not additional target words. ')
+    return 'TARGET: '+local.strip()+'\nCONTEXT (evidence only): '+surrounding, (
+        'Choose only inside TARGET; CONTEXT is evidence and supplies no additional selectable words. ')

@@ -15,3 +15,51 @@ def question(state,region):
             rows.append('explicitly selected inflection reading «'+e.span+'» → «'+e.lexical_recovery['surface']+'»; source text unchanged')
     if not rows:return ''
     return 'Already established interpretation constraints: '+'; '.join(rows)+'. Evaluate the remaining composition subject to these constraints; do not ask again which of those already selected hosts was intended. These constraints do not assert world facts. '
+
+
+def retain_role(state,region,predicate,token,selected,reading=None):
+    """A resolved source-role question constrains every later producer here."""
+    from .composition_session import current
+    runtime=current(state)
+    row={'kind':'ESTABLISHED_PREDICATE_ROLE','region_ref':region.region_id,
+         'task_scope':runtime.input_signature() if runtime else None,
+         'predicate_ref':predicate.token_id,'token_ref':token.token_id,
+         'role':selected[0]['candidate_id'],'proof':selected[1],'reading':reading}
+    if row not in state.syntax_trace:state.syntax_trace.append(row)
+
+
+def compatible_bundle(state,region,bundle):
+    from .composition_session import current
+    runtime=current(state);scope=runtime.input_signature() if runtime else None
+    frames={f.predicate_token_ref:f for f in bundle}
+    for row in state.syntax_trace:
+        if (row.get('kind')!='ESTABLISHED_PREDICATE_ROLE' or row['region_ref']!=region.region_id
+                or row['task_scope']!=scope):continue
+        f=frames.get(row['predicate_ref'])
+        if f is None:return False
+        chosen=f.semantic.get('proposed_roles',{}).get(row['token_ref'])
+        expected=row['role']
+        if (chosen is not None if expected=='NO_DIRECT_ROLE' else chosen!=expected):return False
+        if row.get('reading'):
+            actual=f.semantic.get('morph_bindings',{}).get(row['token_ref'],{})
+            # Whole linguistic readings, not analyzer confidence/proof paths.
+            fields=('lemma','pos','cases','number','gender','tense','person','mood','features')
+            if any(actual.get(k)!=row['reading'].get(k) for k in fields):return False
+    return True
+
+
+def preserves_nominal_functions(state,tokens,bundle):
+    """Selected reference/quantity functions cannot disappear in another producer."""
+    from .nominal_functions import rows
+    for source in rows(state,tokens):
+        if source['function']=='QUANTITY':
+            candidates=[g for f in bundle for g in f.semantic.get('qualitative_groups',())]
+            if not any(g['head_ref']==source['head_ref'] and
+                       g.get('quantity_token_refs')==source['function_refs'] for g in candidates):return False
+        elif source['function']=='REFERENCE':
+            candidates=[u.get('reference_constraint',{}) for f in bundle
+                        for u in f.semantic.get('lexical_units',{}).values()]
+            if not any(g.get('head_ref')==source['head_ref'] and
+                       g.get('function_refs')==source['function_refs'] and
+                       g.get('identity_constraint')==source['identity_constraint'] for g in candidates):return False
+    return True

@@ -35,7 +35,7 @@ def select_child(state,release,selector,region,frames,contract,context):
     question=('Resolve this child under its parent constraint '+contract+'. '+context+
         ' Do not reparse accepted children or change their identities. '
         'Choose only if the parent/source context distinguishes the retained alternatives; '
-        'mere need for a complete tree is not evidence. Otherwise answer ?. ')
+        'mere need for a complete tree is not evidence. Preserve supported alternatives; use ? for insufficient evidence and 0 if none fits. ')
     if general:
         result=choose(state,release,selector,region,cfg,'child_slot',options,question)
         selected=result[0]['candidate_id'] if result else None

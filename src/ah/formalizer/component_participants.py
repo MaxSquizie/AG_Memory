@@ -112,8 +112,10 @@ def resolve_implicit(state, release, selector):
                             +'Target clause: '+state.text[slice(*f.source_range)]+'\n'
                             +'Target predicate: '+f.anchor_span+'; source range: '+str(f.source_range)+'\n'
                             +'Grammatical features of omitted participant: '+str(gap['features'])+'\n'
-                            +'Use the supplied narrative-area context, including later clauses, to choose a reference. An unidentified referent can still be the same participant as an earlier omitted role. '
-                            +'A separate plural event need not reuse a preceding group. In established first-person narration it may include the narrator with unknown other members. In third-person narration do not add the narrator. Quotation, reported speech, a perspective switch or explicit continuation of another group can override the surrounding perspective. Prefer the most informative SUPPORTED candidate, not the nearest noun; membership does not identify the entire group. Compatibility alone does not establish identity; retain insufficient context when evidence is insufficient.'))
+                            +'Choose the reference supported for THIS omission. Grammatical compatibility or proximity alone does not establish identity. '
+                            +'A group member is not the whole group. Use the target speech perspective, not the uploader identity. '
+                            +'The anonymous option preserves an unspecified referent; it does not assert a new, different person. '
+                            +'Later clauses may supply evidence. If several candidates fit, preserve the alternatives.'))
             if chosen is None:
                 from .implicit_introduction import unresolved_group
                 unknown=unresolved_group(state,gap)

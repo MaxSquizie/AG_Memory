@@ -614,6 +614,8 @@ def t3(
             contextual_statements=state.context_facts,
             candidates=candidates,  # rev8: THIS decision's closed set, not the whole schema
         )
+        prompt=('Select the lexical meaning for the target predicate «'+frame.anchor_span+'». '
+                'The supplied participant structure is fixed. Do not reinterpret negation, tense or quotation as a different lexical sense.\n'+prompt)
         def _attempt():
             """Bounded select+validate for this slot (attempts_per_slot). Returns (resp, kind):
             'ok' | 'provider' | 'protocol'. Every attempt — success or failure — is charged exactly

@@ -14,7 +14,7 @@ def extend(manifest, core):
         symbol='fixture:S:'+sid;template='fixture:T:'+sid
         core.add_abstract_symbol({lemma},uid=symbol)
         core.add_template(Domain.C,core.ref(symbol),(ActantRole.OBJECT,ActantRole.LOCATION),uid=template)
-        resources['R-S'].append({'sense_id':sid,'lemma':lemma,'POS':'ADVB'})
+        resources['R-S'].append({'sense_id':sid,'lemma':lemma,'POS':'ADVB','meaning_en':{'вверх':'OBJECT is directed towards a relatively higher LOCATION.', 'вниз':'OBJECT is directed towards a relatively lower LOCATION.', 'там':'OBJECT is situated at LOCATION identified from context.'}[lemma]})
         resources['R-V'].append({'sense_id':sid,'state_class':'EVENT','roles':[
             {'role_id':role,'argument_types':types,'cardinality':{'min':1,'max':1},
              'allowed_cases':['dat'] if role=='LOCATION' and kind=='ANCHOR' else [],

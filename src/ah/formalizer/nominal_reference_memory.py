@@ -70,7 +70,7 @@ def resolve(state, release, selector):
                     question='Resolve «'+constraint['raw']+'» as one noun group. Constraint='+
                     constraint['identity_constraint']+'. Select only a compatible antecedent supported by these source excerpts. '+
                     'Proximity and name spelling alone do not prove identity. An already introduced unnamed or relative place is a valid antecedent: unknown coordinates/name do not make its reference unresolved. '
-                    'Choose the existing referent, not a new object. If several antecedents remain indistinguishable, answer ?.')
+                    'Choose the existing referent, not a new object. If several antecedents fit, list their numbers; use ? when evidence is insufficient to assess them.')
         by_id={o['candidate_id']:r for o,r in zip(options,rows)}
         if chosen in by_id:
             row=by_id[chosen]

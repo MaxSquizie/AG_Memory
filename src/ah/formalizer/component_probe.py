@@ -20,14 +20,37 @@ def _live_probe(state, selector, release, key, slot, options, context, source_ra
         d.selected, d.outcome, d.lifecycle = (chosen,), 'RESOLVED', 'PROVISIONAL'
         d.grounds.append(Ground('C', 'explicit clarification selection', chosen))
         return chosen
+    if equivalent_targets:
+        groups={}
+        for option in options:groups.setdefault(option['label'],[]).append(option)
+        retained=[]
+        for group in groups.values():
+            targets={equivalent_targets.get(o['candidate_id']) for o in group}
+            if len(group)>1 and len(targets)==1 and None not in targets:
+                representative=min(group,key=lambda o:o['candidate_id'])
+                retained.append(representative)
+                d.history.append({'kind':'EQUIVALENT_REFERENCE_OPTIONS','representative':representative['candidate_id'],
+                    'equivalent_refs':[o['candidate_id'] for o in group],'entity_ref':next(iter(targets))})
+            else:retained.extend(group)
+        options=retained;ids=tuple(o['candidate_id'] for o in options);d.candidates=ids
+    # A number cannot disambiguate an invisible distinction. Keep the domain
+    # unresolved instead of asking the model to pick a producer or hidden ID.
+    labels=[o['label'] for o in options]
+    if len(set(labels)) != len(labels):
+        d.outcome='UNRESOLVED'
+        d.history.append({'kind':'UNREPRESENTED_CANDIDATE_DIFFERENCE','candidates':list(ids)})
+        state.diag('PROBE_OPTIONS_INDISTINGUISHABLE',key)
+        return None
+    from .probe_presentation import factor_options
+    options,common=factor_options(options)
+    if common:question=(question or '')+'\nShared by all proposed options (0 rejects this too): '+common
     schema = DecisionSchema(release.sha256, {
         o['candidate_id']: Relation(o['candidate_id'], o['label'], 0, (), o['label']) for o in options})
     prompt = build_selector_prompt(selector, slot_id=slot, frame_id=key,
         context_span=context, mentions={}, schema=schema, candidates=ids,
         contextual_statements=())
-    prompt = ('Read the source and answer the question about its meaning or grammar. '
-        'Options are proposals, not facts. Use only the supplied text and context; '
-        'do not invent identities or events. You are interpreting what is said, not checking whether it happened.\n'+
+    prompt = ('Interpret the supplied text. Options are proposed readings, not world facts. '
+        'Answer only the stated question; preserve established constraints.\n'+
         ((question+'\n\n') if question else '')+prompt)
     try:
         from .selection_prompt import record_prompt
@@ -87,7 +110,7 @@ def _probe(state, selector, release, key, slot, options, context, source_range, 
         runtime.tasks.record_probe(key)
         from .component_policy import policy
         memory=runtime.memory(slot,options,source_range,policy(release)) if not state.structural_closed else ''
-        question=(question or '')+memory+runtime.tasks.question(key)+runtime.input_question()
+        question=(question or '')+memory+runtime.tasks.question(key)+runtime.input_question(slot)
         dependency_signature=digest([dependency_signature,runtime.input_signature(),question])
     from .component_probe_replay import execute
     def run():

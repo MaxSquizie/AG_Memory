@@ -78,7 +78,8 @@ def prepare(state,release=None,selector=None):
                 question='What does the current speaker do with the WHOLE target? '
                 'An assertion that someone said something is an assertion about that speech, not an assertion of its content. '
                 'Likewise, asserting negation, possibility or a condition does not assert the inner event. '
-                'Preserve the accepted internal structure; decide only the act at its outermost level. '+
+                'Preserve the accepted internal structure; decide only the explicit act at its outermost level. '
+                'Classify a question as QUERY even when it could indirectly suggest a request; do not infer an unstated command. '+
                 ('Accepted syntax: '+'; '.join(content_links)+'. ' if content_links else '')) or 'UNKNOWN'
             proof=key
         scope={'scope_ref':'discourse-root:'+digest([state.source_uid,tree]),'source_range':list(bounds),

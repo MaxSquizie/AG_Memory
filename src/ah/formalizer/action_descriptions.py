@@ -54,7 +54,7 @@ def independent_roles(roles, cfg):
 def licensed_roles(frame, valency):
     """T3 rechecks the same construction and valency used by composition."""
     description=frame.semantic.get('action_description')
-    if not description or description.get('valency_digest')!=digest(valency):
+    if not description or digest(valency) not in {description.get('valency_digest'),*description.get('valency_digests',())}:
         return None
     reading=frame.semantic.get('morph_bindings',{}).get(frame.predicate_token_ref,{})
     if reading.get('pos')!='INFN' and not (reading.get('pos')=='PRTS' and 'pssv' in reading.get('features',())):

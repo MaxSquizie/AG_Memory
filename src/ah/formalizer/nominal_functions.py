@@ -29,7 +29,7 @@ def prepare(state,release,selector,region,tokens,cfg):
     from .function_inventory import begin,complete
     inventory=begin(state,'NOMINAL',tokens,cfg.get('_task_constraints'))
     if inventory is None:return True
-    used=set();relation_heads=set()
+    used=set();used_by_kind={k:set() for k in ('RELATION','REFERENCE','QUANTITY')};relation_heads=set()
     while True:
         selected=choose(state,release,selector,region,cfg,'nominal_function',[
             {'candidate_id':'RELATION','label':'An adposition or multiword relational unit: words introducing a noun/pronoun and linking it to an action or another noun (place, destination, origin, instrument, possession or another relation)'},
@@ -39,7 +39,8 @@ def prepare(state,release,selector,region,tokens,cfg):
             'A preposition connecting a place to a verb counts as RELATION, even when the verb already has a place role. '
             'Choose the function of the FIRST remaining such expression, not all functions anywhere in the sentence. '
             'A name by itself or an ordinary descriptive adjective does not count. '
-            'Already assigned function words: «'+' '.join(t.span for t in tokens if t.token_id in used)+'».',
+            'Already assigned functions (do not select the same function of the same occurrence again): '+
+            '; '.join(k+': «'+' '.join(t.span for t in tokens if t.token_id in refs)+'»' for k,refs in used_by_kind.items())+'.',
             empty={'candidate_id':'DONE','label':'no further nominal relation, referential determiner or quantity expression'})
         if not selected:return False
         kind=selected[0]['candidate_id']
@@ -50,17 +51,18 @@ def prepare(state,release,selector,region,tokens,cfg):
             return True
         material=source_set(state,release,selector,region,tokens,cfg,'nominal_function_source',
             kind+': select ONLY the connecting/determining/quantity expression. '
-            'Do not include the noun or pronoun it applies to, other participants, or ordinary descriptive modifiers.',exclude=used)
+            'Exclude a separate nominal head and unrelated modifiers. Include a word that itself BOTH expresses this function and stands for its nominal bearer.',exclude=used_by_kind[kind])
         if not material:return False
         owned,proofs=material;refs=[t.token_id for t in owned]
         expression=' '.join(t.span for t in owned)
         head=choose(state,release,selector,region,cfg,'nominal_function_head',[
-            {'candidate_id':t.token_id,'head_ref':t.token_id,'label':'Nominal head «'+t.span+'» @'+str(t.start)}
-            for t in tokens if t.token_id not in used|set(refs) and any(c.isalnum() for c in t.span)],
+            {'candidate_id':t.token_id,'head_ref':t.token_id,'shared_function':t.token_id in refs,
+             'label':'Nominal head «'+t.span+'» @'+str(t.start)+(' (this occurrence also carries the selected function)' if t.token_id in refs else '')}
+            for t in tokens if (kind!='RELATION' or t.token_id not in refs) and any(c.isalnum() for c in t.span)],
             kind+': selected function expression is «'+expression+'». '
             +('Which noun/pronoun is its complement: the entity/place introduced BY this expression, not the outside predicate or participant it attaches to? '
               if kind=='RELATION' else 'Which noun/pronoun is determined or counted by this expression? ')+
-            'Select the head of that nominal; the expression itself is excluded.')
+            'Select the nominal bearer. A reference or quantity word may itself be that bearer; choose it only if the text supplies no separate head for this expression.')
         if not head:return False
         hid=head[0]['head_ref']
         if kind=='RELATION' and hid in relation_heads:
@@ -71,6 +73,7 @@ def prepare(state,release,selector,region,tokens,cfg):
         row={**inventory,'kind':'NOMINAL_FUNCTION','unit_ref':'nominal-function:'+digest([region.region_id,kind,hid,refs]),
              'function':kind,'head_ref':hid,'function_refs':refs,'anchor_refs':allrefs,
              'source_range':[min(t.start for t in tokens if t.token_id in allrefs),max(t.end for t in tokens if t.token_id in allrefs)],
+             'shared_function':bool(head[0].get('shared_function')), 'head_proof':head[1],
              'proofs':[selected[1],head[1],*proofs],'decision_ref':selected[1]['decision_ref']}
         if kind=='REFERENCE':
             identity=choose(state,release,selector,region,cfg,'nominal_identity_function',[
@@ -81,12 +84,12 @@ def prepare(state,release,selector,region,tokens,cfg):
             row['identity_constraint']=identity[0]['candidate_id'];row['proofs'].append(identity[1])
         if kind=='QUANTITY':
             case=choose(state,release,selector,region,cfg,'nominal_external_case',[
-                {'candidate_id':c,'label':label} for c,label in [('nom','Subject form'),('gen','Genitive form'),
-                ('dat','Dative form'),('acc','Direct object form'),('abl','Instrumental form'),('ins','Instrumental form (alternate tag)'),('loc','Prepositional/locative form'),('voc','Address form')]],
+                {'candidate_id':c,'label':label} for c,label in [('nom','Nominative case'),('gen','Genitive case'),
+                ('dat','Dative case'),('acc','Accusative case'),('abl','Instrumental case'),('loc','Prepositional/locative case'),('voc','Vocative case')]],
                 'Which external grammatical case does this whole quantity group take here? Its inner noun can have a different case.')
             if not case:return False
             row['external_case']=case[0]['candidate_id'];row['case_proof']=case[1]
-        state.syntax_trace.append(row);used.update(refs)
+        state.syntax_trace.append(row);used.update(refs);used_by_kind[kind].update(refs)
 
 
 def prepositions(state,tokens,excluded=()):
@@ -107,3 +110,21 @@ def prepositions(state,tokens,excluded=()):
             'anchor_refs':row['anchor_refs'],'function_refs':refs,'source_range':row['source_range'],
             'ambiguous_pos':True,'structural_license':row['proofs']}
     return out
+
+
+def shared_nominal_readings(state,token,source):
+    """T2 head proof licenses nominal use of a shared source occurrence.
+
+    Keep attested nominal readings. Otherwise nominal function supplies no
+    dictionary lemma or paradigm: those features stay unknown until consumed.
+    """
+    from .state import MorphVariant
+    from .component_policy import _morph
+    from .morphology_domain import offer,license_use
+    values=tuple(v for v in token.variants if v.pos in {'NOUN','NPRO'})
+    if values:return values
+    proof=source['head_proof']
+    values=offer(state,token,[MorphVariant(token.span.casefold(),'NOUN',origin='CONTEXTUAL')],
+                 'SHARED_NOMINAL_FUNCTION',source['function_refs'])
+    for value in values:license_use(state,token.token_id,_morph(value),proof['decision_ref'],proof['candidate_id'])
+    return tuple(values)

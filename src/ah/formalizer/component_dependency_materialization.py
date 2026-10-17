@@ -41,8 +41,12 @@ def prepare_candidate(frame,state,release):
         state.diag('COMPONENT_DEPENDENCY_LICENSE_FAILED',frame.frame_id)
     roles=frame.semantic['proposed_roles'];cid='syntax:'+digest([frame.frame_id,sid,roles])
     spec={'candidate_id':cid,'sense_id':sid,'label':kind+' nominal dependency (not identity/ownership)',
+          'meaning_en':{'GENITIVE':'A genitive nominal describes its host; no identity or ownership is implied.',
+                        'APPOSITION':'An appositive nominal describes its host; no separate identity claim is implied.',
+                        'CASE_DEPENDENCY':'A case-marked nominal depends on its host; its more specific lexical relation remains unspecified.'}[kind],
           'sense_kind':'KNOWN','roles':roles,'implicit_roles':[],'state_class':'STATE',
           'valency_ref':'released-dependency:'+kind}
+    spec['label']+='; '+spec['meaning_en']
     traces=build_source_traces(frame.frame_id,'predicate_value',schema_candidates=[cid],rs_senses=[cid],
         rx3_prior=[],wc_reads=[],rx3_applicable=False,wc_applicable=False,open_candidate=None,
         open_path_verified=True,resource_versions=(release.sha256,))

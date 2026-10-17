@@ -258,7 +258,7 @@ def resolve_references(state, slots, selector, release):
             _probe(state,selector,release,tid+'|reference','reference',options,
                 state.text[slice(*bounds)],bounds,
                 question='What does «'+evidence[tid].span+'» @'+str(evidence[tid].start)+' refer to? '
-                'A sole candidate in this bounded window is not proof. Choose only a source-supported reference; otherwise use ?.')
+                'A sole candidate in this bounded window is not proof. Choose a source-supported reference. List alternative referents when several fit; 0 means none fits, ? means evidence is insufficient.')
             d=state.decisions[tid+'|reference'];d.grounds[:0]=prior_grounds
         else:
             d.outcome='UNRESOLVED'

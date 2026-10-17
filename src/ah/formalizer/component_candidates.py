@@ -8,7 +8,7 @@ from .component_phrases import role_choices, nominal_units, phrase_questions
 from .component_omissions import licensed_gaps
 
 
-def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nominals, groups, *, selector=None, attachment=None, nominal_groups=(), infinitive=None,proposition_slots=None,agreement_source=None,pending_roles=(),qualitative_groups=(),description_context=False):
+def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nominals, groups, *, selector=None, attachment=None, nominal_groups=(), infinitive=None,proposition_slots=None,agreement_source=None,pending_roles=(),qualitative_groups=(),description_context=False,required_pending_roles=()):
     alternatives = {}
     grouped={t for g in nominal_groups for t in g["member_refs"]}
     connectors={t for g in nominal_groups for t in g["marker_refs"]}
@@ -18,7 +18,8 @@ def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nomin
         projected = projection(pv, attachment, cfg)
         from .action_descriptions import passive_rule, surface_roles, unassigned
         passive=passive_rule(pv,cfg) if not attachment else None
-        controlled=infinitive is not None and pv.pos=='INFN'
+        controlled=infinitive is not None and (pv.pos=='INFN' or bool(passive))
+        control_role=passive['host_role'] if passive else cfg['subject_role']
         governed=gv is not None and (pv.pos=='INFN' or passive)
         descriptive=bool(description_context and (passive or pv.pos=='INFN' and not controlled and not governed))
         if gv is not None and not governed:continue
@@ -54,7 +55,10 @@ def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nomin
                     state.diag('PREDICATE_ARGUMENT_DOMAIN_UNRESOLVED',region.region_id);continue
             supplied=deepcopy(proposition_slots or {})
             reserved=set(pending_roles)
-            if val:reserved &= {r['role_id'] for r in val['roles'] if set(r.get('argument_types',())) & {'PROPOSITION','EVENT'}}
+            if val:
+                available={r['role_id'] for r in val['roles'] if set(r.get('argument_types',())) & {'PROPOSITION','EVENT'}}
+                if not set(required_pending_roles)<=available:continue
+                reserved &= available
             if any(not any(a['lemma']==pv.lemma and a['argument_role']==role and a['attitude']==arg['attitude']
                            for a in release.entries('AttitudeMap')) for role,arg in supplied.items()):continue
             if val and (not set(supplied)<={r['role_id'] for r in val['roles']} or any(
@@ -82,9 +86,11 @@ def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nomin
                     continue
             if projected:
                 roles = [r for r in roles if r['role_id'] != projected['rule']['host_role']]
-            pending_required={r['role_id'] for r in roles if r['role_id'] in reserved and r.get('cardinality',{}).get('min',0)>0}
+            # Addressed source children are requirements. An unaddressed set
+            # of possible infinitive slots is a choice domain, not a conjunction.
+            pending_required=set(required_pending_roles)
             roles=[r for r in roles if r['role_id'] not in set(supplied)|reserved
-                   and not (controlled and r['role_id']==cfg['subject_role'])]
+                   and not (controlled and r['role_id']==control_role)]
             reduction=None
             # Released time syntax owns its colon and numeric readings; these
             # are not apposition markers or attributes of a nominal argument.
@@ -93,15 +99,21 @@ def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nomin
             needs_reduction=any(proposed(_morph(v)) for e in nominals for v in e.variants) or bool(qualitative_groups) or len(nominals)>3 or cfg.get('dependency_reduction') and (any(
                 e.token_id not in groups and e.token_id not in grouped and any(v.pos in {'NOUN','NPRO'} and set(v.cases)&({'gen'}|set(cfg.get('nominal_dependency_cases',()))) for v in e.variants)
                 for e in nominals) or any(e.span in cfg.get('apposition_markers',()) for e in dependency_tokens))
-            if needs_reduction and generic_binding is None:
+            if needs_reduction:
                 from .component_dependency_reduction import reduce
+                # A source-selected direct role closes that question, but does
+                # not erase an internal nominal head or its child dependencies.
+                fixed_roots={e.token_id:b[0] for e,b in zip(nominals,generic_binding) if b[0]} if generic_binding is not None else None
+                from .component_dependency_domains import clean
+                fixed_readings={e.token_id:clean(b[1]) for e,b in zip(nominals,generic_binding) if b[1]} if generic_binding is not None else None
                 reduction=reduce(state,release,selector,region,dependency_tokens,p,agreement,roles,nominals,groups,
-                    {**cfg,'subject_role':agreement_role} if passive else cfg,quantities=qualitative_groups,nominal_groups=nominal_groups)
+                    {**cfg,'subject_role':agreement_role} if passive else cfg,quantities=qualitative_groups,nominal_groups=nominal_groups,
+                    required_roots=fixed_roots,required_readings=fixed_readings)
                 if reduction is None: continue
             variants = [role_choices(e,roles,agreement,agreement_role,groups.get(e.token_id),coordinated=e.token_id in grouped) for e in nominals]
             if reduction is not None:
                 variants=[[reduction['roots'].get(e.token_id,(None,None,None))] for e in nominals]
-            if generic_binding is not None:variants=[[b] for b in generic_binding]
+            if generic_binding is not None and reduction is None:variants=[[b] for b in generic_binding]
             count = 1
             for choices in variants: count *= len(choices)
             if count > cfg['max_candidates']:
@@ -122,7 +134,7 @@ def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nomin
                     # Passive agreement describes the patient, never licenses
                     # an omitted agent with the patient's number/gender.
                     gaps.pop(cfg['subject_role'],None)
-                unresolved_roles=sorted(missing-set(gaps)-set(description_roles)-({cfg['subject_role']} if controlled else set()))
+                unresolved_roles=sorted(missing-set(gaps)-set(description_roles)-({control_role} if controlled else set()))
                 used={p.token_id,*temporal,*connectors,*(e.token_id for e,b in assignments)}
                 units=nominal_units(state,tokens,assignments,used)
                 preps={}
@@ -198,10 +210,10 @@ def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nomin
                     semantic['pp_readings']=reduction['pp_readings']
                     semantic['component_questions'].extend(reduction['trace'])
                 if controlled:
-                    if cfg['subject_role'] in rs:continue
+                    if control_role in rs:continue
                     from .control_arguments import bind
-                    bind(semantic,infinitive,cfg['subject_role'])
-                    gaps.pop(cfg['subject_role'],None)
+                    bind(semantic,infinitive,control_role)
+                    gaps.pop(control_role,None)
                 if gaps:
                     semantic['implicit_arguments']={role:{**gap,'gap_id':'gap:'+digest([fid,role]),
                         'predicate_ref':p.token_id,'options':[]} for role,gap in gaps.items()}

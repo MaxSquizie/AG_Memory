@@ -55,7 +55,11 @@ def inherited_role(frame,token_ref,parents):
     binding=frame.semantic.get('control_binding') or {}
     role=binding.get('child_role')
     if not role or frame.construction!='COMPONENTS_V1':return None
-    if frame.semantic.get('morph_bindings',{}).get(frame.predicate_token_ref,{}).get('pos')!='INFN':return None
+    reading=frame.semantic.get('morph_bindings',{}).get(frame.predicate_token_ref,{})
+    passive=frame.semantic.get('passive_predication')
+    if passive:
+        if reading.get('pos')!='PRTS' or 'pssv' not in reading.get('features',()) or role!=passive['host_role']:return None
+    elif reading.get('pos')!='INFN':return None
     parent=(parents or {}).get(binding.get('frame_ref'))
     if parent is None or parent.semantic.get('structural_unresolved'):return None
     alias={k:v for k,v in binding.items() if k!='child_role'}

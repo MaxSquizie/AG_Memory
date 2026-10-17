@@ -43,7 +43,9 @@ def test_release(core,senses=(),syntax=()):
         suid='fixture:S:'+sid;tuid='fixture:T:'+sid
         core.add_abstract_symbol({lemma+':'+sid},uid=suid)
         core.add_template(Domain.C,core.ref(suid),tuple(ActantRole(r['role_id']) for r in roles),uid=tuid)
-        resources['R-S'].append({'lemma':lemma,'POS':pos,'sense_id':sid})
+        from tools.formalizer_lexical_definitions import MEANINGS
+        resources['R-S'].append({'lemma':lemma,'POS':pos,'sense_id':sid,
+            **({'meaning_en':mode[1] if len(mode)>1 else MEANINGS[sid]} if len(mode)>1 or sid in MEANINGS else {})})
         resources['R-V'].append({'sense_id':sid,'roles':roles,'state_class':mode[0] if mode else 'STATE'})
         resources['TemplateMap'].append({'sense_id':sid,'template_ref':tuid,'roles':[r['role_id'] for r in roles]})
     entries=[{'kind':k,'version':'test-v1','schema_version':'v7','entries':v,'dependency_versions':{}} for k,v in sorted(resources.items())]
