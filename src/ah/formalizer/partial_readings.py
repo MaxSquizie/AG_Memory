@@ -15,7 +15,16 @@ class SupportedDomain:
                 'alternatives':deepcopy(list(self.values))}
 
 
+def retired_refs(trace):
+    return {ref for row in trace for ref in [
+        row.get('decision_ref') if row.get('kind')=='DEPENDENCY_REJECTED' else
+        row.get('previous_decision_ref') if row.get('kind')=='COMPOSITION_PROBE_SUPERSEDED' else None]
+        if ref}
+
+
 def valid_domain(state,record):
+    retired=retired_refs(state.syntax_trace)
+    if record.get('decision_ref') in retired:return False
     decision=state.decisions.get(record.get('decision_ref'))
     if decision is None or decision.search_complete is not True:return False
     values=record.get('alternatives',())
@@ -25,6 +34,7 @@ def valid_domain(state,record):
     for row in reversed(state.syntax_trace):
         if row.get('kind')=='TASK_DOMAIN' and row.get('task_ref')==record.get('domain_ref'):
             return (row.get('search_complete') is True and row.get('source_complete') is True
+                and not retired.intersection(row.get('page_refs',()))
                 and ids<=set(row['supported_ids'])
                 and all(row.get('supported_payloads',{}).get(v['candidate_id'])==digest(v) for v in values))
     return False

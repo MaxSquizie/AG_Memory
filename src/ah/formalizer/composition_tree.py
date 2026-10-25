@@ -206,6 +206,8 @@ def finalize(state, region, frames):
             except ValueError as exc:
                 state.diag(str(exc),region.region_id);return
             state.observation.setdefault('partial_compositions',[]).append(deepcopy(record))
+            from .reading_clarifications import merge_offers
+            merge_offers(state,record)
         state.syntax_trace.append({'kind':'COMPOSITION_PARTIAL','region_ref':region.region_id,
             'structure_complete':True,'write_eligible':False,'frame_refs':[f.frame_id for f in frames]})
         return

@@ -10,7 +10,7 @@ from .canonical_ledger import digest
 _BASIS=('proposed_roles','morph_bindings','lexical_units','proposition_args','nominal_args',
         'preposition_bindings','pp_readings','group_readings','nominal_dependencies',
         'bound_arguments','control_binding','implicit_arguments','pending_proposition_roles',
-        'missing_required_roles','uncovered_token_refs','action_description')
+        'missing_required_roles','uncovered_token_refs','action_description','subject_presence')
 
 
 def basis(frame):

@@ -80,6 +80,17 @@ def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nomin
                 if generic_binding is not None:
                     roles=[{'role_id':r,'allowed_cases':sorted({c for _,v,_ in generic_binding if v for c in v.cases}),
                             'cardinality':{'min':0}} for r in sorted({r for r,_,_ in generic_binding if r})]
+                subject_presence=None
+                if (generic_binding is not None and cfg['subject_role'] not in {r for r,_,_ in generic_binding}
+                        and cfg['subject_role'] not in set(supplied)|reserved
+                        and not controlled and not descriptive
+                        and not (projected and projected['rule']['host_role']==cfg['subject_role'])):
+                    from .predicate_functions import subject_presence as determine_subject
+                    subject_presence=determine_subject(state,release,selector,region,p,agreement,nominals,generic_binding,cfg)
+                    if subject_presence is None:
+                        state.diag('PREDICATE_SUBJECT_PRESENCE_UNRESOLVED',region.region_id);continue
+                    if subject_presence[0]['omitted']:
+                        roles.append({'role_id':cfg['subject_role'],'allowed_cases':['nom'],'cardinality':{'min':1}})
                 agreement_role=passive['host_role'] if passive else cfg['subject_role']
                 if projected and projected.get('relative_marker') and not projected.get('general') and val:
                     marker_cases=projected['marker_reading'].cases
@@ -129,7 +140,9 @@ def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nomin
                         if not valid_roles({e.token_id:b[0] for e,b in assignments},nominal_groups):continue
                         if any(not set(g['cases']).intersection(*(set(b[1].cases) for e,b in assignments if e.token_id in g['member_refs'])) for g in nominal_groups):continue
                         missing={r['role_id'] for r in roles if r.get('cardinality',{}).get('min',0)>0}-set(rs)
-                        gaps = licensed_gaps(roles,missing,agreement,cfg,quality=quality or nominal or impersonal,valency=val)
+                        # Passive agreement belongs to the patient. It cannot
+                        # identify or license an omitted actor in SUBJECT.
+                        gaps = licensed_gaps(roles,missing,agreement,cfg,quality=quality or nominal or impersonal or bool(passive),valency=val)
                         description_roles=unassigned(roles if val else [r for r in roles if r.get('cardinality',{}).get('min',0)>0],set(rs)) if descriptive else []
                         if descriptive:gaps={r:g for r,g in gaps.items() if r not in description_roles}
                         if projected and 'pssv' in pv.features:
@@ -201,6 +214,8 @@ def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nomin
                             'quality_predication':quality, 'nominal_predication':nominal, 'copula_ref':copula,
                             'component_questions':questions,'uncovered_token_refs':uncovered,
                             'structural_unresolved':bool(uncovered or unresolved_roles),'component_region':region.region_id}
+                        if subject_presence:
+                            semantic['subject_presence']={'omitted':subject_presence[0]['omitted'],'proof':subject_presence[1]}
                         if reduction and reduction.get('reading_domains'):
                             semantic['reading_domains']=deepcopy(reduction['reading_domains'])
                         if binding_domain and binding_domain.reading_domains:

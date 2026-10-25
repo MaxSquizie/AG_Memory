@@ -8,6 +8,33 @@ from .component_policy import _morph
 from .structural_tasks import choose
 
 
+def subject_presence(state,release,selector,region,predicate,variant,nominals,binding,cfg):
+    """An open predicate's explicit arguments do not close omitted slots.
+
+    This task runs after occurrence roles, before frame construction. It only
+    establishes whether a subject is understood; reference resolution still
+    owns its identity. Morphology licenses agreement, not personal use itself.
+    """
+    from .probe_wording import reading as reading_text,role as role_text
+    roles={t.token_id:r for t,(r,_,_) in zip(nominals,binding) if r}
+    common={'predicate_ref':predicate.token_id,'predicate_reading':_morph(variant),'roles':roles}
+    result=choose(state,release,selector,region,cfg,'predicate_subject_presence',[
+        {'candidate_id':'OMITTED','omitted':True,**common,
+         'label':'An understood subject is omitted from this target; preserve a participant slot whose identity remains to be resolved'},
+        {'candidate_id':'ABSENT','omitted':False,**common,
+         'label':'This use has no subject participant; do not invent one (for example an impersonal predication)'}],
+        'Predicate «'+predicate.span+'»: '+reading_text(_morph(variant))+'. '
+        'Already established explicit participants: '+('; '.join('«'+t.span+'»='+role_text(roles[t.token_id])
+            for t in nominals if t.token_id in roles) or 'none')+'. '
+        'None is the subject. Does this use still have an understood subject, or is there no subject slot? '
+        'Context may identify an omitted subject, but do not choose its identity here. '
+        'Do not replace an established explicit role or use agreement alone to infer personal meaning. Use ? if undecidable.')
+    if result:
+        from .structural_tasks import licensed
+        if licensed(state,result[1],**common,omitted=result[0]['omitted']):return result
+    return None
+
+
 def head(state,release,selector,region,tokens,preferred,cfg):
     from .temporal_functions import owned_refs
     from .nominal_functions import rows

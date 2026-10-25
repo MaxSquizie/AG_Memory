@@ -209,6 +209,8 @@ def resolve(adapter, resolution_key, *, source_text=None):
             option = options[0]
             choices = deepcopy(frozen.get('clarification_choices', {}))
             choices[request['decision_ref']] = option['candidate_id']
+            from .reading_clarifications import project
+            choices.update(project(request,option))
             structures = deepcopy(frozen.get('clarification_structures', {}))
             if option.get('stage') == 'TP':
                 structures[request['decision_ref']] = deepcopy(option['hypothesis'])
