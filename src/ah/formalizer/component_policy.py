@@ -1,4 +1,5 @@
 """Release policy and whole-variant morphology shared by component stages."""
+from .selection_evidence import selected_candidate
 from dataclasses import asdict
 
 def policy(release):
@@ -25,5 +26,5 @@ def _morph(v):
 def rejected(state, frame):
     if frame.semantic.get('structural_rejection'):return True
     decision=state.decisions.get(frame.semantic.get('composition_decision'))
-    return bool(decision and decision.outcome=='RESOLVED' and
+    return bool(selected_candidate(decision) is not None and
                 frame.semantic.get('composition_bundle_root',frame.frame_id) not in decision.selected)

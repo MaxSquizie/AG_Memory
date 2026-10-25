@@ -1,4 +1,5 @@
 """Typed boundary of a nominal phrase: external role and internal head reading."""
+from .selection_evidence import selected_candidate
 from dataclasses import replace
 from .canonical_ledger import digest
 from .component_policy import _morph
@@ -65,12 +66,12 @@ def attested(state, token_ref, reading, _seen=frozenset()):
     refs=reading.get('evidence_refs',())
     if reading.get('origin')=='RECOVERED' and refs:
         decision=state.decisions.get(refs[-1])
-        return bool(decision and decision.outcome=='RESOLVED' and any(
+        return bool(selected_candidate(decision) is not None and any(
             row.get('kind')=='AGREEMENT_RECOVERY' and row['token_ref']==token_ref
             and row.get('selected') in decision.selected and row.get('recovered_reading')==clean(variant(reading))
             for row in state.syntax_trace))
     decision=state.decisions.get(refs[0]) if refs else None
-    if not decision or decision.outcome!='RESOLVED':return False
+    if selected_candidate(decision) is None:return False
     if list(decision.selected)==['NOMINAL'] and list(refs)==[refs[0],token_ref]:
         return any(same(replace(v,pos='NOUN',features=(v.features-{'ADJF'})|{'NOUN','SUBSTANTIVE'},
                    origin='CONTEXTUAL',evidence_refs=tuple(refs)))

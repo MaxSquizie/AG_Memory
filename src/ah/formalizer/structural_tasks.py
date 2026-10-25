@@ -7,6 +7,7 @@ local relation remains provisional until its children and source coverage close.
 from itertools import islice,chain
 from .canonical_ledger import digest
 from .component_probe import _probe
+from .selection_evidence import selected_candidate
 
 
 def enabled(release):
@@ -41,16 +42,14 @@ def choose(state,release,selector,region,cfg,slot,options,question,*,empty=None)
         cid=empty['candidate_id']
         if cid in seen:raise ValueError('EMPTY_COMPLETION_IN_POSITIVE_DOMAIN')
         state.decisions[key]=Decision(slot,key,tuple(sorted(seen))+ (cid,),selected=(cid,),
-            outcome='RESOLVED',search_complete=True,
+            lifecycle='PROVISIONAL',search_complete=True,
             grounds=[Ground('D','complete optional domain has no supported occurrence',cid)])
         state.decisions[key].history.append({'kind':'EMPTY_DOMAIN','page_refs':list(previous),
             'positive_candidates':sorted(seen),'completion':empty})
         state.syntax_trace.append({'kind':'STRUCTURAL_TASK','region_ref':region.region_id,'slot':slot,
             'status':'SELECTED','decision_ref':key,'enumeration_complete':True,
-            'alternatives':[empty],'selected':cid,'task_outcome':'EMPTY','page_refs':list(previous)})
-        from .component_probe_replay import supersede
-        for rejected in previous:supersede(state,rejected,key)
-        return empty,{'decision_ref':key,'candidate_id':cid,'domain_ref':key}
+            'payload_hash':digest(empty),'alternatives':[empty],'selected':cid,'task_outcome':'EMPTY','page_refs':list(previous)})
+        return empty,{'decision_ref':key,'candidate_id':cid,'domain_ref':key,'payload_hash':digest(empty)}
     if len(context)>cfg['context_chars']:
         state.diag('STRUCTURAL_TASK_SEARCH_INCOMPLETE',region.region_id)
         state.syntax_trace.append({'kind':'STRUCTURAL_TASK','region_ref':region.region_id,
@@ -68,7 +67,7 @@ def choose(state,release,selector,region,cfg,slot,options,question,*,empty=None)
             return None
         examined+=len(values)
         choices=[{'candidate_id':v['candidate_id'],'label':v['label']} for v in values]
-        key=region.region_id+'|task:'+digest([task_scope,slot,choices,question,page])
+        key=region.region_id+'|task:'+digest([task_scope,slot,values,question,page])
         fresh=0 if key in state.budget.task_candidate_pages else len(values)
         if examined>limit or state.budget.task_candidates_examined+fresh>limit:
             state.diag('STRUCTURAL_TASK_SEARCH_INCOMPLETE',region.region_id)
@@ -85,7 +84,7 @@ def choose(state,release,selector,region,cfg,slot,options,question,*,empty=None)
             offer_clarification=False,
             question=question+' Evaluate the stated choice on this page. Multiple numbers mean alternative readings of that choice, not different tasks.' )
         decision=state.decisions.get(key)
-        outcome=('ONE_SELECTED' if decision and selected is not None and decision.outcome=='RESOLVED'
+        outcome=('ONE_SELECTED' if selected is not None and selected_candidate(decision)==selected
                  else decision.selector_outcome if decision else None)
         row={'kind':'STRUCTURAL_TASK','region_ref':region.region_id,'source_range':list(region.source_range),
              'target_token_refs':list(region.token_refs),'context_policy':'TARGET_WITH_CONTEXT',
@@ -106,7 +105,7 @@ def choose(state,release,selector,region,cfg,slot,options,question,*,empty=None)
         if has_more:page+=1;continue
         from .task_contracts import SelectionReceipt
         receipt=SelectionReceipt(tuple(sorted(seen)),tuple(sorted(v['candidate_id'] for v,_ in supported)),True)
-        domain_ref='task-domain:'+digest([region.region_id,task_scope,slot,question,receipt.candidates])
+        domain_ref='task-domain:'+digest([region.region_id,task_scope,slot,question,receipt.candidates,[(p['decision_ref'],p['alternatives']) for p in pages]])
         state.syntax_trace.append({'kind':'TASK_DOMAIN','task_ref':domain_ref,'level':'T2_TP',
             'slot':slot,'source_range':list(region.source_range),'token_refs':list(region.token_refs),
             'page_refs':[p['decision_ref'] for p in pages],**receipt.record()})
@@ -116,23 +115,24 @@ def choose(state,release,selector,region,cfg,slot,options,question,*,empty=None)
             from .state import Decision,Ground
             value=next(v for v,_ in supported if v['candidate_id']==explicit)
             state.decisions[domain_ref]=Decision(slot,domain_ref,receipt.candidates,selected=(explicit,),
-                outcome='RESOLVED',search_complete=True,grounds=[Ground('C','explicit clarification of the complete domain',explicit)])
+                lifecycle='PROVISIONAL',search_complete=True,grounds=[Ground('C','explicit clarification of the complete domain',explicit)])
             state.syntax_trace.append({'kind':'STRUCTURAL_TASK','region_ref':region.region_id,'slot':slot,
                 'status':'SELECTED','decision_ref':domain_ref,'enumeration_complete':True,
-                'alternatives':[v for v,_ in supported],'selected':explicit,'domain_ref':domain_ref})
-            from .component_probe_replay import supersede
-            for p in pages:supersede(state,p['decision_ref'],domain_ref)
-            return value,{'decision_ref':domain_ref,'candidate_id':explicit,'domain_ref':domain_ref}
+                'alternatives':[v for v,_ in supported],'selected':explicit,'domain_ref':domain_ref,'payload_hash':digest(value)})
+            return value,{'decision_ref':domain_ref,'candidate_id':explicit,'domain_ref':domain_ref,'payload_hash':digest(value)}
         if len(supported)==1:
             value,winner=supported[0]
-            selected_row=next(p for p in pages if p['decision_ref']==winner)
-            selected_row.update(enumeration_complete=True,domain_ref=domain_ref,task_outcome='SUPPORTED')
-            state.decisions[winner].search_complete=True
-            if winner in state.component_probe_records:
-                state.component_probe_records[winner]['decision']['search_complete']=True
-            from .component_probe_replay import supersede
-            for rejected in previous:supersede(state,rejected,winner)
-            return value,{'decision_ref':winner,'candidate_id':value['candidate_id'],'domain_ref':domain_ref}
+            from copy import deepcopy
+            decision=deepcopy(state.decisions[winner])
+            decision.frame_id=domain_ref;decision.candidates=receipt.candidates
+            decision.search_complete=True;decision.outcome=None
+            state.decisions[domain_ref]=decision
+            state.syntax_trace.append({'kind':'STRUCTURAL_TASK','region_ref':region.region_id,'slot':slot,
+                'status':'SELECTED','decision_ref':domain_ref,'enumeration_complete':True,
+                'alternatives':[value],'selected':value['candidate_id'],'domain_ref':domain_ref,
+                'payload_hash':digest(value),'task_outcome':'SUPPORTED'})
+            return value,{'decision_ref':domain_ref,'candidate_id':value['candidate_id'],
+                          'domain_ref':domain_ref,'payload_hash':digest(value)}
         if supported:
             from .state import Decision
             joint=Decision(slot,domain_ref,receipt.candidates,selected=receipt.supported,
@@ -157,11 +157,11 @@ def licensed(state,proof,**expected):
     if not isinstance(proof,dict):return False
     key,cid=proof.get('decision_ref'),proof.get('candidate_id')
     decision=state.decisions.get(key)
-    if not decision or decision.outcome!='RESOLVED' or tuple(decision.selected)!=(cid,):return False
-    for row in state.syntax_trace:
+    if selected_candidate(decision)!=cid or decision.search_complete is not True:return False
+    for row in reversed(state.syntax_trace):
         if row.get('kind')!='STRUCTURAL_TASK' or row.get('decision_ref')!=key or row.get('selected')!=cid:continue
         if not row.get('enumeration_complete'):return False
-        return any(v.get('candidate_id')==cid and all(v.get(k)==value for k,value in expected.items())
+        return any(v.get('candidate_id')==cid and digest(v)==proof.get('payload_hash')==row.get('payload_hash') and all(v.get(k)==value for k,value in expected.items())
                    for v in row.get('alternatives',()))
     return False
 

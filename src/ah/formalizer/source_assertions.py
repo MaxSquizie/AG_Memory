@@ -2,6 +2,7 @@
 from copy import deepcopy
 from .canonical_ledger import digest
 from .component_probe import _probe
+from .selection_evidence import selected_candidate
 
 
 def enabled(release):
@@ -82,7 +83,7 @@ def roots(state,release):
     for row in state.observation.get('source_assertions',()):
         d=state.decisions.get(row['decision_ref'])
         f=frames.get(row['parent_ref']);arg=f.semantic.get('proposition_args',{}).get(row['role']) if f else None
-        if not d or d.outcome!='RESOLVED' or tuple(d.selected)!=('SOURCE_ASSERTED',) or not arg or arg.get('attitude')!='UNKNOWN':continue
+        if selected_candidate(d)!='SOURCE_ASSERTED' or not arg or arg.get('attitude')!='UNKNOWN':continue
         tree=arg.get('tree') or {'frame_ref':arg['frame_ref']}
         if tree!=row['tree']:raise ValueError('SOURCE_ASSERTION_TREE_CHANGED')
         key=digest(tree)
@@ -97,7 +98,7 @@ def roots(state,release):
         if not projection or projection.get('rule_id')!='TEMPORAL_MAIN_CLAUSE':return
         if tree.get('operator') not in {'BEFORE','AFTER','DURING'} or projection.get('operand')!=0:return
         decision=state.decisions.get(projection['decision_ref'])
-        if decision is None or decision.outcome!='RESOLVED':return
+        if selected_candidate(decision) is None:return
         child=tree['operands'][0]
         if any(frames[f].semantic.get('query_request') or frames[f].semantic.get('structural_unresolved') for f in leaves(tree)):return
         key=digest(child)

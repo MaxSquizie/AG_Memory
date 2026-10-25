@@ -1,5 +1,6 @@
 """Closed short component questions; never model-generated structures."""
 from .state import Decision, Ground
+from .selection_evidence import selected_candidate
 from .selection_protocol import DecisionSchema, Relation
 from .selector_wire import build_selector_prompt, validate_selector_reply
 from .provider_adapter import BudgetExceeded, IntegrityError
@@ -8,18 +9,22 @@ def _live_probe(state, selector, release, key, slot, options, context, source_ra
     from .probe_windows import enter
     enter(state,selector,source_range)
     ids = tuple(o['candidate_id'] for o in options)
-    d = Decision(slot, key, ids)
+    d = Decision(slot, key, ids, search_complete=False)
     state.decisions[key] = d
-    if not ids or state.budget.llm_exhausted:
+    if not ids:
         d.outcome = 'UNRESOLVED'
-        state.diag('COMPUTATION_LIMIT' if ids else 'NO_GROUNDED_CANDIDATE', key)
+        state.diag('NO_GROUNDED_CANDIDATE', key)
         return None
     from .clarifications import choice
     chosen = choice(state, key, ids)
     if chosen is not None:
-        d.selected, d.outcome, d.lifecycle = (chosen,), 'RESOLVED', 'PROVISIONAL'
+        d.selected, d.outcome, d.lifecycle = (chosen,), None, 'PROVISIONAL'
         d.grounds.append(Ground('C', 'explicit clarification selection', chosen))
         return chosen
+    if state.budget.llm_exhausted:
+        d.outcome = 'UNRESOLVED'
+        state.diag('COMPUTATION_LIMIT', key)
+        return None
     if equivalent_targets:
         groups={}
         for option in options:groups.setdefault(option['label'],[]).append(option)
@@ -82,7 +87,7 @@ def _live_probe(state, selector, release, key, slot, options, context, source_ra
             # Choose a proof representative, never a different entity. Frozen
             # candidates and the raw multi-answer remain in the audit trail.
             chosen = min(reply.selected)
-            d.selected, d.outcome, d.lifecycle = (chosen,), 'RESOLVED', 'PROVISIONAL'
+            d.selected, d.outcome, d.lifecycle = (chosen,), None, 'PROVISIONAL'
             d.grounds.extend(Ground('M', 'admissible source reference', cid) for cid in reply.selected)
             d.grounds.append(Ground('D', 'selected references have the same established entity_ref: '+next(iter(targets)), chosen))
             d.history.append({'kind':'EQUIVALENT_REFERENCE_SELECTION', 'selected_refs':list(reply.selected),
@@ -97,7 +102,7 @@ def _live_probe(state, selector, release, key, slot, options, context, source_ra
             offer(state,key,'IMPLICIT_ARGUMENT' if slot=='implicit_argument' else 'COMPONENT',context,options)
         return None
     chosen = reply.selected[0]
-    d.selected, d.outcome, d.lifecycle = (chosen,), 'RESOLVED', 'PROVISIONAL'
+    d.selected, d.outcome, d.lifecycle = (chosen,), None, 'PROVISIONAL'
     d.grounds.append(Ground('M', 'closed source-grounded component question', chosen))
     return chosen
 
@@ -125,14 +130,18 @@ def _probe(state, selector, release, key, slot, options, context, source_range, 
         from .task_contracts import TaskResult,TaskOutcome
         d=state.decisions[key]
         outcome={'ONE_SELECTED':TaskOutcome.SUPPORTED,'MULTIPLE_ADMISSIBLE':TaskOutcome.MULTIPLE,
-                 'INSUFFICIENT_CONTEXT':TaskOutcome.UNKNOWN,'NONE_FIT':TaskOutcome.NONE_FIT}.get(d.selector_outcome)
+                 'INSUFFICIENT_CONTEXT':TaskOutcome.UNKNOWN,'NONE_FIT':TaskOutcome.PAGE_NONE_FIT}.get(d.selector_outcome)
         if outcome is None:
             codes={x.code for x in state.diagnostics[before:]}
-            outcome=(TaskOutcome.SUPPORTED if d.outcome=='RESOLVED' else
+            outcome=(TaskOutcome.SUPPORTED if selected_candidate(d) is not None else
                      TaskOutcome.INCOMPLETE if any('LIMIT' in c or 'INCOMPLETE' in c for c in codes) else TaskOutcome.BLOCKED)
-        return TaskResult(value,outcome,outcome not in {TaskOutcome.INCOMPLETE,TaskOutcome.BLOCKED},
+        return TaskResult(value,outcome,False,
                           outcome!=TaskOutcome.BLOCKED,tuple(d.selected))
     if runtime is None:return run().value
     from .task_contracts import probe_contract
-    return runtime.dispatcher.run('probe:'+key,[dependency_signature,state.observation.get('clarification_choices',{}).get(key)],
+    result=runtime.dispatcher.run('probe:'+key,[dependency_signature,state.observation.get('clarification_choices',{}).get(key)],
         run,kind='PROBE',source_range=source_range,contract=probe_contract(slot,state.structural_closed))
+    # Dispatcher reuse returns a scalar; restore its immutable selection evidence too.
+    from .component_probe_replay import restore_decision
+    restore_decision(state,key,state.component_probe_records[key]['decision'])
+    return result

@@ -1069,7 +1069,10 @@ def _interpret_state(state,text,selector,release,observation,morph,context_reade
             context,f.source_range,
             question='Which lexical use applies to this occurrence in its selected structure? '+established+'Choose a catalog entry when its lexical meaning fits. Tense, date, negation and modality are handled by the structure, not new lexical senses. Choose an unlisted use only when no listed meaning fits; use ? when uncertain.')
         d=state.decisions[f.frame_id+'|predicate_value'];d.source_traces=f.semantic.get('source_traces',())
-        state.component_probe_records[f.frame_id+'|predicate_value']['decision']=asdict(d)
+        from .selection_evidence import selected_candidate
+        if selected_candidate(d) in ids:
+            d.outcome='RESOLVED'
+            d.history.append({'kind':'SEMANTIC_VALIDATION','validator':'prepared_lexical_domain','candidate_id':d.selected[0]})
     from .clarifications import offer
     for f in state.frames:
         d = state.decisions.get(f.frame_id+'|predicate_value')

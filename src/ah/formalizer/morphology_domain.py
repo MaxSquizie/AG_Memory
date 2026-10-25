@@ -3,6 +3,7 @@
 The source evidence is immutable. Proposals are serialized, addressed records;
 only a selected relation licenses their use. A singleton is not such a license.
 """
+from .selection_evidence import selected_candidate
 from dataclasses import replace
 from .canonical_ledger import digest
 from .component_policy import _morph
@@ -57,12 +58,12 @@ def project(state,tokens):
                    and in_scope(state,row) and row['token_ref']==token.token_id]
         if functions:
             row=functions[-1];decision=state.decisions.get(row['decision_ref'])
-            if decision and decision.outcome=='RESOLVED' and row['POS'] in decision.selected:
+            if selected_candidate(decision) is not None and row['POS'] in decision.selected:
                 readings={k:v for k,v in readings.items() if v.pos==row['POS']}
         restrictions=[row for row in state.syntax_trace if row.get('kind')=='MORPHOLOGY_DOMAIN_RESTRICTION' and in_scope(state,row) and row['token_ref']==token.token_id]
         if restrictions:
             row=restrictions[-1];decision=state.decisions.get(row['decision_ref'])
-            if decision and decision.outcome=='RESOLVED' and row['candidate_id'] in decision.selected:
+            if selected_candidate(decision) is not None and row['candidate_id'] in decision.selected:
                 readings={k:v for k,v in readings.items() if clean(v)==row['reading']}
         result.append(replace(token,variants=tuple(readings.values())))
     return result
@@ -71,7 +72,7 @@ def project(state,tokens):
 def license_use(state,token_ref,reading,decision_ref,candidate_id):
     if not proposed(reading):return
     decision=state.decisions.get(decision_ref)
-    if not decision or decision.outcome!='RESOLVED' or candidate_id not in decision.selected:
+    if selected_candidate(decision) is None or candidate_id not in decision.selected:
         raise ValueError('MORPHOLOGY_USE_UNGROUNDED')
     row={'kind':'MORPHOLOGY_USE','token_ref':token_ref,'reading':clean(reading),
          'decision_ref':decision_ref,'candidate_id':candidate_id}
@@ -93,7 +94,7 @@ def attested(state,token,reading):
     for row in state.syntax_trace:
         if row.get('kind')!='MORPHOLOGY_USE' or row['token_ref']!=token.token_id or row['reading']!=clean(reading):continue
         decision=state.decisions.get(row['decision_ref'])
-        if decision and decision.outcome=='RESOLVED' and row['candidate_id'] in decision.selected:return True
+        if selected_candidate(decision) is not None and row['candidate_id'] in decision.selected:return True
     return False
 
 

@@ -3,6 +3,7 @@ from copy import deepcopy
 from dataclasses import asdict
 from .canonical_ledger import digest
 from .state import Decision,Ground,ResourceProvenance
+from .selection_evidence import selected_candidate
 
 
 def execute(live,state,selector,release,key,slot,options,context,source_range,*,equivalent_targets=None,question=None,dependency_signature=None,offer_clarification=True):
@@ -14,13 +15,9 @@ def execute(live,state,selector,release,key,slot,options,context,source_range,*,
     reusable=prior is not None and prior['signature']==signature and prior.get('dependency_signature')==dependency_signature and not prior.get('superseded_by')
     if reusable and not explicit:
         signature=prior['signature']
-        raw=deepcopy(prior['decision'])
-        raw['candidates']=tuple(raw['candidates']);raw['selected']=tuple(raw['selected'])
-        raw['grounds']=[Ground(**g) for g in raw['grounds']]
-        raw['provenance']=ResourceProvenance(**raw['provenance'])
-        d=Decision(**raw);state.decisions[key]=d
+        d=restore_decision(state,key,prior['decision'])
         state.syntax_trace.append({'kind':'COMPONENT_PROBE_REUSED','decision_ref':key,'signature':signature})
-        result=d.selected[0] if d.outcome=='RESOLVED' and len(d.selected)==1 else None
+        result=selected_candidate(d)
         if result is None and offer_clarification:
             from .clarifications import offer
             offer(state,key,'COMPONENT',context,options)
@@ -47,3 +44,19 @@ def supersede(state,previous,current):
     if record is not None:record['superseded_by']=current
     state.syntax_trace.append({'kind':'COMPOSITION_PROBE_SUPERSEDED',
                                'previous_decision_ref':previous,'decision_ref':current})
+
+
+def restore_decision(state,key,record):
+    """Rehydrate probe evidence without inheriting a consumer's validation."""
+    raw=deepcopy(record)
+    raw['candidates']=tuple(raw['candidates']);raw['selected']=tuple(raw['selected'])
+    raw['grounds']=[Ground(**g) for g in raw['grounds']]
+    provenance=raw['provenance'];provenance['pattern_ids']=tuple(provenance['pattern_ids'])
+    raw['provenance']=ResourceProvenance(**provenance)
+    if raw.get('outcome')=='RESOLVED':raw['outcome']=None
+    raw['history']=[h for h in raw['history'] if not isinstance(h,dict) or h.get('kind')!='SEMANTIC_VALIDATION']
+    raw['search_complete']=False
+    raw['machine_state']='OPEN'
+    raw['lifecycle']='PROVISIONAL' if raw['selected'] else 'OPEN'
+    decision=Decision(**raw);state.decisions[key]=decision
+    return decision

@@ -1,4 +1,5 @@
 """Prepare/freeze and resolve omitted participants through addressable choices."""
+from .selection_evidence import selected_candidate
 from copy import deepcopy
 from .canonical_ledger import digest
 from .component_policy import policy, compatible, _features, rejected
@@ -64,7 +65,7 @@ def prepare_implicit(state, release):
         # Rejected whole-clause alternatives must not leak their hypothetical
         # noun readings into later reference choices (e.g. a preposition as M).
         decision=state.decisions.get(f.semantic.get('composition_decision'))
-        if decision and decision.outcome=='RESOLVED' and f.semantic.get('composition_bundle_root',f.frame_id) not in decision.selected:
+        if selected_candidate(decision) is not None and f.semantic.get('composition_bundle_root',f.frame_id) not in decision.selected:
             continue
         for tid in f.argument_token_refs:
             unit=f.semantic.get('lexical_units',{}).get(tid,{})
@@ -150,6 +151,9 @@ def resolve_implicit(state, release, selector):
                 state.diag('IMPLICIT_CHAIN_FEATURE_CONFLICT',gap['gap_id']); continue
             value['decision_ref']=gap['gap_id']
             value['features']=gap['features']
+            decision=state.decisions[gap['gap_id']]
+            decision.outcome='RESOLVED'
+            decision.history.append({'kind':'SEMANTIC_VALIDATION','validator':'implicit_binding','candidate_id':chosen})
             resolved[gap['gap_id']]=value
 
 

@@ -4,6 +4,7 @@ No noun occurrence becomes an entity witness. Restriction and body retain the
 same bound variable, and only a closed quantified root can be asserted.
 """
 import re
+from .selection_evidence import selected_candidate
 from copy import deepcopy
 from .canonical_ledger import digest
 from .component_source import view
@@ -175,7 +176,7 @@ def licensed(state,release,frame):
                              marker_refs=license['marker_refs'],relation_proof=generic):return False
     elif rule not in release.entries('ScopeLexicon') or 'QUANTIFIED_NOMINAL' not in rule.get('attachment_kinds',()):return False
     decision=state.decisions.get(license['decision_ref'])
-    if not decision or decision.outcome!='RESOLVED' or license['candidate_id'] not in decision.selected:return False
+    if selected_candidate(decision) is None or license['candidate_id'] not in decision.selected:return False
     evidence={t.token_id:t for t in state.evidence}
     if tid not in evidence or any(t not in evidence for t in license['marker_refs']):return False
     markers=[evidence[t] for t in license['marker_refs']]

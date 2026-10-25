@@ -262,8 +262,11 @@ def resolve_references(state, slots, selector, release):
             d=state.decisions[tid+'|reference'];d.grounds[:0]=prior_grounds
         else:
             d.outcome='UNRESOLVED'
-        if d.outcome=='RESOLVED':
-            uid=d.selected[0]
+        from .selection_evidence import selected_candidate
+        uid=selected_candidate(d)
+        if uid in candidates:
+            d.outcome='RESOLVED'
+            d.history.append({'kind':'SEMANTIC_VALIDATION','validator':'reference_grounding','candidate_id':uid})
             # One concrete grounding path suffices; independent alternatives
             # remain separate candidate evidence, not an all-of dependency.
             row=min(candidates[uid],key=lambda r:(tuple(r['premise_support_refs']),r['binding_ref']))
