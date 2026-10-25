@@ -10,6 +10,7 @@ from typing import Any
 
 class TaskOutcome(str, Enum):
     SUPPORTED = 'SUPPORTED'
+    PARTIAL = 'PARTIAL'
     MULTIPLE = 'MULTIPLE'
     NONE_FIT = 'NONE_FIT_IN_COMPLETE_DOMAIN'
     PAGE_NONE_FIT = 'NONE_FIT_ON_PAGE'
@@ -75,6 +76,8 @@ class TaskResult:
     search_complete: bool
     source_complete: bool
     alternatives: tuple = ()
+    structure_complete: bool = False
+    write_eligible: bool = False
 
 
 def produced(kind,value,diagnostics=()):
@@ -85,9 +88,15 @@ def produced(kind,value,diagnostics=()):
     if any('INCOMPLETE' in c or c=='COMPUTATION_LIMIT' for c in codes):
         return TaskResult(value,TaskOutcome.INCOMPLETE,False,True)
     if kind=='COMPOSITION' and isinstance(value,list):
+        from .composition_tree import roots
+        partial=[f for f in roots(value) if f.semantic.get('partial_composition')]
+        if len(partial)==1:
+            record=partial[0].semantic['partial_composition']
+            return TaskResult(value,TaskOutcome.PARTIAL,True,True,tuple(record['choices']),True,False)
         alternatives=tuple(f.frame_id for f in value if f.semantic.get('composition_domain'))
         if alternatives:return TaskResult(value,TaskOutcome.MULTIPLE,True,True,alternatives)
         from .composition_tree import roots
         if len(roots(value))!=1:return TaskResult(value,TaskOutcome.UNKNOWN,False,True)
+        return TaskResult(value,TaskOutcome.SUPPORTED,True,True,structure_complete=True)
     if value is None or value is False:return TaskResult(value,TaskOutcome.UNKNOWN,False,True)
     return TaskResult(value,TaskOutcome.SUPPORTED,True,True)

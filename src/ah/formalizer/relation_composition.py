@@ -22,7 +22,8 @@ RELATIONS={
     'AND':'Conjunction: the text connects both propositions together within the current scope',
     'OR':'Inclusive alternative between propositions; the text permits both',
     'XOR':'Exclusive alternative: the text presents exactly one of the propositions',
-    'IMPLIES':'Conditional: antecedent implies consequent; direction must be selected',
+    'IMPLIES':'One conditional rule: a condition implies a consequence; no alternative outcome for when that condition fails',
+    'IF_ELSE':'Conditional with two branches: one outcome when a condition holds, another when that SAME condition does not hold',
     'COUNTERFACTUAL':'Counterfactual condition and its consequence; not material implication',
     'BEFORE':'First event/proposition occurs before the second',
     'AFTER':'First event/proposition occurs after the second',
@@ -78,6 +79,7 @@ def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof
     # requires nonempty operands; no probe can license an empty proposition.
     if not groups or any(not group for group in groups):return None
     names=(['parent clause with a content slot', 'content filling that slot'] if kind=='CONTENT' else
+           ['condition','outcome when the condition holds','outcome when the condition does not hold'] if kind=='IF_ELSE' else
            ['condition','consequence'] if kind in {'IMPLIES','COUNTERFACTUAL'} else
            ['restriction and whole body'] if kind in {'FORALL','EXISTS'} else
            ['part '+str(i+1) for i in range(len(groups))])
@@ -129,7 +131,7 @@ def function_ownership(state,release,selector,region,cfg,kind,groups,*,eligible_
             'Which is the FIRST remaining occurrence in source order expressing this OUTER relation? '
             'Select that occurrence to move it out of its part. '
             +('Words introducing the condition or consequence belong to this outer conditional relation. '
-              if kind in {'IMPLIES','COUNTERFACTUAL'} else '')+
+              if kind in {'IMPLIES','IF_ELSE','COUNTERFACTUAL'} else '')+
             ('Part 1 is the parent, part 2 is its selected content. Parent predicate «'+(owner.span if owner else '')+'» is content and must remain. Select only grammatical connective wording introducing «'+
              ' '.join(t.span for t in groups[1])+'». Move only an introducer of THIS content; '
              'a conjunction introducing a different clause still inside the parent must stay there. ' if kind=='CONTENT' else '')+
@@ -214,7 +216,7 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child):
     if kind in {'FORALL','EXISTS'}:
         from .relation_quantifiers import compose as quantified
         return quantified(state,release,selector,region,tokens,cfg,request,compose_child,kind,proof)
-    if kind in BINARY:
+    if kind in BINARY or kind=='IF_ELSE':
         from .relation_partitions import binary as propose
         selected=PartitionDomain(state,release,selector,region,tokens,cfg,kind,proof).resolve(propose)
         if not selected:return block(state,region)
@@ -227,7 +229,11 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child):
             frames.extend(children)
             if root is None:return block(state,region,frames)
             operands.append(expression(root))
-        tree={'operator':kind,'operands':operands,'anchor_refs':[t.token_id for t in partition[0]]}
+        if kind=='IF_ELSE':
+            from .conditional_composition import branch_tree
+            tree=branch_tree(operands,[t.token_id for t in partition[0]])
+        else:
+            tree={'operator':kind,'operands':operands,'anchor_refs':[t.token_id for t in partition[0]]}
         attach_tree(frames,tree,region)
     else:
         from .relation_partitions import unary as propose

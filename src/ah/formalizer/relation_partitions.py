@@ -36,16 +36,18 @@ def binary(domain):
     from .relation_composition import RELATIONS,function_ownership
     state,release,selector,region,tokens,cfg,kind=inputs(domain)
     groups=[]
-    for i in range(2):
-        contract=('antecedent' if i==0 else 'consequent') if kind in {'IMPLIES','COUNTERFACTUAL'} else 'operand '+str(i+1)
+    contracts=(['condition being checked','outcome when that condition holds','outcome when that condition does not hold']
+        if kind=='IF_ELSE' else ['condition being checked','outcome when that condition holds']
+        if kind in {'IMPLIES','COUNTERFACTUAL'} else ['first proposition','second proposition'])
+    for i,contract in enumerate(contracts):
         chosen=domain.span(tokens,'structural_operand_'+str(i+1),
             kind+' ('+RELATIONS[kind]+'): select the complete '+contract+'. '+
-            ('This is the condition that is sufficient for the other part. ' if contract=='antecedent' else
-             'This is the consequence when the condition holds. ' if contract=='consequent' else '')+
+            ('Include only what is being checked, not what happens as a result. ' if contract=='condition being checked' else
+             'Include only this outcome, not the condition or the alternative outcome. ' if contract.startswith('outcome') else '')+
             'Exclude words linking the two outer parts. Keep any relations nested inside this part.'+
-            (' Already selected part 1: «'+' '.join(t.span for t in groups[0])+'».' if groups else ''),
+            (' Already selected: '+'; '.join(contracts[j]+': «'+' '.join(t.span for t in group)+'»' for j,group in enumerate(groups))+'.' if groups else ''),
             exclude=[t.token_id for g in groups for t in g],
-            covered=[t.token_id for g in groups for t in g],remaining_parts=1-i)
+            covered=[t.token_id for g in groups for t in g],remaining_parts=len(contracts)-i-1)
         if not chosen:return None
         groups.append(chosen[0])
     groups=function_ownership(state,release,selector,region,cfg,kind,groups)

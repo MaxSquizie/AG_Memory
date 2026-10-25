@@ -9,7 +9,11 @@ def merge(state,release,selector,region,tokens,cfg,grammar,components,diagnostic
         'source_range':list(region.source_range),'sources':[
             {'source':'GRAMMAR','frames':len(grammar)}, {'source':'COMPONENT','frames':len(components)}],
         'partial_diagnostics':[d.code for d in state.diagnostics[diagnostics_before:]]})
-    if not grammar:return components
+    from .partial_composition import close_alternatives
+    if not grammar:
+        if not any('INCOMPLETE' in d.code or 'UNRESOLVED' in d.code or d.code in {'COMPONENT_PROBE_FAILED','COMPUTATION_LIMIT'} for d in state.diagnostics[diagnostics_before:]):
+            close_alternatives(state,region,components)
+        return components
     all_frames=[*grammar,*components];by_id={f.frame_id:f for f in all_frames};bundles=[]
     for group in (grammar,components):
         pending=[(f,f.semantic['composition_domain']) for f in group if f.semantic.get('composition_domain')]
@@ -54,7 +58,7 @@ def merge(state,release,selector,region,tokens,cfg,grammar,components,diagnostic
         for f in owned:f.semantic['structural_unresolved']=True
     if len(bundles)==1:
         for f in bundles[0][1]:f.semantic['structural_unresolved']=False
-    else:
+    elif not close_alternatives(state,region,all_frames):
         from .composition_children import select_child
         select_child(state,release,selector,region,all_frames,'ALL_SOURCE_PRODUCERS',
             'Which remaining interpretation fits the source? Preserve established roles, nominal functions, '

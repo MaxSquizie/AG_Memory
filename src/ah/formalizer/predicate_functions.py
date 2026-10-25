@@ -28,10 +28,12 @@ def binding(state,release,selector,region,tokens,predicate,nominals,groups,cfg,p
     from .probe_wording import role as role_text,reading as reading_text
     registry=[r['role_id'] for r in release.entries('RoleRegistry')]
     forbidden={projected['rule']['host_role']} if projected else set()
-    result=[]
+    from .partial_readings import BindingDomain,retain
+    from itertools import product
+    result=[];reading_domains=[]
     for token in nominals:
         if token.token_id in groups:
-            result.append((None,None,None));continue  # The relation remains a lexical child.
+            result.append([(None,None,None)]);continue  # The relation remains a lexical child.
         choices=[v for v in token.variants if v.pos in {'NOUN','NPRO'}]
         if not choices:return None
         priorities=[cfg['open_case_roles'][c] for v in choices for c in sorted(v.cases) if c in cfg['open_case_roles']]
@@ -51,15 +53,23 @@ def binding(state,release,selector,region,tokens,predicate,nominals,groups,cfg,p
         from .component_constraints import retain_role
         if role=='NO_DIRECT_ROLE':
             retain_role(state,region,predicate,token,selected)
-            result.append((None,None,None));continue
+            result.append([(None,None,None)]);continue
         unique={digest({k:v for k,v in _morph(m).items() if k!='score'}):m for m in choices}
-        if len(unique)==1:variant=next(iter(unique.values()))
+        if len(unique)==1:variants=list(unique.values())
         else:
-            reading=choose(state,release,selector,region,cfg,'predicate_argument_reading',[
-                {'candidate_id':cid,'label':reading_text(_morph(v))} for cid,v in unique.items()],
+            from .structural_tasks import choose_domain
+            from .morphology_domain import clean
+            reading=choose_domain(state,release,selector,region,cfg,'predicate_argument_reading',[
+                {'candidate_id':cid,'reading':clean(v),'token_ref':token.token_id,'predicate_ref':predicate.token_id,
+                 'role':role,'label':reading_text(_morph(v))} for cid,v in unique.items()],
                 'Predicate «'+predicate.span+'»: which whole reading of «'+token.span+'» fits its selected role '+role_text(role)+'? Preserve unknown features.')
             if not reading:return None
-            variant=unique[reading[0]['candidate_id']]
-        retain_role(state,region,predicate,token,selected,_morph(variant))
-        result.append((role,variant,None))
-    return result
+            variants=[unique[v['candidate_id']] for v in reading.values]
+            if len(variants)>1:reading_domains.append(retain(state,region,predicate,token,role,reading))
+        retain_role(state,region,predicate,token,selected,_morph(variants[0]) if len(variants)==1 else None)
+        result.append([(role,variant,None) for variant in variants])
+    count=1
+    for values in result:count*=len(values)
+    if count>cfg['max_candidates']:
+        state.diag('COMPONENT_SEARCH_INCOMPLETE',region.region_id);return None
+    return BindingDomain([list(values) for values in product(*result)],reading_domains)

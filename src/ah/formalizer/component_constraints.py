@@ -45,6 +45,12 @@ def compatible_bundle(state,region,bundle):
             # Whole linguistic readings, not analyzer confidence/proof paths.
             fields=('lemma','pos','cases','number','gender','tense','person','mood','features')
             if any(actual.get(k)!=row['reading'].get(k) for k in fields):return False
+    from .partial_readings import domains,valid_domain
+    from .morphology_domain import clean
+    for row in domains(state,region):
+        frame=frames.get(row['predicate_ref'])
+        actual=frame.semantic.get('morph_bindings',{}).get(row['token_ref']) if frame else None
+        if not valid_domain(state,row) or actual is None or clean(actual) not in [v['reading'] for v in row['alternatives']]:return False
     return True
 
 

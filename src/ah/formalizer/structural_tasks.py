@@ -15,6 +15,19 @@ def enabled(release):
 
 
 def choose(state,release,selector,region,cfg,slot,options,question,*,empty=None):
+    return _choose(state,release,selector,region,cfg,slot,options,question,empty=empty)
+
+
+def choose_domain(state,release,selector,region,cfg,slot,options,question):
+    """Return all supported alternatives only after the entire domain closes."""
+    from .partial_readings import SupportedDomain
+    result=_choose(state,release,selector,region,cfg,slot,options,question,retain_domain=True)
+    if result is None or isinstance(result,SupportedDomain):return result
+    value,proof=result
+    return SupportedDomain((value,),proof['decision_ref'],proof['domain_ref'])
+
+
+def _choose(state,release,selector,region,cfg,slot,options,question,*,empty=None,retain_domain=False):
     """Optional searches declare a typed completion outside the model domain.
 
     NONE_FIT closes only one page. EMPTY is licensed only after every page was
@@ -108,7 +121,8 @@ def choose(state,release,selector,region,cfg,slot,options,question,*,empty=None)
         domain_ref='task-domain:'+digest([region.region_id,task_scope,slot,question,receipt.candidates,[(p['decision_ref'],p['alternatives']) for p in pages]])
         state.syntax_trace.append({'kind':'TASK_DOMAIN','task_ref':domain_ref,'level':'T2_TP',
             'slot':slot,'source_range':list(region.source_range),'token_refs':list(region.token_refs),
-            'page_refs':[p['decision_ref'] for p in pages],**receipt.record()})
+            'page_refs':[p['decision_ref'] for p in pages],
+            'supported_payloads':{v['candidate_id']:digest(v) for v,_ in supported},**receipt.record()})
         from .clarifications import choice
         explicit=choice(state,domain_ref,receipt.supported) if supported else None
         if explicit is not None:
@@ -145,6 +159,9 @@ def choose(state,release,selector,region,cfg,slot,options,question,*,empty=None)
             state.syntax_trace.append({'kind':'STRUCTURAL_TASK','region_ref':region.region_id,'slot':slot,
                 'status':'PENDING','reason':'MULTIPLE_ADMISSIBLE','decision_ref':domain_ref,
                 'enumeration_complete':True,'alternatives':[v for v,_ in supported],'selected':None})
+            if retain_domain:
+                from .partial_readings import SupportedDomain
+                return SupportedDomain(tuple(v for v,_ in supported),domain_ref,domain_ref)
         else:
             if empty is not None:return complete_empty()
             state.syntax_trace.append({'kind':'STRUCTURAL_TASK','region_ref':region.region_id,'slot':slot,
@@ -238,7 +255,9 @@ def extend_source_set(state,release,selector,region,tokens,cfg,slot,question,sel
             *[{'candidate_id':t.token_id,'token_ref':t.token_id,
                'label':'Another piece starts at «'+t.span+'» @'+str(t.start)} for t in remaining if t.token_id in reachable]],
             question+' Already included: «'+' '.join(t.span for t in selected)+'». '
-            'Select the FIRST remaining piece in source order, if one exists. Do not select the already included words again.',
+            'Are any words OF THIS SAME PART still missing? If the part is complete, answer 0. '
+            'Otherwise select where its FIRST missing piece begins. Words of another part are not a continuation of this part. '
+            'Do not select the next clause just because it comes next, or select already included words again.',
             empty={'candidate_id':'DONE','label':'no further source words belong to this part'} if can_finish else None)
         if not more:return None
         proofs.append(more[1])

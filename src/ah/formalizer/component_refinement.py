@@ -47,6 +47,8 @@ def compose_area(state, release, selector, region, tokens, cfg, depth=0, attachm
             local=prepare(runtime,region,tokens,request,cfg)
             runtime.area_inputs=(region,local,request)
         frames=_compose_area(state,release,selector,region,local,cfg,depth,attachment,infinitive,request)
+        from .partial_composition import propagate
+        propagate(state,region,frames)
         from .scope_boundaries import retain
         try:retain(state,region,frames)
         except ValueError as exc:

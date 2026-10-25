@@ -27,6 +27,8 @@ def build_plan(state,release,store):
         if fid in active: raise ValueError('CYCLIC_PROPOSITION_ARGUMENT')
         active=active|{fid}
         f=frames[fid]
+        if f.semantic.get('partial_composition') or f.semantic.get('partial_composition_member'):
+            raise ValueError('PARTIAL_COMPOSITION_NOT_WRITABLE')
         if f.semantic.get('structural_unresolved'): raise ValueError('STRUCTURAL_OPERAND_UNRESOLVED')
         if structural and f.semantic.get('temporal_unresolved'):raise ValueError('TEMPORAL_NESTED_SCOPE_UNRESOLVED')
         if structural and (f.semantic.get('relative_temporal') or f.semantic.get('relative_time_targets')):
@@ -187,6 +189,7 @@ def build_plan(state,release,store):
         return nid,ck
 
     def tree_node(tree,frag,active=None):
+        if 'choice_ref' in tree:raise ValueError('PARTIAL_COMPOSITION_NOT_WRITABLE')
         if 'count_literal' in tree: return tree,digest(tree)
         if 'time_literal' in tree: return tree,digest(tree)
         if 'bound_var' in tree: return tree,digest(tree)

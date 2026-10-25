@@ -42,10 +42,10 @@ def network(pool, nominal_groups=()):
     return result
 
 
-def propagate(graph, fixed):
+def propagate(graph, fixed, alternatives=None):
     for tid,option in fixed.items():
         from .component_dependency_domains import key
-        if not graph.restrict(tid,[key(option)],'FIXED_SOURCE_DEPENDENCY'):return False
+        if not graph.restrict(tid,[key(v) for v in (alternatives or {}).get(tid,[option])],'FIXED_SOURCE_DEPENDENCY'):return False
     while graph.propagate():
         changed=False
         # Longer cycles are a global tree invariant, separate from pairwise

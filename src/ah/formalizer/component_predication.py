@@ -123,6 +123,8 @@ def compose_alternatives(state, release, selector, region, tokens, predicates, c
         return frames
     # Partial alternatives stay addressable but cannot masquerade as a complete
     # source interpretation. Each complete choice includes every child frame.
+    from .partial_readings import bundles as common_readings
+    reading_domains=common_readings(state,region,complete)
     needs_probe = len(bundles) > 1 or any(f.semantic['requires_attachment_probe'] for f in frames)
     chosen = complete[0][-1].frame_id if len(complete) == 1 and not needs_probe else None
     from .component_source import view
@@ -182,16 +184,16 @@ def compose_alternatives(state, release, selector, region, tokens, predicates, c
         context, target_question=probe_context(state,region,cfg,raw)
         from .component_constraints import question as established_constraints
         target_question += established_constraints(state,region)
-        chosen = _probe(state, selector, release, region.region_id+'|composition',
+        chosen = None if reading_domains else _probe(state, selector, release, region.region_id+'|composition',
                         'component_attachment', options, context, region.source_range,
                         question=target_question+(local['question'] if local else
                             'Which remaining interpretation fits the target? Previously selected roles, readings and attachments '
                             'are constraints, not questions to reopen. Retain alternatives when the text does not distinguish them.'))
     decision=state.decisions.get(region.region_id+'|composition')
-    deferred=chosen is None and decision is not None and decision.selector_outcome in {
+    deferred=bool(reading_domains) or chosen is None and decision is not None and decision.selector_outcome in {
         'MULTIPLE_ADMISSIBLE','INSUFFICIENT_CONTEXT'}
     admissible=set(options[i]['candidate_id'] for i in range(len(options)))
-    if deferred and decision.selector_outcome=='MULTIPLE_ADMISSIBLE':
+    if deferred and decision is not None and not reading_domains and decision.selector_outcome=='MULTIPLE_ADMISSIBLE':
         admissible=set(next((h['selected'] for h in reversed(decision.history)
                              if h.get('kind')=='CLOSED_PROBE_ALTERNATIVES'),()))
     labels={o['candidate_id']:o['label'] for o in options}
@@ -205,7 +207,7 @@ def compose_alternatives(state, release, selector, region, tokens, predicates, c
         if deferred and carrier.frame_id in admissible:
             carrier.semantic['composition_domain']={'decision_ref':region.region_id+'|composition',
                 'candidate_id':carrier.frame_id,'frame_refs':[f.frame_id for f in bundle],
-                'label':labels[carrier.frame_id]}
+                'label':labels[carrier.frame_id],**({'reading_domains':reading_domains} if reading_domains else {})}
     for bundle in bundles:
         for f in bundle:
             f.semantic['composition_decision'] = region.region_id+'|composition'

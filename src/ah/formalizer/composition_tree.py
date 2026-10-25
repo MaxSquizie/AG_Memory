@@ -4,6 +4,7 @@ All composition clients use slots and references, never frame-id prefixes.
 Wire dictionaries remain the sealed, journalled representation.
 """
 from dataclasses import dataclass
+from copy import deepcopy
 from .canonical_ledger import digest
 
 
@@ -46,7 +47,7 @@ def leaves(tree):
         if 'frame_ref' in node:
             result.add(node['frame_ref'])
         else:
-            pending.extend(node.get('operands', ()))
+            pending.extend(node.get('alternatives', ()) if 'choice_ref' in node else node.get('operands', ()))
     return result
 
 
@@ -90,7 +91,8 @@ def slots(frame):
 
 
 def expression(frame):
-    return frame.semantic.get('component_scope_tree') or reference(frame)
+    return (frame.semantic.get('component_scope_tree')
+            or frame.semantic.get('partial_composition',{}).get('tree') or reference(frame))
 
 
 def forests(frames, logical_roots=()):
@@ -120,7 +122,7 @@ def embedded(frames, trees=()):
 
 def roots(frames):
     """Return candidates at the composition boundary, preserving scope carriers."""
-    candidates = [f for f in frames if not f.semantic.get('structural_unresolved')]
+    candidates = [f for f in frames if not f.semantic.get('structural_unresolved') or f.semantic.get('partial_composition')]
     children = embedded(frames)
     return [f for f in candidates if f.frame_id not in children and not f.semantic.get('component_child')
             and f.semantic.get('composition_group_root',f.frame_id)==f.frame_id]
@@ -153,6 +155,11 @@ def unary_modifier(frame):
 
 def validate(frames, trees=()):
     """Validate closure/cycles once on the DAG; shared children are legal."""
+    if any(f.semantic.get('partial_composition') or f.semantic.get('partial_composition_member') for f in frames):
+        raise ValueError('PARTIAL_COMPOSITION_NOT_WRITABLE')
+    from .partial_composition import nodes
+    if any('choice_ref' in node for tree in [*trees,*(s.tree for f in frames for s in slots(f)),*(expression(f) for f in frames)] for node in nodes(tree)):
+        raise ValueError('PARTIAL_COMPOSITION_NOT_WRITABLE')
     from .scope_boundaries import validate as validate_boundaries
     validate_boundaries(frames)
     by_id = {f.frame_id: f for f in frames}
@@ -189,6 +196,19 @@ def finalize(state, region, frames):
     Internal composers may carry reserved slots. A finalized component cannot.
     Rejected alternatives remain addressable and are not checked as facts.
     """
+    from .partial_composition import propagate,validate as validate_partial
+    propagate(state,region,frames)
+    partial=[f for f in roots(frames) if f.semantic.get('partial_composition')]
+    if partial:
+        for frame in partial:
+            record=frame.semantic['partial_composition']
+            try:validate_partial(state,record,frames)
+            except ValueError as exc:
+                state.diag(str(exc),region.region_id);return
+            state.observation.setdefault('partial_compositions',[]).append(deepcopy(record))
+        state.syntax_trace.append({'kind':'COMPOSITION_PARTIAL','region_ref':region.region_id,
+            'structure_complete':True,'write_eligible':False,'frame_refs':[f.frame_id for f in frames]})
+        return
     selected=[f for f in frames if not f.semantic.get('structural_unresolved')]
     if not selected:
         state.syntax_trace.append({'kind':'COMPOSITION_PENDING' if frames else 'COMPOSITION_EMPTY',

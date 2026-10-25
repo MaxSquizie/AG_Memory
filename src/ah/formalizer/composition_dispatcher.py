@@ -111,7 +111,8 @@ class Dispatcher:
                 from .task_contracts import produced
                 receipt=produced(kind,result,node['diagnostics']);result=receipt.value
                 node['receipt']={'task_outcome':receipt.outcome.value,'search_complete':receipt.search_complete,
-                                 'source_complete':receipt.source_complete,'alternatives':list(receipt.alternatives)}
+                                 'source_complete':receipt.source_complete,'alternatives':list(receipt.alternatives),
+                                 'structure_complete':receipt.structure_complete,'write_eligible':receipt.write_eligible}
                 node.update(result=deepcopy(result),reads=reads,dirty=False,revision=node['revision']+1)
                 self.trace('DISPATCH_COMPLETED',key,revision=node['revision'],
                     contract=node['contract'],**node['receipt'],

@@ -20,10 +20,10 @@ class ProbeExecutor(Protocol):
 
 @dataclass(frozen=True)
 class ProbeLimits:
-    max_calls: int = 128
+    max_calls: int = 1024
     max_prompt_chars: int = 8192
-    max_input_chars: int = 131072
-    max_elapsed_seconds: float = 60.0
+    max_input_chars: int = 4194304
+    max_elapsed_seconds: float = 3600.0
 
     def __post_init__(self):
         if any(type(n) is not int or n<1 for n in (self.max_calls,self.max_prompt_chars,self.max_input_chars)):
@@ -40,10 +40,13 @@ class BoundedExecutor:
 
     def _charge(self,prompt):
         size=self.executor.prompt_size(prompt) if hasattr(self.executor,'prompt_size') else len(prompt)
-        if (self.calls>=self.limits.max_calls or size>self.limits.max_prompt_chars or
-            self.input_chars+size>self.limits.max_input_chars or
-            monotonic()-self.started>self.limits.max_elapsed_seconds):
-            raise BudgetExceeded('COMPUTATION_LIMIT')
+        checks=(('calls',self.calls+1,self.limits.max_calls),
+                ('prompt_chars',size,self.limits.max_prompt_chars),
+                ('input_chars',self.input_chars+size,self.limits.max_input_chars),
+                ('elapsed_seconds',monotonic()-self.started,self.limits.max_elapsed_seconds))
+        for dimension,used,maximum in checks:
+            if used>maximum:
+                raise BudgetExceeded('COMPUTATION_LIMIT',f'{dimension}: {used} > {maximum}')
         self.calls+=1;self.input_chars+=size
 
     def select(self,prompt):

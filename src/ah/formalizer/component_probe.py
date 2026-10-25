@@ -63,7 +63,7 @@ def _live_probe(state, selector, release, key, slot, options, context, source_ra
         limits=state.observation.get('probe_limits',{})
         maximum=getattr(getattr(selector,'limits',None),'max_prompt_chars',limits.get('max_prompt_chars',8192))
         if type(maximum) is not int or maximum<1:raise ValueError('PROBE_LIMIT_INVALID')
-        if len(prompt)>maximum:raise BudgetExceeded('COMPUTATION_LIMIT')
+        if len(prompt)>maximum:raise BudgetExceeded('COMPUTATION_LIMIT',f'prompt_chars: {len(prompt)} > {maximum}')
         state.budget.spend_llm()
         raw = selector.select(prompt)
         d.raw_response = raw
@@ -72,6 +72,7 @@ def _live_probe(state, selector, release, key, slot, options, context, source_ra
     except IntegrityError:
         raise
     except BudgetExceeded as exc:
+        d.history.append({'kind':'PROBE_LIMIT','code':exc.code,'detail':str(exc)})
         d.outcome = 'UNRESOLVED'
         state.diag(exc.code, key)
         return None
@@ -94,6 +95,7 @@ def _live_probe(state, selector, release, key, slot, options, context, source_ra
                               'entity_ref':next(iter(targets)), 'representative':chosen})
             return chosen
     if reply.outcome != 'ONE_SELECTED':
+        d.selected=tuple(reply.selected)
         d.history.append({'kind':'CLOSED_PROBE_ALTERNATIVES','outcome':reply.outcome,
                           'selected':list(reply.selected)})
         d.outcome = 'INSUFFICIENT_CONTEXT' if reply.outcome == 'INSUFFICIENT_CONTEXT' else 'UNRESOLVED'

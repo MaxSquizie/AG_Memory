@@ -396,7 +396,9 @@ class FormalizationState:
                 decision.machine_state = 'FROZEN'
             elif decision.lifecycle == 'PROVISIONAL' or decision.outcome is not None:
                 decision.machine_state = 'PROVISIONAL'
-        if any(d.outcome == 'RESOLVED' for d in self.decisions.values()):
+        if self.observation.get('partial_compositions'):
+            self.machine_state = 'PARTIAL'
+        elif any(d.outcome == 'RESOLVED' for d in self.decisions.values()):
             self.machine_state = 'RESOLVED'
         elif self.structural_closed:
             self.machine_state = 'SEALED'

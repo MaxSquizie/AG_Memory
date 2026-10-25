@@ -101,11 +101,16 @@ class PartitionDomain:
                 return proposal,result
             if runtime:
                 def dispatched():
-                    begin=len(self.state.syntax_trace)
+                    begin=len(self.state.syntax_trace);diagnostics_begin=len(self.state.diagnostics)
                     value=compute()
                     probes=[r['decision_ref'] for r in self.state.syntax_trace[begin:]
                             if r.get('kind')=='STRUCTURAL_TASK' and r.get('decision_ref')]
-                    return value,probes
+                    from .task_contracts import produced,TaskResult,TaskOutcome
+                    checked=value[1] if value else None
+                    ready=bool(checked) and not isinstance(checked,ContentRequired)
+                    receipt=produced('PARTITION',True if ready else None,self.state.diagnostics[diagnostics_begin:])
+                    return TaskResult((value,probes),receipt.outcome,ready and receipt.search_complete,
+                                      receipt.source_complete,structure_complete=ready)
                 result,probes=runtime.dispatcher.run(key,
                     [self.tokens,self.cfg,runtime.input_signature(),runtime.context_signature(),
                      runtime.tasks.feedback,runtime.domain_feedback,self.proof,self.constraints],dispatched,
