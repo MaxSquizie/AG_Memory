@@ -317,7 +317,7 @@ class MainWindow(_BaseMainWindow):
             )
 
         try:
-            self._record_m1_history(result.user_text, result.integration)
+            self._record_m1_history(result.formalization_perception.source_text, result.formalization_integration)
         except Exception as exc:
             self.statusBar().showMessage(f"M1 tracing: {type(exc).__name__}", 2500)
 

@@ -82,6 +82,7 @@ def choose(state,release,selector,region,cfg,slot,options,question,*,empty=None)
         state.budget.task_candidate_pages[key]=len(values)
         state.budget.task_candidates_examined+=fresh
         selected=_probe(state,selector,release,key,slot,choices,context,region.source_range,
+            offer_clarification=False,
             question=question+' Evaluate the stated choice on this page. Multiple numbers mean alternative readings of that choice, not different tasks.' )
         decision=state.decisions.get(key)
         outcome=('ONE_SELECTED' if decision and selected is not None and decision.outcome=='RESOLVED'

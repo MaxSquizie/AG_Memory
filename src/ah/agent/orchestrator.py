@@ -317,6 +317,8 @@ class AgentOrchestrator(_BaseAgentOrchestrator):
                 )
             elif unresolved:
                 producer = lambda: self._unresolved_goal_response(text)
+            elif self._native_write_pending(base.formalization_perception):
+                producer = self._uncommitted_response
             else:
                 producer = lambda: self.agent.respond(agent_context)
 
@@ -325,9 +327,9 @@ class AgentOrchestrator(_BaseAgentOrchestrator):
                 response_perception, response_integration, response_ticks = (
                     self._record_agent_utterance(response_text, lock)
                 )
-                if base.integration.clarifications:
+                if base.formalization_integration.clarifications:
                     with lock:
-                        self._enqueue_clarifications(base.integration.clarifications)
+                        self._enqueue_clarifications(base.formalization_integration.clarifications)
 
         post_route_changed = bool(association_outcomes) or response_integration is not None
         post_autosaved = self._autosave(lock) if post_route_changed else False

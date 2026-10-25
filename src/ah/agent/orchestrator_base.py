@@ -112,6 +112,17 @@ class AgentTurnResult:
     clarification_resolution: ClarificationResolutionCommit | None = None
     agent_context_diagnostic: AgentContextDiagnostic | None = None
     response_error: str | None = None
+    # The answer utterance and the resumed interpretation are distinct results.
+    clarification_perception: PerceptionResult | None = None
+    clarification_integration: IntegrationCommit | None = None
+
+    @property
+    def formalization_perception(self) -> PerceptionResult:
+        return self.clarification_perception or self.perception
+
+    @property
+    def formalization_integration(self) -> IntegrationCommit:
+        return self.clarification_integration or self.integration
 
 
 class AgentOrchestrator:
@@ -270,8 +281,19 @@ class AgentOrchestrator:
         clarify = getattr(self.agent, "clarify", None)
         if callable(clarify):
             return str(clarify(request)).strip()
-        labels = ", ".join(option.label for option in request.options)
-        return f"Уточните, кого или что означает «{request.mention}»: {labels}?"
+        from .llm_agent import LLMAgent
+        return LLMAgent._deterministic_clarification(request)
+
+    @staticmethod
+    def _native_write_pending(perception: PerceptionResult) -> bool:
+        return (perception.native_receipt is not None
+                and not perception.native_receipt.committed_fragments
+                and not perception.queries and not perception.commands
+                and not perception.native_query_roots)
+
+    @staticmethod
+    def _uncommitted_response() -> str:
+        return 'Не удалось однозначно формализовать и записать это утверждение. Уточните его смысл или участников.'
 
     @staticmethod
     def _unresolved_goal_response(text: str) -> str:
@@ -384,6 +406,7 @@ class AgentOrchestrator:
         )
         resolution: ClarificationResolutionCommit | None = None
         structural_result: PerceptionResult | None = None
+        delayed: IntegrationCommit | None = None
         structural_experience_ref = None
         selected = request.options[selected_index - 1] if selected_index is not None else None
 
@@ -414,8 +437,6 @@ class AgentOrchestrator:
                     resolution = self.integration.finalize_structural_clarification(
                         request.ambiguous_ref, selected.ref
                     )
-                    if generate_response and delayed.clarifications:
-                        self._enqueue_clarifications(delayed.clarifications)
                 else:
                     resolution = self.integration.resolve_clarification(
                         request.ambiguous_ref, selected.ref
@@ -457,17 +478,24 @@ class AgentOrchestrator:
         response_ticks: tuple[TickResult, ...] = ()
         response_error: str | None = None
         active_request = next_request if resolution is not None else request
+        if active_request is None and delayed is not None and delayed.clarifications:
+            active_request = delayed.clarifications[0]
         if generate_response:
-            producer = (
-                (lambda: self._generate_clarification(active_request))
-                if active_request is not None
-                else (lambda: self.agent.respond(agent_context))
-            )
+            if active_request is not None:
+                producer = lambda: self._generate_clarification(active_request)
+            elif structural_result is not None and self._native_write_pending(structural_result):
+                producer = self._uncommitted_response
+            else:
+                producer = lambda: self.agent.respond(agent_context)
             response_text, response_error = self._safe_generate_response(producer)
             if response_text is not None:
                 response_perception, response_integration, response_ticks = self._record_agent_utterance(
                     response_text, lock
                 )
+
+                if delayed is not None and delayed.clarifications:
+                    with lock:
+                        self._enqueue_clarifications(delayed.clarifications)
 
         autosaved = self._autosave(lock)
         return AgentTurnResult(
@@ -487,6 +515,8 @@ class AgentOrchestrator:
             clarification_request=active_request,
             clarification_resolution=resolution,
             response_error=response_error,
+            clarification_perception=structural_result,
+            clarification_integration=delayed,
         )
 
     def handle_user_text(
@@ -765,12 +795,11 @@ class AgentOrchestrator:
                 # black-box path the proof system is meant to eliminate. Fail closed
                 # and expose the compiler failure through diagnostics/Proof Explorer.
                 producer = lambda: self._unresolved_goal_response(text)
-            elif (perception.native_receipt is not None and not perception.native_receipt.committed_fragments
-                  and not perception.queries and not perception.commands and not perception.native_query_roots):
+            elif self._native_write_pending(perception):
                 # A stored H utterance is communication, not proof that T6
                 # accepted its content. Never turn a typed refusal into an
                 # acknowledgement generated from the same uncommitted prose.
-                producer = lambda: 'Не удалось однозначно формализовать и записать это утверждение. Уточните его смысл или участников.'
+                producer = self._uncommitted_response
             else:
                 producer = lambda: self.agent.respond(agent_context)
             response_text, response_error = self._safe_generate_response(producer)

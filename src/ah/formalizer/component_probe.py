@@ -4,7 +4,7 @@ from .selection_protocol import DecisionSchema, Relation
 from .selector_wire import build_selector_prompt, validate_selector_reply
 from .provider_adapter import BudgetExceeded, IntegrityError
 
-def _live_probe(state, selector, release, key, slot, options, context, source_range, *, equivalent_targets=None, question=None):
+def _live_probe(state, selector, release, key, slot, options, context, source_range, *, equivalent_targets=None, question=None, offer_clarification=True):
     from .probe_windows import enter
     enter(state,selector,source_range)
     ids = tuple(o['candidate_id'] for o in options)
@@ -93,7 +93,8 @@ def _live_probe(state, selector, release, key, slot, options, context, source_ra
                           'selected':list(reply.selected)})
         d.outcome = 'INSUFFICIENT_CONTEXT' if reply.outcome == 'INSUFFICIENT_CONTEXT' else 'UNRESOLVED'
         from .clarifications import offer
-        offer(state,key,'IMPLICIT_ARGUMENT' if slot=='implicit_argument' else 'COMPONENT',context,options)
+        if offer_clarification:
+            offer(state,key,'IMPLICIT_ARGUMENT' if slot=='implicit_argument' else 'COMPONENT',context,options)
         return None
     chosen = reply.selected[0]
     d.selected, d.outcome, d.lifecycle = (chosen,), 'RESOLVED', 'PROVISIONAL'
@@ -101,7 +102,10 @@ def _live_probe(state, selector, release, key, slot, options, context, source_ra
     return chosen
 
 
-def _probe(state, selector, release, key, slot, options, context, source_range, *, equivalent_targets=None, question=None):
+def _probe(state, selector, release, key, slot, options, context, source_range, *, equivalent_targets=None, question=None, offer_clarification=True):
+    # The enclosing domain owns speaker choices; a page only supplies evidence.
+    if not offer_clarification:
+        state.clarification_candidates[:]=[r for r in state.clarification_candidates if r['decision_ref']!=key]
     from .canonical_ledger import digest
     dependency_signature=digest([release.sha256,slot,options,context,source_range,equivalent_targets,question])
     from .composition_session import current
@@ -116,7 +120,8 @@ def _probe(state, selector, release, key, slot, options, context, source_range, 
     def run():
         before=len(state.diagnostics)
         value=execute(_live_probe,state,selector,release,key,slot,options,context,source_range,
-                      equivalent_targets=equivalent_targets,question=question,dependency_signature=dependency_signature)
+                      equivalent_targets=equivalent_targets,question=question,dependency_signature=dependency_signature,
+                      offer_clarification=offer_clarification)
         from .task_contracts import TaskResult,TaskOutcome
         d=state.decisions[key]
         outcome={'ONE_SELECTED':TaskOutcome.SUPPORTED,'MULTIPLE_ADMISSIBLE':TaskOutcome.MULTIPLE,

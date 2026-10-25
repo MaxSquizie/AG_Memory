@@ -65,11 +65,13 @@ class FormalizationTraceBuilder:
         title: str,
         source_text: str,
         diagnostics: tuple[str, ...] = (),
+        native_receipt=None,
     ) -> FormalizationTraceSnapshot:
         lock = self.runtime_lock or nullcontext()
         with lock:
             graph = self._build_graph(commit)
-        status = "CLARIFICATION_REQUIRED" if commit.clarification_required else "FORMALIZED"
+        status = ("CLARIFICATION_REQUIRED" if commit.clarification_required else
+                  native_receipt.terminal if native_receipt is not None else "FORMALIZED")
         return FormalizationTraceSnapshot(
             trace_id=trace_id,
             source=source,

@@ -177,8 +177,8 @@ class LLMAgent:
 
     @staticmethod
     def _deterministic_clarification(request: ClarificationRequest) -> str:
-        labels = ", ".join(item.label for item in request.options)
-        return f"Уточните, кого или что означает «{request.mention}»: {labels}?"
+        labels = "\n".join(f"{item.index}. {item.label}" for item in request.options)
+        return f"Уточните значение «{request.mention}». Выберите номер варианта:\n{labels}"
 
     @staticmethod
     def _generation_override(generation: LLMRoleSettings) -> dict:

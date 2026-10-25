@@ -1755,12 +1755,13 @@ class MainWindow(QMainWindow):
                 self.services.ignition,
                 runtime_lock=self.services.operation_lock,
             ).build(
-                result.integration,
+                result.formalization_integration,
                 trace_id=f"live:turn:{self._turn_sequence}",
                 source="LIVE",
                 title=f"Turn {self._turn_sequence}",
-                source_text=result.user_text,
-                diagnostics=tuple(str(item) for item in result.perception.diagnostics),
+                source_text=result.formalization_perception.source_text,
+                diagnostics=tuple(str(item) for item in result.formalization_perception.diagnostics),
+                native_receipt=result.formalization_perception.native_receipt,
             )
             self.metrics_panel.add_m1_trace(formalization, select=False)
         except Exception:

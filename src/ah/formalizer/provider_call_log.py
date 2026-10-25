@@ -11,7 +11,7 @@ class ProviderCallLog:
     def _reload(self):
         if self._journal:
             calls={}
-            for r in self._journal.scan_unprocessed(0):
+            for r in self._journal.scan_unprocessed(0, payload_kinds={'prov_call'}):
                 p=r['payload']
                 if p.get('kind')!='prov_call': continue
                 previous=calls.get(p['id'])
@@ -25,7 +25,11 @@ class ProviderCallLog:
             self._calls=calls
 
     def lookup(self,run_id,ordinal):
-        self._reload()
+        with self._lock:
+            self._reload()
+            return self._lookup(run_id,ordinal)
+
+    def _lookup(self,run_id,ordinal):
         values=[r for r in self._calls.values() if r.get('run_id')==run_id and r.get('ordinal')==ordinal]
         return max(values,key=lambda r:r['attempt']) if values else None
 
@@ -34,7 +38,7 @@ class ProviderCallLog:
             self._reload()
             if ordinal is None:
                 ordinal=max((r.get('ordinal',0) for r in self._calls.values() if r.get('run_id')==run_id),default=0)+1
-            old=self.lookup(run_id,ordinal)
+            old=self._lookup(run_id,ordinal)
             if old and (old['request_digest'],old.get('model_key',''),old.get('params_hash',''))!=(request_digest,model_key,params_hash):
                 raise ValueError('REPLAY_MISMATCH')
             attempt=(old['attempt']+1) if old else 1

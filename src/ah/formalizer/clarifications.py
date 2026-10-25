@@ -180,7 +180,7 @@ def resolve(adapter, resolution_key, *, source_text=None):
         if len(requests) != 1:
             raise ValueError('CLARIFICATION_REQUEST_MISSING')
         request = requests[0]
-        from .clarification_liveness import obsolete
+        from .clarification_liveness import obsolete_reason
         if source_text is not None and request['source_text'] != source_text:
             raise ValueError('CLARIFICATION_INPUT_MISMATCH')
         if request['resource_snapshot'] != release.sha256:
@@ -193,7 +193,8 @@ def resolve(adapter, resolution_key, *, source_text=None):
         if frozen is None or digest(frozen) != request['input_sha256']:
             raise ValueError('CLARIFICATION_INPUT_CHANGED')
         old = [r for r in records if r.get('kind') == 'CLARIFICATION_SELECTED' and r.get('request_id') == rid]
-        if not old and obsolete(request): raise ValueError('CLARIFICATION_BRANCH_REJECTED')
+        reason = obsolete_reason(request)
+        if not old and reason: raise ValueError(reason)
         if old:
             if len(old) != 1 or old[0]['option_hash'] != option_hash:
                 raise ValueError('CLARIFICATION_ALREADY_SELECTED')
