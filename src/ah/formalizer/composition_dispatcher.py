@@ -55,6 +55,14 @@ class Dispatcher:
         if self.stack:
             self.stack[-1][1][key]=self.nodes[key]['revision']
 
+    def read(self,key,revision):
+        """Subscribe to an already completed source without running it again."""
+        if any(ref==key for ref,_ in self.stack):raise DispatchBlocked('COMPOSITION_CYCLE')
+        if not self.valid(key,revision):raise DispatchBlocked('COMPOSITION_SOURCE_STALE')
+        if self.stack:self.stack[-1][1].setdefault(key,revision)
+        self.trace('DISPATCH_SOURCE_READ',key,revision=revision)
+        return deepcopy(self.nodes[key]['result'])
+
     def discard_attempt(self):
         """The composer has rejected the entire tentative result.
 

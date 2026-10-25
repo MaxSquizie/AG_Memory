@@ -138,7 +138,13 @@ def build_plan(state,release,store):
             if {r.value for r in store._store.get_template(mapping['template_ref']).roles}!=schema_roles: raise ValueError('CANONICAL_MAPPING_MISSING')
             tid=mapping['template_ref']
         else:
-            tid='T:open:'+digest([state.source_uid,f.predicate_token_ref,selected['candidate_id'],roles])
+            from .content_sources import lexical_origin
+            # A template describes an opaque predicate and its role schema.
+            # Concrete participants belong to the node, not to the template.
+            # Only an explicit source-use dependency shares a lexical origin;
+            # equal spelling in another occurrence does not establish it.
+            tid='T:open:'+digest([state.source_uid,f.predicate_token_ref,lexical_origin(state,f,frames),
+                                  sorted(description_schema_roles(selected,roles))])
             emit('ENSURE_TEMPLATE',{'uid':tid,'predicate_form':predicate_surface,
                 **({'predicate_lemma':predicate_lemma} if predicate_lemma else {}),
                 'roles':sorted(description_schema_roles(selected,roles)),'semantic_status':'UNLINKED','source_ref':f.predicate_token_ref,'source_tag':tag},frag)

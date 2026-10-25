@@ -855,6 +855,12 @@ def _interpret_state(state,text,selector,release,observation,morph,context_reade
     parent_frames={f.frame_id:f for f in state.frames}
     for frame in state.frames:
         from .structural_tasks import licensed as task_licensed
+        from .content_reference_functions import validate_reference
+        if any(not validate_reference(state,frame,role,slot) for role,slot in frame.semantic.get('proposition_args',{}).items()):
+            frame.semantic['structural_unresolved']=True
+            state.diag('CONTENT_REFERENCE_UNGROUNDED',frame.frame_id)
+            candidate_specs[frame.frame_id]=[]
+            continue
         if any(child.get('structural_license') and not task_licensed(state,child['structural_license'],
                owner_ref=frame.predicate_token_ref,role=role,attitude=child.get('attitude'))
                for role,child in frame.semantic.get('proposition_args',{}).items()):
@@ -1031,7 +1037,8 @@ def _interpret_state(state,text,selector,release,observation,morph,context_reade
     structural_seal(state)
     resolve_references(state,reference_slots,selector,release)
     resolve_implicit(state,release,selector)
-    for f in state.frames:
+    from .content_sources import lexical_order,inherit_lexical
+    for f in lexical_order(state.frames):
         enter_probe_window(state,selector,f.source_range)
         specs=candidate_specs[f.frame_id]; ids=tuple(s['candidate_id'] for s in specs)
         d=Decision('predicate_value',f.frame_id,ids); d.source_traces=f.semantic.get('source_traces',()); state.decisions[f.frame_id+'|predicate_value']=d
@@ -1045,6 +1052,7 @@ def _interpret_state(state,text,selector,release,observation,morph,context_reade
         if not specs:
             d.outcome='UNRESOLVED' if f.semantic['has_known_senses'] else 'NO_CANDIDATE'
             state.diag('CANDIDATE_SOURCE_EXHAUSTED' if not f.semantic['has_known_senses'] else 'VALENCY_UNKNOWN',f.frame_id); continue
+        if inherit_lexical(state,f,d,specs,selected_by_speaker):continue
         if selected_by_speaker is not None and not f.semantic.get('structural_unresolved'):
             d.selected=(selected_by_speaker,); d.lifecycle='PROVISIONAL'; d.outcome='RESOLVED'
             d.grounds.append(Ground('C', 'durable explicit speaker disambiguation: '+state.observation['clarification_selection_ref'], selected_by_speaker))
@@ -1076,7 +1084,7 @@ def _interpret_state(state,text,selector,release,observation,morph,context_reade
     from .clarifications import offer
     for f in state.frames:
         d = state.decisions.get(f.frame_id+'|predicate_value')
-        if d is None or d.outcome == 'RESOLVED' or f.semantic.get('structural_unresolved') or f.semantic.get('source_blocked'):
+        if d is None or d.outcome == 'RESOLVED' or f.semantic.get('structural_unresolved') or f.semantic.get('source_blocked') or f.semantic.get('content_source_frame'):
             continue
         options = []
         for cid in d.candidates:

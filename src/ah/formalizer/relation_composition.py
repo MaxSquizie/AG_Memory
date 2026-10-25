@@ -33,6 +33,7 @@ RELATIONS={
     'EXISTS':'Existential nonnumeric quantification; no particular witness identity',
     'QUERY':'A question about content; no assertion of the content',
     'GROUP':'Parentheses group an entire proposition without changing its logical meaning',
+    'CONTENT_REFERENCE':'A predicate takes content referred to elsewhere: an explicit pointer to a proposition/action, or omitted but understood propositional content. The content itself is not expressed inside this target',
 }
 BINARY={'AND','OR','XOR','IMPLIES','COUNTERFACTUAL','BEFORE','AFTER','DURING'}
 
@@ -186,7 +187,8 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child):
         'Choose the outermost relation expressed inside the target; inner relations are handled later. '
         'Choose one lexical predication only when TARGET itself contains no further outer relation; '
         'an outer relation already supplied by CONTEXT must not be selected again. '
-        'The content option requires both the parent predicate and dependent content to be present in this text. '
+        'The full content option requires both the parent predicate and dependent content to be present in this text. '
+        'A reference to content or an omitted but understood content uses the content-reference option; an omitted participant alone does not. '
         'Numeric quantification is deferred.')
     if not result:return block(state,region)
     option,proof=result;kind=option['relation']
@@ -200,6 +202,9 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child):
         # never has to accept a relative-clause hypothesis from a word list.
         return _compose_lexical_area(state,release,selector,region,tokens,
             {**cfg,'_literal_relation':True,'_selected_refinement':boundary,'_skip_reuse':True},depth=cfg.get('_depth',0),request=request)
+    if kind=='CONTENT_REFERENCE':
+        from .content_reference_functions import compose as referenced_content
+        return referenced_content(state,release,selector,region,tokens,cfg,request,compose_child,proof)
     if kind=='CONTENT':return content(state,release,selector,region,tokens,cfg,request,compose_child,proof)
     if kind=='GROUP':
         from .relation_partitions import group as propose
@@ -318,26 +323,7 @@ def content(state,release,selector,region,tokens,cfg,request,compose_child,proof
     if not owner_choice or not licensed(state,owner_choice[1],owner_ref=owner_choice[0]['owner_ref']):return block(state,region)
     owner=next(t for t in parent if t.token_id==owner_choice[0]['owner_ref'])
     source_parts={'content_refs':[t.token_id for t in body],'parent_refs':[t.token_id for t in parent]}
-    role_registry={r['role_id'] for r in release.entries('RoleRegistry') if not r.get('allowed_argument_kinds') or set(r['allowed_argument_kinds']) & {'PROPOSITION','EVENT'}}
-    senses={s['sense_id'] for s in release.entries('R-S') if any(s['lemma']==v.lemma and s['POS']==v.pos for v in owner.variants)}
-    if senses:
-        role_registry &= {r['role_id'] for v in release.entries('R-V') if v['sense_id'] in senses
-                          for r in v['roles'] if set(r.get('argument_types',())) & {'PROPOSITION','EVENT'}}
-    choices=[]
-    from .probe_wording import proposition_role
-    for role in sorted(role_registry):
-        declared=[a for a in release.entries('AttitudeMap') if a['argument_role']==role and any(v.lemma==a['lemma'] for v in owner.variants)]
-        attitudes=sorted({a['attitude'] for a in declared}) if declared else ['QUOTED','EMBEDDED','HYPOTHETICAL','UNKNOWN']
-        for attitude in attitudes:
-            choices.append({'candidate_id':role+':'+attitude,'owner_ref':owner.token_id,'role':role,'attitude':attitude,**source_parts,
-                'label':role+' of «'+owner.span+'»; attitude='+attitude+
-                '; '+proposition_role(role)})
-    link=choose(state,release,selector,region,cfg,'structural_content_role',choices,
-        'Selected owner: «'+owner.span+'» @'+str(owner.start)+'. Selected dependent content: «'+body_text+'». '
-        'Remaining parent: «'+' '.join(t.span for t in parent)+'». '
-        'Choose the role and status of THIS content for THIS predicate. '
-        'QUOTED=reported; EMBEDDED=mental content; HYPOTHETICAL=intended/possible; UNKNOWN=unspecified. '
-        'None asserts the child. No canonical lexical identity is inferred.')
+    link=content_role(state,release,selector,region,cfg,owner,parent,body_text,source_parts)
     if not link:return block(state,region)
     relation,license=link
     inherited=dict(request.pending_propositions or {}) if request else {}
@@ -380,3 +366,26 @@ def content(state,release,selector,region,tokens,cfg,request,compose_child,proof
         'source_range':list(region.source_range),'decision_ref':proof['decision_ref'],
         'owner_ref':target.frame_id,'content_ref':root.frame_id,'role':relation['role'],'attitude':relation['attitude']})
     return frames
+
+
+def content_role(state,release,selector,region,cfg,owner,parent,body_text,source_parts):
+    role_registry={r['role_id'] for r in release.entries('RoleRegistry') if not r.get('allowed_argument_kinds') or set(r['allowed_argument_kinds']) & {'PROPOSITION','EVENT'}}
+    senses={s['sense_id'] for s in release.entries('R-S') if any(s['lemma']==v.lemma and s['POS']==v.pos for v in owner.variants)}
+    if senses:
+        role_registry &= {r['role_id'] for v in release.entries('R-V') if v['sense_id'] in senses
+                          for r in v['roles'] if set(r.get('argument_types',())) & {'PROPOSITION','EVENT'}}
+    choices=[]
+    from .probe_wording import proposition_role
+    for role in sorted(role_registry):
+        declared=[a for a in release.entries('AttitudeMap') if a['argument_role']==role and any(v.lemma==a['lemma'] for v in owner.variants)]
+        attitudes=sorted({a['attitude'] for a in declared}) if declared else ['QUOTED','EMBEDDED','HYPOTHETICAL','UNKNOWN']
+        for attitude in attitudes:
+            choices.append({'candidate_id':role+':'+attitude,'owner_ref':owner.token_id,'role':role,'attitude':attitude,**source_parts,
+                'label':role+' of «'+owner.span+'»; attitude='+attitude+
+                '; '+proposition_role(role)})
+    return choose(state,release,selector,region,cfg,'structural_content_role',choices,
+        'Selected owner: «'+owner.span+'» @'+str(owner.start)+'. Selected dependent content: «'+body_text+'». '
+        'Remaining parent: «'+' '.join(t.span for t in parent)+'». '
+        'Choose the role and status of THIS content for THIS predicate. '
+        'QUOTED=reported; EMBEDDED=mental content; HYPOTHETICAL=intended/possible; UNKNOWN=unspecified. '
+        'None asserts the child. No canonical lexical identity is inferred.')

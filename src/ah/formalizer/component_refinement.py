@@ -109,6 +109,11 @@ def _compose_area(state, release, selector, region, tokens, cfg, depth=0, attach
             if result is None:
                 result=_compose_lexical_area(state,release,selector,region,tokens,
                     {**cfg,'_literal_relation':True},depth,attachment,infinitive,request)
+                from .content_reference_functions import omitted_content
+                result=omitted_content(state,release,selector,region,tokens,cfg,request,result,
+                    lambda owned,slot:compose_area(state,release,selector,region_for(state,region,owned,'RELATION_CHILD'),
+                        owned,child_cfg,depth+1,attachment=attachment,
+                        infinitive=(None if slot and slot.independent_subject else slot.controller if slot and slot.controller else infinitive),request=slot))
             tasks=[r for r in state.syntax_trace[begin:] if r.get('kind')=='STRUCTURAL_TASK']
             if len(roots(result))==1:
                 current=next((r['decision_ref'] for r in tasks if r.get('selected')),None)
