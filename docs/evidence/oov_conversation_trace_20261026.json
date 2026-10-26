@@ -1,0 +1,1310 @@
+{
+  "base_commit": "c0da5782a4ed39c6a687fa80def2226cfa198521",
+  "text": "Я попросил Диму зафлюмить квендрик но он сказал что квендрик не работает и попросил меня подождать.",
+  "fixture": "TEST_ONLY native resource",
+  "result": {
+    "assertions": {
+      "ah": [],
+      "ir": [],
+      "journal": []
+    },
+    "coverage": {
+      "status": "NONE",
+      "level": "NONE",
+      "covered_span_ids": [],
+      "unresolved_span_ids": [
+        "tok:0:1",
+        "tok:11:15",
+        "tok:16:25",
+        "tok:26:34",
+        "tok:2:10",
+        "tok:35:37",
+        "tok:38:40",
+        "tok:41:47",
+        "tok:48:51",
+        "tok:52:60",
+        "tok:61:63",
+        "tok:64:72",
+        "tok:73:74",
+        "tok:75:83",
+        "tok:84:88",
+        "tok:89:98"
+      ],
+      "inference_restrictions": [],
+      "surface_role_count": 0,
+      "opaque_full_claim": false
+    },
+    "diagnostics": {
+      "codes": [
+        "COMPONENT_INFINITIVE_UNRESOLVED",
+        "OOV_KEEP_AS_IS",
+        "STRUCTURAL_IMPLEMENTATION_GAP",
+        "STRUCTURE_NOT_COVERED"
+      ]
+    }
+  },
+  "report": {
+    "observation_id": "observation:a7cbb3ca70c35a4e375c43e77dbf32b54878e9b9e65c9be1765ccad78d6de485",
+    "version": 1,
+    "run_id": "native:0190345f1b8383bcde49f36209fa5a1e2db75039af963c4591b67d4eacbd575b",
+    "binding_ok": true,
+    "t5_eligibility": "OK",
+    "committed_fragments": [],
+    "applied": false,
+    "terminal": "RESOLUTION_ONLY",
+    "batch_hash": "",
+    "diagnostics": [],
+    "node_refs": []
+  },
+  "machine_state": "SEALED",
+  "structural_closed": true,
+  "frames": [],
+  "oov_evidence": [
+    {
+      "span": "зафлюмить",
+      "token_id": "tok:16:25",
+      "start": 16,
+      "end": 25,
+      "lemma": "зафлюмить",
+      "pos": null,
+      "cases": [],
+      "variants": [],
+      "score": 0.0,
+      "lex_status": "OOV_KEEP_AS_IS",
+      "morph_guesses": [
+        {
+          "lemma": "зафлюмитя",
+          "pos": "NOUN",
+          "cases": [],
+          "number": "sing",
+          "gender": "masc",
+          "person": null,
+          "tense": null,
+          "mood": null,
+          "features": [
+            "Infr",
+            "NOUN",
+            "Name",
+            "anim",
+            "voct"
+          ],
+          "score": 0.2727272727272727,
+          "origin": "PREDICTED",
+          "evidence_refs": [
+            "DictionaryAnalyzer",
+            "UnknownPrefixAnalyzer",
+            "KnownPrefixAnalyzer"
+          ]
+        },
+        {
+          "lemma": "зафлюмитя",
+          "pos": "NOUN",
+          "cases": [
+            "gen"
+          ],
+          "number": "plur",
+          "gender": "masc",
+          "person": null,
+          "tense": null,
+          "mood": null,
+          "features": [
+            "NOUN",
+            "Name",
+            "anim"
+          ],
+          "score": 0.2727272727272727,
+          "origin": "PREDICTED",
+          "evidence_refs": [
+            "DictionaryAnalyzer",
+            "UnknownPrefixAnalyzer",
+            "KnownPrefixAnalyzer"
+          ]
+        },
+        {
+          "lemma": "зафлюмитя",
+          "pos": "NOUN",
+          "cases": [
+            "acc"
+          ],
+          "number": "plur",
+          "gender": "masc",
+          "person": null,
+          "tense": null,
+          "mood": null,
+          "features": [
+            "NOUN",
+            "Name",
+            "anim"
+          ],
+          "score": 0.2727272727272727,
+          "origin": "PREDICTED",
+          "evidence_refs": [
+            "DictionaryAnalyzer",
+            "UnknownPrefixAnalyzer",
+            "KnownPrefixAnalyzer"
+          ]
+        },
+        {
+          "lemma": "зафлюмить",
+          "pos": "INFN",
+          "cases": [],
+          "number": null,
+          "gender": null,
+          "person": null,
+          "tense": null,
+          "mood": null,
+          "features": [
+            "INFN",
+            "impf",
+            "intr"
+          ],
+          "score": 0.09090909090909088,
+          "origin": "PREDICTED",
+          "evidence_refs": [
+            "FakeDictionary",
+            "KnownSuffixAnalyzer",
+            "KnownPrefixAnalyzer"
+          ]
+        },
+        {
+          "lemma": "зафлюмить",
+          "pos": "INFN",
+          "cases": [],
+          "number": null,
+          "gender": null,
+          "person": null,
+          "tense": null,
+          "mood": null,
+          "features": [
+            "INFN",
+            "intr",
+            "perf"
+          ],
+          "score": 0.09090909090909088,
+          "origin": "PREDICTED",
+          "evidence_refs": [
+            "FakeDictionary",
+            "KnownSuffixAnalyzer",
+            "KnownPrefixAnalyzer"
+          ]
+        }
+      ],
+      "lexical_recovery": null
+    },
+    {
+      "span": "квендрик",
+      "token_id": "tok:26:34",
+      "start": 26,
+      "end": 34,
+      "lemma": "квендрик",
+      "pos": null,
+      "cases": [],
+      "variants": [],
+      "score": 0.0,
+      "lex_status": "OOV_KEEP_AS_IS",
+      "morph_guesses": [
+        {
+          "lemma": "квендрик",
+          "pos": "NOUN",
+          "cases": [
+            "nom"
+          ],
+          "number": "sing",
+          "gender": "masc",
+          "person": null,
+          "tense": null,
+          "mood": null,
+          "features": [
+            "NOUN",
+            "Name",
+            "anim"
+          ],
+          "score": 0.3333333333333333,
+          "origin": "PREDICTED",
+          "evidence_refs": [
+            "DictionaryAnalyzer",
+            "UnknownPrefixAnalyzer"
+          ]
+        },
+        {
+          "lemma": "квендрика",
+          "pos": "NOUN",
+          "cases": [
+            "gen"
+          ],
+          "number": "plur",
+          "gender": "femn",
+          "person": null,
+          "tense": null,
+          "mood": null,
+          "features": [
+            "NOUN",
+            "Name",
+            "anim"
+          ],
+          "score": 0.3333333333333333,
+          "origin": "PREDICTED",
+          "evidence_refs": [
+            "DictionaryAnalyzer",
+            "UnknownPrefixAnalyzer"
+          ]
+        },
+        {
+          "lemma": "квендрика",
+          "pos": "NOUN",
+          "cases": [
+            "acc"
+          ],
+          "number": "plur",
+          "gender": "femn",
+          "person": null,
+          "tense": null,
+          "mood": null,
+          "features": [
+            "NOUN",
+            "Name",
+            "anim"
+          ],
+          "score": 0.3333333333333333,
+          "origin": "PREDICTED",
+          "evidence_refs": [
+            "DictionaryAnalyzer",
+            "UnknownPrefixAnalyzer"
+          ]
+        }
+      ],
+      "lexical_recovery": null
+    },
+    {
+      "span": "квендрик",
+      "token_id": "tok:52:60",
+      "start": 52,
+      "end": 60,
+      "lemma": "квендрик",
+      "pos": null,
+      "cases": [],
+      "variants": [],
+      "score": 0.0,
+      "lex_status": "OOV_KEEP_AS_IS",
+      "morph_guesses": [
+        {
+          "lemma": "квендрик",
+          "pos": "NOUN",
+          "cases": [
+            "nom"
+          ],
+          "number": "sing",
+          "gender": "masc",
+          "person": null,
+          "tense": null,
+          "mood": null,
+          "features": [
+            "NOUN",
+            "Name",
+            "anim"
+          ],
+          "score": 0.3333333333333333,
+          "origin": "PREDICTED",
+          "evidence_refs": [
+            "DictionaryAnalyzer",
+            "UnknownPrefixAnalyzer"
+          ]
+        },
+        {
+          "lemma": "квендрика",
+          "pos": "NOUN",
+          "cases": [
+            "gen"
+          ],
+          "number": "plur",
+          "gender": "femn",
+          "person": null,
+          "tense": null,
+          "mood": null,
+          "features": [
+            "NOUN",
+            "Name",
+            "anim"
+          ],
+          "score": 0.3333333333333333,
+          "origin": "PREDICTED",
+          "evidence_refs": [
+            "DictionaryAnalyzer",
+            "UnknownPrefixAnalyzer"
+          ]
+        },
+        {
+          "lemma": "квендрика",
+          "pos": "NOUN",
+          "cases": [
+            "acc"
+          ],
+          "number": "plur",
+          "gender": "femn",
+          "person": null,
+          "tense": null,
+          "mood": null,
+          "features": [
+            "NOUN",
+            "Name",
+            "anim"
+          ],
+          "score": 0.3333333333333333,
+          "origin": "PREDICTED",
+          "evidence_refs": [
+            "DictionaryAnalyzer",
+            "UnknownPrefixAnalyzer"
+          ]
+        }
+      ],
+      "lexical_recovery": null
+    }
+  ],
+  "trace": [
+    {
+      "kind": "STRUCTURAL_TASK",
+      "region_ref": "region:f0e548943f4825f38571c46d02a41a5205b1aee4d23462446bfc7079ed034f75",
+      "source_range": [
+        0,
+        99
+      ],
+      "target_token_refs": [
+        "tok:0:1",
+        "tok:2:10",
+        "tok:11:15",
+        "tok:16:25",
+        "tok:26:34",
+        "tok:35:37",
+        "tok:38:40",
+        "tok:41:47",
+        "tok:48:51",
+        "tok:52:60",
+        "tok:61:63",
+        "tok:64:72",
+        "tok:73:74",
+        "tok:75:83",
+        "tok:84:88",
+        "tok:89:98",
+        "tok:98:99"
+      ],
+      "context_policy": "TARGET_WITH_CONTEXT",
+      "slot": "structural_oov_function",
+      "decision_ref": "region:f0e548943f4825f38571c46d02a41a5205b1aee4d23462446bfc7079ed034f75|task:71dcf3bdf0ecc54b6e4e914f8e35f67f3b01e59f2d7b9203dd5983244ceb988e",
+      "page": 0,
+      "examined": 17,
+      "alternatives": [
+        {
+          "candidate_id": "NOUN",
+          "label": "noun: names an entity, substance or concept"
+        },
+        {
+          "candidate_id": "NPRO",
+          "label": "pronoun: stands for a participant rather than naming it"
+        },
+        {
+          "candidate_id": "ADJF",
+          "label": "full adjective: describes a nominal and agrees with it"
+        },
+        {
+          "candidate_id": "ADJS",
+          "label": "short adjective: attributes a property to a subject"
+        },
+        {
+          "candidate_id": "COMP",
+          "label": "comparative: expresses a greater or lesser degree"
+        },
+        {
+          "candidate_id": "VERB",
+          "label": "finite verb: predicates an action or state with tense/person or imperative form"
+        },
+        {
+          "candidate_id": "INFN",
+          "label": "infinitive: names an action or state without finite person/tense"
+        },
+        {
+          "candidate_id": "PRTF",
+          "label": "full participle: describes a nominal through an action"
+        },
+        {
+          "candidate_id": "PRTS",
+          "label": "short participle: predicates an action-related state of a subject"
+        },
+        {
+          "candidate_id": "GRND",
+          "label": "verbal adverb: a secondary action linked to the main predicate"
+        },
+        {
+          "candidate_id": "NUMR",
+          "label": "numeral: expresses a number or quantity"
+        },
+        {
+          "candidate_id": "ADVB",
+          "label": "adverb: modifies an action, property or degree without nominal agreement"
+        },
+        {
+          "candidate_id": "PRED",
+          "label": "impersonal predicative: expresses a state without a nominative subject"
+        },
+        {
+          "candidate_id": "PREP",
+          "label": "adposition: links a nominal complement to another part of the sentence"
+        },
+        {
+          "candidate_id": "CONJ",
+          "label": "conjunction: connects clauses or coordinated units"
+        },
+        {
+          "candidate_id": "PRCL",
+          "label": "particle: adds grammatical or discourse meaning to its scope"
+        },
+        {
+          "candidate_id": "INTJ",
+          "label": "interjection: an independent expressive utterance"
+        }
+      ],
+      "selected": "INFN",
+      "status": "SELECTED",
+      "reason": "ONE_SELECTED",
+      "enumeration_complete": false,
+      "selection_provisional": true,
+      "question": "Which part of speech does «зафлюмить» have in THIS use? Choose its function in the sentence; no lemma, case or identity is established by this answer."
+    },
+    {
+      "kind": "TASK_DOMAIN",
+      "task_ref": "task-domain:efec01d0ac509a675cd35afe694e330069bbe7adc949444b46749edc92eedaec",
+      "level": "T2_TP",
+      "slot": "structural_oov_function",
+      "source_range": [
+        0,
+        99
+      ],
+      "token_refs": [
+        "tok:0:1",
+        "tok:2:10",
+        "tok:11:15",
+        "tok:16:25",
+        "tok:26:34",
+        "tok:35:37",
+        "tok:38:40",
+        "tok:41:47",
+        "tok:48:51",
+        "tok:52:60",
+        "tok:61:63",
+        "tok:64:72",
+        "tok:73:74",
+        "tok:75:83",
+        "tok:84:88",
+        "tok:89:98",
+        "tok:98:99"
+      ],
+      "page_refs": [
+        "region:f0e548943f4825f38571c46d02a41a5205b1aee4d23462446bfc7079ed034f75|task:71dcf3bdf0ecc54b6e4e914f8e35f67f3b01e59f2d7b9203dd5983244ceb988e"
+      ],
+      "supported_payloads": {
+        "INFN": "929b3ef35205dc05db77b38fb7877909c87d0b436e893d596743b278778943b1"
+      },
+      "candidate_ids": [
+        "ADJF",
+        "ADJS",
+        "ADVB",
+        "COMP",
+        "CONJ",
+        "GRND",
+        "INFN",
+        "INTJ",
+        "NOUN",
+        "NPRO",
+        "NUMR",
+        "PRCL",
+        "PRED",
+        "PREP",
+        "PRTF",
+        "PRTS",
+        "VERB"
+      ],
+      "supported_ids": [
+        "INFN"
+      ],
+      "search_complete": true,
+      "source_complete": true,
+      "task_outcome": "SUPPORTED"
+    },
+    {
+      "kind": "STRUCTURAL_TASK",
+      "region_ref": "region:f0e548943f4825f38571c46d02a41a5205b1aee4d23462446bfc7079ed034f75",
+      "slot": "structural_oov_function",
+      "status": "SELECTED",
+      "decision_ref": "task-domain:efec01d0ac509a675cd35afe694e330069bbe7adc949444b46749edc92eedaec",
+      "enumeration_complete": true,
+      "alternatives": [
+        {
+          "candidate_id": "INFN",
+          "label": "infinitive: names an action or state without finite person/tense"
+        }
+      ],
+      "selected": "INFN",
+      "domain_ref": "task-domain:efec01d0ac509a675cd35afe694e330069bbe7adc949444b46749edc92eedaec",
+      "payload_hash": "929b3ef35205dc05db77b38fb7877909c87d0b436e893d596743b278778943b1",
+      "task_outcome": "SUPPORTED"
+    },
+    {
+      "kind": "MORPHOLOGY_FUNCTION_RESTRICTION",
+      "task_scope": "morphology:f593d24a531dd3939cf3565e4a7d6e7c60b70956d41529c046684519bbc7fafb:7ce418497a46ff0a38d3c7d5cf295983ac1fc703c44f4c1f973981e510c892ec",
+      "token_ref": "tok:16:25",
+      "POS": "INFN",
+      "decision_ref": "task-domain:efec01d0ac509a675cd35afe694e330069bbe7adc949444b46749edc92eedaec"
+    },
+    {
+      "kind": "MORPHOLOGY_USE",
+      "token_ref": "tok:16:25",
+      "reading": {
+        "lemma": "зафлюмить",
+        "pos": "INFN",
+        "cases": [],
+        "number": null,
+        "gender": null,
+        "person": null,
+        "tense": null,
+        "mood": null,
+        "features": [],
+        "origin": "CONTEXTUAL",
+        "evidence_refs": [
+          "usage-reading:c8e6a4598cb3924401c5e5f39770642c451601108e99bc3ff4004d8f831392ca",
+          "tok:16:25"
+        ]
+      },
+      "decision_ref": "task-domain:efec01d0ac509a675cd35afe694e330069bbe7adc949444b46749edc92eedaec",
+      "candidate_id": "INFN"
+    },
+    {
+      "kind": "STRUCTURAL_TASK",
+      "region_ref": "region:f0e548943f4825f38571c46d02a41a5205b1aee4d23462446bfc7079ed034f75",
+      "source_range": [
+        0,
+        99
+      ],
+      "target_token_refs": [
+        "tok:0:1",
+        "tok:2:10",
+        "tok:11:15",
+        "tok:16:25",
+        "tok:26:34",
+        "tok:35:37",
+        "tok:38:40",
+        "tok:41:47",
+        "tok:48:51",
+        "tok:52:60",
+        "tok:61:63",
+        "tok:64:72",
+        "tok:73:74",
+        "tok:75:83",
+        "tok:84:88",
+        "tok:89:98",
+        "tok:98:99"
+      ],
+      "context_policy": "TARGET_WITH_CONTEXT",
+      "slot": "structural_oov_function",
+      "decision_ref": "region:f0e548943f4825f38571c46d02a41a5205b1aee4d23462446bfc7079ed034f75|task:a22c515d12f107a0e3086ae110c8d2e28a6fa0eb78cafbb7d384bdc6758d0ccc",
+      "page": 0,
+      "examined": 17,
+      "alternatives": [
+        {
+          "candidate_id": "NOUN",
+          "label": "noun: names an entity, substance or concept"
+        },
+        {
+          "candidate_id": "NPRO",
+          "label": "pronoun: stands for a participant rather than naming it"
+        },
+        {
+          "candidate_id": "ADJF",
+          "label": "full adjective: describes a nominal and agrees with it"
+        },
+        {
+          "candidate_id": "ADJS",
+          "label": "short adjective: attributes a property to a subject"
+        },
+        {
+          "candidate_id": "COMP",
+          "label": "comparative: expresses a greater or lesser degree"
+        },
+        {
+          "candidate_id": "VERB",
+          "label": "finite verb: predicates an action or state with tense/person or imperative form"
+        },
+        {
+          "candidate_id": "INFN",
+          "label": "infinitive: names an action or state without finite person/tense"
+        },
+        {
+          "candidate_id": "PRTF",
+          "label": "full participle: describes a nominal through an action"
+        },
+        {
+          "candidate_id": "PRTS",
+          "label": "short participle: predicates an action-related state of a subject"
+        },
+        {
+          "candidate_id": "GRND",
+          "label": "verbal adverb: a secondary action linked to the main predicate"
+        },
+        {
+          "candidate_id": "NUMR",
+          "label": "numeral: expresses a number or quantity"
+        },
+        {
+          "candidate_id": "ADVB",
+          "label": "adverb: modifies an action, property or degree without nominal agreement"
+        },
+        {
+          "candidate_id": "PRED",
+          "label": "impersonal predicative: expresses a state without a nominative subject"
+        },
+        {
+          "candidate_id": "PREP",
+          "label": "adposition: links a nominal complement to another part of the sentence"
+        },
+        {
+          "candidate_id": "CONJ",
+          "label": "conjunction: connects clauses or coordinated units"
+        },
+        {
+          "candidate_id": "PRCL",
+          "label": "particle: adds grammatical or discourse meaning to its scope"
+        },
+        {
+          "candidate_id": "INTJ",
+          "label": "interjection: an independent expressive utterance"
+        }
+      ],
+      "selected": "NOUN",
+      "status": "SELECTED",
+      "reason": "ONE_SELECTED",
+      "enumeration_complete": false,
+      "selection_provisional": true,
+      "question": "Which part of speech does «квендрик» have in THIS use? Choose its function in the sentence; no lemma, case or identity is established by this answer."
+    },
+    {
+      "kind": "TASK_DOMAIN",
+      "task_ref": "task-domain:8b7a799cb4691f49eaa1965ae20bcaadc00cb77dbaf62954ce2996d401b31b12",
+      "level": "T2_TP",
+      "slot": "structural_oov_function",
+      "source_range": [
+        0,
+        99
+      ],
+      "token_refs": [
+        "tok:0:1",
+        "tok:2:10",
+        "tok:11:15",
+        "tok:16:25",
+        "tok:26:34",
+        "tok:35:37",
+        "tok:38:40",
+        "tok:41:47",
+        "tok:48:51",
+        "tok:52:60",
+        "tok:61:63",
+        "tok:64:72",
+        "tok:73:74",
+        "tok:75:83",
+        "tok:84:88",
+        "tok:89:98",
+        "tok:98:99"
+      ],
+      "page_refs": [
+        "region:f0e548943f4825f38571c46d02a41a5205b1aee4d23462446bfc7079ed034f75|task:a22c515d12f107a0e3086ae110c8d2e28a6fa0eb78cafbb7d384bdc6758d0ccc"
+      ],
+      "supported_payloads": {
+        "NOUN": "18589d0f94e85a4a5c0d3e28cb285ef260fa727f7f43c9841fec4baa466399ff"
+      },
+      "candidate_ids": [
+        "ADJF",
+        "ADJS",
+        "ADVB",
+        "COMP",
+        "CONJ",
+        "GRND",
+        "INFN",
+        "INTJ",
+        "NOUN",
+        "NPRO",
+        "NUMR",
+        "PRCL",
+        "PRED",
+        "PREP",
+        "PRTF",
+        "PRTS",
+        "VERB"
+      ],
+      "supported_ids": [
+        "NOUN"
+      ],
+      "search_complete": true,
+      "source_complete": true,
+      "task_outcome": "SUPPORTED"
+    },
+    {
+      "kind": "STRUCTURAL_TASK",
+      "region_ref": "region:f0e548943f4825f38571c46d02a41a5205b1aee4d23462446bfc7079ed034f75",
+      "slot": "structural_oov_function",
+      "status": "SELECTED",
+      "decision_ref": "task-domain:8b7a799cb4691f49eaa1965ae20bcaadc00cb77dbaf62954ce2996d401b31b12",
+      "enumeration_complete": true,
+      "alternatives": [
+        {
+          "candidate_id": "NOUN",
+          "label": "noun: names an entity, substance or concept"
+        }
+      ],
+      "selected": "NOUN",
+      "domain_ref": "task-domain:8b7a799cb4691f49eaa1965ae20bcaadc00cb77dbaf62954ce2996d401b31b12",
+      "payload_hash": "18589d0f94e85a4a5c0d3e28cb285ef260fa727f7f43c9841fec4baa466399ff",
+      "task_outcome": "SUPPORTED"
+    },
+    {
+      "kind": "MORPHOLOGY_FUNCTION_RESTRICTION",
+      "task_scope": "morphology:f593d24a531dd3939cf3565e4a7d6e7c60b70956d41529c046684519bbc7fafb:7ce418497a46ff0a38d3c7d5cf295983ac1fc703c44f4c1f973981e510c892ec",
+      "token_ref": "tok:26:34",
+      "POS": "NOUN",
+      "decision_ref": "task-domain:8b7a799cb4691f49eaa1965ae20bcaadc00cb77dbaf62954ce2996d401b31b12"
+    },
+    {
+      "kind": "MORPHOLOGY_USE",
+      "token_ref": "tok:26:34",
+      "reading": {
+        "lemma": "квендрик",
+        "pos": "NOUN",
+        "cases": [],
+        "number": null,
+        "gender": null,
+        "person": null,
+        "tense": null,
+        "mood": null,
+        "features": [],
+        "origin": "CONTEXTUAL",
+        "evidence_refs": [
+          "usage-reading:78fa88471592e7ffc5b566589ec378474c39bb333c286242839f124c6f4877e3",
+          "tok:26:34"
+        ]
+      },
+      "decision_ref": "task-domain:8b7a799cb4691f49eaa1965ae20bcaadc00cb77dbaf62954ce2996d401b31b12",
+      "candidate_id": "NOUN"
+    },
+    {
+      "kind": "STRUCTURAL_TASK",
+      "region_ref": "region:f0e548943f4825f38571c46d02a41a5205b1aee4d23462446bfc7079ed034f75",
+      "source_range": [
+        0,
+        99
+      ],
+      "target_token_refs": [
+        "tok:0:1",
+        "tok:2:10",
+        "tok:11:15",
+        "tok:16:25",
+        "tok:26:34",
+        "tok:35:37",
+        "tok:38:40",
+        "tok:41:47",
+        "tok:48:51",
+        "tok:52:60",
+        "tok:61:63",
+        "tok:64:72",
+        "tok:73:74",
+        "tok:75:83",
+        "tok:84:88",
+        "tok:89:98",
+        "tok:98:99"
+      ],
+      "context_policy": "TARGET_WITH_CONTEXT",
+      "slot": "structural_oov_function",
+      "decision_ref": "region:f0e548943f4825f38571c46d02a41a5205b1aee4d23462446bfc7079ed034f75|task:a22c515d12f107a0e3086ae110c8d2e28a6fa0eb78cafbb7d384bdc6758d0ccc",
+      "page": 0,
+      "examined": 17,
+      "alternatives": [
+        {
+          "candidate_id": "NOUN",
+          "label": "noun: names an entity, substance or concept"
+        },
+        {
+          "candidate_id": "NPRO",
+          "label": "pronoun: stands for a participant rather than naming it"
+        },
+        {
+          "candidate_id": "ADJF",
+          "label": "full adjective: describes a nominal and agrees with it"
+        },
+        {
+          "candidate_id": "ADJS",
+          "label": "short adjective: attributes a property to a subject"
+        },
+        {
+          "candidate_id": "COMP",
+          "label": "comparative: expresses a greater or lesser degree"
+        },
+        {
+          "candidate_id": "VERB",
+          "label": "finite verb: predicates an action or state with tense/person or imperative form"
+        },
+        {
+          "candidate_id": "INFN",
+          "label": "infinitive: names an action or state without finite person/tense"
+        },
+        {
+          "candidate_id": "PRTF",
+          "label": "full participle: describes a nominal through an action"
+        },
+        {
+          "candidate_id": "PRTS",
+          "label": "short participle: predicates an action-related state of a subject"
+        },
+        {
+          "candidate_id": "GRND",
+          "label": "verbal adverb: a secondary action linked to the main predicate"
+        },
+        {
+          "candidate_id": "NUMR",
+          "label": "numeral: expresses a number or quantity"
+        },
+        {
+          "candidate_id": "ADVB",
+          "label": "adverb: modifies an action, property or degree without nominal agreement"
+        },
+        {
+          "candidate_id": "PRED",
+          "label": "impersonal predicative: expresses a state without a nominative subject"
+        },
+        {
+          "candidate_id": "PREP",
+          "label": "adposition: links a nominal complement to another part of the sentence"
+        },
+        {
+          "candidate_id": "CONJ",
+          "label": "conjunction: connects clauses or coordinated units"
+        },
+        {
+          "candidate_id": "PRCL",
+          "label": "particle: adds grammatical or discourse meaning to its scope"
+        },
+        {
+          "candidate_id": "INTJ",
+          "label": "interjection: an independent expressive utterance"
+        }
+      ],
+      "selected": "NOUN",
+      "status": "SELECTED",
+      "reason": "ONE_SELECTED",
+      "enumeration_complete": false,
+      "selection_provisional": true,
+      "question": "Which part of speech does «квендрик» have in THIS use? Choose its function in the sentence; no lemma, case or identity is established by this answer."
+    },
+    {
+      "kind": "TASK_DOMAIN",
+      "task_ref": "task-domain:8b7a799cb4691f49eaa1965ae20bcaadc00cb77dbaf62954ce2996d401b31b12",
+      "level": "T2_TP",
+      "slot": "structural_oov_function",
+      "source_range": [
+        0,
+        99
+      ],
+      "token_refs": [
+        "tok:0:1",
+        "tok:2:10",
+        "tok:11:15",
+        "tok:16:25",
+        "tok:26:34",
+        "tok:35:37",
+        "tok:38:40",
+        "tok:41:47",
+        "tok:48:51",
+        "tok:52:60",
+        "tok:61:63",
+        "tok:64:72",
+        "tok:73:74",
+        "tok:75:83",
+        "tok:84:88",
+        "tok:89:98",
+        "tok:98:99"
+      ],
+      "page_refs": [
+        "region:f0e548943f4825f38571c46d02a41a5205b1aee4d23462446bfc7079ed034f75|task:a22c515d12f107a0e3086ae110c8d2e28a6fa0eb78cafbb7d384bdc6758d0ccc"
+      ],
+      "supported_payloads": {
+        "NOUN": "18589d0f94e85a4a5c0d3e28cb285ef260fa727f7f43c9841fec4baa466399ff"
+      },
+      "candidate_ids": [
+        "ADJF",
+        "ADJS",
+        "ADVB",
+        "COMP",
+        "CONJ",
+        "GRND",
+        "INFN",
+        "INTJ",
+        "NOUN",
+        "NPRO",
+        "NUMR",
+        "PRCL",
+        "PRED",
+        "PREP",
+        "PRTF",
+        "PRTS",
+        "VERB"
+      ],
+      "supported_ids": [
+        "NOUN"
+      ],
+      "search_complete": true,
+      "source_complete": true,
+      "task_outcome": "SUPPORTED"
+    },
+    {
+      "kind": "STRUCTURAL_TASK",
+      "region_ref": "region:f0e548943f4825f38571c46d02a41a5205b1aee4d23462446bfc7079ed034f75",
+      "slot": "structural_oov_function",
+      "status": "SELECTED",
+      "decision_ref": "task-domain:8b7a799cb4691f49eaa1965ae20bcaadc00cb77dbaf62954ce2996d401b31b12",
+      "enumeration_complete": true,
+      "alternatives": [
+        {
+          "candidate_id": "NOUN",
+          "label": "noun: names an entity, substance or concept"
+        }
+      ],
+      "selected": "NOUN",
+      "domain_ref": "task-domain:8b7a799cb4691f49eaa1965ae20bcaadc00cb77dbaf62954ce2996d401b31b12",
+      "payload_hash": "18589d0f94e85a4a5c0d3e28cb285ef260fa727f7f43c9841fec4baa466399ff",
+      "task_outcome": "SUPPORTED"
+    },
+    {
+      "kind": "MORPHOLOGY_FUNCTION_RESTRICTION",
+      "task_scope": "morphology:f593d24a531dd3939cf3565e4a7d6e7c60b70956d41529c046684519bbc7fafb:7ce418497a46ff0a38d3c7d5cf295983ac1fc703c44f4c1f973981e510c892ec",
+      "token_ref": "tok:52:60",
+      "POS": "NOUN",
+      "decision_ref": "task-domain:8b7a799cb4691f49eaa1965ae20bcaadc00cb77dbaf62954ce2996d401b31b12"
+    },
+    {
+      "kind": "MORPHOLOGY_USE",
+      "token_ref": "tok:52:60",
+      "reading": {
+        "lemma": "квендрик",
+        "pos": "NOUN",
+        "cases": [],
+        "number": null,
+        "gender": null,
+        "person": null,
+        "tense": null,
+        "mood": null,
+        "features": [],
+        "origin": "CONTEXTUAL",
+        "evidence_refs": [
+          "usage-reading:ff826b399e732c9911b4135bb2ec6dd2c304a1f6c00b9e34a3be48c51f66fbcc",
+          "tok:52:60"
+        ]
+      },
+      "decision_ref": "task-domain:8b7a799cb4691f49eaa1965ae20bcaadc00cb77dbaf62954ce2996d401b31b12",
+      "candidate_id": "NOUN"
+    },
+    {
+      "kind": "STRUCTURAL_TASK",
+      "region_ref": "region:f0e548943f4825f38571c46d02a41a5205b1aee4d23462446bfc7079ed034f75",
+      "source_range": [
+        0,
+        99
+      ],
+      "target_token_refs": [
+        "tok:0:1",
+        "tok:2:10",
+        "tok:11:15",
+        "tok:16:25",
+        "tok:26:34",
+        "tok:35:37",
+        "tok:38:40",
+        "tok:41:47",
+        "tok:48:51",
+        "tok:52:60",
+        "tok:61:63",
+        "tok:64:72",
+        "tok:73:74",
+        "tok:75:83",
+        "tok:84:88",
+        "tok:89:98",
+        "tok:98:99"
+      ],
+      "context_policy": "TARGET_WITH_CONTEXT",
+      "slot": "structural_relation",
+      "decision_ref": "region:f0e548943f4825f38571c46d02a41a5205b1aee4d23462446bfc7079ed034f75|task:250008fd90828449b8992a043f0fbfe83382a8f19e848b120fa107a9944d4140",
+      "page": 0,
+      "examined": 20,
+      "alternatives": [
+        {
+          "candidate_id": "LEXICAL",
+          "relation": "LEXICAL",
+          "label": "One lexical predication or nominal description; no logical operator or dependent clause inside the target. A separately supplied content slot may remain open"
+        },
+        {
+          "candidate_id": "NOMINAL_DESCRIPTION",
+          "relation": "NOMINAL_DESCRIPTION",
+          "label": "A parent clause contains a nominal described by another clause or predicative phrase inside this target"
+        },
+        {
+          "candidate_id": "NOT",
+          "relation": "NOT",
+          "label": "Negation of a proposition (not lexical opposition)"
+        },
+        {
+          "candidate_id": "POSSIBLE",
+          "relation": "POSSIBLE",
+          "label": "Possibility or ability; does not assert occurrence"
+        },
+        {
+          "candidate_id": "NECESSARY",
+          "relation": "NECESSARY",
+          "label": "Necessity or obligation; preserve its scope"
+        },
+        {
+          "candidate_id": "AND",
+          "relation": "AND",
+          "label": "Conjunction: the text connects both propositions together within the current scope"
+        },
+        {
+          "candidate_id": "OR",
+          "relation": "OR",
+          "label": "Inclusive alternative between propositions; the text permits both"
+        },
+        {
+          "candidate_id": "XOR",
+          "relation": "XOR",
+          "label": "Exclusive alternative: the text presents exactly one of the propositions"
+        },
+        {
+          "candidate_id": "IMPLIES",
+          "relation": "IMPLIES",
+          "label": "One conditional rule: a condition implies a consequence; no alternative outcome for when that condition fails"
+        },
+        {
+          "candidate_id": "IF_ELSE",
+          "relation": "IF_ELSE",
+          "label": "Conditional with two branches: one outcome when a condition holds, another when that SAME condition does not hold"
+        },
+        {
+          "candidate_id": "COUNTERFACTUAL",
+          "relation": "COUNTERFACTUAL",
+          "label": "Counterfactual condition and its consequence; not material implication"
+        },
+        {
+          "candidate_id": "BEFORE",
+          "relation": "BEFORE",
+          "label": "First event/proposition occurs before the second"
+        },
+        {
+          "candidate_id": "AFTER",
+          "relation": "AFTER",
+          "label": "First event/proposition occurs after the second"
+        },
+        {
+          "candidate_id": "DURING",
+          "relation": "DURING",
+          "label": "First event/proposition occurs during the second"
+        },
+        {
+          "candidate_id": "CONTENT",
+          "relation": "CONTENT",
+          "label": "The target contains BOTH a parent predicate AND its dependent content: speech, thought, quotation or a controlled infinitive"
+        },
+        {
+          "candidate_id": "FORALL",
+          "relation": "FORALL",
+          "label": "Universal nonnumeric quantification over a restricted variable"
+        },
+        {
+          "candidate_id": "EXISTS",
+          "relation": "EXISTS",
+          "label": "Existential nonnumeric quantification; no particular witness identity"
+        },
+        {
+          "candidate_id": "QUERY",
+          "relation": "QUERY",
+          "label": "A question about content; no assertion of the content"
+        },
+        {
+          "candidate_id": "GROUP",
+          "relation": "GROUP",
+          "label": "Parentheses group an entire proposition without changing its logical meaning"
+        },
+        {
+          "candidate_id": "CONTENT_REFERENCE",
+          "relation": "CONTENT_REFERENCE",
+          "label": "A predicate takes content referred to elsewhere: an explicit pointer to a proposition/action, or omitted but understood propositional content. The content itself is not expressed inside this target"
+        }
+      ],
+      "selected": "LEXICAL",
+      "status": "SELECTED",
+      "reason": "ONE_SELECTED",
+      "enumeration_complete": false,
+      "selection_provisional": true,
+      "question": "Classify ONLY the target words. Context explains their meaning but is not part of this choice. Choose the outermost relation expressed inside the target; inner relations are handled later. Choose one lexical predication only when TARGET itself contains no further outer relation; an outer relation already supplied by CONTEXT must not be selected again. The full content option requires both the parent predicate and dependent content to be present in this text. A reference to content or an omitted but understood content uses the content-reference option; an omitted participant alone does not. Numeric quantification is deferred."
+    },
+    {
+      "kind": "TASK_DOMAIN",
+      "task_ref": "task-domain:b482d877ef656b57fda78c21df8adc166dc23510b46d5eec53749b51b9e3ad21",
+      "level": "T2_TP",
+      "slot": "structural_relation",
+      "source_range": [
+        0,
+        99
+      ],
+      "token_refs": [
+        "tok:0:1",
+        "tok:2:10",
+        "tok:11:15",
+        "tok:16:25",
+        "tok:26:34",
+        "tok:35:37",
+        "tok:38:40",
+        "tok:41:47",
+        "tok:48:51",
+        "tok:52:60",
+        "tok:61:63",
+        "tok:64:72",
+        "tok:73:74",
+        "tok:75:83",
+        "tok:84:88",
+        "tok:89:98",
+        "tok:98:99"
+      ],
+      "page_refs": [
+        "region:f0e548943f4825f38571c46d02a41a5205b1aee4d23462446bfc7079ed034f75|task:250008fd90828449b8992a043f0fbfe83382a8f19e848b120fa107a9944d4140"
+      ],
+      "supported_payloads": {
+        "LEXICAL": "301dd49b9718aa82b08e70120bd3c1265d5190dd26b9817ad31646568aaf0057"
+      },
+      "candidate_ids": [
+        "AFTER",
+        "AND",
+        "BEFORE",
+        "CONTENT",
+        "CONTENT_REFERENCE",
+        "COUNTERFACTUAL",
+        "DURING",
+        "EXISTS",
+        "FORALL",
+        "GROUP",
+        "IF_ELSE",
+        "IMPLIES",
+        "LEXICAL",
+        "NECESSARY",
+        "NOMINAL_DESCRIPTION",
+        "NOT",
+        "OR",
+        "POSSIBLE",
+        "QUERY",
+        "XOR"
+      ],
+      "supported_ids": [
+        "LEXICAL"
+      ],
+      "search_complete": true,
+      "source_complete": true,
+      "task_outcome": "SUPPORTED"
+    },
+    {
+      "kind": "STRUCTURAL_TASK",
+      "region_ref": "region:f0e548943f4825f38571c46d02a41a5205b1aee4d23462446bfc7079ed034f75",
+      "slot": "structural_relation",
+      "status": "SELECTED",
+      "decision_ref": "task-domain:b482d877ef656b57fda78c21df8adc166dc23510b46d5eec53749b51b9e3ad21",
+      "enumeration_complete": true,
+      "alternatives": [
+        {
+          "candidate_id": "LEXICAL",
+          "relation": "LEXICAL",
+          "label": "One lexical predication or nominal description; no logical operator or dependent clause inside the target. A separately supplied content slot may remain open"
+        }
+      ],
+      "selected": "LEXICAL",
+      "domain_ref": "task-domain:b482d877ef656b57fda78c21df8adc166dc23510b46d5eec53749b51b9e3ad21",
+      "payload_hash": "301dd49b9718aa82b08e70120bd3c1265d5190dd26b9817ad31646568aaf0057",
+      "task_outcome": "SUPPORTED"
+    },
+    {
+      "kind": "INFINITIVE_BOUNDARY",
+      "decision_ref": "region:f0e548943f4825f38571c46d02a41a5205b1aee4d23462446bfc7079ed034f75|infinitive-boundary",
+      "options": {
+        "a49e917544bfddd1135ece80ff5d3bc795bb8b8b2d00cecf5f83a3d5c5f2f6e0": [
+          3,
+          7
+        ],
+        "39a8bbb172f0ef8149a7decb1b5828f398f027af792bd47b0c8ec27a239e0f72": [
+          3,
+          11
+        ],
+        "ed0cb8f2a0b629c82734d39d71c620a37e1033230a2b0daa4a66a5c57b4dd544": [
+          3,
+          13
+        ],
+        "61bf2ae87b60b441112e57ec7407eee413dd0923d2c697e671e05bf85f433e21": [
+          3,
+          17
+        ],
+        "356a351e3e9f69f251b8d29e96788cc87dcf446170f6114a31838f9eb6e6c450": [
+          15,
+          17
+        ]
+      },
+      "selected": null
+    }
+  ],
+  "clarifications": [
+    {
+      "decision_ref": "region:f0e548943f4825f38571c46d02a41a5205b1aee4d23462446bfc7079ed034f75|infinitive-boundary",
+      "kind": "COMPONENT",
+      "mention": "Я попросил Диму зафлюмить квендрик но он сказал что квендрик не работает и попросил меня подождать.",
+      "options": [
+        {
+          "candidate_id": "a49e917544bfddd1135ece80ff5d3bc795bb8b8b2d00cecf5f83a3d5c5f2f6e0",
+          "label": "Infinitive area «зафлюмить квендрик но он»; remaining parent «Я попросил Диму сказал что квендрик не работает и попросил меня подождать .»"
+        },
+        {
+          "candidate_id": "39a8bbb172f0ef8149a7decb1b5828f398f027af792bd47b0c8ec27a239e0f72",
+          "label": "Infinitive area «зафлюмить квендрик но он сказал что квендрик не»; remaining parent «Я попросил Диму работает и попросил меня подождать .»"
+        },
+        {
+          "candidate_id": "ed0cb8f2a0b629c82734d39d71c620a37e1033230a2b0daa4a66a5c57b4dd544",
+          "label": "Infinitive area «зафлюмить квендрик но он сказал что квендрик не работает и»; remaining parent «Я попросил Диму попросил меня подождать .»"
+        },
+        {
+          "candidate_id": "61bf2ae87b60b441112e57ec7407eee413dd0923d2c697e671e05bf85f433e21",
+          "label": "Infinitive area «зафлюмить квендрик но он сказал что квендрик не работает и попросил меня подождать.»; remaining parent «Я попросил Диму»"
+        },
+        {
+          "candidate_id": "356a351e3e9f69f251b8d29e96788cc87dcf446170f6114a31838f9eb6e6c450",
+          "label": "Infinitive area «подождать.»; remaining parent «Я попросил Диму зафлюмить квендрик но он сказал что квендрик не работает и попросил меня»"
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "No GUI or production release run",
+    "Only four executor calls; later semantic stages not reached",
+    "Contrast queries isolate outer-relation classification, not full runs"
+  ],
+  "excluded_delivery_attempts": [
+    {
+      "variant": "punctuated_oov",
+      "response": "Недостаточно данных: содержимое `punctuated_oov.json` недоступно в сообщении.",
+      "reason": "File delivery failed; not a semantic result"
+    },
+    {
+      "variant": "unpunctuated_known",
+      "response": "{\"system\":\"You are a vocabulary extraction assistant. Extract only words that appear in the provided text and are likely unfamiliar to a language learner. Return the result in the exact format requested by the prompt. Do not include punctuation-only items or words that are common, grammatical, or already understood from context.\",\"prompt\":\"Read the supplied text and return a JSON array of unfamiliar vocabulary words. Include only words that occur in the text; preserve their original spelling and casing. Exclude punctuation, common function words, and familiar words. Return only valid JSON, with no explanation.\"}",
+      "reason": "Unrelated response; file delivery unverified"
+    },
+    {
+      "variant": "punctuated_known",
+      "response": "?",
+      "reason": "File delivery unverified after other delivery failures; replaced with new isolated inline delivery"
+    }
+  ]
+}
