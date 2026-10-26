@@ -35,12 +35,12 @@ def unary(domain):
 def binary(domain):
     from .relation_composition import RELATIONS,function_ownership
     state,release,selector,region,tokens,cfg,kind=inputs(domain)
-    groups=[]
     contracts=(['condition being checked','outcome when that condition holds','outcome when that condition does not hold']
         if kind=='IF_ELSE' else ['condition being checked','outcome when that condition holds']
         if kind in {'IMPLIES','COUNTERFACTUAL'} else ['first proposition','second proposition'])
-    for i,contract in enumerate(contracts):
-        chosen=domain.span(tokens,'structural_operand_'+str(i+1),
+    def select(i,groups):
+        contract=contracts[i]
+        return domain.span(tokens,'structural_operand_'+str(i+1),
             kind+' ('+RELATIONS[kind]+'): select the complete '+contract+'. '+
             ('Include only what is being checked, not what happens as a result. ' if contract=='condition being checked' else
              'Include only this outcome, not the condition or the alternative outcome. ' if contract.startswith('outcome') else '')+
@@ -48,8 +48,9 @@ def binary(domain):
             (' Already selected: '+'; '.join(contracts[j]+': «'+' '.join(t.span for t in group)+'»' for j,group in enumerate(groups))+'.' if groups else ''),
             exclude=[t.token_id for g in groups for t in g],
             covered=[t.token_id for g in groups for t in g],remaining_parts=len(contracts)-i-1)
-        if not chosen:return None
-        groups.append(chosen[0])
+    from .partition_sequences import select_parts
+    groups=select_parts(domain,contracts,select)
+    if groups is None:return None
     groups=function_ownership(state,release,selector,region,cfg,kind,groups)
     if groups is None:return None
     return PartitionProposal(groups)
@@ -58,21 +59,25 @@ def binary(domain):
 def content(domain):
     from .relation_composition import function_ownership,content_owner
     state,release,selector,region,tokens,cfg,kind=inputs(domain)
-    chosen=domain.span(tokens,'structural_content',
-        'Select the complete dependent proposition: what is said, thought, intended or otherwise taken as content. '
-        'Exclude the parent predicate and its participants, the introducing conjunction, colon, and enclosing '
-        'quotation marks. Start at the first word INSIDE quoted content; retain any operators inside that content.',
-        remaining_parts=1,remaining_contiguous=False)
-    if not chosen:return None
-    body=chosen[0];body_ids={t.token_id for t in body}
-    body_text=' '.join(t.span for t in body)
-    rest=[t for t in tokens if t.token_id not in body_ids]
-    parent_span=domain.span(rest,'structural_parent',
-        'Selected dependent content: «'+body_text+'». It has been removed from the choices below. '
-        'Select the remaining parent text: the predicate that takes this content, its participants and other attached clauses. '
-        'Boundary punctuation may stay; punctuation and connecting words are checked separately.',covered=body_ids)
-    if not parent_span:return None
-    parent=parent_span[0]
+    def select(i,groups):
+        if i==0:
+            return domain.span(tokens,'structural_content',
+                'Select the complete dependent content: a proposition or an infinitive action description '
+                'that is said, thought, requested, intended or otherwise taken as content. '
+                'Exclude the parent predicate and its participants, the introducing conjunction, colon, and enclosing '
+                'quotation marks. IF the content is quoted, start inside its quotes. '
+                'Unquoted content needs no quotation marks. Retain any operators inside that content.',
+                remaining_parts=1,remaining_contiguous=False)
+        body=groups[0];body_ids={t.token_id for t in body}
+        rest=[t for t in tokens if t.token_id not in body_ids]
+        return domain.span(rest,'structural_parent',
+            'Selected dependent content: «'+' '.join(t.span for t in body)+'». It has been removed from the choices below. '
+            'Select the remaining parent text: the predicate that takes this content, its participants and other attached clauses. '
+            'Boundary punctuation may stay; punctuation and connecting words are checked separately.',covered=body_ids)
+    from .partition_sequences import select_parts
+    groups=select_parts(domain,['dependent content','parent clause'],select)
+    if groups is None:return None
+    body,parent=groups
     owner=content_owner(state,release,selector,region,cfg,parent,body)
     if not owner:return None
     groups=function_ownership(state,release,selector,region,cfg,'CONTENT',[parent,body],

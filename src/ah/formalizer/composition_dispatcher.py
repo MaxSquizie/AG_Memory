@@ -74,6 +74,14 @@ class Dispatcher:
             reads.clear()
             self.trace('DISPATCH_RECHECK',key,reason='REJECTED_COMPOSITION_DISCARDED')
 
+    def discard_reads(self,refs,reason):
+        """A local revision replaces only the named tentative dependencies."""
+        if self.stack:
+            key,reads=self.stack[-1]
+            removed=sorted(set(refs)&set(reads))
+            for ref in removed:reads.pop(ref)
+            self.trace('DISPATCH_RECHECK',key,reason=reason,discarded_reads=removed)
+
     def run(self,key,inputs,compute,*,kind,source_range=None,token_refs=(),contract=None):
         if any(ref==key for ref,_ in self.stack):
             self.state.diag('COMPOSITION_CYCLE',key)

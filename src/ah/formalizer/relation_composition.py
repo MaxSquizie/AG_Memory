@@ -83,7 +83,8 @@ def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof
            ['condition','outcome when the condition holds','outcome when the condition does not hold'] if kind=='IF_ELSE' else
            ['condition','consequence'] if kind in {'IMPLIES','COUNTERFACTUAL'} else
            ['restriction and whole body'] if kind in {'FORALL','EXISTS'} else
-           ['part '+str(i+1) for i in range(len(groups))])
+           ['first proposition','second proposition'] if len(groups)==2 else
+           ['content'] if len(groups)==1 else ['operand '+str(i+1) for i in range(len(groups))])
     description='; '.join(name+': '+part for name,part in zip(names,parts))
     option={'candidate_id':'PARTITION','relation':kind,'operands':[[t.token_id for t in g] for g in groups],
         'marker_refs':[t.token_id for t in tokens if t in markers or t.token_id in shared_refs],
@@ -107,19 +108,17 @@ def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof
         return None
     validation_begin=len(state.syntax_trace)
     result=choose(state,release,selector,region,cfg,'structural_partition',[option],
-        'Does this split preserve the source meaning as: '+RELATIONS[kind]+'? '
-        'Each part keeps its participants, predicate and inner negation, modality or quantifiers. '
-        +('The parent intentionally has an open content slot: the second part fills it. '
-          'The parent does not need to be a complete standalone sentence. ' if kind=='CONTENT' else '')+
-        'The parts are NOT asserted separately: the selected outer relation is applied to them. '
-        'Moving words into that relation preserves their meaning; it does not delete negation, modality or a condition. '
-        'The listed outer occurrences need not be adjacent and do not form a new sentence. '+
-        ('The licensed occurrence has BOTH a quantifier function and a bound-mention function: '+
-         ', '.join(t.span for t in tokens if t.token_id in shared_refs)+'. Preserve both functions; do not create a witness. ' if shared_refs else '')+
-        'Other words expressing the outer relation must be outside the parts, '
-        'including words introducing a condition or consequence. Punctuation may separate or enclose the parts. '
-        'An implicit relation needs no linking word. Choose the split if it preserves the meaning; '
-        'answer 0 if words have been assigned to the wrong part, and ? if the text does not decide.')
+        'Check ONE relation application: '+RELATIONS[kind]+'. '
+        'Does the original source connect the quoted content parts by this relation, in the roles shown? '
+        "Keep each part's internal participants, clauses, negation and modality inside that part. "
+        'The parts are not independently asserted by this choice. '
+        +('The parent has an intentionally open content slot filled by the other part; '
+          'it need not be a standalone sentence. ' if kind=='CONTENT' else '')+
+        ('The marked quantifier occurrence also serves as the bound mention; preserve both functions. ' if shared_refs else '')+
+        'Outer relation words may be separated in the source; they are not a new sentence. '
+        'Choose the proposed application if it connects the right contents. '
+        'Answer 0 if the relation or the assignment of its contents is wrong, or ? if the source does not decide. '
+        'This choice does not resolve dictionary meanings or validate the internal parse of each part.')
     if result is None:
         rejected=next((r for r in reversed(state.syntax_trace[validation_begin:])
             if r.get('kind')=='TASK_DOMAIN' and r.get('slot')=='structural_partition'

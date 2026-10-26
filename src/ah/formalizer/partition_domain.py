@@ -46,8 +46,14 @@ class PartitionDomain:
             excluded.update(required)
             kwargs['exclude']=excluded
         if required:
-            words=', '.join('«'+t.span+'» @'+str(t.start) for t in self.tokens if t.token_id in self.required)
-            question+=' For this '+self.kind+' reading, the local ownership check keeps '+words+' in the content. Select boundaries consistent with that choice.'
+            words=', '.join('«'+t.span+'» @'+str(t.start) for t in self.tokens if t.token_id in required)
+            if marker:
+                question+=' Established ownership: '+words+' belongs to content, so exclude it from the outer relation wording.'
+            elif remaining_parts:
+                question+=' Established ownership: '+words+' must belong to SOME content part, not the outer relation wording. '
+                question+='It may belong to this part OR a remaining part; its particular part has not been selected.'
+            else:
+                question+=' Established ownership: the still unassigned '+words+' belongs to content. This last content part must include it.'
         def partial(part):
             selected={t.token_id for t in part}
             if selected & excluded:return False

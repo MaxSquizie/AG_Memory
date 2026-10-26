@@ -33,8 +33,14 @@ def _choose(state,release,selector,region,cfg,slot,options,question,*,empty=None
     NONE_FIT closes only one page. EMPTY is licensed only after every page was
     examined and rejected; unknown, ambiguity and budget stops never close it.
     """
-    if cfg.get('_task_constraints'):
+    # Failure of a whole hypothesis does not refute every constituent choice.
+    # Keep revision identity in keys without injecting the rejected hypothesis
+    # into unrelated ownership, morphology and participant questions.
+    revision_scope=digest([cfg.get('_task_constraints'),cfg.get('_ownership_feedback')])
+    if cfg.get('_task_constraints') and slot in {'structural_relation','structural_revision'}:
         question+='\nEarlier attempt: '+cfg.get('_task_constraints_text',cfg['_task_constraints'])
+    if cfg.get('_ownership_feedback'):
+        question+='\nOwnership revision: '+cfg['_ownership_feedback']
     from .composition_session import current
     runtime=current(state)
     task_scope=runtime.input_signature() if runtime else None
@@ -51,7 +57,7 @@ def _choose(state,release,selector,region,cfg,slot,options,question,*,empty=None
         question+=' Optional search: examine the listed candidates; 0 means none of THESE fits, not missing context.'
     def complete_empty():
         from .state import Decision,Ground
-        key='task-empty:'+digest([region.region_id,task_scope,slot,question,sorted(seen),previous,empty])
+        key='task-empty:'+digest([region.region_id,task_scope,revision_scope,slot,question,sorted(seen),previous,empty])
         cid=empty['candidate_id']
         if cid in seen:raise ValueError('EMPTY_COMPLETION_IN_POSITIVE_DOMAIN')
         state.decisions[key]=Decision(slot,key,tuple(sorted(seen))+ (cid,),selected=(cid,),
@@ -80,7 +86,7 @@ def _choose(state,release,selector,region,cfg,slot,options,question,*,empty=None
             return None
         examined+=len(values)
         choices=[{'candidate_id':v['candidate_id'],'label':v['label']} for v in values]
-        key=region.region_id+'|task:'+digest([task_scope,slot,values,question,page])
+        key=region.region_id+'|task:'+digest([task_scope,revision_scope,slot,values,question,page])
         fresh=0 if key in state.budget.task_candidate_pages else len(values)
         if examined>limit or state.budget.task_candidates_examined+fresh>limit:
             state.diag('STRUCTURAL_TASK_SEARCH_INCOMPLETE',region.region_id)
@@ -191,6 +197,15 @@ def licensed(state,proof,**expected):
 def span(state,release,selector,region,tokens,cfg,slot,question,*,exclude=(),record_remainder=False,admissible=None,initial=None):
     """Every source token boundary is reachable; no punctuation whitelist."""
     forbidden=set(exclude)
+    begin=len(state.syntax_trace)
+    def exhausted():
+        # This closes the first-piece search under these restrictions only.
+        # It is not exhaustion of every partition of the original source.
+        state.syntax_trace.append({'kind':'SOURCE_SPAN_EXHAUSTED','region_ref':region.region_id,
+            'slot':slot,'available_refs':[t.token_id for t in tokens if t.token_id not in forbidden],
+            'excluded_refs':sorted(forbidden),'domain_refs':[r['task_ref'] for r in state.syntax_trace[begin:]
+                if r.get('kind')=='TASK_DOMAIN'], 'search_complete':False,
+            'first_piece_search_complete':True})
     eligible=[(i,t) for i,t in enumerate(tokens) if t.token_id not in forbidden]
     # A caller may propagate a proven, branch-local ownership requirement.
     # Remove a start only when every endpoint violates that requirement.
@@ -209,7 +224,9 @@ def span(state,release,selector,region,tokens,cfg,slot,question,*,exclude=(),rec
         start=initial or choose(state,release,selector,region,cfg,slot+'_start',starts,question+' Select the FIRST token.'+
             (' Earlier starts have no accepted endpoint: '+str(sorted(rejected))+'.' if rejected else ''))
         initial=None
-        if start is None:return None
+        if start is None:
+            if state.syntax_trace[-1].get('status')=='EXHAUSTED':exhausted()
+            return None
         a=start[0]['index']
         def ends():
             for b in endpoints(a):
@@ -227,6 +244,7 @@ def span(state,release,selector,region,tokens,cfg,slot,question,*,exclude=(),rec
         rejected.add(a)
         state.syntax_trace.append({'kind':'STRUCTURAL_BOUNDARY_CONSTRAINT','region_ref':region.region_id,
             'source_range':list(region.source_range),'start_ref':tokens[a].token_id,'reason':'ALL_ENDS_REJECTED'})
+    exhausted()
     return None
 
 

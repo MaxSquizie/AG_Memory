@@ -48,6 +48,16 @@ def function_support(state,token,row):
     return frozenset(v['candidate_id'] for v in values)
 
 
+def function_restrictions(state,token_ref):
+    """Direct restrictions plus explicitly imported occurrence evidence."""
+    scope=scope_fields(state).get('task_scope')
+    imports={r['function_ref'] for r in state.syntax_trace
+             if r.get('kind')=='MORPHOLOGY_FUNCTION_IMPORT' and r.get('task_scope')==scope
+             and r.get('token_ref')==token_ref}
+    return [r for r in state.syntax_trace if r.get('kind')=='MORPHOLOGY_FUNCTION_RESTRICTION'
+            and r.get('token_ref')==token_ref and (in_scope(state,r) or digest(r) in imports)]
+
+
 def function_use(state,token_ref,reading,decision_ref,candidate_id):
     decision=state.decisions.get(decision_ref)
     if decision is None or decision.slot_id!='structural_oov_function':return True
@@ -81,8 +91,7 @@ def project(state,tokens):
     for token in tokens:
         readings={digest(clean(v)):v for v in token.variants}
         readings.update(by_token.get(token.token_id,{}))
-        functions=[row for row in state.syntax_trace if row.get('kind')=='MORPHOLOGY_FUNCTION_RESTRICTION'
-                   and in_scope(state,row) and row['token_ref']==token.token_id]
+        functions=function_restrictions(state,token.token_id)
         if functions:
             supported=function_support(state,token,functions[-1])
             if not supported:raise ValueError('MORPHOLOGY_FUNCTION_UNGROUNDED')

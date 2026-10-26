@@ -10,12 +10,40 @@ def prepare(runtime,region,tokens,request,cfg):
     from .morphology_domain import project
     from .component_policy import _morph
     state=runtime.state
+    parent_scope=runtime.morphology_scope
     # Never start from a previous contextual restriction or spelling repair.
     source=[deepcopy(runtime.original[t.token_id]) for t in tokens]
     owner=digest([region.region_id,region.source_range,[t.token_id for t in tokens]])
-    inputs=canonical([source,request,runtime.tasks.feedback,cfg.get('_task_constraints'),runtime.context_signature()])
+    from .morphology_domain import function_restrictions,function_support
+    inherited=[];providers={};origins={}
+    parent_task=parent_scope.rsplit(':',1)[0] if parent_scope else None
+    old_imports={r['function_ref']:r for r in state.syntax_trace
+        if r.get('kind')=='MORPHOLOGY_FUNCTION_IMPORT' and r.get('task_scope')==parent_scope}
+    for token in source:
+        rows=function_restrictions(state,token.token_id) if parent_task else []
+        if not rows:continue
+        row=rows[-1];ref=digest(row)
+        if parent_task=='morphology:'+owner:
+            # A local revision may reconsider its OWN guesses, but cannot
+            # silently drop an occurrence restriction inherited from its parent.
+            old=old_imports.get(ref)
+            if not old:continue
+            provider,version=old['parent_task'],old['parent_revision']
+        else:
+            provider=parent_task;version=runtime.dispatcher.nodes[provider]['revision']
+        if not function_support(state,token,row):raise ValueError('MORPHOLOGY_FUNCTION_UNGROUNDED')
+        inherited.append(row);providers[provider]=version;origins[ref]=(provider,version)
+    # Execution version validates the use record, not the semantic input key.
+    # Rebuilding after clarification must still reuse unchanged probe evidence.
+    inputs=canonical([source,request,runtime.tasks.feedback,cfg.get('_task_constraints'),runtime.context_signature(),
+                      [{k:v for k,v in r.items() if k!='interpretation_version'} for r in inherited],providers])
     runtime.morphology_scope='morphology:'+owner+':'+digest(inputs)
     scope=runtime.morphology_scope
+    for row in inherited:
+        ref=digest(row);provider,version=origins[ref]
+        state.syntax_trace.append({'kind':'MORPHOLOGY_FUNCTION_IMPORT','task_scope':scope,
+            'token_ref':row['token_ref'],'function_ref':ref,'via_scope':parent_scope,
+            'parent_task':provider,'parent_revision':version})
     area={'source_range':region.source_range,'token_refs':[t.token_id for t in tokens]}
     def recover():
         local=deepcopy(source)
@@ -30,6 +58,7 @@ def prepare(runtime,region,tokens,request,cfg):
         return project(state,local)
     # Link the two producers explicitly, including reused recovery results.
     def domain():
+        for provider,version in providers.items():runtime.dispatcher.read(provider,version)
         runtime.dispatcher.run('agreement:'+owner,inputs,recover,kind='AGREEMENT',**area)
         return select()
     result=runtime.dispatcher.run('morphology:'+owner,[inputs,[_morph(v) for t in recovered for v in t.variants]],

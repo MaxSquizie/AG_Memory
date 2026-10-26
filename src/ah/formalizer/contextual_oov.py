@@ -39,6 +39,20 @@ def resolve(state,release,selector,*,areas=None):
                 from .morphology_domain import offer,license_use,scope_fields
                 readings=offer(state,token,options.values(),'OOV_FUNCTION')
                 functions=list(dict.fromkeys(v.pos for v in readings))
+                from .morphology_domain import function_restrictions,function_support
+                inherited=function_restrictions(state,token.token_id)
+                if inherited:
+                    row=inherited[-1];supported=function_support(state,token,row)
+                    if not supported:raise ValueError('MORPHOLOGY_FUNCTION_UNGROUNDED')
+                    # Keep independently generated richer proposals available;
+                    # the inherited function alone licenses no extra features.
+                    if len(supported)==1:
+                        for reading in readings:
+                            if (reading.pos in supported and not reading.cases and reading.number is None
+                                    and reading.gender is None and reading.person is None and reading.tense is None
+                                    and reading.mood is None and not reading.features):
+                                license_use(state,token.token_id,_morph(reading),row['decision_ref'],reading.pos)
+                    continue
                 # Stable source/hypothesis identity belongs in the question;
                 # the use record below is separately bound to this execution.
                 address={'token_ref':token.token_id,'source_range':[token.start,token.end],

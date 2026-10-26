@@ -122,7 +122,7 @@ def _compose_area(state, release, selector, region, tokens, cfg, depth=0, attach
             if len(roots(result))==1:
                 return result
             reasons=[d.code for d in state.diagnostics[diagnostics_begin:]]
-            if 'STRUCTURAL_REVISION_NO_PROGRESS' in reasons:return result
+            if any(c in reasons for c in ('STRUCTURAL_REVISION_NO_PROGRESS','PARTITION_OWNERSHIP_UNRESOLVED')):return result
             from .composition_session import current as current_session
             runtime=current_session(state)
             used=runtime.tasks.reads[-1]['probes'] if runtime and runtime.tasks.reads else set()
@@ -164,8 +164,10 @@ def _compose_area(state, release, selector, region, tokens, cfg, depth=0, attach
                     'source_range':list(region.source_range),'attempts':revision+1})
                 return block(state,region,result,'STRUCTURAL_REVISION_NO_PROGRESS')
             attempts.add(signature)
-            selected_descriptions=[v['label'] for r in local_tasks if r.get('selected')
+            selected_descriptions=[v['label'] for r in local_tasks if r.get('selected') and r.get('slot')=='structural_relation'
                 for v in r.get('alternatives',()) if v['candidate_id']==r['selected']]
+            selected_descriptions.extend(f['witness']['proposal']['label'] for f in failures
+                if isinstance(f.get('witness'),dict) and f['witness'].get('proposal',{}).get('label'))
             uncovered={tid for f in result for tid in f.semantic.get('uncovered_token_refs',())}
             uncovered.update(tid for r in state.syntax_trace[begin:] if r.get('kind')=='STRUCTURAL_PARTITION_COVERAGE'
                              for tid in r.get('uncovered_token_refs',()))
