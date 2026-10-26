@@ -32,6 +32,33 @@ def in_scope(state,row):
     return not row.get('task_scope') or row.get('task_scope')==scope
 
 
+def function_support(state,token,row):
+    """A POS domain licenses exactly one occurrence in its recorded hypothesis."""
+    from .partial_readings import valid_domain
+    address=row.get('address',{})
+    domain=row.get('function_domain',{})
+    if (address.get('token_ref')!=token.token_id or address.get('source_range')!=[token.start,token.end]
+            or address.get('source_uid')!=state.source_uid
+            or row.get('interpretation_version')!=state.interpretation_version
+            or address.get('task_scope')!=row.get('task_scope')
+            or row.get('decision_ref')!=domain.get('decision_ref') or not valid_domain(state,domain)):
+        return frozenset()
+    values=domain['alternatives']
+    if any(v.get('address')!=address for v in values):return frozenset()
+    return frozenset(v['candidate_id'] for v in values)
+
+
+def function_use(state,token_ref,reading,decision_ref,candidate_id):
+    decision=state.decisions.get(decision_ref)
+    if decision is None or decision.slot_id!='structural_oov_function':return True
+    token=next((t for t in state.evidence if t.token_id==token_ref),None)
+    return bool(token and reading.get('pos')==candidate_id and
+        not reading.get('cases') and all(reading.get(k) is None for k in ('number','gender','person','tense','mood'))
+        and not reading.get('features') and any(candidate_id in function_support(state,token,row)
+            for row in state.syntax_trace if row.get('kind')=='MORPHOLOGY_FUNCTION_RESTRICTION'
+            and row.get('token_ref')==token_ref and row.get('decision_ref')==decision_ref))
+
+
 def offer(state,token,readings,source,anchors=()):
     result=[]
     for v in readings:
@@ -57,9 +84,9 @@ def project(state,tokens):
         functions=[row for row in state.syntax_trace if row.get('kind')=='MORPHOLOGY_FUNCTION_RESTRICTION'
                    and in_scope(state,row) and row['token_ref']==token.token_id]
         if functions:
-            row=functions[-1];decision=state.decisions.get(row['decision_ref'])
-            if selected_candidate(decision) is not None and row['POS'] in decision.selected:
-                readings={k:v for k,v in readings.items() if v.pos==row['POS']}
+            supported=function_support(state,token,functions[-1])
+            if not supported:raise ValueError('MORPHOLOGY_FUNCTION_UNGROUNDED')
+            readings={k:v for k,v in readings.items() if v.pos in supported}
         restrictions=[row for row in state.syntax_trace if row.get('kind')=='MORPHOLOGY_DOMAIN_RESTRICTION' and in_scope(state,row) and row['token_ref']==token.token_id]
         if restrictions:
             row=restrictions[-1];decision=state.decisions.get(row['decision_ref'])
@@ -72,7 +99,8 @@ def project(state,tokens):
 def license_use(state,token_ref,reading,decision_ref,candidate_id):
     if not proposed(reading):return
     decision=state.decisions.get(decision_ref)
-    if selected_candidate(decision) is None or candidate_id not in decision.selected:
+    if (selected_candidate(decision) is None or candidate_id not in decision.selected
+            or not function_use(state,token_ref,reading,decision_ref,candidate_id)):
         raise ValueError('MORPHOLOGY_USE_UNGROUNDED')
     row={'kind':'MORPHOLOGY_USE','token_ref':token_ref,'reading':clean(reading),
          'decision_ref':decision_ref,'candidate_id':candidate_id}
@@ -94,7 +122,8 @@ def attested(state,token,reading):
     for row in state.syntax_trace:
         if row.get('kind')!='MORPHOLOGY_USE' or row['token_ref']!=token.token_id or row['reading']!=clean(reading):continue
         decision=state.decisions.get(row['decision_ref'])
-        if selected_candidate(decision) is not None and row['candidate_id'] in decision.selected:return True
+        if (selected_candidate(decision) is not None and row['candidate_id'] in decision.selected
+                and function_use(state,token.token_id,reading,row['decision_ref'],row['candidate_id'])):return True
     return False
 
 

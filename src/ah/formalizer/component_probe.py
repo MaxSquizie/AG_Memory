@@ -99,9 +99,6 @@ def _live_probe(state, selector, release, key, slot, options, context, source_ra
         d.history.append({'kind':'CLOSED_PROBE_ALTERNATIVES','outcome':reply.outcome,
                           'selected':list(reply.selected)})
         d.outcome = 'INSUFFICIENT_CONTEXT' if reply.outcome == 'INSUFFICIENT_CONTEXT' else 'UNRESOLVED'
-        from .clarifications import offer
-        if offer_clarification:
-            offer(state,key,'IMPLICIT_ARGUMENT' if slot=='implicit_argument' else 'COMPONENT',context,options)
         return None
     chosen = reply.selected[0]
     d.selected, d.outcome, d.lifecycle = (chosen,), None, 'PROVISIONAL'
@@ -111,8 +108,9 @@ def _live_probe(state, selector, release, key, slot, options, context, source_ra
 
 def _probe(state, selector, release, key, slot, options, context, source_range, *, equivalent_targets=None, question=None, offer_clarification=True):
     # The enclosing domain owns speaker choices; a page only supplies evidence.
-    if not offer_clarification:
-        state.clarification_candidates[:]=[r for r in state.clarification_candidates if r['decision_ref']!=key]
+    state.clarification_candidates[:]=[r for r in state.clarification_candidates if r['decision_ref']!=key]
+    state.syntax_trace.append({'kind':'PROBE_PAGE','decision_ref':key,'slot':slot,
+                              'source_range':list(source_range)})
     from .canonical_ledger import digest
     dependency_signature=digest([release.sha256,slot,options,context,source_range,equivalent_targets,question])
     from .composition_session import current

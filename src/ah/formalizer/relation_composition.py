@@ -91,6 +91,21 @@ def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof
         'label':'Proposed split — '+description+'; outer relation occurrences: '+
         (', '.join('«'+t.span+'» @'+str(t.start) for t in links) or 'none')+'; punctuation outside parts: «'+
         ' '.join(t.span for t in punctuation)+'»'}
+    from .composition_session import current
+    runtime=current(state)
+    proposal_signature=digest([state.source_uid,state.interpretation_version,region.region_id,
+        runtime.input_signature() if runtime else None,runtime.context_signature() if runtime else None,
+        state.text,[{k:v for k,v in option.items() if k!='relation_proof'}]])
+    prior=next((r for r in reversed(state.syntax_trace)
+        if r.get('kind')=='COMPOSITION_OBLIGATION_FAILURE' and r.get('category')=='PARTITION_REJECTED'
+        and r.get('witness',{}).get('proposal_signature')==proposal_signature),None)
+    if prior:
+        state.syntax_trace.append({'kind':'STRUCTURAL_REVISION_STALLED','region_ref':region.region_id,
+            'source_range':list(region.source_range),'repeated_failure_ref':prior['failure_ref'],
+            'reason':'SAME_REJECTED_PARTITION_WITH_UNCHANGED_INPUT'})
+        state.diag('STRUCTURAL_REVISION_NO_PROGRESS',region.region_id)
+        return None
+    validation_begin=len(state.syntax_trace)
     result=choose(state,release,selector,region,cfg,'structural_partition',[option],
         'Does this split preserve the source meaning as: '+RELATIONS[kind]+'? '
         'Each part keeps its participants, predicate and inner negation, modality or quantifiers. '
@@ -105,6 +120,17 @@ def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof
         'including words introducing a condition or consequence. Punctuation may separate or enclose the parts. '
         'An implicit relation needs no linking word. Choose the split if it preserves the meaning; '
         'answer 0 if words have been assigned to the wrong part, and ? if the text does not decide.')
+    if result is None:
+        rejected=next((r for r in reversed(state.syntax_trace[validation_begin:])
+            if r.get('kind')=='TASK_DOMAIN' and r.get('slot')=='structural_partition'
+            and r.get('task_outcome')=='NONE_FIT_IN_COMPLETE_DOMAIN'),None)
+        if rejected:
+            from .composition_contracts import record_failure
+            record_failure(state,region,'PARTITION_REJECTED',proof,
+                'The proposed source split was explicitly rejected. This rejects this split only; '
+                'it does not reject every split or the outer relation.',
+                {'proposal':option,'rejection_domain_ref':rejected['task_ref'],
+                 'proposal_signature':proposal_signature},search_complete=False)
     return ([t for t in tokens if t in markers or t.token_id in shared_refs],result[1]) if result else None
 
 
@@ -172,7 +198,14 @@ def child(state,release,selector,region,tokens,cfg,compose,request,contract):
 
 def compose(state,release,selector,region,tokens,cfg,request,compose_child):
     if request and request.output_sort=='EVENT_DESCRIPTION':return None
-    options=[{'candidate_id':k,'relation':k,'label':v} for k,v in RELATIONS.items()]
+    from .composition_session import current
+    runtime=current(state)
+    # Execution versions are not semantic inputs: unchanged probe evidence may
+    # be replayed during clarification, then licensed in the new execution.
+    options=[{'candidate_id':k,'relation':k,'label':v,'region_ref':region.region_id,
+              'token_refs':[t.token_id for t in tokens],
+              'source_uid':state.source_uid,
+              'input_scope':runtime.input_signature() if runtime else None} for k,v in RELATIONS.items()]
     if request and request.surrounding_relations:
         for option in options:
             if option['relation'] in request.surrounding_relations:
@@ -192,7 +225,9 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child):
         'Numeric quantification is deferred.')
     if not result:return block(state,region)
     option,proof=result;kind=option['relation']
-    if kind=='LEXICAL':return None
+    if kind=='LEXICAL':
+        from .composition_contracts import LexicalRoute
+        return LexicalRoute(region.region_id,tuple(t.token_id for t in tokens),proof,state.interpretation_version)
     if kind=='NOMINAL_DESCRIPTION':
         from .refinement_boundaries import general_boundary
         from .component_refinement import _compose_lexical_area

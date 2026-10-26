@@ -28,8 +28,7 @@ def resolve(state,release,selector,*,areas=None):
             from .contextual_oov_roles import candidates
             for v in candidates(tokens,index,release,cfg):
                 options.setdefault(digest(_morph(v)),v)
-            key='oov-reading:'+token.token_id
-            from .structural_tasks import enabled,choose
+            from .structural_tasks import enabled,choose_domain
             if enabled(release):
                 # Productive analyzer guesses stay in diagnostic evidence only.
                 # Neither a function choice nor a later structure choice may
@@ -40,25 +39,36 @@ def resolve(state,release,selector,*,areas=None):
                 from .morphology_domain import offer,license_use,scope_fields
                 readings=offer(state,token,options.values(),'OOV_FUNCTION')
                 functions=list(dict.fromkeys(v.pos for v in readings))
-                selected=choose(state,release,selector,region,cfg,'structural_oov_function',
-                    [{'candidate_id':pos,'label':pos_description(pos)} for pos in functions],
-                    'Which part of speech does «'+token.span+'» have in THIS use? '
+                # Stable source/hypothesis identity belongs in the question;
+                # the use record below is separately bound to this execution.
+                address={'token_ref':token.token_id,'source_range':[token.start,token.end],
+                         'source_uid':state.source_uid,
+                         **scope_fields(state)}
+                marked=(state.text[region.source_range[0]:token.start]+'⟦'+token.span+'⟧'+
+                        state.text[token.end:region.source_range[1]])
+                selected=choose_domain(state,release,selector,region,cfg,'structural_oov_function',
+                    [{'candidate_id':pos,'label':pos_description(pos),'address':address} for pos in functions],
+                    'Which part of speech does the ONE marked occurrence ⟦'+token.span+'⟧ have? '
+                    'Addressed source: '+marked+'\nOther equally spelled words are not selected. '
                     'Choose its function in the sentence; no lemma, case or identity is established by this answer.')
                 if selected:
-                    value,proof=selected;pos=value['candidate_id']
                     state.syntax_trace.append({'kind':'MORPHOLOGY_FUNCTION_RESTRICTION',**scope_fields(state),
-                        'token_ref':token.token_id,'POS':pos,'decision_ref':proof['decision_ref']})
+                        'token_ref':token.token_id,'address':address,'function_domain':selected.record(),
+                        'interpretation_version':state.interpretation_version,
+                        'decision_ref':selected.decision_ref})
                     # Only the feature-unknown reading follows from a function
                     # choice. Richer proposals require their own consumer proof.
-                    for reading in readings:
-                        if reading.pos==pos and not reading.cases and reading.number is None and reading.gender is None and not reading.features:
-                            license_use(state,token.token_id,_morph(reading),proof['decision_ref'],pos)
+                    if len(selected.values)==1:
+                        pos=selected.values[0]['candidate_id']
+                        for reading in readings:
+                            if reading.pos==pos and not reading.cases and reading.number is None and reading.gender is None and not reading.features:
+                                license_use(state,token.token_id,_morph(reading),selected.decision_ref,pos)
                 else:state.diag('OOV_GRAMMAR_UNRESOLVED',token.token_id)
                 continue
             if not options:
                 state.diag('OOV_GRAMMAR_UNRESOLVED',token.token_id);continue
             if len(options)>cfg['max_candidates'] or region.source_range[1]-region.source_range[0]>cfg['context_chars']:
-                state.diag('COMPONENT_SEARCH_INCOMPLETE',key);continue
+                state.diag('COMPONENT_SEARCH_INCOMPLETE','oov-reading:'+token.token_id);continue
             from .morphology_domain import offer
             offer(state,token,options.values(),'OOV_NOMINAL')
             state.syntax_trace.append({'kind':'CONTEXTUAL_OOV','token_ref':token.token_id,

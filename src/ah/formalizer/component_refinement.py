@@ -87,7 +87,7 @@ def _compose_area(state, release, selector, region, tokens, cfg, depth=0, attach
         from .composition_tree import roots
         from .component_probe_replay import supersede
         import json
-        retired=[];attempts=set()
+        attempts=set()
         for revision in range(cfg.get('refinement',{}).get('max_depth',16)):
             begin=len(state.syntax_trace);diagnostics_begin=len(state.diagnostics)
             if revision:
@@ -106,20 +106,23 @@ def _compose_area(state, release, selector, region, tokens, cfg, depth=0, attach
                     owned,child_cfg,depth+1,attachment=attachment,
                     infinitive=(None if slot and slot.independent_subject else slot.controller if slot and slot.controller else infinitive),
                     request=slot))
-            if result is None:
+            from .composition_contracts import LexicalRoute,conflicts,record_failure
+            route=result if isinstance(result,LexicalRoute) else None
+            if result is None or route is not None:
+                if route:route.validate(state,region,tokens)
                 result=_compose_lexical_area(state,release,selector,region,tokens,
                     {**cfg,'_literal_relation':True},depth,attachment,infinitive,request)
+                route_ok=not route or route.accept(state,region,result)
                 from .content_reference_functions import omitted_content
-                result=omitted_content(state,release,selector,region,tokens,cfg,request,result,
+                if route_ok:result=omitted_content(state,release,selector,region,tokens,cfg,request,result,
                     lambda owned,slot:compose_area(state,release,selector,region_for(state,region,owned,'RELATION_CHILD'),
                         owned,child_cfg,depth+1,attachment=attachment,
                         infinitive=(None if slot and slot.independent_subject else slot.controller if slot and slot.controller else infinitive),request=slot))
             tasks=[r for r in state.syntax_trace[begin:] if r.get('kind')=='STRUCTURAL_TASK']
             if len(roots(result))==1:
-                current=next((r['decision_ref'] for r in tasks if r.get('selected')),None)
-                for key in retired:supersede(state,key,current)
                 return result
             reasons=[d.code for d in state.diagnostics[diagnostics_begin:]]
+            if 'STRUCTURAL_REVISION_NO_PROGRESS' in reasons:return result
             from .composition_session import current as current_session
             runtime=current_session(state)
             used=runtime.tasks.reads[-1]['probes'] if runtime and runtime.tasks.reads else set()
@@ -132,12 +135,23 @@ def _compose_area(state, release, selector, region, tokens, cfg, depth=0, attach
                     or any('INCOMPLETE' in c or c in {'RESOURCE_MISSING','ARITHMETIC_QUANTIFIER_DEFERRED',
                         'COMPONENT_PROBE_FAILED','COMPUTATION_LIMIT','COMPOSITION_PRODUCER_PENDING','VALENCY_UNKNOWN','INTEGRITY_ERROR'} for c in reasons)):
                 return result
-            if not any('CONTRADICTION' in code for code in reasons):
+            failures=conflicts(state,region,begin)
+            # Existing dependency narrowing reports an explicit empty constrained
+            # domain, not an arbitrary diagnostic containing a magic substring.
+            witnesses=[r for r in state.syntax_trace[begin:] if r.get('kind')=='DEPENDENCY_REJECTED'
+                       and r.get('region_ref')==region.region_id and r.get('empty_domains')]
+            if route and witnesses:
+                failures.append(record_failure(state,region,'LOCAL_DEPENDENCY_CONFLICT',route.proof,
+                    'A proposed lexical dependency assignment has an empty constrained domain. '
+                    'This does not prove that every interpretation of the source is impossible.',
+                    witnesses,search_complete=False))
+            if not failures:
                 state.diag('STRUCTURAL_IMPLEMENTATION_GAP',region.region_id)
                 return result
-            constraints=json.dumps({'rejected_choices':[
+            local_tasks=[r for r in tasks if r.get('region_ref')==region.region_id]
+            constraints=json.dumps({'attempted_choices':[
                 {'slot':r['slot'],'value':next((v for v in r.get('alternatives',()) if v['candidate_id']==r.get('selected')),None)}
-                for r in tasks if r.get('selected')], 'failures':reasons},ensure_ascii=False,sort_keys=True)
+                for r in local_tasks if r.get('selected')], 'failures':failures},ensure_ascii=False,sort_keys=True)
             local_regions={region.region_id,*(r.get('region_ref') for r in tasks)}
             related=used if runtime else {k for k in state.decisions if any(k.startswith(r+'|') for r in local_regions if r)}
             nonstructural=[(k,d.candidates,d.selected,d.selector_outcome) for k in sorted(related)
@@ -150,12 +164,13 @@ def _compose_area(state, release, selector, region, tokens, cfg, depth=0, attach
                     'source_range':list(region.source_range),'attempts':revision+1})
                 return block(state,region,result,'STRUCTURAL_REVISION_NO_PROGRESS')
             attempts.add(signature)
-            selected_descriptions=[v['label'] for r in tasks if r.get('selected')
+            selected_descriptions=[v['label'] for r in local_tasks if r.get('selected')
                 for v in r.get('alternatives',()) if v['candidate_id']==r['selected']]
             uncovered={tid for f in result for tid in f.semantic.get('uncovered_token_refs',())}
             uncovered.update(tid for r in state.syntax_trace[begin:] if r.get('kind')=='STRUCTURAL_PARTITION_COVERAGE'
                              for tid in r.get('uncovered_token_refs',()))
-            constraint_text='Tried: '+'; '.join(selected_descriptions)+'. No complete parse was built.'
+            constraint_text='Tried: '+'; '.join(dict.fromkeys(selected_descriptions))+'. No complete parse was built.'
+            constraint_text+=' Violated obligations: '+'; '.join(f['explanation'] for f in failures)
             if uncovered:
                 constraint_text+=' Uncovered words: «'+' '.join(t.span for t in tokens if t.token_id in uncovered)+'».'
             constraint_text+=' This may be a parser limitation; failure alone does not prove that the reading is wrong. Repeating the same choices is not a revision.'
@@ -164,7 +179,13 @@ def _compose_area(state, release, selector, region, tokens, cfg, depth=0, attach
                 {'candidate_id':'DEFER','label':'No different reading is supported; leave the parse unresolved'}],
                 constraint_text+' Does the text support revising these choices?')
             if not revision_choice or revision_choice[0]['candidate_id']!='REVISE':return result
-            retired.extend(r['decision_ref'] for r in tasks if r.get('decision_ref') and not r.get('selected'))
+            # Retire this area's superseded decisions, not unrelated children.
+            # The next attempt drops old dispatch reads and obtains fresh ones.
+            replacement=revision_choice[1]['decision_ref']
+            for key in {r['decision_ref'] for r in local_tasks if r.get('decision_ref')}:
+                supersede(state,key,replacement)
+                if runtime and 'probe:'+key in runtime.dispatcher.nodes:
+                    runtime.dispatcher.invalidate('probe:'+key,'STRUCTURAL_HYPOTHESIS_REVISED')
             del state.diagnostics[diagnostics_begin:]
             cfg={**cfg,'_task_constraints':constraints,'_task_constraints_text':constraint_text}
         return block(state,region,result,'STRUCTURAL_TASK_SEARCH_INCOMPLETE')
@@ -257,8 +278,11 @@ def _compose_lexical_area(state, release, selector, region, tokens, cfg, depth=0
             predicates=[]
         elif request is not None and request.agreement_source is not None:
             predicates=[t for t in tokens if any(v.pos=='INFN' for v in t.variants)] + passive_heads
-        elif participial or infinitive:
+        elif participial:
             predicates=[tokens[0]]
+        elif infinitive:
+            predicates=[t for t in tokens if any(v.pos=='INFN' for v in t.variants)
+                        and (not request or not request.head_ref or request.head_ref==t.token_id)]
         else:
             from .component_predication import impersonal_predicate
             predicates=[t for t in tokens if any(v.pos=='VERB' and v.mood!='imperative' or

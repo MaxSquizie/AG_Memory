@@ -18,9 +18,6 @@ def execute(live,state,selector,release,key,slot,options,context,source_range,*,
         d=restore_decision(state,key,prior['decision'])
         state.syntax_trace.append({'kind':'COMPONENT_PROBE_REUSED','decision_ref':key,'signature':signature})
         result=selected_candidate(d)
-        if result is None and offer_clarification:
-            from .clarifications import offer
-            offer(state,key,'COMPONENT',context,options)
     else:
         result=live(state,selector,release,key,slot,options,context,source_range,
                     equivalent_targets=equivalent_targets,question=question,offer_clarification=offer_clarification)

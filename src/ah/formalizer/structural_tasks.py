@@ -173,6 +173,11 @@ def _choose(state,release,selector,region,cfg,slot,options,question,*,empty=None
 def licensed(state,proof,**expected):
     if not isinstance(proof,dict):return False
     key,cid=proof.get('decision_ref'),proof.get('candidate_id')
+    from .partial_readings import retired_refs
+    retired=retired_refs(state.syntax_trace)
+    if key in retired or proof.get('domain_ref') in retired:return False
+    if any(row.get('kind')=='TASK_DOMAIN' and row.get('task_ref')==proof.get('domain_ref')
+           and retired.intersection(row.get('page_refs',())) for row in state.syntax_trace):return False
     decision=state.decisions.get(key)
     if selected_candidate(decision)!=cid or decision.search_complete is not True:return False
     for row in reversed(state.syntax_trace):

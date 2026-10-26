@@ -21,7 +21,10 @@ def choice(state, decision_ref, candidates):
 
 
 def offer(state, decision_ref, kind, mention, options):
-    """A finite closed set, retained even when no candidate is grounded enough."""
+    """Domain owners publish supported alternatives; probe pages cannot."""
+    from .clarification_liveness import page_refs
+    if decision_ref in state.component_probe_records or decision_ref in page_refs(state.syntax_trace):
+        return
     if len(options) < 2:
         return
     row = {'decision_ref': decision_ref, 'kind': kind, 'mention': mention,
