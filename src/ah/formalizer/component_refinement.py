@@ -122,7 +122,8 @@ def _compose_area(state, release, selector, region, tokens, cfg, depth=0, attach
             if len(roots(result))==1:
                 return result
             reasons=[d.code for d in state.diagnostics[diagnostics_begin:]]
-            if any(c in reasons for c in ('STRUCTURAL_REVISION_NO_PROGRESS','PARTITION_OWNERSHIP_UNRESOLVED')):return result
+            if any(c in reasons for c in ('STRUCTURAL_REVISION_NO_PROGRESS','PARTITION_OWNERSHIP_UNRESOLVED',
+                                         'STRUCTURAL_BOUNDARY_UNRESOLVED')):return result
             from .composition_session import current as current_session
             runtime=current_session(state)
             used=runtime.tasks.reads[-1]['probes'] if runtime and runtime.tasks.reads else set()
@@ -146,6 +147,14 @@ def _compose_area(state, release, selector, region, tokens, cfg, depth=0, attach
                     'This does not prove that every interpretation of the source is impossible.',
                     witnesses,search_complete=False))
             if not failures:
+                boundary_events=[r for r in state.syntax_trace[begin:]
+                    if r.get('region_ref')==region.region_id and r.get('kind') in
+                    {'STRUCTURAL_TASK','SOURCE_SPAN_EXHAUSTED'}]
+                if boundary_events and boundary_events[-1]['kind']=='SOURCE_SPAN_EXHAUSTED':
+                    # All offered first pieces were declined under the current
+                    # constraints. This is a known selection outcome, not an
+                    # absent implementation, and not exhaustion of all parses.
+                    return block(state,region,result,'STRUCTURAL_BOUNDARY_UNRESOLVED')
                 state.diag('STRUCTURAL_IMPLEMENTATION_GAP',region.region_id)
                 return result
             local_tasks=[r for r in tasks if r.get('region_ref')==region.region_id]

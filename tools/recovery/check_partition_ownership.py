@@ -95,6 +95,11 @@ assert 'Previously rejected COMBINATION' in starts[1] and 'Start at «Иван»
 assert all('Previously rejected COMBINATION' not in p for slot,p in s.calls
            if slot in {'predicate_function','predicate_argument_role','component_attachment'})
 
+for reply in ('0','?'):
+    r,s,trace=execute('Иван не пришёл.',relation('NOT')+[('structural_introducer_start',reply)])
+    assert not r['assertions']['ah'] and 'STRUCTURAL_IMPLEMENTATION_GAP' not in r['diagnostics']['codes']
+    assert ('STRUCTURAL_BOUNDARY_UNRESOLVED' in r['diagnostics']['codes'])==(reply=='0')
+
 from types import SimpleNamespace
 from ah.formalizer.pipeline import t0
 from ah.formalizer.structural_tasks import choose,licensed
