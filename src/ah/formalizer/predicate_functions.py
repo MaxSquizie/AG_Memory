@@ -51,10 +51,10 @@ def head(state,release,selector,region,tokens,preferred,cfg):
     return (evidence[result[0]['head_ref']] if result[0].get('head_ref') else False,result[1])
 
 
-def binding(state,release,selector,region,tokens,predicate,nominals,groups,cfg,projected=None):
+def binding(state,release,selector,region,tokens,predicate,nominals,groups,cfg,projected=None,*,reserved_roles=()):
     from .probe_wording import role as role_text,reading as reading_text
     registry=[r['role_id'] for r in release.entries('RoleRegistry')]
-    forbidden={projected['rule']['host_role']} if projected else set()
+    forbidden=set(reserved_roles)|({projected['rule']['host_role']} if projected else set())
     from .partial_readings import BindingDomain,retain
     from itertools import product
     result=[];reading_domains=[]
@@ -68,13 +68,18 @@ def binding(state,release,selector,region,tokens,predicate,nominals,groups,cfg,p
         # A catch-all role is an explicit last option, not a semantic prior.
         roles=[r for r in roles if r!='SURFACE_ARG']+(['SURFACE_ARG'] if 'SURFACE_ARG' in roles else [])
         selected=choose(state,release,selector,region,cfg,'predicate_argument_role',[
-            *[{'candidate_id':r,'label':role_text(r)} for r in roles if r not in forbidden],
-            {'candidate_id':'NO_DIRECT_ROLE','label':'This occurrence belongs to another nominal or lexical child, not directly to this predicate'}],
+            *[{'candidate_id':r,'label':role_text(r),'predicate_ref':predicate.token_id,
+               'token_ref':token.token_id,'reserved_roles':sorted(forbidden)} for r in roles if r not in forbidden],
+            {'candidate_id':'NO_DIRECT_ROLE','predicate_ref':predicate.token_id,'token_ref':token.token_id,
+             'reserved_roles':sorted(forbidden),
+             'label':'This occurrence belongs to another nominal or lexical child, not directly to this predicate'}],
             'What role does «'+token.span+'» @'+str(token.start)+' have in predicate «'+predicate.span+'»? '
             'Choose the released valency slot, not every semantic description of the participant. '
             'SUBJECT/OBJECT are core slots after voice projection; a grammatical subject stays SUBJECT even if it feels something. '
             'EXPERIENCER is an oblique/impersonal state participant outside those core slots. Case alone is not proof. '
-            'Use SURFACE_ARG only when no more specific role is established.')
+            'Use SURFACE_ARG only when no more specific role is established.'+
+            (' Already supplied by this predicate\'s accepted input contract and unavailable to a different argument: '+
+             '; '.join(role_text(r) for r in sorted(forbidden))+'. These restrictions do not apply to other predicates.' if forbidden else ''))
         if not selected:return None
         role=selected[0]['candidate_id']
         from .component_constraints import retain_role

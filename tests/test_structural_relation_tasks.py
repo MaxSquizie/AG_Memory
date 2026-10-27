@@ -43,7 +43,8 @@ class Script:
                 role,attitude=value.split(':',1)
                 value=next((label for label in labels.values()
                     if label.startswith(role+' of ') and 'attitude='+attitude in label),value)
-        number=mapping.get(value) or next((n for n,label in labels.items() if label.startswith(value)),None)
+        number=mapping.get(value) or next((n for n,label in labels.items()
+            if label.startswith(value) or label.startswith('An additional relation INSIDE the target words: '+value)),None)
         if number:
             self.steps.popleft();self.selected_slot=slot;return number
         return '0' if slot.startswith('structural_') else self.default
@@ -129,6 +130,22 @@ def content_steps(owner,first,last,parent_first='Иван',attitude='QUOTED'):
     return relation('CONTENT')+bounds('structural_content',first,last)+bounds('structural_parent',parent_first,owner)+[
         ('structural_owner','Content belongs to predicate «'+owner+'»'),('structural_partition','PARTITION'),
         ('structural_content_role','OBJECT:'+attitude)]+relation('LEXICAL')
+
+
+def test_content_introducer_inside_provisional_body(tmp_path,monkeypatch):
+    steps=relation('CONTENT')+bounds('structural_content','что','пришла')+bounds('structural_parent','Иван','сказал')+[
+        ('structural_owner','Content belongs to predicate «сказал»'),
+        ('structural_function_owner','Outer relation owns «что»'),
+        ('structural_partition','PARTITION'),('structural_content_role','OBJECT:QUOTED')]+relation('LEXICAL')
+    steps+=relation('NOT')+bounds('structural_introducer','не','не')+[('structural_partition','PARTITION')]+relation('LEXICAL')
+    result,script=run(tmp_path,monkeypatch,'Иван сказал что Мария не пришла.',steps)
+    assert not result['diagnostics']['codes']
+    assert result['assertions']['ah']==[{'predicate':'SAY','roles':{'AGENT':{'entity':'ivan'},
+        'CONTENT':{'operator':'NOT','operands':[atom('ARRIVE','maria')]}}}]
+    question=next(p for s,p in script.calls if s=='structural_function_owner')
+    options=re.findall(r'^\d+\. (.*)$',question,re.M)
+    assert any('«что»' in o for o in options) and any('«не»' in o for o in options)
+    assert not any(o.startswith('Outer relation owns «сказал»') for o in options)
 
 
 @pytest.mark.parametrize('quoted',[False,True])

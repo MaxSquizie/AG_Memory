@@ -100,7 +100,7 @@ def _compose_area(state, release, selector, region, tokens, cfg, depth=0, attach
                     runtime.area_inputs=(region,tokens,request)
             # Feedback concerns this region. Child inputs carry their own typed
             # constraints; an ancestor's failed split is not child evidence.
-            child_cfg={k:v for k,v in cfg.items() if k not in {'_task_constraints','_task_constraints_text'}}
+            child_cfg={k:v for k,v in cfg.items() if k not in {'_task_constraints','_task_constraints_text','_partition_rejections'}}
             result=compose(state,release,selector,region,tokens,{**cfg,'_depth':depth},request,
                 lambda owned,slot:compose_area(state,release,selector,region_for(state,region,owned,'RELATION_CHILD'),
                     owned,child_cfg,depth+1,attachment=attachment,
@@ -189,7 +189,8 @@ def _compose_area(state, release, selector, region, tokens, cfg, depth=0, attach
                 if runtime and 'probe:'+key in runtime.dispatcher.nodes:
                     runtime.dispatcher.invalidate('probe:'+key,'STRUCTURAL_HYPOTHESIS_REVISED')
             del state.diagnostics[diagnostics_begin:]
-            cfg={**cfg,'_task_constraints':constraints,'_task_constraints_text':constraint_text}
+            cfg={**cfg,'_task_constraints':constraints,'_task_constraints_text':constraint_text,
+                 '_partition_rejections':[f for f in failures if f['category']=='PARTITION_REJECTED']}
         return block(state,region,result,'STRUCTURAL_TASK_SEARCH_INCOMPLETE')
     return _compose_lexical_area(state,release,selector,region,tokens,cfg,depth,attachment,infinitive,request)
 

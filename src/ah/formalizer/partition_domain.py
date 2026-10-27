@@ -31,6 +31,17 @@ class PartitionDomain:
         self.region,self.tokens,self.cfg=region,tokens,cfg
         self.kind,self.proof=kind,proof
         self.constraints=[]
+        # A rejected combination is relevant to its own boundary producer, but
+        # proves no individual boundary wrong. Do not leak it into other
+        # relations, child regions or unrelated lexical questions.
+        owned={t.token_id for t in tokens}
+        self.rejected=[]
+        for failure in cfg.get('_partition_rejections',()):
+            proposal=failure.get('witness',{}).get('proposal',{})
+            covered={r for group in proposal.get('operands',()) for r in group}|set(proposal.get('marker_refs',()))
+            if (failure.get('category')=='PARTITION_REJECTED' and failure.get('region_ref')==region.region_id
+                    and proposal.get('relation')==kind and covered==owned):
+                self.rejected.append(proposal['label'])
 
     @property
     def required(self):
@@ -38,6 +49,11 @@ class PartitionDomain:
 
     def span(self,tokens,slot,question,*,marker=False,covered=(),remaining_parts=0,
              remaining_contiguous=False,**kwargs):
+        if self.rejected:
+            question+=' Previously rejected COMBINATION for this same relation and source: '+'; '.join(self.rejected)+'. '
+            question+='The complete assignment was rejected, not each boundary separately. '
+            question+='An unchanged boundary is allowed if other assignments change. '
+            question+='Select this boundary from the source while keeping that combination excluded; do not copy the rejected split.'
         required=self.required-set(covered)
         excluded=set(kwargs.get('exclude',()))
         if marker:

@@ -78,6 +78,23 @@ r,s,trace=execute('Иван сказал что Мария спит.',steps)
 assert len(r['assertions']['ah'])==1 and not r['diagnostics']['codes']
 assert r['assertions']['ah'][0].get('predicate')!='SLEEP'
 assert any(x.get('kind')=='PARTITION_OWNERSHIP_REVISED' for x in trace)
+
+# A complete rejected assignment informs its own boundary retry. The source
+# start may stay unchanged; neither every boundary nor the relation is false.
+steps=relation('AND')+bounds('structural_operand_1','Иван','Мария')+bounds(
+    'structural_operand_2','спит','спит')+[
+    ('structural_function_owner','Outer relation owns «и»'),('structural_partition','0'),
+    ('structural_revision','The text supports a different')]+relation('AND')+bounds(
+    'structural_operand_1','Иван','пришёл')+bounds('structural_operand_2','Мария','спит')+[
+    ('structural_partition','PARTITION')]+relation('LEXICAL')*2
+r,s,trace=execute('Иван пришёл и Мария спит.',steps)
+assert r['assertions']['ah'] and not r['diagnostics']['codes']
+starts=[p for slot,p in s.calls if slot=='structural_operand_1_start']
+assert len(starts)==2 and 'Previously rejected COMBINATION' not in starts[0]
+assert 'Previously rejected COMBINATION' in starts[1] and 'Start at «Иван»' in starts[1]
+assert all('Previously rejected COMBINATION' not in p for slot,p in s.calls
+           if slot in {'predicate_function','predicate_argument_role','component_attachment'})
+
 from types import SimpleNamespace
 from ah.formalizer.pipeline import t0
 from ah.formalizer.structural_tasks import choose,licensed

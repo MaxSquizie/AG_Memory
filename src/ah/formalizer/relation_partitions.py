@@ -81,7 +81,6 @@ def content(domain):
     owner=content_owner(state,release,selector,region,cfg,parent,body)
     if not owner:return None
     groups=function_ownership(state,release,selector,region,cfg,'CONTENT',[parent,body],
-        eligible_refs={t.token_id for t in parent},
         protected_refs=domain.required|{owner[0]['owner_ref']},owner_ref=owner[0]['owner_ref'])
     if groups is None:return None
     parent,body=groups

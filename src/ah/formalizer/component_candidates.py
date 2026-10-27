@@ -50,7 +50,12 @@ def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nomin
             binding_domain=None
             if val is None and general:
                 from .predicate_functions import binding
-                binding_domain=binding(state,release,selector,region,tokens,p,nominals,groups,cfg,projected)
+                # Only addressed obligations reserve a role here. An unaddressed
+                # set of possible content roles is not a set of occupied slots.
+                occupied=set(proposition_slots or {})|set(required_pending_roles)
+                if controlled:occupied.add(control_role)
+                binding_domain=binding(state,release,selector,region,tokens,p,nominals,groups,cfg,projected,
+                                       reserved_roles=occupied)
                 if binding_domain is None:
                     state.diag('PREDICATE_ARGUMENT_DOMAIN_UNRESOLVED',region.region_id);continue
             for generic_binding in binding_domain.alternatives if binding_domain else [None]:

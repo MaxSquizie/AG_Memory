@@ -141,10 +141,10 @@ def function_ownership(state,release,selector,region,cfg,kind,groups,*,eligible_
     actually owns it. The full partition is confirmed afterwards.
     """
     while True:
-        possible=[t for group in groups for t in group if
+        possible=sorted([t for group in groups for t in group if
             (eligible_refs is None or t.token_id in eligible_refs) and
             t.token_id not in protected_refs and
-            any(c.isalnum() for c in t.span)]
+            any(c.isalnum() for c in t.span)],key=lambda t:(t.start,t.end,t.token_id))
         if not possible:return groups
         options=[{'candidate_id':t.token_id,'token_ref':t.token_id,
             'label':'Outer relation owns «'+t.span+'» @'+str(t.start)+'; '+
@@ -371,6 +371,7 @@ def content(state,release,selector,region,tokens,cfg,request,compose_child,proof
     if len(candidates)!=1:return block(state,region,parents)
     target=candidates[0]
     child_slot=InputSlot(inside_attitude=True,description_context=True,
+        surrounding_relations=(*(request.surrounding_relations if request else ()), 'CONTENT'),
         pending_propositions={ref:roles for ref,roles in inherited.items() if ref in body_ids},
         pending_proposition_sources={ref:refs for ref,refs in sources.items() if ref in body_ids})
     if any(v.pos=='INFN' for t in body for v in t.variants) and not any(v.pos=='VERB' for t in body for v in t.variants):
