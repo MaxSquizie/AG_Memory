@@ -57,11 +57,17 @@ def attach_tree(frames,tree,region):
     return frames
 
 
-def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof,*,shared_functions=()):
+def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof,*,shared_functions=(),owner_choice=None):
     refs=[t.token_id for group in groups for t in group]
     if len(refs)!=len(set(refs)):return None
     used=set(refs);markers=[t for t in tokens if t.token_id not in used]
     from .structural_tasks import licensed
+    owner=None
+    if kind=='CONTENT':
+        if (not owner_choice or len(groups)!=2
+                or not licensed(state,owner_choice[1],owner_ref=owner_choice[0]['owner_ref'])):return None
+        owner=next((t for t in groups[0] if t.token_id==owner_choice[0]['owner_ref']),None)
+        if owner is None:return None
     for shared in shared_functions:
         if (kind not in {'FORALL','EXISTS'} or shared.get('functions')!=['QUANTIFIER','BOUND_MENTION']
                 or shared.get('token_ref') not in used
@@ -86,17 +92,20 @@ def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof
            ['first proposition','second proposition'] if len(groups)==2 else
            ['content'] if len(groups)==1 else ['operand '+str(i+1) for i in range(len(groups))])
     description='; '.join(name+': '+part for name,part in zip(names,parts))
+    if owner:
+        description+='; selected content fills the slot of predicate «'+owner.span+'» @'+str(owner.start)+' in the parent'
     option={'candidate_id':'PARTITION','relation':kind,'operands':[[t.token_id for t in g] for g in groups],
         'marker_refs':[t.token_id for t in tokens if t in markers or t.token_id in shared_refs],
         'shared_functions':list(shared_functions),'relation_proof':proof,
         'label':'Proposed split — '+description+'; outer relation occurrences: '+
         (', '.join('«'+t.span+'» @'+str(t.start) for t in links) or 'none')+'; punctuation outside parts: «'+
         ' '.join(t.span for t in punctuation)+'»'}
+    if owner:option.update(owner_ref=owner.token_id,owner_proof=owner_choice[1])
     from .composition_session import current
     runtime=current(state)
     proposal_signature=digest([state.source_uid,state.interpretation_version,region.region_id,
         runtime.input_signature() if runtime else None,runtime.context_signature() if runtime else None,
-        state.text,[{k:v for k,v in option.items() if k!='relation_proof'}]])
+        state.text,[{k:v for k,v in option.items() if k not in {'relation_proof','owner_proof'}}]])
     prior=next((r for r in reversed(state.syntax_trace)
         if r.get('kind')=='COMPOSITION_OBLIGATION_FAILURE' and r.get('category')=='PARTITION_REJECTED'
         and r.get('witness',{}).get('proposal_signature')==proposal_signature),None)
@@ -113,7 +122,9 @@ def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof
         "Keep each part's internal participants, clauses, negation and modality inside that part. "
         'The parts are not independently asserted by this choice. '
         +('The parent has an intentionally open content slot filled by the other part; '
-          'it need not be a standalone sentence. ' if kind=='CONTENT' else '')+
+          'it need not be a standalone sentence and may contain other clauses. '
+          'The established slot owner is «'+owner.span+'» @'+str(owner.start)+'. '
+          'Check this content at that owner; other parent predicates keep their own clauses and scopes. ' if owner else '')+
         ('The marked quantifier occurrence also serves as the bound mention; preserve both functions. ' if shared_refs else '')+
         'Outer relation words may be separated in the source; they are not a new sentence. '
         'Choose the proposed application if it connects the right contents. '
@@ -136,7 +147,8 @@ def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof
 def function_ownership(state,release,selector,region,cfg,kind,groups,*,eligible_refs=None,protected_refs=(),owner_ref=None):
     """Repeated/discontinuous function tokens can belong to the outer edge.
 
-    Morphology proposes them; no particle spelling determines its scope.
+    Source occurrences remain eligible unless addressed evidence protects them;
+    no particle spelling determines its scope.
     Negation inside a child must remain there unless the selected outer relation
     actually owns it. The full partition is confirmed afterwards.
     """

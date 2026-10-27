@@ -118,7 +118,8 @@ class PartitionDomain:
                     self.state.diag('INTEGRITY_ERROR','partition producer lost required content')
                     return None
                 result=confirm_partition(self.state,self.release,self.selector,self.region,
-                    self.tokens,self.cfg,self.kind,proposal.groups,self.proof,shared_functions=proposal.shared_functions)
+                    self.tokens,self.cfg,self.kind,proposal.groups,self.proof,
+                    shared_functions=proposal.shared_functions,owner_choice=proposal.owner_choice)
                 if on_check:on_check(proposal,result)
                 return proposal,result
             if runtime:

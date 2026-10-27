@@ -166,6 +166,13 @@ def test_recursive_propositions_and_quotes(tmp_path,monkeypatch,quoted):
         'CONTENT':{'predicate':'THINK','roles':{'AGENT':{'entity':'petr'},'CONTENT':atom('ARRIVE','maria')}}}}]
 
     assert len(sealed)==3
+    partitions=[v for row in result['runtime']['ir']['syntax_trace']
+        if row.get('kind')=='STRUCTURAL_TASK' and row.get('slot')=='structural_partition'
+        for v in row.get('alternatives',()) if v.get('relation')=='CONTENT']
+    assert partitions  # A page and its domain may both expose the same payload.
+    assert all(p['owner_ref'] in p['operands'][0] and p['owner_proof']['decision_ref'] for p in partitions)
+    assert len({p['owner_ref'] for p in partitions})==2
+    assert all('selected content fills the slot of predicate' in p['label'] for p in partitions)
     calls=[s for s,p in script.calls]
     assert max(i for i,s in enumerate(calls) if s.startswith('structural_'))<calls.index('predicate_value')
     prompt=next(p for s,p in script.calls if s=='speech_act')
