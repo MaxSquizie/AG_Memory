@@ -35,12 +35,41 @@ def subject_presence(state,release,selector,region,predicate,variant,nominals,bi
     return None
 
 
-def head(state,release,selector,region,tokens,preferred,cfg):
+def head(state,release,selector,region,tokens,preferred,cfg,*,request=None):
     from .temporal_functions import owned_refs
     from .nominal_functions import rows
     excluded=owned_refs(state,tokens)|{r for row in rows(state,tokens) for r in row['function_refs'] if r!=row['head_ref']}
     ordered=list(dict.fromkeys([t.token_id for t in preferred]+[t.token_id for t in tokens]))
     evidence={t.token_id:t for t in tokens}
+    route=cfg.get('_lexical_route')
+    # The parent already selected these occurrences as predicates taking
+    # content. In a proven single-predication region, its sole required owner
+    # is therefore the head. Neither morphology nor a singleton search is the
+    # evidence. A nested region cannot inherit another region's route proof.
+    if route is not None and route.region_ref==region.region_id and request:
+        route.validate(state,region,tokens)
+        owners={ref for ref,roles in (request.pending_propositions or {}).items() if roles and ref in evidence}
+        owners.update(ref for ref,slots in (request.proposition_slots or {}).items() if slots and ref in evidence)
+        if owners:
+            from .composition_session import current
+            from .composition_dispatcher import canonical
+            runtime=current(state)
+            basis=canonical({'owner_refs':sorted(owners),'route_proof':route.proof,
+                   'input_scope':runtime.input_signature() if runtime else None,
+                   'pending_propositions':request.pending_propositions,
+                   'proposition_slots':request.proposition_slots})
+            if len(owners)!=1 or owners & excluded:
+                from .composition_contracts import record_failure
+                record_failure(state,region,'HYPOTHESIS_CONFLICT',route.proof,
+                    'The single-predication route cannot satisfy the established content owners and occurrence functions.',
+                    {**basis,'excluded_owner_refs':sorted(owners & excluded)},search_complete=False)
+                state.diag('LEXICAL_ROUTE_CONFLICT',region.region_id)
+                return None
+            ref=next(iter(owners))
+            proof={'kind':'CONTENT_OWNER_HEAD','head_ref':ref,**basis}
+            state.syntax_trace.append({**proof,'kind':'PREDICATE_HEAD_DERIVED','region_ref':region.region_id,
+                'source_range':list(region.source_range),'derivation':'ONE_PREDICATION_WITH_ESTABLISHED_CONTENT_OWNER'})
+            return evidence[ref],proof
     options=[{'candidate_id':ref,'head_ref':ref,'label':'Predicate occurrence «'+evidence[ref].span+'» @'+str(evidence[ref].start)}
              for ref in ordered if ref not in excluded and any(c.isalnum() for c in evidence[ref].span)]
     options.append({'candidate_id':'NOMINAL','label':'A nominal/event description without a separate predication'})

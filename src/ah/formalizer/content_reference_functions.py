@@ -50,7 +50,13 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child,relat
     except ValueError as exc:return block(state,region,reason=str(exc))
     source_parts={'content_source':option['source_hash'],'parent_refs':[t.token_id for t in parent],
                   'pointer_refs':[t.token_id for t in pointer]}
-    link=content_role(state,release,selector,region,cfg,owner,parent,option['label'],source_parts)
+    reserved=set((request.pending_propositions or {}).get(owner.token_id,())) if request else set()
+    for frame in parents or ():
+        if frame.predicate_token_ref==owner.token_id:
+            reserved.update(frame.semantic.get('proposition_args',{}))
+            reserved.update(frame.semantic.get('proposed_roles',{}).values())
+    link=content_role(state,release,selector,region,cfg,owner,parent,option['label'],source_parts,
+        reserved_roles=reserved)
     if not link:return block(state,region)
     relation,role_proof=link
     if not licensed(state,role_proof,**source_parts,owner_ref=owner.token_id,role=relation['role'],attitude=relation['attitude']):

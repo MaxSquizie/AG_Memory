@@ -111,7 +111,7 @@ def _compose_area(state, release, selector, region, tokens, cfg, depth=0, attach
             if result is None or route is not None:
                 if route:route.validate(state,region,tokens)
                 result=_compose_lexical_area(state,release,selector,region,tokens,
-                    {**cfg,'_literal_relation':True},depth,attachment,infinitive,request)
+                    {**cfg,'_literal_relation':True,'_lexical_route':route},depth,attachment,infinitive,request)
                 route_ok=not route or route.accept(state,region,result)
                 from .content_reference_functions import omitted_content
                 if route_ok:result=omitted_content(state,release,selector,region,tokens,cfg,request,result,
@@ -123,7 +123,7 @@ def _compose_area(state, release, selector, region, tokens, cfg, depth=0, attach
                 return result
             reasons=[d.code for d in state.diagnostics[diagnostics_begin:]]
             if any(c in reasons for c in ('STRUCTURAL_REVISION_NO_PROGRESS','PARTITION_OWNERSHIP_UNRESOLVED',
-                                         'STRUCTURAL_BOUNDARY_UNRESOLVED')):return result
+                                         'STRUCTURAL_BOUNDARY_UNRESOLVED','STRUCTURAL_SELECTION_UNRESOLVED')):return result
             from .composition_session import current as current_session
             runtime=current_session(state)
             used=runtime.tasks.reads[-1]['probes'] if runtime and runtime.tasks.reads else set()
@@ -155,6 +155,11 @@ def _compose_area(state, release, selector, region, tokens, cfg, depth=0, attach
                     # constraints. This is a known selection outcome, not an
                     # absent implementation, and not exhaustion of all parses.
                     return block(state,region,result,'STRUCTURAL_BOUNDARY_UNRESOLVED')
+                if (boundary_events and boundary_events[-1].get('status')=='EXHAUSTED'
+                        and boundary_events[-1].get('enumeration_complete')):
+                    # A completed local selection with no supported option is
+                    # also an implemented outcome, not a missing algorithm.
+                    return block(state,region,result,'STRUCTURAL_SELECTION_UNRESOLVED')
                 state.diag('STRUCTURAL_IMPLEMENTATION_GAP',region.region_id)
                 return result
             local_tasks=[r for r in tasks if r.get('region_ref')==region.region_id]

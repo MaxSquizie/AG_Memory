@@ -96,7 +96,9 @@ class CompositionSession:
             supplied=[self.original[t].span for t in (request.pending_proposition_sources or {}).get(ref,())
                       if t in self.original]
             parts.append('Only «'+owner.span+'» @'+str(owner.start)+' has separately supplied content ('+
-                         ', '.join(sorted(roles))+')'+(' — separately parsed child' if supplied else '')+'. Leave that slot open. '
+                         ', '.join(sorted(roles))+')'+(' from «'+' '.join(supplied)+'»' if supplied else '')+
+                         '. Its source and slot are assigned; its internal analysis is a separate task and is not certified here. Leave that slot open. '
+                         'This assigned child is not omitted or referential content to discover again, even though it is outside TARGET. '
                          'Any other parent predicate and dependent clause INSIDE the target must still be connected.')
         if request.agreement_source:
             from .probe_wording import reading

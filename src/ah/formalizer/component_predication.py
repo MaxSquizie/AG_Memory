@@ -47,7 +47,7 @@ def compose_alternatives(state, release, selector, region, tokens, predicates, c
         state.diag('TEMPORAL_FUNCTION_UNRESOLVED',region.region_id)
         return []
     from .predicate_functions import head as select_head
-    selected_head=(False,None) if request and request.output_sort=='EVENT_DESCRIPTION' else select_head(state,release,selector,region,tokens,predicates,cfg)
+    selected_head=(False,None) if request and request.output_sort=='EVENT_DESCRIPTION' else select_head(state,release,selector,region,tokens,predicates,cfg,request=request)
     if selected_head is None:
         state.diag('PREDICATE_FUNCTION_UNRESOLVED',region.region_id);return []
     predicate,proof=selected_head

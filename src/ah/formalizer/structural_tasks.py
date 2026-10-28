@@ -82,7 +82,8 @@ def _choose(state,release,selector,region,cfg,slot,options,question,*,empty=None
         if not values:
             if empty is not None and not supported:return complete_empty()
             state.syntax_trace.append({'kind':'STRUCTURAL_TASK','region_ref':region.region_id,
-                'slot':slot,'status':'EXHAUSTED','reason':'NO_REMAINING_CANDIDATES','examined':examined})
+                'slot':slot,'status':'EXHAUSTED','reason':'NO_REMAINING_CANDIDATES','examined':examined,
+                'enumeration_complete':True})
             return None
         examined+=len(values)
         choices=[{'candidate_id':v['candidate_id'],'label':v['label']} for v in values]
@@ -222,7 +223,9 @@ def span(state,release,selector,region,tokens,cfg,slot,question,*,exclude=(),rec
         starts=({'candidate_id':'start:'+t.token_id,'label':'Start at «'+t.span+'» @'+str(t.start),
                  'index':i,'token_ref':t.token_id} for i,t in eligible if i not in rejected)
         start=initial or choose(state,release,selector,region,cfg,slot+'_start',starts,question+' Select the FIRST token.'+
-            (' Earlier starts have no accepted endpoint: '+str(sorted(rejected))+'.' if rejected else ''))
+            (' No offered endpoint was accepted for these earlier starts under the current restrictions: '+
+             ', '.join('«'+tokens[i].span+'» @'+str(tokens[i].start) for i in sorted(rejected))+
+             '. This does not reject the remaining starts.' if rejected else ''))
         initial=None
         if start is None:
             if state.syntax_trace[-1].get('status')=='EXHAUSTED':exhausted()

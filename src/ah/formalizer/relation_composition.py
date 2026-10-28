@@ -221,6 +221,10 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child):
         for option in options:
             if option['relation'] in request.surrounding_relations:
                 option['label']='An additional relation INSIDE the target words: '+option['label']+'; not the already handled outer relation'
+    if request and request.pending_propositions:
+        for option in options:
+            if option['relation']=='CONTENT_REFERENCE':
+                option['label']+='; only an ADDITIONAL content slot, not a child already assigned by the parent requirements'
     supplied=''
     if request and request.pending_proposition_roles:
         supplied=('A dependent infinitive is supplied separately; other clauses still inside the target need analysis. ')
@@ -369,7 +373,8 @@ def content(state,release,selector,region,tokens,cfg,request,compose_child,proof
     if not owner_choice or not licensed(state,owner_choice[1],owner_ref=owner_choice[0]['owner_ref']):return block(state,region)
     owner=next(t for t in parent if t.token_id==owner_choice[0]['owner_ref'])
     source_parts={'content_refs':[t.token_id for t in body],'parent_refs':[t.token_id for t in parent]}
-    link=content_role(state,release,selector,region,cfg,owner,parent,body_text,source_parts)
+    link=content_role(state,release,selector,region,cfg,owner,parent,body_text,source_parts,
+        reserved_roles=(request.pending_propositions or {}).get(owner.token_id,()) if request else ())
     if not link:return block(state,region)
     relation,license=link
     inherited=dict(request.pending_propositions or {}) if request else {}
@@ -415,24 +420,29 @@ def content(state,release,selector,region,tokens,cfg,request,compose_child,proof
     return frames
 
 
-def content_role(state,release,selector,region,cfg,owner,parent,body_text,source_parts):
+def content_role(state,release,selector,region,cfg,owner,parent,body_text,source_parts,*,reserved_roles=()):
     role_registry={r['role_id'] for r in release.entries('RoleRegistry') if not r.get('allowed_argument_kinds') or set(r['allowed_argument_kinds']) & {'PROPOSITION','EVENT'}}
     senses={s['sense_id'] for s in release.entries('R-S') if any(s['lemma']==v.lemma and s['POS']==v.pos for v in owner.variants)}
     if senses:
         role_registry &= {r['role_id'] for v in release.entries('R-V') if v['sense_id'] in senses
                           for r in v['roles'] if set(r.get('argument_types',())) & {'PROPOSITION','EVENT'}}
+    # These are addressed assignments for this predicate, not every possible
+    # pending role and not assignments belonging to another predicate.
+    reserved=sorted(set(reserved_roles));role_registry.difference_update(reserved)
     choices=[]
     from .probe_wording import proposition_role
     for role in sorted(role_registry):
         declared=[a for a in release.entries('AttitudeMap') if a['argument_role']==role and any(v.lemma==a['lemma'] for v in owner.variants)]
         attitudes=sorted({a['attitude'] for a in declared}) if declared else ['QUOTED','EMBEDDED','HYPOTHETICAL','UNKNOWN']
         for attitude in attitudes:
-            choices.append({'candidate_id':role+':'+attitude,'owner_ref':owner.token_id,'role':role,'attitude':attitude,**source_parts,
+            choices.append({'candidate_id':role+':'+attitude,'owner_ref':owner.token_id,'role':role,'attitude':attitude,
+                'reserved_roles':reserved,**source_parts,
                 'label':role+' of «'+owner.span+'»; attitude='+attitude+
                 '; '+proposition_role(role)})
     return choose(state,release,selector,region,cfg,'structural_content_role',choices,
         'Selected owner: «'+owner.span+'» @'+str(owner.start)+'. Selected dependent content: «'+body_text+'». '
         'Remaining parent: «'+' '.join(t.span for t in parent)+'». '
+        +('Already assigned slots of THIS owner: '+', '.join(reserved)+'. Select a different slot; the assigned content is not being reconsidered. ' if reserved else '')+
         'Choose the role and status of THIS content for THIS predicate. '
         'QUOTED=reported; EMBEDDED=mental content; HYPOTHETICAL=intended/possible; UNKNOWN=unspecified. '
         'None asserts the child. No canonical lexical identity is inferred.')
