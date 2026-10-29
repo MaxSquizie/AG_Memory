@@ -46,7 +46,7 @@ def compatible(marker,reading,features):
     for feature in features:
         a=getattr(marker,feature);b=reading.get(feature)
         if feature=='cases':
-            if not a or not b or not set(a)&set(b):return False
+            if a and b and not set(a)&set(b):return False
         elif a is not None and b is not None and a!=b:return False
     return True
 
@@ -92,6 +92,24 @@ def _bind(state,release,selector,region,frames,matches,cfg,spend):
             state.diag('COMPONENT_SEARCH_INCOMPLETE' if values else 'QUANTIFIER_HEAD_UNRESOLVED',region.region_id)
             return None
         domains[mid]=values;specs[mid]=(bounds,anchors,rule)
+    # All these frames belong to the selected child, not competing parses.
+    # Binding cannot rewrite an established reading in one of its uses.
+    for mid,values in domains.items():
+        compatible_values={}
+        for cid,value in values.items():
+            consistent=True
+            for frame in frames:
+                spend()
+                if value['head_ref'] not in frame.argument_token_refs or frame.semantic.get('structural_unresolved'):continue
+                if clean(frame.semantic.get('morph_bindings',{}).get(value['head_ref'],{}))!=value['reading']:
+                    consistent=False;break
+            if consistent:compatible_values[cid]=value
+        if not compatible_values:
+            # Different records may be compatible refinements (unknown vs
+            # known), so this is not proof that the language reading is false.
+            state.diag('QUANTIFIER_READING_UNRESOLVED',region.region_id)
+            return None
+        domains[mid]=compatible_values
     graph=DomainNetwork(domains);ids=list(domains)
     for i,a in enumerate(ids):
         for b in ids[i+1:]:
@@ -141,7 +159,7 @@ def _bind(state,release,selector,region,frames,matches,cfg,spend):
         role=rule['restriction_pattern']['role'];token=evidence[head]
         fid='quantifier-restriction:'+digest([mid,value])
         license={'rule':deepcopy(rule),'head_ref':head,'variable':variable,'decision_ref':key,
-                 'candidate_id':value['candidate_id'],'marker_refs':[t.token_id for t in anchors]}
+                 'candidate_id':value['candidate_id'],'binding_slot':mid,'selected_reading':deepcopy(reading),'marker_refs':[t.token_id for t in anchors]}
         semantic={'proposed_roles':{head:role},'bound_arguments':{head:variable},
             'morph_bindings':{head:reading},'lexical_units':{head:{'head_ref':head,'anchor_refs':[head],
                 'surface':token.span,'mention_ref':head}},'quantifier_restriction':license,
@@ -193,6 +211,12 @@ def licensed(state,release,frame):
                for m in re.finditer(rule['pattern'],state.text,re.I)):return False
     reading=frame.semantic.get('morph_bindings',{}).get(tid)
     if not reading or not generic and not any(compatible(v,reading,rule['restriction_pattern']['agreement']) for t in markers for v in t.variants):return False
+    # Attestation alone allows several readings of one occurrence. The
+    # restriction must keep the exact reading selected by this binder.
+    selected_reading=license.get('selected_reading')
+    if (selected_reading is None or clean(reading)!=selected_reading
+            or license.get('candidate_id')!='quantifier-head:'+digest([
+                license.get('binding_slot'),tid,selected_reading])):return False
     from .nominal_readings import attested
     return (attested(state,tid,reading) and frame.predicate_token_ref==tid
         and frame.semantic['proposed_roles']=={tid:restriction_role(frame,tid)}
