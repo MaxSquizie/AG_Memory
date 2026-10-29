@@ -38,3 +38,15 @@ def operations(state,frame,tid,tag,measures=(),reference=None):
     binding=({'binding_id':bid,'mention_ref':mention_ref,'target_ref':mid,'source_tag':tag,'premise_support_refs':state.observation.get('entity_binding_grounds',{}).get(mention_ref,[]),'mention_features':mention_features(ev),**({'binding_kind':'UNRESOLVED_NOMINAL',
         'reference_constraint':unit['reference_constraint']} if placeholder else {}),**(reference or {})})
     return entity,binding
+
+
+def measures_for(state,release,frame):
+    """The same selected predicate mapping for ordinary and dependency writes."""
+    d=state.decisions[frame.frame_id+'|predicate_value']
+    selected=frame.semantic['candidate_specs'][d.selected[0]]
+    from .action_descriptions import schema_roles
+    roles=schema_roles(selected,set(selected['roles'].values())|set(frame.semantic.get('proposition_args',{}))|
+                       set(selected.get('implicit_roles',()))|set(selected.get('spatial_roles',())))
+    mappings=[m for m in release.entries('TemplateMap') if m['sense_id']==selected.get('sense_id') and set(m.get('roles',()))==roles]
+    return [m for m in release.resources.get('MeasureSchema',{}).get('entries',())
+            if len(mappings)==1 and m['template_ref']==mappings[0]['template_ref'] and m.get('literal_syntax')]

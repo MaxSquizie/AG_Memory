@@ -51,6 +51,7 @@ def resolve(state, release, selector):
         if old['interpretation_decision_ref'] not in active:
             unresolve(state,old['interpretation_decision_ref'],'REFERENCE_TASK_REMOVED')
     state.observation['nominal_reference_bindings']={}
+    pending={}
     for key, (mention, constraint) in current.items():
         decision = key+'|referent'
         read = state.observation.get('nominal_reference_reads',{}).get(decision,{})
@@ -67,12 +68,12 @@ def resolve(state, release, selector):
             from .nominal_reference_pages import select
             probed=True
             chosen,page_proofs,incomplete=select(state,release,selector,decision,options,state.text,(start,end),
-                {o['candidate_id']:r['entity_ref'] for o,r in zip(options,rows)},
+                {o['candidate_id']:r.get('entity_ref',r.get('selection_target')) for o,r in zip(options,rows)},
                 lambda page:inputs(state,(constraint['head_ref'],),page),
                 question='Resolve «'+constraint['raw']+'» as one noun group. Constraint='+
                 constraint['identity_constraint']+'. Select only compatible antecedents supported by these source excerpts. '+
                 'Proximity and name spelling alone do not prove identity. An already introduced unnamed or relative place is a valid antecedent: unknown coordinates/name do not make its reference unresolved. '
-                'Choose an existing referent, not a new object. If several antecedents fit, list their numbers; use ? when evidence is insufficient to assess them.')
+                'Choose an existing referent or the source expression whose referent this expression denotes, not a new object. A mention option does not assert a grounded identity: its dependencies will be resolved separately. If several antecedents fit, list their numbers; use ? when evidence is insufficient to assess them.')
             if snapshot(state,constraint,decision)[2]!=domain_hash:
                 chosen=None;incomplete=True
                 unresolve(state,decision,'REFERENCE_DOMAIN_CHANGED_DURING_CALL')
@@ -81,20 +82,22 @@ def resolve(state, release, selector):
             row=by_id[chosen]
             from .state import Ground
             from .reference_structure import signature
-            local_key=next((k for k in ('local_spatial_anchor','local_nominal_anchor','local_group_anchor') if row.get(k)),None)
+            local_key=next((k for k in ('local_spatial_anchor','local_nominal_anchor','local_group_anchor','local_reference_anchor') if row.get(k)),None)
             state.decisions[decision].grounds.append(Ground('D' if local_key else 'P',
-                'local source anchor: '+row['memory_binding_ref'] if local_key else
-                'frozen active-workspace binding: '+row['memory_binding_ref'],chosen))
-            state.observation.setdefault('nominal_reference_bindings',{})[mention]={
-                'target_ref':row['entity_ref'], 'anchor_binding_ref':row['memory_binding_ref'],
-                'reference_kind':row.get('reference_kind','ENTITY'),
-                **({'member_refs':list(row['member_refs'])} if row.get('reference_kind')=='GROUP' else {}),
-                'premise_support_refs':list(row.get('premise_support_refs',[])),
-                **({local_key:deepcopy(row[local_key])} if local_key else {'context_read_hash':read['context_read_hash']}),
-                'interpretation_decision_ref':decision, 'selected_candidate_id':chosen,
+                'addressed source candidate' if local_key else 'frozen active-workspace binding: '+row['memory_binding_ref'],chosen))
+            binding={'interpretation_decision_ref':decision, 'selected_candidate_id':chosen,
                 'reference_domain_hash':digest(read),'produced_domain_hash':domain_hash,
                 'reference_page_proofs':page_proofs,'structure_signature':signature(state),
                 'reference_constraint':deepcopy(constraint)}
+            if local_key=='local_reference_anchor':
+                pending[mention]=(binding,deepcopy(row[local_key]))
+            else:
+                state.observation['nominal_reference_bindings'][mention]={**binding,
+                    'target_ref':row['entity_ref'], 'anchor_binding_ref':row['memory_binding_ref'],
+                    'reference_kind':row.get('reference_kind','ENTITY'),
+                    **({'member_refs':list(row['member_refs'])} if row.get('reference_kind')=='GROUP' else {}),
+                    'premise_support_refs':list(row.get('premise_support_refs',[])),
+                    **({local_key:deepcopy(row[local_key])} if local_key else {'context_read_hash':read['context_read_hash']})}
         else:
             if not probed:unresolve(state,decision,'DOMAIN_UNAVAILABLE' if incomplete else 'NO_CANDIDATES')
             state.diag('NOMINAL_REFERENCE_SEARCH_INCOMPLETE' if incomplete
@@ -105,6 +108,9 @@ def resolve(state, release, selector):
             'mention_ref':mention, 'constraint':constraint, 'candidate_count':len(rows), 'selected':chosen,
             'produced_domain_hash':domain_hash,'evaluation_incomplete':incomplete,
             'completion_scope':'PRODUCED_REFERENCE_UNION_ONLY'})
+
+    from .nominal_reference_chain import finish
+    finish(state,pending)
 
 
 def unresolve(state,decision_ref,reason):

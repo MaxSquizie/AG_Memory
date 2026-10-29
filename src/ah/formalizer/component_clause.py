@@ -22,6 +22,12 @@ def _build_clause(state,release,selector,region,tokens,p,cfg, *, select=True, at
     temporal = owned_refs(state,tokens)
     # The same released temporal ownership already excludes arguments below.
     # It must also exclude a predicate inside the time expression.
+    from .nominal_reference_groups import owned_function_refs
+    nominal_functions=owned_function_refs(state,tokens)
+    if p.token_id in nominal_functions:
+        state.syntax_trace.append({'kind':'NOMINAL_FUNCTION_PREDICATE_EXCLUDED','region_ref':region.region_id,
+            'predicate_ref':p.token_id})
+        return []
     if p.token_id in temporal:
         state.syntax_trace.append({'kind':'TEMPORAL_PREDICATE_EXCLUDED','region_ref':region.region_id,
             'source_range':list(region.source_range),'predicate_ref':p.token_id,
@@ -37,7 +43,7 @@ def _build_clause(state,release,selector,region,tokens,p,cfg, *, select=True, at
         allowed_cases.update({'gen','nom'})  # nominal dependencies need not fill a predicate role
     nominal_connectors={t for g in nominal_groups for t in g['marker_refs']}
     quantity_markers={t for g in qualitative_groups for t in g.get('quantity_token_refs',[g['marker_ref']]) if t!=g['head_ref']}
-    nominals = [e for e in tokens if e.token_id not in temporal|prep_markers|nominal_connectors|quantity_markers and e != p
+    nominals = [e for e in tokens if e.token_id not in temporal|prep_markers|nominal_connectors|quantity_markers and e != p and e.token_id not in nominal_functions
                 and (e.token_id in groups or any(v.pos in {'NOUN','NPRO'} and (set(v.cases)&allowed_cases or v.origin=='CONTEXTUAL' and not v.cases) for v in e.variants))]
     # The number of nominals is not a grammatical exclusion. Large domains
     # go through constraint reduction, under the same released search budget.

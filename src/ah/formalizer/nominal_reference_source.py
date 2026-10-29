@@ -56,14 +56,8 @@ def emit_anchor(state,release,anchor,tag,frag,emit):
     if anchor.get('source_tag')!=tag or not any(r['local_nominal_anchor']==anchor for r in candidates):
         raise ValueError('NOMINAL_REFERENCE_LOCAL_ANCHOR_STALE')
     frame=next(f for f in state.frames if f.frame_id==anchor['frame_ref'])
-    d=state.decisions[frame.frame_id+'|predicate_value'];selected=frame.semantic['candidate_specs'][d.selected[0]]
-    from .action_descriptions import schema_roles
-    roles=schema_roles(selected,set(selected['roles'].values())|set(frame.semantic.get('proposition_args',{}))|
-                       set(selected.get('implicit_roles',()))|set(selected.get('spatial_roles',())))
-    mappings=[m for m in release.entries('TemplateMap') if m['sense_id']==selected.get('sense_id') and set(m.get('roles',()))==roles]
-    measures=[m for m in release.resources.get('MeasureSchema',{}).get('entries',())
-              if len(mappings)==1 and m['template_ref']==mappings[0]['template_ref'] and m.get('literal_syntax')]
-    from .nominal_entity_plan import operations
+    from .nominal_entity_plan import operations,measures_for
+    measures=measures_for(state,release,frame)
     entity,binding=operations(state,frame,anchor['token_ref'],tag,measures)
     if binding['target_ref']!=anchor['entity_ref'] or binding.get('binding_kind'):
         raise ValueError('NOMINAL_REFERENCE_LOCAL_ANCHOR_INVALID')

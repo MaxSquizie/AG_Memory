@@ -2,7 +2,7 @@
 from .canonical_ledger import digest
 
 
-def payload(state, unit):
+def _payload_one(state, unit):
     constraint=unit.get('reference_constraint')
     if constraint is None:
         return None
@@ -28,7 +28,10 @@ def payload(state, unit):
     explicit=state.observation.get('clarification_choices',{}).get(binding['interpretation_decision_ref'])
     if explicit!=binding['selected_candidate_id'] and not live(state,binding.get('reference_page_proofs',[])):
         raise ValueError('NOMINAL_REFERENCE_PAGE_PROOF_STALE')
-    if binding.get('local_group_anchor'):
+    if binding.get('local_reference_anchor'):
+        from .nominal_reference_chain import check
+        check(state,binding)
+    elif binding.get('local_group_anchor'):
         from .nominal_group_source import rows
         if not any(r['local_group_anchor']==binding['local_group_anchor'] for r in rows(state,constraint)):
             raise ValueError('NOMINAL_GROUP_ANCHOR_STALE')
@@ -52,6 +55,22 @@ def payload(state, unit):
     return {'binding_kind':'NOMINAL_REFERENCE',**binding}
 
 
+def payload(state,unit):
+    # Iterative traversal avoids making language nesting depend on Python's
+    # recursion limit. A malformed self-supporting chain cannot license a write.
+    first=_payload_one(state,unit)
+    current=first;seen={unit['mention_ref']} if first else set()
+    while current and current.get('local_reference_anchor'):
+        from .nominal_reference_chain import check
+        frame,parent_unit=check(state,current)
+        mention=parent_unit['mention_ref']
+        if mention in seen:raise ValueError('NOMINAL_REFERENCE_DEPENDENCY_CYCLE')
+        seen.add(mention)
+        current=_payload_one(state,parent_unit)
+        if current is None:raise ValueError('NOMINAL_REFERENCE_DEPENDENCY_STALE')
+    return first
+
+
 def validate(p, ledger, journal, store=None):
     if p.get('binding_kind')!='NOMINAL_REFERENCE':
         return
@@ -62,6 +81,10 @@ def validate(p, ledger, journal, store=None):
     if (not anchor or proof.get('target_ref')!=p['target_ref'] or
             not ledger.binding_live(anchor,ledger.paths()) or journal is None):
         raise ValueError('NOMINAL_REFERENCE_GROUND_INVALID')
+    if p.get('local_reference_anchor'):
+        from .nominal_reference_chain import validate as validate_dependency
+        validate_dependency(p,proof)
+        return
     if p.get('local_group_anchor'):
         from .nominal_group_source import validate_reference
         validate_reference(p,proof)

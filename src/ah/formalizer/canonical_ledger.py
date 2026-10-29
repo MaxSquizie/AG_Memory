@@ -157,24 +157,31 @@ class CanonicalLedger:
             live.update(new)
 
     def binding_live(self, bid, paths):
-        binding=self.data['bindings'].get(bid,{})
-        tag=binding.get('source_tag')
-        if tag is not None and self.data['observations'].get(digest(tag),{}).get('status','LIVE')!='LIVE':
-            return False
-        if binding.get('status')!='LIVE' or any(p not in paths for p in binding.get('premise_support_refs',())):
-            return False
-        if binding.get('binding_kind')=='NOMINAL_GROUP_ANCHOR':
-            members=binding.get('member_binding_refs',())
-            return bool(members) and all(self.binding_live(m,paths) for m in members)
-        if binding.get('binding_kind')=='NOMINAL_REFERENCE' or (binding.get('binding_kind')=='NARRATIVE_MEMBER' and binding.get('anchor_binding_ref')):
-            anchor=self.data['bindings'].get(binding.get('anchor_binding_ref'),{})
-            return (anchor.get('target_ref')==binding.get('target_ref')
-                    and self.binding_live(binding['anchor_binding_ref'],paths))
-        if binding.get('binding_kind')=='SPATIAL_REFERENCE':
-            anchor=self.data['bindings'].get(binding.get('anchor_binding_ref'),{})
-            return (anchor.get('binding_kind')=='SPATIAL_ANCHOR'
-                    and anchor.get('target_ref')==binding.get('target_ref')
-                    and self.binding_live(binding['anchor_binding_ref'],paths))
+        # Dependency depth is a data property, not Python call-stack depth.
+        # Grey nodes identify an ungrounded cycle; a shared black dependency
+        # is a valid DAG join and must not be mistaken for a cycle.
+        colour={};work=[(bid,False)]
+        while work:
+            key,leaving=work.pop()
+            if leaving:colour[key]=2;continue
+            if colour.get(key)==2:continue
+            if colour.get(key)==1:return False
+            binding=self.data['bindings'].get(key,{})
+            tag=binding.get('source_tag')
+            if tag is not None and self.data['observations'].get(digest(tag),{}).get('status','LIVE')!='LIVE':return False
+            if binding.get('status')!='LIVE' or any(p not in paths for p in binding.get('premise_support_refs',())):return False
+            dependencies=[];kind=binding.get('binding_kind')
+            if kind=='NOMINAL_GROUP_ANCHOR':
+                dependencies=list(binding.get('member_binding_refs',()))
+                if not dependencies:return False
+            elif kind in {'NOMINAL_REFERENCE','SPATIAL_REFERENCE'} or (kind=='NARRATIVE_MEMBER' and binding.get('anchor_binding_ref')):
+                anchor_ref=binding.get('anchor_binding_ref')
+                anchor=self.data['bindings'].get(anchor_ref,{})
+                if anchor.get('target_ref')!=binding.get('target_ref'):return False
+                if kind=='SPATIAL_REFERENCE' and anchor.get('binding_kind')!='SPATIAL_ANCHOR':return False
+                dependencies=[anchor_ref]
+            colour[key]=1;work.append((key,True))
+            work.extend((dependency,False) for dependency in dependencies)
         return True
 
     def f_visible(self):

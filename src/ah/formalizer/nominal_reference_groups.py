@@ -13,6 +13,15 @@ def functional(token):
     return bool(token.variants) and all(MARK in v.features for v in token.variants)
 
 
+def owned_function_refs(state,tokens):
+    """Ownership is occurrence-local; a shared head remains a nominal bearer."""
+    from .nominal_functions import rows
+    refs={t.token_id for t in tokens if functional(t)}
+    for row in rows(state,tokens,'REFERENCE'):
+        refs.update(r for r in row['function_refs'] if r!=row['head_ref'])
+    return refs
+
+
 def validate(cfg):
     policy = cfg.get('nominal_references')
     if not policy:

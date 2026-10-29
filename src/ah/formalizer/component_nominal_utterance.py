@@ -9,10 +9,12 @@ def candidates(state,release,region,tokens,cfg,request=None,selector=None,quanti
     if any(v.pos=='VERB' and v.mood!='imperative' for t in tokens for v in t.variants):return []
     from .component_phrases import prepositional_groups
     governed={t for g in prepositional_groups(tokens,state=state,constraints=cfg.get('_task_constraints')).values() for t in g['anchor_refs']}
+    from .nominal_reference_groups import owned_function_refs
+    function_refs=owned_function_refs(state,tokens)
     result=[]
     for e in tokens:
         if request is not None and e.token_id!=request.head_ref:continue
-        if e.token_id in governed:continue
+        if e.token_id in governed|function_refs:continue
         for v in e.variants:
             cases=request.allowed_cases if request is not None else {'nom'}
             if v.pos!='NOUN' or not v.cases & set(cases):continue
@@ -30,7 +32,7 @@ def candidates(state,release,region,tokens,cfg,request=None,selector=None,quanti
             if request is not None and cfg.get('dependency_reduction'):
                 from .component_dependency_reduction import reduce
                 from .component_dependency_domains import clean
-                nominals=[t for t in tokens if any(m.pos in {'NOUN','NPRO'} for m in t.variants)]
+                nominals=[t for t in tokens if t.token_id not in function_refs and any(m.pos in {'NOUN','NPRO'} for m in t.variants)]
                 roles=[{'role_id':cfg['subject_role'],'allowed_cases':sorted(v.cases)}]
                 reduced=reduce(state,release,selector,region,tokens,e,v,roles,nominals,{},cfg,
                                required_roots={e.token_id:cfg['subject_role']},required_readings={e.token_id:clean(v)},quantities=quantities)

@@ -77,29 +77,16 @@ def build_plan(state,release,store):
                 continue
             from .nominal_reference_binding import payload as reference_payload
             reference=reference_payload(state,unit)
-            if reference and reference.get('reference_kind')=='GROUP':
-                from .nominal_group_source import emit_anchor as emit_group_anchor
-                if reference.get('local_group_anchor'):
-                    emit_group_anchor(state,release,reference['local_group_anchor'],tag,frag,emit)
-                elif not store.has_uid(reference['target_ref']) or store._store.kind_of(reference['target_ref']).value!='K':
-                    raise ValueError('GROUP_REFERENCE_STALE')
-                mid=reference['target_ref'];bid='binding:'+digest([tag,mention_ref,mid])
-                emit('SET_IDENTITY_BINDING',{'binding_id':bid,'mention_ref':mention_ref,'source_tag':tag,**reference},frag)
+            if reference:
+                from .nominal_reference_plan import emit as emit_nominal_reference
+                mid,bid=emit_nominal_reference(state,release,store,f,tid,reference,tag,frag,emit,measures)
                 mention_roles.setdefault(role,[]).append(mid)
                 mention_entities[tid]=mid;mention_bindings[tid]=bid
                 continue
-            local_place=reference.get('local_spatial_anchor') if reference else None
-            if local_place:
-                from .spatial_plan import emit_anchor
-                emit_anchor(local_place,tag,frag,emit)
-            local_nominal=reference.get('local_nominal_anchor') if reference else None
-            if local_nominal:
-                from .nominal_reference_source import emit_anchor
-                emit_anchor(state,release,local_nominal,tag,frag,emit)
             from .nominal_entity_plan import operations
             entity,binding=operations(state,f,tid,tag,measures,reference)
             mid=entity['uid'];bid=binding['binding_id']
-            if entity['reference_existing'] and not local_place and not local_nominal and (not store.has_uid(mid) or store._store.kind_of(mid).value!='M'):
+            if entity['reference_existing'] and (not store.has_uid(mid) or store._store.kind_of(mid).value!='M'):
                 raise ValueError('IDENTITY_CONFLICT')
             emit('ENSURE_ENTITY',entity,frag)
             emit('SET_IDENTITY_BINDING',binding,frag)
