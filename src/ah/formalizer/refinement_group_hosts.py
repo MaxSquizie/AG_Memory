@@ -43,4 +43,9 @@ def add_host(frame, projected):
     frame.semantic['refinement_binding']={'kind':projected.get('kind','PARTICIPLE'),'host_token_ref':projected['host'].token_id,
         'host_member_refs':list(members),'host_role':role,'voice_feature':projected['rule'].get('feature'),
         'predicate_ref':frame.predicate_token_ref}
+    if projected.get('relative_marker'):
+        from .component_policy import _morph
+        marker=projected['relative_marker']
+        frame.semantic['morph_bindings'][marker.token_id]=_morph(projected['marker_reading'])
+        frame.semantic['refinement_binding']['marker_ref']=marker.token_id
     frame.semantic['component_questions'].append({'kind':'PARTICIPLE_GROUP_HOST',**frame.semantic['refinement_binding']})

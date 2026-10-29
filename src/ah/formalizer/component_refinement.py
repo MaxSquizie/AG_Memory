@@ -371,7 +371,7 @@ def _compose_lexical_area(state, release, selector, region, tokens, cfg, depth=0
             # for this edge is the original slot, never a separate guessed M.
             hosts.setdefault(tid,(frame,h,hv))
     group_hosts={}
-    if boundary['kind'] in {'PARTICIPLE','BOUND_DESCRIPTION'}:
+    if boundary['kind'] in {'PARTICIPLE','BOUND_DESCRIPTION','RELATIVE_PRONOUN'}:
         from .refinement_group_hosts import candidates as group_candidates
         group_hosts=group_candidates(accepted(frames),evidence,body,all_hosts=cfg.get('_literal_relation',False),
             require_participle_agreement=boundary['kind']=='PARTICIPLE')
@@ -397,7 +397,7 @@ def _compose_lexical_area(state, release, selector, region, tokens, cfg, depth=0
     owner,host,reading=selected_group[:3] if selected_group else hosts[chosen]
     if boundary['kind']=='RELATIVE_PRONOUN' or boundary['kind']=='RELATIVE' and boundary['rule'].get('POS')=='ADJF':
         from .relative_pronoun import compose as compose_relative
-        children,host_frame=compose_relative(state,release,selector,region,body,owner,host,reading,boundary['rule'],cfg,depth)
+        children,host_frame=compose_relative(state,release,selector,region,body,owner,host,reading,boundary['rule'],cfg,depth,group=selected_group[3] if selected_group else None)
         description=select_child(state,release,selector,region,children,'NOMINAL_DESCRIPTION',
             'This area describes the established nominal «'+host.span+'»; preserve its selected morphology and reference.')
         if description is None or host_frame is None:

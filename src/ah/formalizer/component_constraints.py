@@ -92,4 +92,6 @@ def host_live(state,row):
 
 
 def frame_hosts_live(state,frame):
-    return all(host_live(state,r) for r in frame.semantic.get('nominal_host_evidence',()))
+    from .relative_pronoun import binding_live
+    return (binding_live(state,frame)
+            and all(host_live(state,r) for r in frame.semantic.get('nominal_host_evidence',())))

@@ -4,7 +4,7 @@ from .component_policy import _morph, _features, compatible
 from .component_probe import _probe
 
 
-def compose(state,release,selector,region,body,owner,host,reading,rule,cfg,depth):
+def compose(state,release,selector,region,body,owner,host,reading,rule,cfg,depth,*,group=None):
     from .component_refinement import compose_area,region_for,root,accepted
     marker=body[0]; options={}
     for mv in marker.variants:
@@ -52,6 +52,7 @@ def compose(state,release,selector,region,body,owner,host,reading,rule,cfg,depth
     child_tokens=body[1:]
     if not child_tokens:return [],None
     cr=region_for(state,region,child_tokens,'RELATIVE_PRONOUN')
+    if group is not None:options[chosen]['group']=group
     frames=compose_area(state,release,selector,cr,child_tokens,cfg,depth+1,attachment=options[chosen])
     if rule.get('general') and not all(licensed(state,p) for p in options[chosen]['function_proofs']):
         state.diag('RELATIVE_PRONOUN_PREMISE_RETIRED',marker.token_id)
@@ -61,7 +62,11 @@ def compose(state,release,selector,region,body,owner,host,reading,rule,cfg,depth
     hosts=[f for f in accepted(frames) if f.semantic.get('refinement_binding',{}).get('marker_ref')==marker.token_id]
     if content is None or len(hosts)!=1:return frames,None
     host_frame=hosts[0]
-    host_frame.semantic['lexical_units'][host.token_id]=dict(owner.semantic['lexical_units'][host.token_id])
+    if rule.get('general'):
+        host_frame.semantic['refinement_binding']['source_relative_binding']=True
+        host_frame.semantic['refinement_binding']['function_proofs']=options[chosen]['function_proofs']
+    if group is None:
+        host_frame.semantic['lexical_units'][host.token_id]=dict(owner.semantic['lexical_units'][host.token_id])
     state.syntax_trace.append({'kind':'RELATIVE_PRONOUN_BINDING','decision_ref':key,
         'marker_ref':marker.token_id,'host_token_ref':host.token_id,'host_role':options[chosen]['host_role'],
         'predicate_ref':host_frame.predicate_token_ref,'content_ref':content.frame_id})
@@ -78,7 +83,7 @@ def projection(pv,attachment,cfg):
 def role_readings(frame,tid,evidence,default):
     """Use the pronoun's case for its clause role, never rewrite the antecedent."""
     binding=frame.semantic.get('refinement_binding',{})
-    if binding.get('kind')!='RELATIVE_PRONOUN' or binding.get('host_token_ref')!=tid:
+    if binding.get('kind')!='RELATIVE_PRONOUN' or tid not in {binding.get('host_token_ref'),*binding.get('host_member_refs',())}:
         return default
     if frame.semantic.get('proposed_roles',{}).get(tid)!=binding.get('host_role'):return ()
     marker=evidence.get(binding.get('marker_ref'))
@@ -86,3 +91,18 @@ def role_readings(frame,tid,evidence,default):
     if marker is None or not selected:return ()
     clean=lambda row:{k:v for k,v in row.items() if k!='score'}
     return tuple(v for v in marker.variants if clean(_morph(v))==clean(selected))
+
+
+def binding_live(state,frame):
+    """Retain relative-role and reading evidence beyond child construction."""
+    binding=frame.semantic.get('refinement_binding',{})
+    proofs=binding.get('function_proofs')
+    if proofs is None:return not binding.get('source_relative_binding')  # legacy resource-defined projection
+    from .structural_tasks import licensed
+    if len(proofs)!=2 or not all(licensed(state,p) for p in proofs):return False
+    marker=binding.get('marker_ref')
+    reading=frame.semantic.get('morph_bindings',{}).get(marker)
+    return (proofs[0].get('candidate_id')==binding.get('host_role')
+            and reading is not None and proofs[1].get('candidate_id')==digest(reading)
+            and all(frame.semantic.get('proposed_roles',{}).get(t)==binding.get('host_role')
+                    for t in binding.get('host_member_refs',[binding.get('host_token_ref')])))
