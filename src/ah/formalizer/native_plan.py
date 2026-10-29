@@ -77,6 +77,17 @@ def build_plan(state,release,store):
                 continue
             from .nominal_reference_binding import payload as reference_payload
             reference=reference_payload(state,unit)
+            if reference and reference.get('reference_kind')=='GROUP':
+                from .nominal_group_source import emit_anchor as emit_group_anchor
+                if reference.get('local_group_anchor'):
+                    emit_group_anchor(state,release,reference['local_group_anchor'],tag,frag,emit)
+                elif not store.has_uid(reference['target_ref']) or store._store.kind_of(reference['target_ref']).value!='K':
+                    raise ValueError('GROUP_REFERENCE_STALE')
+                mid=reference['target_ref'];bid='binding:'+digest([tag,mention_ref,mid])
+                emit('SET_IDENTITY_BINDING',{'binding_id':bid,'mention_ref':mention_ref,'source_tag':tag,**reference},frag)
+                mention_roles.setdefault(role,[]).append(mid)
+                mention_entities[tid]=mid;mention_bindings[tid]=bid
+                continue
             local_place=reference.get('local_spatial_anchor') if reference else None
             if local_place:
                 from .spatial_plan import emit_anchor
@@ -107,6 +118,12 @@ def build_plan(state,release,store):
                 members=sorted(set(members))
                 kid='K:'+digest(members)
                 emit('ENSURE_GROUP',{'uid':kid,'members':members},frag); roles[role]=kid
+                # Publish the same terminal group introduction for subsequent
+                # references and active-workspace reads, even without a reference now.
+                from .nominal_group_source import rows as group_rows,emit_anchor as emit_group_anchor
+                anchor=next((r['local_group_anchor'] for r in group_rows(state,{'head_ref':None,'anchor_refs':[]})
+                    if r['local_group_anchor']['frame_ref']==fid and r['local_group_anchor']['role']==role),None)
+                if anchor:emit_group_anchor(state,release,anchor,tag,frag,emit)
             else: raise ValueError('ARGUMENT_CARDINALITY_UNRESOLVED')
         for role,child in f.semantic.get('proposition_args',{}).items():
             roles[role]=tree_node(child.get('tree') or {'frame_ref':child['frame_ref']},frag,active)[0]

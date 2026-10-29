@@ -277,17 +277,21 @@ class AHStoreAdapter(Store):
                 ledger.data['rx_cache'].setdefault(p['record_id'],{**p,'status':'LIVE'})
             elif op.op_type=='SET_IDENTITY_BINDING':
                 event=p.get('binding_kind')=='EVENT_REFERENCE'
-                group=p.get('binding_kind')=='GROUP_REFERENCE'
+                group=(p.get('binding_kind') in {'GROUP_REFERENCE','NOMINAL_GROUP_ANCHOR'} or
+                       p.get('binding_kind')=='NOMINAL_REFERENCE' and p.get('reference_kind')=='GROUP')
                 target=p['target_ref']
                 if not draft.store.has_uid(target) or draft.store.kind_of(target).value not in ({'N','G'} if event else {'K'} if group else {'M'}):
                     raise ValueError('REFERENCE_BINDING_TYPE_INVALID')
-                if group and (not p.get('interpretation_decision_ref') or len(set(p.get('member_refs',())))<2
+                if group and ((p.get('binding_kind')!='NOMINAL_GROUP_ANCHOR' and not p.get('interpretation_decision_ref'))
+                              or len(set(p.get('member_refs',())))<2
                               or target!='K:'+digest(sorted(set(p['member_refs'])))):
                     raise ValueError('GROUP_REFERENCE_GROUND_INVALID')
                 if group and sorted(m.uid for m in draft.store.get_element_any_domain(target).members)!=sorted(set(p['member_refs'])):
                     raise ValueError('GROUP_REFERENCE_MEMBERS_MISMATCH')
                 from .spatial_entities import validate_binding as validate_spatial_binding
                 validate_spatial_binding(p,ledger,draft.store,self._journal)
+                from .nominal_group_source import validate as validate_group_anchor
+                validate_group_anchor(p,ledger)
                 from .nominal_reference_binding import validate as validate_nominal_reference
                 validate_nominal_reference(p,ledger,self._journal,draft.store)
                 from .narrative_group_plan import validate_binding as validate_member

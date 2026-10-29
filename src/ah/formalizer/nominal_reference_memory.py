@@ -81,12 +81,14 @@ def resolve(state, release, selector):
             row=by_id[chosen]
             from .state import Ground
             from .reference_structure import signature
-            local_key=next((k for k in ('local_spatial_anchor','local_nominal_anchor') if row.get(k)),None)
+            local_key=next((k for k in ('local_spatial_anchor','local_nominal_anchor','local_group_anchor') if row.get(k)),None)
             state.decisions[decision].grounds.append(Ground('D' if local_key else 'P',
                 'local source anchor: '+row['memory_binding_ref'] if local_key else
                 'frozen active-workspace binding: '+row['memory_binding_ref'],chosen))
             state.observation.setdefault('nominal_reference_bindings',{})[mention]={
                 'target_ref':row['entity_ref'], 'anchor_binding_ref':row['memory_binding_ref'],
+                'reference_kind':row.get('reference_kind','ENTITY'),
+                **({'member_refs':list(row['member_refs'])} if row.get('reference_kind')=='GROUP' else {}),
                 'premise_support_refs':list(row.get('premise_support_refs',[])),
                 **({local_key:deepcopy(row[local_key])} if local_key else {'context_read_hash':read['context_read_hash']}),
                 'interpretation_decision_ref':decision, 'selected_candidate_id':chosen,

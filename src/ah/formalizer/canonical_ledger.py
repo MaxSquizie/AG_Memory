@@ -163,6 +163,9 @@ class CanonicalLedger:
             return False
         if binding.get('status')!='LIVE' or any(p not in paths for p in binding.get('premise_support_refs',())):
             return False
+        if binding.get('binding_kind')=='NOMINAL_GROUP_ANCHOR':
+            members=binding.get('member_binding_refs',())
+            return bool(members) and all(self.binding_live(m,paths) for m in members)
         if binding.get('binding_kind')=='NOMINAL_REFERENCE' or (binding.get('binding_kind')=='NARRATIVE_MEMBER' and binding.get('anchor_binding_ref')):
             anchor=self.data['bindings'].get(binding.get('anchor_binding_ref'),{})
             return (anchor.get('target_ref')==binding.get('target_ref')

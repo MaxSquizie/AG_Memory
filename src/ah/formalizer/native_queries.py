@@ -82,6 +82,11 @@ def project_native_queries(state,release):
                     if not decision or decision.outcome!='RESOLVED' or tuple(decision.selected)!=(group['entity_ref'],):
                         raise ValueError('GROUP_REFERENCE_UNGROUNDED')
                     value={'entity_ref':group['entity_ref'],'member_refs':group['member_refs']}
+                from .nominal_reference_binding import payload as nominal_reference
+                reference=nominal_reference(state,unit)
+                if reference:
+                    value={'entity_ref':reference['target_ref'],
+                           **({'member_refs':reference['member_refs']} if reference.get('reference_kind')=='GROUP' else {})}
                 if mention_ref in state.observation.get('event_bindings',{}):
                     value={'event_ref':state.observation['event_bindings'][mention_ref],
                            'premise_support_refs':state.observation.get('entity_binding_grounds',{}).get(mention_ref,[])}
@@ -198,7 +203,13 @@ def compile_native_queries(core,roots,context,attention_refs=()):
                     else:
                         if value.get('entity_ref'):
                             resolved=core.ref(value['entity_ref'])
-                            if resolved.kind is not RefKind.M: raise ValueError('IDENTITY_CONFLICT')
+                            if 'member_refs' in value:
+                                members=sorted(set(value['member_refs']))
+                                if (resolved.kind is not RefKind.K or len(members)<2
+                                        or resolved.uid!='K:'+digest(members)
+                                        or sorted(m.uid for m in core.store.get_element_any_domain(resolved.uid).members)!=members):
+                                    raise ValueError('QUERY_GROUP_MEMBERS_MISMATCH')
+                            elif resolved.kind is not RefKind.M: raise ValueError('IDENTITY_CONFLICT')
                         else:
                             candidate=ActantCandidate(ActantRole(role),mention=value['mention'])
                             r=EntityResolver(core).resolve(candidate,context,first_person_ref=context.user_ref,

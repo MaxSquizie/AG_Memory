@@ -28,7 +28,11 @@ def payload(state, unit):
     explicit=state.observation.get('clarification_choices',{}).get(binding['interpretation_decision_ref'])
     if explicit!=binding['selected_candidate_id'] and not live(state,binding.get('reference_page_proofs',[])):
         raise ValueError('NOMINAL_REFERENCE_PAGE_PROOF_STALE')
-    if binding.get('local_nominal_anchor'):
+    if binding.get('local_group_anchor'):
+        from .nominal_group_source import rows
+        if not any(r['local_group_anchor']==binding['local_group_anchor'] for r in rows(state,constraint)):
+            raise ValueError('NOMINAL_GROUP_ANCHOR_STALE')
+    elif binding.get('local_nominal_anchor'):
         from .nominal_reference_source import rows
         if not any(r['memory_binding_ref']==binding['anchor_binding_ref']
                    and r['local_nominal_anchor']==binding['local_nominal_anchor'] for r in rows(state,constraint)):
@@ -58,6 +62,10 @@ def validate(p, ledger, journal, store=None):
     if (not anchor or proof.get('target_ref')!=p['target_ref'] or
             not ledger.binding_live(anchor,ledger.paths()) or journal is None):
         raise ValueError('NOMINAL_REFERENCE_GROUND_INVALID')
+    if p.get('local_group_anchor'):
+        from .nominal_group_source import validate_reference
+        validate_reference(p,proof)
+        return
     if p.get('local_nominal_anchor'):
         from .nominal_reference_source import validate as validate_source
         validate_source(p,proof)
