@@ -58,11 +58,13 @@ class ChildTasks:
             blocked=reads['blocked'] or any('INCOMPLETE' in d.code or d.code in {
                 'COMPUTATION_LIMIT','RESOURCE_MISSING','VALENCY_UNKNOWN','INTEGRITY_ERROR',
                 'COMPONENT_PROBE_FAILED'} for d in diagnostics)
-            from .composition_tree import roots
+            from .task_contracts import child_result
+            receipt=child_result(ChildFrames(result,task_key=key),diagnostics,pending=pending,blocked=blocked)
             self.cache[cache_key]={'frames':deepcopy(list(result)),
-                'complete':len(roots(result))==1 and not pending and not blocked,
+                'complete':receipt.structure_complete,
+                'receipt':receipt,
                 'pending':pending,'blocked':blocked,'diagnostics':diagnostics}
-            return ChildFrames(result,task_key=key)
+            return receipt
         finally:
             self.reads.pop();self.active.remove(key)
 
@@ -81,11 +83,20 @@ class ChildTasks:
         self.dispatcher.replace_read('child:'+key)
         from .composition_tree import roots
         selected=[f.frame_id for f in roots(result)]
-        if len(selected)==1:
+        resumed=self.cache[(key,digest(feedback))]
+        if resumed['complete']:
             retired={id(d) for d in base['diagnostics']}
             self.state.diagnostics[:]=[d for d in self.state.diagnostics if id(d) not in retired]
+        else:
+            # Dispatcher retires a previous execution's diagnostics before
+            # recomputing. Parent feedback discharges them only on closure.
+            node=self.dispatcher.nodes['child:'+key]
+            for target in (self.state.diagnostics,resumed['diagnostics'],node['diagnostics']):
+                present={id(d) for d in target}
+                target.extend(d for d in base['diagnostics'] if id(d) not in present)
         self.state.syntax_trace.append({'kind':'COMPOSITION_CHILD_RESUMED','child_key':key,
             'parent_feedback':feedback,'previous_pending':base['pending'],'selected_refs':selected,
+            'structure_complete':resumed['complete'],'search_complete':resumed['receipt'].search_complete,
             'previous_diagnostics':[{'code':d.code,'detail':d.detail} for d in base['diagnostics']]})
         return True
 

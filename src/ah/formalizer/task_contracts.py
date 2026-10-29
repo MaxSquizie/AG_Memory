@@ -126,11 +126,35 @@ def produced(kind,value,diagnostics=()):
         partial=[f for f in roots(value) if f.semantic.get('partial_composition')]
         if len(partial)==1:
             record=partial[0].semantic['partial_composition']
-            return TaskResult(value,TaskOutcome.PARTIAL,False,True,tuple(record['choices']),True,False)
+            return TaskResult(value,TaskOutcome.PARTIAL,False,True,tuple(record['choices']),False,False)
         alternatives=tuple(f.frame_id for f in value if f.semantic.get('composition_domain'))
         if alternatives:return TaskResult(value,TaskOutcome.MULTIPLE,False,True,alternatives)
         from .composition_tree import roots
         if len(roots(value))!=1:return TaskResult(value,TaskOutcome.UNKNOWN,False,True)
-        return TaskResult(value,TaskOutcome.SUPPORTED,False,True,structure_complete=True)
+        return TaskResult(value,TaskOutcome.SUPPORTED,False,True)
     if value is None or value is False:return TaskResult(value,TaskOutcome.UNKNOWN,False,True)
     return TaskResult(value,TaskOutcome.SUPPORTED,False,True)
+
+
+def child_result(value, diagnostics=(), *, pending=(), blocked=False):
+    """Check a selected child boundary, without certifying its search domain.
+
+    This is structural closure only: lexical readiness and write permission
+    remain the responsibility of later stages. Partial choice trees require
+    their own validator and are not closed selected children.
+    """
+    from dataclasses import replace
+    result=produced('COMPOSITION',value,diagnostics)
+    if blocked:
+        return replace(result,outcome=result.outcome if result.outcome==TaskOutcome.BLOCKED else TaskOutcome.INCOMPLETE,structure_complete=False)
+    if result.outcome in {TaskOutcome.BLOCKED,TaskOutcome.INCOMPLETE}:return result
+    if pending:
+        return replace(result,outcome=TaskOutcome.UNKNOWN,structure_complete=False)
+    if result.outcome!=TaskOutcome.SUPPORTED:return result
+    from .composition_tree import roots,validate,forests
+    selected=[f for f in value if not f.semantic.get('structural_unresolved')]
+    if len(roots(selected))!=1:return replace(result,outcome=TaskOutcome.UNKNOWN)
+    try:validate(selected,forests(selected))
+    except ValueError:
+        return replace(result,outcome=TaskOutcome.PARTIAL)
+    return replace(result,structure_complete=True)
