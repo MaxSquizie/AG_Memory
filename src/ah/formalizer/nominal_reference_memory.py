@@ -58,7 +58,8 @@ def resolve(state, release, selector):
         decision = key+'|referent'
         read = state.observation.get('nominal_reference_reads',{}).get(decision,{})
         from .nominal_reference_local import rows as local_rows
-        rows = [*local_rows(state,constraint),*read.get('rows',[])]
+        from .nominal_reference_source import rows as source_rows
+        rows = [*source_rows(state,constraint),*local_rows(state,constraint),*read.get('rows',[])]
         incomplete=not read or bool(read.get('search_incomplete')) or len(rows)>32
         from .reference_presentation import label
         options = [{'candidate_id':'antecedent:'+str(i),
@@ -87,13 +88,14 @@ def resolve(state, release, selector):
             row=by_id[chosen]
             from .state import Ground
             from .reference_structure import signature
-            state.decisions[decision].grounds.append(Ground('D' if row.get('local_spatial_anchor') else 'P',
-                'local source anchor: '+row['memory_binding_ref'] if row.get('local_spatial_anchor') else
+            local_key=next((k for k in ('local_spatial_anchor','local_nominal_anchor') if row.get(k)),None)
+            state.decisions[decision].grounds.append(Ground('D' if local_key else 'P',
+                'local source anchor: '+row['memory_binding_ref'] if local_key else
                 'frozen active-workspace binding: '+row['memory_binding_ref'],chosen))
             state.observation.setdefault('nominal_reference_bindings',{})[mention]={
                 'target_ref':row['entity_ref'], 'anchor_binding_ref':row['memory_binding_ref'],
-                'premise_support_refs':row.get('premise_support_refs',[])[:1],
-                **({'local_spatial_anchor':deepcopy(row['local_spatial_anchor'])} if row.get('local_spatial_anchor') else {'context_read_hash':read['context_read_hash']}),
+                'premise_support_refs':list(row.get('premise_support_refs',[])),
+                **({local_key:deepcopy(row[local_key])} if local_key else {'context_read_hash':read['context_read_hash']}),
                 'interpretation_decision_ref':decision, 'selected_candidate_id':chosen,
                 'reference_domain_hash':digest(read),'structure_signature':signature(state),
                 'reference_constraint':deepcopy(constraint)}

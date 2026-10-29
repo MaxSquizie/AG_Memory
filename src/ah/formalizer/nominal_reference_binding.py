@@ -21,7 +21,12 @@ def payload(state, unit):
             or not binding.get('selected_candidate_id')
             or digest(constraint)!=digest(binding.get('reference_constraint'))):
         raise ValueError('NOMINAL_REFERENCE_SELECTION_STALE')
-    if binding.get('local_spatial_anchor'):
+    if binding.get('local_nominal_anchor'):
+        from .nominal_reference_source import rows
+        if not any(r['memory_binding_ref']==binding['anchor_binding_ref']
+                   and r['local_nominal_anchor']==binding['local_nominal_anchor'] for r in rows(state,constraint)):
+            raise ValueError('NOMINAL_REFERENCE_LOCAL_ANCHOR_STALE')
+    elif binding.get('local_spatial_anchor'):
         from .nominal_reference_local import rows
         if not any(r['memory_binding_ref']==binding['anchor_binding_ref']
                    and digest(r['local_spatial_anchor'])==digest(binding['local_spatial_anchor'])
@@ -46,6 +51,10 @@ def validate(p, ledger, journal, store=None):
     if (not anchor or proof.get('target_ref')!=p['target_ref'] or
             not ledger.binding_live(anchor,ledger.paths()) or journal is None):
         raise ValueError('NOMINAL_REFERENCE_GROUND_INVALID')
+    if p.get('local_nominal_anchor'):
+        from .nominal_reference_source import validate as validate_source
+        validate_source(p,proof)
+        return
     local=p.get('local_spatial_anchor')
     if local is not None:
         meta=store.get_element_any_domain(p['target_ref']).meta.get('relative_place') if store else None

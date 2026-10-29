@@ -371,9 +371,10 @@ def _compose_lexical_area(state, release, selector, region, tokens, cfg, depth=0
             # for this edge is the original slot, never a separate guessed M.
             hosts.setdefault(tid,(frame,h,hv))
     group_hosts={}
-    if boundary['kind']=='PARTICIPLE':
+    if boundary['kind'] in {'PARTICIPLE','BOUND_DESCRIPTION'}:
         from .refinement_group_hosts import candidates as group_candidates
-        group_hosts=group_candidates(accepted(frames),evidence,body,all_hosts=cfg.get('_literal_relation',False))
+        group_hosts=group_candidates(accepted(frames),evidence,body,all_hosts=cfg.get('_literal_relation',False),
+            require_participle_agreement=boundary['kind']=='PARTICIPLE')
     choices=[{'candidate_id':tid,'label':'Existing nominal «'+h.span+'» at '+str([h.start,h.end])}
              for tid,(_,h,_) in hosts.items()]
     choices.extend({'candidate_id':tid,'label':'WHOLE established group «'+h.span+'»'}
@@ -449,7 +450,8 @@ def _compose_lexical_area(state, release, selector, region, tokens, cfg, depth=0
                 'Which participant role does «'+host.span+'» fill inside «'+' '.join(t.span for t in body)+'»?')
             if not selected_role:return block(state,region,frames,'COMPONENT_REFINEMENT_HOST_UNRESOLVED')
             binding={'kind':'BOUND_DESCRIPTION','host':host,'reading':reading,
-                     'host_role':selected_role[0]['candidate_id'],'proof':selected_role[1]}
+                     'host_role':selected_role[0]['candidate_id'],'proof':selected_role[1],
+                     **({'group':selected_group[3]} if selected_group else {})}
         children=compose_area(state,release,selector,cr,body,cfg,depth+1,binding)
         description=select_child(state,release,selector,region,children,'NOMINAL_DESCRIPTION',
             'This area describes the established nominal «'+host.span+'»; preserve its selected morphology and reference.')

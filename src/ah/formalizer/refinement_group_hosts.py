@@ -4,7 +4,7 @@ from .canonical_ledger import digest
 from .state import MorphVariant, TokenEvidence
 
 
-def candidates(frames, evidence, body, *, all_hosts=False):
+def candidates(frames, evidence, body, *, all_hosts=False, require_participle_agreement=True):
     found={}
     for frame in frames:
         for group in frame.semantic.get('nominal_groups',()):
@@ -19,7 +19,7 @@ def candidates(frames, evidence, body, *, all_hosts=False):
             reading=MorphVariant(None,'NOUN',frozenset(cases or ()),number='plur',
                 origin='CONTEXTUAL' if cases is None else 'DECLARED',evidence_refs=tuple(members))
             from .refinement_boundaries import agreeing
-            if not any(agreeing(reading,v) for v in body[0].variants if v.pos=='PRTF'):continue
+            if require_participle_agreement and not any(agreeing(reading,v) for v in body[0].variants if v.pos=='PRTF'):continue
             key='nominal-group:'+digest(members)
             host=TokenEvidence(' + '.join(evidence[t].span for t in members),key,
                 min(evidence[t].start for t in members),max(evidence[t].end for t in members),variants=(reading,))
@@ -36,9 +36,11 @@ def add_host(frame, projected):
         frame.semantic['morph_bindings'][tid]=deepcopy(data['bindings'][tid])
         frame.semantic['lexical_units'][tid]=deepcopy(data['units'][tid])
     frame.argument_token_refs=(*frame.argument_token_refs,*members)
-    group=deepcopy(data['group']);group['marker_refs']=[]
+    # Membership evidence still refers to the original source connector.
+    # Projecting the host into a description does not erase that evidence.
+    group=deepcopy(data['group'])
     frame.semantic['nominal_groups']=[*frame.semantic.get('nominal_groups',()),group]
-    frame.semantic['refinement_binding']={'kind':'PARTICIPLE','host_token_ref':projected['host'].token_id,
-        'host_member_refs':list(members),'host_role':role,'voice_feature':projected['rule']['feature'],
+    frame.semantic['refinement_binding']={'kind':projected.get('kind','PARTICIPLE'),'host_token_ref':projected['host'].token_id,
+        'host_member_refs':list(members),'host_role':role,'voice_feature':projected['rule'].get('feature'),
         'predicate_ref':frame.predicate_token_ref}
     frame.semantic['component_questions'].append({'kind':'PARTICIPLE_GROUP_HOST',**frame.semantic['refinement_binding']})

@@ -99,7 +99,9 @@ def describe(state, *, selected_trees=None, require_sealed=True):
         if temporal:parts.append('time of this predicate: '+temporal)
         for slot in slots(f):
             if slot.kind=='NOMINAL':
-                if slot.metadata.get('host_token_ref'):
+                if slot.metadata.get('host_group_member_refs'):
+                    owner='the whole established group ('+', '.join(occurrence(t) for t in slot.metadata['host_group_member_refs'])+')'
+                elif slot.metadata.get('host_token_ref'):
                     owner=occurrence(slot.metadata['host_token_ref'])
                 elif slot.metadata.get('host_implicit_role'):
                     owner='the omitted '+role(slot.metadata['host_implicit_role'])+' of '+occurrence(f.predicate_token_ref)
