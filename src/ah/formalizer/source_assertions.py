@@ -55,10 +55,12 @@ def resolve(state,release,selector):
             # the text of a sibling or a quoted child. Question/command source
             # acts remain guarded here and by the ordinary T5 boundary.
             if f.semantic.get('discourse_scope',{}).get('speech_act') in {'QUERY','COMMAND'} or state.observation.get('request_kind') in {'QUERY','COMMAND'}:continue
-            choice=_probe(state,selector,release,key,'source_assertion',[
+            options=[
                 {'candidate_id':'SOURCE_ASSERTED','label':'The source itself asserts '+label(target)+' as occurring/holding, independently of the descriptive modifier.'},
-                {'candidate_id':'EMBEDDED','label':'The content is only possible, intended, reported, questioned, denied or otherwise not asserted by the source.'}],
-                context,(lo,hi),question='Determine assertion scope, not world truth or lexical identity. Parent modifier: '+label(tree)+'. Target content: '+label(target)+'. '
+                {'candidate_id':'EMBEDDED','label':'The content is only possible, intended, reported, questioned, denied or otherwise not asserted by the source.'}]
+            from .reference_structure import focus_inputs
+            choice=_probe(state,selector,release,key,'source_assertion',options,
+                context,(lo,hi),inputs=focus_inputs(state,'source_assertion',(f.predicate_token_ref,),options,trees=(tree,)),question='Determine assertion scope, not world truth or lexical identity. Parent modifier: '+label(tree)+'. Target content: '+label(target)+'. '
                 'Read the whole supplied utterance. A descriptive companion/location/manner may preserve assertion; possibility, intention and quotation do not. '
                 'Select SOURCE_ASSERTED only with positive wording evidence. Otherwise select EMBEDDED or ?; never infer occurrence merely from a typed argument.')
             state.syntax_trace.append({'kind':'SOURCE_ASSERTION_SCOPE','decision_ref':key,'parent_ref':fid,'role':role,'tree':deepcopy(target),'source_range':[lo,hi],'selected':choice})

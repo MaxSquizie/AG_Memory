@@ -243,7 +243,7 @@ def licensed(state,proof,*,_visiting=None,**expected):
     return True
 
 
-def span(state,release,selector,region,tokens,cfg,slot,question,*,exclude=(),record_remainder=False,admissible=None,initial=None):
+def span(state,release,selector,region,tokens,cfg,slot,question,*,exclude=(),record_remainder=False,admissible=None,initial=None,prerequisites=()):
     """Every source token boundary is reachable; no punctuation whitelist."""
     from .structural_probe_inputs import collection
     from .probe_prerequisites import from_proof
@@ -276,7 +276,7 @@ def span(state,release,selector,region,tokens,cfg,slot,question,*,exclude=(),rec
             (' No offered endpoint was accepted for these earlier starts under the current restrictions: '+
              ', '.join('«'+tokens[i].span+'» @'+str(tokens[i].start) for i in sorted(rejected))+
              '. This does not reject the remaining starts.' if rejected else ''),
-            source_selection=collection('START',tokens,exclude=forbidden))
+            source_selection=collection('START',tokens,exclude=forbidden),prerequisites=prerequisites)
         initial=None
         if start is None:
             if state.syntax_trace[-1].get('status')=='EXHAUSTED':exhausted()
@@ -294,7 +294,7 @@ def span(state,release,selector,region,tokens,cfg,slot,question,*,exclude=(),rec
         end=choose(state,release,selector,region,cfg,slot+'_end',ends(),
             question+' The start is «'+tokens[a].span+'» @'+str(tokens[a].start)+'. Select the LAST token.',
             source_selection=collection('END',tokens,exclude=forbidden,start=tokens[a].token_id),
-            prerequisites=(from_proof(state,start[1]),))
+            prerequisites=(*prerequisites,from_proof(state,start[1])))
         if end:return tokens[a:end[0]['index']],(start[1],end[1])
         if state.syntax_trace[-1].get('status')!='EXHAUSTED':return None
         rejected.add(a)
@@ -304,7 +304,7 @@ def span(state,release,selector,region,tokens,cfg,slot,question,*,exclude=(),rec
     return None
 
 
-def source_set(state,release,selector,region,tokens,cfg,slot,question,*,exclude=(),record_remainder=False,admissible=None,partial_admissible=None,initial=None):
+def source_set(state,release,selector,region,tokens,cfg,slot,question,*,exclude=(),record_remainder=False,admissible=None,partial_admissible=None,initial=None,prerequisites=()):
     """Select a finite union of source intervals without enumerating 2**n sets.
 
     Every step either closes the set or adds an occurrence. The final whole
@@ -312,7 +312,7 @@ def source_set(state,release,selector,region,tokens,cfg,slot,question,*,exclude=
     """
     chosen=span(state,release,selector,region,tokens,cfg,slot,
         question+' Select the first continuous piece; other pieces can be added next.',exclude=exclude,
-        record_remainder=record_remainder,initial=initial,admissible=partial_admissible)
+        record_remainder=record_remainder,initial=initial,admissible=partial_admissible,prerequisites=prerequisites)
     if not chosen:return None
     return extend_source_set(state,release,selector,region,tokens,cfg,slot,question,
                              chosen[0],chosen[1],exclude=exclude,admissible=admissible,partial_admissible=partial_admissible)

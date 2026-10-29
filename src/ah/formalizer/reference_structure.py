@@ -15,7 +15,7 @@ def signature(state):
             'proposed_roles','proposition_args','nominal_args','component_scope_tree','operator_forest',
             'structural_unresolved','structural_rejection','discourse_scope','partial_composition',
             'component_child','coordination_owner','lexical_units','region','explicit_region',
-            'action_description','passive_predication','impersonal_predication','nominal_predication','nominal_groups',
+            'spatial_slots','action_description','passive_predication','impersonal_predication','nominal_predication','nominal_groups',
             'bound_arguments','implicit_arguments','shared_implicit_arguments')}) for f in state.frames]]))
 
 
@@ -30,11 +30,11 @@ OPERATORS={'NOT':'negation of', 'AND':'conjunction of', 'OR':'inclusive alternat
     'EXACTLY_N':'exactly the stated count: count, binder, then body'}
 
 
-def describe(state):
+def describe(state, *, selected_trees=None, require_sealed=True):
     evidence={t.token_id:t for t in state.evidence}
     frames={f.frame_id:f for f in state.frames}
     missing=[]
-    if not state.structural_closed:missing.append('STRUCTURE_NOT_SEALED')
+    if require_sealed and not state.structural_closed:missing.append('STRUCTURE_NOT_SEALED')
     def time_text(value):
         if not value:return ''
         kinds={'POINT':'at the stated instant','CONTINUOUS':'throughout the stated interval',
@@ -76,6 +76,11 @@ def describe(state):
                          ', '.join(role(r) for r in sem['action_description'].get('unassigned_roles',())))
         for tid,r in sem.get('proposed_roles',{}).items():
             parts.append(role(r)+' = '+occurrence(tid))
+        for spatial in sem.get('spatial_slots',{}).values():
+            rule=spatial['rule']
+            parts.append(role(rule['role_id'])+' is a spatial '+rule['kind'].lower()+
+                         ' introduced by '+occurrence(spatial['mention_ref'])+'; location kind '+rule.get('location_kind','not established')+
+                         '; absolute coordinates not established')
         for group in sem.get('nominal_groups',()):
             parts.append('one coordinated nominal slot containing '+', '.join(occurrence(t) for t in group['member_refs']))
         for tid,variable in sem.get('bound_arguments',{}).items():
@@ -122,11 +127,13 @@ def describe(state):
         text=render_content(tree,active)
         temporal=time_text(tree.get('region'))
         return ('time constraint on this WHOLE expression ('+temporal+'): '+text) if temporal else text
-    trees=forests(state.frames,state.logical_roots)
-    children=embedded(state.frames,trees)
-    trees += [{'frame_ref':f.frame_id} for f in state.frames if f.frame_id not in children
-              and not f.semantic.get('component_child') and not f.semantic.get('coordination_owner')
-              and not f.semantic.get('structural_rejection')]
+    if selected_trees is None:
+        trees=forests(state.frames,state.logical_roots)
+        children=embedded(state.frames,trees)
+        trees += [{'frame_ref':f.frame_id} for f in state.frames if f.frame_id not in children
+                  and not f.semantic.get('component_child') and not f.semantic.get('coordination_owner')
+                  and not f.semantic.get('structural_rejection')]
+    else:trees=list(selected_trees)
     lines=list(dict.fromkeys(render(tree) for tree in trees))
     if not lines:missing.append('STRUCTURE_MISSING')
     return '\n'.join(lines),tuple(dict.fromkeys(missing))
@@ -152,3 +159,15 @@ def implicit_inputs(state,frame,role,options):
     from dataclasses import replace
     return replace(inputs(state,(frame.predicate_token_ref,),options),family='IMPLICIT_ARGUMENT',
                    owner_ref=frame.frame_id,requested_role=role)
+
+
+def focus_inputs(state,slot,target_refs,options,*,trees=None,require_sealed=True):
+    """Project an explicit accepted focus; never select a hypothesis by overlap."""
+    from .probe_inputs import ProbeInputs, FOCUS_FAMILIES
+    established,missing=describe(state,selected_trees=trees,require_sealed=require_sealed)
+    evidence={e.token_id:e for e in state.evidence}
+    descriptions=tuple('«'+evidence[r].span+'» at characters '+str(evidence[r].start)+':'+str(evidence[r].end)
+                       for r in target_refs if r in evidence)
+    return ProbeInputs(FOCUS_FAMILIES[slot],tuple(target_refs),(0,len(state.text)),state.text,
+        tuple(o['candidate_id'] for o in options),established,signature(state),missing,
+        target_descriptions=descriptions)

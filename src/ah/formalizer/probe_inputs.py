@@ -7,6 +7,17 @@ from dataclasses import dataclass, asdict
 from .canonical_ledger import digest
 
 
+FOCUS_FAMILIES={'predicate_value':'LEXICAL_READING','spatial_reference':'SPATIAL_REFERENCE',
+    'speech_act':'DISCOURSE_ACT','discourse_addressee':'ADDRESSEE','source_assertion':'ASSERTION_SCOPE'}
+TASK_SLOTS={'REFERENCE':'reference','IMPLICIT_ARGUMENT':'implicit_argument',
+            **{family:slot for slot,family in FOCUS_FAMILIES.items()}}
+FOCUS_WORDING={
+    'LEXICAL_READING':'Choose only the lexical use of the addressed predicate; preserve its participants, content, negation and modality.',
+    'SPATIAL_REFERENCE':'Choose only the antecedent place of the addressed occurrence; preserve its spatial role and surrounding scope.',
+    'DISCOURSE_ACT':'Choose only the outer speech act of the displayed accepted expression. Its internal content is fixed, not separately asserted.',
+    'ADDRESSEE':'Choose only who is addressed by the specified quoted content; preserve its owner and speaker.',
+    'ASSERTION_SCOPE':'Choose only whether the stated dependent content is independently asserted; preserve its accepted internal structure.'}
+
 @dataclass(frozen=True)
 class ProbeInputs:
     family: str
@@ -20,13 +31,14 @@ class ProbeInputs:
     multiplicity: str = 'ALTERNATIVE_READINGS'
     owner_ref: str | None = None
     requested_role: str | None = None
+    target_descriptions: tuple = ()
 
     def record(self):
         return asdict(self)
 
     def errors(self, state, slot, options, target_range):
         errors=list(self.missing)
-        if {'REFERENCE':'reference','IMPLICIT_ARGUMENT':'implicit_argument'}.get(self.family)!=slot:
+        if TASK_SLOTS.get(self.family)!=slot:
             errors.append('TASK_FAMILY_MISMATCH')
         if self.family=='IMPLICIT_ARGUMENT':
             owner=next((f for f in state.frames if f.frame_id==self.owner_ref),None)
@@ -38,6 +50,10 @@ class ProbeInputs:
         if self.multiplicity!='ALTERNATIVE_READINGS':errors.append('UNSUPPORTED_MULTIPLICITY')
         evidence={t.token_id:t for t in state.evidence}
         if not self.target_refs:errors.append('TARGET_MISSING')
+        if self.family in FOCUS_WORDING:
+            expected=tuple('«'+evidence[r].span+'» at characters '+str(evidence[r].start)+':'+str(evidence[r].end)
+                           for r in self.target_refs if r in evidence)
+            if not self.target_descriptions or self.target_descriptions!=expected:errors.append('TARGET_VIEW_MISMATCH')
         lo,hi=self.source_range
         if not 0<=lo<hi<=len(state.text) or self.source_text!=state.text[lo:hi]:
             errors.append('SOURCE_MISMATCH')
@@ -52,6 +68,9 @@ class ProbeInputs:
         return tuple(dict.fromkeys(errors))
 
     def wording(self):
+        if self.family in FOCUS_WORDING:
+            return ('Addressed occurrences: '+'; '.join(self.target_descriptions)+'.\nEstablished interpretation (preserve roles and scopes):\n'+self.established+'\n'+FOCUS_WORDING[self.family]+
+                ' Several numbers are alternative readings, not a jointly selected group. 0 rejects this page; ? means insufficient evidence.')
         return ('Established interpretation (preserve roles and scopes; it does not assert inner events):\n'+
                 self.established+'\n'+('Choose only the participant for the stated omitted role of the addressed predicate. '
                 if self.family=='IMPLICIT_ARGUMENT' else 'Choose only the referent of the addressed occurrence. ')+

@@ -5,6 +5,7 @@ from .component_source import view
 from .composition_tree import expression, roots, internalize
 from .scope_assignment import assign
 from .canonical_ledger import digest
+from .probe_wording import frame_label
 from dataclasses import replace
 from .composition_tree import InputSlot
 
@@ -71,15 +72,15 @@ def compose(state, release, selector, region, tokens, cfg, child_composer, reque
     for (lo,hi,op), anchors in ordered:
         fid = 'operator-slot:' + digest([region.region_id,lo,hi,op])
         operators[fid] = (op,[t.token_id for t in anchors])
-        modifiers.append({'id':fid,'label':op+' «'+state.text[lo:hi]+'»',
+        modifiers.append({'id':fid,'label':op+' «'+state.text[lo:hi]+'» @'+str(lo)+':'+str(hi),
                           **({'allowed_paths':[()],'outer':True} if (lo,hi,op)==outer else {})})
     for fid,item in quantifiers.items():
         lo,hi,op=item['bounds']
-        modifiers.append({'id':fid,'label':op+' «'+state.text[lo:hi]+'» binding '+item['head_ref'],
+        modifiers.append({'id':fid,'label':op+' «'+state.text[lo:hi]+'» @'+str(lo)+':'+str(hi)+' binding '+next('«'+t.span+'» @'+str(t.start) for t in state.evidence if t.token_id==item['head_ref']),
             'required_refs':item['required_refs'],
             **({'allowed_paths':[()],'outer':True} if item['bounds']==outer else {})})
     result = assign(state,release,selector,region,expression(root),modifiers,cfg,
-                    node_labels={f.frame_id:'«'+f.anchor_span+' '+', '.join(f.arguments)+'»' for f in frames})
+                    node_labels={f.frame_id:frame_label(state,f) for f in frames})
     if result is None:
         for f in frames:f.semantic['structural_unresolved']=True
         return frames

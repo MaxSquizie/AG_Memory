@@ -69,12 +69,16 @@ def prepare(state,release=None,selector=None):
                 label='«'+(anchor.span if anchor else parent.anchor_span)+'»'
                 for slot in slots(parent):
                     content_links.append(label+' has separately parsed '+slot.name+' content')
-            act=_probe(state,selector,release,key,'speech_act',[
+            options=[
                 {'candidate_id':'ASSERTION','label':'The speaker asserts the WHOLE statement, including a report that someone said/thought something; the reported content need not be true'},
                 {'candidate_id':'QUERY','label':'The speaker asks for information or confirmation'},
                 {'candidate_id':'COMMAND','label':'The speaker requests or directs an action'},
-                {'candidate_id':'CONTENT','label':'The ENTIRE target is merely quoted/mentioned, with no assertion about it; not just a quote nested inside an asserted report'}],
+                {'candidate_id':'CONTENT','label':'The ENTIRE target is merely quoted/mentioned, with no assertion about it; not just a quote nested inside an asserted report'}]
+            from .reference_structure import focus_inputs
+            act=_probe(state,selector,release,key,'speech_act',options,
                 state.text[slice(*bounds)],bounds,
+                inputs=focus_inputs(state,'speech_act',tuple(frames[r].predicate_token_ref for r in sorted(direct)),options,
+                    trees=(tree,),require_sealed=False),
                 question='What does the current speaker do with the WHOLE target? '
                 'An assertion that someone said something is an assertion about that speech, not an assertion of its content. '
                 'Likewise, asserting negation, possibility or a condition does not assert the inner event. '
@@ -114,11 +118,16 @@ def prepare(state,release=None,selector=None):
                 any(v.person=='2nd' for v in evidence[tid].variants) for tid in frame.argument_token_refs if tid in evidence):
                 from .component_probe import _probe
                 options=[{'candidate_id':'UNSPECIFIED','label':'The addressee is not identified in this source'}]
-                options.extend({'candidate_id':tid,'label':'The addressee is «'+evidence[tid].span+'»'}
+                options.extend({'candidate_id':tid,'label':'The addressee is «'+evidence[tid].span+'» at characters '+str(evidence[tid].start)+':'+str(evidence[tid].end)}
                                for tid in parent.argument_token_refs if tid in evidence)
+                from .reference_structure import focus_inputs
                 target=_probe(state,selector,release,scope['scope_ref']+'|addressee','discourse_addressee',options,
                               state.text[slice(*parent.source_range)],parent.source_range,
-                              question='Who is addressed by this quoted speech? A recipient role alone is not sufficient evidence.')
+                              inputs=focus_inputs(state,'discourse_addressee',(parent.predicate_token_ref,),options,
+                                  trees=({'frame_ref':parent.frame_id},),require_sealed=False),
+                              question='Who is addressed by the quoted content owned by «'+parent.anchor_span+'» @'+str(evidence[parent.predicate_token_ref].start)+
+                              ', in its '+role+' slot? Established speaker: '+('«'+evidence[scope['speaker_mention']].span+'» @'+str(evidence[scope['speaker_mention']].start)
+                              if scope['speaker_mention'] else 'not established')+'. A recipient role alone is not sufficient evidence.')
                 if target and target!='UNSPECIFIED':scope['addressee_mention']=target
         frame.semantic['discourse_scope']=scope
         frame.semantic['quoted']=scope['quoted']

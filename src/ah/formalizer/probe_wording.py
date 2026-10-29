@@ -89,3 +89,17 @@ POS_FUNCTIONS = {
 
 def pos_description(value):
     return POS_FUNCTIONS[value]
+
+
+def frame_label(state,frame):
+    """Readable source identity for a local candidate; never a frame-id alias."""
+    evidence={t.token_id:t for t in state.evidence}
+    anchor=evidence.get(frame.predicate_token_ref)
+    bounds=(anchor.start,anchor.end) if anchor else frame.source_range
+    text='«'+frame.anchor_span+' '+', '.join(frame.arguments)+'» at characters '+str(bounds[0])+':'+str(bounds[1])
+    assignments=[]
+    for tid,r in frame.semantic.get('proposed_roles',{}).items():
+        token=evidence.get(tid)
+        if token:assignments.append(role(r)+' = «'+token.span+'» @'+str(token.start))
+    if assignments:text+='; selected roles: '+'; '.join(assignments)
+    return text

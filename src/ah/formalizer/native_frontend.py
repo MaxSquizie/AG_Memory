@@ -1073,8 +1073,9 @@ def _interpret_state(state,text,selector,release,observation,morph,context_reade
         options=embedding_order(state,selector,release,f,options,text[slice(*f.source_range)])
         from .lexical_probe_context import build as lexical_context
         context,established=lexical_context(state,f)
+        from .reference_structure import focus_inputs
         _probe(state,selector,release,f.frame_id+'|predicate_value','predicate_value',options,
-            context,f.source_range,
+            context,f.source_range,inputs=focus_inputs(state,'predicate_value',(f.predicate_token_ref,),options),
             question='Which lexical use applies to this occurrence in its selected structure? '+established+'Choose a catalog entry when its lexical meaning fits. Tense, date, negation and modality are handled by the structure, not new lexical senses. Choose an unlisted use only when no listed meaning fits; use ? when uncertain.')
         d=state.decisions[f.frame_id+'|predicate_value'];d.source_traces=f.semantic.get('source_traces',())
         from .selection_evidence import selected_candidate

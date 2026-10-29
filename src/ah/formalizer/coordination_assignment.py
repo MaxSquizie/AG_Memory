@@ -1,5 +1,6 @@
 """Coordinate typed children using the same slot assignment as modifiers."""
 from copy import deepcopy
+from .probe_wording import frame_label
 from .canonical_ledger import digest
 from .composition_tree import expression, reference, unary_modifier, content, leaves, internalize, associative_node
 from .scope_assignment import assign
@@ -27,12 +28,12 @@ def compose(state, release, selector, region, selected, frames, anchors, cfg):
         for frame, slot in reversed(chain):
             mid = 'scope-modifier:' + digest([region.region_id, frame.frame_id])
             replacements[mid] = (frame, slot)
-            modifiers.append({'id': mid, 'label': '«' + frame.anchor_span + ' ' + ', '.join(frame.arguments) + '»',
+            modifiers.append({'id': mid, 'label': frame_label(state,frame),
                               'source_index': index, 'source_refs':sorted(leaves(node)), 'allow_shared': False})
     tree = associative_node('AND', operands, anchors)
     if modifiers:
         result = assign(state, release, selector, region, tree, modifiers, cfg,
-                        node_labels={f.frame_id:'«'+f.anchor_span+' '+', '.join(f.arguments)+'»' for f in frames})
+                        node_labels={f.frame_id:frame_label(state,f) for f in frames})
         if result is None:
             return None
         tree, contents, decisions = result

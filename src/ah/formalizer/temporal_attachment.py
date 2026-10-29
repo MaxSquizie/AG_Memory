@@ -1,5 +1,6 @@
 """Temporal children use ordinary scope slots, including coordinated subtrees."""
 from copy import deepcopy
+from .probe_wording import frame_label
 from .canonical_ledger import digest
 from .composition_tree import leaves, unary_modifier, expression
 from .scope_assignment import assign, expanded_leaves, positions
@@ -47,10 +48,10 @@ def attach(state, release, selector, region, selected, frames, tree, cfg):
         allowed=[path for path,target in positions(tree,lexical_contents)
                  if not expanded_leaves(target,lexical_contents)&incompatible]
         result = assign(state,release,selector,region,tree,[{
-            'id':mid,'label':'time «'+text+'»','source_index':owner,'source_refs':sorted(origin),
+            'id':mid,'label':'time «'+text+'» @'+str(bounds[0])+':'+str(bounds[1]),'source_index':owner,'source_refs':sorted(origin),
             'allowed_paths':allowed}],cfg,
             contents=lexical_contents,
-            node_labels={f.frame_id:'«'+f.anchor_span+' '+', '.join(f.arguments)+'»' for f in frames})
+            node_labels={f.frame_id:frame_label(state,f) for f in frames})
         if result is None:
             return None
         topology, contents, decisions = result

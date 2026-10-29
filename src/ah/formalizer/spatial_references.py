@@ -125,12 +125,16 @@ def resolve(state, release, selector):
         options = [{'candidate_id':a['entity_ref'], 'label':
                     'Same relative place introduced by «'+a['raw']+'» at '+str(a['source_range'])+
                     '; relation='+a['location_kind']+'; absolute coordinates UNKNOWN'+
-                    ('; prior source '+str(a['source_tag'])+' excerpt: «'+a['memory_excerpt']+'»' if a.get('memory_binding_ref') else '')}
+                    ('; prior source '+str(a['source_tag'])+' excerpt: «'+a['memory_excerpt']+'»'+
+                     ('; full original source: «'+a['source_context']+'»' if a.get('source_context_available') else
+                      '; full original source is unavailable or does not match this anchor') if a.get('memory_binding_ref') else '')}
                    for a in slot['options'] if a.get('memory_binding_ref') or a['entity_ref'] in grounded]
         if sum(len(o['label']) for o in options)+hi-lo > policy(release)['context_chars']:
             state.diag('SPATIAL_REFERENCE_SEARCH_INCOMPLETE',slot['decision_ref']); continue
+        from .reference_structure import focus_inputs
         selected = _probe(state,selector,release,slot['decision_ref'],'spatial_reference',options,
                           state.text[lo:hi],slot['target_range'],
+                          inputs=focus_inputs(state,'spatial_reference',(slot['mention_ref'],),options),
                           question='What place does «'+frame.anchor_span+'» refer to in the TARGET clause: '+
                           state.text[slice(*slot['target_range'])]+
                           '? Select only a source-supported antecedent. Direction and location are not synonyms; '

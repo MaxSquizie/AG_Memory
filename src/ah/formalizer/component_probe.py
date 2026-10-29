@@ -114,7 +114,7 @@ def _probe(state, selector, release, key, slot, options, context, source_range, 
     # the audit; a transport-valid string is not a semantic input contract.
     input_record=inputs.record() if inputs is not None else None
     errors=inputs.errors(state,slot,options,source_range) if inputs is not None else (
-        ('INPUT_CONTRACT_MISSING',) if slot in {'reference','implicit_argument'} else ())
+        ('INPUT_CONTRACT_MISSING',) if slot in {'reference','implicit_argument','predicate_value','spatial_reference','speech_act','discourse_addressee','source_assertion'} else ())
     if inputs is not None and hasattr(inputs,'question') and question!=inputs.question:
         errors=(*errors,'QUESTION_MISMATCH')
     from .probe_families import contract as family_contract, errors as family_errors
@@ -166,6 +166,18 @@ def _probe(state, selector, release, key, slot, options, context, source_range, 
                       offer_clarification=offer_clarification)
         from .task_contracts import TaskResult,TaskOutcome
         d=state.decisions[key]
+        after=inputs.errors(state,slot,options,source_range) if inputs is not None else ()
+        if runtime is not None:after=(*after,*runtime.input_errors())
+        if after:
+            from dataclasses import asdict
+            d.selected=();d.outcome='UNRESOLVED'
+            d.history.append({'kind':'PROBE_INPUT_CHANGED_DURING_CALL','errors':list(after)})
+            record=state.component_probe_records.get(key)
+            if record is not None:
+                record['decision']=asdict(d)
+                record['superseded_by']='blocked-input:'+digest([key,after])
+            state.diag('PROBE_INPUT_INCOMPLETE',key+': '+', '.join(after))
+            return TaskResult(None,TaskOutcome.BLOCKED,False,False,())
         outcome={'ONE_SELECTED':TaskOutcome.SUPPORTED,'MULTIPLE_ADMISSIBLE':TaskOutcome.MULTIPLE,
                  'INSUFFICIENT_CONTEXT':TaskOutcome.UNKNOWN,'NONE_FIT':TaskOutcome.PAGE_NONE_FIT}.get(d.selector_outcome)
         if outcome is None:

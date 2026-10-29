@@ -1,5 +1,6 @@
 """Build typed recursive nominal descriptions and event scopes from questions."""
 from copy import deepcopy
+from .probe_wording import frame_label
 from .canonical_ledger import digest
 from .component_policy import _morph
 from .component_phrases import prepositional_groups
@@ -76,10 +77,10 @@ def bundles(state,release,selector,region,tokens,frame,cfg):
     from .scope_assignment import assign, modifier_shape
     from .composition_tree import reference
     ids=['modifier-slot:'+digest([frame.frame_id,u['refs'],_morph(u['variant'])]) for u in event]
-    modifiers=[{'id':fid,'label':'«'+' '.join(t.span for t in tokens if t.token_id in u['refs'])+'»',
+    modifiers=[{'id':fid,'label':'«'+' '.join(t.span for t in tokens if t.token_id in u['refs'])+'»; occurrences '+', '.join(str(t.start)+':'+str(t.end) for t in tokens if t.token_id in u['refs']),
                 'allow_shared':True} for fid,u in zip(ids,event)]
     selected=assign(state,release,selector,region,reference(frame),modifiers,cfg,
-                    node_labels={frame.frame_id:'«'+frame.anchor_span+' '+', '.join(frame.arguments)+'»'})
+                    node_labels={frame.frame_id:frame_label(state,frame)})
     if selected is None:return [[frame]]
     tree,contents,decisions=selected
     shape=modifier_shape(tree,contents,ids,frame.frame_id)

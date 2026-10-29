@@ -41,7 +41,7 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child,relat
     source=choose(state,release,selector,region,cfg,'content_reference_source',[
         *[option for option,_ in sources],
         {'candidate_id':'OTHER_SOURCE','label':'The intended content is not among these established structures, or has not yet been interpreted'}],
-        'Owner «'+owner.span+'». Pointer: '+('«'+' '.join(t.span for t in pointer)+'»' if pointer else 'omitted')+'. '
+        'Owner «'+owner.span+'» @'+str(owner.start)+'. Pointer: '+('«'+' '.join(t.span for t in pointer)+'»' if pointer else 'omitted')+'. '
         'Which content fills the referred/omitted slot of THIS owner? Select that content itself, not an earlier statement ABOUT requesting, reporting or considering it. '
         'The source subject is shown to identify the source; the subject of its current use is determined separately. '
         'The inventory is limited to completed structures in this run. It does not prove absence elsewhere. '
@@ -81,7 +81,7 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child,relat
          'label':'The content keeps its established participants independently of the current owner; this use expresses no shared-subject constraint'},
         {'candidate_id':'CONTROLLED_ACTION','mode':'CONTROLLED_ACTION','source_hash':option['source_hash'],
          'label':'The current construction requires the action subject to be one of its own participants. Bind that participant to the action; preserve its other roles and scope, without equating events'}],
-        'Source: '+option['label']+'. Current owner: «'+' '.join(t.span for t in parent)+'». '
+        'Source: '+option['label']+'. Current owner occurrence: «'+owner.span+'» @'+str(owner.start)+' in «'+' '.join(t.span for t in parent)+'». '
         'Does the current construction CONTROL the subject of the referenced action, or merely refer to independent content? '
         'For other required substitutions answer 0; they must not be silently reduced to a subject change.',
         prerequisites=(accepted('content_reference_source',source),accepted('structural_content_role',link)))
@@ -92,7 +92,7 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child,relat
         control=choose(state,release,selector,region,cfg,'content_reference_control',[
             {'candidate_id':'controller:'+digest(alias),'controller':alias,'source_hash':option['source_hash'],
              'label':'Subject of action «'+option['source_words']+'» = '+label+' of «'+owner.span+'»'} for alias,label in controllers(target)],
-            'Referenced action: «'+option['source_words']+'». Current owner: «'+' '.join(t.span for t in parent)+'». '
+            'Referenced action: «'+option['source_words']+'». Current owner occurrence: «'+owner.span+'» @'+str(owner.start)+' in «'+' '.join(t.span for t in parent)+'». '
             'Who is understood to carry out/be the subject of THAT ACTION in this use? '
             'Choose the action subject, not automatically the subject of the owning predicate. '
             'A request can ask its recipient to act; a report can describe another person acting. Resolve THIS construction from the context.',

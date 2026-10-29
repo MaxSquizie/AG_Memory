@@ -80,6 +80,8 @@ def read_active(store, release, active_refs, source_tags=()):
         lo, hi = max(0, start-96), min(len(text), end+96)
         row['memory_excerpt'] = text[lo:hi] if text[start:end] == row['raw'] else row['raw']
         row['memory_excerpt_range'] = [lo, hi] if text[start:end] == row['raw'] else [start, end]
+        row['source_context_available'] = bool(text) and text[start:end] == row['raw']
+        row['source_context'] = text if row['source_context_available'] else ''
     return rows, False
 
 

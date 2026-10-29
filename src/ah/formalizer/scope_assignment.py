@@ -87,10 +87,13 @@ def _assign(state, release, selector, region, tree, modifiers, cfg, *, contents=
     labels={**(node_labels or {}),**{m['id']:m['label'] for m in modifiers}}
     by_id={m['id']:m for m in modifiers}
     bases=dict(positions(tree,contents));decisions=[]
+    required=expanded_leaves(tree,contents)
+    if any(not labels.get(fid) for fid in required):
+        state.diag('PROBE_INPUT_INCOMPLETE',region.region_id+': SCOPE_SOURCE_VIEW_MISSING');return None
     def describe(node):
         if 'frame_ref' in node:
             fid=node['frame_ref']
-            return labels.get(fid,fid)+('('+describe(contents[fid])+')' if fid in contents else '')
+            return labels[fid]+('('+describe(contents[fid])+')' if fid in contents else '')
         if 'bound_var' in node:return 'variable '+str(node['bound_var'])
         return node.get('operator','value')+'('+', '.join(describe(c) for c in node.get('operands',()))+')'
     def permits(modifier,path,target):
@@ -182,13 +185,17 @@ def _assign(state, release, selector, region, tree, modifiers, cfg, *, contents=
         question=('Choose the immediate content of this modifier. Other listed modifiers are retained slots, '
                   'even if their content is not selected yet. Select one local edge, not a whole tree. '
                   'Preserve variable binding, source ownership and scope barriers; no scope choice asserts occurrence. '
-                  'Established edges: '+str(fixed)+'. ')
+                  'Target modifier: '+by_id[mid]['label']+'. Established edges: '+('; '.join(fixed) or 'none')+'. ')
         if by_id[mid].get('source_index') is not None:
             question+=('Declared SHARED_COORDINATION_V1 preference: when compatible with every conjunct '
                        'and no contrast or scope barrier is supported, prefer shared scope. '
                        'Mere logical possibility of a local reading is not a reason to abstain. ')
-        selected=_probe(state,selector,release,key,'modifier_scope',options,
-                        state.text[slice(*region.source_range)],region.source_range,question=question)
+        from .structural_probe_inputs import inputs
+        context=state.text
+        choices=[{k:v[k] for k in ('candidate_id','label')} for v in options]
+        selected=_probe(state,selector,release,key,'modifier_scope',choices,
+                        context,region.source_range,question=question,
+                        inputs=inputs(state,region,'modifier_scope',options,question,context,0))
         state.syntax_trace.append({'kind':'SCOPE_SLOT','decision_ref':key,'modifier_ref':mid,
                                    'alternatives':options,'selected':selected})
         if selected not in graph.domains[mid]:continue

@@ -4,7 +4,8 @@ Heads and function material are selected separately. Discontinuous material
 keeps exact occurrence refs. Quantities remain source expressions, not numbers.
 """
 from .canonical_ledger import digest
-from .structural_tasks import choose,source_set
+from .structural_tasks import choose,source_set,licensed
+from .probe_prerequisites import accepted,from_proof
 
 
 def rows(state,tokens,kind=None):
@@ -29,6 +30,7 @@ def prepare(state,release,selector,region,tokens,cfg):
     from .function_inventory import begin,complete
     inventory=begin(state,'NOMINAL',tokens,cfg.get('_task_constraints'))
     if inventory is None:return True
+    previous=()
     used=set();used_by_kind={k:set() for k in ('RELATION','REFERENCE','QUANTITY')};relation_heads=set()
     while True:
         selected=choose(state,release,selector,region,cfg,'nominal_function',[
@@ -41,7 +43,8 @@ def prepare(state,release,selector,region,tokens,cfg):
             'A name by itself or an ordinary descriptive adjective does not count. '
             'Already assigned functions (do not select the same function of the same occurrence again): '+
             '; '.join(k+': «'+' '.join(t.span for t in tokens if t.token_id in refs)+'»' for k,refs in used_by_kind.items())+'.',
-            empty={'candidate_id':'DONE','label':'no further nominal relation, referential determiner or quantity expression'})
+            empty={'candidate_id':'DONE','label':'no further nominal relation, referential determiner or quantity expression'},
+            prerequisites=previous)
         if not selected:return False
         kind=selected[0]['candidate_id']
         if kind=='DONE':
@@ -51,7 +54,7 @@ def prepare(state,release,selector,region,tokens,cfg):
             return True
         material=source_set(state,release,selector,region,tokens,cfg,'nominal_function_source',
             kind+': select ONLY the connecting/determining/quantity expression. '
-            'Exclude a separate nominal head and unrelated modifiers. Include a word that itself BOTH expresses this function and stands for its nominal bearer.',exclude=used_by_kind[kind])
+            'Exclude a separate nominal head and unrelated modifiers. Include a word that itself BOTH expresses this function and stands for its nominal bearer.',exclude=used_by_kind[kind],prerequisites=(accepted('nominal_function',selected),))
         if not material:return False
         owned,proofs=material;refs=[t.token_id for t in owned]
         expression=' '.join(t.span for t in owned)
@@ -62,9 +65,12 @@ def prepare(state,release,selector,region,tokens,cfg):
             kind+': selected function expression is «'+expression+'». '
             +('Which noun/pronoun is its complement: the entity/place introduced BY this expression, not the outside predicate or participant it attaches to? '
               if kind=='RELATION' else 'Which noun/pronoun is determined or counted by this expression? ')+
-            'Select the nominal bearer. A reference or quantity word may itself be that bearer; choose it only if the text supplies no separate head for this expression.')
+            'Select the nominal bearer. A reference or quantity word may itself be that bearer; choose it only if the text supplies no separate head for this expression.',
+            prerequisites=tuple(from_proof(state,p) for p in proofs))
         if not head:return False
         hid=head[0]['head_ref']
+        target=('Selected expression: '+', '.join('«'+t.span+'» @'+str(t.start) for t in owned)+
+            '; selected nominal bearer: '+head[0]['label']+'. ')
         if kind=='RELATION' and hid in relation_heads:
             state.diag('NOMINAL_RELATION_MULTIPLE_EDGES_UNRESOLVED',region.region_id)
             return False
@@ -79,16 +85,22 @@ def prepare(state,release,selector,region,tokens,cfg):
             identity=choose(state,release,selector,region,cfg,'nominal_identity_function',[
                 {'candidate_id':'CONTEXTUAL','label':'Identify the nominal from context; identity with a prior mention is not explicitly required'},
                 {'candidate_id':'SAME','label':'The source explicitly requires the same referent as a prior mention'}],
-                'Reference expression: «'+' '.join(t.span for t in owned)+'». What identity constraint is stated?')
+                target+'What identity constraint is stated by this reference expression?',
+                prerequisites=(accepted('nominal_function_head',head),))
             if not identity:return False
             row['identity_constraint']=identity[0]['candidate_id'];row['proofs'].append(identity[1])
         if kind=='QUANTITY':
             case=choose(state,release,selector,region,cfg,'nominal_external_case',[
                 {'candidate_id':c,'label':label} for c,label in [('nom','Nominative case'),('gen','Genitive case'),
                 ('dat','Dative case'),('acc','Accusative case'),('abl','Instrumental case'),('loc','Prepositional/locative case'),('voc','Vocative case')]],
-                'Which external grammatical case does this whole quantity group take here? Its inner noun can have a different case.')
+                target+'Which external grammatical case does this whole quantity group take here? Its inner noun can have a different case.',
+                prerequisites=(accepted('nominal_function_head',head),))
             if not case:return False
-            row['external_case']=case[0]['candidate_id'];row['case_proof']=case[1]
+            row['external_case']=case[0]['candidate_id'];row['case_proof']=case[1];row['proofs'].append(case[1])
+        if not all(licensed(state,p) for p in row['proofs']):
+            state.diag('NOMINAL_FUNCTION_PREMISE_RETIRED',region.region_id);return False
+        last=identity[1] if kind=='REFERENCE' else case[1] if kind=='QUANTITY' else head[1]
+        previous=(from_proof(state,last),)
         state.syntax_trace.append(row);used.update(refs);used_by_kind[kind].update(refs)
 
 
