@@ -33,8 +33,6 @@ def read_active(store, release, active_refs, source_tags=()):
     spatial, incomplete = places(store,release,active_refs,source_tags)
     rows.extend(dict(r, label=r.get('memory_excerpt',r['raw']), features=[],
                      reference_kind='PLACE', premise_support_refs=[]) for r in spatial)
-    if len(rows)>32:
-        return [], True
     return rows, incomplete
 
 
@@ -45,7 +43,6 @@ def attach(state, request, result):
 
 
 def resolve(state, release, selector):
-    from .component_probe import _probe
     # Bindings are derived results of THIS complete resolution pass. An earlier
     # successful selection must not survive a missing/ambiguous new result.
     current=groups(state)
@@ -57,32 +54,28 @@ def resolve(state, release, selector):
     for key, (mention, constraint) in current.items():
         decision = key+'|referent'
         read = state.observation.get('nominal_reference_reads',{}).get(decision,{})
-        from .nominal_reference_local import rows as local_rows
-        from .nominal_reference_source import rows as source_rows
-        rows = [*source_rows(state,constraint),*local_rows(state,constraint),*read.get('rows',[])]
-        incomplete=not read or bool(read.get('search_incomplete')) or len(rows)>32
+        from .nominal_reference_domain import snapshot
+        rows,incomplete,domain_hash=snapshot(state,constraint,decision)
         from .reference_presentation import label
         options = [{'candidate_id':'antecedent:'+str(i),
             'label':label(state,[r])+
                     '; features='+str(r.get('features',[]))} for i,r in enumerate(rows)]
-        chosen = None;probed=False
+        chosen = None;probed=False;page_proofs=[]
         if rows and not incomplete:
             start,end=constraint['source_range']
-            from .regions import reference_goal
-            goal=reference_goal(state,constraint['head_ref'])
-            lo,hi=goal['source_range']
-            context=state.text[lo:hi]
-            if len(context)>2048:incomplete=True
-            else:
-                from .reference_structure import inputs
-                probed=True
-                chosen = _probe(state,selector,release,decision,'reference',options,context,(start,end),
-                    inputs=inputs(state,(constraint['head_ref'],),options),
-                    equivalent_targets={o['candidate_id']:r['entity_ref'] for o,r in zip(options,rows)},
-                    question='Resolve «'+constraint['raw']+'» as one noun group. Constraint='+
-                    constraint['identity_constraint']+'. Select only a compatible antecedent supported by these source excerpts. '+
-                    'Proximity and name spelling alone do not prove identity. An already introduced unnamed or relative place is a valid antecedent: unknown coordinates/name do not make its reference unresolved. '
-                    'Choose the existing referent, not a new object. If several antecedents fit, list their numbers; use ? when evidence is insufficient to assess them.')
+            from .reference_structure import inputs
+            from .nominal_reference_pages import select
+            probed=True
+            chosen,page_proofs,incomplete=select(state,release,selector,decision,options,state.text,(start,end),
+                {o['candidate_id']:r['entity_ref'] for o,r in zip(options,rows)},
+                lambda page:inputs(state,(constraint['head_ref'],),page),
+                question='Resolve «'+constraint['raw']+'» as one noun group. Constraint='+
+                constraint['identity_constraint']+'. Select only compatible antecedents supported by these source excerpts. '+
+                'Proximity and name spelling alone do not prove identity. An already introduced unnamed or relative place is a valid antecedent: unknown coordinates/name do not make its reference unresolved. '
+                'Choose an existing referent, not a new object. If several antecedents fit, list their numbers; use ? when evidence is insufficient to assess them.')
+            if snapshot(state,constraint,decision)[2]!=domain_hash:
+                chosen=None;incomplete=True
+                unresolve(state,decision,'REFERENCE_DOMAIN_CHANGED_DURING_CALL')
         by_id={o['candidate_id']:r for o,r in zip(options,rows)}
         if chosen in by_id:
             row=by_id[chosen]
@@ -97,7 +90,8 @@ def resolve(state, release, selector):
                 'premise_support_refs':list(row.get('premise_support_refs',[])),
                 **({local_key:deepcopy(row[local_key])} if local_key else {'context_read_hash':read['context_read_hash']}),
                 'interpretation_decision_ref':decision, 'selected_candidate_id':chosen,
-                'reference_domain_hash':digest(read),'structure_signature':signature(state),
+                'reference_domain_hash':digest(read),'produced_domain_hash':domain_hash,
+                'reference_page_proofs':page_proofs,'structure_signature':signature(state),
                 'reference_constraint':deepcopy(constraint)}
         else:
             if not probed:unresolve(state,decision,'DOMAIN_UNAVAILABLE' if incomplete else 'NO_CANDIDATES')
@@ -106,7 +100,9 @@ def resolve(state, release, selector):
             from .clarifications import offer
             offer(state,decision,'REFERENCE',constraint['raw'],options)
         state.syntax_trace.append({'kind':'NOMINAL_REFERENCE', 'decision_ref':decision,
-            'mention_ref':mention, 'constraint':constraint, 'candidate_count':len(rows), 'selected':chosen})
+            'mention_ref':mention, 'constraint':constraint, 'candidate_count':len(rows), 'selected':chosen,
+            'produced_domain_hash':domain_hash,'evaluation_incomplete':incomplete,
+            'completion_scope':'PRODUCED_REFERENCE_UNION_ONLY'})
 
 
 def unresolve(state,decision_ref,reason):

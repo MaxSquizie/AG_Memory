@@ -91,11 +91,50 @@ else:raise AssertionError('changed source structure retained')
 del frames[1].semantic['proposed_roles']
 s.decisions['f1|predicate_value'].outcome='UNRESOLVED'
 try:payload(s,unit)
-except ValueError as e:assert str(e)=='NOMINAL_REFERENCE_LOCAL_ANCHOR_STALE'
+except ValueError as e:assert str(e)=='NOMINAL_REFERENCE_DOMAIN_STALE'
 else:raise AssertionError('unresolved anchor retained')
 s.decisions['f1|predicate_value'].outcome='RESOLVED'
+# A competing local candidate changes while the selected future anchor is intact.
+resolve(s,release,selector)
+s.decisions['f0|predicate_value'].outcome='UNRESOLVED'
+try:payload(s,unit)
+except ValueError as e:assert str(e)=='NOMINAL_REFERENCE_DOMAIN_STALE'
+else:raise AssertionError('changed competitor did not invalidate union')
+s.decisions['f0|predicate_value'].outcome='RESOLVED'
+# Retiring a page invalidates its derived parent identity too.
+resolve(s,release,selector)
+page=s.observation['nominal_reference_bindings'][noun.token_id]['reference_page_proofs'][0]
+s.component_probe_records[page['decision_ref']]['superseded_by']='changed grounds'
+try:payload(s,unit)
+except ValueError as e:assert str(e)=='NOMINAL_REFERENCE_PAGE_PROOF_STALE'
+else:raise AssertionError('retired page retained parent identity')
+# A source-domain change during the call cannot be published as a fresh result.
+s.component_probe_records.clear()
+def mutate(prompt):
+    s.decisions['f0|predicate_value'].outcome='UNRESOLVED'
+    return '2'
+resolve(s,release,NS(selection_reply_format='SELECT_LABELS_V1',select=mutate))
+assert not s.observation['nominal_reference_bindings']
+assert not s.decisions['nominal|referent'].selected
+s.decisions['f0|predicate_value'].outcome='RESOLVED'
+# The domain owner now consumes a union beyond 32 without truncating source.
+s.budget.llm_limit=1000
+s.component_probe_records.clear()
+s.text+=' '*2200
+memory=[{'entity_ref':'M:memory:'+str(i),'memory_binding_ref':'memory-binding:'+str(i),
+         'source_tag':['other',1],'label':'Previously introduced person '+str(i),
+         'features':[],'reference_kind':'ENTITY','premise_support_refs':[]} for i in range(65)]
+attach(s,request,{'rows':memory,'scope':'ACTIVE_WORKSPACE','search_incomplete':False})
+replies=iter(['0','0','3']);calls=[]
+def paged(prompt):
+    calls.append(prompt)
+    return next(replies)
+resolve(s,release,NS(selection_reply_format='SELECT_LABELS_V1',select=paged))
+assert len(calls)==3 and all(s.text in prompt for prompt in calls)
+assert payload(s,unit)['target_ref']=='M:memory:64'
+assert s.syntax_trace[-1]['candidate_count']==67
 # Removing the reference task removes its derived binding on the next pass.
 ref.semantic['lexical_units']={}
 resolve(s,release,selector)
 assert not s.observation['nominal_reference_bindings']
-print('PASS: generic/same-clause/future anchors, missing union, live real probe, durable self exclusion, stale union/decision, removed task')
+print('PASS: generic/same-clause/future anchors, missing union, live real probe, durable self exclusion, stale union/decision/competitor/page, changed domain during call, 67-row union, full long context, removed task')

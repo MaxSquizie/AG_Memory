@@ -21,6 +21,13 @@ def payload(state, unit):
             or not binding.get('selected_candidate_id')
             or digest(constraint)!=digest(binding.get('reference_constraint'))):
         raise ValueError('NOMINAL_REFERENCE_SELECTION_STALE')
+    from .nominal_reference_domain import snapshot
+    from .nominal_reference_pages import live
+    if snapshot(state,constraint,binding['interpretation_decision_ref'])[2]!=binding.get('produced_domain_hash'):
+        raise ValueError('NOMINAL_REFERENCE_DOMAIN_STALE')
+    explicit=state.observation.get('clarification_choices',{}).get(binding['interpretation_decision_ref'])
+    if explicit!=binding['selected_candidate_id'] and not live(state,binding.get('reference_page_proofs',[])):
+        raise ValueError('NOMINAL_REFERENCE_PAGE_PROOF_STALE')
     if binding.get('local_nominal_anchor'):
         from .nominal_reference_source import rows
         if not any(r['memory_binding_ref']==binding['anchor_binding_ref']
