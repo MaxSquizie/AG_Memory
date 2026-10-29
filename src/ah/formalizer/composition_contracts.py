@@ -77,5 +77,23 @@ def conflicts(state,region,begin):
     return [row for row in state.syntax_trace[begin:]
             if row.get('kind')=='COMPOSITION_OBLIGATION_FAILURE'
             and row.get('region_ref')==region.region_id
-            and row.get('category') in {'HYPOTHESIS_CONFLICT','PARTITION_REJECTED'}
-            and licensed(state,row.get('owner_proof'))]
+            and row.get('category') in {'HYPOTHESIS_CONFLICT','PARTITION_REJECTED','PRODUCER_UNSUPPORTED'}
+            and licensed(state,row.get('owner_proof'))
+            and (row.get('category')!='PRODUCER_UNSUPPORTED'
+                 or licensed(state,row.get('witness',{}).get('capability_proof')))]
+
+
+def unsupported_route(state,region,cfg,producer,proof,explanation):
+    """Expose a producer limitation to the existing addressed revision loop.
+
+    A limitation does not falsify the reading or select a replacement relation.
+    The caller must supply the actual selected capability question as evidence.
+    """
+    from .structural_tasks import licensed
+    route=cfg.get('_lexical_route')
+    if route is None or not licensed(state,proof):return None
+    if route.region_ref!=region.region_id:return None
+    if not licensed(state,route.proof):return None
+    return record_failure(state,region,'PRODUCER_UNSUPPORTED',route.proof,explanation,
+        {'producer':producer,'capability_proof':deepcopy(proof),
+         'token_refs':list(route.token_refs),'interpretation_rejected':False},search_complete=False)

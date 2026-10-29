@@ -34,7 +34,9 @@ def merge(state,release,selector,region,tokens,cfg,grammar,components,diagnostic
     if not roots(components) and not any(f.semantic.get('composition_domain') for f in components) and any(
             'UNRESOLVED' in d.code for d in local):
         for f in all_frames:f.semantic['structural_unresolved']=True
-        state.diag('COMPOSITION_PRODUCER_PENDING',region.region_id)
+        from .composition_contracts import conflicts
+        if not any(r['category']=='PRODUCER_UNSUPPORTED' for r in conflicts(state,region,0)):
+            state.diag('COMPOSITION_PRODUCER_PENDING',region.region_id)
         return all_frames
     from .component_constraints import accepts_bundle
     retained=[]

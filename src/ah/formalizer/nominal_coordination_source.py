@@ -58,6 +58,12 @@ def discover(state,release,selector,region,tokens,cfg):
                 'groups':deepcopy(groups),'completion_proof':scope[1],'task_outcome':'SUPPORTED'})
             return groups
         if scope[0]['candidate_id']=='COMPLEX':
+            from .composition_contracts import unsupported_route
+            unsupported_route(state,region,cfg,'FLAT_NOMINAL_COORDINATION',scope[1],
+                'The source question established a nested or alternative nominal group. '
+                'This producer enumerates flat joint participants only. Its failure is not '
+                'evidence against that interpretation; an enclosing structural relation may '
+                'represent it while preserving shared material and child scopes.')
             state.diag('NOMINAL_COORDINATION_STRUCTURE_UNSUPPORTED',region.region_id)
             return False
         if len(groups)>=cfg['max_candidates']:
