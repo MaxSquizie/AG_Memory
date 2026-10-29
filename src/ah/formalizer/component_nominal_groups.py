@@ -4,6 +4,51 @@ from .component_probe import _probe
 from .component_area_scope import connectives
 
 
+def intersect_cases(domains):
+    """None is unknown; an empty set is a proved conflict of known domains."""
+    known=[set(d) for d in domains if d is not None]
+    return set.intersection(*known) if known else None
+
+
+def candidate_cases(variants):
+    # role_choices admits only CONTEXTUAL unknown-case readings. Preserve that
+    # same possibility here without changing the reading or inventing a case.
+    if any(not v.cases and v.origin=='CONTEXTUAL' for v in variants):return None
+    return {c for v in variants for c in v.cases}
+
+
+def compatible_cases(readings, group_cases=None):
+    domains=[group_cases]
+    for reading in readings:
+        cases=reading['cases'] if isinstance(reading,dict) else reading.cases
+        origin=reading.get('origin') if isinstance(reading,dict) else reading.origin
+        if not cases and origin!='CONTEXTUAL':return False
+        domains.append(set(cases) if cases else None)
+    result=intersect_cases(domains)
+    return result is None or bool(result)
+
+
+def merge_groups(groups):
+    """Connected source membership is transitive, regardless of edge order."""
+    from copy import deepcopy
+    merged=[]
+    for original in groups:
+        group=deepcopy(original)
+        # Consume all connected components, including those reached by a bridge.
+        while True:
+            linked=next((old for old in merged if set(old['member_refs']) & set(group['member_refs'])),None)
+            if linked is None:break
+            merged.remove(linked)
+            group['member_refs']=list(dict.fromkeys([*linked['member_refs'],*group['member_refs']]))
+            group['marker_refs']=list(dict.fromkeys([*linked['marker_refs'],*group['marker_refs']]))
+            group['contextual_readings']=[*linked.get('contextual_readings',()),*group.get('contextual_readings',())]
+            cases=intersect_cases([linked['cases'],group['cases']])
+            if cases is not None and not cases:return None
+            group['cases']=sorted(cases) if cases is not None else None
+        merged.append(group)
+    return merged
+
+
 def select(state, release, selector, region, tokens, cfg):
     spans=connectives(state,release,region,tokens)
     if not spans: return []
@@ -14,32 +59,25 @@ def select(state, release, selector, region, tokens, cfg):
         a,b=before[-1],after[0]
         av=[v for v in a.variants if v.pos in {'NOUN','NPRO'}]
         bv=[v for v in b.variants if v.pos in {'NOUN','NPRO'}]
-        cases=sorted({c for x in av for y in bv for c in x.cases & y.cases})
+        cases=intersect_cases([candidate_cases(av),candidate_cases(bv)])
         contextual=[]
-        if not cases and av and bv:
+        if cases is not None and not cases and av and bv:
             from .contextual_name_case import resolve
             rows=resolve(state,release,selector,region,a,b,cfg)
             if rows:
                 contextual.extend(rows)
                 cases=sorted({c for row in rows for v in row['variants'] for c in v['cases']})
-        if not cases:
+        if cases is not None and not cases:
             if av and bv:
                 state.diag('NOMINAL_COORDINATION_CASE_CONFLICT',region.region_id)
                 return False
             return None
         groups.append({'member_refs':[a.token_id,b.token_id],
             'marker_refs':[t.token_id for t in tokens if lo<=t.start and t.end<=hi],
-            'cases':cases,'operator':'AND','contextual_readings':contextual})
+            'cases':sorted(cases) if cases is not None else None,'operator':'AND','contextual_readings':contextual})
     # Overlapping pairs form one connected nominal group, never two copies.
-    merged=[]
-    for g in groups:
-        old=next((p for p in merged if set(p['member_refs']) & set(g['member_refs'])),None)
-        if old:
-            old['member_refs']=list(dict.fromkeys([*old['member_refs'],*g['member_refs']]))
-            old['contextual_readings']+=g['contextual_readings']
-            old['marker_refs']+=g['marker_refs'];old['cases']=sorted(set(old['cases']) & set(g['cases']))
-            if not old['cases']: return None
-        else:merged.append(g)
+    merged=merge_groups(groups)
+    if merged is None:return None
     if len(merged)>cfg['max_candidates'] or region.source_range[1]-region.source_range[0]>cfg['context_chars']:
         state.diag('COMPONENT_SEARCH_INCOMPLETE',region.region_id)
         return False

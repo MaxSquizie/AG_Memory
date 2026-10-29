@@ -12,7 +12,8 @@ def compatible(left_id, left, right_id, right, shared_slot=False):
         # competing ROOT roles. Each member keeps its own dependent domain.
         if left['kind']!=right['kind'] or left.get('role')!=right.get('role'):return False
         if left['kind']!='ROOT':return False
-        if not set(left['morph']['cases']) & set(right['morph']['cases']):return False
+        from .component_nominal_groups import compatible_cases
+        if not compatible_cases([left['morph'],right['morph']]):return False
     if left.get('host_ref')==right_id and right.get('host_ref')==left_id:
         return False
     for dependent,host,host_id in ((left,right,right_id),(right,left,left_id)):

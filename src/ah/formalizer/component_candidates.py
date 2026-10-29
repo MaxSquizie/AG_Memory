@@ -141,9 +141,9 @@ def enumerate_candidates(state, release, cfg, region, tokens, p, temporal, nomin
                     for binding in product(*variants):
                         assignments=[(e,b) for e,b in zip(nominals,binding) if b[0] is not None]
                         rs=[b[0] for e,b in assignments]
-                        from .component_nominal_groups import valid_roles
+                        from .component_nominal_groups import valid_roles,compatible_cases
                         if not valid_roles({e.token_id:b[0] for e,b in assignments},nominal_groups):continue
-                        if any(not set(g['cases']).intersection(*(set(b[1].cases) for e,b in assignments if e.token_id in g['member_refs'])) for g in nominal_groups):continue
+                        if any(not compatible_cases([b[1] for e,b in assignments if e.token_id in g['member_refs']],g['cases']) for g in nominal_groups):continue
                         missing={r['role_id'] for r in roles if r.get('cardinality',{}).get('min',0)>0}-set(rs)
                         # Passive agreement belongs to the patient. It cannot
                         # identify or license an omitted actor in SUBJECT.
