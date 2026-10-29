@@ -52,12 +52,12 @@ def merge_groups(groups):
 
 
 def select(state, release, selector, region, tokens, cfg):
-    spans=connectives(state,release,region,tokens)
-    if not spans: return []
     from .structural_tasks import enabled
     if enabled(release):
-        from .nominal_coordination_source import select as addressed
-        return addressed(state,release,selector,region,tokens,cfg,spans)
+        from .nominal_coordination_source import discover
+        return discover(state,release,selector,region,tokens,cfg)
+    spans=connectives(state,release,region,tokens)
+    if not spans:return []
     groups=[]
     for lo,hi in spans:
         before=[t for t in tokens if t.end<=lo];after=[t for t in tokens if t.start>=hi]

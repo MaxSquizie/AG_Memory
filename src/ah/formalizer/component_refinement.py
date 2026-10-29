@@ -310,7 +310,8 @@ def _compose_lexical_area(state, release, selector, region, tokens, cfg, depth=0
                 predicates.extend(t for t in tokens if t not in predicates and
                     (t in passive_heads or any(v.pos=='INFN' for v in t.variants)))
         nominal_groups=[]
-        if connectives(state,release,region,tokens):
+        from .structural_tasks import enabled as structural_enabled
+        if structural_enabled(release) or connectives(state,release,region,tokens):
             from .component_nominal_groups import select as select_nominal_groups
             nominal_groups=select_nominal_groups(state,release,selector,region,tokens,cfg)
             if nominal_groups is False:

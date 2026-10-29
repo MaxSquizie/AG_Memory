@@ -34,7 +34,8 @@ def atomic_signature(state,release,root,owned):
     bindings=[(digest(v),_bindings(root,evidence,v)) for v in release.entries('R-V')
               if v['sense_id'] in senses]
     data=deepcopy(sem)
-    for group in data.get('nominal_groups',()):group.pop('source_evidence',None)
+    for group in data.get('nominal_groups',()):
+        group.pop('source_evidence',None);group.pop('coordination_completion',None)
     for key in _BOOKKEEPING:data.pop(key,None)
     questions=data.pop('component_questions',[])
     for q in questions:
