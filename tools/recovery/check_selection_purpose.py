@@ -66,3 +66,17 @@ for slot in ['nominal_function','temporal_function','structural_function_owner',
     else:raise AssertionError('consumer type bypass')
     assert not sel.prompts
 print('Declared collecting/confirmation consumers reject mismatched operation before empty completion: PASS')
+
+# Both supported transports expose the same alternatives-only contract.
+from ah.formalizer.selection_protocol import DecisionSchema,Relation,validate_selection_response
+from ah.formalizer.selection_labels import validate_selection_label_response
+schema=DecisionSchema('test',{c:Relation(c,c,0,(),c) for c in ['a','b']})
+for reply in [validate_selection_response('{"outcome":"MULTIPLE_ADMISSIBLE","selected":["a","b"]}',schema),
+              validate_selection_label_response('1,2',schema,('a','b'))]:
+    assert reply.multiplicity=='ALTERNATIVE_READINGS' and reply.selected==('a','b')
+from ah.formalizer.function_inventory import complete,completed
+s=state();complete(s,{'inventory_kind':'NOMINAL','inventory_tokens':['t'],'inventory_signature':'test'})
+assert completed(s.syntax_trace[-1])
+s.syntax_trace[-1]['multiplicity']='ALTERNATIVE_READINGS'
+assert not completed(s.syntax_trace[-1])
+print('JSON/label reply alternatives and compatible inventory type cannot be interchanged: PASS')

@@ -110,6 +110,12 @@ class SelectionResponse:
     selected: tuple[str, ...]
     note: str = ""
 
+    @property
+    def multiplicity(self):
+        # Both codecs select interpretations. A compatible group must itself
+        # be one preformed candidate, or be built by a typed collection task.
+        return 'ALTERNATIVE_READINGS'
+
 
 def build_selection_prompt(
     *,
@@ -150,7 +156,9 @@ def build_selection_prompt(
         f"{context_block}\n"
         f"Mentions and preliminary structural links:\n{mention_lines}\n"
         f"Candidates (schema {schema.version}, closed set):\n{candidate_lines}\n"
-        "Task: select the admissible candidate(s), or report that none fits / context is insufficient.\n"
+        "Task: select the admissible interpretation(s), or report that none fits / context is insufficient. "
+        "Several IDs mean alternative readings, never jointly selected objects. "
+        "A group is selected only when one candidate explicitly describes that whole group.\n"
         'Respond with JSON only: {"outcome": "ONE_SELECTED" | "MULTIPLE_ADMISSIBLE" |'
         ' "INSUFFICIENT_CONTEXT" | "NONE_FIT", "selected": ["<id>"], "note": "..."}\n'
         "Rules: outcome ONE_SELECTED requires exactly one selected id; MULTIPLE_ADMISSIBLE"

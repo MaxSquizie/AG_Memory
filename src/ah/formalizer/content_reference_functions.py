@@ -149,9 +149,10 @@ def validate_reference(state,owner,role,slot):
     if not licensed(state,proofs['role'],owner_ref=owner.predicate_token_ref,role=role,attitude=slot['attitude'],
                     content_source=source['source_hash'],parent_refs=row['parent_refs'],pointer_refs=sorted(row['pointer_refs'],key=lambda ref:next(t.start for t in state.evidence if t.token_id==ref))):return False
     if row['controller'] is not None and not licensed(state,proofs['control'],controller=row['controller'],source_hash=source['source_hash']):return False
+    from .source_collections import valid as valid_collection
     if row['presence']=='EXPLICIT' and not any(r.get('kind')=='SOURCE_SET' and r.get('slot')=='content_pointer'
             and r.get('region_ref')==row['region_ref'] and set(r['selected_refs'])==set(row['pointer_refs'])
-            and digest(r['proofs'])==digest(row['pointer_proofs']) for r in state.syntax_trace):return False
+            and digest(r['proofs'])==digest(row['pointer_proofs']) and valid_collection(state,r) for r in state.syntax_trace):return False
     frames={f.frame_id:f for f in state.frames}
     return all(fid in frames and basis(frames[fid])==expected
                for basis_map in (row['frame_bases'],row['source_frame_bases']) for fid,expected in basis_map.items())

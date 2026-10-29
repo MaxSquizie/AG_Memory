@@ -79,7 +79,24 @@ def _choose(state,release,selector,region,cfg,slot,options,question,*,empty=None
     runtime=current(state)
     task_scope=runtime.input_signature() if runtime else None
     iterator=iter(options);page=0;previous=[];examined=0
-    supported=[];pages=[];seen=set()
+    supported=[];pages=[];seen=set();page_evidence=[]
+    from .selection_domains import capture,valid as valid_enumeration
+    from .structural_probe_inputs import source_signature,parent_signature
+    basis=(source_signature(state),parent_signature(state))
+    def enumeration_record():
+        from .task_contracts import SelectionReceipt
+        receipt=SelectionReceipt(tuple(sorted(seen)),tuple(sorted(v['candidate_id'] for v,_ in supported)),True,purpose=purpose)
+        return {'page_refs':[p['decision_ref'] for p in pages],
+                'page_evidence':list(page_evidence),
+                'supported_payloads':{v['candidate_id']:digest(v) for v,_ in supported},**receipt.record()}
+    def enumeration_live():
+        if (basis!=(source_signature(state),parent_signature(state))
+                or not valid_enumeration(state,enumeration_record())):
+            state.diag('STRUCTURAL_TASK_SEARCH_INCOMPLETE',region.region_id)
+            state.syntax_trace.append({'kind':'STRUCTURAL_TASK','region_ref':region.region_id,
+                'slot':slot,'status':'BLOCKED','reason':'ENUMERATION_EVIDENCE_CHANGED'})
+            return False
+        return True
     limit=release.entries('ProposalPolicy')[0].get('max_rule_steps',20000)
     from .component_source import view,probe_context
     owned=set(region.token_refs)
@@ -90,9 +107,12 @@ def _choose(state,release,selector,region,cfg,slot,options,question,*,empty=None
     if empty is not None:
         question+=' Optional search: examine the listed candidates; 0 means none of THESE fits, not missing context.'
     def complete_empty():
-        if not premises_live():return None
+        if not premises_live() or not enumeration_live():return None
         from .state import Decision,Ground
-        key='task-empty:'+digest([region.region_id,task_scope,revision_scope,slot,question,sorted(seen),previous,empty])
+        key='task-empty:'+digest([region.region_id,task_scope,revision_scope,slot,question,sorted(seen),page_evidence,empty])
+        state.syntax_trace.append({'kind':'TASK_DOMAIN','task_ref':key,'level':'T2_TP',
+            'slot':slot,'source_range':list(region.source_range),'token_refs':list(region.token_refs),
+            'prerequisites':prerequisite_records,**enumeration_record()})
         cid=empty['candidate_id']
         if cid in seen:raise ValueError('EMPTY_COMPLETION_IN_POSITIVE_DOMAIN')
         state.decisions[key]=Decision(slot,key,tuple(sorted(seen))+ (cid,),selected=(cid,),
@@ -159,15 +179,21 @@ def _choose(state,release,selector,region,cfg,slot,options,question,*,empty=None
         if outcome not in {'ONE_SELECTED','MULTIPLE_ADMISSIBLE','NONE_FIT'}:
             row['task_outcome']='UNKNOWN' if outcome=='INSUFFICIENT_CONTEXT' else 'RESOURCE_BLOCKED'
             return None
+        evidence=capture(state,key,values)
+        if evidence is None:
+            state.diag('STRUCTURAL_TASK_SEARCH_INCOMPLETE',region.region_id);return None
+        page_evidence.append(evidence)
         supported.extend((v,key) for v in values if v['candidate_id'] in admissible)
         if outcome=='NONE_FIT':row['status']='REJECTED_PAGE';previous.append(key)
         if has_more:page+=1;continue
+        if not enumeration_live():return None
         from .task_contracts import SelectionReceipt
         receipt=SelectionReceipt(tuple(sorted(seen)),tuple(sorted(v['candidate_id'] for v,_ in supported)),True,purpose=purpose)
-        domain_ref='task-domain:'+digest([region.region_id,task_scope,slot,question,receipt.candidates,[(p['decision_ref'],p['alternatives']) for p in pages]])
+        domain_ref='task-domain:'+digest([region.region_id,task_scope,slot,question,receipt.candidates,page_evidence,[(p['decision_ref'],p['alternatives']) for p in pages]])
         state.syntax_trace.append({'kind':'TASK_DOMAIN','task_ref':domain_ref,'level':'T2_TP',
             'slot':slot,'source_range':list(region.source_range),'token_refs':list(region.token_refs),
             'page_refs':[p['decision_ref'] for p in pages],'selection_purpose':purpose.value,'prerequisites':prerequisite_records,
+            'page_evidence':list(page_evidence),
             'supported_payloads':{v['candidate_id']:digest(v) for v,_ in supported},**receipt.record()})
         from .clarifications import choice
         explicit=choice(state,domain_ref,receipt.supported) if supported else None
@@ -239,11 +265,18 @@ def licensed(state,proof,*,_visiting=None,**expected):
         domain=current.get('domain_ref')
         if key in retired or domain in retired:return False
         if retired.intersection(domains.get(domain,{}).get('page_refs',())):return False
+        if domain not in domains:return False
+        from .selection_domains import valid as valid_enumeration
+        if not valid_enumeration(state,domains[domain],retired):return False
         decision=state.decisions.get(key)
         if selected_candidate(decision)!=cid or decision.search_complete is not True:return False
         row=rows.get((key,cid))
         if row is None or not row.get('enumeration_complete'):return False
-        if current.get('selection_purpose')!=row.get('selection_purpose'):return False
+        if (current.get('selection_purpose')!=row.get('selection_purpose')
+                or current.get('selection_purpose')!=domains[domain].get('selection_purpose')):return False
+        if row.get('task_outcome')=='EMPTY':
+            if domains[domain].get('supported_ids'):return False
+        elif domains[domain].get('supported_payloads',{}).get(cid)!=current.get('payload_hash'):return False
         if not any(v.get('candidate_id')==cid and digest(v)==current.get('payload_hash')==row.get('payload_hash')
                    and all(v.get(k)==value for k,value in required.items()) for v in row.get('alternatives',())):return False
         active.add(key);stack.append((current,True,{}))
@@ -334,13 +367,15 @@ def extend_source_set(state,release,selector,region,tokens,cfg,slot,question,sel
     from .structural_probe_inputs import collection
     from .probe_prerequisites import from_proof
     selected,proofs=list(selected),list(proofs);forbidden=set(exclude)
+    completion_reason=None;completion_proof=None
     while True:
         # The peer sees source order, not the order in which pieces happened
         # to be discovered. A later repair can add an earlier occurrence.
         selected.sort(key=lambda t:(t.start,t.end,t.token_id))
         used={t.token_id for t in selected}
         remaining=[t for t in tokens if t.token_id not in used|forbidden]
-        if not remaining:break
+        if not remaining:
+            completion_reason='ALL_AVAILABLE_OCCURRENCES';break
         def ends(a):
             for b in range(a,len(tokens)):
                 if tokens[b].token_id in used|forbidden:break
@@ -359,7 +394,8 @@ def extend_source_set(state,release,selector,region,tokens,cfg,slot,question,sel
             prerequisites=tuple(from_proof(state,p) for p in proofs))
         if not more:return None
         proofs.append(more[1])
-        if more[0]['candidate_id']=='DONE':break
+        if more[0]['candidate_id']=='DONE':
+            completion_reason='NO_SUPPORTED_ADDITION';completion_proof=more[1];break
         a=next(i for i,t in enumerate(tokens) if t.token_id==more[0]['token_ref'])
         choices=[]
         for b in ends(a):
@@ -376,9 +412,12 @@ def extend_source_set(state,release,selector,region,tokens,cfg,slot,question,sel
     selected.sort(key=lambda t:t.start)
     if admissible is not None and not admissible(selected):
         state.diag('STRUCTURAL_CONTENT_UNCOVERED',region.region_id);return None
+    from .source_collections import CollectionReceipt,valid as valid_collection
+    receipt=CollectionReceipt(tuple(t.token_id for t in tokens),tuple(t.token_id for t in selected),
+        tuple(t.token_id for t in tokens if t.token_id in forbidden),tuple(proofs),completion_reason,completion_proof)
+    record=receipt.record()
+    if not valid_collection(state,record):
+        state.diag('SOURCE_COLLECTION_UNRESOLVED',region.region_id);return None
     state.syntax_trace.append({'kind':'SOURCE_SET','slot':slot,'region_ref':region.region_id,
-        'selected_refs':[t.token_id for t in selected],
-        'remainder_refs':[t.token_id for t in tokens if t.token_id not in {x.token_id for x in selected}],
-        'proofs':proofs,'search_complete':False,'selected_set_complete':True,
-        'interpretation_complete':False,'completion_scope':'SELECTED_SOURCE_SET'})
+        'remainder_refs':[t.token_id for t in tokens if t.token_id not in {x.token_id for x in selected}],**record})
     return selected,tuple(proofs)

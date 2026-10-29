@@ -53,10 +53,16 @@ def project(request,option):
     if retired.intersection(domains):raise ValueError('CLARIFICATION_READING_PROOF_RETIRED')
     for ref,cid in mapping.items():
         domain=domains[ref]
+        if domain.get('multiplicity')!='ALTERNATIVE_READINGS' or domain.get('selection_purpose')!='ALTERNATIVE_READING':
+            raise ValueError('CLARIFICATION_READING_MULTIPLICITY_INVALID')
         if any(domain.get(k)!=v for k,v in row['scope'].items()):raise ValueError('CLARIFICATION_READING_SCOPE_CHANGED')
         value=next((v for v in domain['alternatives'] if v['candidate_id']==cid),None)
         receipt=next((r for r in reversed(trace) if r.get('kind')=='TASK_DOMAIN' and r['task_ref']==domain['domain_ref']),None)
+        from .selection_domains import valid_frozen
+        from .task_contracts import SelectionPurpose
         if (value is None or digest(value['reading'])!=digest(option['reading']) or receipt is None
+                or receipt.get('selection_purpose')!=SelectionPurpose.ALTERNATIVE.value
+                or not valid_frozen(request.get('generation_snapshot',{}),receipt)
                 or receipt.get('search_complete') is not True or receipt.get('source_complete') is not True
                 or retired.intersection(receipt.get('page_refs',()))
                 or receipt.get('supported_payloads',{}).get(cid)!=digest(value)):

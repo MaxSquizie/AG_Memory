@@ -59,15 +59,26 @@ print('Prerequisites: prompt evidence, stale replay, payload/slot, in-call revis
 # Synthetic accepted receipts exercise dependency depth, not language parsing.
 from copy import deepcopy
 from ah.formalizer.canonical_ledger import digest
+from ah.formalizer.selection_domains import capture
+from dataclasses import asdict
 s,r,sel,first=fixture();previous=first
 for i in range(1200):
     value={'candidate_id':str(i),'label':'Dependent interpretation '+str(i)}
-    key='depth:'+str(i);proof={'decision_ref':key,'candidate_id':str(i),'domain_ref':key,'payload_hash':digest(value)}
+    key='depth:'+str(i);proof={'decision_ref':key,'candidate_id':str(i),'domain_ref':key,'payload_hash':digest(value),'selection_purpose':'ALTERNATIVE_READING'}
     decision=deepcopy(s.decisions[first[1]['decision_ref']]);decision.frame_id=key;decision.selected=(str(i),);decision.candidates=(str(i),)
     decision.grounds=[Ground('D','synthetic depth witness',str(i))]
     s.decisions[key]=decision
+    page_key=key+':page';page=deepcopy(decision);page.frame_id=page_key;page.search_complete=False
+    page.selector_outcome='ONE_SELECTED';page.outcome=None
+    s.decisions[page_key]=page
+    s.component_probe_records[page_key]={'signature':digest([i]),'dependency_signature':digest([i]),'decision':asdict(page)}
+    s.syntax_trace.append({'kind':'TASK_DOMAIN','task_ref':key,'page_refs':[page_key],
+        'page_evidence':[capture(s,page_key,[value])],'candidate_ids':[str(i)],'supported_ids':[str(i)],
+        'supported_payloads':{str(i):digest(value)},'enumeration_complete':True,'enumeration_scope':'CALLER_GENERATOR',
+        'multiplicity':'ALTERNATIVE_READINGS','selection_purpose':'ALTERNATIVE_READING'})
     s.syntax_trace.append({'kind':'STRUCTURAL_TASK','decision_ref':key,'selected':str(i),
         'enumeration_complete':True,'payload_hash':digest(value),'alternatives':[value],
+        'selection_purpose':'ALTERNATIVE_READING',
         'prerequisites':[accepted('relative_argument_role',previous).record()]})
     previous=(value,proof)
 assert licensed(s,previous[1])

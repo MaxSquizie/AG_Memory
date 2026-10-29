@@ -63,7 +63,7 @@ class SelectionReceipt:
                 'search_complete':self.search_complete,'source_complete':self.source_complete,
                 'enumeration_complete':self.search_complete,
                 'enumeration_scope':'CALLER_GENERATOR','interpretation_complete':False,
-                'selection_purpose':self.purpose.value,
+                'selection_purpose':self.purpose.value,'multiplicity':'ALTERNATIVE_READINGS',
                 'task_outcome':self.outcome.value}
 
 

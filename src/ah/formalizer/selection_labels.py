@@ -42,6 +42,7 @@ def selection_label_instructions(candidate_ids: Sequence[str]) -> str:
     return (
         "Reply with the number of the supported option. "
         "If multiple interpretations remain supported, list their numbers separated by commas. "
+        "These are alternative readings, not jointly selected objects. "
         "Insufficient context: ?\n"
         "No candidate fits: 0\n"
         "One line, no spaces. No JSON or explanation."
@@ -90,7 +91,7 @@ def build_label_selection_prompt(
         + f"Options:\n{candidate_lines}\n"
         + selection_label_instructions(ids),
         {'protocol': PROTOCOL_VERSION, 'slot': slot_id, 'frame_id': frame_id,
-         'schema': schema.version, 'candidates': list(ids)},
+         'schema': schema.version, 'candidates': list(ids), 'multiplicity':'ALTERNATIVE_READINGS'},
     )
 
 

@@ -23,11 +23,14 @@ class DirectProbeInputs:
     descriptions: tuple
     declaration_status: str = 'ADDRESSED_SOURCE_DECLARED'
     family: str = 'DIRECT_SOURCE_CHOICE'
+    multiplicity: str = 'ALTERNATIVE_READINGS'
 
     def record(self):return asdict(self)
 
     def errors(self,state,slot,options,target_range):
-        errors=[];evidence={e.token_id:e for e in state.evidence}
+        errors=[]
+        if self.multiplicity!='ALTERNATIVE_READINGS':errors.append('UNSUPPORTED_MULTIPLICITY')
+        evidence={e.token_id:e for e in state.evidence}
         if slot!=self.slot or tuple(target_range)!=self.target_range:errors.append('TASK_ADDRESS_MISMATCH')
         if not self.target_refs or len(set(self.target_refs))!=len(self.target_refs):errors.append('TARGET_MISSING_OR_DUPLICATE')
         for ref in self.target_refs:

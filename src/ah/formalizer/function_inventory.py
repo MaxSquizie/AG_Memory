@@ -20,15 +20,24 @@ def identity(state,kind,tokens,constraints=None):
 def begin(state,kind,tokens,constraints=None):
     kind,refs,signature=identity(state,kind,tokens,constraints)
     previous=[r for r in state.syntax_trace if r.get('inventory_kind')==kind and r.get('inventory_tokens')==list(refs)]
-    if any(r.get('inventory_complete') and not r.get('superseded') and r['inventory_signature']==signature for r in previous):
+    if any(completed(r) and r['inventory_signature']==signature for r in previous):
         return None
     for row in previous:row['superseded']=True
     return {'inventory_kind':kind,'inventory_tokens':list(refs),'inventory_signature':signature}
 
 
 def complete(state,metadata):
-    state.syntax_trace.append({'kind':'FUNCTION_INVENTORY',**metadata,'inventory_complete':True})
+    state.syntax_trace.append({'kind':'FUNCTION_INVENTORY',**metadata,'inventory_complete':True,
+        'multiplicity':'COMPATIBLE_FUNCTIONS','completion_scope':'DECLARED_FUNCTION_INVENTORY',
+        'interpretation_complete':False})
 
 
 def active(row):
     return not row.get('superseded',False)
+
+
+def completed(row):
+    return (row.get('kind')=='FUNCTION_INVENTORY' and row.get('inventory_complete') is True
+        and row.get('multiplicity')=='COMPATIBLE_FUNCTIONS'
+        and row.get('completion_scope')=='DECLARED_FUNCTION_INVENTORY'
+        and row.get('interpretation_complete') is False and active(row))

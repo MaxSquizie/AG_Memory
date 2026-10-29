@@ -20,11 +20,10 @@ def rows(state,tokens,kind=None):
 
 
 def prepared(state,tokens):
-    from .function_inventory import identity
+    from .function_inventory import identity,completed
     kind,refs,signature=identity(state,'NOMINAL',tokens)
     return any(r.get('inventory_kind')==kind and r.get('inventory_tokens')==list(refs)
-               and r.get('inventory_complete')
-               and not r.get('superseded') for r in state.syntax_trace)
+               and completed(r) for r in state.syntax_trace)
 
 
 def prepare(state,release,selector,region,tokens,cfg):

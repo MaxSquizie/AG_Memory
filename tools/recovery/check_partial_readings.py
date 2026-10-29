@@ -34,7 +34,7 @@ from types import SimpleNamespace as N
 from ah.formalizer.partial_composition import validate
 from ah.formalizer.composition_tree import validate as canonical_validate
 raw=s.native_states[-1]
-state=N(**{**raw,'decisions':{k:N(**v) for k,v in raw['decisions'].items()},'frames':[N(**f) for f in raw['frames']]})
+state=N(**{**raw,'decisions':{k:N(**{**v,'grounds':[N(**g) for g in v['grounds']]}) for k,v in raw['decisions'].items()},'frames':[N(**f) for f in raw['frames']]})
 assert state.machine_state=='PARTIAL'
 assert not r['assertions']['ah'] and not r['assertions']['journal']
 assert len(state.observation['partial_compositions'])==1

@@ -12,7 +12,8 @@ class SupportedDomain:
 
     def record(self):
         return {'decision_ref':self.decision_ref,'domain_ref':self.domain_ref,
-                'alternatives':deepcopy(list(self.values))}
+                'alternatives':deepcopy(list(self.values)),
+                'multiplicity':'ALTERNATIVE_READINGS','selection_purpose':'ALTERNATIVE_READING'}
 
 
 def retired_refs(trace):
@@ -23,6 +24,8 @@ def retired_refs(trace):
 
 
 def valid_domain(state,record):
+    if (record.get('multiplicity')!='ALTERNATIVE_READINGS'
+            or record.get('selection_purpose')!='ALTERNATIVE_READING'):return False
     retired=retired_refs(state.syntax_trace)
     if record.get('decision_ref') in retired:return False
     decision=state.decisions.get(record.get('decision_ref'))
@@ -33,6 +36,10 @@ def valid_domain(state,record):
     if set(decision.selected)!=ids:return False
     for row in reversed(state.syntax_trace):
         if row.get('kind')=='TASK_DOMAIN' and row.get('task_ref')==record.get('domain_ref'):
+            from .selection_domains import valid as valid_enumeration
+            if not valid_enumeration(state,row,retired):return False
+            from .task_contracts import SelectionPurpose
+            if row.get('selection_purpose')!=SelectionPurpose.ALTERNATIVE.value:return False
             from .probe_prerequisites import errors,restored
             if errors(state,restored(row.get('prerequisites',()))):return False
             return (row.get('search_complete') is True and row.get('source_complete') is True
