@@ -31,7 +31,8 @@ for answer,expected in [('1','candidate'),('0',None),('?',None)]:
     assert selected_candidate(decision)==expected
 
 # Fix the proposed domain only; run the real question, codec and consumer.
-variant=SimpleNamespace(pos='NOUN',cases={'nomn'})
+from ah.formalizer.state import MorphVariant
+variant=MorphVariant('test','NOUN',cases=frozenset({'nomn'}))
 for answer,expected in [('1','SUPPORTED'),('2','NOT_APPLICABLE'),('0','PENDING'),('?','PENDING')]:
     state,region=setup();selector=Selector(answer)
     for token in (state.evidence[0],state.evidence[2]):token.variants=(variant,)

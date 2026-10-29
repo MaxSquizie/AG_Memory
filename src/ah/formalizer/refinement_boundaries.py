@@ -105,7 +105,7 @@ def select(state, release, selector, region, tokens, cfg):
     chosen = _probe(state, selector, release, key, 'component_attachment', choices, raw,
         region.source_range, question='Which span is a postnominal description attached to a noun in the remaining parent? '
         'The description may contain further descriptions. Do not use punctuation as proof; '
-        'keep all complements belonging to this area. If none of these boundaries fits, answer 0; use ? when evidence is insufficient.')
+        'keep all complements belonging to this area. If none of these boundaries fits, answer 0; use ? when evidence is insufficient.', target_refs=tuple(t.token_id for t in tokens))
     state.syntax_trace.append({'kind':'REFINEMENT_BOUNDARY','decision_ref':key,
         'candidates':options,'selected':chosen,'token_refs':[t.token_id for t in tokens]})
     return options[chosen] if chosen else False

@@ -52,7 +52,7 @@ def resolve(state, release, selector, region, tokens, cfg):
         chosen=_probe(state,selector,release,key,'nominal_attachment',choices,
                       state.text[slice(*region.source_range)],region.source_range,
                       question='Select the full quantity child of this nominal group, including a qualifier ONLY if it qualifies the quantity, not the event. '
-                      'This is phrase attachment, not numerical calculation or identification of individual members.')
+                      'This is phrase attachment, not numerical calculation or identification of individual members.', target_refs=tuple(t.token_id for t in tokens if t.token_id in _))
         if chosen is None:
             state.diag('QUALITATIVE_QUANTITY_UNRESOLVED',region.region_id);return None,[]
         if chosen=='OTHER':continue

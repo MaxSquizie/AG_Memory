@@ -55,7 +55,7 @@ def select(state, release, selector, region, tokens, cfg):
         'Do not move an operator across the selected boundary. If one operator governs the whole '
         'coordination, select that outer operator; its content slot must remain the whole area. '
         'For a plain associative chain of actions choose the leftmost outer connector; '
-        'this is structural bracketing, not temporal order. Grammar and context override this preference.')
+        'this is structural bracketing, not temporal order. Grammar and context override this preference.', target_refs=tuple(t.token_id for t in tokens))
     state.syntax_trace.append({'kind': 'COMPOSITION_BOUNDARY', 'region_ref': region.region_id,
         'decision_ref': key, 'alternatives': options, 'selected': chosen})
     if chosen == 'INTERNAL':

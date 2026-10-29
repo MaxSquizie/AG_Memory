@@ -66,7 +66,7 @@ def build_clause(state,release,selector,region,tokens,p,cfg, *, select=True, att
             chosen=None
         else:
             chosen=_probe(state,selector,release,region.region_id+'|composition','component_attachment',options,raw,region.source_range,
-                question='Which proposed clause reading fits this source? Preserve the shown whole morphological readings and role assignments within each alternative; do not assert that its event occurred.')
+                question='Which proposed clause reading fits this source? Preserve the shown whole morphological readings and role assignments within each alternative; do not assert that its event occurred.', target_refs=(p.token_id,))
         for f in candidates:
             f.semantic['composition_decision']=region.region_id+'|composition'
             if f.frame_id!=chosen: f.semantic['structural_unresolved']=True

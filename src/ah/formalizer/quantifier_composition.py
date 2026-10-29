@@ -65,6 +65,7 @@ def bind(state,release,selector,region,frames,matches,cfg):
 
 
 def _bind(state,release,selector,region,frames,matches,cfg,spend):
+    from .probe_wording import reading as reading_text
     evidence={t.token_id:t for t in state.evidence};domains={};specs={}
     for bounds,(anchors,rule) in matches.items():
         mid='operator-slot:'+digest([region.region_id,*bounds])
@@ -81,7 +82,7 @@ def _bind(state,release,selector,region,frames,matches,cfg,spend):
                 values[cid]={'candidate_id':cid,'head_ref':tid,'reading':clean(reading),
                     'label':rule['operator']+' «'+state.text[bounds[0]:bounds[1]]+'» binds the existing nominal «'+
                         evidence[tid].span+'» at '+str([evidence[tid].start,evidence[tid].end])+
-                        '; restriction uses this noun; no individual witness or identity is asserted'}
+                        '; whole reading: '+reading_text(clean(reading))+'; restriction uses this noun; no individual witness or identity is asserted'}
         if not values or len(values)>cfg['max_candidates']:
             state.diag('COMPONENT_SEARCH_INCOMPLETE' if values else 'QUANTIFIER_HEAD_UNRESOLVED',region.region_id)
             return None
@@ -117,7 +118,7 @@ def _bind(state,release,selector,region,frames,matches,cfg,spend):
             chosen=_probe(state,selector,release,key,'nominal_attachment',options,
                 state.text[slice(*region.source_range)],region.source_range,
                 question='The bound nominal is already selected when supplied. Select only its remaining compatible whole reading. '
-                         'Do not introduce a named entity, an existential witness or an implicit lexical restriction.')
+                         'Do not introduce a named entity, an existential witness or an implicit lexical restriction.', target_refs=tuple(t.token_id for t in specs[mid][1]))
         if chosen not in graph.domains[mid]:continue
         selected[mid]=(graph.domains[mid][chosen],key)
         graph.restrict(mid,[chosen],'RESOLVED_BINDER_HEAD')

@@ -45,7 +45,7 @@ def prepare(state, release, selector, frozen=None):
                 {'candidate_id':'HEADER','label':'Calendar header dates the following entry, until the next peer calendar header or end of source. Nested temporal expressions retain their own scope.'},
                 {'candidate_id':'INLINE','label':'Ordinary text; does not establish a temporal area over the following entry.'}],
                 context,tuple(row['source_range']),question='Classify the source line «'+row['raw']+
-                '». Layout alone is not evidence of date scope. Do not infer a year, timezone or clock boundaries. Proposed area: '+str(row['scope_range']))
+                '». Layout alone is not evidence of date scope. Do not infer a year, timezone or clock boundaries. Proposed area: '+str(row['scope_range']), target_refs=tuple(e.token_id for e in state.evidence if row['source_range'][0]<=e.start<e.end<=row['source_range'][1]))
             state.syntax_trace.append({'kind':'DOCUMENT_HEADER_DECISION','source_range':row['source_range'],
                 'decision_ref':row['decision_ref'],'task_outcome':'SUPPORTED' if chosen in {'HEADER','INLINE'} else 'UNKNOWN',
                 'function':chosen})

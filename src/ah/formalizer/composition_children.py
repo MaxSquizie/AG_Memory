@@ -42,7 +42,7 @@ def select_child(state,release,selector,region,frames,contract,context):
         if result:key=result[1]['decision_ref']
     else:
         selected=_probe(state,selector,release,key,'child_slot',options,
-            state.text[slice(*region.source_range)],region.source_range,question=question)
+            state.text[slice(*region.source_range)],region.source_range,question=question, target_refs=tuple(region.token_refs))
     state.syntax_trace.append({'kind':'CHILD_DOMAIN_CONSTRAINT','decision_ref':key,
         'parent_contract':contract,'child_domain_refs':[d['decision_ref'] for d in domains.values()],
         'candidates':list(domains),'selected':selected})

@@ -51,7 +51,7 @@ def select(state, release, selector, region, tokens, cfg):
         {'candidate_id':'OTHER','label':'The connector has another scope; these nominal groups are not established'}],
         state.text[slice(*region.source_range)],region.source_range,
         question='Which units does the written conjunction connect in this area? '
-        'Do not infer that the members are one entity or that an event happened. Case and role are resolved later.')
+        'Do not infer that the members are one entity or that an event happened. Case and role are resolved later.', target_refs=tuple(t.token_id for t in tokens if any(t.token_id in g['member_refs'] or t.token_id in g['marker_refs'] for g in merged)))
     state.syntax_trace.append({'kind':'NOMINAL_COORDINATION','region_ref':region.region_id,
         'decision_ref':key,'groups':merged,'selected':chosen,
         'task_outcome':'NOT_APPLICABLE' if chosen=='OTHER' else 'SUPPORTED' if chosen=='NOMINAL' else 'PENDING'})

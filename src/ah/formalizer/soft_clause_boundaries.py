@@ -37,7 +37,7 @@ def areas(state,release,selector,region,tokens,cfg):
             state.text[slice(*region.source_range)],region.source_range,
             question='Check grammar and scope on BOTH sides. Separate finite verbs with a compatible subject, punctuation and capitalization are only weak clues. '
             'A name, heading, coordinated predicate or quoted content is not automatically a new clause. '
-            'Select SPLIT only when the context supports an independent clause; otherwise KEEP or ?.')
+            'Select SPLIT only when the context supports an independent clause; otherwise KEEP or ?.', target_refs=(t.token_id,))
         state.syntax_trace.append({'kind':'SOFT_CLAUSE_BOUNDARY','decision_ref':key,
             'token_ref':t.token_id,'cue':proposals[i],'selected':chosen})
         if chosen is None and version=='FINITE_SUBJECT_HINT_V2':

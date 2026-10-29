@@ -19,6 +19,6 @@ assert choose(s,release,selector,r,{'context_chars':10,'max_candidates':8},
     'structural_relation',options,'Which interpretation?') is None
 assert not seen and s.syntax_trace[-1]['reason']=='CONTEXT_LIMIT'
 _probe(s,selector,release,'direct','structural_relation',options,s.text[:10],r.source_range,
-    question='Which interpretation of this target?')
+    question='Which interpretation of this target?',target_refs=('a','b'))
 assert len(seen)==1 and s.text in seen[0] and 'characters 0:10' in seen[0]
 print('Source context: sentence boundary and small budget never silently remove later evidence; direct final prompt retains it: PASS')

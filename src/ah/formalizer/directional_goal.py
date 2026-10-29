@@ -37,7 +37,7 @@ def constrain(state,release,selector,region,frame,units,hosts,event,cfg):
             state.text[slice(*region.source_range)],region.source_range,
             question='Do these expressions constrain one destination of «'+frame.anchor_span+'»? '
             'This is a local slot constraint, not identification of a remembered place. '
-            'Do not infer arrival, coordinates, distance or absolute height.')
+            'Do not infer arrival, coordinates, distance or absolute height.', target_refs=tuple(dict.fromkeys((direction['token'].token_id,frame.predicate_token_ref))))
         if choice is None:return None
         if choice=='SEPARATE':continue
         goal,rule=options[choice];head,reading=goal['entities'][0]

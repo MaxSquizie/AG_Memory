@@ -40,14 +40,14 @@ def compose(state,release,selector,region,body,owner,host,reading,rule,cfg,depth
     if not options or len(options)>cfg['max_candidates']:
         state.diag('RELATIVE_PRONOUN_ROLE_UNRESOLVED',marker.token_id);return [],None
     key=region.region_id+'|relative-pronoun-role:'+marker.token_id
+    from .probe_wording import reading as reading_text,role as role_text
     choices=[{'candidate_id':cid,'label':'«'+marker.span+'» refers to the already selected «'+host.span+
-        '» and fills '+spec['host_role']+' inside its relative clause; whole reading='+str(
-        {k:v for k,v in _morph(spec['marker_reading']).items() if k in {'lemma','pos','cases','number','gender'}})}
+        '» @'+str(host.start)+' and fills '+role_text(spec['host_role'])+' inside its relative clause; whole reading='+reading_text(_morph(spec['marker_reading']))}
         for cid,spec in options.items()]
     chosen=next(iter(options)) if rule.get('general') else _probe(state,selector,release,key,'relative_pronoun_role',choices,
         state.text[slice(*region.source_range)],region.source_range,
         question='Select the relative pronoun grammatical role inside the description. Its antecedent is already selected. '
-        'The antecedent case in the parent does not determine its role here. Do not create another person or assert the description independently.')
+        'The antecedent case in the parent does not determine its role here. Do not create another person or assert the description independently.', target_refs=(marker.token_id,))
     if chosen is None:return [],None
     child_tokens=body[1:]
     if not child_tokens:return [],None

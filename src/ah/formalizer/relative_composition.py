@@ -41,7 +41,7 @@ def compose(state,release,selector,region,tokens,cfg,child_composer):
                     state.text[slice(*region.source_range)],region.source_range,
                     question='Choose the complete nominal description governed by the temporal relation. '
                     'Include its adjectives and nominal dependents; do not absorb the subject of the following clause. '
-                    'This chooses a child boundary, not an absolute date or the truth of the anchor event.')
+                    'This chooses a child boundary, not an absolute date or the truth of the anchor event.', target_refs=tuple(t.token_id for t in tokens))
     if selected not in options:
         state.diag('COMPONENT_TEMPORAL_SCOPE_UNRESOLVED',region.region_id);return []
     rule,body,parent,slot,prep=options[selected]

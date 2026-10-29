@@ -568,7 +568,7 @@ def _propose(state,selector,release):
         from .probe_structure_view import describe as describe_hypothesis
         options=[{'candidate_id':h.local_id,'label':describe_hypothesis(state,h)} for h,_ in accepted]
         chosen=_probe(state,selector,release,structure_key,'structure_attachment',options,state.text,(0,len(state.text)),
-            question='Which proposed arrangement of the source occurrences fits the text? Compare the displayed links and readings; do not infer world truth.')
+            question='Which proposed arrangement of the source occurrences fits the text? Compare the displayed links and readings; do not infer world truth.', target_refs=tuple(e.token_id for e in state.evidence))
         if chosen is None:
             offer(state,structure_key,'STRUCTURE',state.text,options)
             state.diag('STRUCTURE_UNRESOLVED','TP alternatives retained');return

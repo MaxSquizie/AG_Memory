@@ -26,12 +26,15 @@ for p in Path('src/ah/formalizer').glob('*.py'):
         slot=n.args[idx]
         if isinstance(slot,ast.Constant) and isinstance(slot.value,str):
             assert slot.value in FAMILIES,(p,n.lineno,slot.value)
-            if name=='_probe':assert any(k.arg=='question' for k in n.keywords),(p,n.lineno,'question missing')
+            if name=='_probe':
+                assert any(k.arg=='question' for k in n.keywords),(p,n.lineno,'question missing')
+                assert any(k.arg in {'inputs','target_refs'} for k in n.keywords),(p,n.lineno,'source focus missing')
             sites.append((p.name,n.lineno,slot.value))
         else:
             assert p.name=='structural_tasks.py',(p,n.lineno,'unaccounted dynamic native slot')
             assert any(k.arg in {'inputs','source_selection'} for k in n.keywords),(p,n.lineno)
 assert sites
+assert all(len(spec.required_data)>4 for spec in FAMILIES.values())
 state=t0('source')
 options=[{'candidate_id':'a','label':'Proposed interpretation'}]
 assert 'QUESTION_MISSING' in errors(state,'component_attachment',options,'source',(0,6),None)

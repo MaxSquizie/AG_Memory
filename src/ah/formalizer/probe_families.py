@@ -18,8 +18,28 @@ class SelectionContract:
     def record(self):return asdict(self)
 
 FAMILIES={}
+SEMANTIC_REQUIREMENTS={
+    'SOURCE_BOUNDARY':('proposed_parts_and_boundaries','material_retained_in_parent','outer_vs_inner_scope'),
+    'STRUCTURAL_READING':('whole_candidate_interpretations','fixed_links','remaining_difference'),
+    'NOMINAL_READING':('phrase_occurrences','proposed_hosts_or_grouping','linked_whole_readings'),
+    'LEXICAL_READING':('accepted_predicate_structure','lexical_definitions','assigned_participants_and_scope'),
+    'MORPHOLOGICAL_READING':('addressed_occurrence','whole_correlated_features','governing_constraints','unknown_features_preserved'),
+    'PARTICIPANT_ROLE':('predicate_or_description_owner','participant_or_gap','occupied_and_inherited_roles'),
+    'SOURCE_FUNCTION':('addressed_function_material','function_meanings','already_assigned_functions'),
+    'HEAD_OR_OWNER':('dependent_material','required_head_or_owner_kind','candidate_occurrences'),
+    'RELATION':('addressed_parts','relation_direction_and_meaning','existing_ownership'),
+    'CONTENT_REFERENCE':('current_owner','source_content_and_participants','reference_vs_occurrence','permitted_rebinding'),
+    'SCOPE':('addressed_scope_owner','candidate_contents','fixed_edges_and_barriers','assertion_vs_world_truth'),
+    'DISCOURSE':('whole_target_expression','nested_content_ownership','speaker_and_addressee_status'),
+    'REFERENCE':('mention_occurrence','candidate_source_evidence','accepted_roles_and_scopes'),
+    'IMPLICIT_ARGUMENT':('licensed_missing_role','exact_predicate_owner','candidate_source_evidence'),
+    'REVISION':('named_prior_assignments','failure_evidence_with_limits','permitted_changes','unaffected_constraints'),
+}
 def register(family,object_of_choice,level,slots):
-    spec=SelectionContract(family,object_of_choice,level)
+    # Required meanings are family-specific. Presence of a nonempty question
+    # is not, by itself, certification that its semantics satisfy this list.
+    spec=SelectionContract(family,object_of_choice,level,
+        SelectionContract.__dataclass_fields__['required_data'].default+SEMANTIC_REQUIREMENTS[family])
     for slot in slots.split():
         if slot in FAMILIES:raise ValueError('DUPLICATE_PROBE_SLOT')
         FAMILIES[slot]=spec

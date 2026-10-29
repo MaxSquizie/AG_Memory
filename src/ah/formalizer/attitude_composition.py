@@ -89,7 +89,7 @@ def compose(state,release,selector,region,tokens,cfg,request,child_composer):
                     state.text[slice(*region.source_range)],region.source_range,
                     question='Which released parent/role owns this full proposition content? '
                     'Check its start AND end and the remaining parent. A conjunction reading must introduce a clause, '
-                    'not a pronoun argument. Delimiters alone do not identify a speaker or assert the child event.')
+                    'not a pronoun argument. Delimiters alone do not identify a speaker or assert the child event.', target_refs=tuple(t.token_id for t in tokens))
     if selected not in options:
         state.diag('ATTITUDE_SLOT_UNCLOSED',region.region_id);return []
     owner,rule,body,parent,scope,separators=options[selected]

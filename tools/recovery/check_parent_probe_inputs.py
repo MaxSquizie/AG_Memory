@@ -23,7 +23,7 @@ with runtime.area(r,s.evidence[:2],request),patch('ah.formalizer.composition_ses
      patch('ah.formalizer.component_policy.policy',return_value={'max_candidates':8,'context_chars':2000}):
     assert not runtime.input_errors()
     assert _probe(s,selector,release,'parent','predicate_function',options,s.text[:11],r.source_range,
-        question='Which predicate?')=='one'
+        question='Which predicate?',target_refs=('p',))=='one'
 assert '«сказал» @5' in seen[0] and '«придёт» @15' in seen[0]
 assert 'not an omitted slot to discover' in seen[0] and 'Status: QUOTED' in seen[0]
 for bad,code in [(replace(request,proposition_sources=None),'SUPPLIED_CONTENT_SOURCE_UNAVAILABLE'),
@@ -31,7 +31,7 @@ for bad,code in [(replace(request,proposition_sources=None),'SUPPLIED_CONTENT_SO
     with runtime.area(r,s.evidence[:2],bad),patch('ah.formalizer.composition_session.current',return_value=runtime):
         assert code in runtime.input_errors()
         assert _probe(s,selector,release,'parent','predicate_function',options,s.text[:11],r.source_range,
-            question='Which predicate?') is None
+            question='Which predicate?',target_refs=('p',)) is None
 assert len(seen)==1,'invalid parent input must not reuse or call a selector'
 with runtime.area(r,s.evidence[:2],InputSlot(inside_attitude=True)):
     assert 'does not independently assert' in runtime.input_question('relative_marker_reading')

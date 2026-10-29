@@ -382,7 +382,7 @@ def _compose_lexical_area(state, release, selector, region, tokens, cfg, depth=0
     chosen=_probe(state,selector,release,region.region_id+'|refinement-host','nominal_attachment',choices,
         state.text[slice(*region.source_range)],region.source_range,
         question='Which existing nominal does «'+state.text[body[0].start:body[-1].end]+
-        '» describe? Choose its immediate host. Do not resolve pronoun identities or invent an entity.')
+        '» describe? Choose its immediate host. Do not resolve pronoun identities or invent an entity.', target_refs=tuple(t.token_id for t in body))
     assumption=None
     if chosen is None and boundary['kind']=='PARTICIPLE':
         from .refinement_uncertainty import select as select_assumption

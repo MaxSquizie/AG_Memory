@@ -104,17 +104,24 @@ def _live_probe(state, selector, release, key, slot, options, context, source_ra
     return chosen
 
 
-def _probe(state, selector, release, key, slot, options, context, source_range, *, equivalent_targets=None, question=None, offer_clarification=True, inputs=None):
+def _probe(state, selector, release, key, slot, options, context, source_range, *, equivalent_targets=None, question=None, offer_clarification=True, inputs=None, target_refs=None):
     # The enclosing domain owns speaker choices; a page only supplies evidence.
     state.clarification_candidates[:]=[r for r in state.clarification_candidates if r['decision_ref']!=key]
     state.syntax_trace.append({'kind':'PROBE_PAGE','decision_ref':key,'slot':slot,
                               'source_range':list(source_range)})
     from .canonical_ledger import digest
-    # Migrate semantic families explicitly. Unmigrated slots remain visible in
-    # the audit; a transport-valid string is not a semantic input contract.
+    structural_slots={'reference','implicit_argument','predicate_value','spatial_reference','speech_act','discourse_addressee','source_assertion'}
+    if inputs is None and target_refs is not None and slot not in structural_slots:
+        from .direct_probe_inputs import inputs as addressed_inputs
+        inputs=addressed_inputs(state,slot,target_refs,options,source_range,question)
+    # Every native choice requires an explicit declaration. Later semantic
+    # families additionally require their specialized structural contract.
     input_record=inputs.record() if inputs is not None else None
     errors=inputs.errors(state,slot,options,source_range) if inputs is not None else (
-        ('INPUT_CONTRACT_MISSING',) if slot in {'reference','implicit_argument','predicate_value','spatial_reference','speech_act','discourse_addressee','source_assertion'} else ())
+        ('INPUT_CONTRACT_MISSING',))
+    if inputs is not None and slot in structural_slots:
+        from .probe_inputs import TASK_SLOTS
+        if TASK_SLOTS.get(getattr(inputs,'family',None))!=slot:errors=(*errors,'SEMANTIC_INPUT_FAMILY_MISMATCH')
     if inputs is not None and hasattr(inputs,'question') and question!=inputs.question:
         errors=(*errors,'QUESTION_MISMATCH')
     from .probe_families import contract as family_contract, errors as family_errors

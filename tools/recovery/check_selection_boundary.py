@@ -17,16 +17,16 @@ release=SimpleNamespace(sha256='release',entries=lambda kind:[{'max_rule_steps':
 options=[{'candidate_id':'a','label':'first','role':'SUBJECT'}, {'candidate_id':'b','label':'second','role':'OBJECT'}]
 state=t0('source');state.evidence=[TokenEvidence('source','t',0,6)]
 selector=Selector('1')
-assert _probe(state,selector,release,'p','component_attachment',options,'source',(0,6),question='Which interpretation fits?')=='a'
+assert _probe(state,selector,release,'p','component_attachment',options,'source',(0,6),question='Which interpretation fits?',target_refs=('t',))=='a'
 assert state.decisions['p'].outcome is None and state.decisions['p'].search_complete is False
 state.decisions['p'].outcome='RESOLVED'
 state.decisions['p'].history.append({'kind':'SEMANTIC_VALIDATION'})
-assert _probe(state,selector,release,'p','component_attachment',options,'source',(0,6),question='Which interpretation fits?')=='a'
+assert _probe(state,selector,release,'p','component_attachment',options,'source',(0,6),question='Which interpretation fits?',target_refs=('t',))=='a'
 assert state.decisions['p'].outcome is None and selector.calls==1
 assert not any(h.get('kind')=='SEMANTIC_VALIDATION' for h in state.decisions['p'].history if isinstance(h,dict))
 state.observation['clarification_choices']={'p':'a'}
 state.budget.llm_limit=state.budget.llm_calls
-assert _probe(state,selector,release,'p','component_attachment',options,'source',(0,6),question='Which interpretation fits?')=='a'
+assert _probe(state,selector,release,'p','component_attachment',options,'source',(0,6),question='Which interpretation fits?',target_refs=('t',))=='a'
 assert selector.calls==1 and state.decisions['p'].outcome is None
 state.budget.llm_limit=100
 state.observation.pop('clarification_choices')

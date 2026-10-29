@@ -84,7 +84,7 @@ def project(state, release, selector, region, tokens, cfg):
                  ('; modifier requires the SAME antecedent' if identity else '')},
                 {'candidate_id':'OTHER', 'label':'These words do not form this referential noun group; keep original analyses'}],
                 state.text[slice(*region.source_range)], region.source_range,
-                question='Choose the grammatical function of the whole noun group, not its antecedent. Do not infer identity from proximity.')
+                question='Choose the grammatical function of the whole noun group, not its antecedent. Do not infer identity from proximity.', target_refs=tuple(t.token_id for t in tokens if marker.start<=t.start<t.end<=head.end))
         if choice is None:
             state.diag('NOMINAL_REFERENCE_GROUP_UNRESOLVED',key)
             return None, []

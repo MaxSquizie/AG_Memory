@@ -31,7 +31,7 @@ def prepare(state, release, selector=None):
                 {'candidate_id':'ORIGIN','label':'An unspecified relative origin is introduced'},
                 {'candidate_id':'REFERENCE','label':'The occurrence refers to a place supplied by context'}],
                 state.text[slice(*frame.source_range)],frame.source_range,
-                question='What spatial function, if any, does «'+ev.span+'» have? Preserve its surrounding scope, including quotation. No coordinates can be inferred.')
+                question='What spatial function, if any, does «'+ev.span+'» have? Preserve its surrounding scope, including quotation. No coordinates can be inferred.', target_refs=(ev.token_id,))
             if choice is None:
                 frame.semantic['structural_unresolved']=True;state.diag('SPATIAL_FUNCTION_UNRESOLVED',frame.frame_id);continue
             if choice=='NONE':continue
@@ -48,7 +48,7 @@ def prepare(state, release, selector=None):
                     state.text[slice(*frame.source_range)],frame.source_range,
                     question='Which remaining role does this '+choice+' place fill in «'+ev.span+'»? '
                     'Preserve these established assignments: '+(established or 'none')+'. '
-                    'Do not replace an assigned participant. Use 0 if no offered role fits, ? if undecidable.')
+                    'Do not replace an assigned participant. Use 0 if no offered role fits, ? if undecidable.', target_refs=(ev.token_id,))
                 if role is None:
                     frame.semantic['structural_unresolved']=True;state.diag('SPATIAL_FUNCTION_UNRESOLVED',frame.frame_id);continue
             rules=matching or [{'rule_id':'SOURCE_SPATIAL_FUNCTION_V1','sense_id':None,'role_id':role,

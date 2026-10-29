@@ -47,13 +47,14 @@ def resolve(state,release,selector,morph,*,areas=None):
             key='agreement-recovery:'+token.token_id+(':'+scope['task_scope'] if scope else '')
             if len(candidates)+1>cfg['max_candidates'] or region.source_range[1]-region.source_range[0]>cfg['context_chars']:
                 state.diag('LEXICAL_RECOVERY_INCOMPLETE',key);continue
+            from .probe_wording import reading as reading_text
             choices=[{'candidate_id':'KEEP','label':'Keep «'+token.span+'» as written; no licensed correction established'}]
-            choices += [{'candidate_id':cid,'label':'Explicit inflection correction «'+token.span+'» → «'+surface+'»; same dictionary lexeme; '+str({k:x for k,x in _morph(v).items() if k in {'lemma','pos','cases','number','gender'}})} for cid,(surface,v) in candidates.items()]
+            choices += [{'candidate_id':cid,'label':'Explicit inflection correction «'+token.span+'» → «'+surface+'»; same dictionary lexeme; '+reading_text(_morph(v))} for cid,(surface,v) in candidates.items()]
             from .component_source import view,probe_context
             context,target=probe_context(state,region,cfg,view(state,region,tokens))
             chosen=_probe(state,selector,release,key,'lexical_recovery',choices,context,region.source_range,
-                question=target+'Is a grammatical inflection error supported by this context? The proposed head is «'+head.span+'». '
-                'Edit distance merely proposes candidates, not proof. Keep the original if a legitimate uncorrected reading remains; answer ? if uncertain. Do not alter names or infer a new lexical meaning.')
+                question=target+'Is a grammatical inflection error supported for «'+token.span+'» @'+str(token.start)+'? The proposed head is «'+head.span+'» @'+str(head.start)+'. '
+                'Edit distance merely proposes candidates, not proof. Keep the original if a legitimate uncorrected reading remains; answer ? if uncertain. Do not alter names or infer a new lexical meaning.', target_refs=(token.token_id,))
             row={'kind':'AGREEMENT_RECOVERY',**scope,'token_ref':token.token_id,'head_ref':head.token_id,
                 'original_variants':[_morph(v) for v in token.variants],'options':choices,'selected':chosen}
             state.syntax_trace.append(row)

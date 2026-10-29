@@ -188,7 +188,7 @@ def compose_alternatives(state, release, selector, region, tokens, predicates, c
                         'component_attachment', options, context, region.source_range,
                         question=target_question+(local['question'] if local else
                             'Which remaining interpretation fits the target? Previously selected roles, readings and attachments '
-                            'are constraints, not questions to reopen. Retain alternatives when the text does not distinguish them.'))
+                            'are constraints, not questions to reopen. Retain alternatives when the text does not distinguish them.'), target_refs=tuple(t.token_id for t in tokens))
     decision=state.decisions.get(region.region_id+'|composition')
     deferred=bool(reading_domains) or chosen is None and decision is not None and decision.selector_outcome in {
         'MULTIPLE_ADMISSIBLE','INSUFFICIENT_CONTEXT'}
