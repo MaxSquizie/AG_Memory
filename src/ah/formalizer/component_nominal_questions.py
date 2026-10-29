@@ -111,23 +111,35 @@ def select_hosts(state, release, selector, region, units, frame, cfg):
                 # Before durable offer publication, retire only the obsolete
                 # question. Its Decision and alternatives remain in the trace.
                 state.clarification_candidates=[r for r in state.clarification_candidates if r['decision_ref']!=previous]
+                from .component_probe_replay import supersede
+                supersede(state,previous,decision_ref)
                 state.syntax_trace.append({'kind':'NOMINAL_HOST_REVISITED','head_ref':head,
                     'previous_decision_ref':previous,'decision_ref':decision_ref})
             prior_keys[head]=decision_ref
             from .nominal_host_question import question
             cid=choose(state,release,selector,region,key,options,
                 question(state,frame,units,views,target,u))
+            from .composition_session import current
+            from .selection_domains import fingerprint
+            from .function_inventory import source_basis
+            runtime=current(state)
+            witness={'decision_ref':decision_ref,'selected':cid,'fingerprint':fingerprint(state,decision_ref),
+                'source_basis':source_basis(state)}
             state.syntax_trace.append({'kind':'NOMINAL_HOST_QUESTION','region_ref':region.region_id,
                 'phrase_refs':list(u['refs']),'pending_subtree':target,'candidate_subtrees':views,'selected':cid,
-                'decision_ref':decision_ref})
+                'task_scope':runtime.input_signature() if runtime else None,**witness})
             if cid is None:
                 deferred.append(u)
             else:
                 hosts[head]=cid
+                frame.semantic.setdefault('nominal_host_evidence',[]).append(witness)
         if len(deferred)==len(pending):
             state.diag('COMPONENT_NOMINAL_SELECTION_UNRESOLVED',region.region_id)
             return None
         pending=deferred
+    from .component_constraints import frame_hosts_live
+    if not frame_hosts_live(state,frame):
+        state.diag('COMPONENT_NOMINAL_HOST_UNRESOLVED',region.region_id);return None
     fixed={d['head_ref']:d['host_ref'] for d in frame.semantic.get('nominal_dependencies',())}
     combined={**fixed,**hosts}
     for head in combined:

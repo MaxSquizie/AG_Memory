@@ -26,7 +26,8 @@ def agrees(predicate):
 def resolve(state, release, selector, region, tokens, cfg):
     if not cfg.get('nominal_host_role'):return tokens, []
     from .nominal_functions import prepared,rows
-    if prepared(state,tokens):return general_groups(state,release,tokens,rows(state,tokens,'QUANTITY'))
+    from .function_inventory import current
+    if current(state,'NOMINAL',tokens,cfg.get('_task_constraints'),require=True) is not None:return general_groups(state,release,tokens,rows(state,tokens,'QUANTITY'))
     state.require_structures_open('QUANTITY_COMPOSITION')
     from .quantity_phrases import candidates
     proposals=[]

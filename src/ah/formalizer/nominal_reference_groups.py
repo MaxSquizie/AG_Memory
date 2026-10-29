@@ -29,7 +29,8 @@ def validate(cfg):
 
 def project(state, release, selector, region, tokens, cfg):
     from .nominal_functions import prepared,rows
-    if prepared(state,tokens):
+    from .function_inventory import current
+    if current(state,'NOMINAL',tokens,cfg.get('_task_constraints'),require=True) is not None:
         groups=[];selected={};evidence={t.token_id:t for t in tokens}
         for source in rows(state,tokens,'REFERENCE'):
             lo,hi=source['source_range'];key=source['decision_ref']

@@ -3,9 +3,12 @@
 
 def question(state,region):
     evidence={e.token_id:e for e in state.evidence};rows=[]
+    from .composition_session import current
+    runtime=current(state);scope=runtime.input_signature() if runtime else None
     choices=state.observation.get('clarification_choices',{})
     for trace in state.syntax_trace:
         if trace.get('kind')!='NOMINAL_HOST_QUESTION' or trace['region_ref']!=region.region_id or not trace['selected']:continue
+        if trace.get('task_scope')!=scope or not host_live(state,trace):continue
         view=next(v for v in trace['candidate_subtrees'] if v['candidate_id']==trace['selected'])
         phrase=' '.join(evidence[t].span for t in trace['phrase_refs'])
         origin='explicit user clarification' if trace.get('decision_ref') in choices else 'previous resolved local question'
@@ -71,3 +74,18 @@ def preserves_nominal_functions(state,tokens,bundle):
                        g.get('function_refs')==source['function_refs'] and
                        g.get('identity_constraint')==source['identity_constraint'] for g in candidates):return False
     return True
+
+
+def host_live(state,row):
+    from .partial_readings import retired_refs
+    from .selection_domains import fingerprint
+    from .selection_evidence import selected_candidate
+    from .function_inventory import source_basis
+    key=row.get('decision_ref');stamp=fingerprint(state,key)
+    return (key not in retired_refs(state.syntax_trace) and stamp is not None
+        and row.get('fingerprint')==stamp and row.get('source_basis')==source_basis(state)
+        and row.get('selected') is not None and selected_candidate(state.decisions.get(key))==row['selected'])
+
+
+def frame_hosts_live(state,frame):
+    return all(host_live(state,r) for r in frame.semantic.get('nominal_host_evidence',()))

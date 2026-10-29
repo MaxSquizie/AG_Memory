@@ -9,7 +9,7 @@ from .canonical_ledger import digest
 
 
 _BOOKKEEPING={
-    'hypothesis','grammar_ambiguity','composition_source','composition_source_ref',
+    'nominal_host_evidence','function_inventory_refs','hypothesis','grammar_ambiguity','composition_source','composition_source_ref',
     'source_frame_ref','component_region','composition_decision','composition_bundle_root',
     'composition_domain','structural_unresolved','requires_attachment_probe','reading_domains',
 }

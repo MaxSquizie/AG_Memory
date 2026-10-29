@@ -4,7 +4,7 @@ from .component_policy import _features, compatible
 from .nominal_reference_groups import functional
 
 
-def prepositional_groups(tokens, excluded=(), *, state=None):
+def prepositional_groups(tokens, excluded=(), *, state=None, constraints=None):
     """Recognize PREP plus a typed nominal group, retaining whole PREP readings.
 
     Grounded determiner/identity-function tokens stay inside the group.
@@ -12,8 +12,10 @@ def prepositional_groups(tokens, excluded=(), *, state=None):
     prepositions and coordination are not flattened by this local constructor.
     """
     if state is not None:
-        from .nominal_functions import prepared,prepositions
-        if prepared(state,tokens):return prepositions(state,tokens,excluded)
+        from .nominal_functions import prepositions
+        from .function_inventory import current
+        if current(state,'NOMINAL',tokens,constraints,require=True) is not None:
+            return prepositions(state,tokens,excluded)
     result={}
     for i, prep in enumerate(tokens):
         variants=[v for v in prep.variants if v.pos=='PREP']

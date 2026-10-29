@@ -74,8 +74,8 @@ schema=DecisionSchema('test',{c:Relation(c,c,0,(),c) for c in ['a','b']})
 for reply in [validate_selection_response('{"outcome":"MULTIPLE_ADMISSIBLE","selected":["a","b"]}',schema),
               validate_selection_label_response('1,2',schema,('a','b'))]:
     assert reply.multiplicity=='ALTERNATIVE_READINGS' and reply.selected==('a','b')
-from ah.formalizer.function_inventory import complete,completed
-s=state();complete(s,{'inventory_kind':'NOMINAL','inventory_tokens':['t'],'inventory_signature':'test'})
+from ah.formalizer.function_inventory import begin,complete,completed
+s=state();complete(s,begin(s,'TEMPORAL',[]))
 assert completed(s.syntax_trace[-1])
 s.syntax_trace[-1]['multiplicity']='ALTERNATIVE_READINGS'
 assert not completed(s.syntax_trace[-1])

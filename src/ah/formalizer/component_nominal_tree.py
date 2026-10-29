@@ -30,7 +30,7 @@ def bundles(state,release,selector,region,tokens,frame,cfg):
         quantities=list(quantity_units(tokens,missing,frame))
         units.extend(quantities)
         quantity_refs={t for u in quantities for t in u['refs']}
-        for group in prepositional_groups(tokens,state=state).values():
+        for group in prepositional_groups(tokens,state=state,constraints=cfg.get('_task_constraints')).values():
             if set(group['anchor_refs'])<=missing: units.extend(nominal_variants(tokens,group,limit))
         for e in tokens:
             if e.token_id in missing and e.token_id not in quantity_refs:
@@ -210,4 +210,6 @@ def materialize(state,region,tokens,original,units,hosts,order,cfg,*,shape=None)
             'host_role':child.semantic.get('nominal_host_role',cfg['nominal_host_role']),'frame_ref':child.frame_id})
         parent.semantic['component_questions'].append({'kind':'NOMINAL_DESCRIPTION','host_token_ref':host,
             'description_ref':child.frame_id,'anchor_ref':child.predicate_token_ref,'independently_asserted':False})
+    for f in frames:
+        f.semantic['nominal_host_evidence']=deepcopy(original.semantic.get('nominal_host_evidence',[]))
     return [f for f in frames if f is not root]+[root]

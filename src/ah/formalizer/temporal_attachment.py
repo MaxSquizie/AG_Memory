@@ -7,6 +7,9 @@ from .scope_assignment import assign, expanded_leaves, positions
 
 
 def attach(state, release, selector, region, selected, frames, tree, cfg):
+    from .function_inventory import frame_live
+    if any(not frame_live(state,f) for f in frames if not f.semantic.get('structural_unresolved')):
+        state.diag('FUNCTION_INVENTORY_UNRESOLVED',region.region_id);return None
     raw = state.text[slice(*region.source_range)]
     from .temporal_sources import symbolic_only
     from .temporal_functions import units, normalize

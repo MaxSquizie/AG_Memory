@@ -8,7 +8,7 @@ def candidates(state,release,region,tokens,cfg,request=None,selector=None,quanti
     if request is None and cfg.get('nominal_utterances')!='NOMINATIVE_DESCRIPTION_V1':return []
     if any(v.pos=='VERB' and v.mood!='imperative' for t in tokens for v in t.variants):return []
     from .component_phrases import prepositional_groups
-    governed={t for g in prepositional_groups(tokens,state=state).values() for t in g['anchor_refs']}
+    governed={t for g in prepositional_groups(tokens,state=state,constraints=cfg.get('_task_constraints')).values() for t in g['anchor_refs']}
     result=[]
     for e in tokens:
         if request is not None and e.token_id!=request.head_ref:continue

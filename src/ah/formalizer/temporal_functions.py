@@ -31,8 +31,7 @@ def prepare(state, release, selector, region, tokens, cfg):
         if not result:
             return False
         if result[0]['candidate_id'] == 'NONE':
-            complete(state,inventory)
-            return True
+            return complete(state,inventory,result[1])
         selected = source_set(state, release, selector, region, remaining, cfg, 'temporal_source',
                               'Select one whole temporal expression, including its qualifiers.',initial=result)
         if not selected:
@@ -44,15 +43,15 @@ def prepare(state, release, selector, region, tokens, cfg):
             'region_ref': region.region_id, 'source_range': [owned[0].start, owned[-1].end],
             'token_refs': refs, 'proofs': proofs})
         remaining = [t for t in remaining if t.token_id not in refs]
-    complete(state,inventory)
-    return True
+    return complete(state,inventory)
 
 
 def units(state, token_refs=None):
+    from .function_inventory import unit_live
     allowed = set(token_refs) if token_refs is not None else None
     found = {}
     for row in state.syntax_trace:
-        if row.get('kind') == 'TEMPORAL_FUNCTION' and not row.get('superseded') and (allowed is None or set(row['token_refs']) <= allowed):
+        if row.get('kind') == 'TEMPORAL_FUNCTION' and not row.get('superseded') and (allowed is None or set(row['token_refs']) <= allowed) and unit_live(state,row):
             found[tuple(row['token_refs'])] = row
     return list(found.values())
 
@@ -63,6 +62,8 @@ def owned_refs(state, tokens=None):
 
 
 def normalize(state, release, row):
+    from .function_inventory import unit_live
+    if not unit_live(state,row):return None,['FUNCTION_INVENTORY_UNRESOLVED']
     from .native_frontend import _temporal
     refs = set(row['token_refs'])
     lo, hi = row['source_range']

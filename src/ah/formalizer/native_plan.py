@@ -27,6 +27,10 @@ def build_plan(state,release,store):
         if fid in active: raise ValueError('CYCLIC_PROPOSITION_ARGUMENT')
         active=active|{fid}
         f=frames[fid]
+        from .function_inventory import frame_live
+        if not frame_live(state,f):raise ValueError('FUNCTION_INVENTORY_UNRESOLVED')
+        from .component_constraints import frame_hosts_live
+        if not frame_hosts_live(state,f):raise ValueError('NOMINAL_HOST_PROOF_RETIRED')
         if f.semantic.get('partial_composition') or f.semantic.get('partial_composition_member'):
             raise ValueError('PARTIAL_COMPOSITION_NOT_WRITABLE')
         if f.semantic.get('structural_unresolved'): raise ValueError('STRUCTURAL_OPERAND_UNRESOLVED')

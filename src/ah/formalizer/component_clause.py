@@ -4,7 +4,7 @@ from .component_probe import _probe
 from .component_candidates import enumerate_candidates
 
 
-def build_clause(state,release,selector,region,tokens,p,cfg, *, select=True, attachment=None, nominal_groups=(), infinitive=None,qualitative_groups=(),proposition_slots=None,agreement_source=None,pending_roles=(),description_context=False,required_pending_roles=()):
+def _build_clause(state,release,selector,region,tokens,p,cfg, *, select=True, attachment=None, nominal_groups=(), infinitive=None,qualitative_groups=(),proposition_slots=None,agreement_source=None,pending_roles=(),description_context=False,required_pending_roles=()):
     from .contextual_name_case import overlay
     tokens=overlay(tokens,nominal_groups)
     if select:
@@ -17,6 +17,8 @@ def build_clause(state,release,selector,region,tokens,p,cfg, *, select=True, att
     # Relative event anchors are typed children of the common composer.
     # This layer owns only lexical calendar/clock expressions.
     from .temporal_functions import owned_refs
+    from .function_inventory import current
+    current(state,'TEMPORAL',tokens,cfg.get('_task_constraints'),require=True)
     temporal = owned_refs(state,tokens)
     # The same released temporal ownership already excludes arguments below.
     # It must also exclude a predicate inside the time expression.
@@ -26,7 +28,7 @@ def build_clause(state,release,selector,region,tokens,p,cfg, *, select=True, att
             'temporal_refs':sorted(temporal)})
         return []
     from .component_phrases import prepositional_groups
-    groups=prepositional_groups(tokens,temporal,state=state)
+    groups=prepositional_groups(tokens,temporal,state=state,constraints=cfg.get('_task_constraints'))
     prep_markers={r for g in groups.values() for r in g.get('function_refs',[g['token_ref']])}
     allowed_cases=set(cfg['open_case_roles']) | {c for val in release.entries('R-V') for role in val['roles'] for c in role.get('allowed_cases',())}
     if attachment:
@@ -71,3 +73,13 @@ def build_clause(state,release,selector,region,tokens,p,cfg, *, select=True, att
             f.semantic['composition_decision']=region.region_id+'|composition'
             if f.frame_id!=chosen: f.semantic['structural_unresolved']=True
     return candidates
+
+
+def build_clause(state,release,selector,region,tokens,p,cfg,**kwargs):
+    from .function_inventory import InventoryUnavailable,attach
+    try:
+        frames=_build_clause(state,release,selector,region,tokens,p,cfg,**kwargs)
+        return attach(state,tokens,cfg,frames)
+    except InventoryUnavailable as exc:
+        state.diag('FUNCTION_INVENTORY_UNRESOLVED',str(exc))
+        return []

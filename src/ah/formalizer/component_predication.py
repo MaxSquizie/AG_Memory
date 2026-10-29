@@ -37,7 +37,7 @@ def consume_copula(tokens, predicate, variant, cfg, used, morph):
     return e.token_id
 
 
-def compose_alternatives(state, release, selector, region, tokens, predicates, cfg, *, attachment=None, nominal_groups=(), infinitive=None, request=None):
+def _compose_alternatives(state, release, selector, region, tokens, predicates, cfg, *, attachment=None, nominal_groups=(), infinitive=None, request=None):
     from .nominal_functions import prepare as nominal_functions
     if not nominal_functions(state,release,selector,region,tokens,cfg):
         state.diag('NOMINAL_FUNCTION_UNRESOLVED',region.region_id)
@@ -219,3 +219,13 @@ def compose_alternatives(state, release, selector, region, tokens, predicates, c
                 for tid,reading in f.semantic.get('morph_bindings',{}).items():
                     license_use(state,tid,reading,region.region_id+'|composition',chosen)
     return frames
+
+
+def compose_alternatives(state,release,selector,region,tokens,predicates,cfg,**kwargs):
+    from .function_inventory import InventoryUnavailable,attach
+    try:
+        frames=_compose_alternatives(state,release,selector,region,tokens,predicates,cfg,**kwargs)
+        return attach(state,tokens,cfg,frames)
+    except InventoryUnavailable as exc:
+        state.diag('FUNCTION_INVENTORY_UNRESOLVED',str(exc))
+        return []

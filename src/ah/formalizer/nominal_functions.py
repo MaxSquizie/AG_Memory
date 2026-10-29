@@ -10,20 +10,19 @@ from .probe_prerequisites import accepted,from_proof
 
 
 def rows(state,tokens,kind=None):
+    from .function_inventory import unit_live
     allowed={t.token_id for t in tokens}
     unique={}
     for row in state.syntax_trace:
         if (row.get('kind')=='NOMINAL_FUNCTION' and not row.get('superseded') and set(row['anchor_refs'])<=allowed
-                and (kind is None or row['function']==kind)):
+                and (kind is None or row['function']==kind) and unit_live(state,row)):
             unique[row['unit_ref']]=row
     return list(unique.values())
 
 
-def prepared(state,tokens):
-    from .function_inventory import identity,completed
-    kind,refs,signature=identity(state,'NOMINAL',tokens)
-    return any(r.get('inventory_kind')==kind and r.get('inventory_tokens')==list(refs)
-               and completed(r) for r in state.syntax_trace)
+def prepared(state,tokens,constraints=None):
+    from .function_inventory import current
+    return current(state,'NOMINAL',tokens,constraints) is not None
 
 
 def prepare(state,release,selector,region,tokens,cfg):
@@ -50,8 +49,7 @@ def prepare(state,release,selector,region,tokens,cfg):
         if kind=='DONE':
             state.syntax_trace.append({'kind':'NOMINAL_FUNCTION_DOMAIN','token_refs':[t.token_id for t in tokens],
                 'decision_ref':selected[1]['decision_ref'],'search_complete':True,**inventory})
-            complete(state,inventory)
-            return True
+            return complete(state,inventory,selected[1])
         material=source_set(state,release,selector,region,tokens,cfg,'nominal_function_source',
             kind+': select ONLY the connecting/determining/quantity expression. '
             'Exclude a separate nominal head and unrelated modifiers. Include a word that itself BOTH expresses this function and stands for its nominal bearer.',exclude=used_by_kind[kind],prerequisites=(accepted('nominal_function',selected),))

@@ -13,7 +13,7 @@ def signature(state):
         [(t.token_id,t.span,t.start,t.end) for t in state.evidence],
         [(f.frame_id,f.predicate_token_ref,f.source_range,f.argument_token_refs,{k:f.semantic.get(k) for k in (
             'proposed_roles','proposition_args','nominal_args','component_scope_tree','operator_forest',
-            'structural_unresolved','structural_rejection','discourse_scope','partial_composition',
+            'nominal_host_evidence','function_inventory_refs','structural_unresolved','structural_rejection','discourse_scope','partial_composition',
             'component_child','coordination_owner','lexical_units','region','explicit_region',
             'spatial_slots','action_description','passive_predication','impersonal_predication','nominal_predication','nominal_groups',
             'bound_arguments','implicit_arguments','shared_implicit_arguments')}) for f in state.frames]]))
@@ -61,6 +61,10 @@ def describe(state, *, selected_trees=None, require_sealed=True):
         return '«'+t.span+'» at characters '+str(t.start)+':'+str(t.end)
     def frame_text(fid,active):
         f=frames.get(fid)
+        from .function_inventory import frame_live
+        if f is not None and not frame_live(state,f):missing.append('FUNCTION_INVENTORY_UNRESOLVED')
+        from .component_constraints import frame_hosts_live
+        if f is not None and not frame_hosts_live(state,f):missing.append('NOMINAL_HOST_PROOF_RETIRED')
         if f is None or fid in active:
             missing.append('STRUCTURE_REFERENCE_UNAVAILABLE');return '[unavailable structure]'
         sem=f.semantic
