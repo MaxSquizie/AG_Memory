@@ -38,6 +38,9 @@ def _choose(state,release,selector,region,cfg,slot,options,question,*,empty=None
     prerequisite_records=[r.record() for r in prerequisites]
     def premises_live():
         errors=premise_errors(state,prerequisites)
+        from .composition_session import current
+        runtime=current(state)
+        if runtime is not None:errors=(*errors,*runtime.input_errors())
         if errors:
             state.diag('PROBE_INPUT_INCOMPLETE',region.region_id+': '+', '.join(errors))
             state.syntax_trace.append({'kind':'STRUCTURAL_TASK','region_ref':region.region_id,

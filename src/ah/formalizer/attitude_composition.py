@@ -102,7 +102,9 @@ def compose(state,release,selector,region,tokens,cfg,request,child_composer):
     args={k:dict(v) for k,v in (request.proposition_slots or {}).items()} if request else {}
     args.setdefault(owner.token_id,{})[rule['argument_role']]={'tree':expression(child),'attitude':rule['attitude'],
         'holder_role':rule.get('holder_role',cfg['subject_role']),'attachment_decision_ref':key}
-    parent_request=replace(request or InputSlot(),proposition_slots=args)
+    sources={k:dict(v) for k,v in (request.proposition_sources or {}).items()} if request else {}
+    sources.setdefault(owner.token_id,{})[rule['argument_role']]=tuple(t.token_id for t in body)
+    parent_request=replace(request or InputSlot(),proposition_slots=args,proposition_sources=sources)
     parents=child_composer(parent,parent_request)
     target=[f for f in parents if not f.semantic.get('structural_unresolved') and
             f.predicate_token_ref==owner.token_id and rule['argument_role'] in f.semantic.get('proposition_args',{})]

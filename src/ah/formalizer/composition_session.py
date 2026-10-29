@@ -61,6 +61,27 @@ class CompositionSession:
         region,tokens,request=self.area_inputs
         return digest(canonical([region.source_range,[t.token_id for t in tokens],request]))
 
+    def input_errors(self):
+        if not self.area_inputs:return ()
+        _,tokens,request=self.area_inputs
+        if request is None:return ()
+        errors=[];owned={t.token_id for t in tokens}
+        if request.output_sort not in {'PROPOSITION','EVENT_DESCRIPTION'}:errors.append('PARENT_OUTPUT_SORT_UNREPRESENTED')
+        if request.head_ref and request.head_ref not in self.original:errors.append('PARENT_HEAD_UNAVAILABLE')
+        if request.agreement_source and request.agreement_source.token_id not in self.original:errors.append('AGREEMENT_OWNER_UNAVAILABLE')
+        if request.controller:
+            from .control_arguments import members
+            if any(m['token_ref'] not in self.original for m in members(request.controller)):errors.append('CONTROLLER_OCCURRENCE_UNAVAILABLE')
+        for owner,slots in (request.proposition_slots or {}).items():
+            if owner not in owned:continue
+            if owner not in self.original:errors.append('CONTENT_OWNER_UNAVAILABLE')
+            for role in slots:
+                refs=(request.proposition_sources or {}).get(owner,{}).get(role,())
+                if not refs or any(r not in self.original for r in refs):errors.append('SUPPLIED_CONTENT_SOURCE_UNAVAILABLE')
+        for owner,refs in (request.pending_proposition_sources or {}).items():
+            if owner in owned and any(r not in self.original for r in refs):errors.append('PENDING_CONTENT_SOURCE_UNAVAILABLE')
+        return tuple(dict.fromkeys(errors))
+
     def input_question(self,slot=None):
         if not self.area_inputs:return ''
         region,tokens,request=self.area_inputs
@@ -73,11 +94,12 @@ class CompositionSession:
             from .relation_composition import RELATIONS
             parts.append('Already handled outside the target: '+'; '.join(RELATIONS[k] for k in request.surrounding_relations)+
                 '. Select another such relation only if the target words themselves express it.')
-        if request.output_sort=='EVENT_DESCRIPTION' and not morphology:parts.append('This area must describe an event or state.')
-        if not morphology and request.description_context and not request.controller and any(v.pos in {'INFN','PRTS'} for t in tokens for v in t.variants):
+        if request.output_sort=='EVENT_DESCRIPTION':parts.append('This area must describe an event or state.')
+        if request.inside_attitude:parts.append('This target is nested content; interpreting it does not independently assert that it is true.')
+        if request.description_context and not request.controller:
             parts.append('This content is not independently asserted. An action description may leave participants unspecified; '
                          'do not invent a performer or copy agreement from an impersonal modal word.')
-        if request.independent_subject and not morphology:
+        if request.independent_subject:
             parts.append('No subject is inherited from the surrounding predicate. Determine participants from this content itself; '
                          'do not copy a speaker or an ancestor controller into it.')
         if request.allowed_cases:
@@ -85,13 +107,24 @@ class CompositionSession:
             parts.append('The parent requires '+reading({'cases':sorted(request.allowed_cases)})+'.')
         if request.head_ref:
             head=self.original.get(request.head_ref)
-            if head:parts.append('The selected head is «'+head.span+'».')
-        if request.pending_proposition_roles and not morphology:
+            if head:parts.append('The selected head is «'+head.span+'» @'+str(head.start)+'.')
+        if request.pending_proposition_roles:
             parts.append('A dependent infinitive is supplied separately; its owner is still to be selected. '
                          'Other dependent clauses inside the target still need their own analysis.')
         owned={t.token_id for t in tokens}
+        from .probe_wording import role as role_text
+        for ref,slots in (request.proposition_slots or {}).items():
+            if ref not in owned:continue
+            owner=self.original[ref]
+            for role,arg in slots.items():
+                refs=(request.proposition_sources or {}).get(ref,{}).get(role,())
+                words='; '.join('«'+self.original[r].span+'» @'+str(self.original[r].start) for r in refs)
+                parts.append('Already supplied '+role_text(role)+' of «'+owner.span+'» @'+str(owner.start)+
+                    ': '+words+'. Status: '+arg.get('attitude','UNKNOWN')+'. Preserve its assigned owner and role; '
+                    'the child structure is supplied separately, not an omitted slot to discover or assign again. '
+                    'Its content is not independently asserted.')
         for ref,roles in (request.pending_propositions or {}).items():
-            if ref not in owned or morphology:continue
+            if ref not in owned:continue
             owner=self.original[ref]
             supplied=[self.original[t].span for t in (request.pending_proposition_sources or {}).get(ref,())
                       if t in self.original]
@@ -104,7 +137,7 @@ class CompositionSession:
             from .probe_wording import reading
             from .component_policy import _morph as canonical_reading
             governor=request.agreement_source
-            parts.append('Agreement governor: «'+governor.span+'»; '+
+            parts.append('Agreement governor: «'+governor.span+'» @'+str(governor.start)+'; '+
                 ' / '.join(reading(canonical_reading(v)) for v in governor.variants)+'.')
         if request.controller:
             from .control_arguments import members

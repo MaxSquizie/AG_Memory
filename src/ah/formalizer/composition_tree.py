@@ -77,6 +77,7 @@ class InputSlot:
     surrounding_relations: tuple = ()
     pending_propositions: dict | None = None
     pending_proposition_sources: dict | None = None
+    proposition_sources: dict | None = None
 
     def pending_for(self, predicate_ref):
         """A separated proposition leaves a slot on its owner, not every verb."""

@@ -118,6 +118,9 @@ def _probe(state, selector, release, key, slot, options, context, source_range, 
     if inputs is not None and hasattr(inputs,'question') and question!=inputs.question:
         errors=(*errors,'QUESTION_MISMATCH')
     from .probe_families import contract as family_contract, errors as family_errors
+    from .composition_session import current
+    runtime=current(state)
+    if runtime is not None:errors=(*errors,*runtime.input_errors())
     family=family_contract(slot,inputs)
     errors=tuple(dict.fromkeys((*errors,*family_errors(state,slot,options,context,source_range,question,inputs))))
     state.syntax_trace.append({'kind':'PROBE_INPUT_CONTRACT','decision_ref':key,
