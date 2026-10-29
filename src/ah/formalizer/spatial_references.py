@@ -9,6 +9,20 @@ def policy(release):
     return release.entries('ProposalPolicy')[0].get('spatial_references')
 
 
+def source_candidates(anchors, target, mention_ref, context_chars):
+    """Retain source anchors before and after the reference; budget is not evidence.
+
+    The executor sees the full envelope of offered anchors and the target.
+    Scope/identity remain a selection obligation, never a distance filter.
+    """
+    options=sorted((deepcopy(a) for a in anchors
+                    if a['anchor_ref']!=mention_ref),
+                   key=lambda a:(a['source_range'],a['entity_ref']))
+    lo=min([max(0,target[0]-context_chars//2),*(a['source_range'][0] for a in options)])
+    hi=max([target[1],*(a['source_range'][1] for a in options)])
+    return options,[lo,hi]
+
+
 def prepare(state, release, selector=None):
     cfg = policy(release)
     if not cfg: return
@@ -80,11 +94,12 @@ def prepare(state, release, selector=None):
             target=min(regions,key=lambda r:r[1]-r[0]) if regions else frame.source_range
             slot['target_range']=list(target)
             slot['decision_ref']='spatial:'+digest([state.source_uid,state.interpretation_version,ev.token_id,slot['rule']['rule_id']])
-            slot['context_range'] = [max(0,target[0]-cfg['context_chars']//2),target[1]]
-            lo,hi = slot['context_range']
-            slot['options'] = [deepcopy(a) for a in anchors.values()
-                               if lo <= a['source_range'][0] < a['source_range'][1] <= ev.start]
-            slot['options'].sort(key=lambda a:(a['source_range'],a['entity_ref']))
+            slot['options'],slot['context_range']=source_candidates(
+                anchors.values(),target,ev.token_id,cfg['context_chars'])
+            # A later anchor's token alone does not expose its clause/scope.
+            # Keep its following source too; overflow remains explicit below.
+            if slot['context_range'][1]>target[1]:slot['context_range'][1]=len(state.text)
+            lo,hi=slot['context_range']
             slot['search_incomplete'] = len(slot['options'])>cfg['max_candidates'] or hi-lo>cfg['context_chars']
 
 

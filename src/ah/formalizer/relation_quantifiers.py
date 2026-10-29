@@ -7,6 +7,18 @@ from .relation_composition import block,attach_tree
 from .partition_domain import PartitionDomain,PartitionProposal
 
 
+def binder_candidates(tokens):
+    """Source addresses precede lexical interpretation of the child.
+
+    A morphology proposal is not a complete inventory of nominal uses.
+    Selecting an address does not license its POS or a quantified restriction;
+    bind still requires an established nominal reading in the composed child.
+    """
+    for token in tokens:
+        yield {'candidate_id':token.token_id,'head_ref':token.token_id,
+               'label':'Bind the participant mention at «'+token.span+'» @'+str(token.start)}
+
+
 def compose(state,release,selector,region,tokens,cfg,request,compose_child,operator,proof):
     def propose(domain):
         marker=domain.span(tokens,'structural_quantifier',
@@ -31,9 +43,8 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child,opera
     selected=PartitionDomain(state,release,selector,region,tokens,cfg,operator,proof).resolve(propose)
     if not selected:return block(state,region)
     proposal,partition=selected;owned=proposal.groups[0];anchors=proposal.data['anchors']
-    heads=[t for t in owned if any(v.pos in {'NOUN','NPRO'} for v in t.variants)]
     selected=proposal.data['binding'] if proposal.shared_functions else choose(state,release,selector,region,cfg,'structural_binder_head',
-        [{'candidate_id':t.token_id,'head_ref':t.token_id,'label':'Bind the nominal «'+t.span+'» @'+str(t.start)} for t in heads],
+        binder_candidates(owned),
         operator+': select the restricted variable mention. Its complete body remains indivisible; do not create a witness.')
     if not selected:return block(state,region)
     slot=request or InputSlot()
