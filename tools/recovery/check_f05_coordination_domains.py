@@ -43,7 +43,7 @@ s=t0('шмырлик и кот')
 tokens=[TokenEvidence('шмырлик','a',0,7,variants=(MorphVariant(None,'NOUN',origin='CONTEXTUAL'),)),
         TokenEvidence('и','and',8,9),TokenEvidence('кот','b',10,13,variants=(MorphVariant('кот','NOUN',frozenset({'nom'}),origin='DICTIONARY'),))]
 r=TextRegion('r','SENTENCE',(0,13),('a','and','b'),None)
-with patch('ah.formalizer.component_nominal_groups.connectives',return_value=[(8,9)]),patch('ah.formalizer.component_nominal_groups._probe',return_value='NOMINAL'):
+with patch('ah.formalizer.structural_tasks.enabled',return_value=False),patch('ah.formalizer.component_nominal_groups.connectives',return_value=[(8,9)]),patch('ah.formalizer.component_nominal_groups._probe',return_value='NOMINAL'):
     result=select(s,None,None,r,tokens,{'max_candidates':8,'context_chars':100})
 assert result[0]['cases']==['nom'] and not tokens[0].variants[0].cases
 print('F05 coordination: exhaustive finite case-domain oracle, connected-group permutations, actual dependency propagation, unknown preserved and conflicts rejected: PASS')

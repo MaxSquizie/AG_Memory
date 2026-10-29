@@ -38,6 +38,10 @@ def consume_copula(tokens, predicate, variant, cfg, used, morph):
 
 
 def _compose_alternatives(state, release, selector, region, tokens, predicates, cfg, *, attachment=None, nominal_groups=(), infinitive=None, request=None):
+    from .nominal_coordination_source import live as group_live
+    if not all(group_live(state,g) for g in nominal_groups):
+        state.diag('NOMINAL_COORDINATION_EVIDENCE_UNRESOLVED',region.region_id)
+        return []
     from .nominal_functions import prepare as nominal_functions
     if not nominal_functions(state,release,selector,region,tokens,cfg):
         state.diag('NOMINAL_FUNCTION_UNRESOLVED',region.region_id)

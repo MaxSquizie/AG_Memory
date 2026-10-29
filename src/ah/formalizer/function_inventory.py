@@ -116,6 +116,8 @@ def attach(state,tokens,cfg,frames):
 
 
 def frame_live(state,frame):
+    from .nominal_coordination_source import live as group_live
+    if not all(group_live(state,g) for g in frame.semantic.get("nominal_groups",())):return False
     receipts={r.get('inventory_ref'):r for r in state.syntax_trace if r.get('kind')=='FUNCTION_INVENTORY'}
     from .dispatch_evidence import observe
     for ref in frame.semantic.get('function_inventory_refs',()):

@@ -46,7 +46,11 @@ def resolve(state, release, selector, region, left, right, cfg):
 
 def overlay(tokens, groups):
     """Keep original R1 evidence immutable; only this candidate area sees variants."""
-    readings={r['token_ref']:r for g in groups for r in g.get('contextual_readings',())}
+    readings={}
+    for group in groups:
+        for row in group.get('contextual_readings',()):
+            values=readings.setdefault(row['token_ref'],{})
+            for value in row['variants']:values.setdefault(digest(value),value)
     return [replace(t, variants=(*t.variants,*tuple(MorphVariant(**{**v,'cases':frozenset(v['cases']),
         'features':frozenset(v['features']),'evidence_refs':tuple(v['evidence_refs'])})
-        for v in readings[t.token_id]['variants']))) if t.token_id in readings else t for t in tokens]
+        for v in readings[t.token_id].values()))) if t.token_id in readings else t for t in tokens]

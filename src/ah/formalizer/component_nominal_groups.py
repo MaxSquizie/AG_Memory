@@ -42,6 +42,8 @@ def merge_groups(groups):
             group['member_refs']=list(dict.fromkeys([*linked['member_refs'],*group['member_refs']]))
             group['marker_refs']=list(dict.fromkeys([*linked['marker_refs'],*group['marker_refs']]))
             group['contextual_readings']=[*linked.get('contextual_readings',()),*group.get('contextual_readings',())]
+            if 'source_evidence' in linked or 'source_evidence' in group:
+                group['source_evidence']=[*linked.get('source_evidence',()),*group.get('source_evidence',())]
             cases=intersect_cases([linked['cases'],group['cases']])
             if cases is not None and not cases:return None
             group['cases']=sorted(cases) if cases is not None else None
@@ -52,6 +54,10 @@ def merge_groups(groups):
 def select(state, release, selector, region, tokens, cfg):
     spans=connectives(state,release,region,tokens)
     if not spans: return []
+    from .structural_tasks import enabled
+    if enabled(release):
+        from .nominal_coordination_source import select as addressed
+        return addressed(state,release,selector,region,tokens,cfg,spans)
     groups=[]
     for lo,hi in spans:
         before=[t for t in tokens if t.end<=lo];after=[t for t in tokens if t.start>=hi]
