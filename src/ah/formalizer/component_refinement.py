@@ -393,6 +393,10 @@ def _compose_lexical_area(state, release, selector, region, tokens, cfg, depth=0
         assumption=select_assumption(state,release,region.region_id+'|refinement-host',choices,members,cfg)
         if assumption:chosen=assumption['selected']
     if chosen is None: return block(state,region,frames,'COMPONENT_REFINEMENT_HOST_UNRESOLVED')
+    from .refinement_host_proof import capture as capture_owner,live as owner_live
+    owner_proof=None if assumption else capture_owner(state,region.region_id+'|refinement-host',chosen,boundary.get('proofs',()))
+    if not assumption and not owner_live(state,owner_proof):
+        return block(state,region,frames,'COMPONENT_REFINEMENT_HOST_UNRESOLVED')
     selected_group=group_hosts.get(chosen)
     owner,host,reading=selected_group[:3] if selected_group else hosts[chosen]
     if boundary['kind']=='RELATIVE_PRONOUN' or boundary['kind']=='RELATIVE' and boundary['rule'].get('POS')=='ADJF':
@@ -462,10 +466,17 @@ def _compose_lexical_area(state, release, selector, region, tokens, cfg, depth=0
         # Reuse the exact nominal unit/mention of the already assembled host.
         if not selected_group:
             host_frame.semantic['lexical_units'][chosen]=deepcopy(owner.semantic['lexical_units'][chosen])
+    if owner_proof is not None:
+        if not owner_live(state,owner_proof):
+            return block(state,region,[*frames,*children],'COMPONENT_REFINEMENT_HOST_UNRESOLVED')
+        for child in children:
+            child.semantic['refinement_owner_required']=True
+            child.semantic.setdefault('refinement_owner_proofs',[]).append(deepcopy(owner_proof))
     internalize(children,description,owner)
     owner.semantic.setdefault('nominal_args',[]).append({'host_token_ref':chosen,'host_role':host_role,
         'frame_ref':description.frame_id,'host_frame_ref':host_frame.frame_id,
         **({'tree':description.semantic['component_scope_tree']} if description.semantic.get('component_scope_tree') else {}),
+        **({'host_selection_required':True,'host_selection_proof':deepcopy(owner_proof)} if owner_proof else {}),
         **({'scope_assumption':assumption} if assumption else {}),
         **({'host_group_member_refs':selected_group[3]['group']['member_refs']} if selected_group else {})})
     state.syntax_trace.append({'kind':'NOMINAL_REFINEMENT','parent_ref':owner.frame_id,

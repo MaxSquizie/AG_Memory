@@ -95,7 +95,8 @@ def host_live(state,row):
 
 def frame_hosts_live(state,frame):
     from .relative_pronoun import binding_live
-    return (binding_live(state,frame)
+    from .refinement_host_proof import frame_live as owner_live
+    return (binding_live(state,frame) and owner_live(state,frame)
             and all(host_live(state,r) for r in frame.semantic.get('nominal_host_evidence',())))
 
 

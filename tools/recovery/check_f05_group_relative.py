@@ -18,9 +18,9 @@ for text,marker,last,role in [
         ('nominal_attachment','WHOLE established group'),('relative_argument_role',role)]+relation('LEXICAL')
     with TemporaryDirectory() as tmp,MonkeyPatch.context() as patch:
         from ah.formalizer import v7_pipeline
-        original=v7_pipeline.build_plan;captured=[]
+        original=v7_pipeline.build_plan;captured=[];plan_inputs=[]
         def capture(state,*args,**kwargs):
-            result=original(state,*args,**kwargs);captured.append(state);return result
+            result=original(state,*args,**kwargs);captured.append(state);plan_inputs.append((args,kwargs));return result
         patch.setattr(v7_pipeline,'build_plan',capture)
         result,script=run(Path(tmp),patch,text,steps)
         print(result['diagnostics'],result['assertions']['ah'])
@@ -58,6 +58,28 @@ for text,marker,last,role in [
         assert not frame_hosts_live(state,changed)
         changed=deepcopy(child);changed.semantic['refinement_binding']['host_role']='UNRELATED'
         assert not frame_hosts_live(state,changed)
+        parent=next(f for f in state.frames if any(a.get('host_selection_required') for a in f.semantic.get('nominal_args',())))
+        owner_proof=parent.semantic['nominal_args'][0]['host_selection_proof']
+        assert child.semantic['refinement_owner_required']
+        assert frame_hosts_live(state,parent)
+        lost=deepcopy(child);lost.semantic.pop('refinement_owner_proofs')
+        assert not frame_hosts_live(state,lost)
+        changed=deepcopy(parent);changed.semantic['nominal_args'][0]['host_token_ref']='different occurrence'
+        assert not frame_hosts_live(state,changed)
+        # Use the runtime evidence adapter to check the exact captured selection.
+        from ah.formalizer.dispatch_evidence import valid
+        assert valid(state,'REFINEMENT_HOST',owner_proof)
+        changed_state=deepcopy(state)
+        supersede(changed_state,owner_proof['decision_ref'],'owner replacement')
+        assert not frame_hosts_live(changed_state,parent) and not frame_hosts_live(changed_state,child)
+        assert not valid(changed_state,'REFINEMENT_HOST',owner_proof)
+        changed_boundary=deepcopy(state)
+        assert owner_proof['premises']
+        supersede(changed_boundary,owner_proof['premises'][0]['decision_ref'],'boundary replacement')
+        assert not frame_hosts_live(changed_boundary,parent) and not frame_hosts_live(changed_boundary,child)
+        args,kwargs=plan_inputs[-1]
+        _,_,diagnostics,_=original(changed_state,*args,**kwargs)
+        assert any(d.startswith('NOMINAL_HOST_PROOF_RETIRED:') for d in diagnostics),diagnostics
         proof=child.semantic['refinement_binding']['function_proofs'][0]
         supersede(state,proof['decision_ref'],'replacement')
         assert not frame_hosts_live(state,child)

@@ -8,6 +8,9 @@ def observe(state,kind,value,expected=True):
 
 
 def valid(state,kind,value):
+    if kind=='REFINEMENT_HOST':
+        from .refinement_host_proof import live
+        return live(state,value)
     if kind=='CONSTRAINT_SET':
         from .component_constraints import constraint_signature
         return constraint_signature(state,value['region_ref'],value['task_scope'])==value['signature']
