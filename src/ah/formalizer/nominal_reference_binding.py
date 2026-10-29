@@ -10,6 +10,29 @@ def payload(state, unit):
     binding=state.observation.get('nominal_reference_bindings',{}).get(mention)
     if binding is None:
         return None  # A typed placeholder preserves the source relation, not identity.
+    from .selection_evidence import selected_candidate
+    from .reference_structure import signature
+    read=state.observation.get('nominal_reference_reads',{}).get(binding['interpretation_decision_ref'],{})
+    if (not read or read.get('search_incomplete') or digest(read)!=binding.get('reference_domain_hash')
+            or signature(state)!=binding.get('structure_signature')):
+        raise ValueError('NOMINAL_REFERENCE_DOMAIN_STALE')
+    decision=state.decisions.get(binding['interpretation_decision_ref'])
+    if (selected_candidate(decision)!=binding.get('selected_candidate_id')
+            or not binding.get('selected_candidate_id')
+            or digest(constraint)!=digest(binding.get('reference_constraint'))):
+        raise ValueError('NOMINAL_REFERENCE_SELECTION_STALE')
+    if binding.get('local_spatial_anchor'):
+        from .nominal_reference_local import rows
+        if not any(r['memory_binding_ref']==binding['anchor_binding_ref']
+                   and digest(r['local_spatial_anchor'])==digest(binding['local_spatial_anchor'])
+                   for r in rows(state,constraint)):
+            raise ValueError('NOMINAL_REFERENCE_LOCAL_ANCHOR_STALE')
+    else:
+        read=state.observation.get('nominal_reference_reads',{}).get(binding['interpretation_decision_ref'],{})
+        if (not read or read.get('search_incomplete') or read.get('context_read_hash')!=binding.get('context_read_hash')
+                or not any(r['entity_ref']==binding['target_ref'] and r['memory_binding_ref']==binding['anchor_binding_ref']
+                           for r in read.get('rows',()))):
+            raise ValueError('NOMINAL_REFERENCE_READ_STALE')
     return {'binding_kind':'NOMINAL_REFERENCE',**binding}
 
 
@@ -30,7 +53,7 @@ def validate(p, ledger, journal, store=None):
         if (meta!=expected or local.get('entity_ref')!=p['target_ref']
                 or local.get('source_tag')!=p['source_tag'] or proof.get('source_tag')!=p['source_tag']
                 or proof.get('binding_kind')!='SPATIAL_ANCHOR'
-                or local['source_range'][1]>p['reference_constraint']['source_range'][0]
+                or local['anchor_ref'] in set(p['reference_constraint'].get('anchor_refs',()))|{p['reference_constraint']['head_ref']}
                 or p.get('context_read_hash') or p.get('premise_support_refs')):
             raise ValueError('NOMINAL_REFERENCE_LOCAL_ANCHOR_INVALID')
         return

@@ -46,25 +46,35 @@ def attach(state, request, result):
 
 def resolve(state, release, selector):
     from .component_probe import _probe
-    for key, (mention, constraint) in groups(state).items():
+    # Bindings are derived results of THIS complete resolution pass. An earlier
+    # successful selection must not survive a missing/ambiguous new result.
+    current=groups(state)
+    active={key+'|referent' for key in current}
+    for old in state.observation.get('nominal_reference_bindings',{}).values():
+        if old['interpretation_decision_ref'] not in active:
+            unresolve(state,old['interpretation_decision_ref'],'REFERENCE_TASK_REMOVED')
+    state.observation['nominal_reference_bindings']={}
+    for key, (mention, constraint) in current.items():
         decision = key+'|referent'
         read = state.observation.get('nominal_reference_reads',{}).get(decision,{})
         from .nominal_reference_local import rows as local_rows
         rows = [*local_rows(state,constraint),*read.get('rows',[])]
-        incomplete=bool(read.get('search_incomplete')) or len(rows)>32
+        incomplete=not read or bool(read.get('search_incomplete')) or len(rows)>32
         from .reference_presentation import label
         options = [{'candidate_id':'antecedent:'+str(i),
             'label':label(state,[r])+
                     '; features='+str(r.get('features',[]))} for i,r in enumerate(rows)]
-        chosen = None
+        chosen = None;probed=False
         if rows and not incomplete:
             start,end=constraint['source_range']
             from .regions import reference_goal
             goal=reference_goal(state,constraint['head_ref'])
             lo,hi=goal['source_range']
             context=state.text[lo:hi]
-            if len(context)<=2048:
+            if len(context)>2048:incomplete=True
+            else:
                 from .reference_structure import inputs
+                probed=True
                 chosen = _probe(state,selector,release,decision,'reference',options,context,(start,end),
                     inputs=inputs(state,(constraint['head_ref'],),options),
                     equivalent_targets={o['candidate_id']:r['entity_ref'] for o,r in zip(options,rows)},
@@ -76,6 +86,7 @@ def resolve(state, release, selector):
         if chosen in by_id:
             row=by_id[chosen]
             from .state import Ground
+            from .reference_structure import signature
             state.decisions[decision].grounds.append(Ground('D' if row.get('local_spatial_anchor') else 'P',
                 'local source anchor: '+row['memory_binding_ref'] if row.get('local_spatial_anchor') else
                 'frozen active-workspace binding: '+row['memory_binding_ref'],chosen))
@@ -83,11 +94,24 @@ def resolve(state, release, selector):
                 'target_ref':row['entity_ref'], 'anchor_binding_ref':row['memory_binding_ref'],
                 'premise_support_refs':row.get('premise_support_refs',[])[:1],
                 **({'local_spatial_anchor':deepcopy(row['local_spatial_anchor'])} if row.get('local_spatial_anchor') else {'context_read_hash':read['context_read_hash']}),
-                'interpretation_decision_ref':decision, 'reference_constraint':deepcopy(constraint)}
+                'interpretation_decision_ref':decision, 'selected_candidate_id':chosen,
+                'reference_domain_hash':digest(read),'structure_signature':signature(state),
+                'reference_constraint':deepcopy(constraint)}
         else:
+            if not probed:unresolve(state,decision,'DOMAIN_UNAVAILABLE' if incomplete else 'NO_CANDIDATES')
             state.diag('NOMINAL_REFERENCE_SEARCH_INCOMPLETE' if incomplete
                        else 'NOMINAL_REFERENCE_UNRESOLVED',decision)
             from .clarifications import offer
             offer(state,decision,'REFERENCE',constraint['raw'],options)
         state.syntax_trace.append({'kind':'NOMINAL_REFERENCE', 'decision_ref':decision,
             'mention_ref':mention, 'constraint':constraint, 'candidate_count':len(rows), 'selected':chosen})
+
+
+def unresolve(state,decision_ref,reason):
+    """A skipped probe cannot leave an earlier local success active."""
+    decision=state.decisions.get(decision_ref)
+    if decision is None:return
+    decision.history.append({'kind':'NOMINAL_REFERENCE_RESULT_WITHDRAWN','reason':reason,
+                             'previous_selected':list(decision.selected)})
+    decision.selected=();decision.outcome='UNRESOLVED';decision.search_complete=False
+    decision.machine_state='OPEN';decision.lifecycle='PROVISIONAL'
