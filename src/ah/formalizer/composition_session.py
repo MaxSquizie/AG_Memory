@@ -120,7 +120,7 @@ class CompositionSession:
 
 
     def memory(self,slot,options,source_range,cfg):
-        if self.reader is None or len(options)<2:return ''
+        if self.reader is None or not options:return ''
         # This reader returns the addressed active context, not a different
         # answer per candidate ordering. Reuse it throughout the same area.
         from .context_proofs import compile_goals

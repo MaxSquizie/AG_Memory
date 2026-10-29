@@ -43,7 +43,9 @@ def select_generated(state, accepted, selector, release):
         from .component_probe import _probe
         choices=[{'candidate_id':cid,'label':'; '.join(delta[cid]) or 'No additional attachment'} for cid in ids]
         chosen=_probe(state,selector,release,row['decision_ref'],'structural_attachment',choices,
-            state.text[region.source_range[0]:region.source_range[1]],(start,end))
+            state.text[region.source_range[0]:region.source_range[1]],(start,end),
+            question='Which displayed attachment difference fits these occurrences? All alternatives share these fixed links: '+
+            ('; '.join(sorted(common)) or 'none')+'. Preserve the common links and compare only the displayed differences.')
         if chosen is None:continue
         for cid in ids:
             if cid != chosen:

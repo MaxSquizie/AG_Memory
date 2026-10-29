@@ -33,6 +33,8 @@ class ProbeInputs:
             if owner is None or self.requested_role not in owner.semantic.get('implicit_arguments',{}):
                 errors.append('OMITTED_ROLE_NOT_ESTABLISHED')
             elif self.target_refs!=(owner.predicate_token_ref,):errors.append('OMITTED_ROLE_OWNER_MISMATCH')
+            elif self.requested_role in owner.semantic.get('proposed_roles',{}).values():
+                errors.append('OMITTED_ROLE_ALREADY_FILLED')
         if self.multiplicity!='ALTERNATIVE_READINGS':errors.append('UNSUPPORTED_MULTIPLICITY')
         evidence={t.token_id:t for t in state.evidence}
         if not self.target_refs:errors.append('TARGET_MISSING')

@@ -12,7 +12,7 @@ def label(state, rows):
     for row in rows:
         parts=[row['label'], 'type='+row.get('reference_kind','ENTITY')]
         refs=[row.get('local_anchor_ref'),row.get('head_ref')]
-        refs.extend(m.get('mention_ref') for m in row.get('members',()))
+        refs.extend(m.get('source_token_ref') or m.get('mention_ref') for m in row.get('members',()))
         anchors=list(dict.fromkeys(r for r in refs if r in evidence))
         for ref in anchors:
             token=evidence[ref]

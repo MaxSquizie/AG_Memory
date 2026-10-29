@@ -44,21 +44,21 @@ s,rows=fixture();sel=Selector()
 options=[{'candidate_id':'one','label':'first referent'}]
 task=inputs(s,('he',),options)
 assert not task.errors(s,'reference',options,(21,23))
-assert _probe(s,sel,release,'p','reference',options,s.text,(21,23),inputs=task)=='one'
-assert _probe(s,sel,release,'p','reference',options,s.text,(21,23),inputs=task)=='one'
+assert _probe(s,sel,release,'p','reference',options,s.text,(21,23),question="Which referent fits this occurrence?",inputs=task)=='one'
+assert _probe(s,sel,release,'p','reference',options,s.text,(21,23),question="Which referent fits this occurrence?",inputs=task)=='one'
 assert len(sel.prompts)==1
 # Same IDs/text with revised roles must not replay an answer to the old task.
 s.frames[0].semantic['proposed_roles']={'a':'RECIPIENT','b':'SUBJECT'}
-assert _probe(s,sel,release,'p','reference',options,s.text,(21,23),inputs=task) is None
+assert _probe(s,sel,release,'p','reference',options,s.text,(21,23),question="Which referent fits this occurrence?",inputs=task) is None
 assert len(sel.prompts)==1
-assert _probe(s,sel,release,'p','reference',options,s.text,(21,23),inputs=inputs(s,('he',),options))=='one'
+assert _probe(s,sel,release,'p','reference',options,s.text,(21,23),question="Which referent fits this occurrence?",inputs=inputs(s,('he',),options))=='one'
 assert len(sel.prompts)==2
 # Missing declaration cannot be bypassed by clarification or a cached answer.
 s.observation['clarification_choices']={'p':'one'}
-assert _probe(s,sel,release,'p','reference',options,s.text,(21,23)) is None
+assert _probe(s,sel,release,'p','reference',options,s.text,(21,23),question='Which referent fits this occurrence?') is None
 assert len(sel.prompts)==2
 s,rows=fixture();sel=Selector();s.structural_closed=False
-assert _probe(s,sel,release,'p','reference',options,s.text,(21,23),inputs=inputs(s,('he',),options)) is None
+assert _probe(s,sel,release,'p','reference',options,s.text,(21,23),question="Which referent fits this occurrence?",inputs=inputs(s,('he',),options)) is None
 assert not sel.prompts
 # Explicit partiality elsewhere must not make current roles into alleged facts.
 s,rows=fixture();s.frames.append(FrameCandidate('unfinished','FLAT','Саша',(),

@@ -40,9 +40,14 @@ def freeze_context(store, release, source_tags, *, active_refs=None):
             if store._store.kind_of(uid).value=='K':
                 members=sorted(m.uid for m in entity.members)
                 if uid!='K:'+digest(members) or len(members)<2:continue
+                member_labels=[]
+                for member in members:
+                    name=store._store.get_element_any_domain(member).properties.get('name')
+                    member_labels.append(str(name.value) if name is not None else 'unnamed member (identity not described)')
                 rows.append({'entity_ref':uid,'reference_kind':'GROUP','binding_ref':bid,
                     'source_tag':binding['source_tag'],'premise_support_refs':supports,
-                    'features':[{'number':'plur'}],'member_refs':members,'label':'Previously established group '+uid})
+                    'features':[{'number':'plur'}],'member_refs':members,
+                    'label':'Previously established whole group: '+' + '.join(member_labels)})
                 if len(rows)>256:raise ValueError('COREF_CANDIDATE_LIMIT')
                 continue
             if entity.meta.get('relative_place') is not None:
@@ -72,6 +77,7 @@ def freeze_context(store, release, source_tags, *, active_refs=None):
                     if not node.get('template_ref') or node.get('temporal_mode') not in {'EVENT','PROCESS','TRANSITION'} or not node.get('polarity',True): continue
                     rows.append({'entity_ref':support['conclusion_ref'],'reference_kind':'EVENT',
                         'binding_ref':'event:'+sid,'source_tag':[oid,version],
+                        'source_ref':node.get('source_ref'),
                         'premise_support_refs':[sid],'features':[],
                         'template_ref':node['template_ref'],'temporal_mode':node['temporal_mode'],
                         'label':texts.get((oid,version),'событие из объявленного наблюдения')})
@@ -79,7 +85,7 @@ def freeze_context(store, release, source_tags, *, active_refs=None):
         # Attach evidence at the frozen-read boundary for every consumer,
         # including ordinary pronoun references and direct declared windows.
         from .reference_source_context import attach
-        attach(store,[r for r in rows if r.get('reference_kind')!='EVENT'])
+        attach(store,rows)
         return rows
 
 

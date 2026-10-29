@@ -51,17 +51,22 @@ def build_clause(state,release,selector,region,tokens,p,cfg, *, select=True, att
         for f in candidates: f.semantic['structural_unresolved']=True
     elif len(candidates)>1 or any(f.semantic['requires_attachment_probe'] for f in candidates):
         options=[]
+        from .probe_wording import role as role_text, linked_readings
         for f in candidates:
-            roles=', '.join(r+'='+evidence[t].span for t,r in f.semantic['proposed_roles'].items())
+            roles=', '.join(role_text(r)+'=«'+evidence[t].span+'» at '+str(evidence[t].start) for t,r in f.semantic['proposed_roles'].items())
             if f.semantic['relative_temporal']: roles += '; relative event anchors='+str(f.semantic['relative_temporal'])
-            if f.semantic['preposition_bindings']: roles += '; prepositions='+str(f.semantic['preposition_bindings'])
-            if f.semantic['missing_required_roles']: roles += '; UNRESOLVED mandatory roles='+str(f.semantic['missing_required_roles'])
-            if f.semantic.get('implicit_arguments'): roles += '; omitted roles (identity unresolved)='+str(list(f.semantic['implicit_arguments']))
-            options.append({'candidate_id':f.frame_id,'label':str(f.semantic['morph_bindings'][p.token_id]['lemma'])+'; '+roles+'; morphology='+str({t:{k:v for k,v in m.items() if k in {'cases','number','gender','pos'}} for t,m in f.semantic['morph_bindings'].items()})})
+            if f.semantic['preposition_bindings']:
+                roles+='; relational markers: '+ '; '.join('«'+evidence[b['token_ref']].span+'» at '+str(evidence[b['token_ref']].start)+
+                    ' introduces «'+evidence[t].span+'» at '+str(evidence[t].start) for t,b in f.semantic['preposition_bindings'].items())
+            if f.semantic['missing_required_roles']: roles += '; UNRESOLVED mandatory roles='+', '.join(role_text(r) for r in f.semantic['missing_required_roles'])
+            if f.semantic.get('implicit_arguments'): roles += '; omitted roles (identity unresolved)='+', '.join(role_text(r) for r in f.semantic['implicit_arguments'])
+            options.append({'candidate_id':f.frame_id,'label':'Predicate «'+p.span+'» at '+str(p.start)+'; '+roles+
+                            '; whole readings: '+linked_readings(f.semantic['morph_bindings'],evidence)})
         if len(raw)>cfg['context_chars'] or all(f.semantic['structural_unresolved'] for f in candidates):
             chosen=None
         else:
-            chosen=_probe(state,selector,release,region.region_id+'|composition','component_attachment',options,raw,region.source_range)
+            chosen=_probe(state,selector,release,region.region_id+'|composition','component_attachment',options,raw,region.source_range,
+                question='Which proposed clause reading fits this source? Preserve the shown whole morphological readings and role assignments within each alternative; do not assert that its event occurred.')
         for f in candidates:
             f.semantic['composition_decision']=region.region_id+'|composition'
             if f.frame_id!=chosen: f.semantic['structural_unresolved']=True

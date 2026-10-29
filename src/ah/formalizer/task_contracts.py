@@ -61,8 +61,13 @@ CONTRACTS={kind:ProducerContract(kind,level,source,target,domain,completion) for
 ]}
 
 
-def probe_contract(slot,closed=False):
+def probe_contract(slot,closed=False,inputs=None):
     from dataclasses import replace
+    from .probe_families import contract
+    spec=contract(slot,inputs)
+    if spec is not None:
+        return replace(CONTRACTS['PROBE'],level=spec.level,input_sort=spec.family+'_INPUT',
+                       applicability=spec.object_of_choice,completion=spec.permission+'; '+spec.negative_scope)
     level='T4' if closed else 'TD' if slot in {
         'reference','implicit_argument','discourse_addressee','spatial_reference','nominal_reference'} else 'T1_T2' if slot in {
         'structural_oov_function','predicate_argument_reading','structural_marker_reading','agreement_recovery'} else 'T2_TP'

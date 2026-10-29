@@ -20,7 +20,7 @@ def candidates(state,mention_ref=None,window_size=None):
                 known=state.observation.get('entity_bindings',{}).get(mention)
                 if not known and any(v.pos=='NPRO' for v in evidence[tid].variants):break
                 members.append({'entity_ref':known or 'M:'+digest([state.source_uid,mention]),
-                    'mention_ref':mention,'label':unit.get('surface',evidence[tid].span),'existing':bool(known)})
+                    'mention_ref':mention,'source_token_ref':tid,'label':unit.get('surface',evidence[tid].span),'existing':bool(known)})
             else:
                 ids=sorted({m['entity_ref'] for m in members})
                 if len(ids)<2:continue

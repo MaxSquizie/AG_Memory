@@ -16,14 +16,15 @@ def attach(store, rows):
         # original envelope when a qualification lies outside that window.
         row['source_context']=text
         row['source_context_complete']=bool(text)
-        binding=store.ledger.data['bindings'][row.get('memory_binding_ref',row.get('binding_ref'))]
-        entity=store._store.get_element_any_domain(row['entity_ref'])
-        implicit=entity.meta.get('implicit_participant')
+        event=row.get('reference_kind')=='EVENT'
+        binding={} if event else store.ledger.data['bindings'][row.get('memory_binding_ref',row.get('binding_ref'))]
+        entity=None if event else store._store.get_element_any_domain(row['entity_ref'])
+        implicit=entity.meta.get('implicit_participant') if entity is not None else None
         if implicit is not None:
             row['label']='Previously grounded omitted '+implicit['participant_kind'].lower()+' (identity unidentified)'
             row['implicit_participant']=dict(implicit)
-        anchors=[binding.get('mention_ref','')]
-        placeholder=entity.meta.get('referential_placeholder')
+        anchors=[row.get('source_ref') or '',binding.get('mention_ref','')]
+        placeholder=entity.meta.get('referential_placeholder') if entity is not None else None
         if placeholder is not None:
             constraint=placeholder['constraint']
             row['referential_placeholder']=dict(placeholder)

@@ -7,14 +7,16 @@ from .probe_wording import role
 def signature(state):
     # This is deliberately independent of resolved lexical senses/reference
     # results. Those are not permissions to change the accepted source roles.
-    return digest([state.source_uid,state.interpretation_version,state.text,
+    from .composition_dispatcher import canonical
+    return digest(canonical([state.source_uid,state.interpretation_version,state.text,
         state.structural_closed,state.logical_roots,
         [(t.token_id,t.span,t.start,t.end) for t in state.evidence],
         [(f.frame_id,f.predicate_token_ref,f.source_range,f.argument_token_refs,{k:f.semantic.get(k) for k in (
             'proposed_roles','proposition_args','nominal_args','component_scope_tree','operator_forest',
             'structural_unresolved','structural_rejection','discourse_scope','partial_composition',
             'component_child','coordination_owner','lexical_units','region','explicit_region',
-            'bound_arguments','implicit_arguments','shared_implicit_arguments')}) for f in state.frames]])
+            'action_description','passive_predication','impersonal_predication','nominal_predication','nominal_groups',
+            'bound_arguments','implicit_arguments','shared_implicit_arguments')}) for f in state.frames]]))
 
 
 OPERATORS={'NOT':'negation of', 'AND':'conjunction of', 'OR':'inclusive alternatives',
@@ -65,17 +67,35 @@ def describe(state):
         if sem.get('structural_unresolved') or sem.get('structural_rejection'):
             return occurrence(f.predicate_token_ref)+' [structure unresolved; no established role assignment]'
         parts=[]
+        for field,text in (('passive_predication','passive reading: the patient does not become the actor'),
+                           ('impersonal_predication','impersonal state; do not invent a grammatical subject'),
+                           ('nominal_predication','nominal predication; a description/classification, not an action occurrence')):
+            if sem.get(field):parts.append(text)
+        if sem.get('action_description'):
+            parts.append('action description; occurrence not asserted; unassigned roles: '+
+                         ', '.join(role(r) for r in sem['action_description'].get('unassigned_roles',())))
         for tid,r in sem.get('proposed_roles',{}).items():
             parts.append(role(r)+' = '+occurrence(tid))
+        for group in sem.get('nominal_groups',()):
+            parts.append('one coordinated nominal slot containing '+', '.join(occurrence(t) for t in group['member_refs']))
         for tid,variable in sem.get('bound_arguments',{}).items():
             parts.append(occurrence(tid)+' is bound variable '+str(variable)+'; not an independently named individual')
         for r in sem.get('implicit_arguments',{}):parts.append(role(r)+' omitted; identity not inferred here')
-        for r in sem.get('shared_implicit_arguments',{}):parts.append(role(r)+' shared with the governing predicate')
+        for r,alias in sem.get('shared_implicit_arguments',{}).items():
+            parent=frames.get(alias.get('frame_ref'))
+            if parent is None:
+                missing.append('SHARED_PARTICIPANT_OWNER_MISSING');continue
+            parts.append(role(r)+' shares the omitted '+role(alias['role'])+' of '+occurrence(parent.predicate_token_ref))
         temporal=time_text(sem.get('explicit_region') or sem.get('region'))
         if temporal:parts.append('time of this predicate: '+temporal)
         for slot in slots(f):
             if slot.kind=='NOMINAL':
-                owner=occurrence(slot.metadata.get('host_token_ref'))
+                if slot.metadata.get('host_token_ref'):
+                    owner=occurrence(slot.metadata['host_token_ref'])
+                elif slot.metadata.get('host_implicit_role'):
+                    owner='the omitted '+role(slot.metadata['host_implicit_role'])+' of '+occurrence(f.predicate_token_ref)
+                else:
+                    missing.append('NOMINAL_HOST_MISSING');owner='[unavailable host]'
                 slot_label='nominal description of '+owner
                 if slot.metadata.get('host_role'):slot_label+='; host fills '+role(slot.metadata['host_role'])+' in that description'
             else:slot_label=role(slot.name)

@@ -63,3 +63,12 @@ assert 'не о поездке' not in row['memory_excerpt']
 assert row['source_context']==long_text and row['source_context_complete']
 assert 'не о поездке' in label(state,[row])
 print('F03 complete prior source preserves a qualification outside the short excerpt: PASS')
+# Event candidates have support paths rather than identity bindings. They
+# still need exact source occurrences, even within one identical source text.
+rows=[{'label':long_text,'source_tag':['source',1],'binding_ref':'event:'+str(i),
+       'entity_ref':'event:'+str(i),'reference_kind':'EVENT','source_ref':ref}
+      for i,ref in enumerate(('tok:0:4','tok:5:16'))]
+attach(store,rows)
+assert all(r['memory_anchor_range'] for r in rows)
+assert label(state,[rows[0]])!=label(state,[rows[1]])
+print('F03 event references retain source anchors without identity bindings: PASS')

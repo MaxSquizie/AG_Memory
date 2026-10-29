@@ -117,9 +117,12 @@ def _probe(state, selector, release, key, slot, options, context, source_range, 
         ('INPUT_CONTRACT_MISSING',) if slot in {'reference','implicit_argument'} else ())
     if inputs is not None and hasattr(inputs,'question') and question!=inputs.question:
         errors=(*errors,'QUESTION_MISMATCH')
+    from .probe_families import contract as family_contract, errors as family_errors
+    family=family_contract(slot,inputs)
+    errors=tuple(dict.fromkeys((*errors,*family_errors(state,slot,options,context,source_range,question,inputs))))
     state.syntax_trace.append({'kind':'PROBE_INPUT_CONTRACT','decision_ref':key,
-        'slot':slot,'status':'INVALID' if errors else getattr(inputs,'declaration_status','DECLARED') if inputs is not None else 'UNDECLARED',
-        'inputs':input_record,'errors':list(errors)})
+        'slot':slot,'status':'INVALID' if errors else getattr(inputs,'declaration_status','DECLARED') if inputs is not None else 'FAMILY_DECLARED',
+        'inputs':input_record,'semantic_contract':family.record() if family else None,'errors':list(errors)})
     if errors:
         # Invalidate this cached evaluation, not the stable task address for
         # all future revisions. A repaired declaration may use the same key.
@@ -165,7 +168,7 @@ def _probe(state, selector, release, key, slot, options, context, source_range, 
     if runtime is None:return run().value
     from .task_contracts import probe_contract
     result=runtime.dispatcher.run('probe:'+key,[dependency_signature,state.observation.get('clarification_choices',{}).get(key)],
-        run,kind='PROBE',source_range=source_range,contract=probe_contract(slot,state.structural_closed))
+        run,kind='PROBE',source_range=source_range,contract=probe_contract(slot,state.structural_closed,inputs))
     # Dispatcher reuse returns a scalar; restore its immutable selection evidence too.
     from .component_probe_replay import restore_decision
     restore_decision(state,key,state.component_probe_records[key]['decision'])
