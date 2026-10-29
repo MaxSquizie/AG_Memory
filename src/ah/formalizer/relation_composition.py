@@ -5,6 +5,7 @@ Children use the same composer. Coverage and ordinary T3/T5 still validate every
 selected structure; no child is returned as assertible after a parent failure.
 """
 from dataclasses import replace
+from .task_contracts import SelectionPurpose
 from .canonical_ledger import digest
 from .composition_tree import InputSlot,expression,internalize,leaves
 from .composition_children import select_child
@@ -131,11 +132,14 @@ def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof
         'Outer relation words may be separated in the source; they are not a new sentence. '
         'Choose the proposed application if it connects the right contents. '
         'Answer 0 if the relation or the assignment of its contents is wrong, or ? if the source does not decide. '
-        'This choice does not resolve dictionary meanings or validate the internal parse of each part.')
+        'This choice does not resolve dictionary meanings or validate the internal parse of each part.',purpose=SelectionPurpose.CONFIRM)
     if result is None:
         rejected=next((r for r in reversed(state.syntax_trace[validation_begin:])
             if r.get('kind')=='TASK_DOMAIN' and r.get('slot')=='structural_partition'
-            and r.get('task_outcome')=='NONE_FIT_IN_COMPLETE_DOMAIN'),None)
+            and r.get('task_outcome')=='NONE_FIT_IN_ENUMERATED_GENERATOR'
+            and r.get('enumeration_complete') is True
+            and r.get('candidate_ids')==['PARTITION']
+            and r.get('selection_purpose')==SelectionPurpose.CONFIRM.value),None)
         if rejected:
             from .composition_contracts import record_failure
             record_failure(state,region,'PARTITION_REJECTED',proof,
@@ -176,7 +180,7 @@ def function_ownership(state,release,selector,region,cfg,kind,groups,*,eligible_
              ' '.join(t.span for t in groups[1])+'». Move only an introducer of THIS content; '
              'a conjunction introducing a different clause still inside the parent must stay there. ' if kind=='CONTENT' else '')+
             'Predicates and participants remain content. Negation, modality and quantification of an inner proposition stay inside it.',
-            empty={'candidate_id':'KEEP_ALL','label':'keep all listed words in their parts'})
+            empty={'candidate_id':'KEEP_ALL','label':'keep all listed words in their parts'},purpose=SelectionPurpose.NEXT)
         if not selected:return None
         if selected[0]['candidate_id']=='KEEP_ALL':return groups
         tid=selected[0]['token_ref']

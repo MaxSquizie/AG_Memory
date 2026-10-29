@@ -61,9 +61,11 @@ assert 'SOURCE_INTERVAL_OUTSIDE_DOMAIN' in scope.errors(s,[{'token_ref':'c'}],re
 scope=collection('CONTINUE',s.evidence,selected=(s.evidence[0],))
 assert 'SOURCE_CANDIDATE_OUTSIDE_DOMAIN' in scope.errors(s,[{'token_ref':'a'}],region.token_refs)
 print('F04 source collection: discontinuous selection, occurrence identity, no re-selection/crossing exclusion: PASS')
+from ah.formalizer.task_contracts import SelectionPurpose
 bad=collection('CONTINUE',s.evidence,selected=(s.evidence[0],),exclude=('a',))
 assert choose(s,release,Selector(),region,cfg,'part',[],'Continue?',
-    empty={'candidate_id':'DONE','label':'complete'},source_selection=bad) is None
+    empty={'candidate_id':'DONE','label':'complete'},source_selection=bad,
+    purpose=SelectionPurpose.NEXT) is None
 assert s.syntax_trace[-1]['reason']=='SOURCE_CONTRACT_INVALID'
 print('F04 empty generator cannot bypass contradictory source obligations: PASS')
 scope=collection('END',s.evidence,start='a')

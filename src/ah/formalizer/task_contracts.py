@@ -13,11 +13,34 @@ class TaskOutcome(str, Enum):
     PARTIAL = 'PARTIAL'
     MULTIPLE = 'MULTIPLE'
     NONE_FIT = 'NONE_FIT_IN_COMPLETE_DOMAIN'
+    GENERATOR_NONE_FIT = 'NONE_FIT_IN_ENUMERATED_GENERATOR'
     PAGE_NONE_FIT = 'NONE_FIT_ON_PAGE'
     UNKNOWN = 'UNKNOWN'
     NOT_APPLICABLE = 'NOT_APPLICABLE'
     INCOMPLETE = 'SEARCH_INCOMPLETE'
     BLOCKED = 'RESOURCE_BLOCKED'
+
+
+class SelectionPurpose(str, Enum):
+    ALTERNATIVE = 'ALTERNATIVE_READING'
+    NEXT = 'NEXT_COLLECTION_STEP'
+    CONFIRM = 'CONFIRM_PROPOSED_RELATION'
+
+    def wording(self):
+        return {
+            self.ALTERNATIVE: 'Choose a reading of this one addressed question.',
+            self.NEXT: 'Choose the next step of this collection. Several numbers are alternative next steps, not several objects to add together.',
+            self.CONFIRM: 'Confirm or reject the single proposed relation. This does not enumerate other possible relations.',
+        }[self]
+
+
+def required_selection_purpose(slot, source_selection=None):
+    """Declared consumer obligations, never inferred from question wording."""
+    if getattr(source_selection,'operation',None)=='CONTINUE':return SelectionPurpose.NEXT
+    if slot in {'nominal_function','temporal_function','structural_function_owner'}:
+        return SelectionPurpose.NEXT
+    if slot=='structural_partition':return SelectionPurpose.CONFIRM
+    return None
 
 
 @dataclass(frozen=True)
@@ -26,17 +49,21 @@ class SelectionReceipt:
     supported: tuple[str, ...]
     search_complete: bool
     source_complete: bool = True
+    purpose: SelectionPurpose = SelectionPurpose.ALTERNATIVE
 
     @property
     def outcome(self):
         if not self.source_complete:return TaskOutcome.BLOCKED
         if not self.search_complete:return TaskOutcome.INCOMPLETE
-        if not self.supported:return TaskOutcome.NONE_FIT
+        if not self.supported:return TaskOutcome.GENERATOR_NONE_FIT
         return TaskOutcome.SUPPORTED if len(self.supported)==1 else TaskOutcome.MULTIPLE
 
     def record(self):
         return {'candidate_ids':list(self.candidates),'supported_ids':list(self.supported),
                 'search_complete':self.search_complete,'source_complete':self.source_complete,
+                'enumeration_complete':self.search_complete,
+                'enumeration_scope':'CALLER_GENERATOR','interpretation_complete':False,
+                'selection_purpose':self.purpose.value,
                 'task_outcome':self.outcome.value}
 
 

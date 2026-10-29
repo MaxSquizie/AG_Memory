@@ -5,6 +5,7 @@ normalizer missing a selected expression is an implementation gap, never proof
 that the expression was not temporal. No guessed timestamp is emitted.
 """
 from .canonical_ledger import digest
+from .task_contracts import SelectionPurpose
 from .structural_tasks import choose, source_set
 
 
@@ -26,7 +27,7 @@ def prepare(state, release, selector, region, tokens, cfg):
             'A word mentioned as a name/title is not a time use. '
             'Target words: «' +
             ' '.join(t.span for t in remaining) + '».',
-            empty={'candidate_id':'NONE','label':'no remaining time expression'})
+            empty={'candidate_id':'NONE','label':'no remaining time expression'},purpose=SelectionPurpose.NEXT)
         if not result:
             return False
         if result[0]['candidate_id'] == 'NONE':

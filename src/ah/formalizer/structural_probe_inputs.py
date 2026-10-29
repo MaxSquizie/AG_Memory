@@ -6,6 +6,7 @@ language-domain coverage remain separate; they are not certified by this type.
 from dataclasses import dataclass, asdict
 from copy import deepcopy
 from .canonical_ledger import digest
+from .task_contracts import SelectionPurpose, required_selection_purpose
 
 
 def source_signature(state):
@@ -38,11 +39,17 @@ class StructuralProbeInputs:
     enumeration_scope: str = 'CALLER_GENERATOR'
     declaration_status: str = 'PAGE_DECLARED'
     prerequisites: tuple = ()
+    purpose: SelectionPurpose = SelectionPurpose.ALTERNATIVE
 
     def record(self):return asdict(self)
 
     def errors(self,state,slot,options,target_range):
         errors=[]
+        if not isinstance(self.purpose,SelectionPurpose):errors.append('SELECTION_PURPOSE_INVALID')
+        required=required_selection_purpose(slot,self.source_selection)
+        if required is not None and self.purpose!=required:errors.append('SELECTION_PURPOSE_CONSUMER_MISMATCH')
+        if self.purpose==SelectionPurpose.CONFIRM and len(self.candidate_payloads)!=1:
+            errors.append('CONFIRMATION_REQUIRES_ONE_PROPOSAL')
         from .probe_prerequisites import errors as premise_errors
         errors.extend(premise_errors(state,self.prerequisites))
         if self.family!='STRUCTURAL_PAGE':errors.append('TASK_FAMILY_MISMATCH')
@@ -70,13 +77,13 @@ class StructuralProbeInputs:
         text=('This is one page of the stated choice. Several numbers express alternative readings '
                 'of that same choice, never a jointly selected set. 0 rejects only the displayed page; '
                 '? means the evidence is insufficient to decide among these options.')
-        return text+''.join(r.wording() for r in self.prerequisites)+(self.source_selection.wording() if self.source_selection is not None else '')
+        return self.purpose.wording()+' '+text+''.join(r.wording() for r in self.prerequisites)+(self.source_selection.wording() if self.source_selection is not None else '')
 
 
-def inputs(state,region,slot,values,question,context,page,source_selection=None,prerequisites=()):
+def inputs(state,region,slot,values,question,context,page,source_selection=None,prerequisites=(),purpose=SelectionPurpose.ALTERNATIVE):
     return StructuralProbeInputs(slot,tuple(region.source_range),tuple(region.token_refs),context,
         source_signature(state),parent_signature(state),tuple(deepcopy(values)),question,page,source_selection,
-        prerequisites=tuple(deepcopy(prerequisites)))
+        prerequisites=tuple(deepcopy(prerequisites)),purpose=purpose)
 
 
 @dataclass(frozen=True)

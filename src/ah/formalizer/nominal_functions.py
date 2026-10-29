@@ -4,6 +4,7 @@ Heads and function material are selected separately. Discontinuous material
 keeps exact occurrence refs. Quantities remain source expressions, not numbers.
 """
 from .canonical_ledger import digest
+from .task_contracts import SelectionPurpose
 from .structural_tasks import choose,source_set,licensed
 from .probe_prerequisites import accepted,from_proof
 
@@ -44,7 +45,7 @@ def prepare(state,release,selector,region,tokens,cfg):
             'Already assigned functions (do not select the same function of the same occurrence again): '+
             '; '.join(k+': «'+' '.join(t.span for t in tokens if t.token_id in refs)+'»' for k,refs in used_by_kind.items())+'.',
             empty={'candidate_id':'DONE','label':'no further nominal relation, referential determiner or quantity expression'},
-            prerequisites=previous)
+            prerequisites=previous,purpose=SelectionPurpose.NEXT)
         if not selected:return False
         kind=selected[0]['candidate_id']
         if kind=='DONE':
