@@ -24,7 +24,7 @@ class DispatchBlocked(ValueError):
 class Dispatcher:
     def __init__(self,state,limit=20000):
         self.state=state;self.limit=limit;self.spent=0
-        self.nodes={};self.consumers={};self.stack=[]
+        self.nodes={};self.consumers={};self.stack=[];self.evidence_stack=[];self.checking_evidence=False
 
     def trace(self,kind,key,**fields):
         self.state.syntax_trace.append({'kind':kind,'task_ref':key,
@@ -39,16 +39,41 @@ class Dispatcher:
             node=self.nodes.get(ref)
             if node is not None:
                 node['dirty']=True
+                node['invalidation_epoch']=node.get('invalidation_epoch',0)+1
                 self.trace('DISPATCH_INVALIDATED',ref,reason=reason,changed_task_ref=key)
             queue.extend(self.consumers.get(ref,()))
 
+    def observe(self,kind,value,expected=True):
+        if self.checking_evidence or not self.evidence_stack:return
+        if kind not in {'PROOF','INVENTORY','INVENTORY_QUERY','NOMINAL_HOST'}:raise ValueError('DISPATCH_EVIDENCE_KIND_UNKNOWN')
+        identity=digest([kind,canonical(value),expected])
+        self.evidence_stack[-1][identity]={'kind':kind,'value':deepcopy(value),'expected':expected}
+
+    def evidence_valid(self,reads):
+        from .dispatch_evidence import valid
+        prior=self.checking_evidence;self.checking_evidence=True
+        try:return all(valid(self.state,r['kind'],r['value'])==r.get('expected',True) for r in reads.values())
+        finally:self.checking_evidence=prior
+
     def valid(self,key,revision=None,seen=None):
-        node=self.nodes.get(key)
-        if not node or node['dirty'] or 'result' not in node:return False
-        if revision is not None and node['revision']!=revision:return False
-        seen=set() if seen is None else seen
-        if key in seen:return False
-        return all(self.valid(ref,version,seen|{key}) for ref,version in node['reads'].items())
+        # Validate the read graph iteratively: recursion depth is not a domain limit.
+        active=set(seen or ());done=set();pending=[(key,revision,False)]
+        while pending:
+            ref,version,leaving=pending.pop()
+            if leaving:active.remove(ref);done.add(ref);continue
+            node=self.nodes.get(ref)
+            if not node or node['dirty'] or 'result' not in node:return False
+            if version is not None and node['revision']!=version:return False
+            if ref in active:return False
+            if ref in done:continue
+            if not self.evidence_valid(node.get('evidence_reads',{})):return False
+            if node['kind']=='PROBE':
+                from .dispatch_evidence import probe_stamp
+                stamp=probe_stamp(self.state,ref.removeprefix('probe:'))
+                if stamp is None or stamp!=node.get('probe_stamp'):return False
+            active.add(ref);pending.append((ref,version,True))
+            pending.extend((child,v,False) for child,v in node['reads'].items())
+        return True
 
     def replace_read(self,key):
         """A consumer explicitly replaced its tentative child in place."""
@@ -72,6 +97,7 @@ class Dispatcher:
         if self.stack:
             key,reads=self.stack[-1]
             reads.clear()
+            if self.evidence_stack:self.evidence_stack[-1].clear()
             self.trace('DISPATCH_RECHECK',key,reason='REJECTED_COMPOSITION_DISCARDED')
 
     def discard_reads(self,refs,reason):
@@ -80,6 +106,16 @@ class Dispatcher:
             key,reads=self.stack[-1]
             removed=sorted(set(refs)&set(reads))
             for ref in removed:reads.pop(ref)
+            if self.evidence_stack:
+                external=self.evidence_stack[-1]
+                for identity,row in list(external.items()):
+                    if row['kind'] not in {'PROOF','NOMINAL_HOST'}:continue
+                    value=row['value']
+                    if row['kind']=='PROOF':
+                        from .partition_role_revision import proof_refs
+                        addressed={'probe:'+r for r in proof_refs(self.state,value['proof'])} if isinstance(value.get('proof'),dict) else set()
+                    else:addressed={'probe:'+value['decision_ref']}
+                    if addressed & set(refs):external.pop(identity)
             self.trace('DISPATCH_RECHECK',key,reason=reason,discarded_reads=removed)
 
     def run(self,key,inputs,compute,*,kind,source_range=None,token_refs=(),contract=None):
@@ -107,13 +143,16 @@ class Dispatcher:
                 retired={id(d) for d in node.get('diagnostics',())}
                 self.state.diagnostics[:]=[d for d in self.state.diagnostics if id(d) not in retired]
                 before=len(self.state.diagnostics)
-                reads={};self.stack.append((key,reads))
+                reads={};evidence_reads={};epoch=node.get('invalidation_epoch',0)
+                self.stack.append((key,reads));self.evidence_stack.append(evidence_reads)
                 try:result=compute()
-                finally:self.stack.pop()
+                finally:self.stack.pop();self.evidence_stack.pop()
                 # A dependency changed after it was consumed during this task.
                 # Do not publish a mixture of revisions.
-                if any(not self.valid(ref,version) for ref,version in reads.items()):
-                    attempted=digest([node['signature'],[(ref,self.nodes[ref]['signature']) for ref in sorted(reads)]])
+                if (node.get('invalidation_epoch',0)!=epoch
+                        or not self.evidence_valid(evidence_reads)
+                        or any(not self.valid(ref,version) for ref,version in reads.items())):
+                    attempted=digest([node['signature'],[(ref,self.nodes[ref]['signature']) for ref in sorted(reads)],evidence_reads])
                     if attempted in attempts:
                         self.state.diag('COMPOSITION_DEPENDENCY_NO_PROGRESS',key)
                         raise DispatchBlocked('COMPOSITION_DEPENDENCY_NO_PROGRESS')
@@ -129,10 +168,15 @@ class Dispatcher:
                 node['receipt']={'task_outcome':receipt.outcome.value,'search_complete':receipt.search_complete,
                                  'source_complete':receipt.source_complete,'alternatives':list(receipt.alternatives),
                                  'structure_complete':receipt.structure_complete,'write_eligible':receipt.write_eligible}
-                node.update(result=deepcopy(result),reads=reads,dirty=False,revision=node['revision']+1)
+                node.update(result=deepcopy(result),reads=reads,evidence_reads=evidence_reads,
+                            dirty=False,revision=node['revision']+1)
+                if kind=='PROBE':
+                    from .dispatch_evidence import probe_stamp
+                    node['probe_stamp']=probe_stamp(self.state,key.removeprefix('probe:'))
                 self.trace('DISPATCH_COMPLETED',key,revision=node['revision'],
                     contract=node['contract'],**node['receipt'],
-                    dependencies=[{'task_ref':ref,'revision':v} for ref,v in reads.items()])
+                    dependencies=[{'task_ref':ref,'revision':v} for ref,v in reads.items()],
+                    evidence_reads=deepcopy(list(evidence_reads.values())))
                 break
         if self.stack:self.stack[-1][1].setdefault(key,node['revision'])
         return deepcopy(node['result'])

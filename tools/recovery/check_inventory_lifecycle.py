@@ -3,6 +3,7 @@ from copy import deepcopy
 from types import SimpleNamespace as NS
 from unittest.mock import patch
 from ah.formalizer.pipeline import t0
+from ah.formalizer.composition_dispatcher import Dispatcher
 from ah.formalizer.state import TokenEvidence
 from ah.formalizer.regions import TextRegion
 from ah.formalizer.structural_tasks import choose
@@ -53,6 +54,7 @@ assert not inv.unit_live(s,copy) and not inv.current(s,'NOMINAL',s.evidence,'con
 # Returning from a child changes current input identity; it does not retire the
 # child's already licensed receipt in a parent snapshot.
 s,r,row,pos,neg=fixture('TEMPORAL')
-with patch('ah.formalizer.composition_session.current',return_value=NS(input_signature=lambda:'parent',context_signature=lambda:'context',domain_feedback=None)):
+with patch('ah.formalizer.composition_session.current',return_value=NS(input_signature=lambda:'parent',context_signature=lambda:'context',domain_feedback=None,
+        dispatcher=Dispatcher(s))):
     assert inv.unit_live(s,row) and inv.current(s,'TEMPORAL',s.evidence,'constraints-A') is None
 print('Inventories: exact constraints, positive/negative retirement, copied units, no lexical fallback, parent vs child identity: PASS')

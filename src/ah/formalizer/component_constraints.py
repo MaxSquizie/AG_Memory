@@ -82,9 +82,13 @@ def host_live(state,row):
     from .selection_evidence import selected_candidate
     from .function_inventory import source_basis
     key=row.get('decision_ref');stamp=fingerprint(state,key)
-    return (key not in retired_refs(state.syntax_trace) and stamp is not None
+    usable=(key not in retired_refs(state.syntax_trace) and stamp is not None
         and row.get('fingerprint')==stamp and row.get('source_basis')==source_basis(state)
         and row.get('selected') is not None and selected_candidate(state.decisions.get(key))==row['selected'])
+    if usable:
+        from .dispatch_evidence import observe
+        observe(state,'NOMINAL_HOST',row)
+    return usable
 
 
 def frame_hosts_live(state,frame):

@@ -49,8 +49,13 @@ def current(state,kind,tokens,constraints=None,*,require=False):
     kind,refs,signature=identity(state,kind,tokens,constraints)
     previous=[r for r in state.syntax_trace if r.get('inventory_kind')==kind and r.get('inventory_tokens')==list(refs)]
     match=next((r for r in reversed(previous) if r.get('inventory_signature')==signature and live(state,r)),None)
+    from .dispatch_evidence import observe
+    observe(state,'INVENTORY_QUERY',{'kind':kind,'refs':list(refs),'signature':signature},match is not None)
     if match is None and require and previous:
         raise InventoryUnavailable(kind+': function inventory inputs or dependencies changed')
+    if match is not None:
+        from .dispatch_evidence import observe
+        observe(state,'INVENTORY',match['inventory_ref'])
     return match
 
 
@@ -88,7 +93,11 @@ def complete(state,metadata,completion_proof=None):
 def unit_live(state,unit):
     if not active(unit) or not unit.get('inventory_ref'):return False
     receipt=next((r for r in reversed(state.syntax_trace) if r.get('inventory_ref')==unit['inventory_ref'] and completed(r)),None)
-    return bool(receipt and live(state,receipt) and receipt['unit_hashes'].get(unit.get('unit_ref'))==unit_hash(unit))
+    usable=bool(receipt and live(state,receipt) and receipt['unit_hashes'].get(unit.get('unit_ref'))==unit_hash(unit))
+    if usable:
+        from .dispatch_evidence import observe
+        observe(state,'INVENTORY',receipt['inventory_ref'])
+    return usable
 
 
 def require_unit(state,unit):
@@ -108,6 +117,9 @@ def attach(state,tokens,cfg,frames):
 
 def frame_live(state,frame):
     receipts={r.get('inventory_ref'):r for r in state.syntax_trace if r.get('kind')=='FUNCTION_INVENTORY'}
-    if any(ref not in receipts or not live(state,receipts[ref])
-           for ref in frame.semantic.get('function_inventory_refs',())):return False
+    from .dispatch_evidence import observe
+    for ref in frame.semantic.get('function_inventory_refs',()):
+        usable=ref in receipts and live(state,receipts[ref])
+        observe(state,'INVENTORY',ref,usable)
+        if not usable:return False
     return all(unit_live(state,u) for u in frame.semantic.get('temporal_functions',()))

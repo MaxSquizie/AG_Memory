@@ -242,7 +242,7 @@ def _choose(state,release,selector,region,cfg,slot,options,question,*,empty=None
         return None
 
 
-def licensed(state,proof,*,_visiting=None,**expected):
+def _licensed(state,proof,*,_visiting=None,**expected):
     """Validate the finite dependency graph without recursive Python calls."""
     if not isinstance(proof,dict):return False
     from .partial_readings import retired_refs
@@ -286,6 +286,15 @@ def licensed(state,proof,*,_visiting=None,**expected):
             if digest(premise['value'])!=premise['proof'].get('payload_hash'):return False
             stack.append((premise['proof'],False,{}))
     return True
+
+
+def licensed(state,proof,*,_visiting=None,**expected):
+    result=_licensed(state,proof,_visiting=_visiting,**expected)
+    # A failed read matters too: otherwise a cached pending result cannot see
+    # a repaired prerequisite. Payload expectations remain part of the read.
+    from .dispatch_evidence import observe
+    if _visiting is None:observe(state,'PROOF',{'proof':proof,'expected_payload':expected},result)
+    return result
 
 
 def span(state,release,selector,region,tokens,cfg,slot,question,*,exclude=(),record_remainder=False,admissible=None,initial=None,prerequisites=()):
