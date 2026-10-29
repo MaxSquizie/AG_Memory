@@ -10,10 +10,17 @@ def merge(state,release,selector,region,tokens,cfg,grammar,components,diagnostic
             {'source':'GRAMMAR','frames':len(grammar)}, {'source':'COMPONENT','frames':len(components)}],
         'partial_diagnostics':[d.code for d in state.diagnostics[diagnostics_before:]]})
     from .partial_composition import close_alternatives
-    if not grammar:
-        if not any('INCOMPLETE' in d.code or 'UNRESOLVED' in d.code or d.code in {'COMPONENT_PROBE_FAILED','COMPUTATION_LIMIT'} for d in state.diagnostics[diagnostics_before:]):
-            close_alternatives(state,region,components)
-        return components
+    local=state.diagnostics[diagnostics_before:]
+    # Both routes share the same producer obligations, including an empty
+    # grammar result. A resource failure is never negative domain evidence.
+    from .task_contracts import produced,TaskOutcome
+    receipt=produced('GRAMMAR',None,local)
+    if receipt.outcome in {TaskOutcome.BLOCKED,TaskOutcome.INCOMPLETE}:
+        all_frames=[*grammar,*components]
+        for f in all_frames:f.semantic['structural_unresolved']=True
+        state.syntax_trace.append({'kind':'COMPOSITION_UNION_PENDING','region_ref':region.region_id,
+            'task_outcome':receipt.outcome.value,'diagnostics':[d.code for d in local]})
+        return all_frames
     all_frames=[*grammar,*components];by_id={f.frame_id:f for f in all_frames};bundles=[]
     for group in (grammar,components):
         pending=[(f,f.semantic['composition_domain']) for f in group if f.semantic.get('composition_domain')]
@@ -24,11 +31,6 @@ def merge(state,release,selector,region,tokens,cfg,grammar,components,diagnostic
             if len(found)==1:
                 owned=[f for f in group if not f.semantic.get('structural_unresolved')]
                 bundles.append((found[0],owned,'; '.join(f.anchor_span for f in owned)))
-    # Reaching a generator limit is not a negative result for that generator.
-    local=state.diagnostics[diagnostics_before:]
-    if any('SEARCH_INCOMPLETE' in d.code or d.code=='COMPONENT_PROBE_FAILED' for d in local):
-        for f in all_frames:f.semantic['structural_unresolved']=True
-        return all_frames
     if not roots(components) and not any(f.semantic.get('composition_domain') for f in components) and any(
             'UNRESOLVED' in d.code for d in local):
         for f in all_frames:f.semantic['structural_unresolved']=True
@@ -48,6 +50,10 @@ def merge(state,release,selector,region,tokens,cfg,grammar,components,diagnostic
                 'region_ref':region.region_id,'frame_refs':[f.frame_id for f in owned]})
     bundles=retained
     if not bundles:return all_frames
+    if not grammar:
+        if not any('UNRESOLVED' in d.code for d in local):
+            close_alternatives(state,region,components)
+        return components
     from .composition_equivalence import coalesce,describe
     bundles,duplicates=coalesce(state,release,region,bundles)
     all_frames=[f for f in all_frames if f.frame_id not in duplicates]
@@ -63,6 +69,11 @@ def merge(state,release,selector,region,tokens,cfg,grammar,components,diagnostic
         select_child(state,release,selector,region,all_frames,'ALL_SOURCE_PRODUCERS',
             'Which remaining interpretation fits the source? Preserve established roles, nominal functions, '
             'linked morphology and child scopes; decide only the remaining difference.')
-    # Local dead ends belong to a producer trace, not to the accepted alternative.
-    if roots(all_frames):del state.diagnostics[diagnostics_before:]
+    # Only the producer can discharge a diagnostic with an addressed proof.
+    # Root cardinality says nothing about a failed probe or unfinished source.
+    state.syntax_trace.append({'kind':'COMPOSITION_UNION_RESULT','region_ref':region.region_id,
+        'root_refs':[f.frame_id for f in roots(all_frames)],
+        'retained_diagnostics':[{'code':d.code,'detail':d.detail}
+                                for d in state.diagnostics[diagnostics_before:]],
+        'search_complete':False})
     return all_frames

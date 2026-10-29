@@ -16,7 +16,7 @@ def token_key(tokens):
 class CompositionSources:
     def __init__(self,state,release):
         from .native_frontend import _required_operators
-        self.state=state;self.release=release;self.by_tokens=defaultdict(list);self.child_domains={};self.projected=set();self.failed=set()
+        self.state=state;self.release=release;self.by_tokens=defaultdict(list);self.child_domains={};self.projected=set();self.failed={}
         self.evidence={e.token_id:e for e in state.evidence}
         self.required=_required_operators(state,release)
         required_by_token=defaultdict(set)
@@ -89,9 +89,13 @@ class CompositionSources:
         from copy import copy
         from .morphology_domain import clean
         key=digest([[t.token_id,[clean(v) for v in t.variants]] for t in tokens])
-        if key in self.failed:return False
+        if key in self.failed:
+            code,detail=self.failed[key]
+            self.state.grammar_search_incomplete=True
+            if not any(d.code==code and d.detail==detail for d in self.state.diagnostics):
+                self.state.diag(code,detail)
+            return False
         if key in self.projected:return
-        self.projected.add(key)
         from .grammar_domains import chart
         chart(self.state)
         local=copy(self.state);local.evidence=list(tokens);local.frames=[];local.clause_candidates=[]
@@ -110,7 +114,7 @@ class CompositionSources:
             hypotheses,provenance,bindings=propose_graphs(local,self.release,request)
             accepted=_frames_for_hypotheses(local,hypotheses,self.release,provenance,bindings)
         except (SearchLimit,ProtocolError) as exc:
-            self.failed.add(key)
+            self.failed[key]=('COMPONENT_SEARCH_INCOMPLETE',str(exc))
             self.state.grammar_search_incomplete=True
             self.state.diag('COMPONENT_SEARCH_INCOMPLETE',str(exc));return False
         local.frames=[f for _,frames in accepted for f in frames]
@@ -118,6 +122,7 @@ class CompositionSources:
         target=token_key(tokens)
         existing={cid for cid,_ in self.by_tokens[target]}
         self.by_tokens[target].extend((cid,frames) for cid,frames in inventory.by_tokens.get(target,()) if cid not in existing)
+        self.projected.add(key)
         self.state.syntax_trace.append({'kind':'GRAMMAR_CHILD_PROJECTED','projection_ref':key,
             'owned_token_refs':[t.token_id for t in tokens],
             'candidate_refs':[cid for cid,_ in self.by_tokens[target]]})
