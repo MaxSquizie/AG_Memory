@@ -45,7 +45,7 @@ class Dispatcher:
 
     def observe(self,kind,value,expected=True):
         if self.checking_evidence or not self.evidence_stack:return
-        if kind not in {'PROOF','INVENTORY','INVENTORY_QUERY','NOMINAL_HOST'}:raise ValueError('DISPATCH_EVIDENCE_KIND_UNKNOWN')
+        if kind not in {'PROOF','INVENTORY','INVENTORY_QUERY','NOMINAL_HOST','CONSTRAINT_SET'}:raise ValueError('DISPATCH_EVIDENCE_KIND_UNKNOWN')
         identity=digest([kind,canonical(value),expected])
         self.evidence_stack[-1][identity]={'kind':kind,'value':deepcopy(value),'expected':expected}
 
@@ -122,14 +122,19 @@ class Dispatcher:
         if any(ref==key for ref,_ in self.stack):
             self.state.diag('COMPOSITION_CYCLE',key)
             raise DispatchBlocked('COMPOSITION_CYCLE')
+        from .task_contracts import CONTRACTS,ProducerContract
+        declaration=asdict(contract or CONTRACTS.get(kind,ProducerContract(kind,'CALLER_DECLARED','CALLER_INPUT','CALLER_RESULT','caller-defined domain','explicit completion')))
+        if declaration['kind']!=kind:raise ValueError('DISPATCH_CONTRACT_KIND_MISMATCH')
         signature=digest(canonical(inputs));node=self.nodes.get(key)
         if node is None:
-            node={'kind':kind,'signature':signature,'revision':0,'reads':{},'dirty':True}
-            from .task_contracts import CONTRACTS,ProducerContract
-            node['contract']=asdict(contract or CONTRACTS.get(kind,ProducerContract(kind,'CALLER_DECLARED','CALLER_INPUT','CALLER_RESULT','caller-defined domain','explicit completion')))
+            node={'kind':kind,'signature':signature,'revision':0,'reads':{},'dirty':True,'contract':declaration}
             self.nodes[key]=node
-        elif node['signature']!=signature:
-            self.invalidate(key,'INPUT_CHANGED');node['signature']=signature
+        else:
+            if node['kind']!=kind or node['contract']!=declaration:
+                self.invalidate(key,'PRODUCER_CONTRACT_CHANGED')
+                node['kind']=kind;node['contract']=declaration
+            if node['signature']!=signature:
+                self.invalidate(key,'INPUT_CHANGED');node['signature']=signature
         if source_range is not None:node['area']={'source_range':list(source_range),'token_refs':list(token_refs)}
         if self.valid(key):
             self.trace('DISPATCH_REUSED',key,revision=node['revision'])
@@ -163,9 +168,11 @@ class Dispatcher:
                 for ref in reads:self.consumers.setdefault(ref,set()).add(key)
                 nested={id(d) for ref,n in self.nodes.items() if ref!=key for d in n.get('diagnostics',())}
                 node['diagnostics']=[d for d in self.state.diagnostics[before:] if id(d) not in nested]
-                from .task_contracts import produced
+                from .task_contracts import produced,TaskResult
+                explicit=isinstance(result,TaskResult)
                 receipt=produced(kind,result,node['diagnostics']);result=receipt.value
-                node['receipt']={'task_outcome':receipt.outcome.value,'search_complete':receipt.search_complete,
+                node['receipt']={'completion_basis':'EXPLICIT_TASK_RESULT' if explicit else 'UNDECLARED_SEARCH_COMPLETION',
+                                 'task_outcome':receipt.outcome.value,'search_complete':receipt.search_complete,
                                  'source_complete':receipt.source_complete,'alternatives':list(receipt.alternatives),
                                  'structure_complete':receipt.structure_complete,'write_eligible':receipt.write_eligible}
                 node.update(result=deepcopy(result),reads=reads,evidence_reads=evidence_reads,

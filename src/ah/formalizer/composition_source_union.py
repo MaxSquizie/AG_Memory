@@ -34,10 +34,10 @@ def merge(state,release,selector,region,tokens,cfg,grammar,components,diagnostic
         for f in all_frames:f.semantic['structural_unresolved']=True
         state.diag('COMPOSITION_PRODUCER_PENDING',region.region_id)
         return all_frames
-    from .component_constraints import compatible_bundle,preserves_nominal_functions
+    from .component_constraints import accepts_bundle
     retained=[]
     for root,owned,label in bundles:
-        if compatible_bundle(state,region,owned) and preserves_nominal_functions(state,tokens,owned):
+        if accepts_bundle(state,region,tokens,owned):
             retained.append((root,owned,label))
         else:
             for f in owned:

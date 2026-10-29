@@ -8,6 +8,9 @@ def observe(state,kind,value,expected=True):
 
 
 def valid(state,kind,value):
+    if kind=='CONSTRAINT_SET':
+        from .component_constraints import constraint_signature
+        return constraint_signature(state,value['region_ref'],value['task_scope'])==value['signature']
     if kind=='PROOF':
         from .structural_tasks import licensed
         return licensed(state,value['proof'],**value['expected_payload'])

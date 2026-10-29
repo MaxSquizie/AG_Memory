@@ -2,6 +2,7 @@
 
 
 def question(state,region):
+    observe_constraints(state,region)
     evidence={e.token_id:e for e in state.evidence};rows=[]
     from .composition_session import current
     runtime=current(state);scope=runtime.input_signature() if runtime else None
@@ -32,6 +33,7 @@ def retain_role(state,region,predicate,token,selected,reading=None):
 
 
 def compatible_bundle(state,region,bundle):
+    observe_constraints(state,region)
     from .composition_session import current
     runtime=current(state);scope=runtime.input_signature() if runtime else None
     frames={f.predicate_token_ref:f for f in bundle}
@@ -95,3 +97,40 @@ def frame_hosts_live(state,frame):
     from .relative_pronoun import binding_live
     return (binding_live(state,frame)
             and all(host_live(state,r) for r in frame.semantic.get('nominal_host_evidence',())))
+
+
+def constraint_signature(state,region_ref,scope):
+    """Membership and liveness of obligations, including the initially empty set.
+
+    The query is addressed to one area/input hypothesis. No constraint crosses
+    into an unrelated child or occurrence merely because its wording matches.
+    """
+    from .canonical_ledger import digest
+    from .composition_dispatcher import canonical
+    from .structural_tasks import licensed
+    from .partial_readings import valid_domain
+    records=[]
+    for row in state.syntax_trace:
+        kind=row.get('kind')
+        if (kind not in {'ESTABLISHED_PREDICATE_ROLE','PARTIAL_READING_DOMAIN','NOMINAL_HOST_QUESTION'}
+                or row.get('region_ref')!=region_ref or row.get('task_scope')!=scope):continue
+        if kind=='ESTABLISHED_PREDICATE_ROLE':
+            live=licensed(state,row['proof'],predicate_ref=row['predicate_ref'],token_ref=row['token_ref'])
+        elif kind=='PARTIAL_READING_DOMAIN':live=valid_domain(state,row)
+        else:live=host_live(state,row)
+        records.append([row,live])
+    return digest(canonical(records))
+
+
+def observe_constraints(state,region):
+    from .composition_session import current
+    runtime=current(state)
+    if runtime is None:return
+    scope=runtime.input_signature()
+    runtime.dispatcher.observe('CONSTRAINT_SET',{'region_ref':region.region_id,'task_scope':scope,
+        'signature':constraint_signature(state,region.region_id,scope)})
+
+
+def accepts_bundle(state,region,tokens,bundle):
+    """Common source obligations for component and grammar alternatives."""
+    return compatible_bundle(state,region,bundle) and preserves_nominal_functions(state,tokens,bundle)

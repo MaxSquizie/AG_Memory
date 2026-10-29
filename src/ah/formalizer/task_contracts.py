@@ -113,6 +113,8 @@ class TaskResult:
 
 
 def produced(kind,value,diagnostics=()):
+    # Bare return values can establish a result shape, never exhaustion of a
+    # producer domain. Only an explicit TaskResult declares search completion.
     if isinstance(value,TaskResult):return value
     codes={d.code for d in diagnostics}
     if codes & {'RESOURCE_MISSING','VALENCY_UNKNOWN','INTEGRITY_ERROR','PROVIDER_UNAVAILABLE','COMPONENT_PROBE_FAILED'}:
@@ -124,11 +126,11 @@ def produced(kind,value,diagnostics=()):
         partial=[f for f in roots(value) if f.semantic.get('partial_composition')]
         if len(partial)==1:
             record=partial[0].semantic['partial_composition']
-            return TaskResult(value,TaskOutcome.PARTIAL,True,True,tuple(record['choices']),True,False)
+            return TaskResult(value,TaskOutcome.PARTIAL,False,True,tuple(record['choices']),True,False)
         alternatives=tuple(f.frame_id for f in value if f.semantic.get('composition_domain'))
-        if alternatives:return TaskResult(value,TaskOutcome.MULTIPLE,True,True,alternatives)
+        if alternatives:return TaskResult(value,TaskOutcome.MULTIPLE,False,True,alternatives)
         from .composition_tree import roots
         if len(roots(value))!=1:return TaskResult(value,TaskOutcome.UNKNOWN,False,True)
-        return TaskResult(value,TaskOutcome.SUPPORTED,True,True,structure_complete=True)
+        return TaskResult(value,TaskOutcome.SUPPORTED,False,True,structure_complete=True)
     if value is None or value is False:return TaskResult(value,TaskOutcome.UNKNOWN,False,True)
-    return TaskResult(value,TaskOutcome.SUPPORTED,True,True)
+    return TaskResult(value,TaskOutcome.SUPPORTED,False,True)

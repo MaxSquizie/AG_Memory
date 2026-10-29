@@ -161,7 +161,7 @@ def test_nominal_producers_recheck_parent_requirements_through_common_cache(prod
                            {'role_id':'OBJECT','allowed_cases':['acc']}]
                     result=reduce(state,release,selector,region,state.evidence,predicate,predicate.variants[0],
                         roles,[state.evidence[0]],{},cfg)
-                    return tuple(r[0] for r in result['roots'].values())
+                    return tuple(tuple(r[0] for r in alternative['roots'].values()) for alternative in result)
                 return bool(project(state,release,selector,region,state.evidence,cfg)[1])
         before=run(InputSlot());assert before
         assert run(InputSlot())==before and len(selector.prompts)==1
