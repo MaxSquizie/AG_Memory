@@ -68,6 +68,11 @@ def _bind(state,release,selector,region,frames,matches,cfg,spend):
     from .probe_wording import reading as reading_text
     evidence={t.token_id:t for t in state.evidence};domains={};specs={}
     for bounds,(anchors,rule) in matches.items():
+        if rule.get('quantifier_kind_license'):
+            from .structural_tasks import licensed
+            witness=rule['quantifier_kind_license']
+            if witness.get('candidate_id')!='NONNUMERIC' or not licensed(state,witness):
+                state.diag('QUANTIFIER_KIND_UNRESOLVED',region.region_id);return None
         mid='operator-slot:'+digest([region.region_id,*bounds])
         spec=rule['restriction_pattern'];values={}
         for frame in frames:
@@ -170,6 +175,8 @@ def licensed(state,release,frame):
         from .structural_tasks import enabled,licensed as task_licensed
         if not enabled(release) or not task_licensed(state,generic,relation=rule['operator']):return False
         if not task_licensed(state,rule.get('head_license'),head_ref=tid):return False
+        kind=rule.get('quantifier_kind_license')
+        if not kind or kind.get('candidate_id')!='NONNUMERIC' or not task_licensed(state,kind):return False
         if rule['operator'] not in {'FORALL','EXISTS'} or rule.get('head_ref')!=tid:return False
         try:validate_rule(rule,{r['role_id'] for r in release.entries('RoleRegistry')})
         except (ValueError,KeyError,TypeError):return False

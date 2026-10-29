@@ -37,7 +37,8 @@ def general_boundary(state,release,selector,region,tokens,cfg):
 
 
 def agreeing(host, participle):
-    return (host.pos in {'NOUN', 'NPRO'} and bool(host.cases & participle.cases)
+    from .component_nominal_groups import compatible_cases
+    return (host.pos in {'NOUN', 'NPRO'} and compatible_cases([host, participle])
             and compatible(_features(host), _features(participle)))
 
 

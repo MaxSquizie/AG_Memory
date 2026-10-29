@@ -58,9 +58,11 @@ def attach_tree(frames,tree,region):
     return frames
 
 
-def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof,*,shared_functions=(),owner_choice=None,marker_roles=None):
+def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof,*,shared_functions=(),owner_choice=None,marker_roles=None,shared_material=None):
     refs=[t.token_id for group in groups for t in group]
-    if len(refs)!=len(set(refs)):return None
+    from .shared_proposition_material import validate as shared_valid
+    if shared_material is not None and kind not in {'OR','XOR'}:return None
+    if not shared_valid(state,groups,shared_material):return None
     used=set(refs);markers=[t for t in tokens if t.token_id not in used]
     from .structural_tasks import licensed
     owner=None
@@ -97,7 +99,7 @@ def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof
         description+='; selected content fills the slot of predicate «'+owner.span+'» @'+str(owner.start)+' in the parent'
     option={'candidate_id':'PARTITION','relation':kind,'operands':[[t.token_id for t in g] for g in groups],
         'marker_refs':[t.token_id for t in tokens if t in markers or t.token_id in shared_refs],
-        'shared_functions':list(shared_functions),'relation_proof':proof,
+        'shared_functions':list(shared_functions),'shared_material':shared_material,'relation_proof':proof,
         'label':'Proposed split — apply '+RELATIONS[kind]+' to these parts: '+description+'; outer relation occurrences: '+
         (', '.join('«'+t.span+'» @'+str(t.start) for t in links) or 'none')+'; punctuation outside parts: «'+
         ' '.join(t.span for t in punctuation)+'»'}
@@ -116,8 +118,12 @@ def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof
             'reason':'SAME_REJECTED_PARTITION_WITH_UNCHANGED_INPUT'})
         state.diag('STRUCTURAL_REVISION_NO_PROGRESS',region.region_id)
         return None
+    from .probe_prerequisites import from_proof
+    shared_requirements=() if shared_material is None else tuple(from_proof(state,p) for p in
+        [shared_material['scope_proof'],*shared_material['collection']['proofs']])
     validation_begin=len(state.syntax_trace)
     result=choose(state,release,selector,region,cfg,'structural_partition',[option],
+        ('Shared source wording deliberately appears inside each alternative; this does not assert the alternatives jointly. ' if shared_material else '')+
         'Check ONE relation application: '+RELATIONS[kind]+'. '
         'Does the original source connect the quoted content parts by this relation, in the roles shown? '
         'The selected OUTER meaning applies to the parts; its own wording is outside them. '
@@ -132,7 +138,7 @@ def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof
         'Outer relation words may be separated in the source; they are not a new sentence. '
         'Choose the proposed application if it connects the right contents. '
         'Answer 0 if the relation or the assignment of its contents is wrong, or ? if the source does not decide. '
-        'This choice does not resolve dictionary meanings or validate the internal parse of each part.',purpose=SelectionPurpose.CONFIRM)
+        'This choice does not resolve dictionary meanings or validate the internal parse of each part.',purpose=SelectionPurpose.CONFIRM,prerequisites=shared_requirements)
     if result is None:
         rejected=next((r for r in reversed(state.syntax_trace[validation_begin:])
             if r.get('kind')=='TASK_DOMAIN' and r.get('slot')=='structural_partition'

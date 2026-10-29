@@ -241,7 +241,8 @@ def test_modal_control_inside_modal(tmp_path,monkeypatch):
 def test_relative_clause_is_quantifier_restriction(tmp_path,monkeypatch):
     text='Каждый студент, который прочитал книгу, может сдать экзамен.'
     steps=relation('FORALL')+bounds('structural_quantifier','Каждый','Каждый')+[
-        ('structural_partition','PARTITION'),('structural_binder_head','Bind the nominal «студент»')]+unary('POSSIBLE','может','может')+[
+        ('structural_quantifier_kind','NONNUMERIC'),('quantifier_source_functions','SEPARATE'),
+        ('structural_partition','PARTITION'),('structural_binder_head','Bind the participant mention at «студент»')]+unary('POSSIBLE','может','может')+[
         ('structural_governor','Agreement/controller anchor «может»')]+relation('NOMINAL_DESCRIPTION')+bounds('structural_description','который','книгу')+[
         ('structural_description_binding','An explicit relative expression'),('structural_description_marker','«который»')]+relation('LEXICAL')+relation('LEXICAL')
     result,_=run(tmp_path,monkeypatch,text,steps)
@@ -275,7 +276,8 @@ def test_oov_role_is_explicitly_licensed(tmp_path,monkeypatch):
 def test_quantified_modal_has_indivisible_coordinated_body(tmp_path,monkeypatch):
     text='Каждый студент может читать книгу и спать.'
     steps=relation('FORALL')+bounds('structural_quantifier','Каждый','Каждый')+[
-        ('structural_partition','PARTITION'),('structural_binder_head','Bind the nominal «студент»')]+unary('POSSIBLE','может','может')+[
+        ('structural_quantifier_kind','NONNUMERIC'),('quantifier_source_functions','SEPARATE'),
+        ('structural_partition','PARTITION'),('structural_binder_head','Bind the participant mention at «студент»')]+unary('POSSIBLE','может','может')+[
         ('structural_governor','Agreement/controller anchor «может»')]+binary('AND',('студент','книгу'),('спать','спать'))+[
         ('implicit_argument','Same bound variable')]
     result,_=run(tmp_path,monkeypatch,text,steps)
@@ -300,7 +302,7 @@ def test_nested_modals_share_adjectival_agreement_governor(tmp_path,monkeypatch)
 
 def test_arithmetic_quantifier_remains_deferred(tmp_path,monkeypatch):
     result,_=run(tmp_path,monkeypatch,'Два студента читают книгу.',
-        relation('EXISTS')+bounds('structural_quantifier','Два','Два'))
+        relation('EXISTS')+bounds('structural_quantifier','Два','Два')+[('structural_quantifier_kind','ARITHMETIC')])
     assert result['assertions']['ah']==[]
     assert 'ARITHMETIC_QUANTIFIER_DEFERRED' in result['diagnostics']['codes']
 
@@ -386,7 +388,8 @@ def test_query_wrapper_preserves_question_scope(tmp_path,monkeypatch):
 @pytest.mark.parametrize('marker,operator',[('Каждый','FORALL'),('Любой','FORALL'),('Некоторый','EXISTS')])
 def test_nonnumeric_binders_without_keyword_admission(tmp_path,monkeypatch,marker,operator):
     steps=relation(operator)+bounds('structural_quantifier',marker,marker)+[
-        ('structural_partition','PARTITION'),('structural_binder_head','Bind the nominal «студент»')]+relation('LEXICAL')
+        ('structural_quantifier_kind','NONNUMERIC'),('quantifier_source_functions','SEPARATE'),
+        ('structural_partition','PARTITION'),('structural_binder_head','Bind the participant mention at «студент»')]+relation('LEXICAL')
     result,_=run(tmp_path,monkeypatch,marker+' студент читает книгу.',steps)
     assert result['assertions']['ah'] and result['assertions']['ah'][0]['operator']==operator
     assert result['diagnostics']['codes']==[]

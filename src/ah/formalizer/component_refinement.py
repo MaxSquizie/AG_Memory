@@ -373,7 +373,7 @@ def _compose_lexical_area(state, release, selector, region, tokens, cfg, depth=0
     group_hosts={}
     if boundary['kind']=='PARTICIPLE':
         from .refinement_group_hosts import candidates as group_candidates
-        group_hosts=group_candidates(accepted(frames),evidence,body)
+        group_hosts=group_candidates(accepted(frames),evidence,body,all_hosts=cfg.get('_literal_relation',False))
     choices=[{'candidate_id':tid,'label':'Existing nominal «'+h.span+'» at '+str([h.start,h.end])}
              for tid,(_,h,_) in hosts.items()]
     choices.extend({'candidate_id':tid,'label':'WHOLE established group «'+h.span+'»'}

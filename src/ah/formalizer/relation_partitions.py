@@ -53,6 +53,12 @@ def binary(domain):
     if groups is None:return None
     groups=function_ownership(state,release,selector,region,cfg,kind,groups)
     if groups is None:return None
+    if kind in {'OR','XOR'}:
+        from .shared_proposition_material import propose as sharing
+        shared=sharing(domain,groups)
+        if shared is None:return None
+        groups,witness=shared
+        return PartitionProposal(groups,shared_material=witness)
     return PartitionProposal(groups)
 
 

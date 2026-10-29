@@ -4,18 +4,20 @@ from .canonical_ledger import digest
 from .state import MorphVariant, TokenEvidence
 
 
-def candidates(frames, evidence, body):
+def candidates(frames, evidence, body, *, all_hosts=False):
     found={}
     for frame in frames:
         for group in frame.semantic.get('nominal_groups',()):
             members=group['member_refs']
-            if any(evidence[t].start>=body[0].start for t in members):continue
+            if not all_hosts and any(evidence[t].start>=body[0].start for t in members):continue
             bindings=frame.semantic.get('morph_bindings',{})
             if any(t not in bindings for t in members):continue
-            cases=set.intersection(*(set(bindings[t]['cases']) for t in members))
-            if not cases:continue
-            reading=MorphVariant(None,'NOUN',frozenset(cases),number='plur',
-                origin='DECLARED',evidence_refs=tuple(members))
+            from .component_nominal_groups import compatible_cases,intersect_cases
+            readings=[bindings[t] for t in members]
+            if not compatible_cases(readings):continue
+            cases=intersect_cases([set(r['cases']) if r['cases'] else None for r in readings])
+            reading=MorphVariant(None,'NOUN',frozenset(cases or ()),number='plur',
+                origin='CONTEXTUAL' if cases is None else 'DECLARED',evidence_refs=tuple(members))
             from .refinement_boundaries import agreeing
             if not any(agreeing(reading,v) for v in body[0].variants if v.pos=='PRTF'):continue
             key='nominal-group:'+digest(members)

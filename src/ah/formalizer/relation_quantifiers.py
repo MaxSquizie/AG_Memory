@@ -19,27 +19,42 @@ def binder_candidates(tokens):
                'label':'Bind the participant mention at «'+token.span+'» @'+str(token.start)}
 
 
+def quantifier_kind(state,release,selector,region,tokens,cfg,proofs=()):
+    from .probe_prerequisites import from_proof
+    return choose(state,release,selector,region,cfg,'structural_quantifier_kind',[
+        {'candidate_id':'NONNUMERIC','label':'The expression quantifies universally or existentially without a numerical count, threshold, proportion or arithmetic condition'},
+        {'candidate_id':'ARITHMETIC','label':'The expression imposes a numerical count, threshold, proportion or arithmetic condition, whether written in digits or words'}],
+        'Classify the meaning of the selected quantifier expression «'+' '.join(t.span for t in tokens)+'». '
+        'A possible numeral reading of one word is not evidence that this use is numerical. '
+        'Do not reselect its source boundaries or classify numbers elsewhere in the sentence.',
+        prerequisites=tuple(from_proof(state,p) for p in proofs))
+
+
 def compose(state,release,selector,region,tokens,cfg,request,compose_child,operator,proof):
     def propose(domain):
         marker=domain.span(tokens,'structural_quantifier',
-            operator+': select the nonnumeric quantifier expression only, excluding its nominal restriction.',marker=True)
+            operator+': select the quantifier expression only, excluding its nominal restriction.',marker=True)
         if not marker:return None
         anchors=marker[0];ids={t.token_id for t in anchors};owned=[t for t in tokens if t.token_id not in ids]
-        if any(v.pos=='NUMR' or 'Anum' in v.features for t in anchors for v in t.variants):
+        kind=quantifier_kind(state,release,selector,region,anchors,cfg,marker[1])
+        if not kind:return None
+        if kind[0]['candidate_id']=='ARITHMETIC':
             state.diag('ARITHMETIC_QUANTIFIER_DEFERRED',region.region_id)
             return None
+        from .probe_prerequisites import accepted
         binding=choose(state,release,selector,region,cfg,'quantifier_source_functions',[
             {'candidate_id':'SEPARATE','shared':False,'label':'The quantified mention is separate from these quantifier words'},
             *[{'candidate_id':t.token_id,'head_ref':t.token_id,'shared':True,
                'label':'«'+t.span+'» simultaneously expresses quantification and the bound participant'} for t in anchors]],
-            'Does this quantifier contain its own participant mention? The same occurrence can have both functions.')
+            'Does this quantifier contain its own participant mention? The same occurrence can have both functions.',
+            prerequisites=(accepted('structural_quantifier_kind',kind),))
         if not binding:return None
         shared=()
         if binding[0]['shared']:
             head=next(t for t in anchors if t.token_id==binding[0]['head_ref'])
             owned=sorted([*owned,head],key=lambda t:t.start)
             shared=({'token_ref':head.token_id,'functions':['QUANTIFIER','BOUND_MENTION'],'proof':binding[1]},)
-        return PartitionProposal([owned],{'anchors':anchors,'binding':binding},shared)
+        return PartitionProposal([owned],{'anchors':anchors,'binding':binding,'quantifier_kind':kind},shared)
     selected=PartitionDomain(state,release,selector,region,tokens,cfg,operator,proof).resolve(propose)
     if not selected:return block(state,region)
     proposal,partition=selected;owned=proposal.groups[0];anchors=proposal.data['anchors']
@@ -55,6 +70,7 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child,opera
     rule={'operator':operator,'attachment_kinds':['QUANTIFIED_NOMINAL'],'variable_sort':'ENTITY',
         'restriction_pattern':{'head_pos':['NOUN','NPRO'],'agreement':['cases','number','gender'],
             'role':cfg['subject_role'],'body_operator':'IMPLIES' if operator=='FORALL' else 'AND'},
+        'quantifier_kind_license':proposal.data['quantifier_kind'][1],
         'structural_license':proof,'head_license':selected[1],'head_ref':selected[0]['head_ref'],
         'partition_license':partition[1]}
     from .quantifier_composition import bind
