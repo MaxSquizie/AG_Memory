@@ -435,7 +435,7 @@ def content(state,release,selector,region,tokens,cfg,request,compose_child,proof
     return frames
 
 
-def content_role(state,release,selector,region,cfg,owner,parent,body_text,source_parts,*,reserved_roles=()):
+def content_role(state,release,selector,region,cfg,owner,parent,body_text,source_parts,*,reserved_roles=(),prerequisites=()):
     role_registry={r['role_id'] for r in release.entries('RoleRegistry') if not r.get('allowed_argument_kinds') or set(r['allowed_argument_kinds']) & {'PROPOSITION','EVENT'}}
     senses={s['sense_id'] for s in release.entries('R-S') if any(s['lemma']==v.lemma and s['POS']==v.pos for v in owner.variants)}
     if senses:
@@ -460,4 +460,4 @@ def content_role(state,release,selector,region,cfg,owner,parent,body_text,source
         +('Already assigned slots of THIS owner: '+', '.join(reserved)+'. Select a different slot; the assigned content is not being reconsidered. ' if reserved else '')+
         'Choose the role and status of THIS content for THIS predicate. '
         'QUOTED=reported; EMBEDDED=mental content; HYPOTHETICAL=intended/possible; UNKNOWN=unspecified. '
-        'None asserts the child. No canonical lexical identity is inferred.')
+        'None asserts the child. No canonical lexical identity is inferred.',prerequisites=prerequisites)

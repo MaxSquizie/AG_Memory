@@ -33,6 +33,8 @@ def valid_domain(state,record):
     if set(decision.selected)!=ids:return False
     for row in reversed(state.syntax_trace):
         if row.get('kind')=='TASK_DOMAIN' and row.get('task_ref')==record.get('domain_ref'):
+            from .probe_prerequisites import errors,restored
+            if errors(state,restored(row.get('prerequisites',()))):return False
             return (row.get('search_complete') is True and row.get('source_complete') is True
                 and not retired.intersection(row.get('page_refs',()))
                 and ids<=set(row['supported_ids'])

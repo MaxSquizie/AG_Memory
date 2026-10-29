@@ -139,6 +139,12 @@ def _probe(state, selector, release, key, slot, options, context, source_range, 
     if inputs is not None:
         context=inputs.source_text
         question=(question or '')+'\n'+inputs.wording()
+    # Direct producers as well as paged tasks must not lose later/earlier
+    # evidence merely because their selection target is a smaller region.
+    # This grants no ownership outside the declared target or candidate list.
+    if state.text not in context:
+        context+='\nFULL SOURCE (evidence only): '+state.text
+        question+='\nThe target occupies characters '+str(source_range[0])+':'+str(source_range[1])+'. Broader source is readable evidence, not additional selectable material.'
     dependency_signature=digest([release.sha256,slot,options,context,source_range,equivalent_targets,question])
     if input_record is not None:dependency_signature=digest([dependency_signature,input_record])
     from .composition_session import current

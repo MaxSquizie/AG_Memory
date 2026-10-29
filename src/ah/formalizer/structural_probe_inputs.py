@@ -37,11 +37,14 @@ class StructuralProbeInputs:
     negative_scope: str = 'DISPLAYED_PAGE'
     enumeration_scope: str = 'CALLER_GENERATOR'
     declaration_status: str = 'PAGE_DECLARED'
+    prerequisites: tuple = ()
 
     def record(self):return asdict(self)
 
     def errors(self,state,slot,options,target_range):
         errors=[]
+        from .probe_prerequisites import errors as premise_errors
+        errors.extend(premise_errors(state,self.prerequisites))
         if self.family!='STRUCTURAL_PAGE':errors.append('TASK_FAMILY_MISMATCH')
         if not self.source_text.strip():errors.append('SOURCE_MISSING')
         if slot!=self.slot:errors.append('TASK_SLOT_MISMATCH')
@@ -67,12 +70,13 @@ class StructuralProbeInputs:
         text=('This is one page of the stated choice. Several numbers express alternative readings '
                 'of that same choice, never a jointly selected set. 0 rejects only the displayed page; '
                 '? means the evidence is insufficient to decide among these options.')
-        return text+(self.source_selection.wording() if self.source_selection is not None else '')
+        return text+''.join(r.wording() for r in self.prerequisites)+(self.source_selection.wording() if self.source_selection is not None else '')
 
 
-def inputs(state,region,slot,values,question,context,page,source_selection=None):
+def inputs(state,region,slot,values,question,context,page,source_selection=None,prerequisites=()):
     return StructuralProbeInputs(slot,tuple(region.source_range),tuple(region.token_refs),context,
-        source_signature(state),parent_signature(state),tuple(deepcopy(values)),question,page,source_selection)
+        source_signature(state),parent_signature(state),tuple(deepcopy(values)),question,page,source_selection,
+        prerequisites=tuple(deepcopy(prerequisites)))
 
 
 @dataclass(frozen=True)

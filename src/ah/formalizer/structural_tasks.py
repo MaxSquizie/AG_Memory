@@ -14,25 +14,36 @@ def enabled(release):
     return release.entries('ProposalPolicy')[0].get('composition',{}).get('structural_tasks')=='CLOSED_RELATIONS_V1'
 
 
-def choose(state,release,selector,region,cfg,slot,options,question,*,empty=None,source_selection=None):
-    return _choose(state,release,selector,region,cfg,slot,options,question,empty=empty,source_selection=source_selection)
+def choose(state,release,selector,region,cfg,slot,options,question,*,empty=None,source_selection=None,prerequisites=()):
+    return _choose(state,release,selector,region,cfg,slot,options,question,empty=empty,source_selection=source_selection,prerequisites=prerequisites)
 
 
-def choose_domain(state,release,selector,region,cfg,slot,options,question):
+def choose_domain(state,release,selector,region,cfg,slot,options,question,*,prerequisites=()):
     """Return all supported alternatives only after the entire domain closes."""
     from .partial_readings import SupportedDomain
-    result=_choose(state,release,selector,region,cfg,slot,options,question,retain_domain=True)
+    result=_choose(state,release,selector,region,cfg,slot,options,question,retain_domain=True,prerequisites=prerequisites)
     if result is None or isinstance(result,SupportedDomain):return result
     value,proof=result
     return SupportedDomain((value,),proof['decision_ref'],proof['domain_ref'])
 
 
-def _choose(state,release,selector,region,cfg,slot,options,question,*,empty=None,retain_domain=False,source_selection=None):
+def _choose(state,release,selector,region,cfg,slot,options,question,*,empty=None,retain_domain=False,source_selection=None,prerequisites=()):
     """Optional searches declare a typed completion outside the model domain.
 
     NONE_FIT closes only one page. EMPTY is licensed only after every page was
     examined and rejected; unknown, ambiguity and budget stops never close it.
     """
+    from .probe_prerequisites import errors as premise_errors
+    prerequisites=tuple(prerequisites)
+    prerequisite_records=[r.record() for r in prerequisites]
+    def premises_live():
+        errors=premise_errors(state,prerequisites)
+        if errors:
+            state.diag('PROBE_INPUT_INCOMPLETE',region.region_id+': '+', '.join(errors))
+            state.syntax_trace.append({'kind':'STRUCTURAL_TASK','region_ref':region.region_id,
+                'slot':slot,'status':'BLOCKED','reason':'PREMISE_CONTRACT_INVALID','errors':errors})
+        return not errors
+    if not premises_live():return None
     if source_selection is not None:
         errors=source_selection.errors(state,(),region.token_refs)
         if errors:
@@ -45,7 +56,7 @@ def _choose(state,release,selector,region,cfg,slot,options,question,*,empty=None
     # into unrelated ownership, morphology and participant questions.
     from dataclasses import asdict
     revision_scope=digest([cfg.get('_task_constraints'),cfg.get('_ownership_feedback'),
-                          asdict(source_selection) if source_selection is not None else None])
+                          asdict(source_selection) if source_selection is not None else None,prerequisite_records])
     if cfg.get('_task_constraints') and slot in {'structural_relation','structural_revision'}:
         question+='\nEarlier attempt: '+cfg.get('_task_constraints_text',cfg['_task_constraints'])
     if cfg.get('_ownership_feedback'):
@@ -65,6 +76,7 @@ def _choose(state,release,selector,region,cfg,slot,options,question,*,empty=None
     if empty is not None:
         question+=' Optional search: examine the listed candidates; 0 means none of THESE fits, not missing context.'
     def complete_empty():
+        if not premises_live():return None
         from .state import Decision,Ground
         key='task-empty:'+digest([region.region_id,task_scope,revision_scope,slot,question,sorted(seen),previous,empty])
         cid=empty['candidate_id']
@@ -76,7 +88,7 @@ def _choose(state,release,selector,region,cfg,slot,options,question,*,empty=None
             'positive_candidates':sorted(seen),'completion':empty})
         state.syntax_trace.append({'kind':'STRUCTURAL_TASK','region_ref':region.region_id,'slot':slot,
             'status':'SELECTED','decision_ref':key,'enumeration_complete':True,
-            'payload_hash':digest(empty),'alternatives':[empty],'selected':cid,'task_outcome':'EMPTY','page_refs':list(previous)})
+            'payload_hash':digest(empty),'alternatives':[empty],'selected':cid,'task_outcome':'EMPTY','page_refs':list(previous),'prerequisites':prerequisite_records})
         return empty,{'decision_ref':key,'candidate_id':cid,'domain_ref':key,'payload_hash':digest(empty)}
     if len(context)>cfg['context_chars']:
         state.diag('STRUCTURAL_TASK_SEARCH_INCOMPLETE',region.region_id)
@@ -110,11 +122,12 @@ def _choose(state,release,selector,region,cfg,slot,options,question,*,empty=None
         state.budget.task_candidate_pages[key]=len(values)
         state.budget.task_candidates_examined+=fresh
         from .structural_probe_inputs import inputs
-        page_inputs=inputs(state,region,slot,values,question,context,page,source_selection)
+        page_inputs=inputs(state,region,slot,values,question,context,page,source_selection,prerequisites)
         selected=_probe(state,selector,release,key,slot,choices,context,region.source_range,
             inputs=page_inputs,
             offer_clarification=False,
             question=question)
+        if not premises_live():return None
         decision=state.decisions.get(key)
         outcome=('ONE_SELECTED' if selected is not None and selected_candidate(decision)==selected
                  else decision.selector_outcome if decision else None)
@@ -123,7 +136,7 @@ def _choose(state,release,selector,region,cfg,slot,options,question,*,empty=None
              'slot':slot,'decision_ref':key,'page':page,'examined':examined,
              'alternatives':values,'selected':selected,'status':'SELECTED' if selected else 'PENDING',
              'reason':outcome or 'PROBE_BLOCKED','enumeration_complete':False,
-             'selection_provisional':True,'question':question}
+             'selection_provisional':True,'question':question,'prerequisites':prerequisite_records}
         state.syntax_trace.append(row)
         pages.append(row)
         if decision is not None:decision.search_complete=False
@@ -140,7 +153,7 @@ def _choose(state,release,selector,region,cfg,slot,options,question,*,empty=None
         domain_ref='task-domain:'+digest([region.region_id,task_scope,slot,question,receipt.candidates,[(p['decision_ref'],p['alternatives']) for p in pages]])
         state.syntax_trace.append({'kind':'TASK_DOMAIN','task_ref':domain_ref,'level':'T2_TP',
             'slot':slot,'source_range':list(region.source_range),'token_refs':list(region.token_refs),
-            'page_refs':[p['decision_ref'] for p in pages],
+            'page_refs':[p['decision_ref'] for p in pages],'prerequisites':prerequisite_records,
             'supported_payloads':{v['candidate_id']:digest(v) for v,_ in supported},**receipt.record()})
         from .clarifications import choice
         explicit=choice(state,domain_ref,receipt.supported) if supported else None
@@ -151,7 +164,7 @@ def _choose(state,release,selector,region,cfg,slot,options,question,*,empty=None
                 lifecycle='PROVISIONAL',search_complete=True,grounds=[Ground('C','explicit clarification of the complete domain',explicit)])
             state.syntax_trace.append({'kind':'STRUCTURAL_TASK','region_ref':region.region_id,'slot':slot,
                 'status':'SELECTED','decision_ref':domain_ref,'enumeration_complete':True,
-                'alternatives':[v for v,_ in supported],'selected':explicit,'domain_ref':domain_ref,'payload_hash':digest(value)})
+                'prerequisites':prerequisite_records,'alternatives':[v for v,_ in supported],'selected':explicit,'domain_ref':domain_ref,'payload_hash':digest(value)})
             return value,{'decision_ref':domain_ref,'candidate_id':explicit,'domain_ref':domain_ref,'payload_hash':digest(value)}
         if len(supported)==1:
             value,winner=supported[0]
@@ -162,7 +175,7 @@ def _choose(state,release,selector,region,cfg,slot,options,question,*,empty=None
             state.decisions[domain_ref]=decision
             state.syntax_trace.append({'kind':'STRUCTURAL_TASK','region_ref':region.region_id,'slot':slot,
                 'status':'SELECTED','decision_ref':domain_ref,'enumeration_complete':True,
-                'alternatives':[value],'selected':value['candidate_id'],'domain_ref':domain_ref,
+                'prerequisites':prerequisite_records,'alternatives':[value],'selected':value['candidate_id'],'domain_ref':domain_ref,
                 'payload_hash':digest(value),'task_outcome':'SUPPORTED'})
             return value,{'decision_ref':domain_ref,'candidate_id':value['candidate_id'],
                           'domain_ref':domain_ref,'payload_hash':digest(value)}
@@ -189,27 +202,48 @@ def _choose(state,release,selector,region,cfg,slot,options,question,*,empty=None
         return None
 
 
-def licensed(state,proof,**expected):
+def licensed(state,proof,*,_visiting=None,**expected):
+    """Validate the finite dependency graph without recursive Python calls."""
     if not isinstance(proof,dict):return False
-    key,cid=proof.get('decision_ref'),proof.get('candidate_id')
     from .partial_readings import retired_refs
     retired=retired_refs(state.syntax_trace)
-    if key in retired or proof.get('domain_ref') in retired:return False
-    if any(row.get('kind')=='TASK_DOMAIN' and row.get('task_ref')==proof.get('domain_ref')
-           and retired.intersection(row.get('page_refs',())) for row in state.syntax_trace):return False
-    decision=state.decisions.get(key)
-    if selected_candidate(decision)!=cid or decision.search_complete is not True:return False
-    for row in reversed(state.syntax_trace):
-        if row.get('kind')!='STRUCTURAL_TASK' or row.get('decision_ref')!=key or row.get('selected')!=cid:continue
-        if not row.get('enumeration_complete'):return False
-        return any(v.get('candidate_id')==cid and digest(v)==proof.get('payload_hash')==row.get('payload_hash') and all(v.get(k)==value for k,value in expected.items())
-                   for v in row.get('alternatives',()))
-    return False
+    rows={};domains={}
+    for row in state.syntax_trace:
+        if row.get('kind')=='STRUCTURAL_TASK':
+            rows[(row.get('decision_ref'),row.get('selected'))]=row
+        elif row.get('kind')=='TASK_DOMAIN':domains[row.get('task_ref')]=row
+    active=set(_visiting or ());done=set();stack=[(proof,False,expected)]
+    while stack:
+        current,leaving,required=stack.pop()
+        if not isinstance(current,dict):return False
+        key,cid=current.get('decision_ref'),current.get('candidate_id')
+        identity=digest(current)
+        if leaving:
+            active.remove(key);done.add(identity);continue
+        if key in active:return False
+        if identity in done and not required:continue
+        domain=current.get('domain_ref')
+        if key in retired or domain in retired:return False
+        if retired.intersection(domains.get(domain,{}).get('page_refs',())):return False
+        decision=state.decisions.get(key)
+        if selected_candidate(decision)!=cid or decision.search_complete is not True:return False
+        row=rows.get((key,cid))
+        if row is None or not row.get('enumeration_complete'):return False
+        if not any(v.get('candidate_id')==cid and digest(v)==current.get('payload_hash')==row.get('payload_hash')
+                   and all(v.get(k)==value for k,value in required.items()) for v in row.get('alternatives',())):return False
+        active.add(key);stack.append((current,True,{}))
+        for premise in row.get('prerequisites',()):
+            prior=state.decisions.get(premise['proof'].get('decision_ref'))
+            if prior is None or prior.slot_id!=premise['slot']:return False
+            if digest(premise['value'])!=premise['proof'].get('payload_hash'):return False
+            stack.append((premise['proof'],False,{}))
+    return True
 
 
 def span(state,release,selector,region,tokens,cfg,slot,question,*,exclude=(),record_remainder=False,admissible=None,initial=None):
     """Every source token boundary is reachable; no punctuation whitelist."""
     from .structural_probe_inputs import collection
+    from .probe_prerequisites import from_proof
     forbidden=set(exclude)
     begin=len(state.syntax_trace)
     def exhausted():
@@ -256,7 +290,8 @@ def span(state,release,selector,region,tokens,cfg,slot,question,*,exclude=(),rec
                             '; selected words «'+' '.join(t.span for t in tokens[a:b+1])+'»'}
         end=choose(state,release,selector,region,cfg,slot+'_end',ends(),
             question+' The start is «'+tokens[a].span+'» @'+str(tokens[a].start)+'. Select the LAST token.',
-            source_selection=collection('END',tokens,exclude=forbidden,start=tokens[a].token_id))
+            source_selection=collection('END',tokens,exclude=forbidden,start=tokens[a].token_id),
+            prerequisites=(from_proof(state,start[1]),))
         if end:return tokens[a:end[0]['index']],(start[1],end[1])
         if state.syntax_trace[-1].get('status')!='EXHAUSTED':return None
         rejected.add(a)
@@ -282,6 +317,7 @@ def source_set(state,release,selector,region,tokens,cfg,slot,question,*,exclude=
 
 def extend_source_set(state,release,selector,region,tokens,cfg,slot,question,selected,proofs,*,exclude=(),admissible=None,partial_admissible=None):
     from .structural_probe_inputs import collection
+    from .probe_prerequisites import from_proof
     selected,proofs=list(selected),list(proofs);forbidden=set(exclude)
     while True:
         # The peer sees source order, not the order in which pieces happened
@@ -304,7 +340,8 @@ def extend_source_set(state,release,selector,region,tokens,cfg,slot,question,sel
             'Otherwise select where its FIRST missing piece begins. Words of another part are not a continuation of this part. '
             'Do not select the next clause just because it comes next, or select already included words again.',
             empty={'candidate_id':'DONE','label':'no further source words belong to this part'} if can_finish else None,
-            source_selection=collection('CONTINUE',tokens,selected,forbidden))
+            source_selection=collection('CONTINUE',tokens,selected,forbidden),
+            prerequisites=tuple(from_proof(state,p) for p in proofs))
         if not more:return None
         proofs.append(more[1])
         if more[0]['candidate_id']=='DONE':break
@@ -315,9 +352,12 @@ def extend_source_set(state,release,selector,region,tokens,cfg,slot,question,sel
                 'label':'End after «'+tokens[b].span+'» @'+str(tokens[b].end)})
         end=choose(state,release,selector,region,cfg,slot+'_piece_end',choices,
             'Expression being collected: '+question+' Already included: «'+' '.join(t.span for t in selected)+'». Next piece starts at «'+tokens[a].span+'». Select ONLY its last word.',
-            source_selection=collection('PIECE_END',tokens,selected,forbidden,start=tokens[a].token_id))
+            source_selection=collection('PIECE_END',tokens,selected,forbidden,start=tokens[a].token_id),
+            prerequisites=(from_proof(state,more[1]),))
         if not end:return None
         selected.extend(tokens[a:end[0]['end']]);proofs.append(end[1])
+    if not all(licensed(state,p) for p in proofs):
+        state.diag('SOURCE_SELECTION_PREMISE_RETIRED',region.region_id);return None
     selected.sort(key=lambda t:t.start)
     if admissible is not None and not admissible(selected):
         state.diag('STRUCTURAL_CONTENT_UNCOVERED',region.region_id);return None

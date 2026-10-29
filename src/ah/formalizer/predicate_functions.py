@@ -6,6 +6,7 @@ Whole readings remain linked and every semantic role requires source evidence.
 from .canonical_ledger import digest
 from .component_policy import _morph
 from .structural_tasks import choose
+from .probe_prerequisites import accepted
 
 
 def subject_presence(state,release,selector,region,predicate,variant,nominals,binding,cfg):
@@ -123,7 +124,8 @@ def binding(state,release,selector,region,tokens,predicate,nominals,groups,cfg,p
             reading=choose_domain(state,release,selector,region,cfg,'predicate_argument_reading',[
                 {'candidate_id':cid,'reading':clean(v),'token_ref':token.token_id,'predicate_ref':predicate.token_id,
                  'role':role,'label':reading_text(_morph(v))} for cid,v in unique.items()],
-                'Predicate «'+predicate.span+'»: which whole reading of «'+token.span+'» fits its selected role '+role_text(role)+'? Preserve unknown features.')
+                'Predicate «'+predicate.span+'» @'+str(predicate.start)+': which whole reading of «'+token.span+'» @'+str(token.start)+' fits its selected role '+role_text(role)+'? Preserve unknown features.',
+                prerequisites=(accepted('predicate_argument_role',selected),))
             if not reading:return None
             variants=[unique[v['candidate_id']] for v in reading.values]
             if len(variants)>1:reading_domains.append(retain(state,region,predicate,token,role,reading))

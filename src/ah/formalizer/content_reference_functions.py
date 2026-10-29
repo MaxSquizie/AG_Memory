@@ -8,6 +8,7 @@ from dataclasses import replace
 from .canonical_ledger import digest
 from .composition_tree import InputSlot,expression,internalize
 from .structural_tasks import choose,source_set,licensed
+from .probe_prerequisites import accepted
 
 
 def compose(state,release,selector,region,tokens,cfg,request,compose_child,relation_proof,omission=None,parents=None):
@@ -33,6 +34,8 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child,relat
     owner_choice=omission or content_owner(state,release,selector,region,cfg,parent,pointer)
     if not owner_choice:return block(state,region)
     owner=next(t for t in parent if t.token_id==owner_choice[0]['owner_ref'])
+    premises=(accepted('omitted_content_presence' if omission else 'content_reference_presence',presence),
+              accepted('omitted_content_presence' if omission else 'structural_owner',owner_choice))
     from .content_sources import available,read,copy_use
     sources=available(runtime,region)
     source=choose(state,release,selector,region,cfg,'content_reference_source',[
@@ -42,7 +45,8 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child,relat
         'Which content fills the referred/omitted slot of THIS owner? Select that content itself, not an earlier statement ABOUT requesting, reporting or considering it. '
         'The source subject is shown to identify the source; the subject of its current use is determined separately. '
         'The inventory is limited to completed structures in this run. It does not prove absence elsewhere. '
-        'Select the other-source option when a different source is required; use ? when the text does not identify the source.')
+        'Select the other-source option when a different source is required; use ? when the text does not identify the source.',
+        prerequisites=premises)
     if not source or source[0]['candidate_id']=='OTHER_SOURCE':
         return block(state,region,reason='CONTENT_SOURCE_UNAVAILABLE')
     option,source_proof=source
@@ -56,7 +60,7 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child,relat
             reserved.update(frame.semantic.get('proposition_args',{}))
             reserved.update(frame.semantic.get('proposed_roles',{}).values())
     link=content_role(state,release,selector,region,cfg,owner,parent,option['label'],source_parts,
-        reserved_roles=reserved)
+        reserved_roles=reserved,prerequisites=(*premises,accepted('content_reference_source',source)))
     if not link:return block(state,region)
     relation,role_proof=link
     if not licensed(state,role_proof,**source_parts,owner_ref=owner.token_id,role=relation['role'],attitude=relation['attitude']):
@@ -79,7 +83,8 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child,relat
          'label':'The current construction requires the action subject to be one of its own participants. Bind that participant to the action; preserve its other roles and scope, without equating events'}],
         'Source: '+option['label']+'. Current owner: «'+' '.join(t.span for t in parent)+'». '
         'Does the current construction CONTROL the subject of the referenced action, or merely refer to independent content? '
-        'For other required substitutions answer 0; they must not be silently reduced to a subject change.')
+        'For other required substitutions answer 0; they must not be silently reduced to a subject change.',
+        prerequisites=(accepted('content_reference_source',source),accepted('structural_content_role',link)))
     if not kind:return block(state,region,parents)
     controller=None;control_proof=None
     if kind[0]['mode']=='CONTROLLED_ACTION':
@@ -90,9 +95,14 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child,relat
             'Referenced action: «'+option['source_words']+'». Current owner: «'+' '.join(t.span for t in parent)+'». '
             'Who is understood to carry out/be the subject of THAT ACTION in this use? '
             'Choose the action subject, not automatically the subject of the owning predicate. '
-            'A request can ask its recipient to act; a report can describe another person acting. Resolve THIS construction from the context.')
+            'A request can ask its recipient to act; a report can describe another person acting. Resolve THIS construction from the context.',
+            prerequisites=(accepted('content_reference_kind',kind),))
         if not control:return block(state,region,parents)
         controller=control[0]['controller'];control_proof=control[1]
+    required=[relation_proof,presence[1],owner_choice[1],source_proof,role_proof,kind[1],*pointer_proofs]
+    if control_proof is not None:required.append(control_proof)
+    if not all(licensed(state,p) for p in required):
+        return block(state,region,parents,'CONTENT_REFERENCE_UNGROUNDED')
     try:
         children,root=copy_use(source_root,source_frames,target,region,source_proof,controller,cfg['subject_role'],state.evidence)
     except ValueError as exc:return block(state,region,parents,str(exc))

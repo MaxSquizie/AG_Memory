@@ -16,7 +16,8 @@ def compose(state,release,selector,region,body,owner,host,reading,rule,cfg,depth
             options[digest([marker.token_id,morph,role])]={'marker':marker,'marker_reading':mv,
                 'host':host,'reading':reading,'host_role':role,'kind':'RELATIVE_PRONOUN'}
     if rule.get('general'):
-        from .structural_tasks import choose
+        from .structural_tasks import choose,licensed
+        from .probe_prerequisites import accepted as prerequisite
         from .probe_wording import reading as describe,role as role_text
         role=choose(state,release,selector,region,cfg,'relative_argument_role',[
             {'candidate_id':r['role_id'],'label':r['role_id']+': '+role_text(r['role_id'])} for r in release.entries('RoleRegistry')],
@@ -29,7 +30,8 @@ def compose(state,release,selector,region,body,owner,host,reading,rule,cfg,depth
             'Which whole reading of «'+marker.span+'» at '+str(marker.start)+' fits this use? '
             'Established antecedent: «'+host.span+'» at '+str(host.start)+'. '
             'Established role inside the description: '+role_text(role[0]['candidate_id'])+'. '
-            'Preserve this role; do not select another role or copy the antecedent case.')
+            'Preserve this role; do not select another role or copy the antecedent case.',
+            prerequisites=(prerequisite('relative_argument_role',role),))
         if not selected:return [],None
         mv=variants[selected[0]['candidate_id']]
         options={'general:'+digest([marker.token_id,role[0],selected[0]]):{'marker':marker,'marker_reading':mv,
@@ -51,6 +53,10 @@ def compose(state,release,selector,region,body,owner,host,reading,rule,cfg,depth
     if not child_tokens:return [],None
     cr=region_for(state,region,child_tokens,'RELATIVE_PRONOUN')
     frames=compose_area(state,release,selector,cr,child_tokens,cfg,depth+1,attachment=options[chosen])
+    if rule.get('general') and not all(licensed(state,p) for p in options[chosen]['function_proofs']):
+        state.diag('RELATIVE_PRONOUN_PREMISE_RETIRED',marker.token_id)
+        for frame in frames:frame.semantic['structural_unresolved']=True
+        return frames,None
     content=root(frames)
     hosts=[f for f in accepted(frames) if f.semantic.get('refinement_binding',{}).get('marker_ref')==marker.token_id]
     if content is None or len(hosts)!=1:return frames,None

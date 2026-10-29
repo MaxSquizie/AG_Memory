@@ -40,7 +40,7 @@ assert 'STRUCTURAL_IMPLEMENTATION_GAP' not in result['diagnostics']['codes']
 state = t0('сказал содержание')
 owner, body = state.evidence
 region = SimpleNamespace(region_id='addressed-role', source_range=(0, len(state.text)),
-    token_refs=tuple(t.token_id for t in state.evidence), grounds=())
+    token_refs=tuple(t.token_id for t in state.evidence), grounds=(), parent_ref=None)
 entries = {'RoleRegistry': [{'role_id': r, 'allowed_argument_kinds': ['PROPOSITION']}
                            for r in ('OBJECT', 'TOPIC')], 'R-S': [], 'AttitudeMap': [], 'ProposalPolicy': [{}]}
 release = SimpleNamespace(sha256='addressed-contract', entries=lambda kind: entries[kind])
@@ -75,7 +75,7 @@ from ah.formalizer.predicate_functions import head
 state = t0('он сказал')
 subject, owner = state.evidence
 region = SimpleNamespace(region_id='owner-head', source_range=(0, len(state.text)),
-    token_refs=tuple(t.token_id for t in state.evidence), grounds=())
+    token_refs=tuple(t.token_id for t in state.evidence), grounds=(), parent_ref=None)
 seen = []
 selector.select = lambda prompt: seen.append(str(prompt)) or '1'
 value, proof = choose(state, release, selector, region, cfg, 'structural_relation', [{

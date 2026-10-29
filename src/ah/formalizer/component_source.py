@@ -21,21 +21,11 @@ def probe_context(state, region, cfg, local, *, include_surrounding=True):
     """Reading context may cross the area; token ownership never does."""
     if not include_surrounding:
         return 'TARGET: '+local.strip(), ''
-    # Context belongs to the source ancestry, not to the algorithm which
-    # created this child. Coordination and other recursive areas need the
-    # same evidence as morphological refinements; ownership stays in TARGET.
-    if not region.parent_ref:
-        return 'TARGET: '+local.strip(), ''
-    regions={r.region_id:r for r in state.region_forest.regions}
-    current=region; seen=set()
-    while current.parent_ref in regions and current.region_id not in seen:
-        seen.add(current.region_id)
-        parent=regions[current.parent_ref]
-        if parent.source_range[1]-parent.source_range[0]>cfg['context_chars']:
-            break
-        current=parent
-        if current.kind=='SENTENCE': break
-    surrounding=state.text[slice(*current.source_range)]
+    # A region boundary proves ownership, not independence of interpretation
+    # from the rest of this observation. No relevance proof licenses dropping
+    # sibling sentences or a long ancestor. The caller's budget must report
+    # incompleteness rather than silently making that semantic assumption.
+    surrounding=state.text
     if surrounding.strip()==local.strip():
         return 'TARGET: '+local.strip(), ''
     return 'TARGET: '+local.strip()+'\nCONTEXT (evidence only): '+surrounding, (

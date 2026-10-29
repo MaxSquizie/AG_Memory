@@ -35,6 +35,8 @@ def compatible_bundle(state,region,bundle):
     for row in state.syntax_trace:
         if (row.get('kind')!='ESTABLISHED_PREDICATE_ROLE' or row['region_ref']!=region.region_id
                 or row['task_scope']!=scope):continue
+        from .structural_tasks import licensed
+        if not licensed(state,row['proof'],predicate_ref=row['predicate_ref'],token_ref=row['token_ref']):return False
         f=frames.get(row['predicate_ref'])
         if f is None:return False
         chosen=f.semantic.get('proposed_roles',{}).get(row['token_ref'])
