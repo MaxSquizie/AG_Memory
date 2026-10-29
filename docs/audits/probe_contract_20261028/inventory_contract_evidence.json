@@ -1,0 +1,17 @@
+{
+  "kind": "CONTROLLED_HELPER_WITNESSES",
+  "changed_inputs": {
+    "old_signature": "4bbcfd01891750ddc3f14e75197e0e8badc45b1f094bb1c4d87f655cfb5b7066",
+    "current_signature": "9d9aeee03980e97bdea8370186930909f7a0352317474b429baff980a1cee9fc",
+    "prepared_after_input_change": true
+  },
+  "retired_proof": {
+    "proof_licensed_after_retirement": false,
+    "nominal_inventory_reused": true,
+    "temporal_inventory_reused": true,
+    "nominal_rows_returned": 1,
+    "temporal_units_returned": 1
+  },
+  "singleton_memory": "",
+  "limits": "No live model, no full dispatcher schedule, no GUI, no durable write."
+}

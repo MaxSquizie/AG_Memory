@@ -5,10 +5,14 @@ from .component_probe import _probe
 
 
 def choose(state, release, selector, region, key, options, question):
-    if len(options)==1: return options[0]['candidate_id']
+    # Generated singleton hypotheses still admit rejection or uncertainty.
+    # Only the common recorded selection boundary supplies a use ground.
     key=region.region_id+'|nominal:'+digest([key,options])
+    from .structural_probe_inputs import inputs
+    context=state.text[slice(*region.source_range)]
     return _probe(state,selector,release,key,'nominal_attachment',options,
-        state.text[slice(*region.source_range)],region.source_range,question=question)
+        context,region.source_range,question=question,
+        inputs=inputs(state,region,'nominal_attachment',options,question,context,0))
 
 
 def select_units(state, release, selector, region, covers, frame, cfg):

@@ -76,6 +76,10 @@ def freeze_context(store, release, source_tags, *, active_refs=None):
                         'template_ref':node['template_ref'],'temporal_mode':node['temporal_mode'],
                         'label':texts.get((oid,version),'событие из объявленного наблюдения')})
                     if len(rows)>256: raise ValueError('COREF_CANDIDATE_LIMIT')
+        # Attach evidence at the frozen-read boundary for every consumer,
+        # including ordinary pronoun references and direct declared windows.
+        from .reference_source_context import attach
+        attach(store,[r for r in rows if r.get('reference_kind')!='EVENT'])
         return rows
 
 
@@ -253,10 +257,13 @@ def resolve_references(state, slots, selector, release):
                 d.outcome='UNRESOLVED';state.diag('COREF_PROBE_LIMIT',tid)
                 unresolved.append(tid);continue
             prior_grounds=list(d.grounds)
-            options=[{'candidate_id':uid,'label':rows[0]['label']+'; type='+rows[0].get('reference_kind','ENTITY')}
+            from .reference_presentation import label
+            options=[{'candidate_id':uid,'label':label(state,rows)}
                      for uid,rows in candidates.items()]
+            from .reference_structure import inputs
             _probe(state,selector,release,tid+'|reference','reference',options,
                 state.text[slice(*bounds)],bounds,
+                inputs=inputs(state,(tid,),options),
                 question='What does «'+evidence[tid].span+'» @'+str(evidence[tid].start)+' refer to? '
                 'A sole candidate in this bounded window is not proof. Choose a source-supported reference. List alternative referents when several fit; 0 means none fits, ? means evidence is insufficient.')
             d=state.decisions[tid+'|reference'];d.grounds[:0]=prior_grounds
@@ -282,8 +289,9 @@ def resolve_references(state, slots, selector, release):
         else:
             unresolved.append(tid); state.diag('REFERENCE_AMBIGUOUS' if ids else 'REFERENCE_UNKNOWN',tid)
             from .clarifications import offer
+            from .reference_presentation import label
             offer(state, tid+'|reference', 'REFERENCE', evidence[tid].span,
-                  [{'candidate_id': uid, 'label': rows[0]['label']} for uid, rows in candidates.items()])
+                  [{'candidate_id': uid, 'label': label(state,rows)} for uid, rows in candidates.items()])
     state.observation['entity_bindings']=explicit
     state.observation['entity_binding_grounds']=grounds
     state.observation['unresolved_references']=unresolved

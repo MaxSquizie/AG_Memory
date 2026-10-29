@@ -57,7 +57,7 @@ def attach_tree(frames,tree,region):
     return frames
 
 
-def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof,*,shared_functions=(),owner_choice=None):
+def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof,*,shared_functions=(),owner_choice=None,marker_roles=None):
     refs=[t.token_id for group in groups for t in group]
     if len(refs)!=len(set(refs)):return None
     used=set(refs);markers=[t for t in tokens if t.token_id not in used]
@@ -79,7 +79,7 @@ def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof
     punctuation_refs={t.token_id for t in punctuation}
     links=[t for t in markers if t.token_id not in punctuation_refs]
     from .relation_markers import confirm
-    checked=confirm(state,release,selector,region,cfg,kind,links,groups)
+    checked=confirm(state,release,selector,region,cfg,kind,links,groups,established=marker_roles,owner=owner)
     if isinstance(checked,ContentRequired):return checked
     if not checked:return None
     # Coverage checks may refine an incomplete proposal. Completion still
@@ -97,7 +97,7 @@ def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof
     option={'candidate_id':'PARTITION','relation':kind,'operands':[[t.token_id for t in g] for g in groups],
         'marker_refs':[t.token_id for t in tokens if t in markers or t.token_id in shared_refs],
         'shared_functions':list(shared_functions),'relation_proof':proof,
-        'label':'Proposed split — '+description+'; outer relation occurrences: '+
+        'label':'Proposed split — apply '+RELATIONS[kind]+' to these parts: '+description+'; outer relation occurrences: '+
         (', '.join('«'+t.span+'» @'+str(t.start) for t in links) or 'none')+'; punctuation outside parts: «'+
         ' '.join(t.span for t in punctuation)+'»'}
     if owner:option.update(owner_ref=owner.token_id,owner_proof=owner_choice[1])
@@ -119,7 +119,9 @@ def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof
     result=choose(state,release,selector,region,cfg,'structural_partition',[option],
         'Check ONE relation application: '+RELATIONS[kind]+'. '
         'Does the original source connect the quoted content parts by this relation, in the roles shown? '
-        "Keep each part's internal participants, clauses, negation and modality inside that part. "
+        'The selected OUTER meaning applies to the parts; its own wording is outside them. '
+        'Preserve their participants and any ADDITIONAL clauses, negation or modality nested inside a part. '
+        'Do not require the selected outer operator to appear inside its own content as another operator. '
         'The parts are not independently asserted by this choice. '
         +('The parent has an intentionally open content slot filled by the other part; '
           'it need not be a standalone sentence and may contain other clauses. '
@@ -349,8 +351,21 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child):
     return frames
 
 
-def content_owner(state,release,selector,region,cfg,parent,body):
+def content_owner(state,release,selector,region,cfg,parent,body=None):
     """Select the slot's lexical owner before assigning connective material."""
+    if body is None:
+        return choose(state,release,selector,region,cfg,'structural_owner',
+            [{'candidate_id':t.token_id,'owner_ref':t.token_id,
+              'label':'Content belongs to predicate «'+t.span+'» @'+str(t.start)}
+             for t in parent if any(c.isalnum() for c in t.span)],
+            'Choose the predicate INSIDE TARGET whose dependent proposition or action description is also INSIDE TARGET. '
+            'This selects the owner before selecting its content boundaries. '
+            'A predicate outside TARGET, including the ancestor whose slot this target fills, is not this owner. '
+            'Content already supplied separately by the parent requirements does not count as content inside TARGET. '
+            'If several predicates have their own dependent contents here, select the FIRST such predicate in source order; '
+            'the other constructions remain for recursive analysis. This is traversal order, not a claim that they lack content. '
+            'Several numbers mean alternative owners at this first position, not all content-taking predicates. '
+            'Do not select a participant or infer an unknown word’s lexical meaning.')
     body_text=' '.join(t.span for t in body)
     owners=[t for t in parent if any(c.isalnum() for c in t.span)]
     source_parts={'content_refs':[t.token_id for t in body],'parent_refs':[t.token_id for t in parent]}

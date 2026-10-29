@@ -3,6 +3,7 @@ import re
 
 
 def attach(store, rows):
+    if not rows:return
     wanted={tuple(r['source_tag']) for r in rows}
     texts={}
     for record in store._journal.scan_unprocessed(0,payload_kinds={'run_bind'}):
@@ -11,6 +12,10 @@ def attach(store, rows):
             texts[tag]=(p.get('snapshot_data') or {}).get('text','')
     for row in rows:
         text=texts.get(tuple(row['source_tag']),'')
+        # The short excerpt locates an anchor; it cannot stand in for the
+        # original envelope when a qualification lies outside that window.
+        row['source_context']=text
+        row['source_context_complete']=bool(text)
         binding=store.ledger.data['bindings'][row.get('memory_binding_ref',row.get('binding_ref'))]
         entity=store._store.get_element_any_domain(row['entity_ref'])
         implicit=entity.meta.get('implicit_participant')
@@ -36,6 +41,8 @@ def attach(store, rows):
                 if 0<=lo<hi<=len(text):spans.append((lo,hi))
         if spans:
             lo,hi=spans[0]
+            row['memory_anchor_range']=[lo,hi]
+            row['memory_anchor_text']=text[lo:hi]
             lo,hi=max(0,lo-96),min(len(text),hi+96)
             row['memory_excerpt']=text[lo:hi]
             row['memory_excerpt_range']=[lo,hi]

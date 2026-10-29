@@ -83,11 +83,12 @@ def prepare_implicit(state, release):
             if tid in f.semantic.get('bound_arguments',{}):
                 previous.append({'key':'bound:'+mention,'kind':'BOUND_VARIABLE','mention_ref':mention,
                     'bound_var':f.semantic['bound_arguments'][tid],
-                    'features':common,'end':f.source_range[1],'label':unit.get('surface',ev.span)})
+                    'features':common,'end':f.source_range[1],'label':unit.get('surface',ev.span)+' at characters '+str(ev.start)+':'+str(ev.end)})
                 continue
             previous.append({'key':'mention:'+mention,'kind':'MENTION','mention_ref':mention,
                 'entity_ref':state.observation.get('entity_bindings',{}).get(mention) or 'M:'+digest([state.source_uid,mention]),
-                'anchor_label':unit.get('surface',ev.span), 'features':common,'end':f.source_range[1],'label':unit.get('surface',ev.span)})
+                'anchor_label':unit.get('surface',ev.span), 'features':common,'end':f.source_range[1],
+                'label':unit.get('surface',ev.span)+' at characters '+str(ev.start)+':'+str(ev.end)})
 
 
 def resolve_implicit(state, release, selector):
@@ -107,7 +108,9 @@ def resolve_implicit(state, release, selector):
             from .implicit_introduction import introduce_without_antecedent
             chosen=introduce_without_antecedent(state,gap)
             if chosen is None:
-                chosen=_probe(state,selector,release,gap['gap_id'],'implicit_argument',options,state.text[lo:hi],f.source_range,
+                from .reference_structure import implicit_inputs
+                chosen=_probe(state,selector,release,gap['gap_id'],'implicit_argument',options,state.text,f.source_range,
+                          inputs=implicit_inputs(state,f,role,options),
                           equivalent_targets=targets,
                           question=('Resolve the omitted '+role+' of the TARGET clause below, not of another clause in the context.\n'
                             +'Target clause: '+state.text[slice(*f.source_range)]+'\n'
@@ -168,8 +171,13 @@ def add_memory_options(gap, rows, release):
         paths={tuple(path) for path in old.get('grounding_paths',())}
         paths.add(tuple(sorted(row['premise_support_refs'])))
         anchor=old.get('anchor_binding_ref',row['binding_ref']) if old.get('grounding_paths') and min(tuple(p) for p in old['grounding_paths'])<=tuple(sorted(row['premise_support_refs'])) else row['binding_ref']
+        description=row['label']
+        if row.get('memory_anchor_range'):description+='; source occurrence at '+str(row['memory_anchor_range'])
+        if row.get('source_context'):description+='; original source: '+row['source_context']
+        descriptions=list(dict.fromkeys([*old.get('source_descriptions',()),description]))
         by_id[cid]={'candidate_id':cid,'kind':'MEMORY','entity_ref':row['entity_ref'],
-            'label':'Memory participant '+row['label'],'anchor_binding_ref':anchor,'context_decision_ref':gap['gap_id'],
+            'label':'Memory participant '+' | Another description of this same participant: '.join(descriptions),
+            'source_descriptions':descriptions,'anchor_binding_ref':anchor,'context_decision_ref':gap['gap_id'],
             'grounding_paths':[list(path) for path in sorted(paths)]}
     gap['options']=list(by_id.values())
     from .narrative_groups import add_memory

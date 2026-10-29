@@ -59,27 +59,36 @@ def binary(domain):
 def content(domain):
     from .relation_composition import function_ownership,content_owner
     state,release,selector,region,tokens,cfg,kind=inputs(domain)
+    if domain.owner_choice is None:
+        domain.owner_choice=content_owner(state,release,selector,region,cfg,tokens)
+    if not domain.owner_choice:return None
     def select(i,groups):
+        owner_ref=domain.owner_choice[0]['owner_ref'] if domain.owner_choice else None
+        owner=next((t for t in tokens if t.token_id==owner_ref),None)
+        owner_note=(' Selected owner INSIDE TARGET: «'+owner.span+'» @'+str(owner.start)+
+                    ('. Select only the content of THIS predicate. ' if i==0 else '. Select the parent part containing THIS predicate. ')+
+                    'The owner remains in the parent part. '
+                    'An ancestor’s content slot is the context of this whole task, not the content being selected here.' if owner else '')
         if i==0:
             return domain.span(tokens,'structural_content',
                 'Select the complete dependent content: a proposition or an infinitive action description '
                 'that is said, thought, requested, intended or otherwise taken as content. '
                 'Exclude the parent predicate and its participants, the introducing conjunction, colon, and enclosing '
                 'quotation marks. IF the content is quoted, start inside its quotes. '
-                'Unquoted content needs no quotation marks. Retain any operators inside that content.',
-                remaining_parts=1,remaining_contiguous=False)
+                'Unquoted content needs no quotation marks. Retain any operators inside that content.'+owner_note,
+                exclude=[owner_ref] if owner_ref else (),remaining_parts=1,remaining_contiguous=False)
         body=groups[0];body_ids={t.token_id for t in body}
         rest=[t for t in tokens if t.token_id not in body_ids]
         return domain.span(rest,'structural_parent',
             'Selected dependent content: «'+' '.join(t.span for t in body)+'». It has been removed from the choices below. '
             'Select the remaining parent text: the predicate that takes this content, its participants and other attached clauses. '
-            'Boundary punctuation may stay; punctuation and connecting words are checked separately.',covered=body_ids)
+            'Boundary punctuation may stay; punctuation and connecting words are checked separately.'+owner_note,
+            covered=body_ids,must_include=[owner_ref] if owner_ref else ())
     from .partition_sequences import select_parts
     groups=select_parts(domain,['dependent content','parent clause'],select)
     if groups is None:return None
     body,parent=groups
-    owner=content_owner(state,release,selector,region,cfg,parent,body)
-    if not owner:return None
+    owner=domain.owner_choice
     groups=function_ownership(state,release,selector,region,cfg,'CONTENT',[parent,body],
         protected_refs=domain.required|{owner[0]['owner_ref']},owner_ref=owner[0]['owner_ref'])
     if groups is None:return None

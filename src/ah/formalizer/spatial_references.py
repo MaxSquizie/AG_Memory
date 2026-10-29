@@ -39,10 +39,16 @@ def prepare(state, release, selector=None):
             matching=[r for r in rules if r['kind']==selected_kind and (choice=='REFERENCE' or r.get('location_kind')==choice)]
             role=None
             if not matching:
+                occupied=frame.semantic.get('proposed_roles',{})
+                established='; '.join(role_text(r)+' = «'+evidence[tid].span+'» at '+str(evidence[tid].start)
+                                      for tid,r in occupied.items())
                 role=_probe(state,selector,release,key+'|role','spatial_role',[
-                    {'candidate_id':r['role_id'],'label':r['role_id']+': '+role_text(r['role_id'])} for r in release.entries('RoleRegistry')],
+                    {'candidate_id':r['role_id'],'label':r['role_id']+': '+role_text(r['role_id'])}
+                    for r in release.entries('RoleRegistry') if r['role_id'] not in occupied.values()],
                     state.text[slice(*frame.source_range)],frame.source_range,
-                    question='Which role does this '+choice+' place fill in «'+ev.span+'»?')
+                    question='Which remaining role does this '+choice+' place fill in «'+ev.span+'»? '
+                    'Preserve these established assignments: '+(established or 'none')+'. '
+                    'Do not replace an assigned participant. Use 0 if no offered role fits, ? if undecidable.')
                 if role is None:
                     frame.semantic['structural_unresolved']=True;state.diag('SPATIAL_FUNCTION_UNRESOLVED',frame.frame_id);continue
             rules=matching or [{'rule_id':'SOURCE_SPATIAL_FUNCTION_V1','sense_id':None,'role_id':role,

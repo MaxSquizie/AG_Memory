@@ -30,8 +30,6 @@ def read_active(store, release, active_refs, source_tags=()):
     # their separately typed EVENT_REFERENCE contract.
     rows = [dict(r, memory_binding_ref=r['binding_ref']) for r in rows
             if r.get('reference_kind') != 'EVENT']
-    from .reference_source_context import attach as attach_excerpts
-    attach_excerpts(store,rows)
     spatial, incomplete = places(store,release,active_refs,source_tags)
     rows.extend(dict(r, label=r.get('memory_excerpt',r['raw']), features=[],
                      reference_kind='PLACE', premise_support_refs=[]) for r in spatial)
@@ -54,8 +52,9 @@ def resolve(state, release, selector):
         from .nominal_reference_local import rows as local_rows
         rows = [*local_rows(state,constraint),*read.get('rows',[])]
         incomplete=bool(read.get('search_incomplete')) or len(rows)>32
+        from .reference_presentation import label
         options = [{'candidate_id':'antecedent:'+str(i),
-            'label':r['label']+'; type='+r.get('reference_kind','ENTITY')+
+            'label':label(state,[r])+
                     '; features='+str(r.get('features',[]))} for i,r in enumerate(rows)]
         chosen = None
         if rows and not incomplete:
@@ -65,7 +64,9 @@ def resolve(state, release, selector):
             lo,hi=goal['source_range']
             context=state.text[lo:hi]
             if len(context)<=2048:
+                from .reference_structure import inputs
                 chosen = _probe(state,selector,release,decision,'reference',options,context,(start,end),
+                    inputs=inputs(state,(constraint['head_ref'],),options),
                     equivalent_targets={o['candidate_id']:r['entity_ref'] for o,r in zip(options,rows)},
                     question='Resolve «'+constraint['raw']+'» as one noun group. Constraint='+
                     constraint['identity_constraint']+'. Select only a compatible antecedent supported by these source excerpts. '+

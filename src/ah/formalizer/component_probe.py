@@ -2,7 +2,7 @@
 from .state import Decision, Ground
 from .selection_evidence import selected_candidate
 from .selection_protocol import DecisionSchema, Relation
-from .selector_wire import build_selector_prompt, validate_selector_reply
+from .selector_wire import build_selector_prompt
 from .provider_adapter import BudgetExceeded, IntegrityError
 
 def _live_probe(state, selector, release, key, slot, options, context, source_range, *, equivalent_targets=None, question=None, offer_clarification=True):
@@ -54,20 +54,18 @@ def _live_probe(state, selector, release, key, slot, options, context, source_ra
     prompt = build_selector_prompt(selector, slot_id=slot, frame_id=key,
         context_span=context, mentions={}, schema=schema, candidates=ids,
         contextual_statements=())
+    revising=slot in {'structural_revision','structural_ownership_revision','structural_marker_revision'}
     prompt = ('Interpret the supplied text. Options are proposed readings, not world facts. '
-        'Answer only the stated question; preserve established constraints.\n'+
+        +('Answer only the stated revision question. The named earlier assignments may be replaced; '
+          'preserve all other established constraints.\n' if revising else
+          'Answer only the stated question; preserve established constraints.\n')+
         ((question+'\n\n') if question else '')+prompt)
     try:
-        from .selection_prompt import record_prompt
-        record_prompt(d, prompt)
         limits=state.observation.get('probe_limits',{})
         maximum=getattr(getattr(selector,'limits',None),'max_prompt_chars',limits.get('max_prompt_chars',8192))
         if type(maximum) is not int or maximum<1:raise ValueError('PROBE_LIMIT_INVALID')
-        if len(prompt)>maximum:raise BudgetExceeded('COMPUTATION_LIMIT',f'prompt_chars: {len(prompt)} > {maximum}')
-        state.budget.spend_llm()
-        raw = selector.select(prompt)
-        d.raw_response = raw
-        reply = validate_selector_reply(selector, raw, schema, ids, allowed=frozenset(ids))
+        from .selection_exchange import exchange
+        reply=exchange(state,selector,d,prompt,schema,ids,maximum)
         d.selector_outcome = reply.outcome
     except IntegrityError:
         raise
@@ -106,13 +104,40 @@ def _live_probe(state, selector, release, key, slot, options, context, source_ra
     return chosen
 
 
-def _probe(state, selector, release, key, slot, options, context, source_range, *, equivalent_targets=None, question=None, offer_clarification=True):
+def _probe(state, selector, release, key, slot, options, context, source_range, *, equivalent_targets=None, question=None, offer_clarification=True, inputs=None):
     # The enclosing domain owns speaker choices; a page only supplies evidence.
     state.clarification_candidates[:]=[r for r in state.clarification_candidates if r['decision_ref']!=key]
     state.syntax_trace.append({'kind':'PROBE_PAGE','decision_ref':key,'slot':slot,
                               'source_range':list(source_range)})
     from .canonical_ledger import digest
+    # Migrate semantic families explicitly. Unmigrated slots remain visible in
+    # the audit; a transport-valid string is not a semantic input contract.
+    input_record=inputs.record() if inputs is not None else None
+    errors=inputs.errors(state,slot,options,source_range) if inputs is not None else (
+        ('INPUT_CONTRACT_MISSING',) if slot in {'reference','implicit_argument'} else ())
+    if inputs is not None and hasattr(inputs,'question') and question!=inputs.question:
+        errors=(*errors,'QUESTION_MISMATCH')
+    state.syntax_trace.append({'kind':'PROBE_INPUT_CONTRACT','decision_ref':key,
+        'slot':slot,'status':'INVALID' if errors else getattr(inputs,'declaration_status','DECLARED') if inputs is not None else 'UNDECLARED',
+        'inputs':input_record,'errors':list(errors)})
+    if errors:
+        # Invalidate this cached evaluation, not the stable task address for
+        # all future revisions. A repaired declaration may use the same key.
+        record=state.component_probe_records.get(key)
+        if record is not None:record['superseded_by']='blocked-input:'+digest([key,input_record,errors])
+        from .composition_session import current
+        runtime=current(state)
+        if runtime is not None:runtime.dispatcher.invalidate('probe:'+key,'PROBE_INPUT_INCOMPLETE')
+        d=Decision(slot,key,tuple(o['candidate_id'] for o in options),outcome='UNRESOLVED')
+        d.history.append({'kind':'PROBE_INPUT_REJECTED','errors':list(errors)})
+        state.decisions[key]=d
+        state.diag('PROBE_INPUT_INCOMPLETE',key+': '+', '.join(errors))
+        return None
+    if inputs is not None:
+        context=inputs.source_text
+        question=(question or '')+'\n'+inputs.wording()
     dependency_signature=digest([release.sha256,slot,options,context,source_range,equivalent_targets,question])
+    if input_record is not None:dependency_signature=digest([dependency_signature,input_record])
     from .composition_session import current
     runtime=current(state)
     if runtime is not None:

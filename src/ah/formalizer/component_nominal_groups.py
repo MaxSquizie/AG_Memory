@@ -53,7 +53,11 @@ def select(state, release, selector, region, tokens, cfg):
         question='Which units does the written conjunction connect in this area? '
         'Do not infer that the members are one entity or that an event happened. Case and role are resolved later.')
     state.syntax_trace.append({'kind':'NOMINAL_COORDINATION','region_ref':region.region_id,
-        'decision_ref':key,'groups':merged,'selected':chosen})
+        'decision_ref':key,'groups':merged,'selected':chosen,
+        'task_outcome':'NOT_APPLICABLE' if chosen=='OTHER' else 'SUPPORTED' if chosen=='NOMINAL' else 'PENDING'})
+    # Explicitly rejecting this grouping is not an unknown or failed probe.
+    # The next producer must establish its own relation before composing it.
+    if chosen=='OTHER':return None
     return merged if chosen=='NOMINAL' else False
 
 

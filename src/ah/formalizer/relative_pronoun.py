@@ -26,7 +26,10 @@ def compose(state,release,selector,region,body,owner,host,reading,rule,cfg,depth
         variants={digest(_morph(m)):m for m in marker.variants}
         selected=choose(state,release,selector,region,cfg,'relative_marker_reading',[
             {'candidate_id':cid,'label':describe(_morph(m))} for cid,m in variants.items()],
-            'Which whole reading of «'+marker.span+'» fits this use? Do not copy the antecedent case.')
+            'Which whole reading of «'+marker.span+'» at '+str(marker.start)+' fits this use? '
+            'Established antecedent: «'+host.span+'» at '+str(host.start)+'. '
+            'Established role inside the description: '+role_text(role[0]['candidate_id'])+'. '
+            'Preserve this role; do not select another role or copy the antecedent case.')
         if not selected:return [],None
         mv=variants[selected[0]['candidate_id']]
         options={'general:'+digest([marker.token_id,role[0],selected[0]]):{'marker':marker,'marker_reading':mv,

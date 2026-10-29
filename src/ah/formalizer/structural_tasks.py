@@ -14,8 +14,8 @@ def enabled(release):
     return release.entries('ProposalPolicy')[0].get('composition',{}).get('structural_tasks')=='CLOSED_RELATIONS_V1'
 
 
-def choose(state,release,selector,region,cfg,slot,options,question,*,empty=None):
-    return _choose(state,release,selector,region,cfg,slot,options,question,empty=empty)
+def choose(state,release,selector,region,cfg,slot,options,question,*,empty=None,source_selection=None):
+    return _choose(state,release,selector,region,cfg,slot,options,question,empty=empty,source_selection=source_selection)
 
 
 def choose_domain(state,release,selector,region,cfg,slot,options,question):
@@ -27,16 +27,25 @@ def choose_domain(state,release,selector,region,cfg,slot,options,question):
     return SupportedDomain((value,),proof['decision_ref'],proof['domain_ref'])
 
 
-def _choose(state,release,selector,region,cfg,slot,options,question,*,empty=None,retain_domain=False):
+def _choose(state,release,selector,region,cfg,slot,options,question,*,empty=None,retain_domain=False,source_selection=None):
     """Optional searches declare a typed completion outside the model domain.
 
     NONE_FIT closes only one page. EMPTY is licensed only after every page was
     examined and rejected; unknown, ambiguity and budget stops never close it.
     """
+    if source_selection is not None:
+        errors=source_selection.errors(state,(),region.token_refs)
+        if errors:
+            state.diag('PROBE_INPUT_INCOMPLETE',region.region_id+': '+', '.join(errors))
+            state.syntax_trace.append({'kind':'STRUCTURAL_TASK','region_ref':region.region_id,
+                'slot':slot,'status':'BLOCKED','reason':'SOURCE_CONTRACT_INVALID','errors':errors})
+            return None
     # Failure of a whole hypothesis does not refute every constituent choice.
     # Keep revision identity in keys without injecting the rejected hypothesis
     # into unrelated ownership, morphology and participant questions.
-    revision_scope=digest([cfg.get('_task_constraints'),cfg.get('_ownership_feedback')])
+    from dataclasses import asdict
+    revision_scope=digest([cfg.get('_task_constraints'),cfg.get('_ownership_feedback'),
+                          asdict(source_selection) if source_selection is not None else None])
     if cfg.get('_task_constraints') and slot in {'structural_relation','structural_revision'}:
         question+='\nEarlier attempt: '+cfg.get('_task_constraints_text',cfg['_task_constraints'])
     if cfg.get('_ownership_feedback'):
@@ -100,9 +109,12 @@ def _choose(state,release,selector,region,cfg,slot,options,question,*,empty=None
         seen.update(ids)
         state.budget.task_candidate_pages[key]=len(values)
         state.budget.task_candidates_examined+=fresh
+        from .structural_probe_inputs import inputs
+        page_inputs=inputs(state,region,slot,values,question,context,page,source_selection)
         selected=_probe(state,selector,release,key,slot,choices,context,region.source_range,
+            inputs=page_inputs,
             offer_clarification=False,
-            question=question+' Evaluate the stated choice on this page. Multiple numbers mean alternative readings of that choice, not different tasks.' )
+            question=question)
         decision=state.decisions.get(key)
         outcome=('ONE_SELECTED' if selected is not None and selected_candidate(decision)==selected
                  else decision.selector_outcome if decision else None)
@@ -197,6 +209,7 @@ def licensed(state,proof,**expected):
 
 def span(state,release,selector,region,tokens,cfg,slot,question,*,exclude=(),record_remainder=False,admissible=None,initial=None):
     """Every source token boundary is reachable; no punctuation whitelist."""
+    from .structural_probe_inputs import collection
     forbidden=set(exclude)
     begin=len(state.syntax_trace)
     def exhausted():
@@ -225,7 +238,8 @@ def span(state,release,selector,region,tokens,cfg,slot,question,*,exclude=(),rec
         start=initial or choose(state,release,selector,region,cfg,slot+'_start',starts,question+' Select the FIRST token.'+
             (' No offered endpoint was accepted for these earlier starts under the current restrictions: '+
              ', '.join('«'+tokens[i].span+'» @'+str(tokens[i].start) for i in sorted(rejected))+
-             '. This does not reject the remaining starts.' if rejected else ''))
+             '. This does not reject the remaining starts.' if rejected else ''),
+            source_selection=collection('START',tokens,exclude=forbidden))
         initial=None
         if start is None:
             if state.syntax_trace[-1].get('status')=='EXHAUSTED':exhausted()
@@ -233,7 +247,7 @@ def span(state,release,selector,region,tokens,cfg,slot,question,*,exclude=(),rec
         a=start[0]['index']
         def ends():
             for b in endpoints(a):
-                yield {'candidate_id':'end:'+tokens[b].token_id,'index':b+1,
+                yield {'candidate_id':'end:'+tokens[b].token_id,'index':b+1,'token_ref':tokens[b].token_id,
                     **({'boundary_end_ref':tokens[b].token_id,
                         'selected_refs':[t.token_id for t in tokens[a:b+1]],
                         'remainder_refs':[t.token_id for t in [*tokens[:a],*tokens[b+1:]]]}
@@ -241,7 +255,8 @@ def span(state,release,selector,region,tokens,cfg,slot,question,*,exclude=(),rec
                     'label':'End after «'+tokens[b].span+'» @'+str(tokens[b].end)+
                             '; selected words «'+' '.join(t.span for t in tokens[a:b+1])+'»'}
         end=choose(state,release,selector,region,cfg,slot+'_end',ends(),
-            question+' The start is «'+tokens[a].span+'» @'+str(tokens[a].start)+'. Select the LAST token.')
+            question+' The start is «'+tokens[a].span+'» @'+str(tokens[a].start)+'. Select the LAST token.',
+            source_selection=collection('END',tokens,exclude=forbidden,start=tokens[a].token_id))
         if end:return tokens[a:end[0]['index']],(start[1],end[1])
         if state.syntax_trace[-1].get('status')!='EXHAUSTED':return None
         rejected.add(a)
@@ -266,8 +281,12 @@ def source_set(state,release,selector,region,tokens,cfg,slot,question,*,exclude=
 
 
 def extend_source_set(state,release,selector,region,tokens,cfg,slot,question,selected,proofs,*,exclude=(),admissible=None,partial_admissible=None):
+    from .structural_probe_inputs import collection
     selected,proofs=list(selected),list(proofs);forbidden=set(exclude)
     while True:
+        # The peer sees source order, not the order in which pieces happened
+        # to be discovered. A later repair can add an earlier occurrence.
+        selected.sort(key=lambda t:(t.start,t.end,t.token_id))
         used={t.token_id for t in selected}
         remaining=[t for t in tokens if t.token_id not in used|forbidden]
         if not remaining:break
@@ -284,17 +303,19 @@ def extend_source_set(state,release,selector,region,tokens,cfg,slot,question,sel
             'Are any words OF THIS SAME PART still missing? If the part is complete, answer 0. '
             'Otherwise select where its FIRST missing piece begins. Words of another part are not a continuation of this part. '
             'Do not select the next clause just because it comes next, or select already included words again.',
-            empty={'candidate_id':'DONE','label':'no further source words belong to this part'} if can_finish else None)
+            empty={'candidate_id':'DONE','label':'no further source words belong to this part'} if can_finish else None,
+            source_selection=collection('CONTINUE',tokens,selected,forbidden))
         if not more:return None
         proofs.append(more[1])
         if more[0]['candidate_id']=='DONE':break
         a=next(i for i,t in enumerate(tokens) if t.token_id==more[0]['token_ref'])
         choices=[]
         for b in ends(a):
-            choices.append({'candidate_id':tokens[b].token_id,'end':b+1,
+            choices.append({'candidate_id':tokens[b].token_id,'end':b+1,'token_ref':tokens[b].token_id,
                 'label':'End after «'+tokens[b].span+'» @'+str(tokens[b].end)})
         end=choose(state,release,selector,region,cfg,slot+'_piece_end',choices,
-            'Expression being collected: '+question+' Already included: «'+' '.join(t.span for t in selected)+'». Next piece starts at «'+tokens[a].span+'». Select ONLY its last word.')
+            'Expression being collected: '+question+' Already included: «'+' '.join(t.span for t in selected)+'». Next piece starts at «'+tokens[a].span+'». Select ONLY its last word.',
+            source_selection=collection('PIECE_END',tokens,selected,forbidden,start=tokens[a].token_id))
         if not end:return None
         selected.extend(tokens[a:end[0]['end']]);proofs.append(end[1])
     selected.sort(key=lambda t:t.start)

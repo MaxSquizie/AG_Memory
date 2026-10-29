@@ -11,6 +11,16 @@ from tools.formalizer_v7_extended_binding import Session
 
 class Script:
     def __init__(self,steps,default='1'):
+        # Legacy scenarios declared CONTENT's owner after its boundaries.
+        # The addressed protocol now selects that same owner first. Reorder
+        # only the declared task, preserving every answer and semantic oracle.
+        steps=list(steps)
+        for i,(slot,value) in enumerate(steps):
+            if slot!='structural_relation' or value!='CONTENT':continue
+            for j in range(i+1,len(steps)):
+                if steps[j][0]=='structural_relation':break
+                if steps[j][0]=='structural_owner':
+                    steps.insert(i+1,steps.pop(j));break
         self.steps=deque(steps);self.default=default;self.calls=[];self.errors=[];self.selected_slot=None
 
     def generate(self,prompt,**kwargs):

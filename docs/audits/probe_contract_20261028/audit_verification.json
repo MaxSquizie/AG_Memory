@@ -1,0 +1,13 @@
+{
+  "src_files_hashed": 477,
+  "formalizer_files_unchanged_since_start": 259,
+  "inventoried_sites": 116,
+  "reviewed_sites": 116,
+  "missing_old_sites": [],
+  "unassigned_sites": [],
+  "broken_report_links": [],
+  "runtime_changed": false,
+  "semantic_live_runs": 0,
+  "durable_write_runs": 0,
+  "verification_scope": "artifact consistency and source immutability, not full language correctness"
+}

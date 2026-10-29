@@ -21,7 +21,10 @@ def probe_context(state, region, cfg, local, *, include_surrounding=True):
     """Reading context may cross the area; token ownership never does."""
     if not include_surrounding:
         return 'TARGET: '+local.strip(), ''
-    if 'MORPHOLOGICAL_REFINEMENT' not in region.grounds:
+    # Context belongs to the source ancestry, not to the algorithm which
+    # created this child. Coordination and other recursive areas need the
+    # same evidence as morphological refinements; ownership stays in TARGET.
+    if not region.parent_ref:
         return 'TARGET: '+local.strip(), ''
     regions={r.region_id:r for r in state.region_forest.regions}
     current=region; seen=set()
@@ -33,5 +36,7 @@ def probe_context(state, region, cfg, local, *, include_surrounding=True):
         current=parent
         if current.kind=='SENTENCE': break
     surrounding=state.text[slice(*current.source_range)]
+    if surrounding.strip()==local.strip():
+        return 'TARGET: '+local.strip(), ''
     return 'TARGET: '+local.strip()+'\nCONTEXT (evidence only): '+surrounding, (
         'Choose only inside TARGET; CONTEXT is evidence and supplies no additional selectable words. ')

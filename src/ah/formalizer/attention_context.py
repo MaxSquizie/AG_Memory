@@ -188,9 +188,6 @@ class AttentionContextReader:
                     else:
                         rows = freeze_context(store, self.release, state.observation.get('coreference_sources', []),
                                               active_refs=active)
-                        if request['kind'] in {'IMPLICIT_ARGUMENT','STRUCTURE'}:
-                            from .reference_source_context import attach
-                            attach(store,[r for r in rows if r.get('reference_kind')!='EVENT'])
                 except ValueError as exc:
                     code=str(exc).split(':',1)[0]
                     if code not in {'RESOURCE_MISSING','COREF_WINDOW_LIMIT','COREF_CANDIDATE_LIMIT'}:

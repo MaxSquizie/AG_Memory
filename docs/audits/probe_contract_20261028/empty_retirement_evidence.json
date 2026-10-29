@@ -1,0 +1,16 @@
+{
+  "positive_domain_after_peer_retirement": false,
+  "kind": "CONTROLLED_REAL_PROTOCOL_WITNESS",
+  "completion": {
+    "candidate_id": "NONE",
+    "label": "no remaining time expression"
+  },
+  "negative_pages": [
+    "r|task:3724b2ea6a0506889b065eb15b609604d49607cb44d1a40350a2ad3413143ff0",
+    "r|task:078fbdfe30441f2f0671b5a96a5000c6305e33a197d347ab6098dc1fcb4cb299"
+  ],
+  "retired_page": "r|task:3724b2ea6a0506889b065eb15b609604d49607cb44d1a40350a2ad3413143ff0",
+  "licensed_before": true,
+  "licensed_after_retirement": true,
+  "limit": "No natural-language model, GUI schedule or durable write tested."
+}

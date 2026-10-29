@@ -20,6 +20,26 @@ def coordinate(state,release,selector,region,tokens,predicates,cfg,protected, *,
         state.diag('COMPONENT_COORDINATION_UNRESOLVED',region.region_id); return []
     if any(a[1]>b[0] for a,b in zip(matches,matches[1:])): return []
     ranges=list(zip([lo,*[end for start,end in matches]],[*[start for start,end in matches],hi]))
+    source_proof=None
+    if boundary is None:
+        # Lexicon matches and rejection of a nominal grouping merely propose
+        # this partition. They do not establish proposition-level AND.
+        from .structural_tasks import choose
+        proposal={'candidate_id':'COORDINATION','relation':'AND',
+            'operand_refs':[[t.token_id for t in tokens if a<=t.start and t.end<=b] for a,b in ranges],
+            'label':'Conjunction of these complete proposition parts: '+
+                '; '.join('«'+state.text[a:b].strip()+'»' for a,b in ranges)}
+        result=choose(state,release,selector,region,cfg,'coordination_boundary',[proposal],
+            'Does the source connect these parts as propositions by conjunction (AND)? '
+            'Each part retains its own participants, descriptions, negation and modality. '
+            'This choice does not assert the parts independently. '
+            'Answer 0 if this relation or these boundaries do not fit, or ? if undecidable.')
+        if not result:
+            state.diag('COMPONENT_COORDINATION_UNRESOLVED',region.region_id)
+            return []
+        source_proof=result[1]
+        state.syntax_trace.append({'kind':'COORDINATION_SOURCE_PARTITION','region_ref':region.region_id,
+            'proposal':proposal,'proof':source_proof})
     all_frames=[]; selected=[]
     for index,(start,end) in enumerate(ranges):
         local=[e for e in tokens if start<=e.start and e.end<=end]
@@ -47,6 +67,12 @@ def coordinate(state,release,selector,region,tokens,predicates,cfg,protected, *,
     eligible={f.frame_id:not f.semantic['structural_unresolved'] for f in all_frames}
     anchors=[e.token_id for e in tokens if any(a<=e.start and e.end<=b for a,b in matches)]
     if complete and len(raw)<=cfg['context_chars']:
+        if source_proof:
+            from .structural_tasks import licensed
+            if not licensed(state,source_proof,relation='AND',operand_refs=proposal['operand_refs']):
+                for f in all_frames:f.semantic['structural_unresolved']=True
+                state.diag('COORDINATION_SOURCE_UNGROUNDED',region.region_id)
+                return all_frames
         from .coordination_assignment import compose
         chosen=compose(state,release,selector,region,selected_frames,all_frames,anchors,cfg)
     if chosen is None:
@@ -55,7 +81,7 @@ def coordinate(state,release,selector,region,tokens,predicates,cfg,protected, *,
     state.syntax_trace.append({'composition_region':region.region_id,'kind':'COORDINATION',
         'candidates':[f.frame_id for f in all_frames],'decision_ref':key,
         'conjunct_refs':[f.frame_id for f in selected_frames],'local_eligible':eligible,
-        'coordination_anchors':anchors,'selected_tree':chosen,
+        'coordination_anchors':anchors,'selected_tree':chosen,'source_proof':source_proof,
         'coverage':'COMPLETE' if chosen is not None else 'PARTIAL'})
 
     return all_frames

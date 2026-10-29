@@ -31,6 +31,8 @@ class PartitionDomain:
         self.region,self.tokens,self.cfg=region,tokens,cfg
         self.kind,self.proof=kind,proof
         self.constraints=[]
+        self.markers={};self.revisions=set();self.trace_begin=len(state.syntax_trace)
+        self.owner_choice=None
         # A rejected combination is relevant to its own boundary producer, but
         # proves no individual boundary wrong. Do not leak it into other
         # relations, child regions or unrelated lexical questions.
@@ -48,7 +50,7 @@ class PartitionDomain:
         return {ref for c in self.constraints for ref in c.token_refs}
 
     def span(self,tokens,slot,question,*,marker=False,covered=(),remaining_parts=0,
-             remaining_contiguous=False,**kwargs):
+             remaining_contiguous=False,must_include=(),**kwargs):
         if self.rejected:
             question+=' Previously rejected COMBINATION for this same relation and source: '+'; '.join(self.rejected)+'. '
             question+='The complete assignment was rejected, not each boundary separately. '
@@ -61,6 +63,12 @@ class PartitionDomain:
             # This is branch-local ownership, never a spelling/POS blacklist.
             excluded.update(required)
             kwargs['exclude']=excluded
+        elif self.markers:
+            excluded.update(self.markers);kwargs['exclude']=excluded
+        if self.markers:
+            words=', '.join('«'+t.span+'» @'+str(t.start) for t in self.tokens if t.token_id in self.markers)
+            question+=' Established outer-relation occurrences: '+words+'. '+(
+                'The complete outer wording must include them.' if marker else 'Keep these occurrences outside the content parts.')
         if required:
             words=', '.join('«'+t.span+'» @'+str(t.start) for t in self.tokens if t.token_id in required)
             if marker:
@@ -84,6 +92,8 @@ class PartitionDomain:
         def complete(part):
             if not partial(part):return False
             selected={t.token_id for t in part}
+            if not set(must_include)<=selected:return False
+            if marker and not set(self.markers)<=selected:return False
             if remaining_parts and remaining_contiguous:
                 # Check the remaining continuous operand only at completion:
                 # further pieces of this operand may still consume required words.
@@ -112,14 +122,19 @@ class PartitionDomain:
         while True:
             trace_begin=len(self.state.syntax_trace)
             def compute():
+                from .partition_role_revision import read_proof
+                if self.owner_choice and not read_proof(self.state,self.owner_choice[1],owner_ref=self.owner_choice[0]['owner_ref']):return None
+                if not all(read_proof(self.state,c.proof) for c in self.constraints if c.proof):return None
+                if not all(read_proof(self.state,p,marker_relation_ref=ref) for ref,p in self.markers.items()):return None
                 proposal=propose(self)
                 if proposal is None:return None
+                if proposal.owner_choice:self.owner_choice=proposal.owner_choice
                 if not self.required<={t.token_id for g in proposal.groups for t in g}:
                     self.state.diag('INTEGRITY_ERROR','partition producer lost required content')
                     return None
                 result=confirm_partition(self.state,self.release,self.selector,self.region,
                     self.tokens,self.cfg,self.kind,proposal.groups,self.proof,
-                    shared_functions=proposal.shared_functions,owner_choice=proposal.owner_choice)
+                    shared_functions=proposal.shared_functions,owner_choice=proposal.owner_choice,marker_roles=self.markers)
                 if on_check:on_check(proposal,result)
                 return proposal,result
             if runtime:
@@ -136,7 +151,7 @@ class PartitionDomain:
                                       receipt.source_complete,structure_complete=ready)
                 result,probes=runtime.dispatcher.run(key,
                     [self.tokens,self.cfg,runtime.input_signature(),runtime.context_signature(),
-                     runtime.tasks.feedback,runtime.domain_feedback,self.proof,self.constraints],dispatched,
+                     runtime.tasks.feedback,runtime.domain_feedback,self.proof,self.constraints,self.markers,self.owner_choice],dispatched,
                     kind='PARTITION',source_range=self.region.source_range,token_refs=self.region.token_refs)
                 for ref in probes:runtime.tasks.record_probe(ref)
                 # The consumer deliberately replaces this provisional split;
@@ -150,7 +165,9 @@ class PartitionDomain:
                         row.update(status='REPAIRED',replacement_decision_ref=checked[1]['decision_ref'])
                     self.trace('RESOLVED' if self.constraints else 'SELECTED',checked[1]['decision_ref'])
                     return result
-                if self.constraints:
+                if self.constraints or self.markers:
+                    from .partition_role_revision import revise
+                    if revise(self,trace_begin):continue
                     self.trace('PENDING')
                     self.state.diag('STRUCTURAL_MARKER_CONTENT' if any(c.proof for c in self.constraints)
                                     else 'STRUCTURAL_CONTENT_UNCOVERED',self.region.region_id)
@@ -172,4 +189,6 @@ class PartitionDomain:
             'source_range':list(self.region.source_range),'relation':self.kind,'relation_proof':self.proof,
             'status':status,'required_content_refs':[t.token_id for t in self.tokens if t.token_id in self.required],
             'constraint_proofs':[c.proof for c in self.constraints if c.proof],
+            'required_marker_proofs':dict(self.markers),
+            'owner_choice':self.owner_choice,
             'decision_ref':decision_ref,'selection_provisional':True})

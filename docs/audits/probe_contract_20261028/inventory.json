@@ -1,0 +1,2014 @@
+{
+  "scope": "static callsites; not complete dynamic call graph",
+  "head": "6515de5d0bbb820c28a6bc2ed72ccada465453de",
+  "files_scanned": 259,
+  "parse_errors": [],
+  "callsites": [
+    {
+      "file": "src/ah/formalizer/attitude_composition.py",
+      "line": 88,
+      "function": "compose",
+      "call": "_probe",
+      "resolved_import": "component_probe._probe",
+      "family": "component_probe._probe",
+      "literal_arguments": [
+        "attitude_attachment"
+      ],
+      "call_source": "_probe(state,selector,release,key,'attitude_attachment',choices,\n                    state.text[slice(*region.source_range)],region.source_range,\n                    question='Which released parent/role owns this full proposition content? '\n                    'Check its start AND end and the remaining parent. A conjunction reading must introduce a clause, '\n                    'not a pronoun argument. Delimiters alone do not identify a speaker or assert the child event.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/component_clause.py",
+      "line": 64,
+      "function": "build_clause",
+      "call": "_probe",
+      "resolved_import": "component_probe._probe",
+      "family": "component_probe._probe",
+      "literal_arguments": [
+        "component_attachment"
+      ],
+      "call_source": "_probe(state,selector,release,region.region_id+'|composition','component_attachment',options,raw,region.source_range)",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/component_dependency_reduction.py",
+      "line": 86,
+      "function": "reduce",
+      "call": "choose_domain",
+      "resolved_import": "structural_tasks.choose_domain",
+      "family": "structural_tasks.choose_domain",
+      "literal_arguments": [
+        "nominal_dependency"
+      ],
+      "call_source": "choose_domain(state,release,selector,region,cfg,'nominal_dependency',options,question)",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/component_infinitives.py",
+      "line": 18,
+      "function": "compose",
+      "call": "choose",
+      "resolved_import": "structural_tasks.choose",
+      "family": "structural_tasks.choose",
+      "literal_arguments": [
+        "infinitive_head",
+        "Select the head of a dependent infinitive inside TARGET, or the whole-target description when that is permitted. This selects a proposed head, not its subject or factual occurrence."
+      ],
+      "call_source": "choose(state,release,selector,region,cfg,'infinitive_head',choices,\n        'Select the head of a dependent infinitive inside TARGET, or the whole-target description '\n        'when that is permitted. This selects a proposed head, not its subject or factual occurrence.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/component_infinitives.py",
+      "line": 27,
+      "function": "compose",
+      "call": "source_set",
+      "resolved_import": "structural_tasks.source_set",
+      "family": "structural_tasks.source_set",
+      "literal_arguments": [
+        "infinitive_content",
+        "Select the complete dependent infinitive content, including its complements. Exclude the parent predicate, its participants, and other clauses. The remaining parent must retain the predicate that takes this content. A boundary does not establish the controller or assert the action."
+      ],
+      "call_source": "source_set(state,release,selector,region,tokens,cfg,'infinitive_content',\n        'Select the complete dependent infinitive content, including its complements. '\n        'Exclude the parent predicate, its participants, and other clauses. '\n        'The remaining parent must retain the predicate that takes this content. '\n        'A boundary does not establish the controller or assert the action.',\n        initial=selected,admissible=admissible)",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/component_infinitives.py",
+      "line": 63,
+      "function": "compose",
+      "call": "choose",
+      "resolved_import": "structural_tasks.choose",
+      "family": "structural_tasks.choose",
+      "literal_arguments": [
+        "infinitive_link",
+        "Select a source-supported infinitive relation AND subject control. Distinguish what the parent predicate is about (OBJECT) from why a separate parent action is performed (PURPOSE). UNKNOWN leaves the status unspecified; HYPOTHETICAL presents the child as intended or possible. A complement may have a different controller: answer 0 if no candidate represents the source, or ? if the evidence is insufficient. Do not assign identity from proximity."
+      ],
+      "call_source": "choose(state,release,selector,region,cfg,'infinitive_link',choices,\n        'Select a source-supported infinitive relation AND subject control. '\n        'Distinguish what the parent predicate is about (OBJECT) from why a separate parent action is performed (PURPOSE). '\n        'UNKNOWN leaves the status unspecified; HYPOTHETICAL presents the child as intended or possible. '\n        'A complement may have a different controller: answer 0 if no candidate represents the source, or ? if the evidence is insufficient. Do not assign identity from proximity.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/component_nominal_groups.py",
+      "line": 49,
+      "function": "select",
+      "call": "_probe",
+      "resolved_import": "component_probe._probe",
+      "family": "component_probe._probe",
+      "literal_arguments": [
+        "nominal_coordination"
+      ],
+      "call_source": "_probe(state,selector,release,key,'nominal_coordination',[\n        {'candidate_id':'NOMINAL','label':'Conjoined participants in ONE nominal slot: '+'; '.join(labels)},\n        {'candidate_id':'OTHER','label':'The connector has another scope; these nominal groups are not established'}],\n        state.text[slice(*region.source_range)],region.source_range,\n        question='Which units does the written conjunction connect in this area? '\n        'Do not infer that the members are one entity or that an event happened. Case and role are resolved later.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/component_nominal_questions.py",
+      "line": 10,
+      "function": "choose",
+      "call": "_probe",
+      "resolved_import": "component_probe._probe",
+      "family": "component_probe._probe",
+      "literal_arguments": [
+        "nominal_attachment"
+      ],
+      "call_source": "_probe(state,selector,release,key,'nominal_attachment',options,\n        state.text[slice(*region.source_range)],region.source_range,question=question)",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/component_participants.py",
+      "line": 110,
+      "function": "resolve_implicit",
+      "call": "_probe",
+      "resolved_import": "component_probe._probe",
+      "family": "component_probe._probe",
+      "literal_arguments": [
+        "implicit_argument"
+      ],
+      "call_source": "_probe(state,selector,release,gap['gap_id'],'implicit_argument',options,state.text[lo:hi],f.source_range,\n                          equivalent_targets=targets,\n                          question=('Resolve the omitted '+role+' of the TARGET clause below, not of another clause in the context.\\n'\n                            +'Target clause: '+state.text[slice(*f.source_range)]+'\\n'\n                            +'Target predicate: '+f.anchor_span+'; source range: '+str(f.source_range)+'\\n'\n                            +'Grammatical features of omitted participant: '+str(gap['features'])+'\\n'\n                            +'Choose the reference supported for THIS omission. Grammatical compatibility or proximity alone does not establish identity. '\n                            +'A group member is not the whole group. Use the target speech perspective, not the uploader identity. '\n                            +'The anonymous option preserves an unspecified referent; it does not assert a new, different person. '\n                            +'Later clauses may supply evidence. If several candidates fit, preserve the alternatives.'))",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/component_predication.py",
+      "line": 187,
+      "function": "compose_alternatives",
+      "call": "_probe",
+      "resolved_import": "component_probe._probe",
+      "family": "component_probe._probe",
+      "literal_arguments": [
+        "component_attachment"
+      ],
+      "call_source": "_probe(state, selector, release, region.region_id+'|composition',\n                        'component_attachment', options, context, region.source_range,\n                        question=target_question+(local['question'] if local else\n                            'Which remaining interpretation fits the target? Previously selected roles, readings and attachments '\n                            'are constraints, not questions to reopen. Retain alternatives when the text does not distinguish them.'))",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/component_refinement.py",
+      "line": 382,
+      "function": "_compose_lexical_area",
+      "call": "_probe",
+      "resolved_import": "component_probe._probe",
+      "family": "component_probe._probe",
+      "literal_arguments": [
+        "nominal_attachment"
+      ],
+      "call_source": "_probe(state,selector,release,region.region_id+'|refinement-host','nominal_attachment',choices,\n        state.text[slice(*region.source_range)],region.source_range,\n        question='Which existing nominal does «'+state.text[body[0].start:body[-1].end]+\n        '» describe? Choose its immediate host. Do not resolve pronoun identities or invent an entity.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/component_refinement.py",
+      "line": 193,
+      "function": "_compose_area",
+      "call": "choose",
+      "resolved_import": "structural_tasks.choose",
+      "family": "structural_tasks.choose",
+      "literal_arguments": [
+        "structural_revision"
+      ],
+      "call_source": "choose(state,release,selector,region,cfg,'structural_revision',[\n                {'candidate_id':'REVISE','label':'The text supports a different relation or different boundaries; reconsider them'},\n                {'candidate_id':'DEFER','label':'No different reading is supported; leave the parse unresolved'}],\n                constraint_text+' Does the text support revising these choices?')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/component_refinement.py",
+      "line": 420,
+      "function": "_compose_lexical_area",
+      "call": "choose",
+      "resolved_import": "structural_tasks.choose",
+      "family": "structural_tasks.choose",
+      "literal_arguments": [
+        "structural_marker_reading",
+        "Choose the whole reading of the source connector under the selected host and child constraints."
+      ],
+      "call_source": "choose(state,release,selector,region,cfg,'structural_marker_reading',\n                [{'candidate_id':cid,'reading':_morph(v),'label':describe_reading(_morph(v))} for cid,v in unique.items()],\n                'Choose the whole reading of the source connector under the selected host and child constraints.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/component_refinement.py",
+      "line": 446,
+      "function": "_compose_lexical_area",
+      "call": "choose",
+      "resolved_import": "structural_tasks.choose",
+      "family": "structural_tasks.choose",
+      "literal_arguments": [
+        "structural_description_role"
+      ],
+      "call_source": "choose(state,release,selector,region,cfg,'structural_description_role',[\n                {'candidate_id':r['role_id'],'label':r['role_id']+': '+role_text(r['role_id'])} for r in release.entries('RoleRegistry')],\n                'Which participant role does «'+host.span+'» fill inside «'+' '.join(t.span for t in body)+'»?')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/component_temporal_scope.py",
+      "line": 20,
+      "function": "resolve",
+      "call": "_probe",
+      "resolved_import": "component_probe._probe",
+      "family": "component_probe._probe",
+      "literal_arguments": [
+        "temporal_scope"
+      ],
+      "call_source": "_probe(state,selector,release,key,'temporal_scope',[\n            {'candidate_id':'SOURCE_ASSERTED','label':label+' is directly asserted by the source; other modifiers preserve this temporal relation'},\n            {'candidate_id':'EMBEDDED','label':'The temporal relation is only embedded under modality, negation, report, or another unasserted scope'}],\n            raw,region.source_range,question='Resolve the scope of the written temporal phrase. '\n            'Do not infer occurrence, calendar dates or world truth. Select SOURCE_ASSERTED only if the wording itself asserts this ordering for the named event. '\n            'Select EMBEDDED for an explicitly non-asserted scope; answer ? if the wording is insufficient.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/composition_boundaries.py",
+      "line": 52,
+      "function": "select",
+      "call": "_probe",
+      "resolved_import": "component_probe._probe",
+      "family": "component_probe._probe",
+      "literal_arguments": [
+        "composition_boundary"
+      ],
+      "call_source": "_probe(state, selector, release, key, 'composition_boundary', options,\n        state.text[lo:hi], region.source_range,\n        question='Select the outer connection of this source area before parsing its children. '\n        'Do not move an operator across the selected boundary. If one operator governs the whole '\n        'coordination, select that outer operator; its content slot must remain the whole area. '\n        'For a plain associative chain of actions choose the leftmost outer connector; '\n        'this is structural bracketing, not temporal order. Grammar and context override this preference.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/composition_children.py",
+      "line": 40,
+      "function": "select_child",
+      "call": "choose",
+      "resolved_import": "structural_tasks.choose",
+      "family": "structural_tasks.choose",
+      "literal_arguments": [
+        "child_slot"
+      ],
+      "call_source": "choose(state,release,selector,region,cfg,'child_slot',options,question)",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/composition_children.py",
+      "line": 44,
+      "function": "select_child",
+      "call": "_probe",
+      "resolved_import": "component_probe._probe",
+      "family": "component_probe._probe",
+      "literal_arguments": [
+        "child_slot"
+      ],
+      "call_source": "_probe(state,selector,release,key,'child_slot',options,\n            state.text[slice(*region.source_range)],region.source_range,question=question)",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/content_reference_functions.py",
+      "line": 38,
+      "function": "compose",
+      "call": "choose",
+      "resolved_import": "structural_tasks.choose",
+      "family": "structural_tasks.choose",
+      "literal_arguments": [
+        "content_reference_source"
+      ],
+      "call_source": "choose(state,release,selector,region,cfg,'content_reference_source',[\n        *[option for option,_ in sources],\n        {'candidate_id':'OTHER_SOURCE','label':'The intended content is not among these established structures, or has not yet been interpreted'}],\n        'Owner «'+owner.span+'». Pointer: '+('«'+' '.join(t.span for t in pointer)+'»' if pointer else 'omitted')+'. '\n        'Which content fills the referred/omitted slot of THIS owner? Select that content itself, not an earlier statement ABOUT requesting, reporting or considering it. '\n        'The source subject is shown to identify the source; the subject of its current use is determined separately. '\n        'The inventory is limited to completed structures in this run. It does not prove absence elsewhere. '\n        'Select the other-source option when a different source is required; use ? when the text does not identify the source.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/content_reference_functions.py",
+      "line": 75,
+      "function": "compose",
+      "call": "choose",
+      "resolved_import": "structural_tasks.choose",
+      "family": "structural_tasks.choose",
+      "literal_arguments": [
+        "content_reference_kind"
+      ],
+      "call_source": "choose(state,release,selector,region,cfg,'content_reference_kind',[\n        {'candidate_id':'SAME_CONTENT','mode':'SAME_CONTENT','source_hash':option['source_hash'],\n         'label':'The content keeps its established participants independently of the current owner; this use expresses no shared-subject constraint'},\n        {'candidate_id':'CONTROLLED_ACTION','mode':'CONTROLLED_ACTION','source_hash':option['source_hash'],\n         'label':'The current construction requires the action subject to be one of its own participants. Bind that participant to the action; preserve its other roles and scope, without equating events'}],\n        'Source: '+option['label']+'. Current owner: «'+' '.join(t.span for t in parent)+'». '\n        'Does the current construction CONTROL the subject of the referenced action, or merely refer to independent content? '\n        'For other required substitutions answer 0; they must not be silently reduced to a subject change.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/content_reference_functions.py",
+      "line": 160,
+      "function": "omitted_content",
+      "call": "choose",
+      "resolved_import": "structural_tasks.choose",
+      "family": "structural_tasks.choose",
+      "literal_arguments": [
+        "omitted_content_presence"
+      ],
+      "call_source": "choose(state,release,selector,region,cfg,'omitted_content_presence',[\n        {'candidate_id':'ABSENT','presence':'ABSENT',**parts,\n         'label':'No propositional/action content is omitted in this use; the existing participants suffice'},\n        {'candidate_id':'OMITTED','presence':'OMITTED',**parts,\n         'label':'An understood proposition/action is omitted: preserve a content slot and resolve what fills it'}],\n        'Target predicate «'+root.anchor_span+'» in «'+' '.join(t.span for t in tokens)+'». '\n        'Does this use leave an understood ACTION/PROPOSITION unspoken? This is about what is said, intended, achieved or otherwise taken as content. '\n        'An omitted person or thing is a different question. Do not invent an optional topic or purpose. '\n        'Choose omitted content only when this use actually refers to it; use ? if undecidable.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/content_reference_functions.py",
+      "line": 18,
+      "function": "compose",
+      "call": "choose",
+      "resolved_import": "structural_tasks.choose",
+      "family": "structural_tasks.choose",
+      "literal_arguments": [
+        "content_reference_presence",
+        "The selected relation takes a proposition or action as content, not an entity participant. Is the content entirely omitted, or is there explicit pointer wording? Do not choose its source or role yet."
+      ],
+      "call_source": "choose(state,release,selector,region,cfg,'content_reference_presence',[\n        {'candidate_id':'OMITTED','presence':'OMITTED','label':'The content is understood but no pointer wording is present in this target'},\n        {'candidate_id':'EXPLICIT','presence':'EXPLICIT','label':'Some target words explicitly point to content expressed elsewhere'}],\n        'The selected relation takes a proposition or action as content, not an entity participant. '\n        'Is the content entirely omitted, or is there explicit pointer wording? Do not choose its source or role yet.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/content_reference_functions.py",
+      "line": 26,
+      "function": "compose",
+      "call": "source_set",
+      "resolved_import": "structural_tasks.source_set",
+      "family": "structural_tasks.source_set",
+      "literal_arguments": [
+        "content_pointer",
+        "Select all wording that points to THIS content, including its grammatical introducer. Keep the owning predicate and its other participants outside this set."
+      ],
+      "call_source": "source_set(state,release,selector,region,tokens,cfg,'content_pointer',\n            'Select all wording that points to THIS content, including its grammatical introducer. '\n            'Keep the owning predicate and its other participants outside this set.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/content_reference_functions.py",
+      "line": 87,
+      "function": "compose",
+      "call": "choose",
+      "resolved_import": "structural_tasks.choose",
+      "family": "structural_tasks.choose",
+      "literal_arguments": [
+        "content_reference_control"
+      ],
+      "call_source": "choose(state,release,selector,region,cfg,'content_reference_control',[\n            {'candidate_id':'controller:'+digest(alias),'controller':alias,'source_hash':option['source_hash'],\n             'label':'Subject of action «'+option['source_words']+'» = '+label+' of «'+owner.span+'»'} for alias,label in controllers(target)],\n            'Referenced action: «'+option['source_words']+'». Current owner: «'+' '.join(t.span for t in parent)+'». '\n            'Who is understood to carry out/be the subject of THAT ACTION in this use? '\n            'Choose the action subject, not automatically the subject of the owning predicate. '\n            'A request can ask its recipient to act; a report can describe another person acting. Resolve THIS construction from the context.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/contextual_agreement.py",
+      "line": 54,
+      "function": "resolve",
+      "call": "_probe",
+      "resolved_import": "component_probe._probe",
+      "family": "component_probe._probe",
+      "literal_arguments": [
+        "lexical_recovery"
+      ],
+      "call_source": "_probe(state,selector,release,key,'lexical_recovery',choices,context,region.source_range,\n                question=target+'Is a grammatical inflection error supported by this context? The proposed head is «'+head.span+'». '\n                'Edit distance merely proposes candidates, not proof. Keep the original if a legitimate uncorrected reading remains; answer ? if uncertain. Do not alter names or infer a new lexical meaning.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/contextual_oov.py",
+      "line": 63,
+      "function": "resolve",
+      "call": "choose_domain",
+      "resolved_import": "structural_tasks.choose_domain",
+      "family": "structural_tasks.choose_domain",
+      "literal_arguments": [
+        "structural_oov_function"
+      ],
+      "call_source": "choose_domain(state,release,selector,region,cfg,'structural_oov_function',\n                    [{'candidate_id':pos,'label':pos_description(pos),'address':address} for pos in functions],\n                    'Which part of speech does the ONE marked occurrence ⟦'+token.span+'⟧ have? '\n                    'Addressed source: '+marked+'\\nOther equally spelled words are not selected. '\n                    'Choose its function in the sentence; no lemma, case or identity is established by this answer.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/coreference.py",
+      "line": 258,
+      "function": "resolve_references",
+      "call": "_probe",
+      "resolved_import": "component_probe._probe",
+      "family": "component_probe._probe",
+      "literal_arguments": [
+        "reference"
+      ],
+      "call_source": "_probe(state,selector,release,tid+'|reference','reference',options,\n                state.text[slice(*bounds)],bounds,\n                question='What does «'+evidence[tid].span+'» @'+str(evidence[tid].start)+' refer to? '\n                'A sole candidate in this bounded window is not proof. Choose a source-supported reference. List alternative referents when several fit; 0 means none fits, ? means evidence is insufficient.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/directional_goal.py",
+      "line": 36,
+      "function": "constrain",
+      "call": "_probe",
+      "resolved_import": "component_probe._probe",
+      "family": "component_probe._probe",
+      "literal_arguments": [
+        "referent_constraint"
+      ],
+      "call_source": "_probe(state,selector,release,key,'referent_constraint',choices,\n            state.text[slice(*region.source_range)],region.source_range,\n            question='Do these expressions constrain one destination of «'+frame.anchor_span+'»? '\n            'This is a local slot constraint, not identification of a remembered place. '\n            'Do not infer arrival, coordinates, distance or absolute height.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/discourse_scopes.py",
+      "line": 72,
+      "function": "prepare",
+      "call": "_probe",
+      "resolved_import": "component_probe._probe",
+      "family": "component_probe._probe",
+      "literal_arguments": [
+        "speech_act"
+      ],
+      "call_source": "_probe(state,selector,release,key,'speech_act',[\n                {'candidate_id':'ASSERTION','label':'The speaker asserts the WHOLE statement, including a report that someone said/thought something; the reported content need not be true'},\n                {'candidate_id':'QUERY','label':'The speaker asks for information or confirmation'},\n                {'candidate_id':'COMMAND','label':'The speaker requests or directs an action'},\n                {'candidate_id':'CONTENT','label':'The ENTIRE target is merely quoted/mentioned, with no assertion about it; not just a quote nested inside an asserted report'}],\n                state.text[slice(*bounds)],bounds,\n                question='What does the current speaker do with the WHOLE target? '\n                'An assertion that someone said something is an assertion about that speech, not an assertion of its content. '\n                'Likewise, asserting negation, possibility or a condition does not assert the inner event. '\n                'Preserve the accepted internal structure; decide only the explicit act at its outermost level. '\n                'Classify a question as QUERY even when it could indirectly suggest a request; do not infer an unstated command. '+\n                ('Accepted syntax: '+'; '.join(content_links)+'. ' if content_links else ''))",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/discourse_scopes.py",
+      "line": 119,
+      "function": "prepare",
+      "call": "_probe",
+      "resolved_import": "component_probe._probe",
+      "family": "component_probe._probe",
+      "literal_arguments": [
+        "discourse_addressee"
+      ],
+      "call_source": "_probe(state,selector,release,scope['scope_ref']+'|addressee','discourse_addressee',options,\n                              state.text[slice(*parent.source_range)],parent.source_range,\n                              question='Who is addressed by this quoted speech? A recipient role alone is not sufficient evidence.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/document_scopes.py",
+      "line": 44,
+      "function": "prepare",
+      "call": "_probe",
+      "resolved_import": "component_probe._probe",
+      "family": "component_probe._probe",
+      "literal_arguments": [
+        "document_scope"
+      ],
+      "call_source": "_probe(state,selector,release,row['decision_ref'],'document_scope',[\n                {'candidate_id':'HEADER','label':'Calendar header dates the following entry, until the next peer calendar header or end of source. Nested temporal expressions retain their own scope.'},\n                {'candidate_id':'INLINE','label':'Ordinary text; does not establish a temporal area over the following entry.'}],\n                context,tuple(row['source_range']),question='Classify the source line «'+row['raw']+\n                '». Layout alone is not evidence of date scope. Do not infer a year, timezone or clock boundaries. Proposed area: '+str(row['scope_range']))",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/fake_selector.py",
+      "line": 183,
+      "function": "<module>",
+      "call": "sel.select",
+      "resolved_import": "sel.select",
+      "family": "potential_transport_or_other_select",
+      "literal_arguments": [],
+      "call_source": "sel.select(prompt)",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/kernel.py",
+      "line": 54,
+      "function": "select",
+      "call": "self.executor.select",
+      "resolved_import": "self.executor.select",
+      "family": "potential_transport_or_other_select",
+      "literal_arguments": [],
+      "call_source": "self.executor.select(prompt)",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/kernel.py",
+      "line": 58,
+      "function": "propose_local",
+      "call": "self.executor.propose_local",
+      "resolved_import": "self.executor.propose_local",
+      "family": "potential_transport_or_other_select",
+      "literal_arguments": [],
+      "call_source": "self.executor.propose_local(prompt)",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/lexical_embedding.py",
+      "line": 66,
+      "function": "rank",
+      "call": "adapter.select",
+      "resolved_import": "adapter.select",
+      "family": "potential_transport_or_other_select",
+      "literal_arguments": [],
+      "call_source": "adapter.select(request,run_id,ordinal=1)",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/naming_probe.py",
+      "line": 83,
+      "function": "naming_probe",
+      "call": "selector.select",
+      "resolved_import": "selector.select",
+      "family": "potential_transport_or_other_select",
+      "literal_arguments": [],
+      "call_source": "selector.select(_naming_prompt(reading,context_facts))",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/native_frontend.py",
+      "line": 570,
+      "function": "_propose",
+      "call": "_probe",
+      "resolved_import": "component_probe._probe",
+      "family": "component_probe._probe",
+      "literal_arguments": [
+        "structure_attachment"
+      ],
+      "call_source": "_probe(state,selector,release,structure_key,'structure_attachment',options,state.text,(0,len(state.text)),\n            question='Which proposed arrangement of the source occurrences fits the text? Compare the displayed links and readings; do not infer world truth.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/native_frontend.py",
+      "line": 1076,
+      "function": "_interpret_state",
+      "call": "_probe",
+      "resolved_import": "component_probe._probe",
+      "family": "component_probe._probe",
+      "literal_arguments": [
+        "predicate_value"
+      ],
+      "call_source": "_probe(state,selector,release,f.frame_id+'|predicate_value','predicate_value',options,\n            context,f.source_range,\n            question='Which lexical use applies to this occurrence in its selected structure? '+established+'Choose a catalog entry when its lexical meaning fits. Tense, date, negation and modality are handled by the structure, not new lexical senses. Choose an unlisted use only when no listed meaning fits; use ? when uncertain.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/native_frontend.py",
+      "line": 548,
+      "function": "_propose",
+      "call": "selector.propose_local",
+      "resolved_import": "selector.propose_local",
+      "family": "potential_transport_or_other_select",
+      "literal_arguments": [],
+      "call_source": "selector.propose_local(prompt)",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/nominal_functions.py",
+      "line": 34,
+      "function": "prepare",
+      "call": "choose",
+      "resolved_import": "structural_tasks.choose",
+      "family": "structural_tasks.choose",
+      "literal_arguments": [
+        "nominal_function"
+      ],
+      "call_source": "choose(state,release,selector,region,cfg,'nominal_function',[\n            {'candidate_id':'RELATION','label':'An adposition or multiword relational unit: words introducing a noun/pronoun and linking it to an action or another noun (place, destination, origin, instrument, possession or another relation)'},\n            {'candidate_id':'REFERENCE','label':'An expression points to which person/thing is meant, using context or an earlier mention'},\n            {'candidate_id':'QUANTITY','label':'An expression says how many or how much of a noun group; keep its wording'}],\n            'Look for words in THIS target that introduce or specify a noun/pronoun. '\n            'A preposition connecting a place to a verb counts as RELATION, even when the verb already has a place role. '\n            'Choose the function of the FIRST remaining such expression, not all functions anywhere in the sentence. '\n            'A name by itself or an ordinary descriptive adjective does not count. '\n            'Already assigned functions (do not select the same function of the same occurrence again): '+\n            '; '.join(k+': «'+' '.join(t.span for t in tokens if t.token_id in refs)+'»' for k,refs in used_by_kind.items())+'.',\n            empty={'candidate_id':'DONE','label':'no further nominal relation, referential determiner or quantity expression'})",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/nominal_functions.py",
+      "line": 52,
+      "function": "prepare",
+      "call": "source_set",
+      "resolved_import": "structural_tasks.source_set",
+      "family": "structural_tasks.source_set",
+      "literal_arguments": [
+        "nominal_function_source"
+      ],
+      "call_source": "source_set(state,release,selector,region,tokens,cfg,'nominal_function_source',\n            kind+': select ONLY the connecting/determining/quantity expression. '\n            'Exclude a separate nominal head and unrelated modifiers. Include a word that itself BOTH expresses this function and stands for its nominal bearer.',exclude=used_by_kind[kind])",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/nominal_functions.py",
+      "line": 58,
+      "function": "prepare",
+      "call": "choose",
+      "resolved_import": "structural_tasks.choose",
+      "family": "structural_tasks.choose",
+      "literal_arguments": [
+        "nominal_function_head"
+      ],
+      "call_source": "choose(state,release,selector,region,cfg,'nominal_function_head',[\n            {'candidate_id':t.token_id,'head_ref':t.token_id,'shared_function':t.token_id in refs,\n             'label':'Nominal head «'+t.span+'» @'+str(t.start)+(' (this occurrence also carries the selected function)' if t.token_id in refs else '')}\n            for t in tokens if (kind!='RELATION' or t.token_id not in refs) and any(c.isalnum() for c in t.span)],\n            kind+': selected function expression is «'+expression+'». '\n            +('Which noun/pronoun is its complement: the entity/place introduced BY this expression, not the outside predicate or participant it attaches to? '\n              if kind=='RELATION' else 'Which noun/pronoun is determined or counted by this expression? ')+\n            'Select the nominal bearer. A reference or quantity word may itself be that bearer; choose it only if the text supplies no separate head for this expression.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/nominal_functions.py",
+      "line": 79,
+      "function": "prepare",
+      "call": "choose",
+      "resolved_import": "structural_tasks.choose",
+      "family": "structural_tasks.choose",
+      "literal_arguments": [
+        "nominal_identity_function"
+      ],
+      "call_source": "choose(state,release,selector,region,cfg,'nominal_identity_function',[\n                {'candidate_id':'CONTEXTUAL','label':'Identify the nominal from context; identity with a prior mention is not explicitly required'},\n                {'candidate_id':'SAME','label':'The source explicitly requires the same referent as a prior mention'}],\n                'Reference expression: «'+' '.join(t.span for t in owned)+'». What identity constraint is stated?')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/nominal_functions.py",
+      "line": 86,
+      "function": "prepare",
+      "call": "choose",
+      "resolved_import": "structural_tasks.choose",
+      "family": "structural_tasks.choose",
+      "literal_arguments": [
+        "nominal_external_case",
+        "Which external grammatical case does this whole quantity group take here? Its inner noun can have a different case."
+      ],
+      "call_source": "choose(state,release,selector,region,cfg,'nominal_external_case',[\n                {'candidate_id':c,'label':label} for c,label in [('nom','Nominative case'),('gen','Genitive case'),\n                ('dat','Dative case'),('acc','Accusative case'),('abl','Instrumental case'),('loc','Prepositional/locative case'),('voc','Vocative case')]],\n                'Which external grammatical case does this whole quantity group take here? Its inner noun can have a different case.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/nominal_reference_groups.py",
+      "line": 82,
+      "function": "project",
+      "call": "_probe",
+      "resolved_import": "component_probe._probe",
+      "family": "component_probe._probe",
+      "literal_arguments": [
+        "nominal_attachment"
+      ],
+      "call_source": "_probe(state, selector, release, key, 'nominal_attachment', [\n                {'candidate_id':'REFERENCE', 'label':raw+': determiner identifies an antecedent of the noun'+\n                 ('; modifier requires the SAME antecedent' if identity else '')},\n                {'candidate_id':'OTHER', 'label':'These words do not form this referential noun group; keep original analyses'}],\n                state.text[slice(*region.source_range)], region.source_range,\n                question='Choose the grammatical function of the whole noun group, not its antecedent. Do not infer identity from proximity.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/nominal_reference_memory.py",
+      "line": 68,
+      "function": "resolve",
+      "call": "_probe",
+      "resolved_import": "component_probe._probe",
+      "family": "component_probe._probe",
+      "literal_arguments": [
+        "reference"
+      ],
+      "call_source": "_probe(state,selector,release,decision,'reference',options,context,(start,end),\n                    equivalent_targets={o['candidate_id']:r['entity_ref'] for o,r in zip(options,rows)},\n                    question='Resolve «'+constraint['raw']+'» as one noun group. Constraint='+\n                    constraint['identity_constraint']+'. Select only a compatible antecedent supported by these source excerpts. '+\n                    'Proximity and name spelling alone do not prove identity. An already introduced unnamed or relative place is a valid antecedent: unknown coordinates/name do not make its reference unresolved. '\n                    'Choose the existing referent, not a new object. If several antecedents fit, list their numbers; use ? when evidence is insufficient to assess them.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/open_set_probe.py",
+      "line": 65,
+      "function": "propose_value",
+      "call": "selector.select",
+      "resolved_import": "selector.select",
+      "family": "potential_transport_or_other_select",
+      "literal_arguments": [],
+      "call_source": "selector.select(build_probe_prompt(slot_id, miss_texts, existing_values, slot_definition=slot_definition, existing_definitions=existing_definitions))",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/partition_domain.py",
+      "line": 108,
+      "function": "span",
+      "call": "span",
+      "resolved_import": "structural_tasks.source_set",
+      "family": "structural_tasks.source_set",
+      "literal_arguments": [],
+      "call_source": "span(self.state,self.release,self.selector,self.region,tokens,self.cfg,slot,question,\n                    admissible=complete,partial_admissible=partial,**kwargs)",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/partition_role_revision.py",
+      "line": 58,
+      "function": "revise",
+      "call": "choose",
+      "resolved_import": "structural_tasks.choose",
+      "family": "structural_tasks.choose",
+      "literal_arguments": [
+        "structural_marker_revision"
+      ],
+      "call_source": "choose(state,domain.release,domain.selector,domain.region,domain.cfg,'structural_marker_revision',alternatives,\n        'Current outer relation: '+RELATIONS[domain.kind]+'. '\n        'No first piece was accepted from the still available occurrences: '+remaining+'. '\n        'The earlier function assignments below excluded their occurrences from that search. '\n        'Does the ORIGINAL SOURCE support changing one of those assignments as shown? '\n        'A failed search does not prove any assignment wrong or exhaust every possible parse. '\n        'Select only a source-supported correction, not the correction that would merely let execution continue. '\n        'Other established functions and the outer relation remain fixed. '\n        '0 means no listed correction is supported; ? means insufficient evidence.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/partition_sequences.py",
+      "line": 55,
+      "function": "select_parts",
+      "call": "choose",
+      "resolved_import": "structural_tasks.choose",
+      "family": "structural_tasks.choose",
+      "literal_arguments": [
+        "structural_ownership_revision"
+      ],
+      "call_source": "choose(state,domain.release,domain.selector,domain.region,local_cfg,\n                'structural_ownership_revision',options,\n                'Current outer relation: '+RELATIONS[domain.kind]+'. No accepted '+roles[index]+\n                ' could be built from the still available words «'+remaining+'». '\n                'Earlier assignments exclude their words from this part. Which assignment below contains '\n                'words that the SOURCE places in the missing part and therefore needs reconsideration? '\n                'Select the assignment to reconsider NEXT; multiple numbers are alternative next repairs, not a joint change. '\n                'Failure alone is not evidence that an assignment is wrong. '\n                '0: no listed assignment is shown wrong by the source; ?: insufficient evidence.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/pipeline.py",
+      "line": 626,
+      "function": "_attempt",
+      "call": "selector.select",
+      "resolved_import": "selector.select",
+      "family": "potential_transport_or_other_select",
+      "literal_arguments": [],
+      "call_source": "selector.select(prompt)",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/predicate_functions.py",
+      "line": 21,
+      "function": "subject_presence",
+      "call": "choose",
+      "resolved_import": "structural_tasks.choose",
+      "family": "structural_tasks.choose",
+      "literal_arguments": [
+        "predicate_subject_presence"
+      ],
+      "call_source": "choose(state,release,selector,region,cfg,'predicate_subject_presence',[\n        {'candidate_id':'OMITTED','omitted':True,**common,\n         'label':'An understood subject is omitted from this target; preserve a participant slot whose identity remains to be resolved'},\n        {'candidate_id':'ABSENT','omitted':False,**common,\n         'label':'This use has no subject participant; do not invent one (for example an impersonal predication)'}],\n        'Predicate «'+predicate.span+'»: '+reading_text(_morph(variant))+'. '\n        'Already established explicit participants: '+('; '.join('«'+t.span+'»='+role_text(roles[t.token_id])\n            for t in nominals if t.token_id in roles) or 'none')+'. '\n        'None is the subject. Does this use still have an understood subject, or is there no subject slot? '\n        'Context may identify an omitted subject, but do not choose its identity here. '\n        'Do not replace an established explicit role or use agreement alone to infer personal meaning. Use ? if undecidable.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/predicate_functions.py",
+      "line": 76,
+      "function": "head",
+      "call": "choose",
+      "resolved_import": "structural_tasks.choose",
+      "family": "structural_tasks.choose",
+      "literal_arguments": [
+        "predicate_function",
+        "Which source occurrence predicates something of participants in this target? Any grammatical form can have predicative use. Select a nominal description only if there is no separate predication."
+      ],
+      "call_source": "choose(state,release,selector,region,cfg,'predicate_function',options,\n        'Which source occurrence predicates something of participants in this target? Any grammatical form can have predicative use. '\n        'Select a nominal description only if there is no separate predication.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/predicate_functions.py",
+      "line": 99,
+      "function": "binding",
+      "call": "choose",
+      "resolved_import": "structural_tasks.choose",
+      "family": "structural_tasks.choose",
+      "literal_arguments": [
+        "predicate_argument_role"
+      ],
+      "call_source": "choose(state,release,selector,region,cfg,'predicate_argument_role',[\n            *[{'candidate_id':r,'label':role_text(r),'predicate_ref':predicate.token_id,\n               'token_ref':token.token_id,'reserved_roles':sorted(forbidden)} for r in roles if r not in forbidden],\n            {'candidate_id':'NO_DIRECT_ROLE','predicate_ref':predicate.token_id,'token_ref':token.token_id,\n             'reserved_roles':sorted(forbidden),\n             'label':'This occurrence belongs to another nominal or lexical child, not directly to this predicate'}],\n            'What role does «'+token.span+'» @'+str(token.start)+' have in predicate «'+predicate.span+'»? '\n            'Choose the released valency slot, not every semantic description of the participant. '\n            'SUBJECT/OBJECT are core slots after voice projection; a grammatical subject stays SUBJECT even if it feels something. '\n            'EXPERIENCER is an oblique/impersonal state participant outside those core slots. Case alone is not proof. '\n            'Use SURFACE_ARG only when no more specific role is established.'+\n            (' Already supplied by this predicate\\'s accepted input contract and unavailable to a different argument: '+\n             '; '.join(role_text(r) for r in sorted(forbidden))+'. These restrictions do not apply to other predicates.' if forbidden else ''))",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/predicate_functions.py",
+      "line": 123,
+      "function": "binding",
+      "call": "choose_domain",
+      "resolved_import": "structural_tasks.choose_domain",
+      "family": "structural_tasks.choose_domain",
+      "literal_arguments": [
+        "predicate_argument_reading"
+      ],
+      "call_source": "choose_domain(state,release,selector,region,cfg,'predicate_argument_reading',[\n                {'candidate_id':cid,'reading':clean(v),'token_ref':token.token_id,'predicate_ref':predicate.token_id,\n                 'role':role,'label':reading_text(_morph(v))} for cid,v in unique.items()],\n                'Predicate «'+predicate.span+'»: which whole reading of «'+token.span+'» fits its selected role '+role_text(role)+'? Preserve unknown features.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/qualitative_quantity.py",
+      "line": 52,
+      "function": "resolve",
+      "call": "_probe",
+      "resolved_import": "component_probe._probe",
+      "family": "component_probe._probe",
+      "literal_arguments": [
+        "nominal_attachment"
+      ],
+      "call_source": "_probe(state,selector,release,key,'nominal_attachment',choices,\n                      state.text[slice(*region.source_range)],region.source_range,\n                      question='Select the full quantity child of this nominal group, including a qualifier ONLY if it qualifies the quantity, not the event. '\n                      'This is phrase attachment, not numerical calculation or identification of individual members.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/quantifier_composition.py",
+      "line": 117,
+      "function": "_bind",
+      "call": "_probe",
+      "resolved_import": "component_probe._probe",
+      "family": "component_probe._probe",
+      "literal_arguments": [
+        "nominal_attachment"
+      ],
+      "call_source": "_probe(state,selector,release,key,'nominal_attachment',options,\n                state.text[slice(*region.source_range)],region.source_range,\n                question='The bound nominal is already selected when supplied. Select only its remaining compatible whole reading. '\n                         'Do not introduce a named entity, an existential witness or an implicit lexical restriction.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/real_backend.py",
+      "line": 115,
+      "function": "propose_local",
+      "call": "self._adapter.propose_local",
+      "resolved_import": "self._adapter.propose_local",
+      "family": "potential_transport_or_other_select",
+      "literal_arguments": [],
+      "call_source": "self._adapter.propose_local(prompt,self.run_id)",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/real_backend.py",
+      "line": 118,
+      "function": "select",
+      "call": "self._adapter.select",
+      "resolved_import": "self._adapter.select",
+      "family": "potential_transport_or_other_select",
+      "literal_arguments": [],
+      "call_source": "self._adapter.select(prompt, self.run_id)",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/refinement_boundaries.py",
+      "line": 9,
+      "function": "general_boundary",
+      "call": "source_set",
+      "resolved_import": "structural_tasks.source_set",
+      "family": "structural_tasks.source_set",
+      "literal_arguments": [
+        "structural_description",
+        "Select the dependent description of a nominal. Keep the parent clause outside it."
+      ],
+      "call_source": "source_set(state,release,selector,region,tokens,cfg,'structural_description',\n        'Select the dependent description of a nominal. Keep the parent clause outside it.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/refinement_boundaries.py",
+      "line": 14,
+      "function": "general_boundary",
+      "call": "choose",
+      "resolved_import": "structural_tasks.choose",
+      "family": "structural_tasks.choose",
+      "literal_arguments": [
+        "structural_description_binding"
+      ],
+      "call_source": "choose(state,release,selector,region,cfg,'structural_description_binding',[\n        {'candidate_id':'RELATIVE_PRONOUN','label':'An explicit relative expression fills a participant role inside this description'},\n        {'candidate_id':'RELATIVE','label':'An explicit connector relates this description to its nominal host'},\n        {'candidate_id':'BOUND_DESCRIPTION','label':'The nominal host fills an unexpressed participant role in this description'}],\n        'How does «'+' '.join(t.span for t in body)+'» refer to its host? Choose the grammatical relation, independent of wording or punctuation.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/refinement_boundaries.py",
+      "line": 105,
+      "function": "select",
+      "call": "_probe",
+      "resolved_import": "component_probe._probe",
+      "family": "component_probe._probe",
+      "literal_arguments": [
+        "component_attachment"
+      ],
+      "call_source": "_probe(state, selector, release, key, 'component_attachment', choices, raw,\n        region.source_range, question='Which span is a postnominal description attached to a noun in the remaining parent? '\n        'The description may contain further descriptions. Do not use punctuation as proof; '\n        'keep all complements belonging to this area. If none of these boundaries fits, answer 0; use ? when evidence is insufficient.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/refinement_boundaries.py",
+      "line": 23,
+      "function": "general_boundary",
+      "call": "choose",
+      "resolved_import": "structural_tasks.choose",
+      "family": "structural_tasks.choose",
+      "literal_arguments": [
+        "structural_description_marker",
+        "Which occurrence links the description to its host?"
+      ],
+      "call_source": "choose(state,release,selector,region,cfg,'structural_description_marker',[\n            {'candidate_id':t.token_id,'label':'«'+t.span+'» @'+str(t.start)} for t in body],\n            'Which occurrence links the description to its host?')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/refinement_boundaries.py",
+      "line": 74,
+      "function": "select",
+      "call": "choose",
+      "resolved_import": "structural_tasks.choose",
+      "family": "structural_tasks.choose",
+      "literal_arguments": [
+        "structural_refinement",
+        "Select the whole nominal description. Its host may precede OR follow it. All morphologically eligible starts and token ends remain available in later pages."
+      ],
+      "call_source": "choose(state,release,selector,region,cfg,'structural_refinement',candidates(),\n            'Select the whole nominal description. Its host may precede OR follow it. '\n            'All morphologically eligible starts and token ends remain available in later pages.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/refinement_boundaries.py",
+      "line": 30,
+      "function": "general_boundary",
+      "call": "extend_source_set",
+      "resolved_import": "structural_tasks.extend_source_set",
+      "family": "structural_tasks.extend_source_set",
+      "literal_arguments": [
+        "structural_description_link",
+        "Select every piece of the linking expression; keep the described proposition outside it."
+      ],
+      "call_source": "extend_source_set(state,release,selector,region,body,cfg,'structural_description_link',\n                'Select every piece of the linking expression; keep the described proposition outside it.',\n                [next(t for t in body if t.token_id==marker)],[result[1]])",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/region_probes.py",
+      "line": 45,
+      "function": "select_generated",
+      "call": "_probe",
+      "resolved_import": "component_probe._probe",
+      "family": "component_probe._probe",
+      "literal_arguments": [
+        "structural_attachment"
+      ],
+      "call_source": "_probe(state,selector,release,row['decision_ref'],'structural_attachment',choices,\n            state.text[region.source_range[0]:region.source_range[1]],(start,end))",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/relation_composition.py",
+      "line": 119,
+      "function": "confirm_partition",
+      "call": "choose",
+      "resolved_import": "structural_tasks.choose",
+      "family": "structural_tasks.choose",
+      "literal_arguments": [
+        "structural_partition"
+      ],
+      "call_source": "choose(state,release,selector,region,cfg,'structural_partition',[option],\n        'Check ONE relation application: '+RELATIONS[kind]+'. '\n        'Does the original source connect the quoted content parts by this relation, in the roles shown? '\n        'The selected OUTER meaning applies to the parts; its own wording is outside them. '\n        'Preserve their participants and any ADDITIONAL clauses, negation or modality nested inside a part. '\n        'Do not require the selected outer operator to appear inside its own content as another operator. '\n        'The parts are not independently asserted by this choice. '\n        +('The parent has an intentionally open content slot filled by the other part; '\n          'it need not be a standalone sentence and may contain other clauses. '\n          'The established slot owner is «'+owner.span+'» @'+str(owner.start)+'. '\n          'Check this content at that owner; other parent predicates keep their own clauses and scopes. ' if owner else '')+\n        ('The marked quantifier occurrence also serves as the bound mention; preserve both functions. ' if shared_refs else '')+\n        'Outer relation words may be separated in the source; they are not a new sentence. '\n        'Choose the proposed application if it connects the right contents. '\n        'Answer 0 if the relation or the assignment of its contents is wrong, or ? if the source does not decide. '\n        'This choice does not resolve dictionary meanings or validate the internal parse of each part.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/relation_composition.py",
+      "line": 235,
+      "function": "compose",
+      "call": "choose",
+      "resolved_import": "structural_tasks.choose",
+      "family": "structural_tasks.choose",
+      "literal_arguments": [
+        "structural_relation"
+      ],
+      "call_source": "choose(state,release,selector,region,cfg,'structural_relation',options,supplied+\n        'Classify ONLY the target words. Context explains their meaning but is not part of this choice. '\n        'Choose the outermost relation expressed inside the target; inner relations are handled later. '\n        'Choose one lexical predication only when TARGET itself contains no further outer relation; '\n        'an outer relation already supplied by CONTEXT must not be selected again. '\n        'The full content option requires both the parent predicate and dependent content to be present in this text. '\n        'A reference to content or an omitted but understood content uses the content-reference option; an omitted participant alone does not. '\n        'Numeric quantification is deferred.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/relation_composition.py",
+      "line": 372,
+      "function": "content_owner",
+      "call": "choose",
+      "resolved_import": "structural_tasks.choose",
+      "family": "structural_tasks.choose",
+      "literal_arguments": [
+        "structural_owner"
+      ],
+      "call_source": "choose(state,release,selector,region,cfg,'structural_owner',\n        [{'candidate_id':t.token_id,'owner_ref':t.token_id,**source_parts,\n          'label':'Content belongs to predicate «'+t.span+'» @'+str(t.start)} for t in owners],\n        'Selected dependent content: «'+body_text+'». Remaining parent: «'+' '.join(t.span for t in parent)+'». '\n        'Which predicate takes THIS content as what is said, thought, intended or otherwise described? '\n        'Other parent predicates may own a different clause. Position alone is not evidence.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/relation_composition.py",
+      "line": 457,
+      "function": "content_role",
+      "call": "choose",
+      "resolved_import": "structural_tasks.choose",
+      "family": "structural_tasks.choose",
+      "literal_arguments": [
+        "structural_content_role"
+      ],
+      "call_source": "choose(state,release,selector,region,cfg,'structural_content_role',choices,\n        'Selected owner: «'+owner.span+'» @'+str(owner.start)+'. Selected dependent content: «'+body_text+'». '\n        'Remaining parent: «'+' '.join(t.span for t in parent)+'». '\n        +('Already assigned slots of THIS owner: '+', '.join(reserved)+'. Select a different slot; the assigned content is not being reconsidered. ' if reserved else '')+\n        'Choose the role and status of THIS content for THIS predicate. '\n        'QUOTED=reported; EMBEDDED=mental content; HYPOTHETICAL=intended/possible; UNKNOWN=unspecified. '\n        'None asserts the child. No canonical lexical identity is inferred.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/relation_composition.py",
+      "line": 168,
+      "function": "function_ownership",
+      "call": "choose",
+      "resolved_import": "structural_tasks.choose",
+      "family": "structural_tasks.choose",
+      "literal_arguments": [
+        "structural_function_owner"
+      ],
+      "call_source": "choose(state,release,selector,region,cfg,'structural_function_owner',options,\n            kind+' ('+RELATIONS[kind]+'). Current parts: '+\n            '; '.join(str(i+1)+': «'+' '.join(t.span for t in group)+'»' for i,group in enumerate(groups))+'. '+\n            'Which is the FIRST remaining occurrence in source order expressing this OUTER relation? '\n            'Select that occurrence to move it out of its part. '\n            +('Words introducing the condition or consequence belong to this outer conditional relation. '\n              if kind in {'IMPLIES','IF_ELSE','COUNTERFACTUAL'} else '')+\n            ('Part 1 is the parent, part 2 is its selected content. Parent predicate «'+(owner.span if owner else '')+'» is content and must remain. Select only grammatical connective wording introducing «'+\n             ' '.join(t.span for t in groups[1])+'». Move only an introducer of THIS content; '\n             'a conjunction introducing a different clause still inside the parent must stay there. ' if kind=='CONTENT' else '')+\n            'Predicates and participants remain content. Negation, modality and quantification of an inner proposition stay inside it.',\n            empty={'candidate_id':'KEEP_ALL','label':'keep all listed words in their parts'})",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/relation_composition.py",
+      "line": 357,
+      "function": "content_owner",
+      "call": "choose",
+      "resolved_import": "structural_tasks.choose",
+      "family": "structural_tasks.choose",
+      "literal_arguments": [
+        "structural_owner",
+        "Choose the predicate INSIDE TARGET whose dependent proposition or action description is also INSIDE TARGET. This selects the owner before selecting its content boundaries. A predicate outside TARGET, including the ancestor whose slot this target fills, is not this owner. Content already supplied separately by the parent requirements does not count as content inside TARGET. If several predicates have their own dependent contents here, select the FIRST such predicate in source order; the other constructions remain for recursive analysis. This is traversal order, not a claim that they lack content. Several numbers mean alternative owners at this first position, not all content-taking predicates. Do not select a participant or infer an unknown word’s lexical meaning."
+      ],
+      "call_source": "choose(state,release,selector,region,cfg,'structural_owner',\n            [{'candidate_id':t.token_id,'owner_ref':t.token_id,\n              'label':'Content belongs to predicate «'+t.span+'» @'+str(t.start)}\n             for t in parent if any(c.isalnum() for c in t.span)],\n            'Choose the predicate INSIDE TARGET whose dependent proposition or action description is also INSIDE TARGET. '\n            'This selects the owner before selecting its content boundaries. '\n            'A predicate outside TARGET, including the ancestor whose slot this target fills, is not this owner. '\n            'Content already supplied separately by the parent requirements does not count as content inside TARGET. '\n            'If several predicates have their own dependent contents here, select the FIRST such predicate in source order; '\n            'the other constructions remain for recursive analysis. This is traversal order, not a claim that they lack content. '\n            'Several numbers mean alternative owners at this first position, not all content-taking predicates. '\n            'Do not select a participant or infer an unknown word’s lexical meaning.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/relation_composition.py",
+      "line": 411,
+      "function": "content",
+      "call": "choose",
+      "resolved_import": "structural_tasks.choose",
+      "family": "structural_tasks.choose",
+      "literal_arguments": [
+        "structural_control"
+      ],
+      "call_source": "choose(state,release,selector,region,cfg,'structural_control',\n            [{'candidate_id':'INDEPENDENT_CONTENT','independent_content':True,**source_parts,\n              'label':'Independent content: no participant of «'+owner.span+'» is supplied as its infinitive subject'},\n             *[{'candidate_id':'controller:'+digest(alias),'controller':alias,**source_parts,'label':'Same '+label+' of «'+owner.span+'»'}\n               for alias,label in controllers(target)]],\n            'Parent: «'+' '.join(t.span for t in parent)+'». Content: «'+body_text+'». '\n            'Which participant, if any, is understood as the grammatical subject of THIS infinitive content? '\n            'A passive subject receives the action; it need not perform it. '\n            'A quoted or impersonal statement can have its own subject interpretation. '\n            'Choose independent content if this connection is absent; the child will determine its own participants. '\n            'Select a shared participant only when the source establishes that identity. Use ? if undecidable.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/relation_composition.py",
+      "line": 195,
+      "function": "child",
+      "call": "choose",
+      "resolved_import": "structural_tasks.choose",
+      "family": "structural_tasks.choose",
+      "literal_arguments": [
+        "structural_event_head"
+      ],
+      "call_source": "choose(state,release,selector,region,cfg,'structural_event_head',opts,\n                contract+'. Target words: «'+' '.join(t.span for t in tokens)+'». '\n                'Is this a complete clause, or a noun phrase naming an event/state? '\n                'For a complete clause choose the complete-clause option; its predicate will be selected next. '\n                'For an event noun phrase choose its head. A person or object name alone is not an event. '\n                'If none fits, answer 0.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/relation_composition.py",
+      "line": 320,
+      "function": "compose",
+      "call": "choose",
+      "resolved_import": "structural_tasks.choose",
+      "family": "structural_tasks.choose",
+      "literal_arguments": [
+        "structural_governor"
+      ],
+      "call_source": "choose(state,release,selector,region,cfg,'structural_governor',\n                [{'candidate_id':'INDEPENDENT','label':'No agreement governor: the child has independent predication'},\n                 *governor_options],\n                'Modal words: «'+' '.join(t.span for t in markers)+'». Content: «'+' '.join(t.span for t in owned)+'». '\n                'Does a modal word supply person, number or gender agreement for a dependent infinitive? '\n                'If the content already has its own conjugated predicate, choose no governor. '\n                'Impersonal necessity or permission has no subject agreement: choose no governor. '\n                'A passive predicate agrees with its patient, not its performer. '\n                'A dictionary reading alone does not establish this connection.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/relation_markers.py",
+      "line": 43,
+      "function": "confirm",
+      "call": "choose",
+      "resolved_import": "structural_tasks.choose",
+      "family": "structural_tasks.choose",
+      "literal_arguments": [
+        "relation_marker_role"
+      ],
+      "call_source": "choose(state,release,selector,region,cfg,'relation_marker_role',options,\n            'Outer relation: '+kind+' ('+RELATIONS[kind]+'). Words assigned to it: «'+\n            ' '.join(t.span for t in links)+'». Content parts: '+('none retained' if empty else content)+'. '\n            +('The selected content owner is «'+owner.span+'» @'+str(owner.start)+'. '\n              'The first part is the PARENT, including its other clauses; the second is THIS owner\\'s DEPENDENT CONTENT. '\n              'A link between clauses of the parent is internal to the parent, not an introducer of this dependent content. ' if owner else '')+\n            'Question about ONE source word: «'+token.span+'» @'+str(token.start)+'. '\n            'Is it part of this outer wording, or does it belong to the content, including a nested negation, modality or quantifier? '\n            'The current split removes this word from the content. Judge its meaning in the original source. '\n            'An action remains content even when it is negated or has not happened. '\n            'Choose only this occurrence\\'s function. The other assigned words may still be misplaced; '\n            'this choice does not approve the whole split or the completeness of the remaining content.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/relation_partitions.py",
+      "line": 14,
+      "function": "unary",
+      "call": "domain.span",
+      "resolved_import": "domain.span",
+      "family": "domain.span",
+      "literal_arguments": [
+        "structural_introducer"
+      ],
+      "call_source": "domain.span(tokens,'structural_introducer',\n        kind+' ('+RELATIONS[kind]+'): select only the complete words expressing this outer relation. '\n        'Include the full linking expression and any conjunction introducing its content. '\n        'Exclude words belonging to a different nested relation, even when adjacent to the outer marker. '\n        'Exclude the content proposition, its subject and predicate. Separating commas may be included; '\n        'do not end early just because the first word already signals the relation.',record_remainder=True,marker=True)",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/relation_partitions.py",
+      "line": 104,
+      "function": "group",
+      "call": "domain.span",
+      "resolved_import": "domain.span",
+      "family": "domain.span",
+      "literal_arguments": [
+        "structural_group",
+        "Select the complete parenthesized proposition, excluding the outer delimiters."
+      ],
+      "call_source": "domain.span(tokens,'structural_group',\n        'Select the complete parenthesized proposition, excluding the outer delimiters.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/relation_partitions.py",
+      "line": 43,
+      "function": "select",
+      "call": "domain.span",
+      "resolved_import": "domain.span",
+      "family": "domain.span",
+      "literal_arguments": [],
+      "call_source": "domain.span(tokens,'structural_operand_'+str(i+1),\n            kind+' ('+RELATIONS[kind]+'): select the complete '+contract+'. '+\n            ('Include only what is being checked, not what happens as a result. ' if contract=='condition being checked' else\n             'Include only this outcome, not the condition or the alternative outcome. ' if contract.startswith('outcome') else '')+\n            'Exclude words linking the two outer parts. Keep any relations nested inside this part.'+\n            (' Already selected: '+'; '.join(contracts[j]+': «'+' '.join(t.span for t in group)+'»' for j,group in enumerate(groups))+'.' if groups else ''),\n            exclude=[t.token_id for g in groups for t in g],\n            covered=[t.token_id for g in groups for t in g],remaining_parts=len(contracts)-i-1)",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/relation_partitions.py",
+      "line": 82,
+      "function": "select",
+      "call": "domain.span",
+      "resolved_import": "domain.span",
+      "family": "domain.span",
+      "literal_arguments": [
+        "structural_parent"
+      ],
+      "call_source": "domain.span(rest,'structural_parent',\n            'Selected dependent content: «'+' '.join(t.span for t in body)+'». It has been removed from the choices below. '\n            'Select the remaining parent text: the predicate that takes this content, its participants and other attached clauses. '\n            'Boundary punctuation may stay; punctuation and connecting words are checked separately.'+owner_note,\n            covered=body_ids,must_include=[owner_ref] if owner_ref else ())",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/relation_partitions.py",
+      "line": 73,
+      "function": "select",
+      "call": "domain.span",
+      "resolved_import": "domain.span",
+      "family": "domain.span",
+      "literal_arguments": [
+        "structural_content"
+      ],
+      "call_source": "domain.span(tokens,'structural_content',\n                'Select the complete dependent content: a proposition or an infinitive action description '\n                'that is said, thought, requested, intended or otherwise taken as content. '\n                'Exclude the parent predicate and its participants, the introducing conjunction, colon, and enclosing '\n                'quotation marks. IF the content is quoted, start inside its quotes. '\n                'Unquoted content needs no quotation marks. Retain any operators inside that content.'+owner_note,\n                exclude=[owner_ref] if owner_ref else (),remaining_parts=1,remaining_contiguous=False)",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/relation_quantifiers.py",
+      "line": 12,
+      "function": "propose",
+      "call": "domain.span",
+      "resolved_import": "domain.span",
+      "family": "domain.span",
+      "literal_arguments": [
+        "structural_quantifier"
+      ],
+      "call_source": "domain.span(tokens,'structural_quantifier',\n            operator+': select the nonnumeric quantifier expression only, excluding its nominal restriction.',marker=True)",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/relation_quantifiers.py",
+      "line": 19,
+      "function": "propose",
+      "call": "choose",
+      "resolved_import": "structural_tasks.choose",
+      "family": "structural_tasks.choose",
+      "literal_arguments": [
+        "quantifier_source_functions",
+        "Does this quantifier contain its own participant mention? The same occurrence can have both functions."
+      ],
+      "call_source": "choose(state,release,selector,region,cfg,'quantifier_source_functions',[\n            {'candidate_id':'SEPARATE','shared':False,'label':'The quantified mention is separate from these quantifier words'},\n            *[{'candidate_id':t.token_id,'head_ref':t.token_id,'shared':True,\n               'label':'«'+t.span+'» simultaneously expresses quantification and the bound participant'} for t in anchors]],\n            'Does this quantifier contain its own participant mention? The same occurrence can have both functions.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/relation_quantifiers.py",
+      "line": 35,
+      "function": "compose",
+      "call": "choose",
+      "resolved_import": "structural_tasks.choose",
+      "family": "structural_tasks.choose",
+      "literal_arguments": [
+        "structural_binder_head"
+      ],
+      "call_source": "choose(state,release,selector,region,cfg,'structural_binder_head',\n        [{'candidate_id':t.token_id,'head_ref':t.token_id,'label':'Bind the nominal «'+t.span+'» @'+str(t.start)} for t in heads],\n        operator+': select the restricted variable mention. Its complete body remains indivisible; do not create a witness.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/relative_composition.py",
+      "line": 40,
+      "function": "compose",
+      "call": "_probe",
+      "resolved_import": "component_probe._probe",
+      "family": "component_probe._probe",
+      "literal_arguments": [
+        "temporal_boundary"
+      ],
+      "call_source": "_probe(state,selector,release,key,'temporal_boundary',choices,\n                    state.text[slice(*region.source_range)],region.source_range,\n                    question='Choose the complete nominal description governed by the temporal relation. '\n                    'Include its adjectives and nominal dependents; do not absorb the subject of the following clause. '\n                    'This chooses a child boundary, not an absolute date or the truth of the anchor event.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/relative_pronoun.py",
+      "line": 21,
+      "function": "compose",
+      "call": "choose",
+      "resolved_import": "structural_tasks.choose",
+      "family": "structural_tasks.choose",
+      "literal_arguments": [
+        "relative_argument_role"
+      ],
+      "call_source": "choose(state,release,selector,region,cfg,'relative_argument_role',[\n            {'candidate_id':r['role_id'],'label':r['role_id']+': '+role_text(r['role_id'])} for r in release.entries('RoleRegistry')],\n            'Which semantic role does «'+marker.span+'» fill inside the description? Its antecedent is «'+host.span+'». '\n            'Account for passive voice; neither the antecedent case nor the pronoun case alone decides the role.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/relative_pronoun.py",
+      "line": 27,
+      "function": "compose",
+      "call": "choose",
+      "resolved_import": "structural_tasks.choose",
+      "family": "structural_tasks.choose",
+      "literal_arguments": [
+        "relative_marker_reading"
+      ],
+      "call_source": "choose(state,release,selector,region,cfg,'relative_marker_reading',[\n            {'candidate_id':cid,'label':describe(_morph(m))} for cid,m in variants.items()],\n            'Which whole reading of «'+marker.span+'» fits this use? Do not copy the antecedent case.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/relative_pronoun.py",
+      "line": 42,
+      "function": "compose",
+      "call": "_probe",
+      "resolved_import": "component_probe._probe",
+      "family": "component_probe._probe",
+      "literal_arguments": [
+        "relative_pronoun_role"
+      ],
+      "call_source": "_probe(state,selector,release,key,'relative_pronoun_role',choices,\n        state.text[slice(*region.source_range)],region.source_range,\n        question='Select the relative pronoun grammatical role inside the description. Its antecedent is already selected. '\n        'The antecedent case in the parent does not determine its role here. Do not create another person or assert the description independently.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/scope_assignment.py",
+      "line": 190,
+      "function": "_assign",
+      "call": "_probe",
+      "resolved_import": "component_probe._probe",
+      "family": "component_probe._probe",
+      "literal_arguments": [
+        "modifier_scope"
+      ],
+      "call_source": "_probe(state,selector,release,key,'modifier_scope',options,\n                        state.text[slice(*region.source_range)],region.source_range,question=question)",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/selection_exchange.py",
+      "line": 16,
+      "function": "exchange",
+      "call": "selector.select",
+      "resolved_import": "selector.select",
+      "family": "potential_transport_or_other_select",
+      "literal_arguments": [],
+      "call_source": "selector.select(prompt)",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/soft_clause_boundaries.py",
+      "line": 34,
+      "function": "areas",
+      "call": "_probe",
+      "resolved_import": "component_probe._probe",
+      "family": "component_probe._probe",
+      "literal_arguments": [
+        "clause_boundary"
+      ],
+      "call_source": "_probe(state,selector,release,key,'clause_boundary',[\n            {'candidate_id':'SPLIT','label':'Independent clauses at this boundary: LEFT «'+state.text[tokens[0].start:t.start]+'» / RIGHT «'+state.text[t.start:tokens[-1].end]+'»; the right clause is outside preceding descriptions'},\n            {'candidate_id':'KEEP','label':'This predicate remains in the existing clause/scope; do not split here'}],\n            state.text[slice(*region.source_range)],region.source_range,\n            question='Check grammar and scope on BOTH sides. Separate finite verbs with a compatible subject, punctuation and capitalization are only weak clues. '\n            'A name, heading, coordinated predicate or quoted content is not automatically a new clause. '\n            'Select SPLIT only when the context supports an independent clause; otherwise KEEP or ?.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/source_areas.py",
+      "line": 41,
+      "function": "areas",
+      "call": "choose",
+      "resolved_import": "structural_tasks.choose",
+      "family": "structural_tasks.choose",
+      "literal_arguments": [
+        "structural_source_boundary"
+      ],
+      "call_source": "choose(state,release,selector,combined,cfg,'structural_source_boundary',[\n            {'candidate_id':'SEPARATE','label':'Independent composition areas; neither side supplies an unfinished construction or scope of the other'},\n            {'candidate_id':'JOIN','label':'One composition area: a clause, quotation, operator or other construction spans this boundary'}],\n            'Boundary at source offset '+str(current.source_range[1])+'. '\n            'Does the next text complete a construction or scope begun here? Ordinary reference to an earlier entity alone does not require joining.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/source_assertions.py",
+      "line": 58,
+      "function": "walk",
+      "call": "_probe",
+      "resolved_import": "component_probe._probe",
+      "family": "component_probe._probe",
+      "literal_arguments": [
+        "source_assertion"
+      ],
+      "call_source": "_probe(state,selector,release,key,'source_assertion',[\n                {'candidate_id':'SOURCE_ASSERTED','label':'The source itself asserts '+label(target)+' as occurring/holding, independently of the descriptive modifier.'},\n                {'candidate_id':'EMBEDDED','label':'The content is only possible, intended, reported, questioned, denied or otherwise not asserted by the source.'}],\n                context,(lo,hi),question='Determine assertion scope, not world truth or lexical identity. Parent modifier: '+label(tree)+'. Target content: '+label(target)+'. '\n                'Read the whole supplied utterance. A descriptive companion/location/manner may preserve assertion; possibility, intention and quotation do not. '\n                'Select SOURCE_ASSERTED only with positive wording evidence. Otherwise select EMBEDDED or ?; never infer occurrence merely from a typed argument.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/spatial_references.py",
+      "line": 126,
+      "function": "resolve",
+      "call": "_probe",
+      "resolved_import": "component_probe._probe",
+      "family": "component_probe._probe",
+      "literal_arguments": [
+        "spatial_reference"
+      ],
+      "call_source": "_probe(state,selector,release,slot['decision_ref'],'spatial_reference',options,\n                          state.text[lo:hi],slot['target_range'],\n                          question='What place does «'+frame.anchor_span+'» refer to in the TARGET clause: '+\n                          state.text[slice(*slot['target_range'])]+\n                          '? Select only a source-supported antecedent. Direction and location are not synonyms; '\n                          'a directed movement can introduce its relative destination. No coordinates are required. '\n                          'If none of the supplied antecedents fits, answer 0; use ? when evidence is insufficient to assess them. This is a bounded context read, not a global search.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/spatial_references.py",
+      "line": 27,
+      "function": "prepare",
+      "call": "_probe",
+      "resolved_import": "component_probe._probe",
+      "family": "component_probe._probe",
+      "literal_arguments": [
+        "spatial_function"
+      ],
+      "call_source": "_probe(state,selector,release,key,'spatial_function',[\n                {'candidate_id':'NONE','label':'No separate contextual place slot is expressed by this lexical occurrence'},\n                {'candidate_id':'LOCATION','label':'An unspecified relative location is introduced'},\n                {'candidate_id':'DESTINATION','label':'An unspecified relative destination is introduced'},\n                {'candidate_id':'ORIGIN','label':'An unspecified relative origin is introduced'},\n                {'candidate_id':'REFERENCE','label':'The occurrence refers to a place supplied by context'}],\n                state.text[slice(*frame.source_range)],frame.source_range,\n                question='What spatial function, if any, does «'+ev.span+'» have? Preserve its surrounding scope, including quotation. No coordinates can be inferred.')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/spatial_references.py",
+      "line": 42,
+      "function": "prepare",
+      "call": "_probe",
+      "resolved_import": "component_probe._probe",
+      "family": "component_probe._probe",
+      "literal_arguments": [
+        "spatial_role"
+      ],
+      "call_source": "_probe(state,selector,release,key+'|role','spatial_role',[\n                    {'candidate_id':r['role_id'],'label':r['role_id']+': '+role_text(r['role_id'])} for r in release.entries('RoleRegistry')],\n                    state.text[slice(*frame.source_range)],frame.source_range,\n                    question='Which role does this '+choice+' place fill in «'+ev.span+'»?')",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/structural_tasks.py",
+      "line": 103,
+      "function": "_choose",
+      "call": "_probe",
+      "resolved_import": "component_probe._probe",
+      "family": "component_probe._probe",
+      "literal_arguments": [],
+      "call_source": "_probe(state,selector,release,key,slot,choices,context,region.source_range,\n            offer_clarification=False,\n            question=question+' Evaluate the stated choice on this page. Multiple numbers mean alternative readings of that choice, not different tasks.' )",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/temporal_functions.py",
+      "line": 17,
+      "function": "prepare",
+      "call": "choose",
+      "resolved_import": "structural_tasks.choose",
+      "family": "structural_tasks.choose",
+      "literal_arguments": [
+        "temporal_function"
+      ],
+      "call_source": "choose(state, release, selector, region, cfg, 'temporal_function', [\n            *[{'candidate_id':'time:'+t.token_id,'index':i,'token_ref':t.token_id,\n               'label':'A time expression starts at «'+t.span+'» @'+str(t.start)}\n              for i,t in enumerate(remaining)]],\n            'Find separate words that answer WHEN, FOR HOW LONG or HOW OFTEN the target event/state holds. '\n            'Select the first word of the FIRST such expression. Verb tense alone is not a separate time expression. '\n            'If the target only names participants and an action, with no time wording, answer 0. '\n            'The actual date need not be known to recognize relative time wording. '\n            'Use ? only if you cannot decide the function of words actually present; missing event date is not a reason for ?. '\n            'A word mentioned as a name/title is not a time use. '\n            'Target words: «' +\n            ' '.join(t.span for t in remaining) + '».',\n            empty={'candidate_id':'NONE','label':'no remaining time expression'})",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    },
+    {
+      "file": "src/ah/formalizer/temporal_functions.py",
+      "line": 35,
+      "function": "prepare",
+      "call": "source_set",
+      "resolved_import": "structural_tasks.source_set",
+      "family": "structural_tasks.source_set",
+      "literal_arguments": [
+        "temporal_source",
+        "Select one whole temporal expression, including its qualifiers."
+      ],
+      "call_source": "source_set(state, release, selector, region, remaining, cfg, 'temporal_source',\n                              'Select one whole temporal expression, including its qualifiers.',initial=result)",
+      "semantic_review": "REQUIRES_PER_SITE_PROOF",
+      "reachability": "NOT_ESTABLISHED_BY_CALLSITE_ENUMERATION"
+    }
+  ],
+  "source_sha256": {
+    "src/ah/formalizer/__init__.py": "d6b0f066ea43f142c851b0944e26d0aa13ba447ad416802bff0c21ea1871a747",
+    "src/ah/formalizer/action_descriptions.py": "4f2c61c6ee7cb7c2e20eccaa7c0ca497a2ba3cd2ad87783d25f86c28742ddd3d",
+    "src/ah/formalizer/aggregate_count.py": "0b1313d2d1c90e5475bdc03c13689ac69c6f8cd25fc87ca27bc4d41f53920ca0",
+    "src/ah/formalizer/ah_adapter.py": "b01add9de740267eceb56f33f4dead3fd6c914d0534bb91d5acc1067540dfda0",
+    "src/ah/formalizer/attention_context.py": "7f944e9370f0065f7835a5638383674e26a72d9d2e288956c03244f15fc2e53a",
+    "src/ah/formalizer/attitude_composition.py": "7a4ec65addcab5bf41409c5160aa04930a4a0e804496f6b0bb38bf920504654e",
+    "src/ah/formalizer/bound_references.py": "084b4d67012939b3d9e08dd209471f078cfcc954d689c82af6b1031b2158199b",
+    "src/ah/formalizer/c_consolidate.py": "71f43ceb69e05de83444df4fe64d413e1fe99be5dfdf10612397f1712e61f7d4",
+    "src/ah/formalizer/candidate_ir.py": "7c07a05c11c7b17bcb12646d82e6df01247e2134ff44f15f7d501d08be9234b2",
+    "src/ah/formalizer/canonical_ledger.py": "9bc1f578f8750caa3c93283b18c10f84a0f2f39b63977d6f4cad3362a5111076",
+    "src/ah/formalizer/clarification_deferral.py": "9255b46c5f3df8a7ddd3d0817c0cf392eed0397c584789270d347f5774aaf57e",
+    "src/ah/formalizer/clarification_liveness.py": "0f4006ab883836c4ac01af29932908bbbec607974397e1655922391a280ae7b2",
+    "src/ah/formalizer/clarifications.py": "3dfe9e74d2e22fded0bee2e1d8f0ce96e1b16793a967ec64c21e57494f974ab2",
+    "src/ah/formalizer/clause_boundary_candidates.py": "e11eb358d7cfc220a92b5e8bf867c1573ae7cb03f857feb646f1cd1f89450541",
+    "src/ah/formalizer/clause_detection.py": "81a6ffb1a2187afa794ff97681dac7de17eb7c62dd1fb6f6d6cb255d883cdcc9",
+    "src/ah/formalizer/clock_expressions.py": "e3781199b52c00c1808c89ac3cb9fd39adfcbb616b0873bbf7e5b0428338a0a6",
+    "src/ah/formalizer/clock_range_evidence.py": "b92ffd7bd5922973fcdd98084b6b9b282c110a66e177a0ee112e76efed826c35",
+    "src/ah/formalizer/clock_ranges.py": "54e4ab26d925191cc7d57d695e45e832dc81493864d920785901bf8ee0d9d237",
+    "src/ah/formalizer/commit_stage.py": "144a1e03f8e1c4bd1f72c0db0f7e00f8ccb8cc640fc8274a937f9d1f94f4d9ca",
+    "src/ah/formalizer/component_area_scope.py": "2dde3b6d44ea559acbfc9a8eaa1ca36c7ee03fee234957df50900760c295e310",
+    "src/ah/formalizer/component_candidates.py": "670923cebe1e0b83e909c03f89f6d3c8daa490f670e6482a2391c0649dcf80bd",
+    "src/ah/formalizer/component_clause.py": "bf6c111feedb6a5f616add628ad81aadad5c4be487e221e38f223118373a03a3",
+    "src/ah/formalizer/component_constraints.py": "daf481cc6c619fafdcb659f26a1595990463cb21b2813f29f8b0a4f35c9abdc3",
+    "src/ah/formalizer/component_coordination.py": "761fea4387ea5167fe59b814a8b212a48b332e73066ac2c6f1fc753acdcc7076",
+    "src/ah/formalizer/component_dependency_domains.py": "e20b6c5eeeb4205fd6c2afe30ddd28d15ecee0f09eab837a96e8a507cc69134e",
+    "src/ah/formalizer/component_dependency_materialization.py": "5f1ed33477bb453ba0d8283e2da07b852838e19e8bdc64e30c8df1c537be98c9",
+    "src/ah/formalizer/component_dependency_reduction.py": "713c37740eb2613a7be906b04901ab7a4c7b44e080eb77ecb9a1eb1b156b57f6",
+    "src/ah/formalizer/component_infinitives.py": "1aa9f0502c677dd7d81850219c4ae56f36d2fcab8e9a20134c69d02b707c879d",
+    "src/ah/formalizer/component_modifiers.py": "9107aaaa70d5e8601e0cdc141501fe3abc01a50d0960ffbb47bba47713dc4682",
+    "src/ah/formalizer/component_nominal_groups.py": "4b391195870703bb9f62bd7006e8de6cde7f636f2ce5f442a4f2a74d2d930c5c",
+    "src/ah/formalizer/component_nominal_questions.py": "d318d983c0f9c1afb9282aec188248b39a68ac8ce2525e3c5325f445e1f0e62b",
+    "src/ah/formalizer/component_nominal_tree.py": "ecba577a9f62f2333a18f0ddbced01432f3377e15dd55dbb147ae4d6547720a0",
+    "src/ah/formalizer/component_nominal_utterance.py": "3d4a78dce182d826ea02874b8d9f46d8bee3aa022c9292dff658e0c75fc4be09",
+    "src/ah/formalizer/component_omissions.py": "f4e950973331b10bc271c735ba6491835123644afa875b00bccdbd81e3422fde",
+    "src/ah/formalizer/component_participants.py": "2e1d1fb3ae1d88fbf39251e7c9c2a75539d17169ec53cea96e5714dc45eeaab1",
+    "src/ah/formalizer/component_phrases.py": "182785ee3c0f4f07787ab54a3b2a4eb09ec4f6d70d582ffdb6beea3bd31f0b4b",
+    "src/ah/formalizer/component_policy.py": "dd788422406f660f8cb763ba5dca9fc4f2b31c1d548a3bb6a16623920a68ca90",
+    "src/ah/formalizer/component_predication.py": "e78ca73f5ebfafbd5ee5500a3035f9d5ca37ab866fe46a23a180379719023a01",
+    "src/ah/formalizer/component_probe.py": "e0997d43e35cc82b937f44e0472fbfc256229330fa04e500fdec3f7c10ad16db",
+    "src/ah/formalizer/component_probe_replay.py": "cfdd9d7e00d4bb26bf36c476a4c48d162c1cdac36678938086f4dce250ec77b9",
+    "src/ah/formalizer/component_refinement.py": "9d7b80cf6a2350e984de4be8f8c31f612624415c2bb61d8ac11df1369aef5402",
+    "src/ah/formalizer/component_scope_contrast.py": "4fa62f604163e98d5344e72564d79a138473494e5c9dd31a563b7dd074c65c25",
+    "src/ah/formalizer/component_source.py": "5b45c45d31a32f99027bebe0e85a37a5a4892d2f2ef500e4f37ab6fcac472df5",
+    "src/ah/formalizer/component_temporal_scope.py": "abc12d6c7fc895bb2312d5e2a2001634b4994f581cdf55f732d572ee7a0d2ca1",
+    "src/ah/formalizer/components.py": "ff3a4e14e5dbe66809c9a407848dc068fcb247d60241395ca187b8c2562f3f4c",
+    "src/ah/formalizer/composition.py": "77aad4fe0d1f1ab5c7d05b7280b13f6dc9180a4e37cf9ebd5880ec85d1794385",
+    "src/ah/formalizer/composition_boundaries.py": "e8b2d830ac1c2a2e54d49c915e24f87724e0a015181fdd3d07a0b2a4abed649a",
+    "src/ah/formalizer/composition_children.py": "ff55b465c2ae75bdecd0791e60ba9aeeaefc1d82fcf8a6f3e4fc5c20514459a2",
+    "src/ah/formalizer/composition_contracts.py": "8d337f7e79f9ac51b563e91b9318cbdd4a19debe1aa575eb4629e23770c8b0f6",
+    "src/ah/formalizer/composition_dispatcher.py": "538916beaaae983e3f9db8ca7e98a635df6e70375299e039390b939859777603",
+    "src/ah/formalizer/composition_domains.py": "31ffe8184acd306246b1a20a0eb1ea99cde9707fd2ed160b18038891ede29c90",
+    "src/ah/formalizer/composition_equivalence.py": "d9374084156a8e2749ec0dbd6c078395a451f1c3fcfd5d992a2810ad4692bd53",
+    "src/ah/formalizer/composition_morphology.py": "6191b366588cbec5f19cf8cce3ccb0048e5c981e683ddc1fe31290953c17bb3e",
+    "src/ah/formalizer/composition_session.py": "f6bd663250bddec361592490d0fbd198f4daf459271bb3800b6b9adebd355171",
+    "src/ah/formalizer/composition_source_union.py": "0dbc74f96fc44beceb2259991e2eff3694b8aa1625998c2bc085d9718633da9b",
+    "src/ah/formalizer/composition_sources.py": "2b53a7e8000ed804543870331bd56b3397e643e776d3a8cc1c5f3d578834f9b1",
+    "src/ah/formalizer/composition_tasks.py": "8fe139ae80c13acc82a0e638391d4a1fd31a5b4bcddadee917d30138153905c8",
+    "src/ah/formalizer/composition_tree.py": "bba206ed96c797643ee0ceef60ec535d28b83cc42f69ad3e23d005ea2457e7ec",
+    "src/ah/formalizer/conditional_composition.py": "b9b1c9c64635ebfe806025fe6ee33228a128e2ee3bd96fc28adbfb9789d322d1",
+    "src/ah/formalizer/content_reference_functions.py": "2567d13f20d932c4f1e2acaa22886d1040ebd2c8fe3e2c70661f17ff451f975d",
+    "src/ah/formalizer/content_separators.py": "33a728d002a7b7632311296e084e8edc883bea119c0be3ec5d6223f0b0cb79b6",
+    "src/ah/formalizer/content_sources.py": "18996b9c37bb22b6a9a7bd24663677d5959ebbda606ce75ac00870f3ea5e1b82",
+    "src/ah/formalizer/context_proofs.py": "74949159af37750190241d9853aee1d7bf3847c0c54c48aec4fd8a77dd007652",
+    "src/ah/formalizer/contextual_agreement.py": "0e034d72b1d1b54ce58b755bf7df7656d5204cb9edcf2371bd02705cd87cda4c",
+    "src/ah/formalizer/contextual_name_case.py": "cb2eab5e0bb92b9fa1aeea7a6128dffa9eff7371204d60a7f5a8e6b4de348f27",
+    "src/ah/formalizer/contextual_oov.py": "514385e915370fc3e70cf6f80f812a0fcf978de2587c3e3c5cdb4b96b6d06b46",
+    "src/ah/formalizer/contextual_oov_roles.py": "06587dfc1d5f6685c925863342781dfa80e7d60067af3e5d283c8d415eebec96",
+    "src/ah/formalizer/contextual_preposition_case.py": "68d66d4ec930638fa7eefe893391122921f825badc7407b89136bbdf777687a0",
+    "src/ah/formalizer/contextual_substantives.py": "121433e4805f7885a5c6e10ddbf7057f2f31bba0552698f85e6baf356750bfac",
+    "src/ah/formalizer/control_arguments.py": "bab3185039165d07ecacf1ebf01516bc6bffccc758ec95774ebc63e74f525208",
+    "src/ah/formalizer/coordination_assignment.py": "3df67468354fc005f2cb083f3aa63255398a68259366427dac536984d7c98637",
+    "src/ah/formalizer/coordination_clarifications.py": "2b59613293be1cac84f7d5818b67b779945ccb026657e45053b9d960635fdf23",
+    "src/ah/formalizer/coordination_scope.py": "2a9812b639ae8aa88bb9981324d5ddf56013a5c11126753ef98beb3de60cb38d",
+    "src/ah/formalizer/coreference.py": "9f615769f06e7111aca361d41707045cff8738efc1fcf49519fab9f1f241d426",
+    "src/ah/formalizer/count_reader.py": "ecc4763037c45afa861a25977cdcb2e3091a8a59ad74e7b54b05ab3ff9952bb9",
+    "src/ah/formalizer/coverage.py": "012ec5568b161be90b0019b317cc9af8996fcec111e9af4f52d3c307e1b98914",
+    "src/ah/formalizer/dependency_constraints.py": "742b622fb329689613ea2d8705b3395d7aadb1a38db48cf2f6ce222c0064b5a5",
+    "src/ah/formalizer/diagnostic_graph.py": "81cd28f7b91aeb521d7853dec38e5dee3c80aa1ac52c3bdf907d5aa50864c239",
+    "src/ah/formalizer/directional_goal.py": "a74a292a5ce3617318fac6d553ce7da9212a66a171587ad3ac310fb0278bef24",
+    "src/ah/formalizer/discourse_scopes.py": "72ffdfed6587d68aa84ea33c2746bf021a5f629dfcc1e923d194fa5ca441dbda",
+    "src/ah/formalizer/document_calendar.py": "b8c6463c8af8c08152a833a42dbdbf9be0833a45b296ad454b22effa327e4468",
+    "src/ah/formalizer/document_scopes.py": "bd7d29648fd3963f0e338b23ab4e393b7c242b51640f49cc5e7d9ba28616b98a",
+    "src/ah/formalizer/fact_query.py": "c3983b69856c866498991c895ce1fbe9b00271df8f41b110b53dd81a797ec6e6",
+    "src/ah/formalizer/fake_selector.py": "0cffec6a5e683e703a1dcb9319f48d7e59ce7b5876c8585ad31a5eb7cfe40709",
+    "src/ah/formalizer/function_inventory.py": "c634cc9b211b2c930d3cab9b00edc882956dd04552741a3bfd9f36e600e6ee02",
+    "src/ah/formalizer/goal_channel.py": "2babd127890b9c432c075df7abcd5148e90619882c8b445b7fe192672450c3b6",
+    "src/ah/formalizer/goal_executor.py": "216e26eb5b6ae0031e8e44e3911950ac11fb10881b16074900fd3c605f5dc818",
+    "src/ah/formalizer/goal_forms.py": "12a5fe6e73de7f03acb22374d0102bedbba40db33bc4005340c5c5ede14e03c9",
+    "src/ah/formalizer/goal_queries.py": "ada483aa87cf8247f4089558d1c462367642d9ee5f728782e8211de10dc0644c",
+    "src/ah/formalizer/grammar_domains.py": "a4e1e9406ec702228be7782edb8706f36dc4f319b5cace9bfa2fb50d9f385bf0",
+    "src/ah/formalizer/graph_ops.py": "9c9c7de105d214dbecc7b5e9bb7480634fadf760dcf5adbc189577315da2ae18",
+    "src/ah/formalizer/group_references.py": "a882827bada0c3a944ba1cb80054ef008fb35eef17292eec9c1f70a7863d7c2f",
+    "src/ah/formalizer/if_query.py": "607573e11533ab8597742f112f8ae4265d58ea5fbfca31dcdad20149995c56f2",
+    "src/ah/formalizer/implicit_descriptions.py": "fdc970dac89ec7ff539c4dfd6d1005808144a2888f10a8c1ac9c306b0838e844",
+    "src/ah/formalizer/implicit_introduction.py": "61fd9f96dcced1a6728a6acbed4941a6b9cca73c103d0d2412280b35bd1b360a",
+    "src/ah/formalizer/implicit_plan.py": "3a1008bdb59d4a4ec7b1fa7bb2f7bd4ef7e630f0038462365fc95300eb778a67",
+    "src/ah/formalizer/inference_engine.py": "8afba4505aea16849d1ca67b6d7406e89b62c83425697da686e1ed682eeabbdc",
+    "src/ah/formalizer/inference_policy.py": "6080f8179eb8d5304ea5c65cfb5736a35da84e3c9781a7c833877182337e4eaf",
+    "src/ah/formalizer/integration_ir.py": "a9ac974be890d0d20e42de7293a63145fc9b45d1825aba1507117d2c95571c23",
+    "src/ah/formalizer/interrogatives.py": "690835e60f3ad18f3fad875d79f0b1ea81e19658ff6c6e8c81c936ebf8404dd9",
+    "src/ah/formalizer/ir_to_graph.py": "749398b89e5cc8edf49f55c6919997988baf1c07c61a1a78fb2f3408dbaa7442",
+    "src/ah/formalizer/kernel.py": "02ef0e377a1dad96a523c1277c192f5992a7d3bc9067257a2b2c65761a04f051",
+    "src/ah/formalizer/legacy_compare.py": "ce44c0b8af990a5194a18d73e9b33dae450c90a3af607896cc2b1097aaac9dfa",
+    "src/ah/formalizer/lexical_embedding.py": "58e2ddd858ae827c87c9c653a95be2b80a1d68f50da22d7928b60a270d4218eb",
+    "src/ah/formalizer/lexical_forms.py": "56c458c354cf0800cce839653d74d6d3b9c03e32a26425295f5c72adbec487cc",
+    "src/ah/formalizer/lexical_probe_context.py": "3fd7f95a0295067c899bbaf0153a148a8b5551c50ab7dac5d148d1291451a64f",
+    "src/ah/formalizer/lexical_snapshot.py": "8c13e1e64f411ee3724996dd7c0a4e60f10261aa82ef86f7265990cc633a3a2d",
+    "src/ah/formalizer/lmstudio_selector.py": "cd1c1cc37c8a8e391366bcba0072bd3a269cf3d09e5114eaa583204fb414608d",
+    "src/ah/formalizer/memory_service.py": "a7691eb88fb99976c730bf88f252eacfbbbb249c4cd112d200d37cc80c8b40c2",
+    "src/ah/formalizer/memory_store.py": "630596d93e9f8c116beb03aad008fee49779321b9ae04fe7ada09121d1a590f7",
+    "src/ah/formalizer/migration.py": "ee75fff618c2f149939696354d41be473ec1e45f3e63fc57dbf8b1851d53bf11",
+    "src/ah/formalizer/modifier_scope_shapes.py": "d1ca839cbb3c71fb64b12a7bfc867e5ab4e8706d3ed95eece06b7724e1e9e426",
+    "src/ah/formalizer/morph_evidence.py": "53636d9e4009face2d1a44681a28c3ac7316f79d72d2cb22f84540e813418aec",
+    "src/ah/formalizer/morphology_domain.py": "8e8d744a39c75ef382f048604660df79c1dc52c5c0031b63b8fe7275be7416da",
+    "src/ah/formalizer/mutation_plan.py": "f8ed263ce99a82bdeea29254f84889f4780eee3a0dd73817489741deb4779453",
+    "src/ah/formalizer/named_periods.py": "c3dc5597e4394a426e53a7e747052f5b5c97953966539b50348aeeaca60db6bc",
+    "src/ah/formalizer/naming_probe.py": "1e332a642321907fe41b9d2be6ecd68b77f317f65268913e94a490538f025a84",
+    "src/ah/formalizer/narrative_group_plan.py": "bf8dd45e14f333bc017d18977edb9334a0c62a2cdd962103f269702dc9a51248",
+    "src/ah/formalizer/narrative_groups.py": "950722205dfc76c084bd793844c4fb1f8df0851d677ed2df06965d216900a558",
+    "src/ah/formalizer/narrative_perspective.py": "f24b931981282ec541410f9f4cfd6685ecf7dfdad352b78a401be0c4528a15c3",
+    "src/ah/formalizer/native_derivations.py": "1e0e920ca20852b1af69e7f6c8f91257106ab03d44bf786a6938b3130d770d09",
+    "src/ah/formalizer/native_frontend.py": "3b68ff6ce184598d8ece5b5c2789fbe9be3fc73afd00c9bca356c9e8e354ecc7",
+    "src/ah/formalizer/native_plan.py": "be1111d1ad1c4f9a587af74b7eb8e514819306199505781771aaa74db6602a5d",
+    "src/ah/formalizer/native_queries.py": "653de2069d07bc57ce7fa96c355c720412bb578d2d10e0a464c76e4992f34466",
+    "src/ah/formalizer/native_questions.py": "2dd85f374d1415eefa2c407b13e0608c5159a54d13dd251a9a09bbcd1d07e446",
+    "src/ah/formalizer/native_records.py": "277abf863011e644305f622e77ce0fb0577e48d1ab63fd6799622005070a4fc3",
+    "src/ah/formalizer/native_scope.py": "519ffa259027bc5e6484d12de01ac58839bf306945ea4c50691708bd4637773f",
+    "src/ah/formalizer/nominal_apposition.py": "d67c245d0af31d33cdacc23aaf9fab029f7d85ea24a76e1c03d46b4ffda21be7",
+    "src/ah/formalizer/nominal_functions.py": "6060c4cc7a22b096635ec103613003674885191ffcc05082bb6ea12ae147aaae",
+    "src/ah/formalizer/nominal_group_member.py": "28bb937cbba79986d3e10f8124b55d37b417242dda925208ea7abc26014faeec",
+    "src/ah/formalizer/nominal_host_question.py": "6eddc3148e5e78f280a61d58a65a8c9cf76f888d6046cc5bcbb4ef0e67406788",
+    "src/ah/formalizer/nominal_host_views.py": "560f2450af2b4961f53d344048defc7bf255f5bfe559575b0e8fb32654fda11e",
+    "src/ah/formalizer/nominal_prefix_descriptions.py": "23eff28b8ef39ade3732c35ded30cb8734722f8279d43bcac98e963146dc3dc3",
+    "src/ah/formalizer/nominal_readings.py": "74d08c2b3860b84429e5832c027f731ee7d13387fb4c3f9e7b0ffa70a2b60273",
+    "src/ah/formalizer/nominal_reference_binding.py": "faa8113939013d09cfd5374f8c1d5494a7ee86a2f30d4c56a4eb0517de5793dc",
+    "src/ah/formalizer/nominal_reference_groups.py": "67e24ea12c504795a26165928586621f883c5b407da111de142f2007691214ad",
+    "src/ah/formalizer/nominal_reference_local.py": "82f3e7fbd1ed55a56448b3d7c5008265d4e672ef7faf1d908508aebc44e04524",
+    "src/ah/formalizer/nominal_reference_memory.py": "2555563edb65b4e4dd4b0811bd944298a50b3ad4f5773cad8ca337d4070bda5d",
+    "src/ah/formalizer/nominal_residual_descriptions.py": "84e0c4115f4689e107edaba13684f58328ebb8139b1212d71eb8a8f5895edc5f",
+    "src/ah/formalizer/nominal_usage.py": "3d0a7053c211deb3f25a1b7f878ff78374c27c44e470e99b44fadd871f1a467d",
+    "src/ah/formalizer/numeral_extraction.py": "e3d6e07faacc0f3f016f4a6809d06833d72b24ad66fbe7b97c02da18d48a64e8",
+    "src/ah/formalizer/open_set_gate.py": "7af43db3b2e5e39f41dc2c50567cd5cfa82c763573b11763aa7cfeb7133a05bf",
+    "src/ah/formalizer/open_set_probe.py": "f580f90915ab20db6861e58b2bd0328193555b3fba96dfd00de6e04c6a218fbd",
+    "src/ah/formalizer/operator_algebra.py": "f5b59453be7673f4071325e9460d10b709e9d61b9e9b1aebcc0481dceddde900",
+    "src/ah/formalizer/operator_composition.py": "0c36cb54f38bf7d70053c55c894eac81e68cd12a7e060ea9f7008d2428a7e4b9",
+    "src/ah/formalizer/oracle.py": "0cc5db329a7d781787948df97b50c26bb296a16caf4591ba641645e252210219",
+    "src/ah/formalizer/orchestrator.py": "180e2136c12f89c9bcf8edf88e83a6a933a13fb3337faa372653313e5c5de6bd",
+    "src/ah/formalizer/partial_composition.py": "d6bd3bbabcd657180eb45ceeffe6f13b7f74b9bd1dcb44112bd51cedb5b1777c",
+    "src/ah/formalizer/partial_readings.py": "1d56a06db6689bf10c75d0b496b68c8d239bb829148004162324c69e1538cf16",
+    "src/ah/formalizer/participial_roles.py": "b85110f680a182454db3154f15d82ec333817e98efaf2dd1d6381c8b5b96cf4e",
+    "src/ah/formalizer/partition_domain.py": "53fa8ed7fbbaa72dffd3fe8b672873f628f232bc800ab23b6bb9b9a344cbd3aa",
+    "src/ah/formalizer/partition_role_revision.py": "faad0624730f9dfe1211b18537d24223a0b3d7440e9f2d8be9789bc5d4503bab",
+    "src/ah/formalizer/partition_sequences.py": "8fd21c48b113ec96c9aa253efe698e3375c33f49c01d56cfdc7121f21ff2bd86",
+    "src/ah/formalizer/phrase_readings.py": "ebcfd86b9b54d4211538938c7c7024d2197ee054d5a7a93a94524c05a991ba67",
+    "src/ah/formalizer/pipeline.py": "ba5cc6171711c4ea3ad0f1ed93aef2c9a813f734159fcaa6ee16cca48fd39681",
+    "src/ah/formalizer/predicate_functions.py": "b222409f69615f32ba25ca5cb082b53b0bccb19a3bad3b3d6c086ac58fc81bf4",
+    "src/ah/formalizer/probe_diagnostics.py": "f7c3cbb0cd9c825d4c951ced052c54d5a631d4367c2134ba8e708bfb9864f472",
+    "src/ah/formalizer/probe_presentation.py": "cf65aa952174bb0fd9074e0167a0a14ad2293fbe4abc102af33fed285efc65a5",
+    "src/ah/formalizer/probe_structure_view.py": "20fb6b70f4de5fa548460904db610538c6af1d30fc9691f7586d202f77531e6f",
+    "src/ah/formalizer/probe_windows.py": "8676573f2ded9a7672b7783daec6561b761ebf8d46c33629b1d569c3b7aa777a",
+    "src/ah/formalizer/probe_wording.py": "398d02c5f786e1cd0df37b026ecf9dd19dec36fa125b54fe97ad3e1184621406",
+    "src/ah/formalizer/proof_closure.py": "501efaa6b2e6141ae45f81886d3bdd52d66a1f6201705253a523765e2582d69f",
+    "src/ah/formalizer/provider_adapter.py": "9289d639c03b9fc100c4fc5bf1fc0b8839221bb2541fddf3adb46cbe2c49079a",
+    "src/ah/formalizer/provider_budget.py": "adef477d648c1d969a32d807ee42395fed8195ab376a0335908811415a91b777",
+    "src/ah/formalizer/provider_call_log.py": "ab8c1ea5ec2709f4b2abccf158eb61e3b6ab7aaebfb8070e9a6a073dacfcf464",
+    "src/ah/formalizer/qualitative_group_entity.py": "f87c5c4d3cd982f5b58491ef2398c595846f21a50865d9c963cb8f266deb2076",
+    "src/ah/formalizer/qualitative_quantity.py": "7615d58e376afbc1c81d0142a8a7e4c8184d3b89703d44454cc6852f215c7060",
+    "src/ah/formalizer/quantifier_composition.py": "c1bae65a39ed4ab1a2ab0e5c111adbbe19dbaafcd7a636ab0e2462f3243fe8e2",
+    "src/ah/formalizer/quantifiers.py": "8ce576233730e7faa7760854cd92f0c8dd30f0c53ccead94517116125593e69a",
+    "src/ah/formalizer/quantity_phrases.py": "b52af1bde5e0a2aedb0e7209ffaa94a9bd94dff0b4d5ba2cce73c8b77930debf",
+    "src/ah/formalizer/query_bindings.py": "d77aa25525abb180f766e5b4a2c20d4a3164a390eed2a57922b24fac38866ded",
+    "src/ah/formalizer/query_requests.py": "10c6ad0e54e82ffd08ffc46165019b86740266c8b8855030b2b87e9c6e27542c",
+    "src/ah/formalizer/query_resources.py": "14624dba667762885ca9da6a3e8b286fe5c9352abb763e80d527b12faea21ba7",
+    "src/ah/formalizer/question_projection.py": "cb767084dbef5537c9000469bf1dee3891c06e5da6c17a79755c3770281eaeaf",
+    "src/ah/formalizer/reading_clarifications.py": "7743378fd4528bba27b3def644a39adacfcc233f38a7602d3faaeb76a50af95c",
+    "src/ah/formalizer/real_backend.py": "7fb2e07e716589b2735f0a8c6d691ed893a27a8cae8ccc7c871a2ef0fd217c3c",
+    "src/ah/formalizer/recovery.py": "f3b9ce677b94eb6a4b157db4269b4b9f0e9357f3c0e870045612aa54cb588c05",
+    "src/ah/formalizer/reference_source_context.py": "fceaa3e3877eeec8c87fc5ed97b75867f0e728e20cf6335bb3b2db8ad36b7c04",
+    "src/ah/formalizer/referential_placeholder.py": "53ff222c87547cba8468cf86d25384691b4664edf9d1661dfd905a0d6ac11583",
+    "src/ah/formalizer/refinement_boundaries.py": "349e11c95841b995eb23fb38f426f4007f70f637709eacb8127502e94fb253f2",
+    "src/ah/formalizer/refinement_group_hosts.py": "73bf7fad34b5c758858c74659efa2fb9ba18babe394bc6c41d4f7b1e2d2020b3",
+    "src/ah/formalizer/refinement_host_path.py": "e0cf33826038719fce6abd3fe38d0c1935b9fef9e0311fa0847aca8c8a1c5c0c",
+    "src/ah/formalizer/refinement_release.py": "a8cb4accc2fc11cace36f0f089667887409fcc3c1282b8e92f2923d0a1fc7ec3",
+    "src/ah/formalizer/refinement_uncertainty.py": "6a39a7a6d09c6d6975acc825a530f31c92f519203304a19fb48b4a5270f50a1b",
+    "src/ah/formalizer/region_probes.py": "a578b13215fee4fb596bfd19ba72f510e0cc20781a4df7cc0f95df6688b8e705",
+    "src/ah/formalizer/regions.py": "b828234b2236fbbbb2af44d3b4c5b60d3a4d313955a4cbb917f288073b5702fd",
+    "src/ah/formalizer/relation_composition.py": "b48ef05378489cdeec0be9eb61a83a4c6ba2ef3556763370ec282f26e818ec58",
+    "src/ah/formalizer/relation_markers.py": "741ffc4c2277dfae77629c908ca7b9a3ba3ddc12f47b4c2c37a8bc6503e1f99a",
+    "src/ah/formalizer/relation_partitions.py": "7559492cc7fa960604ec75111fe83f0c15e4b073f7ead6ab76dfd6d4b2c111bd",
+    "src/ah/formalizer/relation_quantifiers.py": "851ef196ae60af7fffe316b025a023fc5da7147f3d8b5a0ec3641bf9230e031f",
+    "src/ah/formalizer/relative_composition.py": "791fb95450950e4cef0b6fb23d58baa232404b6ca7b6844b5f51514d846f5182",
+    "src/ah/formalizer/relative_pronoun.py": "dc7c66ec8bb15a4a9b2c4e4135aad8faa3c0477881d62f487cb54fba4604018f",
+    "src/ah/formalizer/relative_time_plan.py": "a22c48c3ddbd82ab6e7fc892612b038031e4208a7a72a042fbf25c3610895719",
+    "src/ah/formalizer/replay.py": "f50aeabd6b41e23d67e62c416931eed8f4af8879551ae93d324a6701232780ea",
+    "src/ah/formalizer/resources/__init__.py": "a542a6e4eb0ba2a504a0da7b2927b3e6d832e0777e9e5b4af4ea350f6de7d136",
+    "src/ah/formalizer/resources/authoring.py": "a9c1103c9f0dd4aa82ee49f7276f495b529bb299d665a0fb14307fb3905a2a00",
+    "src/ah/formalizer/resources/coverage.py": "aa7f22939ff120d3b95ae81e969d9c216d4b2212fb4479041939353f48100262",
+    "src/ah/formalizer/resources/dependency_release.py": "1003e106db99c5f75d0d4ebf2ca94868fabb7d8c96ac47ba36c177bd5994f7a7",
+    "src/ah/formalizer/resources/loader.py": "b08f4550a53b420b4ccae33b1e87b367f88b76ef04c966e7aaa081f643e585d4",
+    "src/ah/formalizer/resources/registry.py": "3bc4664f5a349080f8afcfdf69b0c8095dfeee326fd21c15073867587d8ad679",
+    "src/ah/formalizer/resources/release_cli.py": "ae02c97e60af21c5b7a5c3492e6be7441dc786464b0b6eb9e2b8ad7b7f6c4a78",
+    "src/ah/formalizer/resources/rule_dsl.py": "087376b148428ec1785da62b907915c74f3aeb40d2f64a476913cb9cc3a37fbb",
+    "src/ah/formalizer/resources/schemas.py": "0a5b87c7cdc1d86d212745543a4b90db0fa1b630d440c18da30241895bed7122",
+    "src/ah/formalizer/resources/signatures.py": "f1a6375d951b36e64613d6e711bc6fff3317faa33be7441967af7ea0fe128c4c",
+    "src/ah/formalizer/retraction.py": "21b9bf0cd990219400b2c633d70e0dbcdb6230a9dfb766915fb7dda6dc3240c0",
+    "src/ah/formalizer/rules.py": "e69e54b2886e702595c9126fc2098878e29b7e8819da293d7cf8298d68e9b549",
+    "src/ah/formalizer/run_binding.py": "754daa126b8c4c898e9757e64705c45f33ce560fe60e1216e8ea7a19a6e7e634",
+    "src/ah/formalizer/runtime_adapter.py": "285092869b5cb2af0c25c5261185bedc34b5e2dd9b3418c43e6a1ffa146925d0",
+    "src/ah/formalizer/rx_cache.py": "f5b5e97bf3a5957747c2bb09b8549d42d97ee3bfdd52b295c9a443b7321fb52c",
+    "src/ah/formalizer/rx_observability.py": "b34539c8c65cb2198d443c5ff3beed21f457746ca90674c4e005f60a5d83fd6e",
+    "src/ah/formalizer/scalar_values.py": "07daf891442938d641351aca3760940d9d83f1c86a34c1d156c237ccbdbe8bc6",
+    "src/ah/formalizer/scope_assignment.py": "c37311d9613f2d3beeb4a97761799b355061e9a615873fa119fe3e4e253a6749",
+    "src/ah/formalizer/scope_boundaries.py": "1e863999be903b2836994ea1b495ce3fc4e5d17e13d1062779d76550c5970ad6",
+    "src/ah/formalizer/scope_validation.py": "41a64d8452f815725cf0a334d704a4cda58d83ef2fa0205f9ae22f2ed5af91a1",
+    "src/ah/formalizer/seal.py": "dbc4ff187b13269cd3b7df9a862be0abaa970594e6cf5032a731a1d1b548041b",
+    "src/ah/formalizer/selection_evidence.py": "e31bb927e7ce6675783bb345e77db15f26269326dda14ed96a71eee8d5b6e715",
+    "src/ah/formalizer/selection_exchange.py": "089d65c613358e01304894c8849e388d3809f89a020395f9803dbaf70c65f6c6",
+    "src/ah/formalizer/selection_labels.py": "ebcfa8d05e21372b791dd0a6c1a6a998ad421736544545fb93b239524cb3b069",
+    "src/ah/formalizer/selection_prompt.py": "ed3ad5c029e41ad4ecef0a1e617bd8cb332ffcfaee2299a019fb04fb074b5f3d",
+    "src/ah/formalizer/selection_protocol.py": "6e79848c529c7c8b199eb9ab0e79796c24b0e999a61da76330bc916d474a4eac",
+    "src/ah/formalizer/selector_wire.py": "00e1a4ee475c34e26b60bec1b2ee02403c2b5e8676285f426c2b2aa234e60a58",
+    "src/ah/formalizer/soft_clause_boundaries.py": "0e95cfc91b6e37bc1cc6e2aff9245dd49ae876540ec552c9666b1bdaab95bf27",
+    "src/ah/formalizer/source_areas.py": "f03bf1fe07295db37d0a37800d3bd130b6f275161dbc54d35e3d7df293aad79c",
+    "src/ah/formalizer/source_assertions.py": "a54608c8a4af6561113808fcec247ccca32a0939aee8e9b90a4243c009fcab30",
+    "src/ah/formalizer/spatial_entities.py": "2b2035773d2da09c086b90d3f7afad9c8607726eff14f0ec404271ce5d633507",
+    "src/ah/formalizer/spatial_memory.py": "22b855785f23e78df8f3d63bcf98c9ea4ee9a3766ca1623dfa474ed7431a36f3",
+    "src/ah/formalizer/spatial_plan.py": "6570a3c1c97180ebbb2a33af885f308b4480bb19fe81d7292c302921288b2bc7",
+    "src/ah/formalizer/spatial_references.py": "a55175b3fe702c92e8c242ff86f3131d6ea34916cba9fc07665dee449c5999a6",
+    "src/ah/formalizer/spatial_release.py": "763843f819c6ba733c6c29445bbaae088983b4c1ac722c229a8906ee0a8e429a",
+    "src/ah/formalizer/speech_act.py": "16818d509d84fe8a87b3098cc2e6c9299fc4adc8846edac2d61fc633354f9e48",
+    "src/ah/formalizer/state.py": "95ce79e9b890e3cc7f19a86d5c8734f932cc942a5054f91a25fff1c6bafd7b89",
+    "src/ah/formalizer/store_interface.py": "ac944de9d7539936445b7c73204e11455f60adfc3d97f8e599e5b3f555f80ac1",
+    "src/ah/formalizer/structural_content_time.py": "36d9dc1fb15fb78d133f2fff3ff326f921ea7167e40001be7716ad8f99218496",
+    "src/ah/formalizer/structural_tasks.py": "4024077a981f061907b59c91fdc92478473dba4e7e489115ae02a87de618bb7e",
+    "src/ah/formalizer/support_som.py": "a2e1883e6aea51b0c320e5e24cfb4567cc7ab9b170d8fa9ef2b707d07f487b4f",
+    "src/ah/formalizer/symbolic_temporal_bounds.py": "c765f4eb386905926da56a91c77b925fbaf1097ef0e7736d0fb4282306e92979",
+    "src/ah/formalizer/syntax_rules.py": "37485e06e459b2c27c640a87a85bba567c946aee4afb0c8437a03474cb857569",
+    "src/ah/formalizer/t3_sources.py": "1285ab7334f1ce85fd80fc65d34534426f6aba194b8b174f2c3a254a9c6b5562",
+    "src/ah/formalizer/t5_batch.py": "3ee43d8b093b4b60a6949b26e939f5b01adbf8a6cede9f0295828a90817d792d",
+    "src/ah/formalizer/t6_admission.py": "e0cc3f8faa12e8574886d23226c9840f1a83f476ab1727c60ad631ac2edbebd9",
+    "src/ah/formalizer/t6_core.py": "a2de11096b3e23cf59183f29482884db2e477686a221b3d0aaa02662e30b8464",
+    "src/ah/formalizer/t6b_revision.py": "e5fb1e83f6f256a1ecc5afd35a4edc35b182818261c73557835b19f9bad20ee8",
+    "src/ah/formalizer/tag_source.py": "f15c587cd7deb9b47bfef36c82e1a636a666f1037950139d1cba48abc86976f6",
+    "src/ah/formalizer/task_contracts.py": "2136e4f0cf676c911ea411b69333bb043446eaadab873e5e4d68d412bcd436b2",
+    "src/ah/formalizer/telemetry.py": "6b9f38913a302e8e85502a337ae19ebf786fb7a2df5056a7fdba6b9e575d9585",
+    "src/ah/formalizer/temporal.py": "cbd88d45b22f056cad50f2ca9748c96f5240b69a1d840f69c1bc02571a453564",
+    "src/ah/formalizer/temporal_adapter.py": "4b54d0f9a63bd0fec186e9f407dfc71cbc6baaf43a7fa810fa75d7d158074f3f",
+    "src/ah/formalizer/temporal_attachment.py": "2a2200200b3ffacb1c48c687247ae02c114aa55296fcb4d7cb51d5eff9f990de",
+    "src/ah/formalizer/temporal_constraints.py": "d4bf2b6698c2df605bc96330846fdec4fca706e28a2a1acc7ed4d92ba52cd02e",
+    "src/ah/formalizer/temporal_functions.py": "8bf73f93a2f14b57a8b0e13124d80730adb28f0f8d1bf4eca8db0cbd7b8b4bbd",
+    "src/ah/formalizer/temporal_license.py": "740c89567732e0ef55df2d22dd8c2dd9646e3c6d5ce82d121d225700553240f5",
+    "src/ah/formalizer/temporal_order.py": "b56b9cac095660d7d4e84b511f48c4b7b673bfca922addbea4157929b2b98f3b",
+    "src/ah/formalizer/temporal_sources.py": "995018e3a2ef9a351ba9f9e2ecb0617ab6aea9c574e9490845e7fbb160cff377",
+    "src/ah/formalizer/temporal_token_ownership.py": "9fd4f45f529c0844763df3ebd9077972ba824ad03cb608ca3337dca92c0f76b7",
+    "src/ah/formalizer/tp_compact_protocol.py": "78ddb2e0803715e7669f2222576d24f8cbf37cfcc45ea3a90b0e08a626b760c7",
+    "src/ah/formalizer/tp_proposer.py": "399147c576b742f5af74c0c75804e8d3db2d58d4d0a5b9171fb3180130cb7b2f",
+    "src/ah/formalizer/tp_readable_protocol.py": "297fc9dc330485bc625e7e48a0833beded93ace6e6c86714aa6dc4bb25a091fa",
+    "src/ah/formalizer/usage_layer.py": "aceef5cf807a250720a4b80c139ff65bb09cf67bb9698dc47467decb3487e44c",
+    "src/ah/formalizer/v7_pipeline.py": "670ef28a639647e5940ce32f406180636962be716a39ba42ebd349dad31f7c7c"
+  },
+  "captured_slots": {
+    "structural_oov_function": [
+      "0eed6b377061ed0c451fc5d22b8f58d063e1268468b6809917bd72b893ea23bd",
+      "23805453753543fe502f036902d6d0227c58522ba1b7d5e1851e0f396e0e0470",
+      "336282b48d47074a0b6d5c31a8bd558c3efdebff577954c86ef3265c60762cea",
+      "391a9b416c0f15ba41d72128374f5d81d6e0007974f90d3e9bd281d13e38c462",
+      "6062d3f3c78d4ac99183078ae3092b11837d2be1f9bf4b9670e731d9cf5eae8e",
+      "9f2cea94fcf945163f1cf415e8ad4d52a7475713b13bcb38662bee74431c1bd4",
+      "d459ef5a52cc8e8fdfc6147732cea56f5f1fffb29ef09ccca398d12128b11c6e"
+    ],
+    "structural_relation": [
+      "009af3f953828b49c5f0e65506c5f7d96ff3d0be803ef92c0884f3c108c3221d",
+      "10f2efaf67a086176a98eeeeed54b6c1da111a209adf888430697c123036f0e2",
+      "19913d371a86f7424ace7df95f5bf77edced667318ea059cc7a57958ff57f942",
+      "1d5fc67075699a680e676a95e37aa97e99f08991b733b10a9075bf1d3a55f510",
+      "26f18a13637c37dc18cdd6a428d70a3492886b09619a4c1177442bc263a518d5",
+      "328554d528f7aa83ff31ca67cd86c33f3edb59b91461c62c8e7a9f5ae2ec0803",
+      "388e569e3c74bfb14d2a658750fd70ea994b7c916162ce299c193a1ccfd5a6ce",
+      "39febe85ab923e25ab2d390fd4d347597dd976e387960f32d74945154d95cc2e",
+      "3c35f64a19f6b94dd91c0a79e5e7d558429401cc5149b376eed57069d977ef84",
+      "4e4faced09b24b2e268d3b818e9d5f9d4840adfd47b71cc81cfea17c00878197",
+      "5073908c5a470fc5d399a24cd7564e6ca5f305387677ddd36e82463c0aceba56",
+      "5ab06a4b55a69c8e3ac7132aba4001f9634e896cdc376d440f60c4fc00eef098",
+      "66b67674ca5cc195bce7dd9b81efe5e59105b8718568e93ae93110291b4111d3",
+      "8f6a833a4ec87629c23762903340792b63ddf2716f4cbb667f5d3a810f43ac49",
+      "9c69aa8d88008b0b55021767f28d2775069e01aea7096b9677db11a19966bb9c",
+      "9f261f4fac7ae915aafaa8c52c14f88fa39915b5906c1e2bbfe2ece532b6d9c1",
+      "a0eccff8a58d793eecc0cba36fed3672b6e5f3f8a8b2f7a5c4f7adc699774a7e",
+      "a3fb5a0b2f1d84256da979c8576e493a26ec1c5f1760862777f075a20993e95d",
+      "aae875e69233750ad7fe985d19aa04ee200c0dd5a81846740045f410d60300d1",
+      "b28a1b702eba4791ad1aa4e8a56d7f6318fa8fa204d768d6626044919a24a7ba",
+      "bce3d15c6d5f36a8b0fdf70afc3341021927199a2a89a1dee576d06f87dc5525",
+      "d071dc6c730926e8de0f3542e260656b4294b67e49ac7b80e829c4b71b8af851",
+      "db88a306824c80d355b915e3395355777607c522b3b0c05cc1a7ffb336e6f178",
+      "dc73ee1dbbbb08b9bf91487aac35e16e889061fdf011dcf2182cad5e222bd5b6",
+      "e027b88db1574158cf8a071b0cb3e31fb4616c8920927010691ebc8f0c6c8bd7",
+      "e22fd7bd460945fe2ffe834d2bd1f8427abb2c5eec4a0fd078de85210b06fb50",
+      "e2777743a088829839f0361b10a5fee16c01f8d096e12457698dfceb398ab3b3",
+      "e291901914528f8091f09450af33f4d3dfb88840e29ccf17d88d42ceec3e94c3",
+      "f64484f6ad00606fba61b984e235a7b667b4bebaafc798818f282e3aa1fdc8be"
+    ],
+    "component_attachment": [
+      "527c7087dd0652e5640e7924ab19267b98a35ff6f87a4f09aa4eb868a1db12e1",
+      "6db491fe0bb6c0434493b023d0d591bf262307dc4a4f3c597420df6bc8ebc01e",
+      "6dc2aed70178b6f101b9de2ae83b2ae063c21ccde705b9dec7589519c8b13e80",
+      "9d99bb18f461e5b40b66405fc0affe43a48ef23fc3a7473214381f2227102063",
+      "beb4f030b0f9ae50ff868e65401fc0ff7ad6cab369eab3ee7fa45bc80e01fbca",
+      "d0ef2ca6ca20f6b5a0e0c08ad5a4e1e81e767266f0b17e67906ed0c22e938284",
+      "ec13d47077428a092adad30d8c3f392ebfea6804a4ed9acac8430d21baa570c3"
+    ],
+    "structural_operand_1_start": [
+      "0cebb8c284d070d65dd8561e20fa28f494a05ad2d0d17ca420cfdc6c05b575aa",
+      "2c781b5f1d8230bc7a650233d526cd5e09f8f468b7526f2430ba2c8f532a1b62",
+      "553c49499cdb0b99ff5890e3fef43d6a102678c51a40f5ad911e359e5bfac2ee",
+      "808d641a7d4de0d82da672ba50811cb1c5b45975498c529e53b6391cb1134287",
+      "b3d24b930c207cd1395b03cffd19c35edc5fd3113fe172054aa17d2772040246",
+      "d5294531b101b11319cf720fe796feef79288298951ab8b30eeb7b71cc8e6d62"
+    ],
+    "structural_operand_1_end": [
+      "12535757203a87ccec7152cb89760157421916d1dea393e0231b81bd334be665",
+      "1b7587cb99843bb215e7497ca8b82ec8fc6366da2ff5fbd60eb7286404aa5910",
+      "db721890b07cbc0ac30bb24358b7dc5e98d39dc8bc5e77af1a6239edecc89342",
+      "dc9ca8b4109143530e7984a474cac01380f25bb70c7a31e8894b2b12c86fc296",
+      "e32a88e3b9f3a8454991013c56d35fee987dc1a6de09caea0dbb547eae002ad4"
+    ],
+    "structural_operand_1_continue": [
+      "13e5adda65a704689d7bbf2247b85eac311f1150f740822101f48cb3be9bcebf",
+      "2f56911b25fd0a868c51d7f74e93bc6acda89d5012ebe6f3becbb0871017abe7",
+      "39d369545443cf2270200a3802aa0b9e77a41bb7dcb0340b102256b8423b562c",
+      "3ac2acb06a61289884b45bf51be09ef8bd2479f8a06cfb6e7ebc7e7842768cd4",
+      "7bc4c4ab39a4eb9da1d11f890ff4f8c5e38a4b8a0c9ea89b8aaa9752431e0040",
+      "ac599eeaa49c5b242bf420dce3ea93399eaa528fe854dfbd9301c98c7888166f",
+      "d2b2200608ce8d7a708f7cddf36e15edc3b07a54bb6279b0bf24fea76a37323a"
+    ],
+    "structural_operand_2_start": [
+      "24dd1a488b94b5408d78586cdddd0e8cf60d62432f77871512ff7e08fe9e5509",
+      "450882eeadef5d8462602a68780d85cb737dba98b793f7bc9264bc7531d8ed1b",
+      "4d4119b60801f356a5ef892af70641ce5d2e75a8ec0acaba26b936e3d0529ed2",
+      "50b2e7c1b19b72a275e44b134506a224b27257ba919fb0f64023c5ece44db73d",
+      "84fb94e5ccaf6d86b83f5443d261885269049802904d2ad4fcc96ad7d45a9f99",
+      "c11a01abbab92709c44653cdbf4e8a021f22302f1c12a0cbe77fa580ebb54104"
+    ],
+    "structural_operand_2_end": [
+      "032b361f19c07d309b13a58fdfc87c4b8868c2d6f587af4734fe2438f4883889",
+      "1d171681f57b4087321cbc28d444ed445810d0020778f0e260f1da2c4b11114d",
+      "26bd2b8ac45df294a01fa154ef46f21a90a29f71c6f88a3f02c6983af29e7214",
+      "a04854fb63acd5d3ce2c2c96d66341ed2d8ca0b96bf7c4bb370dcf774e7691d8",
+      "e7dbb654d4dec37b554833eda8585be290b8471bc628de8b4079500819e5906f"
+    ],
+    "structural_operand_2_continue": [
+      "0c65e9c2be8467f3bf6b06b7c5ca73269d64d195a87d8ab7da8172ae546e30a7",
+      "449cf82826df0592a9fa4d6b546bba2161d99654da3571638dc61c768ffddca8",
+      "551e1c753babd0bae3a2279007c45225fe97ed86898e9a505ad1cfc38a24e229",
+      "93d6694c64885c88c5e387d2abb733a3793736d16c2ef89f5057b2aaa0438a48",
+      "f30deadee2b21f5a0a58d6273c5122d2754febbdb8d9971883077a1b1e515d56"
+    ],
+    "structural_operand_2_piece_end": [
+      "9e2234a7ba2e1e1a589ebb108705d141663d1cbf9032eb6423e1b5487b912e9f"
+    ],
+    "structural_function_owner": [
+      "0959e0ac482734deeeb40fdefbea39855c99bf118936b39f8e3f19470300929f",
+      "1757ae4a6625bec59d5d71e29f01b5b85b431cd046173d4d51cce6337aabc6e7",
+      "1d9a887b50bedd6f84b713217dc0b425d3156742eb13e527751d85b159afdfb2",
+      "47c9ca774cdeb7d10714f75c9ad8129fbc8fce1d424d4c739885c9669aa79370",
+      "5581d5d8dddf5c33bb1a1eabf08ed3a0a9e8d47d5c7b35dad665a2489480183c",
+      "5d533a5447b921324037ea960102cb36f1567ad7f044265e0f69efd83877dd6c",
+      "6749dc6ac600e63d6ef7e0fdb06b93113d9c8477f1c3b5f2e0606cd1182b40ae",
+      "6eb6c3644bafd3a68f261829e644c60f9f6e420f6449c97b8151a76e21d23210",
+      "801c2ec7b691232b327de31418d21fe8c441fdb23d5be7ea08671cb4e4571466",
+      "8b94fc9942d9b14163a8fe7937ff73342d4f545ba47a1a06b19b2b9679fb63b4",
+      "9bee7056dba4d75cf719c350703f79494bd8828d20347c26b3697cd195e70e6c",
+      "b2424d4fe017db5d7a79da55fce41851f284c3ffd911c86107f5cba703e96945",
+      "b55cacb11d711585280d6fea5439063ed1f587dc8b9076ff911c9446b60b289a",
+      "bce666e36bca82d77aa1ed6f57076f5c1b50de580c73d6a7a105244bc9f59212",
+      "c412b3f0482e959d8d3094b771ed473c751b8a850f13f83ac60c610752046151",
+      "d1034a4ea078f82c618a592403bf49ee5f427e296f0c2e5db0a4ea6d1ac46258",
+      "e3e5e3f2d5aec2471856ff1bad8150563aed9df985d21507dece382c5f97cef9",
+      "e720c83bb4bced82416afa181a1ec7d87c1addc278683ae50d0be56de2b173e7"
+    ],
+    "relation_marker_role": [
+      "02418e16ec10bffe9191f01e13733c855c6afa36ad0fba39b71e5cfba29c6af5",
+      "1e5985ac009111781cd6a6e98ce3fab7abcbcd46f2febdfef6b245b43cbca24c",
+      "23f640ac8660c2fdc2f649e3d68359b08627aecd8a9b217812095936e9e928b7",
+      "28faaa3b2ffed801e9fad7ba5ae499756c8e9f95d04358a2b8b8dbba8163ba64",
+      "2a05cdea80326408b24a2d4a55bf892ffa7ad807c777a10b46ae9d3bf99f36e6",
+      "43e715039583b77ee017ed0f8c1f02412937d3e89e68d0d721bc45c1bfb91544",
+      "616df852a111cf5fa1e5f64b3bed0c95403cd6f4d1f77c25691d89454510a8a4",
+      "68ffddff0156f01b418fca6678aa9560c522ffc7e55582dea6f2b511857c42ef",
+      "693b484a88b4171a4723419ba9cb6195b0f8ec76b84cdccdd81564c18282a926",
+      "6b152a01d3add7f8da3ad2f54f3bb1e64574d46ba6d36b18b2858aa687b94654",
+      "7a280ef9cc7f351522ac38c02667bc3efdf94f4e288b37e74888aadfa5a3a08f",
+      "7a93db6cd573818d45d15a94bbf5cd29d2c88502c3424eced6cd5f7b823e0168",
+      "8235fc41f6d0af7723743585ee0eb0e417c3b3c27d623400c9f709341d5f2139",
+      "828f84d5c89207897090415c6beea915f0450fde3b12a9fc7513dbd91b2c92a8",
+      "8b834e43843030a708b22e12c8a996a41bfdf6f9a50ec7e0e731882c76669430",
+      "8b866cfeff5217c58d599e0428faed62ed2c72b62e6dacd3ea391284674ea9f0",
+      "ad96090f9f527d427eb2c958eb4459d7cb969a526ff40ba85c4604a96a520dd7",
+      "bc80d0cf49c6c73967a8271e815ae14ed10cc690aafe3f148da14a4845f3e0c3",
+      "c098758d426b6f8e50298a7a966d3ceb7bf8ea661b5022ccdf349766293b2a07",
+      "c6879029e4371073f70e9241a1deb938b125026d4faede90f751a1f31c964966",
+      "c7bc0d5f981bf5efb1bf03960e8082cf49465405584de430be88c0d15c15a378",
+      "cc63b67794dbeca67b960c57a58f21b75cf0ba942ed6db5c405a6eaaaef7e0a1",
+      "d35587e43872905edf3039a48909036ea37118a2b83e30b0b58a80819750d9f3",
+      "d4e9350736eb980a4a148e48f63326ce2e93f85dee5bc6968bfdca5b7eac96fb",
+      "e27f8133eb8531be202670f262630ebf32460b2ed7099144386c6f8496dca861",
+      "f2e1b2cf601239dbe40a080c9e9297ba3af7eb1289537187b2fef522964eced9",
+      "f5126e8b003e48cdf5bfeb0b9eea3e5909f60943fa51b323f08bf8bff0e24fb8"
+    ],
+    "structural_partition": [
+      "0ae48cc6efc2c75fb9a22f3fa8708286705f44aa62c4b9f49e9383ca3bded5f5",
+      "14f9b90e76ae2f6bea23fb38915b8b53f551cae474b87004a462bf849c2f8e59",
+      "1af93c9123299d1ec10227cd3ba6e25c6192d998cd072fb57f8cf7e9d9d1b027",
+      "1cc689b0ce7e204359f0739d82b445a9e72fbc23e7b02138400e811d2917dff2",
+      "1d4dbbbc0bbcb16c6b3e72c0f82e7b1812f8fed8157dcc00cd981a3945b43940",
+      "2b08848beebb40e12c48e465311c0b72864e6067735e4dd87030b6a84556cf87",
+      "3aebc00e2eab66e04cc3d2d2687bf7ec1911da6c7fbacd78956b3ae761360438",
+      "7abf70bf1ed0ac3d381318e855e1c72ee5c913f831e666fab5444a7d24f81497",
+      "a3557dadfcf8a26072765c91bf4c02f7d839ed0262b8bbc949aaff82f9b0285a",
+      "acf3ecd9f22b758ea39696cc78c1454fb19676d4efdcde28500c799ffd458bd9",
+      "c817e05ed396c4f5946ea8495b2daae261719366cdd050a926b367970938631e",
+      "ca1ba5db764fce6a9fa9404825c71d1cf5d28f61dd492c42a397ca12dee97283",
+      "df7eebb015de32629ba8ffc0aecc55304f4f78d3e7334efbdea77c607e213c24",
+      "e3539fbb3b13a114cd3309a458e5c58fc446c42d22070782296cc0685a4f3241",
+      "fcef9baefc231d02f52070f2e77f5713eb9ccca5cb3a7964b57c77b47d73f8d6"
+    ],
+    "structural_revision": [
+      "125fa1aad434f868ed5a5ecf0d1e931032d33bf778abf1c93e6013a9ffcb5b31",
+      "1417129799fe117138de9c8e6e066c2905bc1be954112cc708b960d2205163d3",
+      "35ceff28a013151a267e3cf6ef066f81d15687beb3bcca1ed97b8361a977330d",
+      "a7386e6d1635ed150d531a8f5eceafb35695a414fb4490cd2ca57fbf66af78af",
+      "b9652f60d4f7ef28db585029a957dd947fbadbd80736228837f3e0a2a7f1903c",
+      "e4857e3386b20af39f4ca57446f61b133ca2a4cb3ec9c96f96e08e723058f2b1",
+      "ec507199f9d6f43858f8285e7517ff91dfb41b351efa1fd74ad031be43ce7413"
+    ],
+    "structural_operand_1_piece_end": [
+      "55c8c0516793d468f25a0aaba8036dbeabea4cf9d71bbf12c2d5a24bb3f7f7e7",
+      "b9bced5d830f4941447ccc07938581250ccec4ecd0035e7e39008f9f3ccf76fa"
+    ],
+    "structural_ownership_revision": [
+      "5ad6a8d25e2cf86b166aa189d86d6db87a72363b20d7d936552328f022fb9013",
+      "f91181132c03c606970271678e2c66f3d00260489f281b85403328032bb0ba22"
+    ],
+    "structural_content_start": [
+      "0279deaeaf8cb9e9768cf28212bcf3394053caa7027d564bbee796b9945d8b8e",
+      "107a58a9e9d112b2295f64e1e77330d9b2b2c23d5fa5b4ef583580672217e7e0",
+      "2c97790046477f9417de650904c1e03c26f1086e74966f9c64f90e915e4868ca",
+      "35ffe9519565c1ebaf6125336cf5c27d67bca262fa87061c545bf0ab6317fb70",
+      "3f3f11693d161bd39eb6d8cc79fe6f30343b8e86faf40dde82663a3a4d25094e",
+      "5066e38e039ae21e30ccf1250567d639dd988c09e1dda22ea791d485699da90c",
+      "6b41bf4fcef7089fb6b016593ce607b5eb8961b4690697ba4401b693bbc32bfa",
+      "709301e97040e88d7ca0953ccdefd04240a2bbc0c8af87239a1ca571dc9dfc4b",
+      "bcfca4cd23f805a5a5526e9dce531a6a7af26f790b1f844cc17a0be58dee690a",
+      "c2ec423d97074d046f9c0cd4cb30204c07a4ed363370caf8c39a49efdc7757a8",
+      "f83fc03e41a5045ef5d3951a568ec72d0bef9bb152e31429dabe9275fbebe7c2"
+    ],
+    "structural_content_end": [
+      "33f025192a1847e074ff38b60f4b1feb24e190458a6d2e60d354236733794c9f",
+      "3f83c915995d63275455b032b0e8b430e40c64e691deb8bc3a246469079da27b",
+      "72c6ca547dd6f85b384ee931a0dbc58044ce179788388ab6ab5f8faa05b38b51",
+      "9f083c46be935c015eed484994a2f00c673f12195d156a2c877de9d0ec4c2539",
+      "b9d3cd8605a853a32cb13651e55ff81c61a5534c3e69b3abed86f92db7f74e42",
+      "bf099dba57f455997d8166dd88341801b2a7a0b25880f78c6e55d5b698f9d0a8",
+      "cdd36743adac1c81f436c29b5d477f2c8689243fafd3a69d05549f093c8ce5ce",
+      "d4196f6d5652f5cb7378e8e9f79ad6e479891bd98e993d65dc4f12a5d6665ee6",
+      "f2bbd8807a1bf752674c0f7ff7d0417aa9ddb3590f9d5da50f364cbfa7c90ff7"
+    ],
+    "structural_content_continue": [
+      "0d83f21d2efac0d81abe9c9fc68e2fda523b6eaf78f1a6f5089262bb5bd6d46a",
+      "74b7e9b0713b3d9863463739466cc299166a6ded158d377b979e88356efce1c0",
+      "b5dbd26210516e0152fb4c643d1eff13f2c25117f462a7ddc9d9de8cd5c74335",
+      "b82c90a2826e0e6be9572238f622ce7b85f25e5c0e81fe47ba496b38cc36e2c5",
+      "c4c22679e4ec4d88c43646edfc0681bf1e90250d11849654c47bc509c7ef04f4",
+      "db245921370801e321962619f0c089960ddcf323f38563f5fa5044933fc13840",
+      "e939f8eb4a54dfcffe3c8a9d28fd23b260f99e8480a38627b81b50049d99e53a",
+      "ee3329f85700ad947100f51332c83db56aa35b965fce60bb8e3c4759b22134ad"
+    ],
+    "structural_parent_start": [
+      "547401789fab6e2c19cdacaedfe1d608524315ca9a616aa8e8e0e873979880de",
+      "56de4b2b7381f5f2c3a0506c3b313be2365fc58f1f4d46433ccb93142ddd8d5e",
+      "5e2b657c48e9960db9a882f441d8617c6089f58ff2d07fb45e596c3fd08d4b74",
+      "65556d75545dee24777c6ad46e9fb0d0aa39befeceed61aeb6b5c2cd14071bc2",
+      "66eab1c82ac28382dbb77dab0985966d502f0f110c654aae7cccea4d01349a65",
+      "8d97fad97090a0e39d5e9947b91705bb89e4d622a915ec028047197e4593f020",
+      "a96e74849af11740e375d972bb346378fdb6d13da1ae45ea89ce06c0953dff74",
+      "fb857e939eb27105bb8f44cd31a3d35b9fe41487984c6c6773970dec50ab5d4d"
+    ],
+    "structural_parent_end": [
+      "0d42219a58e3321f34645b5e8ae70aa7f072192b32f7d211a0898e525da7e839",
+      "15ddc3ead62df5c37fa00fc7bf3d6c338d0a9c80d8ba35b8184034ef11a2aca9",
+      "347def9962fb717214d99b73234822d295e3cb85d6f66e6f5cee6b13d810753b",
+      "3c1a603efcefb48022c4672e761f64cadc049c51fa25ba15647bb3b8b227eaa1",
+      "502c496c915b8ea362a600ba96e3c29d354a9c1f00aac819c02d4e530e58c113",
+      "62b97839e3733d4bd1f4f6627404757a870af4adf3b98f815d0665c1110defd3",
+      "9149e5611496b3d701d95b0319f2ec14bba787a8bab0ab4d74f67e5cafc239c8",
+      "b6572e38a07144006bec55efde1afe8e485bf4118923b37870156b65ed47a366",
+      "d0bbba28724f8547635c757a89d1bafe17cc44402dc6c08c5421542cfd38a6d4"
+    ],
+    "structural_owner": [
+      "076574142a53d08714144837a92b6c6587b74ae6ea79067d06197dc54a837772",
+      "1110e318b3a2f1ca88b4f87758c101e83a6ddf775557566eb9fd3686ac273200",
+      "53dbeb022eacfba54ad304b9deead2def9c3ad41f2b228fdafb0c00a42d0b81f",
+      "9e8f9631a3fb7a21c958976c9defda15151e4e2404d8ec4c41e85fc8d97e2e37",
+      "b2b6acb3a373cb3b2cdbae5402d287027bfc9a3a5316a006ebfe9ad88c1bd550",
+      "b9e2bb6582bcec4381909ec21bcded2b5d22e2c9b44f4850c6c01ae63d7f6994",
+      "cec29f1ebd7f51dfeeb99bc9383e8e79322aaa1b3c44c8b2802ebc2391b2971c",
+      "f21aec354e14b198033a267645d0b9b5388cd6e9718bc9ade5d0ec93aa5daa59"
+    ],
+    "structural_content_role": [
+      "02aa2f1977c67cfc2051c124988cf65cfbbad6eb1fa4c3a5c9c69ae33f8c88ec",
+      "45799bb0afc571cc84bc382e436e1782997eee338bd6fa4ac630b6469df5a1a7",
+      "4b88deedcf3093b6774b0132343b69b3ef4d2b05b43202dc38f6b31e05fd0c4c",
+      "717f367469fe34b16d719adfc69eed0819bd536b3f1083efc4132f218b2d8a52",
+      "a8bd6f1ee1294904a4d3f832e524774e23d35f9f963cfcad03d02589af8bf17e",
+      "d0e169991bbf8390f20ed2cd40850fbe1dd9250e9d1d69b9236e99a14dbf9385"
+    ],
+    "nominal_function": [
+      "3337a9163e1e292d849677f83367aec933674f897578d1c2ec63dd1ed7a99d88",
+      "34f79bf891deb64a5c4e0f72718a2d3c540611363e5b574205cd843154feae43",
+      "386e6b8e8c733fe8cb8fc479e796955faf212efc66b2d9fe7809064c221b614d",
+      "7d91025c3466d9bd106ea40acfb1095ce9438c7ecd5047b2e58554ec85941cfd",
+      "7feeb1019b5b7f0b90414b7196e56716147b9539521444f60c43e1cb651636f9",
+      "9fa9b5c82948299c7607cd9709488ad0e9715e6ee62dc349c317326dbfaf71cb",
+      "e0d29f7f84daeb0d0e419ece9ac567bf6e7b5d2d60a26c85e69ef1f5ce7a24c7",
+      "f2a6a721c0f956b35cb55e9ab510aad2d66fec79ae519b3aa2ebd01bb951442f"
+    ],
+    "temporal_function": [
+      "1cdb1a31249a2576ee78c7f6b40dc84c405509deadf2211579696a5d86c72959",
+      "a57fc261be71a148012609d175801ca1ca4dbdd57e142943cf0d2b571bfc1cba",
+      "a6c8e9a09e093172cd201287a3d67b3e6c08da5c6fc25b6b48040b7df1cef202",
+      "aa3ca6876bc80c1fe67577380eceb50d11386530265d4ac23d1ac6e20dd8c3e6",
+      "be1ace4758c8598e66b07e495a35004428237ebec0528d1e4ca821c8ac187d1b",
+      "ca802894be0a8fd70e1f127ea719cd0f1a3696d104b8238fa3448ed60958dd18",
+      "eab9492fb3104bc0047abf336d740f4c001917195f6238c0c92b66b9b20d8a2a"
+    ],
+    "predicate_function": [
+      "012891d176b566a6aee6206e3f4aa21fba8bb06fd12fde8668b29ea9b0b236c6",
+      "1d2da04599ca4e5eff002ddf7fa9df83cb45a326cca7e99dcd32a337a4ec842a",
+      "2b74a7a8c554499bd23435143928cc800dd72d774b97081bf379a60532cfa2a6",
+      "66520dd7034a3d2915e1b6b4a4b4ddfdeb81946b75ddeed0c4d74394222cb997",
+      "a38e165d3fc7a30c1a0f9c824cead2b586e2db053aadfb4f6e51eb3fd1212fdd"
+    ],
+    "predicate_argument_role": [
+      "337bd84aa9b89fcac9b3cb4d8b9b7ba7c0ceae845a255461802bdb1e5222fc0f",
+      "3778cf021af59c336e924a77a1fd19683115fec15ee6adefdd445a9991ff487e",
+      "59d3c274c09ac877a985229be897d4f1de1de071b8d17c8f4719b1ca155eeec9",
+      "6d2141ad6738617c67c7abf22bbcba3a50236570254c3598112106e143fd5675",
+      "7f2e6d04bde740a734206466be5e8764dd4151e27366889dd9649b1cd4ea8dc5",
+      "7f541e219446bcf4a1aed9ac02a40dac2b87f4e49acf69a302387d8fab2377ef",
+      "81dc7c48b09d23a1fe99fc3f6bcab50c20b0e660968cd878b0c389b0e8f56af7",
+      "90599ee2473ff7116598dce69d7ec12bfa5c97b5e9ae6f7bc1a953e52fb007a8",
+      "aded636739fff5e5fb1f4cc97a404787c05fa81f32d61df87f823051131c3f20",
+      "e528eb714583194d1c3be854d4b5946efceb62f8564f3357704518bbef5d58c0"
+    ],
+    "predicate_argument_reading": [
+      "a6f2ae60dfd6b9655647ef83ada3619668e71ae96d8c1bdae49af7cd2642844e",
+      "ad8cef67711c1dc37c84370915ee0d3f51d12a991372ff413c519fd2c74bdbb2"
+    ],
+    "structural_control": [
+      "1d26660cb8267622ce5a0c819b5f3ff1100273542bd779397217611092216885"
+    ],
+    "nominal_dependency": [
+      "013948d139fd8f994335511c3e82c7a651ca14549d8403afda723e5cf6279a89"
+    ],
+    "omitted_content_presence": [
+      "610ecc9244a3a06cc050072f74e077114b35497c173a3cc78ea3af032fa584da"
+    ],
+    "structural_content_piece_end": [
+      "b5b9f8b6630e1c601b0137ee73b0037aa96b995a199a843b437a3f81a82cd2e8"
+    ],
+    "structural_parent_continue": [
+      "0528f22f4be22c1b2402d43e4a2101f003ff01e6f0b78878ab0dc5d2f8e0ae28",
+      "26a729fb99cdf282fcec6f56e031aea189b7bbbdb6c6c0e32751b521514dac4d",
+      "3e60ac3b9a97769a54091f9133ad82324f1dbacd2ee14366671f9ad8b2864c42",
+      "71f1f01c481e458d2ed154ac9fda3758f78d27dd2f44d318215ea4f3b00d4827"
+    ],
+    "structural_parent_piece_end": [
+      "5125d302709a68dd68fa16e69eadd29700dddb3a4e6fc08905cb8a51d79e2a6f",
+      "f83874378294e1cd6dfc1ba5c7f417e59e04a1268300c7f3317d75b457133350",
+      "fe196a49f343ca960905467f84e7d873bf9bffb01a22a00b08c59b869e14648a"
+    ],
+    "structural_introducer_start": [
+      "0695c0be502802b96ffd8e069f6b7fdf632e3876213a74d4926ba3a73c98c6fd",
+      "21219cf90dd9d675712332ae0ae0cc599c2e7b3b5af70a9475cbec8df694fd08",
+      "5097194778854ff686e300734939b80178f87f32e5e01ab5880489b19c43475f",
+      "5e5fef0e41c99e669a2dd4073c111b2fba161667982be421b503990636df6fa7",
+      "c41b6680c37890a27cb76159471e89879e80baf5d48d78036ac581aaaf22175a"
+    ],
+    "structural_introducer_end": [
+      "379587e03e4673126160cb84d3c190e855239e57a6ad20c1b41a181727ec5fd7",
+      "bb7f672a17eb6118623ad2c23f4b1fc8d4d947bb65b860288bae5dac6102b26f",
+      "f8b00f7f32db13ae590b37ab69a7fe7be42619d91df187716481e1cf3f08ea1d"
+    ],
+    "structural_introducer_continue": [
+      "b5148659290a461c1ec99282a06ac98f950bfb58cdac70389e6a4be8f756873c",
+      "f1b6e488d8ca7511adedaee4bb1375e9e5af2d2323b4c71199a1f12f0d43f508"
+    ],
+    "reference": [
+      "535d48f8527efc33c1c535b1d0adf3c2311a97e7be023a8d10f155acdac04228"
+    ],
+    "structural_marker_revision": [
+      "533ac432f76c710fe48c7b5e44bc8f67c9d202ef7132168a933a61e7bf507f18",
+      "a36428fdbba83dcea18c747a71ead3f310be985c5049bfd3e148a5856985809e"
+    ],
+    "infinitive_head": [
+      "39bb89bdd9d75a20b4bef13ad032aba1a7a10bb1731c776a08003c6f9b10b450"
+    ],
+    "infinitive_content_end": [
+      "7cb0c1e2d2b9ef8a8130520a6a6d612647022e715b51ab148e441fe0743d7958"
+    ],
+    "infinitive_content_continue": [
+      "f7cec205a094cffd2f377ca0403062ce6df14d14c6e7588e21999a57d0864c5c"
+    ],
+    "nominal_function_source_start": [
+      "05b47abcbca8dec4adc6e21249428a57eafcb84a99870621dd48b7f414d5e4ce"
+    ],
+    "nominal_function_source_end": [
+      "faa52a967d745215357469339c548c3c15ca9cf74e58cb46dc26280973a3d88c"
+    ],
+    "nominal_function_source_continue": [
+      "3157452fb79d808dd7fc762b5d27282b351a6491af7ab1bc1722bf6e82d918ab"
+    ],
+    "nominal_function_head": [
+      "62961542b91dc901bb6c8901d2e3076010d5c99fc6faceccaf2fc1ab4bd419ed"
+    ],
+    "nominal_identity_function": [
+      "0fee043555aa1d8db1817b4e80a174282a9439303b23f4bd93abd2ffa7978e42"
+    ],
+    "content_reference_presence": [
+      "3330542ce14fb4046078444ec73802876ead4c303879ef63ac21e7ab0a2af4c8"
+    ]
+  }
+}
