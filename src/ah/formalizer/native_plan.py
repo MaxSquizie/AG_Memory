@@ -33,7 +33,7 @@ def build_plan(state,release,store):
         if not frame_hosts_live(state,f):raise ValueError('NOMINAL_HOST_PROOF_RETIRED')
         if f.semantic.get('partial_composition') or f.semantic.get('partial_composition_member'):
             raise ValueError('PARTIAL_COMPOSITION_NOT_WRITABLE')
-        if f.semantic.get('structural_unresolved'): raise ValueError('STRUCTURAL_OPERAND_UNRESOLVED')
+        if f.semantic.get('structural_unresolved') or f.semantic.get('parent_slot_obligation'): raise ValueError('STRUCTURAL_OPERAND_UNRESOLVED')
         if structural and f.semantic.get('temporal_unresolved'):raise ValueError('TEMPORAL_NESTED_SCOPE_UNRESOLVED')
         if structural and (f.semantic.get('relative_temporal') or f.semantic.get('relative_time_targets')):
             raise ValueError('TEMPORAL_NESTED_SCOPE_UNSUPPORTED')

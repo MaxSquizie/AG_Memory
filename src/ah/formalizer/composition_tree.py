@@ -168,7 +168,7 @@ def validate(frames, trees=()):
         raise ValueError('COMPOSITION_DUPLICATE_FRAME')
     edges = {fid: set().union(*(leaves(s.tree) for s in slots(f))) for fid, f in by_id.items()}
     for fid, f in by_id.items():
-        if f.semantic.get('pending_proposition_roles'):
+        if f.semantic.get('pending_proposition_roles') or f.semantic.get('parent_slot_obligation'):
             raise ValueError('COMPOSITION_SLOT_UNCLOSED')
         # A scope carrier stores an enclosing expression, not an outgoing
         # content edge from this lexical node to every sibling in that scope.

@@ -232,6 +232,7 @@ class CompositionSources:
                 lambda root,reading,address=address:any(
                     root is domains['ROOT'].get(cid) and (address not in bindings[cid] or digest(reading) in bindings[cid][address])
                     for cid in domains['ROOT']), 'SHARED_OCCURRENCE_READING')
+        parent_obligations={}
         if request:
             allowed=[]
             for cid,(owned,_) in choices.items():
@@ -239,7 +240,12 @@ class CompositionSources:
                 if frame.semantic.get('output_sort','PROPOSITION')!=request.output_sort:continue
                 if request.head_ref:
                     reading=frame.semantic.get('morph_bindings',{}).get(request.head_ref)
-                    if reading is None or request.allowed_cases and not set(reading['cases'])&set(request.allowed_cases):continue
+                    cases=set(reading.get('cases',())) if reading else set()
+                    if request.allowed_cases and cases and not cases&set(request.allowed_cases):continue
+                    if reading is None or request.allowed_cases and not cases:
+                        parent_obligations[cid]={'head_ref':request.head_ref,
+                            'required_cases':sorted(request.allowed_cases or ()),
+                            'reason':'HEAD_READING_UNKNOWN' if reading is None else 'HEAD_CASE_UNKNOWN'}
                 allowed.append(cid)
             graph.restrict('ROOT',allowed,'PARENT_TYPED_SLOT')
         graph.propagate()
@@ -248,10 +254,14 @@ class CompositionSources:
             if frame.frame_id not in allowed:
                 frame.semantic['structural_unresolved']=True
                 self.state.diag('COMPOSITION_CHILD_CONSTRAINT_CONFLICT',frame.frame_id)
+            elif frame.frame_id in parent_obligations:
+                frame.semantic['structural_unresolved']=True
+                frame.semantic['parent_slot_obligation']=parent_obligations[frame.frame_id]
+                self.state.diag('COMPOSITION_CHILD_CONSTRAINT_UNRESOLVED',frame.frame_id)
         self.child_domains[key]=graph
         self.state.syntax_trace.append({'kind':'COMPOSITION_SOURCE_DOMAIN','child_key':key,
             'region_ref':region.region_id,'sources':sorted({f.semantic.get('composition_source','COMPONENT') for f in frames}),
-            'constraint_state':graph.snapshot()})
+            'constraint_state':graph.snapshot(),'parent_obligations':parent_obligations})
 
     def allowed(self,key):
         graph=self.child_domains.get(key)

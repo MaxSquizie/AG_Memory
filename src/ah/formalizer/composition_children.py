@@ -8,7 +8,8 @@ def select_child(state,release,selector,region,frames,contract,context):
     from .composition_session import current
     runtime=current(state)
     allowed=runtime.sources.allowed(getattr(frames,'task_key',None)) if runtime else None
-    found=[f for f in roots(frames) if allowed is None or f.frame_id in allowed]
+    found=[f for f in roots(frames) if (allowed is None or f.frame_id in allowed)
+           and not f.semantic.get('parent_slot_obligation')]
     if len(found)==1:return found[0]
     domains={f.frame_id:f.semantic['composition_domain'] for f in frames
              if f.semantic.get('composition_domain')}
@@ -16,7 +17,7 @@ def select_child(state,release,selector,region,frames,contract,context):
         from .composition_session import current
         runtime=current(state)
         if runtime and runtime.tasks.resume(frames,contract,context,region.region_id):
-            found=roots(frames)
+            found=[f for f in roots(frames) if not f.semantic.get('parent_slot_obligation')]
             if len(found)==1:return found[0]
             domains={f.frame_id:f.semantic['composition_domain'] for f in frames
                      if f.semantic.get('composition_domain')}
@@ -48,6 +49,11 @@ def select_child(state,release,selector,region,frames,contract,context):
         'candidates':list(domains),'selected':selected})
     if selected not in domains:return None
     selected_refs=set(domains[selected]['frame_refs'])
+    if any(f.semantic.get('parent_slot_obligation') for f in frames if f.frame_id in selected_refs):
+        # Selection among readings does not supply a missing morphological
+        # premise required by the parent slot.
+        state.diag('COMPOSITION_CHILD_CONSTRAINT_UNRESOLVED',selected)
+        return None
     source_ids={f.semantic.get('composition_source_ref') for f in frames if f.semantic.get('composition_source_ref')}
     if source_ids:
         state.clarification_candidates[:]=[row for row in state.clarification_candidates
