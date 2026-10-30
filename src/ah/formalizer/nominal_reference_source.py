@@ -2,10 +2,21 @@
 from .canonical_ledger import digest
 
 
-def rows(state,constraint):
+def eligible_frames(state):
+    """The common accepted-source boundary for entity, group and mention rows."""
     from .component_policy import rejected
     from .function_inventory import frame_live
     from .component_constraints import frame_hosts_live
+    for frame in state.frames:
+        d=state.decisions.get(frame.frame_id+'|predicate_value')
+        if (not d or d.outcome!='RESOLVED' or len(d.selected)!=1 or rejected(state,frame)
+                or any(frame.semantic.get(k) for k in ('structural_unresolved','partial_composition','partial_composition_member'))
+                or not frame_live(state,frame) or not frame_hosts_live(state,frame)):continue
+        spec=frame.semantic.get('candidate_specs',{}).get(d.selected[0],{})
+        yield frame,d,spec
+
+
+def rows(state,constraint):
     from .coreference import mention_features
     from .native_frontend import _frame_variants
     from dataclasses import replace
@@ -13,12 +24,7 @@ def rows(state,constraint):
     evidence={t.token_id:t for t in state.evidence}
     own=set(constraint.get('anchor_refs',()))|{constraint['head_ref']}
     result=[]
-    for frame in state.frames:
-        d=state.decisions.get(frame.frame_id+'|predicate_value')
-        if (not d or d.outcome!='RESOLVED' or len(d.selected)!=1 or rejected(state,frame)
-                or any(frame.semantic.get(k) for k in ('structural_unresolved','partial_composition','partial_composition_member'))
-                or not frame_live(state,frame) or not frame_hosts_live(state,frame)):continue
-        spec=frame.semantic.get('candidate_specs',{}).get(d.selected[0],{})
+    for frame,d,spec in eligible_frames(state):
         for tid in spec.get('roles',{}):
             if tid in own or tid not in evidence:continue
             unit=frame.semantic.get('lexical_units',{}).get(tid,{})

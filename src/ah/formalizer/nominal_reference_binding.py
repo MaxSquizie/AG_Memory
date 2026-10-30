@@ -23,7 +23,8 @@ def _payload_one(state, unit):
         raise ValueError('NOMINAL_REFERENCE_SELECTION_STALE')
     from .nominal_reference_domain import snapshot
     from .nominal_reference_pages import live
-    if snapshot(state,constraint,binding['interpretation_decision_ref'])[2]!=binding.get('produced_domain_hash'):
+    _,incomplete,domain_hash=snapshot(state,constraint,binding['interpretation_decision_ref'])
+    if incomplete or domain_hash!=binding.get('produced_domain_hash'):
         raise ValueError('NOMINAL_REFERENCE_DOMAIN_STALE')
     explicit=state.observation.get('clarification_choices',{}).get(binding['interpretation_decision_ref'])
     if explicit!=binding['selected_candidate_id'] and not live(state,binding.get('reference_page_proofs',[])):

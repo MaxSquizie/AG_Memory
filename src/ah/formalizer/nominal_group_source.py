@@ -4,6 +4,10 @@ from .canonical_ledger import digest
 
 
 def rows(state,constraint,entities=None):
+    return domain(state,constraint,entities)[0]
+
+
+def domain(state,constraint,entities=None):
     from .nominal_reference_source import rows as entity_rows
     from .component_nominal_groups import group_for
     entities=entity_rows(state,constraint) if entities is None else entities
@@ -11,20 +15,32 @@ def rows(state,constraint,entities=None):
     for row in entities:
         a=row['local_nominal_anchor']
         by_frame.setdefault(a['frame_ref'],{})[a['token_ref']]=row
-    result=[]
-    for frame in state.frames:
+    result=[];pending=[]
+    own=set(constraint.get('anchor_refs',()))|{constraint['head_ref']}
+    from .nominal_reference_source import eligible_frames
+    for frame,decision,spec in eligible_frames(state):
         available=by_frame.get(frame.frame_id,{})
-        if not available:continue
-        decision=state.decisions[frame.frame_id+'|predicate_value']
-        roles=frame.semantic['candidate_specs'][decision.selected[0]]['roles']
+        roles=spec.get('roles',{})
         for role in sorted(set(roles.values())):
             refs=[t for t,r in roles.items() if r==role]
-            if len(refs)<2 or any(t not in available for t in refs):continue
+            if len(refs)<2 or own.intersection(refs):continue
             try:group=group_for(frame,role,roles)
-            except ValueError:continue
+            except ValueError:
+                pending.append({'frame_ref':frame.frame_id,'role':role,'member_refs':refs,
+                    'reason':'GROUP_STRUCTURE_UNRESOLVED'})
+                continue
+            missing=[t for t in refs if t not in available]
+            if missing:
+                pending.append({'frame_ref':frame.frame_id,'role':role,'member_refs':refs,
+                    'group_hash':digest(group),'pending_member_refs':missing,
+                    'reason':'GROUP_MEMBERS_NOT_TERMINAL'})
+                continue
             members=[available[t] for t in refs]
             ids=sorted({m['entity_ref'] for m in members})
-            if len(ids)<2:continue
+            if len(ids)<2:
+                pending.append({'frame_ref':frame.frame_id,'role':role,'member_refs':refs,
+                    'group_hash':digest(group),'reason':'GROUP_IDENTITY_REPRESENTATION_UNRESOLVED'})
+                continue
             uid='K:'+digest(ids);tag=[state.source_uid,state.interpretation_version]
             anchor={'frame_ref':frame.frame_id,'role':role,'source_tag':tag,'entity_ref':uid,
                 'member_refs':ids,'group_hash':digest(group),
@@ -39,7 +55,7 @@ def rows(state,constraint,entities=None):
                 'label':'The whole established group: '+' + '.join(m['label'] for m in members),
                 'members':[{'source_token_ref':t} for t in refs],
                 'local_group_anchor':anchor})
-    return result
+    return result,pending
 
 
 def binding_id(anchor):

@@ -108,6 +108,12 @@ def resolve(state, release, selector):
             'mention_ref':mention, 'constraint':constraint, 'candidate_count':len(rows), 'selected':chosen,
             'produced_domain_hash':domain_hash,'evaluation_incomplete':incomplete,
             'completion_scope':'PRODUCED_REFERENCE_UNION_ONLY'})
+        from .nominal_reference_domain import inspect
+        _,receipt=inspect(state,constraint,decision)
+        state.syntax_trace.append({'kind':'NOMINAL_REFERENCE_SOURCE_RECEIPT',
+            'decision_ref':decision,'enumeration_complete':receipt['enumeration_complete'],
+            'enumeration_scope':receipt['enumeration_scope'],
+            'obligations':deepcopy(receipt['obligations']),'language_complete':False})
 
     from .nominal_reference_chain import finish
     finish(state,pending)
