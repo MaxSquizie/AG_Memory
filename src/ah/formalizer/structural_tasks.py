@@ -28,6 +28,15 @@ def choose_domain(state,release,selector,region,cfg,slot,options,question,*,prer
     return SupportedDomain((value,),proof['decision_ref'],proof['domain_ref'])
 
 
+def choose_open(state,release,selector,region,cfg,slot,options,question,*,prerequisites=()):
+    """Keep scalar evidence for one choice, membership evidence for alternatives.
+
+    A SupportedDomain never licenses any one member as a selected relation.
+    """
+    return _choose(state,release,selector,region,cfg,slot,options,question,
+                   retain_domain=True,prerequisites=prerequisites)
+
+
 def _choose(state,release,selector,region,cfg,slot,options,question,*,empty=None,retain_domain=False,source_selection=None,prerequisites=(),purpose=SelectionPurpose.ALTERNATIVE):
     """Optional searches declare a typed completion outside the model domain.
 

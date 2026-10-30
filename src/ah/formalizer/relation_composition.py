@@ -9,7 +9,7 @@ from .task_contracts import SelectionPurpose
 from .canonical_ledger import digest
 from .composition_tree import InputSlot,expression,internalize,leaves
 from .composition_children import select_child
-from .structural_tasks import choose
+from .structural_tasks import choose,choose_open
 from .partition_domain import ContentRequired,PartitionDomain
 import unicodedata
 
@@ -242,7 +242,7 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child):
         supplied=('A dependent infinitive is supplied separately; other clauses still inside the target need analysis. ')
     if request and request.agreement_source:
         supplied+='An infinitive here can receive agreement from a separately handled governor. '
-    result=choose(state,release,selector,region,cfg,'structural_relation',options,supplied+
+    result=choose_open(state,release,selector,region,cfg,'structural_relation',options,supplied+
         'Classify ONLY the target words. Context explains their meaning but is not part of this choice. '
         'Choose the outermost relation expressed inside the target; inner relations are handled later. '
         'Choose one lexical predication only when TARGET itself contains no further outer relation; '
@@ -251,6 +251,11 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child):
         'A reference to content or an omitted but understood content uses the content-reference option; an omitted participant alone does not. '
         'Numeric quantification is deferred.')
     if not result:return block(state,region)
+    from .partial_readings import SupportedDomain
+    if isinstance(result,SupportedDomain):
+        from .structural_forest import retain
+        retain(state,region,tokens,request,cfg,result)
+        return block(state,region,reason='STRUCTURAL_FOREST_OPEN')
     option,proof=result;kind=option['relation']
     if kind=='LEXICAL':
         from .composition_contracts import LexicalRoute
