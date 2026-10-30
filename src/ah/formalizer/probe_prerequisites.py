@@ -17,7 +17,7 @@ class AcceptedSelection:
     def record(self):return asdict(self)
 
     def errors(self,state,visiting=None):
-        from .structural_tasks import licensed
+        from .structural_tasks import licensed_in_scope as licensed
         decision=state.decisions.get(self.proof.get('decision_ref'))
         if decision is None or decision.slot_id!=self.slot:return ('PREMISE_SLOT_MISMATCH',)
         if digest(self.value)!=self.proof.get('payload_hash'):return ('PREMISE_PAYLOAD_CHANGED',)

@@ -1,6 +1,6 @@
 """Source-proved shared wording in distinct logical alternatives."""
 from copy import deepcopy
-from .structural_tasks import choose,source_set,licensed
+from .structural_tasks import choose,source_set,licensed_in_scope as licensed
 from .probe_prerequisites import accepted
 from .source_collections import valid
 

@@ -21,7 +21,7 @@ class CollectionReceipt:
 
 
 def valid(state,row):
-    from .structural_tasks import licensed
+    from .structural_tasks import licensed_in_scope as licensed
     from .task_contracts import SelectionPurpose
     source=row.get('source_refs',());selected=row.get('selected_refs',());excluded=row.get('excluded_refs',())
     if (row.get('multiplicity')!='COMPATIBLE_OCCURRENCES'

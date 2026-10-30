@@ -254,7 +254,9 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child):
     from .partial_readings import SupportedDomain
     if isinstance(result,SupportedDomain):
         from .structural_forest import retain
-        retain(state,region,tokens,request,cfg,result)
+        forest=retain(state,region,tokens,request,cfg,result)
+        from .structural_shells import produce
+        produce(state,release,selector,region,tokens,cfg,request,forest)
         return block(state,region,reason='STRUCTURAL_FOREST_OPEN')
     option,proof=result;kind=option['relation']
     if kind=='LEXICAL':

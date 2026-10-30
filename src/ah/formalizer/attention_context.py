@@ -84,6 +84,20 @@ class _RuntimeOverlay:
 
 
 class AttentionContextReader:
+    def fork(self,scope_ref):
+        """Private attention progression over the same frozen canonical memory.
+
+        Branch reads remain journaled/replayable but never publish their focus
+        into the parent's live engine. Do not deepcopy the shared store/locks.
+        """
+        base=deepcopy(self.base)
+        base['attention']=attention_snapshot(self.engine)
+        child=AttentionContextReader(self.store,self.release,None,
+            self.run_id+':branch:'+digest([scope_ref,base,sorted(self.read_token_refs)]),base)
+        child.read_token_refs=set(self.read_token_refs)
+        child.engine._active_uids=set(self.engine._active_uids)
+        return child
+
     def __init__(self, store, release, engine, run_id, base):
         self.store, self.release, self.live_engine = store, release, engine
         self.run_id, self.base = run_id, base
@@ -220,6 +234,7 @@ class AttentionContextReader:
 
     def _publish(self, result):
         engine = self.live_engine
+        if engine is None:return
         with engine._lock:
             current = digest(attention_snapshot(engine))
             target = digest(result['attention_after'])

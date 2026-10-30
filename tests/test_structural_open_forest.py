@@ -10,12 +10,12 @@ from ah.formalizer.structural_forest import current_domains,live
 from ah.formalizer.structural_tasks import licensed
 
 
-def native(tmp_path,monkeypatch,choices):
+def native(tmp_path,monkeypatch,choices,answer=None):
     captured=[];prompts=[]
     def generate(self,prompt,**kw):
         prompts.append(prompt)
         slot=re.search(r'Decision slot: (\S+)',prompt).group(1)
-        if slot!='structural_relation':return '?'
+        if slot!='structural_relation':return answer(slot,prompt) if answer else '?'
         labels=re.findall(r'^(\d+)\. (.*)$',prompt,re.M)
         selected=[n for n,label in labels if any(label.startswith(RELATIONS[c]) for c in choices)]
         return ','.join(selected) if selected else '0'
@@ -55,7 +55,8 @@ def test_native_retains_each_member_without_scalar_license_or_write(tmp_path,mon
         assert not licensed(state,proof,slot='structural_relation')
     assert not any(r.get('slot')=='structural_relation' and r.get('selected')
                    for r in state.syntax_trace if r.get('kind')=='STRUCTURAL_TASK')
-    assert {re.search(r'Decision slot: (\S+)',p).group(1) for p in prompts}=={'structural_relation'}
+    assert all(re.search(r'Decision slot: (\S+)',p).group(1) in
+               {'structural_relation','structural_operand_1_start'} for p in prompts)
 
 
 def test_receipt_rejects_mutation_revision_and_page_retirement(tmp_path,monkeypatch):

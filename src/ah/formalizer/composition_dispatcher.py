@@ -45,7 +45,7 @@ class Dispatcher:
 
     def observe(self,kind,value,expected=True):
         if self.checking_evidence or not self.evidence_stack:return
-        if kind not in {'PROOF','INVENTORY','INVENTORY_QUERY','NOMINAL_HOST','CONSTRAINT_SET','REFINEMENT_HOST'}:raise ValueError('DISPATCH_EVIDENCE_KIND_UNKNOWN')
+        if kind not in {'CONDITIONAL_PROOF','PROOF','INVENTORY','INVENTORY_QUERY','NOMINAL_HOST','CONSTRAINT_SET','REFINEMENT_HOST'}:raise ValueError('DISPATCH_EVIDENCE_KIND_UNKNOWN')
         identity=digest([kind,canonical(value),expected])
         self.evidence_stack[-1][identity]={'kind':kind,'value':deepcopy(value),'expected':expected}
 

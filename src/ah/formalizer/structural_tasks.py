@@ -5,6 +5,7 @@ the displayed page; an unknown answer leaves that task pending. The selected
 local relation remains provisional until its children and source coverage close.
 """
 from itertools import islice,chain
+from copy import deepcopy
 from .canonical_ledger import digest
 from .component_probe import _probe
 from .selection_evidence import selected_candidate
@@ -37,7 +38,27 @@ def choose_open(state,release,selector,region,cfg,slot,options,question,*,prereq
                    retain_domain=True,prerequisites=prerequisites)
 
 
-def _choose(state,release,selector,region,cfg,slot,options,question,*,empty=None,retain_domain=False,source_selection=None,prerequisites=(),purpose=SelectionPurpose.ALTERNATIVE):
+def _choose(state,release,selector,region,cfg,slot,options,question,**kwargs):
+    from .structural_conditions import execution_basis,active,declared
+    basis=execution_basis(state,cfg);condition=active(state)
+    if declared(state) and condition is None:
+        state.diag('STRUCTURAL_CONDITION_INAPPLICABLE',region.region_id)
+        return None
+    begin=len(state.syntax_trace)
+    try:
+        result=_choose_impl(state,release,selector,region,cfg,slot,options,question,**kwargs)
+        if basis!=execution_basis(state,cfg) or (condition and active(state)!=condition):
+            state.diag('STRUCTURAL_CONDITION_INPUT_CHANGED',region.region_id)
+            return None
+        return result
+    finally:
+        for row in state.syntax_trace[begin:]:
+            if row.get('kind') in {'TASK_DOMAIN','STRUCTURAL_TASK'}:
+                row['execution_basis']=deepcopy(basis)
+                if condition:row['branch_condition']=condition.record()
+
+
+def _choose_impl(state,release,selector,region,cfg,slot,options,question,*,empty=None,retain_domain=False,source_selection=None,prerequisites=(),purpose=SelectionPurpose.ALTERNATIVE):
     """Optional searches declare a typed completion outside the model domain.
 
     NONE_FIT closes only one page. EMPTY is licensed only after every page was
@@ -78,8 +99,13 @@ def _choose(state,release,selector,region,cfg,slot,options,question,*,empty=None
     # Keep revision identity in keys without injecting the rejected hypothesis
     # into unrelated ownership, morphology and participant questions.
     from dataclasses import asdict
-    revision_scope=digest([purpose.value,cfg.get('_task_constraints'),cfg.get('_ownership_feedback'),
-                          asdict(source_selection) if source_selection is not None else None,prerequisite_records])
+    from .structural_conditions import active
+    condition=active(state)
+    if condition:question+=condition.wording()
+    revision_inputs=[purpose.value,cfg.get('_task_constraints'),cfg.get('_ownership_feedback'),
+                     asdict(source_selection) if source_selection is not None else None,prerequisite_records]
+    if condition:revision_inputs.insert(0,condition.hypothesis_ref)
+    revision_scope=digest(revision_inputs)
     if cfg.get('_task_constraints') and slot in {'structural_relation','structural_revision'}:
         question+='\nEarlier attempt: '+cfg.get('_task_constraints_text',cfg['_task_constraints'])
     if cfg.get('_ownership_feedback'):
@@ -251,7 +277,7 @@ def _choose(state,release,selector,region,cfg,slot,options,question,*,empty=None
         return None
 
 
-def _licensed(state,proof,*,_visiting=None,**expected):
+def _licensed(state,proof,*,_visiting=None,_branch=None,**expected):
     """Validate the finite dependency graph without recursive Python calls."""
     if not isinstance(proof,dict):return False
     from .partial_readings import retired_refs
@@ -281,6 +307,11 @@ def _licensed(state,proof,*,_visiting=None,**expected):
         if selected_candidate(decision)!=cid or decision.search_complete is not True:return False
         row=rows.get((key,cid))
         if row is None or not row.get('enumeration_complete'):return False
+        condition=row.get('branch_condition')
+        if condition is not None:
+            from .structural_conditions import historical
+            if (_branch is None or condition!=_branch or not historical(state,condition)
+                    or domains[domain].get('branch_condition')!=condition):return False
         if (current.get('selection_purpose')!=row.get('selection_purpose')
                 or current.get('selection_purpose')!=domains[domain].get('selection_purpose')):return False
         if row.get('task_outcome')=='EMPTY':
@@ -305,6 +336,19 @@ def licensed(state,proof,*,_visiting=None,**expected):
     if _visiting is None:observe(state,'PROOF',{'proof':proof,'expected_payload':expected},result)
     return result
 
+
+
+def licensed_in_scope(state,proof,*,_visiting=None,**expected):
+    """Read a selected answer under the active condition; never license membership."""
+    from .structural_conditions import active
+    condition=active(state)
+    if condition is None:return licensed(state,proof,_visiting=_visiting,**expected)
+    record=condition.record()
+    result=_licensed(state,proof,_visiting=_visiting,_branch=record,**expected)
+    from .dispatch_evidence import observe
+    if _visiting is None:observe(state,'CONDITIONAL_PROOF',
+        {'proof':proof,'expected_payload':expected,'condition':record},result)
+    return result
 
 def span(state,release,selector,region,tokens,cfg,slot,question,*,exclude=(),record_remainder=False,admissible=None,initial=None,prerequisites=()):
     """Every source token boundary is reachable; no punctuation whitelist."""
@@ -425,7 +469,7 @@ def extend_source_set(state,release,selector,region,tokens,cfg,slot,question,sel
             prerequisites=(from_proof(state,more[1]),))
         if not end:return None
         selected.extend(tokens[a:end[0]['end']]);proofs.append(end[1])
-    if not all(licensed(state,p) for p in proofs):
+    if not all(licensed_in_scope(state,p) for p in proofs):
         state.diag('SOURCE_SELECTION_PREMISE_RETIRED',region.region_id);return None
     selected.sort(key=lambda t:t.start)
     if admissible is not None and not admissible(selected):

@@ -1,6 +1,6 @@
 """Addressed function evidence and source-supported revision of a blocked split."""
 from .canonical_ledger import digest
-from .structural_tasks import choose, licensed
+from .structural_tasks import choose, licensed_in_scope as licensed
 
 
 def proof_refs(state, proof):

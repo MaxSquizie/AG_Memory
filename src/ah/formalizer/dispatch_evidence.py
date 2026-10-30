@@ -8,6 +8,11 @@ def observe(state,kind,value,expected=True):
 
 
 def valid(state,kind,value):
+    if kind=='CONDITIONAL_PROOF':
+        from .structural_conditions import historical
+        from .structural_tasks import _licensed
+        return historical(state,value['condition']) and _licensed(state,value['proof'],
+            _branch=value['condition'],**value['expected_payload'])
     if kind=='REFINEMENT_HOST':
         from .refinement_host_proof import live
         return live(state,value)
