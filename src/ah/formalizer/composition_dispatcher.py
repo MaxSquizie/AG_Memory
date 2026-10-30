@@ -151,6 +151,17 @@ class Dispatcher:
                 reads={};evidence_reads={};epoch=node.get('invalidation_epoch',0)
                 self.stack.append((key,reads));self.evidence_stack.append(evidence_reads)
                 try:result=compute()
+                except Exception as exc:
+                    from .composition_expansion import ExpansionRequired
+                    if isinstance(exc,ExpansionRequired):
+                        # An interrupted execution has no result receipt. Keep
+                        # diagnostic ownership for replay without swallowing
+                        # completed children's independent diagnostics.
+                        nested={id(d) for ref,n in self.nodes.items() if ref!=key for d in n.get('diagnostics',())}
+                        node['diagnostics']=[d for d in self.state.diagnostics[before:] if id(d) not in nested]
+                        self.invalidate(key,'EXPANSION_DEFERRED')
+                        self.trace('DISPATCH_SUSPENDED',key,continuation_ref=exc.address)
+                    raise
                 finally:self.stack.pop();self.evidence_stack.pop()
                 # A dependency changed after it was consumed during this task.
                 # Do not publish a mixture of revisions.

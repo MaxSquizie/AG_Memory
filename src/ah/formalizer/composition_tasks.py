@@ -18,11 +18,24 @@ class ChildTasks:
         self.state=state;self.dispatcher=dispatcher;self.cache={};self.active=set();self.tasks={}
         self.inputs={};self.areas={}
         self.feedback=None;self.attempted=set();self.reads=[]
+        from .composition_expansion import ExpansionWindows
+        self.expansion=ExpansionWindows(state)
 
     def child(self,key,compute,inputs=None):
+        from .composition_expansion import ExpansionRequired
         previous=self.feedback
         if previous and previous.get('target_child',key)!=key:self.feedback=None
-        try:return self._child(key,compute,inputs)
+        outer=not self.expansion.path
+        try:
+            while True:
+                try:
+                    # Cycle handling belongs to the dispatcher, not expansion.
+                    if key in self.active:return self._child(key,compute,inputs)
+                    with self.expansion.enter(key,inputs if inputs is not None else self.inputs.get(key),self.feedback):
+                        return self._child(key,compute,inputs)
+                except ExpansionRequired as pending:
+                    if not outer:raise
+                    self.expansion.demand(pending)
         finally:self.feedback=previous
 
     def _child(self,key,compute,inputs=None):
