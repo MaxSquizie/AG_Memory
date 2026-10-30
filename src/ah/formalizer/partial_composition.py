@@ -12,7 +12,7 @@ _BASIS=('proposed_roles','morph_bindings','lexical_units','proposition_args','no
         'bound_arguments','control_binding','implicit_arguments','shared_implicit_arguments','pending_proposition_roles',
         'temporal_functions','relative_temporal','qualitative_groups','nominal_groups','attribute_constraints',
         'missing_required_roles','uncovered_token_refs','action_description','subject_presence',
-        'content_source_frame','content_use_range')
+        'content_source_frame','content_use_range','parent_slot_obligation')
 
 
 def basis(frame):
@@ -64,8 +64,10 @@ def validate(state,record,frames):
         if ref in seen:continue
         frame=by_id.get(ref)
         if frame is None or record['frame_bases'].get(ref)!=basis(frame):raise ValueError('PARTIAL_FRAME_BASIS_CHANGED')
+        from .component_constraints import frame_hosts_live
+        if not frame_hosts_live(state,frame):raise ValueError('PARTIAL_FRAME_HOST_STALE')
         sem=frame.semantic
-        if any(sem.get(k) for k in ('structural_rejection','pending_proposition_roles','pending_content_reference','missing_required_roles','uncovered_token_refs')):
+        if any(sem.get(k) for k in ('structural_rejection','pending_proposition_roles','pending_content_reference','missing_required_roles','uncovered_token_refs','parent_slot_obligation')):
             raise ValueError('PARTIAL_COMPOSITION_UNCLOSED')
         seen.add(ref);edges[ref]=set()
         for slot in slots(frame):

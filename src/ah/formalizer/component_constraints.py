@@ -36,28 +36,41 @@ def compatible_bundle(state,region,bundle):
     observe_constraints(state,region)
     from .composition_session import current
     runtime=current(state);scope=runtime.input_signature() if runtime else None
-    frames={f.predicate_token_ref:f for f in bundle}
+    from collections import defaultdict
+    frames=defaultdict(list)
+    for frame in bundle:frames[frame.predicate_token_ref].append(frame)
+    def uses(predicate,token):
+        # A shared predicate can occur in several branch frames. Reading a
+        # token as context is not selecting it as an argument in every branch.
+        return [f for f in frames[predicate] if token in f.argument_token_refs
+                or token in f.semantic.get('proposed_roles',{})
+                or token in f.semantic.get('morph_bindings',{})]
     for row in state.syntax_trace:
         if (row.get('kind')!='ESTABLISHED_PREDICATE_ROLE' or row['region_ref']!=region.region_id
                 or row['task_scope']!=scope):continue
         from .structural_tasks import licensed
         if not licensed(state,row['proof'],predicate_ref=row['predicate_ref'],token_ref=row['token_ref']):return False
-        f=frames.get(row['predicate_ref'])
-        if f is None:return False
-        chosen=f.semantic.get('proposed_roles',{}).get(row['token_ref'])
+        if not frames[row['predicate_ref']]:return False
         expected=row['role']
-        if (chosen is not None if expected=='NO_DIRECT_ROLE' else chosen!=expected):return False
-        if row.get('reading'):
-            actual=f.semantic.get('morph_bindings',{}).get(row['token_ref'],{})
-            # Whole linguistic readings, not analyzer confidence/proof paths.
-            fields=('lemma','pos','cases','number','gender','tense','person','mood','features')
-            if any(actual.get(k)!=row['reading'].get(k) for k in fields):return False
+        relevant=uses(row['predicate_ref'],row['token_ref'])
+        if (expected!='NO_DIRECT_ROLE' or row.get('reading')) and not relevant:return False
+        for f in relevant:
+            chosen=f.semantic.get('proposed_roles',{}).get(row['token_ref'])
+            if (chosen is not None if expected=='NO_DIRECT_ROLE' else chosen!=expected):return False
+            if row.get('reading'):
+                actual=f.semantic.get('morph_bindings',{}).get(row['token_ref'],{})
+                # Whole linguistic readings, not analyzer confidence/proof paths.
+                fields=('lemma','pos','cases','number','gender','tense','person','mood','features')
+                if any(actual.get(k)!=row['reading'].get(k) for k in fields):return False
     from .partial_readings import domains,valid_domain
     from .morphology_domain import clean
     for row in domains(state,region):
-        frame=frames.get(row['predicate_ref'])
-        actual=frame.semantic.get('morph_bindings',{}).get(row['token_ref']) if frame else None
-        if not valid_domain(state,row) or actual is None or clean(actual) not in [v['reading'] for v in row['alternatives']]:return False
+        relevant=uses(row['predicate_ref'],row['token_ref'])
+        if not valid_domain(state,row) or not relevant:return False
+        for frame in relevant:
+            actual=frame.semantic.get('morph_bindings',{}).get(row['token_ref'])
+            if (actual is None or clean(actual) not in [v['reading'] for v in row['alternatives']]
+                    or frame.semantic.get('proposed_roles',{}).get(row['token_ref'])!=row['role']):return False
     return True
 
 
