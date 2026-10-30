@@ -4,6 +4,7 @@ Tasks are ephemeral services, not a second serialized IR or a fact store.
 Only changed parent input can resume a task; a retry is not a source-clock tick.
 """
 from copy import deepcopy
+from contextlib import contextmanager
 from .canonical_ledger import digest
 
 
@@ -20,23 +21,86 @@ class ChildTasks:
         self.feedback=None;self.attempted=set();self.reads=[]
         from .composition_expansion import ExpansionWindows
         self.expansion=ExpansionWindows(state)
+        self.driving=False;self.suspended=set()
+        self.capture_context=None;self.restore_context=None
 
     def child(self,key,compute,inputs=None):
         from .composition_expansion import ExpansionRequired
-        previous=self.feedback
-        if previous and previous.get('target_child',key)!=key:self.feedback=None
-        outer=not self.expansion.path
+        from .composition_dispatcher import DispatchBlocked
+        feedback=self.feedback
+        if feedback and feedback.get('target_child',key)!=key:feedback=None
+        invocation={'key':key,'compute':compute,
+            'inputs':inputs if inputs is not None else self.inputs.get(key),
+            'feedback':deepcopy(feedback),'prefix':list(self.expansion.path),
+            'context':self.capture_context() if self.capture_context else None,
+            'area':deepcopy(self.areas.get(key,{}))}
+        if self.driving:
+            if key in self.suspended or any(ref==key for ref,_ in self.expansion.path[:self.expansion.window_base]):
+                self.state.diag('COMPOSITION_CYCLE',key)
+                raise DispatchBlocked('COMPOSITION_CYCLE')
+            return self._invoke(invocation)
+        self.driving=True;work=[invocation]
         try:
-            while True:
+            while work:
+                current=work[-1]
+                self.suspended={job['key'] for job in work[:-1]}
                 try:
-                    # Cycle handling belongs to the dispatcher, not expansion.
-                    if key in self.active:return self._child(key,compute,inputs)
-                    with self.expansion.enter(key,inputs if inputs is not None else self.inputs.get(key),self.feedback):
-                        return self._child(key,compute,inputs)
+                    with self._window(current):result=self._invoke(current)
                 except ExpansionRequired as pending:
-                    if not outer:raise
+                    demanded=pending.invocation
+                    if demanded['key'] in {job['key'] for job in work}:
+                        self.state.diag('COMPOSITION_CYCLE',demanded['key'])
+                        raise DispatchBlocked('COMPOSITION_CYCLE')
                     self.expansion.demand(pending)
+                    work.append(demanded)
+                    continue
+                work.pop()
+            return result
+        finally:
+            self.driving=False;self.suspended=set()
+
+    def _invoke(self,invocation):
+        from .composition_expansion import ExpansionRequired
+        from .composition_dispatcher import canonical
+        key=invocation['key'];previous=self.feedback;self.feedback=invocation['feedback']
+        self.areas[key]=invocation['area']
+        try:
+            node=self.dispatcher.nodes.get('child:'+key,{})
+            signature=digest(canonical([invocation['inputs'],self.feedback]))
+            cached=node.get('signature')==signature and self.dispatcher.valid('child:'+key)
+            # A completed dependency consumes no new expansion level. Cycles
+            # are still checked by the dispatcher before any cached read.
+            if key in self.active or cached:
+                result=self._child(key,invocation['compute'],invocation['inputs'])
+                self.expansion.frontier.pop(digest([*self.expansion.path,(key,signature)]),None)
+                return result
+            with self.expansion.enter(key,invocation['inputs'],self.feedback):
+                return self._child(key,invocation['compute'],invocation['inputs'])
+        except ExpansionRequired as pending:
+            if not hasattr(pending,'invocation'):pending.invocation=invocation
+            raise
         finally:self.feedback=previous
+
+    @contextmanager
+    def _window(self,invocation):
+        previous_path=self.expansion.path
+        previous_base=self.expansion.window_base
+        previous_context=self.capture_context() if self.capture_context else None
+        self.expansion.path=list(invocation['prefix'])
+        self.expansion.window_base=len(self.expansion.path)
+        if self.restore_context:self.restore_context(invocation['context'])
+        completed=False
+        self.state.syntax_trace.append({'kind':'COMPOSITION_WINDOW_ENTERED',
+            'child_key':invocation['key'],'logical_depth':self.expansion.window_base,
+            'execution_window':self.expansion.width})
+        try:
+            yield
+            completed=True
+        finally:
+            if self.restore_context:self.restore_context(previous_context)
+            self.expansion.path=previous_path;self.expansion.window_base=previous_base
+            self.state.syntax_trace.append({'kind':'COMPOSITION_WINDOW_EXITED',
+                'child_key':invocation['key'],'execution_completed':completed})
 
     def _child(self,key,compute,inputs=None):
         self.tasks[key]=compute
@@ -91,6 +155,10 @@ class ChildTasks:
         self.attempted.add(attempt)
         previous=self.feedback;self.feedback=feedback
         try:result=self.child(key,self.tasks[key])
+        except Exception as exc:
+            from .composition_expansion import ExpansionRequired
+            if isinstance(exc,ExpansionRequired):self.attempted.discard(attempt)
+            raise
         finally:self.feedback=previous
         frames[:]=result
         self.dispatcher.replace_read('child:'+key)

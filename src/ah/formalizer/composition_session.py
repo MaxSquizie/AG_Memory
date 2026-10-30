@@ -25,16 +25,27 @@ class CompositionSession:
         self.selector,self.morph=selector,morph
         self.original={e.token_id:deepcopy(e) for e in state.evidence}
         self.area_inputs=None;self.morphology_scope=None;self.domain_feedback=None
+        self.tasks.capture_context=self.capture_context
+        self.tasks.restore_context=self.restore_context
         from .composition_sources import CompositionSources
         self.sources=CompositionSources(state,release)
         self.evidence=sorted(state.evidence,key=lambda e:e.start)
         self.starts=[e.start for e in self.evidence]
 
+    def capture_context(self):
+        from copy import deepcopy
+        return deepcopy((self.area_inputs,self.morphology_scope,self.domain_feedback))
+
+    def restore_context(self,context):
+        from copy import deepcopy
+        self.area_inputs,self.morphology_scope,self.domain_feedback=deepcopy(context)
+
     def child(self,key,compute,inputs=None):
         if self.area_inputs:
             region,tokens,_=self.area_inputs
             self.tasks.areas[key]={'source_range':region.source_range,'token_refs':[t.token_id for t in tokens]}
-        return self.tasks.child(key,compute,[inputs,self.context_signature()])
+        return self.tasks.child(key,compute,[inputs,self.context_signature(),
+            self.morphology_scope,self.domain_feedback])
 
     def context_signature(self):
         # Attention ticks are not evidence revisions. The reader freezes the AH

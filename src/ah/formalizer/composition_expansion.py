@@ -1,8 +1,9 @@
 """Addressed expansion windows, independent of semantic completion.
 
 The synchronous composer demands children one at a time. At a window boundary
-it unwinds without publishing a child result. The outer driver then permits
-only that demanded continuation and replays the prefix through the dispatcher.
+it unwinds without publishing a child result. The outer driver executes that
+continuation in a fresh window, then replays the suspended window through the
+dispatcher. Logical ancestry remains separate from execution-stack depth.
 This is not a beam search: no candidate is removed or ranked here.
 """
 from contextlib import contextmanager
@@ -24,7 +25,7 @@ class ExpansionWindows:
         self.state = state
         self.width = width
         self.path = []
-        self.granted = set()
+        self.window_base = 0
         self.frontier = {}
 
     @contextmanager
@@ -32,11 +33,9 @@ class ExpansionWindows:
         item = (key, digest(canonical([inputs, feedback])))
         path = tuple(self.path + [item])
         address = digest(path)
-        # A grant starts a fresh window at this exact occurrence and contract.
-        base = 0
-        for index in range(1, len(path) + 1):
-            if digest(path[:index]) in self.granted:
-                base = index - 1
+        # The scheduler starts a fresh execution window for the demanded
+        # invocation. Logical prefix length is never an expanded stack grant.
+        base = self.window_base
         if len(self.path) - base >= self.width:
             self.frontier[address] = {'child_key': key, 'path': path,
                 'inputs': canonical(inputs), 'feedback': canonical(feedback),
@@ -56,9 +55,8 @@ class ExpansionWindows:
             self.path.pop()
 
     def demand(self, pending):
-        if pending.address not in self.frontier or pending.address in self.granted:
+        if pending.address not in self.frontier:
             raise ValueError('COMPOSITION_EXPANSION_NO_PROGRESS')
-        self.granted.add(pending.address)
         self.state.syntax_trace.append({'kind': 'COMPOSITION_EXPANSION_REQUESTED',
             'continuation_ref': pending.address,
             'child_key': self.frontier[pending.address]['child_key'],

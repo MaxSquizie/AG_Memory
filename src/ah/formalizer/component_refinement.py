@@ -35,6 +35,15 @@ def block(state, region, frames, reason):
     return frames
 
 
+def depth_exhausted(state,release,cfg,depth):
+    from .composition_session import current
+    runtime=current(state)
+    # Scheduled composition has bounded execution windows and dispatcher fuel.
+    # Its logical ancestry is not an execution-stack/resource limit.
+    if runtime and runtime.tasks.driving:return False
+    return depth>=cfg.get('refinement',{}).get('max_depth',release.entries('ProposalPolicy')[0]['max_depth'])
+
+
 def compose_area(state, release, selector, region, tokens, cfg, depth=0, attachment=None, infinitive=None, request=None):
     from .composition_session import current, child_key
     runtime=current(state)
@@ -80,7 +89,7 @@ def compose_area(state, release, selector, region, tokens, cfg, depth=0, attachm
 def _compose_area(state, release, selector, region, tokens, cfg, depth=0, attachment=None, infinitive=None, request=None):
     from .structural_tasks import enabled
     if enabled(release):
-        if depth>=cfg.get('refinement',{}).get('max_depth',release.entries('ProposalPolicy')[0]['max_depth']):
+        if depth_exhausted(state,release,cfg,depth):
             return block(state,region,[],'COMPONENT_REFINEMENT_SEARCH_INCOMPLETE')
         from .relation_composition import compose
         from .structural_tasks import choose
@@ -234,7 +243,7 @@ def _compose_lexical_area(state, release, selector, region, tokens, cfg, depth=0
     from .refinement_boundaries import select, agreeing
     from .component_predication import compose_alternatives
     tokens=list(tokens)
-    if depth>=cfg.get('refinement',{}).get('max_depth',release.entries('ProposalPolicy')[0]['max_depth']):
+    if depth_exhausted(state,release,cfg,depth):
         return block(state,region,[],'COMPONENT_REFINEMENT_SEARCH_INCOMPLETE')
     from .attitude_composition import compose as compose_attitude
     attitude_frames=None if cfg.get('_literal_relation') else compose_attitude(state,release,selector,region,tokens,cfg,request,
