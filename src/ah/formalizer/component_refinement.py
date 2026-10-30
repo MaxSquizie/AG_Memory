@@ -371,7 +371,7 @@ def _compose_lexical_area(state, release, selector, region, tokens, cfg, depth=0
             # for this edge is the original slot, never a separate guessed M.
             hosts.setdefault(tid,(frame,h,hv))
     group_hosts={}
-    if boundary['kind'] in {'PARTICIPLE','BOUND_DESCRIPTION','RELATIVE_PRONOUN'}:
+    if boundary['kind'] in {'PARTICIPLE','BOUND_DESCRIPTION','RELATIVE_PRONOUN','RELATIVE'}:
         from .refinement_group_hosts import candidates as group_candidates
         group_hosts=group_candidates(accepted(frames),evidence,body,all_hosts=cfg.get('_literal_relation',False),
             require_participle_agreement=boundary['kind']=='PARTICIPLE')
@@ -420,6 +420,7 @@ def _compose_lexical_area(state, release, selector, region, tokens, cfg, depth=0
         variants=[v for v in marker.variants if rule.get('general') or v.pos==rule['POS'] and v.lemma==rule['lemma']]
         # Non-equivalent whole readings are not silently selected.
         unique={digest({k:v for k,v in _morph(m).items() if k!='score'}):m for m in variants}
+        connector_reading_proof=None
         if len(unique)!=1:
             if not cfg.get('_literal_relation'):return block(state,region,[*frames,*children],'COMPONENT_REFINEMENT_MARKER_UNRESOLVED')
             from .structural_tasks import choose
@@ -428,6 +429,7 @@ def _compose_lexical_area(state, release, selector, region, tokens, cfg, depth=0
                 'Choose the whole reading of the source connector under the selected host and child constraints.')
             if not selected:return block(state,region,[*frames,*children],'COMPONENT_REFINEMENT_MARKER_UNRESOLVED')
             unique={selected[0]['candidate_id']:unique[selected[0]['candidate_id']]}
+            connector_reading_proof=selected[1]
         sem=deepcopy(content.semantic)
         sem={k:sem[k] for k in ('component_region',) if k in sem}
         from .modifier_scope_shapes import argument
@@ -436,11 +438,25 @@ def _compose_lexical_area(state, release, selector, region, tokens, cfg, depth=0
             proposition_args={cfg['modifier_content_role']:argument(content,'UNKNOWN')},
             structural_unresolved=False,missing_required_roles=[],uncovered_token_refs=[],component_questions=[],
             preposition_bindings={},relative_temporal=[],requires_attachment_probe=False,owned_token_refs=list(link_refs),nominal_description=True)
+        if connector_reading_proof is not None:
+            sem['relative_connector_reading']={'proof':deepcopy(connector_reading_proof),'marker_ref':marker.token_id}
         sem['lexical_units'][marker.token_id]={'head_ref':marker.token_id,'anchor_refs':list(link_refs),
             'surface':' '.join(evidence[r].span for r in link_refs),'mention_ref':'relation:'+digest(link_refs)}
         description=FrameCandidate('component-relative:'+digest([marker.token_id,chosen,content.frame_id]),'FLAT',marker.span,
             (marker.span,host.span),(host.span,),construction='COMPONENTS_V1',predicate_token_ref=marker.token_id,
             argument_token_refs=(chosen,),source_range=(marker.start,body[-1].end),semantic=sem,provenance=owner.provenance)
+        if selected_group:
+            # The synthetic group key is an address for selection, not a
+            # source token or a new entity. Project original members instead.
+            members=selected_group[3]['group']['member_refs']
+            description.participants=(marker.span,*(evidence[t].span for t in members))
+            description.arguments=tuple(evidence[t].span for t in members)
+            description.argument_token_refs=()
+            for field in ('proposed_roles','morph_bindings','lexical_units'):
+                description.semantic[field].pop(chosen,None)
+            from .refinement_group_hosts import add_host
+            add_host(description,{'group':selected_group[3],'host':host,
+                'kind':'RELATIVE','rule':{'host_role':cfg['nominal_host_role']}})
         internalize(children,content,description)
         children.append(description); host_frame=description
         host_role=cfg['nominal_host_role']

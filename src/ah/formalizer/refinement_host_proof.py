@@ -32,6 +32,13 @@ def live(state,proof):
 
 def frame_live(state,frame):
     sem=frame.semantic
+    connector=sem.get('relative_connector_reading')
+    if connector:
+        from .canonical_ledger import digest
+        from .structural_tasks import licensed
+        from .morphology_domain import clean
+        proof=connector.get('proof');reading=sem.get('morph_bindings',{}).get(connector.get('marker_ref'))
+        if not reading or not licensed(state,proof) or proof['candidate_id']!=digest(clean(reading)):return False
     proofs=sem.get('refinement_owner_proofs',())
     if sem.get('refinement_owner_required') and not proofs:return False
     if not all(live(state,p) for p in proofs):return False
