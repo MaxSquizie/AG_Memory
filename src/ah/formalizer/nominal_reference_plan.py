@@ -4,19 +4,22 @@ from .canonical_ledger import digest
 
 def emit(state,release,store,frame,tid,reference,tag,frag,write,measures=()):
     from .nominal_reference_binding import payload
-    from .nominal_reference_chain import check
-    work=[(frame,tid,reference,measures)];seen={frame.semantic['lexical_units'][tid]['mention_ref']}
-    current=reference
-    while current.get('local_reference_anchor'):
-        parent,unit=check(state,current);mention=unit['mention_ref']
-        if mention in seen:raise ValueError('NOMINAL_REFERENCE_DEPENDENCY_CYCLE')
-        seen.add(mention)
-        token=current['local_reference_anchor']['token_ref']
-        current=payload(state,unit)
-        if current is None:raise ValueError('NOMINAL_REFERENCE_DEPENDENCY_STALE')
-        from .nominal_entity_plan import measures_for
-        work.append((parent,token,current,measures_for(state,release,parent)))
-    for owner,token,ref,owner_measures in reversed(work):
+    from .nominal_group_dependency import dependency_units
+    work=[(frame,tid,reference,measures,False)];colour={};ordered=[]
+    while work:
+        owner,token,current,current_measures,leaving=work.pop()
+        mention=owner.semantic['lexical_units'][token]['mention_ref']
+        if leaving:
+            colour[mention]=2;ordered.append((owner,token,current,current_measures));continue
+        if colour.get(mention)==1:raise ValueError('NOMINAL_REFERENCE_DEPENDENCY_CYCLE')
+        if colour.get(mention)==2:continue
+        colour[mention]=1;work.append((owner,token,current,current_measures,True))
+        for parent,parent_token,unit in dependency_units(state,current):
+            value=payload(state,unit)
+            if value is None:raise ValueError('NOMINAL_REFERENCE_DEPENDENCY_STALE')
+            from .nominal_entity_plan import measures_for
+            work.append((parent,parent_token,value,measures_for(state,release,parent),False))
+    for owner,token,ref,owner_measures in ordered:
         local=bool(ref.get('local_reference_anchor'))
         if ref.get('local_group_anchor'):
             from .nominal_group_source import emit_anchor

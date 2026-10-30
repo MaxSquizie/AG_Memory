@@ -18,6 +18,9 @@ def domain(state,constraint,entities=None):
     result=[];pending=[]
     own=set(constraint.get('anchor_refs',()))|{constraint['head_ref']}
     from .nominal_reference_source import eligible_frames
+    from .nominal_reference_chain import rows as mention_rows
+    mentions={(r['local_reference_anchor']['frame_ref'],r['local_reference_anchor']['token_ref']):r
+              for r in mention_rows(state,constraint)}
     for frame,decision,spec in eligible_frames(state):
         available=by_frame.get(frame.frame_id,{})
         roles=spec.get('roles',{})
@@ -31,6 +34,19 @@ def domain(state,constraint,entities=None):
                 continue
             missing=[t for t in refs if t not in available]
             if missing:
+                if all((frame.frame_id,t) in mentions for t in missing):
+                    members=[{'terminal':deepcopy(available[t])} if t in available else
+                             {'reference':deepcopy(mentions[frame.frame_id,t]['local_reference_anchor'])}
+                             for t in refs]
+                    dependency={'frame_ref':frame.frame_id,'role':role,'member_token_refs':refs,
+                        'source_tag':[state.source_uid,state.interpretation_version],
+                        'group_hash':digest(group),'members':members}
+                    result.append({'reference_kind':'GROUP_MENTION',
+                        'selection_target':'group-mention:'+digest(dependency),
+                        'local_group_dependency':dependency,'features':[{'number':'plur'}],
+                        'members':[{'source_token_ref':t} for t in refs],
+                        'label':'The whole established group of source participants (member identities are separate dependencies)'})
+                    continue
                 pending.append({'frame_ref':frame.frame_id,'role':role,'member_refs':refs,
                     'group_hash':digest(group),'pending_member_refs':missing,
                     'reason':'GROUP_MEMBERS_NOT_TERMINAL'})
@@ -63,11 +79,16 @@ def binding_id(anchor):
 
 
 def emit_anchor(state,release,anchor,tag,frag,emit):
-    row=next((r for r in rows(state,{'head_ref':None,'anchor_refs':[]})
-              if r['local_group_anchor']==anchor),None)
+    if anchor.get('group_dependency'):
+        from .nominal_group_dependency import check_anchor
+        row=check_anchor(state,anchor)
+    else:
+        row=next((r for r in rows(state,{'head_ref':None,'anchor_refs':[]})
+                  if r.get('local_group_anchor')==anchor),None)
     if row is None or anchor['source_tag']!=tag:raise ValueError('NOMINAL_GROUP_ANCHOR_STALE')
     from .nominal_reference_source import emit_anchor as member
-    for a in anchor['member_anchors']:member(state,release,a,tag,frag,emit)
+    for a in anchor['member_anchors']:
+        if not a.get('reference_anchor'):member(state,release,a,tag,frag,emit)
     emit('ENSURE_GROUP',{'uid':anchor['entity_ref'],'members':anchor['member_refs']},frag)
     emit('SET_IDENTITY_BINDING',{'binding_id':binding_id(anchor),'binding_kind':'NOMINAL_GROUP_ANCHOR',
         'mention_ref':anchor['mention_ref'],'target_ref':anchor['entity_ref'],'source_tag':tag,
@@ -87,6 +108,11 @@ def validate(p,ledger):
     targets=[];premises=set()
     for member,bid in zip(a['member_anchors'],a['member_binding_refs']):
         b=ledger.data['bindings'].get(bid,{})
+        if member.get('reference_anchor'):
+            from .nominal_group_dependency import validate_member
+            validate_member(member,bid,b,a,ledger,paths)
+            targets.append(b['target_ref']);premises.update(b.get('premise_support_refs',()))
+            continue
         if (member.get('frame_ref')!=a['frame_ref'] or member.get('source_tag')!=p['source_tag']
                 or not member.get('basis_hash') or not ledger.binding_live(bid,paths) or b.get('binding_kind')
                 or b.get('source_tag')!=p['source_tag'] or b.get('mention_ref')!=member['mention_ref']

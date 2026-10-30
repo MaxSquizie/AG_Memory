@@ -73,7 +73,7 @@ def resolve(state, release, selector):
                 question='Resolve «'+constraint['raw']+'» as one noun group. Constraint='+
                 constraint['identity_constraint']+'. Select only compatible antecedents supported by these source excerpts. '+
                 'Proximity and name spelling alone do not prove identity. An already introduced unnamed or relative place is a valid antecedent: unknown coordinates/name do not make its reference unresolved. '
-                'Choose an existing referent or the source expression whose referent this expression denotes, not a new object. A mention option does not assert a grounded identity: its dependencies will be resolved separately. If several antecedents fit, list their numbers; use ? when evidence is insufficient to assess them.')
+                'Choose an existing referent or the source expression whose referent this expression denotes, not a new object. A mention or source-group option does not assert grounded identities: all member dependencies will be resolved separately. If several antecedents fit, list their numbers; use ? when evidence is insufficient to assess them.')
             if snapshot(state,constraint,decision)[2]!=domain_hash:
                 chosen=None;incomplete=True
                 unresolve(state,decision,'REFERENCE_DOMAIN_CHANGED_DURING_CALL')
@@ -82,14 +82,16 @@ def resolve(state, release, selector):
             row=by_id[chosen]
             from .state import Ground
             from .reference_structure import signature
-            local_key=next((k for k in ('local_spatial_anchor','local_nominal_anchor','local_group_anchor','local_reference_anchor') if row.get(k)),None)
+            local_key=next((k for k in ('local_spatial_anchor','local_nominal_anchor','local_group_anchor','local_reference_anchor','local_group_dependency') if row.get(k)),None)
             state.decisions[decision].grounds.append(Ground('D' if local_key else 'P',
                 'addressed source candidate' if local_key else 'frozen active-workspace binding: '+row['memory_binding_ref'],chosen))
             binding={'interpretation_decision_ref':decision, 'selected_candidate_id':chosen,
                 'reference_domain_hash':digest(read),'produced_domain_hash':domain_hash,
                 'reference_page_proofs':page_proofs,'structure_signature':signature(state),
                 'reference_constraint':deepcopy(constraint)}
-            if local_key=='local_reference_anchor':
+            if local_key=='local_group_dependency':
+                pending[mention]=(binding,{'group_dependency':deepcopy(row[local_key])})
+            elif local_key=='local_reference_anchor':
                 pending[mention]=(binding,deepcopy(row[local_key]))
             else:
                 state.observation['nominal_reference_bindings'][mention]={**binding,

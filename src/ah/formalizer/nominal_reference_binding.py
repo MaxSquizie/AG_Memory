@@ -34,7 +34,11 @@ def _payload_one(state, unit):
         check(state,binding)
     elif binding.get('local_group_anchor'):
         from .nominal_group_source import rows
-        if not any(r['local_group_anchor']==binding['local_group_anchor'] for r in rows(state,constraint)):
+        anchor=binding['local_group_anchor']
+        if anchor.get('group_dependency'):
+            from .nominal_group_dependency import check_anchor
+            check_anchor(state,anchor)
+        elif not any(r.get('local_group_anchor')==anchor for r in rows(state,constraint)):
             raise ValueError('NOMINAL_GROUP_ANCHOR_STALE')
     elif binding.get('local_nominal_anchor'):
         from .nominal_reference_source import rows
@@ -60,15 +64,18 @@ def payload(state,unit):
     # Iterative traversal avoids making language nesting depend on Python's
     # recursion limit. A malformed self-supporting chain cannot license a write.
     first=_payload_one(state,unit)
-    current=first;seen={unit['mention_ref']} if first else set()
-    while current and current.get('local_reference_anchor'):
-        from .nominal_reference_chain import check
-        frame,parent_unit=check(state,current)
-        mention=parent_unit['mention_ref']
-        if mention in seen:raise ValueError('NOMINAL_REFERENCE_DEPENDENCY_CYCLE')
-        seen.add(mention)
-        current=_payload_one(state,parent_unit)
-        if current is None:raise ValueError('NOMINAL_REFERENCE_DEPENDENCY_STALE')
+    from .nominal_group_dependency import dependency_units
+    colour={};work=[(unit,first,False)] if first else []
+    while work:
+        current_unit,current,leaving=work.pop();mention=current_unit['mention_ref']
+        if leaving:colour[mention]=2;continue
+        if colour.get(mention)==1:raise ValueError('NOMINAL_REFERENCE_DEPENDENCY_CYCLE')
+        if colour.get(mention)==2:continue
+        colour[mention]=1;work.append((current_unit,current,True))
+        for _,_,parent_unit in dependency_units(state,current):
+            parent=_payload_one(state,parent_unit)
+            if parent is None:raise ValueError('NOMINAL_REFERENCE_DEPENDENCY_STALE')
+            work.append((parent_unit,parent,False))
     return first
 
 

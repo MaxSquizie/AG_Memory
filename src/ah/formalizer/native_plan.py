@@ -108,8 +108,16 @@ def build_plan(state,release,store):
                 # Publish the same terminal group introduction for subsequent
                 # references and active-workspace reads, even without a reference now.
                 from .nominal_group_source import rows as group_rows,emit_anchor as emit_group_anchor
-                anchor=next((r['local_group_anchor'] for r in group_rows(state,{'head_ref':None,'anchor_refs':[]})
-                    if r['local_group_anchor']['frame_ref']==fid and r['local_group_anchor']['role']==role),None)
+                anchor=None
+                for row in group_rows(state,{'head_ref':None,'anchor_refs':[]}):
+                    source=row.get('local_group_anchor') or row.get('local_group_dependency',{})
+                    if source.get('frame_ref')!=fid or source.get('role')!=role:continue
+                    anchor=row.get('local_group_anchor')
+                    if row.get('local_group_dependency'):
+                        from .nominal_group_dependency import ground
+                        grounded=ground(state,row['local_group_dependency'])
+                        anchor=grounded['local_group_anchor'] if grounded else None
+                    break
                 if anchor:emit_group_anchor(state,release,anchor,tag,frag,emit)
             else: raise ValueError('ARGUMENT_CARDINALITY_UNRESOLVED')
         for role,child in f.semantic.get('proposition_args',{}).items():
