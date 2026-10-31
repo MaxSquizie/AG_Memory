@@ -76,9 +76,14 @@ def begin(state,kind,tokens,constraints=None):
     kind,refs,signature=identity(state,kind,tokens,constraints)
     if current(state,kind,tokens,constraints) is not None:return None
     previous=[r for r in state.syntax_trace if r.get('inventory_kind')==kind and r.get('inventory_tokens')==list(refs)]
-    for row in previous:row['superseded']=True
+    from .composition_session import current as session
+    runtime=session(state);scope=runtime.input_signature() if runtime else None
+    region=runtime.area_inputs[0].region_id if runtime and runtime.area_inputs else None
+    for row in previous:
+        if (row.get('task_scope')==scope and row.get('region_ref')==region
+                and row.get('branch_condition')==execution_condition(state)):row['superseded']=True
     return {'inventory_kind':kind,'inventory_tokens':list(refs),'inventory_signature':signature,
-        'branch_condition':execution_condition(state),
+        'branch_condition':execution_condition(state),'task_scope':scope,'region_ref':region,
         'source_basis':source_basis(state),'inventory_ref':'inventory:'+digest([kind,refs,signature,len(previous)])}
 
 

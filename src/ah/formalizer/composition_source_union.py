@@ -38,18 +38,29 @@ def merge(state,release,selector,region,tokens,cfg,grammar,components,diagnostic
         if not any(r['category']=='PRODUCER_UNSUPPORTED' for r in conflicts(state,region,0)):
             state.diag('COMPOSITION_PRODUCER_PENDING',region.region_id)
         return all_frames
-    from .component_constraints import accepts_bundle
-    retained=[]
+    from .component_constraints import inspect_bundle
+    retained=[];pending_constraints=False
     for root,owned,label in bundles:
-        if accepts_bundle(state,region,tokens,owned):
+        # Submission to the scalar chooser requires nominal projections in
+        # the artifact. This rejects an incomplete artifact, not its language
+        # hypothesis, and does not certify producer/domain completeness.
+        checked=inspect_bundle(state,region,tokens,owned,require_nominal_projection=True)
+        if checked['status']=='REQUIREMENTS_SATISFIED':
             retained.append((root,owned,label))
         else:
+            if checked['status'] not in {'CONTRACT_CONFLICT','INVALID_PRODUCER_OUTPUT'}:pending_constraints=True
             for f in owned:
                 f.semantic['structural_unresolved']=True
-                f.semantic['structural_rejection']='ESTABLISHED_SOURCE_CONSTRAINT_CONFLICT'
-                f.semantic.pop('composition_domain',None)
-            state.syntax_trace.append({'kind':'ESTABLISHED_SOURCE_CONSTRAINT_REJECTION',
-                'region_ref':region.region_id,'frame_refs':[f.frame_id for f in owned]})
+                f.semantic['constraint_obligations']=checked
+                if checked['status'] in {'CONTRACT_CONFLICT','INVALID_PRODUCER_OUTPUT'}:
+                    f.semantic['structural_rejection']=('PRODUCER_OUTPUT_CONTRACT_INVALID' if checked['status']=='INVALID_PRODUCER_OUTPUT' else 'ESTABLISHED_SOURCE_CONSTRAINT_CONFLICT')
+                    f.semantic.pop('composition_domain',None)
+            state.syntax_trace.append({'kind':('PRODUCER_OUTPUT_CONTRACT_INVALID' if checked['status']=='INVALID_PRODUCER_OUTPUT' else 'ESTABLISHED_SOURCE_CONSTRAINT_REJECTION' if checked['status']=='CONTRACT_CONFLICT' else 'ESTABLISHED_SOURCE_CONSTRAINT_PENDING'),
+                'region_ref':region.region_id,'frame_refs':[f.frame_id for f in owned],'assessment':checked})
+    if pending_constraints:
+        state.diag('COMPOSITION_CONSTRAINT_UNRESOLVED',region.region_id)
+        for frame in all_frames:frame.semantic['structural_unresolved']=True
+        return all_frames
     bundles=retained
     if not bundles:return all_frames
     if not grammar:

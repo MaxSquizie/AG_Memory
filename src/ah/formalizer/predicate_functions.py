@@ -128,8 +128,8 @@ def binding(state,release,selector,region,tokens,predicate,nominals,groups,cfg,p
                 prerequisites=(accepted('predicate_argument_role',selected),))
             if not reading:return None
             variants=[unique[v['candidate_id']] for v in reading.values]
-            if len(variants)>1:reading_domains.append(retain(state,region,predicate,token,role,reading))
-        retain_role(state,region,predicate,token,selected,_morph(variants[0]) if len(variants)==1 else None)
+            reading_domains.append(retain(state,region,predicate,token,role,reading))
+        retain_role(state,region,predicate,token,selected)
         result.append([(role,variant,None) for variant in variants])
     count=1
     for values in result:count*=len(values)

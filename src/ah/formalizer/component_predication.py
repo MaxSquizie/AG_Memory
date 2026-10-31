@@ -99,11 +99,14 @@ def _compose_alternatives(state, release, selector, region, tokens, predicates, 
         if bundle:bundle[-1].semantic['temporal_functions']=deepcopy(selected_times)
     frames = [f for bundle in bundles for f in bundle]
     attach_references(frames,references)
-    from .component_constraints import accepts_bundle
+    from .component_constraints import inspect_bundle
     for b in bundles:
-        if not accepts_bundle(state,region,tokens,b):
+        checked=inspect_bundle(state,region,tokens,b)
+        if checked['status']!='REQUIREMENTS_SATISFIED':
             for f in b:f.semantic['structural_unresolved']=True
-            state.syntax_trace.append({'kind':'ESTABLISHED_ROLE_CONSTRAINT_REJECTION','region_ref':region.region_id,'frame_refs':[f.frame_id for f in b]})
+            state.syntax_trace.append({'kind':'ESTABLISHED_ROLE_CONSTRAINT_REJECTION' if checked['status']=='CONTRACT_CONFLICT' else 'ESTABLISHED_ROLE_CONSTRAINT_PENDING',
+                'region_ref':region.region_id,'frame_refs':[f.frame_id for f in b],'assessment':checked})
+            for f in b:f.semantic['constraint_obligations']=checked
     complete = [b for b in bundles if all(not f.semantic['structural_unresolved'] for f in b)]
     # Producer provenance is not a language ambiguity. Compare interpretations,
     # never labels, before offering the component domain to a model.

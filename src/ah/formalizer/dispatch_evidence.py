@@ -8,6 +8,11 @@ def observe(state,kind,value,expected=True):
 
 
 def valid(state,kind,value):
+    if kind=='BUNDLE_CONSTRAINTS':
+        from .bundle_constraints import inspect,signature
+        from .state import FrameCandidate
+        return signature(inspect(state,value['region_ref'],value['task_scope'],value['token_refs'],
+            [FrameCandidate(**f) for f in value['frames']],value.get('condition'),nominal=value['nominal'],require_nominal_projection=value.get('require_nominal_projection',False)))==value['signature']
     if kind in {'READING_DOMAIN','STRUCTURAL_FOREST'}:
         from .validation_graph import validate
         return validate('DOMAIN' if kind=='READING_DOMAIN' else 'FOREST',state,value)
@@ -56,6 +61,18 @@ def probe_stamp(state,key):
 
 def evidence_probe_refs(state,kind,value):
     """Addresses an explicitly replaced assumption; no validation or observers."""
+    if kind=='BUNDLE_CONSTRAINTS':
+        from .bundle_constraints import select_records,required_inventory_refs
+        from .state import FrameCandidate
+        refs=evidence_probe_refs(state,'CONDITIONAL_PROOF',{'proof':None,'condition':value.get('condition')})
+        for row in select_records(state,value['region_ref'],value['task_scope'],value.get('condition')):
+            refs.update(evidence_probe_refs(state,'READING_DOMAIN',row) if row['kind']=='PARTIAL_READING_DOMAIN'
+                else evidence_probe_refs(state,'CONDITIONAL_PROOF',{'proof':row['proof'],'condition':value.get('condition')}))
+        if value['nominal']:
+            frames=[FrameCandidate(**f) for f in value['frames']]
+            for ref in required_inventory_refs(state,value['region_ref'],value['task_scope'],value['token_refs'],frames,value.get('condition')):
+                refs.update(evidence_probe_refs(state,'INVENTORY',{'inventory_ref':ref,'condition':value.get('condition')}))
+        return refs
     if kind in {'NOMINAL_HOST','REFINEMENT_HOST'}:return {value['decision_ref']}
     domains={r['task_ref']:r for r in state.syntax_trace if r.get('kind')=='TASK_DOMAIN'}
     def include_packet(packet):

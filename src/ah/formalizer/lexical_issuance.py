@@ -96,6 +96,9 @@ def assess(state,result,source):
     from .state import FrameCandidate
     from .composition_contracts import lexical_violations
     from .composition_tree import expression,leaves,slots
+    from .structural_shells import evidence_state
+    issued=state._lexical_issuer.get(source['issuance_ref'])
+    local=evidence_state(state,{'evidence':issued['evidence']},read_only=True)
     frames=[FrameCandidate(**deepcopy(row)) for row in source['frames']]
     by_id={f.frame_id:f for f in frames};outputs=[]
     for bundle in source['bundles']:
@@ -117,10 +120,17 @@ def assess(state,result,source):
             unknown.append({'kind':'FRAME_STRUCTURE_UNESTABLISHED'})
         slot_conflicts,slot_unknown=slot_obligations(by_id[root],result.get('input_slot') or {})
         conflicts.extend(slot_conflicts);unknown.extend(slot_unknown)
+        from .bundle_constraints import inspect as check_bundle
+        from .structural_conditions import resolve
+        node=resolve(local,result['condition'])
+        semantic=check_bundle(local,node.forest['region_ref'],issued['basis']['input_scope'],
+            result['token_refs'],owned,result['condition'])
+        conflicts.extend(semantic['conflicts']);unknown.extend(semantic['unknowns'])
         # Explicit unfinished work cannot be discharged by a successful origin
         # check. Other typed-slot consumers have not yet all been connected.
         unknown.extend(deepcopy(source['obligations']))
-        unknown.append({'kind':'REMAINING_LEXICAL_CONTRACTS_PENDING'})
-        outputs.append({'root_ref':root,'status':'CONTRACT_CONFLICT' if conflicts else 'OPEN_REQUIREMENTS',
-                        'conflicts':conflicts,'obligations':unknown})
+        unknown.extend({'kind':kind} for kind in ('NOMINAL_RELATION_CONTRACT_PENDING',
+            'OWNER_RELATIVE_CONTRACT_PENDING','CONTROL_CONTRACT_PENDING','TEMPORAL_CONTRACT_PENDING'))
+        outputs.append({'root_ref':root,'status':'STALE_EVIDENCE' if semantic['stale'] else 'CONTRACT_CONFLICT' if conflicts else 'OPEN_REQUIREMENTS',
+                        'conflicts':conflicts,'obligations':unknown,'semantic_requirements':semantic})
     return {**origin,'bundles':outputs}

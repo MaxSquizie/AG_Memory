@@ -1186,3 +1186,46 @@ REFERENCE/QUANTITY функций и inventory membership. Stale, неизвес
 и доказанный конфликт bundle должны различаться; owner/relative/control пока
 остаются именованными обязательствами. После этого — дальнейшие L3 contracts,
 source cache/L4 child scheduling. Все шесть блоков F05 открыты.
+
+
+## 2026-10-31 — L3-S: исторические семантические требования
+
+Добавлен bundle_constraints.inspect с явными region/input scope/condition.
+Роль проверяется по predicate/token/candidate_id и всем релевантным использованиям.
+NO_DIRECT_ROLE не запрещает контекстное чтение. Domain readings сопоставляются
+целиком: нельзя собрать новый вариант из признаков разных альтернатив. Совместимый,
+но отсутствующий в домене вариант остаётся UNKNOWN. Singleton ответ reading probe
+сохраняет domain proof; одиночное предложение анализатора остаётся в frames, но не
+публикуется как семантический запрет другим источникам. Legacy reading без отдельного
+основания даёт READING_PROVENANCE_UNKNOWN.
+
+REFERENCE/QUANTITY проверяются по inventory membership и точным вхождениям,
+identity constraint и внешнему падежу. Scoped исполнение непустых функций теперь
+использует licensed_in_scope, публичный frame_live остаётся безусловным. Inventory
+хранит region/scope; supersession не переносится в соседнюю ветвь. Общий selector
+inventory refs используется и checker, и dependency discard. Пустая проверка также
+подписана на condition lineage и появление новых требований.
+
+Historical assess подключён к общему checker. Scalar source union различает
+CONTRACT_CONFLICT, OPEN_REQUIREMENTS, STALE_EVIDENCE. Неизвестное требование не
+позволяет объявить соседний вариант единственным завершённым ответом. Отдельный
+явный контракт submission требует nominal projection в готовом artifact обоих
+производителей: отсутствие даёт INVALID_PRODUCER_OUTPUT, а не отрицательное
+свидетельство о языковой гипотезе. Open/conditional checker этого режима не включает.
+Из этого не следует полнота генератора или готовность записи.
+
+Найденная при проверке регрессия двух scalar REFERENCE/QUANTITY сценариев
+подтверждена сравнением с нетронутым 0b39012 (2 passed); исправлена явным output
+contract. Ожидания этих сценариев не менялись. Targeted пакет shared-predicate и
+lexical issuance: 18 passed; финальный semantic+scalar пакет: 14 passed in 4.55s.
+Финальная повторная historical native проверка: 2 passed in 19.81s.
+Среди проверок — реальные условные непустые REFERENCE/QUANTITY producers,
+whole-reading контрасты, отсутствующий/устаревший proof, точные occurrences,
+появление поздних требований, scope isolation и блокировка scalar union при UNKNOWN.
+Это сценарные ответы и unit контрасты, не проверка Luna или локальной модели.
+Reviewer и coordinator проверяли read-only; замечания о reading provenance,
+whole membership, nominal occurrences и dependency selection устранены.
+
+Остаются NOMINAL_RELATION, owner/relative, control, temporal contracts, полнота
+источников, source cache/resume, child demands и publication gate. Следующий
+семантический этап — owner/relative evidence. Все шесть блоков F05 открыты.

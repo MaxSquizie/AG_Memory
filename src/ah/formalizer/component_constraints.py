@@ -32,63 +32,33 @@ def retain_role(state,region,predicate,token,selected,reading=None):
     if row not in state.syntax_trace:state.syntax_trace.append(row)
 
 
-def compatible_bundle(state,region,bundle):
-    observe_constraints(state,region)
+def inspect_bundle(state,region,tokens,bundle,*,nominal=True,require_nominal_projection=False):
     from .composition_session import current
+    from .function_inventory import execution_condition
+    from .bundle_constraints import inspect,signature
+    from dataclasses import asdict
     runtime=current(state);scope=runtime.input_signature() if runtime else None
-    from collections import defaultdict
-    frames=defaultdict(list)
-    for frame in bundle:frames[frame.predicate_token_ref].append(frame)
-    def uses(predicate,token):
-        # A shared predicate can occur in several branch frames. Reading a
-        # token as context is not selecting it as an argument in every branch.
-        return [f for f in frames[predicate] if token in f.argument_token_refs
-                or token in f.semantic.get('proposed_roles',{})
-                or token in f.semantic.get('morph_bindings',{})]
-    for row in state.syntax_trace:
-        if (row.get('kind')!='ESTABLISHED_PREDICATE_ROLE' or row['region_ref']!=region.region_id
-                or row['task_scope']!=scope):continue
-        from .structural_tasks import licensed_in_scope as licensed
-        if not licensed(state,row['proof'],predicate_ref=row['predicate_ref'],token_ref=row['token_ref']):return False
-        if not frames[row['predicate_ref']]:return False
-        expected=row['role']
-        relevant=uses(row['predicate_ref'],row['token_ref'])
-        if (expected!='NO_DIRECT_ROLE' or row.get('reading')) and not relevant:return False
-        for f in relevant:
-            chosen=f.semantic.get('proposed_roles',{}).get(row['token_ref'])
-            if (chosen is not None if expected=='NO_DIRECT_ROLE' else chosen!=expected):return False
-            if row.get('reading'):
-                actual=f.semantic.get('morph_bindings',{}).get(row['token_ref'],{})
-                # Whole linguistic readings, not analyzer confidence/proof paths.
-                fields=('lemma','pos','cases','number','gender','tense','person','mood','features')
-                if any(actual.get(k)!=row['reading'].get(k) for k in fields):return False
-    from .partial_readings import domains,valid_domain
-    from .morphology_domain import clean
-    for row in domains(state,region):
-        relevant=uses(row['predicate_ref'],row['token_ref'])
-        if not valid_domain(state,row) or not relevant:return False
-        for frame in relevant:
-            actual=frame.semantic.get('morph_bindings',{}).get(row['token_ref'])
-            if (actual is None or clean(actual) not in [v['reading'] for v in row['alternatives']]
-                    or frame.semantic.get('proposed_roles',{}).get(row['token_ref'])!=row['role']):return False
-    return True
+    condition=execution_condition(state)
+    refs=[t.token_id for t in tokens]
+    result=inspect(state,region.region_id,scope,refs,bundle,condition,nominal=nominal,require_nominal_projection=require_nominal_projection)
+    from .dispatch_evidence import observe
+    observe(state,'BUNDLE_CONSTRAINTS',{'region_ref':region.region_id,'task_scope':scope,
+        'token_refs':refs,'frames':[asdict(f) for f in bundle],'condition':condition,
+        'nominal':nominal,'require_nominal_projection':require_nominal_projection,'signature':signature(result)})
+    return result
+
+
+def compatible_bundle(state,region,bundle):
+    return inspect_bundle(state,region,[],bundle,nominal=False)['status']=='REQUIREMENTS_SATISFIED'
 
 
 def preserves_nominal_functions(state,tokens,bundle):
-    """Selected reference/quantity functions cannot disappear in another producer."""
-    from .nominal_functions import rows
-    for source in rows(state,tokens):
-        if source['function']=='QUANTITY':
-            candidates=[g for f in bundle for g in f.semantic.get('qualitative_groups',())]
-            if not any(g['head_ref']==source['head_ref'] and
-                       g.get('quantity_token_refs')==source['function_refs'] for g in candidates):return False
-        elif source['function']=='REFERENCE':
-            candidates=[u.get('reference_constraint',{}) for f in bundle
-                        for u in f.semantic.get('lexical_units',{}).values()]
-            if not any(g.get('head_ref')==source['head_ref'] and
-                       g.get('function_refs')==source['function_refs'] and
-                       g.get('identity_constraint')==source['identity_constraint'] for g in candidates):return False
-    return True
+    from .composition_session import current
+    runtime=current(state)
+    if runtime and runtime.area_inputs:
+        return inspect_bundle(state,runtime.area_inputs[0],tokens,bundle)['status']=='REQUIREMENTS_SATISFIED'
+    # Historical callers must supply an explicit area and scope to inspect.
+    return False
 
 
 def host_live(state,row):
@@ -149,4 +119,4 @@ def observe_constraints(state,region):
 
 def accepts_bundle(state,region,tokens,bundle):
     """Common source obligations for component and grammar alternatives."""
-    return compatible_bundle(state,region,bundle) and preserves_nominal_functions(state,tokens,bundle)
+    return inspect_bundle(state,region,tokens,bundle)['status']=='REQUIREMENTS_SATISFIED'

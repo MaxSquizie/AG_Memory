@@ -16,7 +16,7 @@ def setup(monkeypatch,role='SUBJECT',reading=None):
     state=t0('source');region=NS(region_id='r')
     state.syntax_trace.append({'kind':'ESTABLISHED_PREDICATE_ROLE','region_ref':'r','task_scope':None,
         'predicate_ref':'p','token_ref':'a','role':role,'proof':{'id':'proof'},'reading':reading})
-    monkeypatch.setattr('ah.formalizer.structural_tasks.licensed',lambda *a,**k:True)
+    monkeypatch.setattr('ah.formalizer.structural_tasks._licensed',lambda *a,**k:True)
     return state,region
 
 
@@ -48,7 +48,9 @@ def test_partial_reading_domain_preserves_role_in_all_uses(monkeypatch):
     state=t0('source');region=NS(region_id='r')
     row={'predicate_ref':'p','token_ref':'a','role':'SUBJECT',
         'alternatives':[{'reading':clean({'pos':'NOUN','cases':['nom']})}]}
-    monkeypatch.setattr('ah.formalizer.partial_readings.domains',lambda *a:[row])
+    row.update(kind='PARTIAL_READING_DOMAIN',region_ref='r',task_scope=None,domain_ref='d')
+    for v in row['alternatives']:v.update(predicate_ref='p',token_ref='a',role='SUBJECT')
+    state.syntax_trace.append(row)
     monkeypatch.setattr('ah.formalizer.partial_readings.valid_domain',lambda *a:True)
     for bundle in permutations([frame('left','a'),frame('right','b')]):
         assert compatible_bundle(state,region,bundle)

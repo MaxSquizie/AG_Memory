@@ -5,7 +5,7 @@ keeps exact occurrence refs. Quantities remain source expressions, not numbers.
 """
 from .canonical_ledger import digest
 from .task_contracts import SelectionPurpose
-from .structural_tasks import choose,source_set,licensed
+from .structural_tasks import choose,source_set,licensed_in_scope as licensed
 from .probe_prerequisites import accepted,from_proof
 
 

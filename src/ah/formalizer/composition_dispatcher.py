@@ -47,7 +47,7 @@ class Dispatcher:
         from .producer_reads import observe
         observe(self,kind,value,expected)
         if self.checking_evidence or not self.evidence_stack:return
-        if kind not in {'READING_DOMAIN','STRUCTURAL_FOREST','PARTITION_EXCLUSION','CONDITIONAL_PROOF','PROOF','INVENTORY','INVENTORY_QUERY','NOMINAL_HOST','CONSTRAINT_SET','REFINEMENT_HOST'}:raise ValueError('DISPATCH_EVIDENCE_KIND_UNKNOWN')
+        if kind not in {'BUNDLE_CONSTRAINTS','READING_DOMAIN','STRUCTURAL_FOREST','PARTITION_EXCLUSION','CONDITIONAL_PROOF','PROOF','INVENTORY','INVENTORY_QUERY','NOMINAL_HOST','CONSTRAINT_SET','REFINEMENT_HOST'}:raise ValueError('DISPATCH_EVIDENCE_KIND_UNKNOWN')
         identity=digest([kind,canonical(value),expected])
         self.evidence_stack[-1][identity]={'kind':kind,'value':deepcopy(value),'expected':expected}
 
