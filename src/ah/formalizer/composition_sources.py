@@ -237,15 +237,14 @@ class CompositionSources:
             allowed=[]
             for cid,(owned,_) in choices.items():
                 frame=by_id[cid]
-                if frame.semantic.get('output_sort','PROPOSITION')!=request.output_sort:continue
-                if request.head_ref:
-                    reading=frame.semantic.get('morph_bindings',{}).get(request.head_ref)
-                    cases=set(reading.get('cases',())) if reading else set()
-                    if request.allowed_cases and cases and not cases&set(request.allowed_cases):continue
-                    if reading is None or request.allowed_cases and not cases:
-                        parent_obligations[cid]={'head_ref':request.head_ref,
-                            'required_cases':sorted(request.allowed_cases or ()),
-                            'reason':'HEAD_READING_UNKNOWN' if reading is None else 'HEAD_CASE_UNKNOWN'}
+                from .composition_contracts import slot_obligations
+                from .composition_dispatcher import canonical
+                conflicts,unknown=slot_obligations(frame,canonical(request))
+                if conflicts:continue
+                if unknown:
+                    parent_obligations[cid]={'head_ref':request.head_ref,
+                        'required_cases':sorted(request.allowed_cases or ()),
+                        'reason':unknown[0]['kind']}
                 allowed.append(cid)
             graph.restrict('ROOT',allowed,'PARENT_TYPED_SLOT')
         graph.propagate()

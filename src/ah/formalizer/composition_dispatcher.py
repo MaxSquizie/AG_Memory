@@ -44,6 +44,8 @@ class Dispatcher:
             queue.extend(self.consumers.get(ref,()))
 
     def observe(self,kind,value,expected=True):
+        from .producer_reads import observe
+        observe(self,kind,value,expected)
         if self.checking_evidence or not self.evidence_stack:return
         if kind not in {'READING_DOMAIN','STRUCTURAL_FOREST','PARTITION_EXCLUSION','CONDITIONAL_PROOF','PROOF','INVENTORY','INVENTORY_QUERY','NOMINAL_HOST','CONSTRAINT_SET','REFINEMENT_HOST'}:raise ValueError('DISPATCH_EVIDENCE_KIND_UNKNOWN')
         identity=digest([kind,canonical(value),expected])
@@ -102,6 +104,8 @@ class Dispatcher:
 
     def discard_reads(self,refs,reason):
         """A local revision replaces only the named tentative dependencies."""
+        from .producer_reads import discard
+        discard(self,refs)
         if self.stack:
             key,reads=self.stack[-1]
             removed=sorted(set(refs)&set(reads))
@@ -193,4 +197,6 @@ class Dispatcher:
                     evidence_reads=deepcopy(list(evidence_reads.values())))
                 break
         if self.stack:self.stack[-1][1].setdefault(key,node['revision'])
+        from .producer_reads import task
+        task(self,key)
         return deepcopy(node['result'])

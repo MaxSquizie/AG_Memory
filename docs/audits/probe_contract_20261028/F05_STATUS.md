@@ -46,8 +46,13 @@
   child demand с точной приватной invocation. Инвентари функций и ограничения ролей
   читают условные основания; их кеш-подписки сохраняют явную ветвь. Публичные проверки
   остаются безусловными. Ресурсная остановка lexical source возобновляется через frontier.
-  Результат пока PENDING_VALIDATION: нет исторического lexical validator, доказательства
-  полноты источников и исполнения child demands. Это не готовая интерпретация.
+  Результат пока PENDING_VALIDATION. Добавлена проверка происхождения отдельного
+  source output по приватному issuer, точным typed payloads и реально прочитанным
+  зависимостям; snapshot разделяет STALE_EVIDENCE, PRODUCED_EVIDENCE_CURRENT и
+  CONTEXT_REVALIDATION_PENDING. Последний статус сохраняется при cache hits.
+  Общие чистые lexical/typed-slot проверки показывают конфликт конкретного bundle
+  отдельно от неизвестного признака. Полная семантическая проверка, проверка чтений
+  памяти, доказательство полноты источников и исполнение child demands ещё открыты.
   Модальность, CONTENT/CONTENT_REFERENCE, NOMINAL_DESCRIPTION и кванторы пока pending.
 - Потребители: relation_composition, PartitionDomain, ChildTasks, composition_tree,
   native compiler. structural_forest/structural_shells сохраняют открытые домены и условные оболочки.

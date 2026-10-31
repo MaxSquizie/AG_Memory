@@ -1088,3 +1088,56 @@ NOT цепочка проходит разрешённое окно до уро�
 Финальный целевой пакет: 25 passed in 62.67s (structural_lexical, open_forest,
 windows, native all-source union, четыре scalar action-description маршрута).
 compileall и git diff --check прошли. Остальные suites не запускались.
+
+
+## 2026-10-31 — OF2.2-L3, происхождение source output и зависимости чтений
+
+Добавлен приватный run-local Issuer. Его записи отделены от observation/evidence
+пакетов: исходный source output, condition, execution basis, адрес входа и прочитанные
+основания фиксируются при реальном выполнении. Fingerprint использует type-preserving
+pickle.dumps + SHA256 (только запись, без loads). Пересчитанный checksum предъявленного
+результата не удостоверяет подменённый frame, bundle membership или тип контейнера.
+Issuer разделяется приватными validation views, выдаёт только копии записей, не
+восстанавливается из сериализованного observation: отсутствие issuer явно блокирует
+проверку происхождения. Это не долговременная provenance-система и не write license.
+
+producer_reads наблюдает непосредственные reads источника и замороженные успешные
+closure/revision dispatcher tasks, включая cache hits. Незавершённые/отброшенные
+внутренние попытки не попадают как успешные чтения. Addressed discard удаляет только
+названные зависимости, соответствующие агрегаты и ставшие недостижимыми дочерние
+узлы; независимые прочитанные ветви сохраняются. Cached closure не перезаписывает
+более поздние direct constraints порядком DFS. Разные одновременно использованные
+версии одного probe отмечаются inconsistent, а не превращаются в одну новую версию.
+
+Историческая inspect проверяет issuer, точный output, condition chain, basis/address,
+probe fingerprints и typed external reads с приоритетом current authoritative state
+над доверенным issuance packet. Проверки выполняются последовательными независимыми
+входами в существующий validation_graph; новый LEXICAL expander пока не введён.
+Поэтому расширение view-interning для новых lexical graph obligations остаётся
+отдельным обязательством следующего шлюза, а не объявлено выполненным.
+
+lexical_violations выделен из scalar LexicalRoute.accept без изменения его семантики;
+slot_obligations общий для CompositionSources.retain и conditional assessment.
+Известный конфликт addressed case/output sort отделяется от неизвестного reading/case;
+лексическая оболочка с внутренней relation показывается как конфликт этого bundle.
+Ни один из этих конфликтов автоматически не исключает весь LEXICAL generator.
+Доказанная живость source output отдельно от OPEN_REQUIREMENTS и проверки остальных
+семантических consumers. Snapshot выводит эти состояния, не повышая completion flags.
+
+Обнаружена дополнительная граница: component источник читает memory context.
+Пока его historical validator не подключён, наличие GOAL_CONTEXT dependency или
+source-specific context history сохраняет CONTEXT_REVALIDATION_PENDING. История
+контекстных зависимостей сохраняется консервативно по source при retry/cache hit;
+отсутствие новых context_reads не означает отсутствие использованного контекста.
+Грамматический источник может оставаться текущим независимо от этого обязательства.
+
+Reviewer проверил typed issuance, nested discard, frozen revisions, cache/context
+retention; новых блокеров в этом ограниченном участке не нашёл. Это partial L3:
+полная проверка semantically linked morphology/owners/inventories, memory receipts,
+conditional constraints, единый lexical graph validator, source completion и L4
+child-demand scheduling остаются открытыми. Все шесть блоков F05 открыты.
+
+Финальный целевой пакет: 21 passed in 97.80s: 11 native/negative issuance checks,
+6 source-read capture checks, 2 existing dispatcher regressions, resource resume
+и scalar all-source union. Проверки используют сценарные ответы и отдельные
+scheduler fixtures; это не live-model evidence. compileall/diff --check прошли.

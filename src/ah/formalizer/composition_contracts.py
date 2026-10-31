@@ -23,28 +23,8 @@ class LexicalRoute:
 
     def accept(self,state,region,frames):
         """Check produced structures, never infer syntax from the number of verbs."""
-        from .composition_tree import roots,expression,leaves
-        by_id={f.frame_id:f for f in frames}
-        violations=[]
-        for root in roots(frames):
-            tree=expression(root)
-            pending=[tree]
-            while pending:
-                node=pending.pop()
-                if 'choice_ref' in node:
-                    pending.extend(node.get('alternatives',()));continue
-                if node.get('operator'):
-                    violations.append({'frame_ref':root.frame_id,'relation_tree':node});continue
-                for fid in leaves(node):
-                    frame=by_id[fid]
-                    for role,slot in frame.semantic.get('proposition_args',{}).items():
-                        from .composition_tree import content
-                        for child in leaves(content(slot)):
-                            f=by_id.get(child)
-                            if f and f.predicate_token_ref in self.token_refs:
-                                violations.append({'owner_ref':fid,'role':role,'child_ref':child})
-                    if frame.semantic.get('nominal_args'):
-                        violations.append({'owner_ref':fid,'nominal_args':frame.semantic['nominal_args']})
+        from .composition_tree import roots
+        violations=lexical_violations(frames,self.token_refs)
         if violations:
             record_failure(state,region,'HYPOTHESIS_CONFLICT',self.proof,
                 'A selected lexical-only route produced an internal relation.',violations,search_complete=False)
@@ -99,3 +79,51 @@ def unsupported_route(state,region,cfg,producer,proof,explanation):
     return record_failure(state,region,'PRODUCER_UNSUPPORTED',route.proof,explanation,
         {'producer':producer,'capability_proof':deepcopy(proof),
          'token_refs':list(route.token_refs),'interpretation_rejected':False},search_complete=False)
+
+
+def lexical_violations(frames,token_refs,*,boundaries=None):
+    """Pure lexical-route compatibility; no selection, exclusion or writes."""
+    from .composition_tree import roots,expression,leaves
+    by_id={f.frame_id:f for f in frames}
+    violations=[]
+    for root in (roots(frames) if boundaries is None else boundaries):
+        tree=expression(root)
+        pending=[tree]
+        while pending:
+            node=pending.pop()
+            if 'choice_ref' in node:
+                pending.extend(node.get('alternatives',()));continue
+            if node.get('operator'):
+                violations.append({'frame_ref':root.frame_id,'relation_tree':node});continue
+            for fid in leaves(node):
+                frame=by_id[fid]
+                for role,slot in frame.semantic.get('proposition_args',{}).items():
+                    from .composition_tree import content
+                    for child in leaves(content(slot)):
+                        f=by_id.get(child)
+                        if f and f.predicate_token_ref in token_refs:
+                            violations.append({'owner_ref':fid,'role':role,'child_ref':child})
+                if frame.semantic.get('nominal_args'):
+                    violations.append({'owner_ref':fid,'nominal_args':frame.semantic['nominal_args']})
+    return violations
+
+
+def slot_obligations(carrier,slot):
+    """The same known/unknown case boundary used by CompositionSources.retain.
+
+    This checks only output sort and the addressed head reading; other slot
+    responsibilities remain explicit obligations at the caller.
+    """
+    conflicts=[];unknown=[]
+    actual=carrier.semantic.get('output_sort','PROPOSITION')
+    if actual!=slot.get('output_sort','PROPOSITION'):
+        conflicts.append({'kind':'OUTPUT_SORT_CONFLICT','actual':actual,'required':slot.get('output_sort')})
+    head=slot.get('head_ref');allowed=set(slot.get('allowed_cases') or ())
+    if head:
+        reading=carrier.semantic.get('morph_bindings',{}).get(head)
+        cases=set(reading.get('cases') or ()) if reading else set()
+        if reading is None or allowed and not cases:
+            unknown.append({'kind':'HEAD_READING_UNKNOWN' if reading is None else 'HEAD_CASE_UNKNOWN','head_ref':head})
+        elif allowed and not cases&allowed:
+            conflicts.append({'kind':'HEAD_CASE_CONFLICT','head_ref':head,'actual':sorted(cases),'required':sorted(allowed)})
+    return conflicts,unknown

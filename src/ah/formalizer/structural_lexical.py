@@ -29,6 +29,8 @@ def produce(state,release,selector,region,tokens,cfg,request,forest):
     from .structural_resume import synchronize
     parent=current(state);inherited=active(state)
     if parent is None or not applicable(state,forest,cfg):return []
+    from .lexical_issuance import authority
+    issuer=authority(state)
     results=[]
     for hypothesis in forest['hypotheses']:
         if hypothesis['candidate']['relation']!='LEXICAL':continue
@@ -46,7 +48,7 @@ def produce(state,release,selector,region,tokens,cfg,request,forest):
             runtime.tasks.feedback=deepcopy(parent.tasks.feedback)
             runtime.structural_child_edge=getattr(parent,'structural_child_edge',None)
             task={'state':local,'runtime':runtime,'sources':{},'begin':len(local.syntax_trace),
-                  'diagnostics_begin':len(local.diagnostics),'result':None,'demands':{}}
+                  'diagnostics_begin':len(local.diagnostics),'result':None,'demands':{},'source_contexts':{}}
             parent.structural_lexical_tasks[key]=task
         local=task['state'];runtime=task['runtime'];synchronize(state,local)
         for name in ('structural_condition_registry','structural_condition_evidence','structural_shell_registry'):
@@ -71,21 +73,39 @@ def produce(state,release,selector,region,tokens,cfg,request,forest):
                         for source,compute in sources.items():
                             # The dispatcher still owns probe replay. A source
                             # snapshot itself is not a reusable completion proof.
-                            start=len(local.diagnostics);obligations=[];frames=[];returned=False
-                            try:
-                                with capture(local,{'hypothesis_ref':hypothesis['hypothesis_ref'],'source':source}):
-                                    frames=list(compute() or ());returned=True
-                            except ChildDemand as demand:
-                                obligations.append(demand.obligation)
-                                task['demands'][demand.obligation['obligation_ref']]=demand.invocation
-                            except DispatchBlocked:
-                                obligations.append({'kind':'RESOURCE_PENDING','source':source})
+                            start=len(local.diagnostics);context_start=len(local.context_reads)
+                            obligations=[];frames=[];returned=False
+                            from .producer_reads import capture as capture_reads
+                            with capture_reads(runtime.dispatcher) as reads:
+                                try:
+                                    with capture(local,{'hypothesis_ref':hypothesis['hypothesis_ref'],'source':source}):
+                                        frames=list(compute() or ());returned=True
+                                except ChildDemand as demand:
+                                    obligations.append(demand.obligation)
+                                    task['demands'][demand.obligation['obligation_ref']]=demand.invocation
+                                except DispatchBlocked:
+                                    obligations.append({'kind':'RESOURCE_PENDING','source':source})
                             diagnostics=[asdict(d) for d in local.diagnostics[start:]]
                             task['sources'][source]={'source':source,'execution_complete':returned,
                                 'producer_complete':False,'structure_complete':False,
                                 'frames':[asdict(f) for f in frames],'bundles':bundles(frames),
                                 'diagnostics':diagnostics,'obligations':obligations+[
                                     {'kind':'SOURCE_CLOSURE_UNESTABLISHED','source':source}]}
+                            from .structural_conditions import execution_basis
+                            packet={'trace':deepcopy(local.syntax_trace),
+                                'decisions':{k:asdict(v) for k,v in local.decisions.items()},
+                                'probes':deepcopy(local.component_probe_records),
+                                'context_reads':deepcopy(local.context_reads[context_start:])}
+                            source_reads=reads.snapshot()
+                            contexts=task['source_contexts'].setdefault(source,set())
+                            contexts.update(source_reads.get('contexts',()))
+                            contexts.update('context:'+digest(r) for r in packet['context_reads'])
+                            source_reads['contexts']=sorted(contexts)
+                            ref=issuer.issue(task['sources'][source],condition.record(),execution_basis(local,cfg),
+                                {'token_refs':[t.token_id for t in tokens],
+                                 'input_slot':canonical(request),'source_range':list(region.source_range)},
+                                source_reads,packet)
+                            task['sources'][source]['issuance_ref']=ref
             finally:parent.dispatcher.spent+=runtime.dispatcher.spent-before
         registry(state).update(deepcopy(registry(local)))
         state.observation.setdefault('structural_condition_evidence',{}).update(

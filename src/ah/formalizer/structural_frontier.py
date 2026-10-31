@@ -30,6 +30,8 @@ def one_level(state,runtime,region,tokens,cfg,request):
 class StructuralFrontier:
     def __init__(self,runtime,region,tokens,cfg,request,forest):
         self.runtime=runtime;self.state=runtime.state;self.jobs={}
+        from .lexical_issuance import authority
+        authority(self.state)
         self.windows=[];self.cost={'constraint_checks':0,'validation_seconds':0.0,'production_seconds':0.0}
         self.generation_ref='structural-generation:'+digest([forest['receipt_digest'],execution_basis(self.state,cfg)])
         self.basis=execution_basis(self.state,cfg);self.context=runtime.capture_context()
@@ -229,6 +231,13 @@ class StructuralFrontier:
 
     def snapshot(self):
         from .partition_exclusions import live as exclusion_live
+        from .lexical_issuance import assess
+        def lexical_status(job):
+            if job['status']=='STALE':return []
+            self.sync(job)
+            return [{'result_ref':r['result_ref'],'sources':[{'source':s['source'],
+                **assess(job['state'],r,s)} for s in r['sources']]}
+                for r in job.get('lexical_results',())]
         def exclusions(job):
             refs=set()
             for result in job['results']:
@@ -245,6 +254,7 @@ class StructuralFrontier:
                 'condition_ref':j['parent_shell']['condition']['condition_ref'] if j['parent_shell'] else None,
                 'token_refs':[t.token_id for t in j['tokens']], 'input_slot':canonical(j['request']),
                 'excluded_combination_refs':exclusions(j),
+                'lexical_status':lexical_status(j),
                 'lexical_result_refs':[r['result_ref'] for r in j.get('lexical_results',())] if j['status']!='STALE' else [],
                 'result_refs':[r['shell_ref'] for r in j['results'] if live(j['state'],r)] if j['status']!='STALE' else []}
                 for j in order(self.jobs.values())]}
