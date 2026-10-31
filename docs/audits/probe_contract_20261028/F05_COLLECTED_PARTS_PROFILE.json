@@ -1,0 +1,9 @@
+{
+  "parts": 4,
+  "production_seconds": 14.203832272,
+  "prompt_calls": 46,
+  "shells": 2,
+  "jobs": 9,
+  "max_depth": 2,
+  "execution": "native producers, scripted answers, no publication"
+}

@@ -361,7 +361,7 @@ def licensed_in_scope(state,proof,*,_visiting=None,**expected):
         {'proof':proof,'expected_payload':expected,'condition':record},result)
     return result
 
-def span(state,release,selector,region,tokens,cfg,slot,question,*,exclude=(),record_remainder=False,admissible=None,initial=None,prerequisites=()):
+def span(state,release,selector,region,tokens,cfg,slot,question,*,exclude=(),record_remainder=False,admissible=None,initial=None,prerequisites=(),fixed_initial=False):
     """Every source token boundary is reachable; no punctuation whitelist."""
     from .structural_probe_inputs import collection
     from .probe_prerequisites import from_proof
@@ -418,11 +418,12 @@ def span(state,release,selector,region,tokens,cfg,slot,question,*,exclude=(),rec
         rejected.add(a)
         state.syntax_trace.append({'kind':'STRUCTURAL_BOUNDARY_CONSTRAINT','region_ref':region.region_id,
             'source_range':list(region.source_range),'start_ref':tokens[a].token_id,'reason':'ALL_ENDS_REJECTED'})
+        if fixed_initial:return None  # This rejected the addressed start, not every start.
     exhausted()
     return None
 
 
-def source_set(state,release,selector,region,tokens,cfg,slot,question,*,exclude=(),record_remainder=False,admissible=None,partial_admissible=None,initial=None,prerequisites=()):
+def source_set(state,release,selector,region,tokens,cfg,slot,question,*,exclude=(),record_remainder=False,admissible=None,partial_admissible=None,initial=None,prerequisites=(),fixed_initial=False):
     """Select a finite union of source intervals without enumerating 2**n sets.
 
     Every step either closes the set or adds an occurrence. The final whole
@@ -430,7 +431,8 @@ def source_set(state,release,selector,region,tokens,cfg,slot,question,*,exclude=
     """
     chosen=span(state,release,selector,region,tokens,cfg,slot,
         question+' Select the first continuous piece; other pieces can be added next.',exclude=exclude,
-        record_remainder=record_remainder,initial=initial,admissible=partial_admissible,prerequisites=prerequisites)
+        record_remainder=record_remainder,initial=initial,admissible=partial_admissible,prerequisites=prerequisites,
+        fixed_initial=fixed_initial)
     if not chosen:return None
     return extend_source_set(state,release,selector,region,tokens,cfg,slot,question,
                              chosen[0],chosen[1],exclude=exclude,admissible=admissible,partial_admissible=partial_admissible)

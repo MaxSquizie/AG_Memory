@@ -6,7 +6,7 @@ Only a source-supported repair choice permits retiring an earlier assignment.
 from .canonical_ledger import digest
 
 
-def select_parts(domain,roles,select):
+def select_parts(domain,roles,select,*,continuation=None):
     from .composition_contracts import record_failure
     from .composition_session import current
     from .component_probe_replay import supersede
@@ -18,10 +18,17 @@ def select_parts(domain,roles,select):
     original_cfg=domain.cfg
     local_cfg={k:v for k,v in original_cfg.items() if k not in {'_task_constraints','_task_constraints_text','_ownership_feedback'}}
     try:
-        while len(groups)<len(roles):
+        while True:
             index=len(groups);begin=len(state.syntax_trace)
-            domain.cfg={**(local_cfg if feedback else original_cfg),'_ownership_feedback':feedback}
-            chosen=select(index,groups)
+            domain.cfg={**local_cfg,'_ownership_feedback':feedback} if feedback else original_cfg
+            if continuation is None:
+                if len(groups)>=len(roles):return groups
+            elif len(groups)>=2:
+                more=continuation(groups,proofs)
+                if more is None:return None
+                if not more:return groups
+                if len(groups)>=len(roles):roles.append('another direct content part')
+            chosen=select(index,groups,proofs) if continuation is not None else select(index,groups)
             if chosen:
                 starts.append(begin);groups.append(chosen[0]);proofs.append(chosen[1]);continue
             exhausted=next((r for r in reversed(state.syntax_trace[begin:])
@@ -82,5 +89,4 @@ def select_parts(domain,roles,select):
                 'revised_role':roles[target],'preserved_roles':roles[:target],
                 'retired_refs':sorted(refs),'relation_proof':domain.proof})
             del groups[target:];del starts[target:];del proofs[target:]
-        return groups
     finally:domain.cfg=original_cfg

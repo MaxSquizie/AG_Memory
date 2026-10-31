@@ -58,20 +58,13 @@ def attach_tree(frames,tree,region):
     return frames
 
 
-def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof,*,shared_functions=(),owner_choice=None,marker_roles=None,shared_material=None,arity_proof=None):
+def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof,*,shared_functions=(),owner_choice=None,marker_roles=None,shared_material=None,grouping=None):
     refs=[t.token_id for group in groups for t in group]
     from .shared_proposition_material import validate as shared_valid
     if shared_material is not None and kind not in {'OR','XOR'}:return None
     if not shared_valid(state,groups,shared_material):return None
     used=set(refs);markers=[t for t in tokens if t.token_id not in used]
     from .structural_tasks import licensed
-    if arity_proof is not None:
-        from .structural_tasks import licensed_in_scope
-        count_decision=state.decisions.get(arity_proof.get('decision_ref'))
-        if (kind not in {'AND','OR','XOR'} or len(groups)<2
-                or count_decision is None or count_decision.slot_id!='structural_operand_count'
-                or not licensed_in_scope(state,arity_proof,
-                                relation=kind,operand_count=len(groups))):return None
     owner=None
     if kind=='CONTENT':
         if (not owner_choice or len(groups)!=2
@@ -96,6 +89,10 @@ def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof
     # Coverage checks may refine an incomplete proposal. Completion still
     # requires nonempty operands; no probe can license an empty proposition.
     if not groups or any(not group for group in groups):return None
+    if kind in {'AND','OR','XOR'} or grouping is not None:
+        from .direct_partitions import valid as grouping_valid
+        shared=shared_material['collection']['selected_refs'] if shared_material else ()
+        if not grouping_valid(state,grouping,kind,groups,[t.token_id for t in markers],shared):return None
     names=(['parent clause with a content slot', 'content filling that slot'] if kind=='CONTENT' else
            ['condition','outcome when the condition holds','outcome when the condition does not hold'] if kind=='IF_ELSE' else
            ['condition','consequence'] if kind in {'IMPLIES','COUNTERFACTUAL'} else
@@ -127,7 +124,7 @@ def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof
     premise_proofs=list(marker_roles.values())+[s['proof'] for s in shared_functions]
     if owner_choice:premise_proofs.append(owner_choice[1])
     if proof.get('decision_ref'):premise_proofs.append(proof)
-    if arity_proof is not None:premise_proofs.append(arity_proof)
+    if grouping is not None:premise_proofs.append(grouping['completion_proof'])
     if shared_material is not None:
         premise_proofs.extend([shared_material['scope_proof'],*shared_material['collection']['proofs']])
     requirements=tuple(from_proof(state,p) for p in premise_proofs)

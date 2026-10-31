@@ -59,7 +59,7 @@ def test_native_retains_each_member_without_scalar_license_or_write(tmp_path,mon
     assert not any(r.get('slot')=='structural_relation' and r.get('selected')
                    for r in state.syntax_trace if r.get('kind')=='STRUCTURAL_TASK')
     assert all(re.search(r'Decision slot: (\S+)',p).group(1) in
-               {'structural_relation','structural_operand_count'} for p in prompts)
+               {'structural_relation','structural_operand_1_start'} for p in prompts)
 
 
 def test_receipt_rejects_mutation_revision_and_page_retirement(tmp_path,monkeypatch):

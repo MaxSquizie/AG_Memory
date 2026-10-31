@@ -11,9 +11,6 @@ from ah.formalizer.structural_tasks import licensed,licensed_in_scope
 
 def boundaries(slot,prompt):
     if 'Optional search:' in prompt:return '0'
-    if slot=='structural_operand_count':
-        return next((n for n,label in re.findall(r'^(\d+)\. (.*)$',prompt,re.M)
-                     if label.startswith('2 direct content parts')),'0')
     if slot=='structural_partition' or slot=='relation_marker_role':return '1'
     labels=re.findall(r'^(\d+)\. (.*)$',prompt,re.M)
     desired={'structural_operand_1_start':'Start at «Иван»',

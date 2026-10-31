@@ -23,9 +23,9 @@ def main():
     text=' и '.join(['Иван читает']*args.parts)
     def answer(slot,prompt):
         labels=re.findall(r'^(\d+)\. (.*)$',prompt,re.M)
+        if slot=='structural_group_next':
+            return next((n for n,label in labels if label.startswith('Another direct part begins at «Иван»')),'0')
         if 'Optional search:' in prompt:return '0'
-        if slot=='structural_operand_count':
-            return next((n for n,label in labels if label.startswith(str(args.parts)+' direct content parts')),'0')
         if slot=='structural_relation':
             return next((n for n,label in labels if 'One lexical predication' in label),'0')
         if slot in {'structural_partition','relation_marker_role'}:return '1'

@@ -37,7 +37,7 @@ class SelectionPurpose(str, Enum):
 def required_selection_purpose(slot, source_selection=None):
     """Declared consumer obligations, never inferred from question wording."""
     if getattr(source_selection,'operation',None)=='CONTINUE':return SelectionPurpose.NEXT
-    if slot in {'nominal_function','temporal_function','structural_function_owner','nominal_coordination_discovery'}:
+    if slot in {'nominal_function','temporal_function','structural_function_owner','nominal_coordination_discovery','structural_group_next'}:
         return SelectionPurpose.NEXT
     if slot=='structural_partition':return SelectionPurpose.CONFIRM
     return None

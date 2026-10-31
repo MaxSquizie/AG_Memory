@@ -24,7 +24,7 @@ class PartitionProposal:
     shared_functions: tuple = ()
     owner_choice: object = None
     shared_material: object = None
-    arity_proof: object = None
+    grouping: object = None
 
 
 class PartitionDomain:
@@ -53,7 +53,7 @@ class PartitionDomain:
         return {ref for c in self.constraints for ref in c.token_refs}
 
     def span(self,tokens,slot,question,*,marker=False,covered=(),remaining_parts=0,
-             remaining_contiguous=False,must_include=(),**kwargs):
+             remaining_contiguous=False,must_include=(),open_parts=False,**kwargs):
         self.refresh_rejections()
         if self.rejected:
             question+=' Previously rejected COMBINATION for this same relation and source: '+'; '.join(self.rejected)+'. '
@@ -77,7 +77,7 @@ class PartitionDomain:
             words=', '.join('«'+t.span+'» @'+str(t.start) for t in self.tokens if t.token_id in required)
             if marker:
                 question+=' Established ownership: '+words+' belongs to content, so exclude it from the outer relation wording.'
-            elif remaining_parts:
+            elif remaining_parts or open_parts:
                 question+=' Established ownership: '+words+' must belong to SOME content part, not the outer relation wording. '
                 question+='It may belong to this part OR a remaining part; its particular part has not been selected.'
             else:
@@ -108,7 +108,7 @@ class PartitionDomain:
                         run=set()
                     else:run.add(token.token_id)
                 return bool(run) and missing<=run
-            return bool(marker or remaining_parts or required<=selected)
+            return bool(marker or remaining_parts or open_parts or required<=selected)
         return span(self.state,self.release,self.selector,self.region,tokens,self.cfg,slot,question,
                     admissible=complete,partial_admissible=partial,**kwargs)
 
@@ -140,7 +140,7 @@ class PartitionDomain:
                 result=confirm_partition(self.state,self.release,self.selector,self.region,
                     self.tokens,self.cfg,self.kind,proposal.groups,self.proof,
                     shared_functions=proposal.shared_functions,owner_choice=proposal.owner_choice,marker_roles=self.markers,
-                    shared_material=proposal.shared_material,arity_proof=proposal.arity_proof)
+                    shared_material=proposal.shared_material,grouping=proposal.grouping)
                 if on_check:on_check(proposal,result)
                 return proposal,result
             if runtime:

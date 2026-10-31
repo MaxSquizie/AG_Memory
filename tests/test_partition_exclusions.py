@@ -150,12 +150,24 @@ def test_rejection_read_invalidates_partition_cache(tmp_path,monkeypatch):
 def test_different_partition_with_shared_boundary_is_not_excluded(tmp_path,monkeypatch):
     from ah.formalizer import relation_composition
     from test_structural_frontier import SHORT,short_answer
-    original=relation_composition.confirm_partition;checked=[];answers=[]
+    original=relation_composition.confirm_partition;checked=[];answers=[];alternate=False
     def answer(slot,prompt):
+        if alternate and slot in {'structural_operand_1_start','structural_operand_1_end',
+                                   'structural_operand_2_start','structural_operand_2_end'}:
+            import re
+            from ah.formalizer.composition_session import _current
+            tokens=_current.get().area_inputs[1]
+            split=next(i for i,t in enumerate(tokens) if t.span=='и')
+            token={'structural_operand_1_start':tokens[0],'structural_operand_1_end':tokens[split-1],
+                   'structural_operand_2_start':tokens[split+1],'structural_operand_2_end':tokens[-1]}[slot]
+            prefix=('Start at' if slot.endswith('start') else 'End after')+' «'+token.span+'» @'+str(
+                token.start if slot.endswith('start') else token.end)
+            return next((n for n,label in re.findall(r'^(\d+)\. (.*)$',prompt,re.M) if label.startswith(prefix)),'0')
         if slot=='structural_partition':
             answers.append(True);return '0' if len(answers)==1 else '1'
         return short_answer(slot,prompt)
     def confirm(state,*args,**kw):
+        nonlocal alternate
         result=original(state,*args,**kw)
         if args[5]=='AND' and not checked:
             receipt=next(r for r in reversed(state.syntax_trace) if r.get('kind')=='STRUCTURAL_PARTITION_EXCLUSION')
@@ -164,9 +176,20 @@ def test_different_partition_with_shared_boundary_is_not_excluded(tmp_path,monke
             other=[tokens[:split],tokens[split+1:]]
             assert other[0][0].token_id==values[6][0][0].token_id
             assert [[t.token_id for t in g] for g in other]!=receipt['candidate']['proposal']['operands']
-            values[6]=other
-            # Fresh ownership for the new split; the former combination alone is excluded.
-            fresh={**kw,'marker_roles':{}}
+            # A different grouping needs its own boundary and completion proofs;
+            # reusing the old grouping witness must not license moved tokens.
+            from ah.formalizer.partition_domain import PartitionDomain
+            from ah.formalizer.relation_partitions import binary
+            alternate=True
+            try:
+                domain=PartitionDomain(state,values[0],values[1],values[2],tokens,
+                    {**values[4],'_ownership_feedback':'Evaluate another partition with a different assignment of the remaining source.'},
+                    values[5],values[7])
+                proposal=binary(domain)
+            finally:alternate=False
+            assert proposal and proposal.groups==other
+            values[6]=proposal.groups
+            fresh={**kw,'marker_roles':{},'grouping':proposal.grouping}
             accepted=original(state,*values,**fresh)
             assert accepted and live(state,receipt)
             row=next(r for r in reversed(state.syntax_trace) if r.get('kind')=='STRUCTURAL_PARTITION_CANDIDATE')

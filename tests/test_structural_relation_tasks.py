@@ -26,6 +26,9 @@ class Script:
     def generate(self,prompt,**kwargs):
         slot=re.search(r'Decision slot: (\S+)',prompt).group(1)
         self.calls.append((slot,prompt))
+        # Existing fixtures declare all their operands explicitly. If they do
+        # not request another sibling, they reject all remaining starts.
+        if slot=='structural_group_next' and (not self.steps or self.steps[0][0]!=slot):return '0'
         if 'Optional search:' in prompt and (not self.steps or self.steps[0][0]!=slot):return '0'
         if slot==self.selected_slot and (not self.steps or self.steps[0][0]!=slot):return '0'
         if not slot.startswith('structural_') and (not self.steps or self.steps[0][0]!=slot):return self.default
@@ -47,8 +50,6 @@ class Script:
             if value in RELATIONS:value=RELATIONS[value]
             elif value=='INDEPENDENT':value='No agreement governor:'
             elif value=='RELATION_ONLY':value='Relation wording «'
-            elif slot=='structural_operand_count' and value.startswith('PARTS_'):
-                value=value.removeprefix('PARTS_')+' direct content parts'
             elif value=='PARTITION' and len(labels)==1:
                 value=next(iter(labels.values()))
             elif slot=='structural_content_role' and ':' in value:
@@ -75,11 +76,7 @@ def run(tmp_path,monkeypatch,text,steps,kind='ASSERTION',default='1',observer_co
     return result,script
 
 
-def relation(kind,*,count=2):
-    # These scripted scenarios declare the group size; production never defaults
-    # an unknown count to two. Explicit n-ary cases pass their own count.
-    return [('structural_relation',kind)]+(
-        [('structural_operand_count','PARTS_'+str(count))] if kind in {'AND','OR','XOR'} else [])
+def relation(kind):return [('structural_relation',kind)]
 
 
 def bounds(slot,first,last):
