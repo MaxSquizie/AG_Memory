@@ -8,6 +8,9 @@ def observe(state,kind,value,expected=True):
 
 
 def valid(state,kind,value):
+    if kind=='PARTITION_EXCLUSION':
+        from .partition_exclusions import live
+        return live(state,value)
     if kind=='CONDITIONAL_PROOF':
         from .structural_conditions import historical
         from .structural_tasks import _licensed

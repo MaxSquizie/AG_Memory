@@ -175,11 +175,20 @@ class StructuralFrontier:
         return snapshot
 
     def snapshot(self):
+        from .partition_exclusions import live as exclusion_live
+        def exclusions(job):
+            refs=set()
+            for result in job['results']:
+                local=evidence_state(job['state'],result,read_only=True)
+                refs.update(r['candidate']['combination_ref'] for r in result['evidence']['trace']
+                    if r.get('kind')=='STRUCTURAL_PARTITION_EXCLUSION' and exclusion_live(local,r))
+            return sorted(refs) if job['status']!='STALE' else []
         return {'generation_ref':self.generation_ref,'window_depth':3,'structure_complete':False,'write_eligible':False,
             'jobs':[{'job_ref':j['job_ref'],'depth':j['depth'],'status':j['status'],
                 'parent_shell_ref':j['parent_shell']['shell_ref'] if j['parent_shell'] else None,
                 'condition_ref':j['parent_shell']['condition']['condition_ref'] if j['parent_shell'] else None,
                 'token_refs':[t.token_id for t in j['tokens']], 'input_slot':canonical(j['request']),
+                'excluded_combination_refs':exclusions(j),
                 'result_refs':[r['shell_ref'] for r in j['results'] if live(j['state'],r)] if j['status']!='STALE' else []}
                 for j in order(self.jobs.values())]}
 

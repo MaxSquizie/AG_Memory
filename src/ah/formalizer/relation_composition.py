@@ -82,6 +82,7 @@ def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof
     punctuation_refs={t.token_id for t in punctuation}
     links=[t for t in markers if t.token_id not in punctuation_refs]
     from .relation_markers import confirm
+    if marker_roles is None:marker_roles={}
     checked=confirm(state,release,selector,region,cfg,kind,links,groups,established=marker_roles,owner=owner)
     if isinstance(checked,ContentRequired):return checked
     if not checked:return None
@@ -106,21 +107,22 @@ def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof
     if owner:option.update(owner_ref=owner.token_id,owner_proof=owner_choice[1])
     from .composition_session import current
     runtime=current(state)
-    proposal_signature=digest([state.source_uid,state.interpretation_version,region.region_id,
-        runtime.input_signature() if runtime else None,runtime.context_signature() if runtime else None,
-        state.text,[{k:v for k,v in option.items() if k not in {'relation_proof','owner_proof'}}]])
-    prior=next((r for r in reversed(state.syntax_trace)
-        if r.get('kind')=='COMPOSITION_OBLIGATION_FAILURE' and r.get('category')=='PARTITION_REJECTED'
-        and r.get('witness',{}).get('proposal_signature')==proposal_signature),None)
+    from .partition_exclusions import address,offer,find,record as record_exclusion
+    candidate=offer(state,region,tokens,cfg,option)
+    prior=find(state,candidate)
     if prior:
         state.syntax_trace.append({'kind':'STRUCTURAL_REVISION_STALLED','region_ref':region.region_id,
-            'source_range':list(region.source_range),'repeated_failure_ref':prior['failure_ref'],
+            'source_range':list(region.source_range),'exclusion_ref':prior['exclusion_ref'],'combination_ref':candidate['combination_ref'],
             'reason':'SAME_REJECTED_PARTITION_WITH_UNCHANGED_INPUT'})
         state.diag('STRUCTURAL_REVISION_NO_PROGRESS',region.region_id)
         return None
     from .probe_prerequisites import from_proof
-    shared_requirements=() if shared_material is None else tuple(from_proof(state,p) for p in
-        [shared_material['scope_proof'],*shared_material['collection']['proofs']])
+    premise_proofs=list(marker_roles.values())+[s['proof'] for s in shared_functions]
+    if owner_choice:premise_proofs.append(owner_choice[1])
+    if proof.get('decision_ref'):premise_proofs.append(proof)
+    if shared_material is not None:
+        premise_proofs.extend([shared_material['scope_proof'],*shared_material['collection']['proofs']])
+    requirements=tuple(from_proof(state,p) for p in premise_proofs)
     validation_begin=len(state.syntax_trace)
     result=choose(state,release,selector,region,cfg,'structural_partition',[option],
         ('Shared source wording deliberately appears inside each alternative; this does not assert the alternatives jointly. ' if shared_material else '')+
@@ -138,7 +140,7 @@ def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof
         'Outer relation words may be separated in the source; they are not a new sentence. '
         'Choose the proposed application if it connects the right contents. '
         'Answer 0 if the relation or the assignment of its contents is wrong, or ? if the source does not decide. '
-        'This choice does not resolve dictionary meanings or validate the internal parse of each part.',purpose=SelectionPurpose.CONFIRM,prerequisites=shared_requirements)
+        'This choice does not resolve dictionary meanings or validate the internal parse of each part.',purpose=SelectionPurpose.CONFIRM,prerequisites=requirements)
     if result is None:
         rejected=next((r for r in reversed(state.syntax_trace[validation_begin:])
             if r.get('kind')=='TASK_DOMAIN' and r.get('slot')=='structural_partition'
@@ -146,13 +148,15 @@ def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof
             and r.get('enumeration_complete') is True
             and r.get('candidate_ids')==['PARTITION']
             and r.get('selection_purpose')==SelectionPurpose.CONFIRM.value),None)
-        if rejected:
+        unchanged=address(state,region,tokens,cfg,option)['combination_ref']==candidate['combination_ref']
+        exclusion=record_exclusion(state,candidate,rejected) if rejected and unchanged else None
+        if exclusion:
             from .composition_contracts import record_failure
             record_failure(state,region,'PARTITION_REJECTED',proof,
                 'The proposed source split was explicitly rejected. This rejects this split only; '
                 'it does not reject every split or the outer relation.',
                 {'proposal':option,'rejection_domain_ref':rejected['task_ref'],
-                 'proposal_signature':proposal_signature},search_complete=False)
+                 'combination_ref':candidate['combination_ref'],'exclusion_ref':exclusion['exclusion_ref']},search_complete=False)
     return ([t for t in tokens if t in markers or t.token_id in shared_refs],result[1]) if result else None
 
 

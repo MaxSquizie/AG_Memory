@@ -85,7 +85,10 @@ def produce(state,release,selector,region,tokens,cfg,request,forest):
             'obligations':[{'kind':'PARTITION_DOMAIN_UNENUMERATED'}]}
         if selected:
             proposal,partition=selected
-            row.update(status='SHELL_PRODUCED',partition_proof=deepcopy(partition[1]),
+            selected_row=next(r for r in reversed(local.syntax_trace) if r.get('kind')=='STRUCTURAL_TASK'
+                and r.get('decision_ref')==partition[1]['decision_ref'])
+            combination=next(v['combination_ref'] for v in selected_row['alternatives'] if v['candidate_id']=='PARTITION')
+            row.update(status='SHELL_PRODUCED',combination_ref=combination,partition_proof=deepcopy(partition[1]),
                 marker_refs=[t.token_id for t in partition[0]],shared_material=deepcopy(proposal.shared_material))
             slot=request or InputSlot()
             slot=replace(slot,surrounding_relations=(*slot.surrounding_relations,kind))
@@ -163,5 +166,6 @@ def _live(state,shell):
     if not _licensed(local,shell['partition_proof'],_branch=shell['condition'],relation=shell['relation']):return False
     # The partition's selected payload must match every materialized child slot.
     return _licensed(local,shell['partition_proof'],_branch=shell['condition'],
+        combination_ref=shell.get('combination_ref'),
         operands=[c['token_refs'] for c in shell['children']],marker_refs=shell['marker_refs'],
         shared_material=shell['shared_material'])

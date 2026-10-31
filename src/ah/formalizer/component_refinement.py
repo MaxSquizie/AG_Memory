@@ -211,6 +211,18 @@ def _compose_area(state, release, selector, region, tokens, cfg, depth=0, attach
                 supersede(state,key,replacement)
                 if runtime and 'probe:'+key in runtime.dispatcher.nodes:
                     runtime.dispatcher.invalidate('probe:'+key,'STRUCTURAL_HYPOTHESIS_REVISED')
+            # Rejections travel only through the live addressed receipt channel.
+            # Historical revision text must not turn a retired refusal back into
+            # a current constraint in relation or morphology questions.
+            history=json.loads(constraints)
+            history['failures']=[f for f in failures if f['category']!='PARTITION_REJECTED']
+            constraints=json.dumps(history,ensure_ascii=False,sort_keys=True)
+            constraint_text='Tried: '+'; '.join(dict.fromkeys(selected_descriptions))+'. No complete parse was built.'
+            if history['failures']:
+                constraint_text+=' Other obligations: '+'; '.join(f['explanation'] for f in history['failures'])
+            if uncovered:
+                constraint_text+=' Uncovered words: «'+' '.join(t.span for t in tokens if t.token_id in uncovered)+'».'
+            constraint_text+=' This history does not exclude any partition. Only separately supplied live evidence can exclude a combination.'
             del state.diagnostics[diagnostics_begin:]
             cfg={**cfg,'_task_constraints':constraints,'_task_constraints_text':constraint_text,
                  '_partition_rejections':[f for f in failures if f['category']=='PARTITION_REJECTED']}

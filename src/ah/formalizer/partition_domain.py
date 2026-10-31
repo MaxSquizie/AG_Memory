@@ -37,14 +37,15 @@ class PartitionDomain:
         # A rejected combination is relevant to its own boundary producer, but
         # proves no individual boundary wrong. Do not leak it into other
         # relations, child regions or unrelated lexical questions.
-        owned={t.token_id for t in tokens}
         self.rejected=[]
-        for failure in cfg.get('_partition_rejections',()):
-            proposal=failure.get('witness',{}).get('proposal',{})
-            covered={r for group in proposal.get('operands',()) for r in group}|set(proposal.get('marker_refs',()))
-            if (failure.get('category')=='PARTITION_REJECTED' and failure.get('region_ref')==region.region_id
-                    and proposal.get('relation')==kind and covered==owned):
-                self.rejected.append(proposal['label'])
+
+    def refresh_rejections(self):
+        from .partition_exclusions import failure_receipt,applicable
+        self.rejected=[]
+        for failure in self.cfg.get('_partition_rejections',()):
+            receipt=failure_receipt(self.state,failure)
+            if receipt and applicable(self.state,receipt,self.region,self.tokens,self.cfg,self.kind):
+                self.rejected.append(receipt['candidate']['offered_payload']['label'])
 
     @property
     def required(self):
@@ -52,6 +53,7 @@ class PartitionDomain:
 
     def span(self,tokens,slot,question,*,marker=False,covered=(),remaining_parts=0,
              remaining_contiguous=False,must_include=(),**kwargs):
+        self.refresh_rejections()
         if self.rejected:
             question+=' Previously rejected COMBINATION for this same relation and source: '+'; '.join(self.rejected)+'. '
             question+='The complete assignment was rejected, not each boundary separately. '
@@ -123,6 +125,7 @@ class PartitionDomain:
         while True:
             trace_begin=len(self.state.syntax_trace)
             def compute():
+                self.refresh_rejections()
                 from .partition_role_revision import read_proof
                 if self.owner_choice and not read_proof(self.state,self.owner_choice[1],owner_ref=self.owner_choice[0]['owner_ref']):return None
                 if not all(read_proof(self.state,c.proof) for c in self.constraints if c.proof):return None

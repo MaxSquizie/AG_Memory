@@ -73,12 +73,14 @@ def record_failure(state,region,category,owner_proof,explanation,witness,*,searc
 
 
 def conflicts(state,region,begin):
+    from .partition_exclusions import failure_live
     from .structural_tasks import licensed
     return [row for row in state.syntax_trace[begin:]
             if row.get('kind')=='COMPOSITION_OBLIGATION_FAILURE'
             and row.get('region_ref')==region.region_id
             and row.get('category') in {'HYPOTHESIS_CONFLICT','PARTITION_REJECTED','PRODUCER_UNSUPPORTED'}
             and licensed(state,row.get('owner_proof'))
+            and (row.get('category')!='PARTITION_REJECTED' or failure_live(state,row))
             and (row.get('category')!='PRODUCER_UNSUPPORTED'
                  or licensed(state,row.get('witness',{}).get('capability_proof')))]
 
