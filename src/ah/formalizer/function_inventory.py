@@ -18,6 +18,8 @@ def identity(state,kind,tokens,constraints=None):
     signature=digest([source_basis(state),refs,constraints,runtime.input_signature() if runtime else None,
                       runtime.context_signature() if runtime else None,
                       runtime.domain_feedback if runtime else None])
+    condition=execution_condition(state)
+    if condition is not None:signature=digest([signature,condition])
     return kind,refs,signature
 
 
@@ -36,8 +38,18 @@ def unit_hash(row):
     return digest({k:v for k,v in row.items() if k!='superseded'})
 
 
-def live(state,row):
-    from .structural_tasks import licensed
+def live(state,row,*,condition=None):
+    from .structural_tasks import _licensed,licensed as scalar_licensed
+    def licensed(state,proof):
+        if condition is None:return scalar_licensed(state,proof)
+        result=_licensed(state,proof,_branch=condition)
+        from .dispatch_evidence import observe
+        observe(state,'CONDITIONAL_PROOF',{'proof':proof,'condition':condition,'expected_payload':{}},result)
+        return result
+    required=row.get('branch_condition')
+    if required is not None:
+        from .structural_conditions import allows
+        if condition is None or not allows(state,required,condition):return False
     if (not completed(row) or row.get('source_basis')!=source_basis(state)
             or 'inventory_ref' not in row or 'unit_hashes' not in row):return False
     units={r['unit_ref']:unit_hash(r) for r in state.syntax_trace
@@ -48,14 +60,15 @@ def live(state,row):
 def current(state,kind,tokens,constraints=None,*,require=False):
     kind,refs,signature=identity(state,kind,tokens,constraints)
     previous=[r for r in state.syntax_trace if r.get('inventory_kind')==kind and r.get('inventory_tokens')==list(refs)]
-    match=next((r for r in reversed(previous) if r.get('inventory_signature')==signature and live(state,r)),None)
+    condition=execution_condition(state)
+    match=next((r for r in reversed(previous) if r.get('inventory_signature')==signature and live(state,r,condition=condition)),None)
     from .dispatch_evidence import observe
-    observe(state,'INVENTORY_QUERY',{'kind':kind,'refs':list(refs),'signature':signature},match is not None)
+    observe(state,'INVENTORY_QUERY',{'kind':kind,'refs':list(refs),'signature':signature,'condition':condition},match is not None)
     if match is None and require and previous:
         raise InventoryUnavailable(kind+': function inventory inputs or dependencies changed')
     if match is not None:
         from .dispatch_evidence import observe
-        observe(state,'INVENTORY',match['inventory_ref'])
+        observe(state,'INVENTORY',{'inventory_ref':match['inventory_ref'],'condition':condition})
     return match
 
 
@@ -65,11 +78,14 @@ def begin(state,kind,tokens,constraints=None):
     previous=[r for r in state.syntax_trace if r.get('inventory_kind')==kind and r.get('inventory_tokens')==list(refs)]
     for row in previous:row['superseded']=True
     return {'inventory_kind':kind,'inventory_tokens':list(refs),'inventory_signature':signature,
+        'branch_condition':execution_condition(state),
         'source_basis':source_basis(state),'inventory_ref':'inventory:'+digest([kind,refs,signature,len(previous)])}
 
 
 def complete(state,metadata,completion_proof=None):
-    from .structural_tasks import licensed
+    from .structural_tasks import licensed_in_scope as licensed
+    if metadata.get('branch_condition')!=execution_condition(state):
+        state.diag('FUNCTION_INVENTORY_UNRESOLVED','condition changed during inventory preparation');return False
     if metadata.get('source_basis')!=source_basis(state):
         state.diag('FUNCTION_INVENTORY_UNRESOLVED','source changed during inventory preparation');return False
     units=[r for r in state.syntax_trace if r.get('inventory_ref')==metadata['inventory_ref']
@@ -90,18 +106,19 @@ def complete(state,metadata,completion_proof=None):
     return True
 
 
-def unit_live(state,unit):
+def unit_live(state,unit,*,scoped=False):
+    condition=execution_condition(state) if scoped else None
     if not active(unit) or not unit.get('inventory_ref'):return False
     receipt=next((r for r in reversed(state.syntax_trace) if r.get('inventory_ref')==unit['inventory_ref'] and completed(r)),None)
-    usable=bool(receipt and live(state,receipt) and receipt['unit_hashes'].get(unit.get('unit_ref'))==unit_hash(unit))
+    usable=bool(receipt and live(state,receipt,condition=condition) and receipt['unit_hashes'].get(unit.get('unit_ref'))==unit_hash(unit))
     if usable:
         from .dispatch_evidence import observe
-        observe(state,'INVENTORY',receipt['inventory_ref'])
+        observe(state,'INVENTORY',{'inventory_ref':receipt['inventory_ref'],'condition':condition})
     return usable
 
 
 def require_unit(state,unit):
-    if not unit_live(state,unit):raise InventoryUnavailable('function snapshot is no longer licensed')
+    if not unit_live(state,unit,scoped=True):raise InventoryUnavailable('function snapshot is no longer licensed')
 
 
 def attach(state,tokens,cfg,frames):
@@ -125,3 +142,9 @@ def frame_live(state,frame):
         observe(state,'INVENTORY',ref,usable)
         if not usable:return False
     return all(unit_live(state,u) for u in frame.semantic.get('temporal_functions',()))
+
+
+def execution_condition(state):
+    from .structural_conditions import active
+    condition=active(state)
+    return condition.record() if condition else None

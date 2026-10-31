@@ -51,7 +51,7 @@ def units(state, token_refs=None):
     allowed = set(token_refs) if token_refs is not None else None
     found = {}
     for row in state.syntax_trace:
-        if row.get('kind') == 'TEMPORAL_FUNCTION' and not row.get('superseded') and (allowed is None or set(row['token_refs']) <= allowed) and unit_live(state,row):
+        if row.get('kind') == 'TEMPORAL_FUNCTION' and not row.get('superseded') and (allowed is None or set(row['token_refs']) <= allowed) and unit_live(state,row,scoped=True):
             found[tuple(row['token_refs'])] = row
     return list(found.values())
 
@@ -63,7 +63,7 @@ def owned_refs(state, tokens=None):
 
 def normalize(state, release, row):
     from .function_inventory import unit_live
-    if not unit_live(state,row):return None,['FUNCTION_INVENTORY_UNRESOLVED']
+    if not unit_live(state,row,scoped=True):return None,['FUNCTION_INVENTORY_UNRESOLVED']
     from .native_frontend import _temporal
     refs = set(row['token_refs'])
     lo, hi = row['source_range']

@@ -7,7 +7,7 @@ from .structural_shells import produce,live,evidence_state
 from .structural_relations import CONTRACTS,child_request
 from time import perf_counter
 
-REGISTRIES=('structural_condition_registry','structural_condition_evidence','structural_shell_registry')
+REGISTRIES=('structural_condition_registry','structural_condition_evidence','structural_shell_registry','structural_lexical_results')
 RESOURCE_CODES={'COMPOSITION_DISPATCH_INCOMPLETE','COMPUTATION_LIMIT','STRUCTURAL_TASK_SEARCH_INCOMPLETE'}
 
 
@@ -193,9 +193,16 @@ class StructuralFrontier:
                         if job['forest'] is not None:
                             job['results']=produce(state,runtime.release,runtime.selector,job['region'],
                                 job['tokens'],job['cfg'],job['request'],job['forest'])
+                            from .structural_lexical import produce as produce_lexical
+                            job['lexical_results']=produce_lexical(state,runtime.release,runtime.selector,job['region'],
+                                job['tokens'],job['cfg'],job['request'],job['forest'])
                 codes={d.code for d in state.diagnostics[diag_begin:]}
                 codes.update(d['code'] for r in job['results'] for d in r['evidence']['diagnostics'])
-                if codes & RESOURCE_CODES:job['status']='PENDING_RESOURCE'
+                lexical_sources=[s for r in job.get('lexical_results',()) for s in r['sources']]
+                codes.update(d['code'] for s in lexical_sources for d in s['diagnostics'])
+                lexical_resource=any(o['kind']=='RESOURCE_PENDING' for s in lexical_sources for o in s['obligations'])
+                if codes & RESOURCE_CODES or lexical_resource:job['status']='PENDING_RESOURCE'
+                elif job.get('lexical_results') and not job['results']:job['status']='PENDING_EVIDENCE'
                 elif job['results'] and any(r['status']=='SHELL_PRODUCED' for r in job['results']):job['status']='PRODUCED'
                 elif job['forest'] and all(h['candidate']['relation'] not in CONTRACTS for h in job['forest']['hypotheses']):
                     job['status']='PENDING_CAPABILITY'
@@ -238,6 +245,7 @@ class StructuralFrontier:
                 'condition_ref':j['parent_shell']['condition']['condition_ref'] if j['parent_shell'] else None,
                 'token_refs':[t.token_id for t in j['tokens']], 'input_slot':canonical(j['request']),
                 'excluded_combination_refs':exclusions(j),
+                'lexical_result_refs':[r['result_ref'] for r in j.get('lexical_results',())] if j['status']!='STALE' else [],
                 'result_refs':[r['shell_ref'] for r in j['results'] if live(j['state'],r)] if j['status']!='STALE' else []}
                 for j in order(self.jobs.values())]}
 

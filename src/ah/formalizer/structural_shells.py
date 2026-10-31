@@ -25,6 +25,7 @@ def produce(state,release,selector,region,tokens,cfg,request,forest):
     # shared; conditional choices, revisions, diagnostics and frames cannot leak.
     for hypothesis in execution_order(forest):
         kind=hypothesis['candidate']['relation']
+        if kind=='LEXICAL':continue  # Separate conditional lexical result contract.
         if kind not in CONTRACTS:
             state.syntax_trace.append({'kind':'STRUCTURAL_SHELL_PENDING',
                 'hypothesis_ref':hypothesis['hypothesis_ref'],'reason':'RELATION_PRODUCER_NOT_CONNECTED',

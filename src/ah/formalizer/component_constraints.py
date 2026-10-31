@@ -48,7 +48,7 @@ def compatible_bundle(state,region,bundle):
     for row in state.syntax_trace:
         if (row.get('kind')!='ESTABLISHED_PREDICATE_ROLE' or row['region_ref']!=region.region_id
                 or row['task_scope']!=scope):continue
-        from .structural_tasks import licensed
+        from .structural_tasks import licensed_in_scope as licensed
         if not licensed(state,row['proof'],predicate_ref=row['predicate_ref'],token_ref=row['token_ref']):return False
         if not frames[row['predicate_ref']]:return False
         expected=row['role']
@@ -113,7 +113,7 @@ def frame_hosts_live(state,frame):
             and all(host_live(state,r) for r in frame.semantic.get('nominal_host_evidence',())))
 
 
-def constraint_signature(state,region_ref,scope):
+def constraint_signature(state,region_ref,scope,condition=None):
     """Membership and liveness of obligations, including the initially empty set.
 
     The query is addressed to one area/input hypothesis. No constraint crosses
@@ -121,7 +121,7 @@ def constraint_signature(state,region_ref,scope):
     """
     from .canonical_ledger import digest
     from .composition_dispatcher import canonical
-    from .structural_tasks import licensed
+    from .structural_tasks import _licensed
     from .partial_readings import valid_domain
     records=[]
     for row in state.syntax_trace:
@@ -129,7 +129,7 @@ def constraint_signature(state,region_ref,scope):
         if (kind not in {'ESTABLISHED_PREDICATE_ROLE','PARTIAL_READING_DOMAIN','NOMINAL_HOST_QUESTION'}
                 or row.get('region_ref')!=region_ref or row.get('task_scope')!=scope):continue
         if kind=='ESTABLISHED_PREDICATE_ROLE':
-            live=licensed(state,row['proof'],predicate_ref=row['predicate_ref'],token_ref=row['token_ref'])
+            live=_licensed(state,row['proof'],_branch=condition,predicate_ref=row['predicate_ref'],token_ref=row['token_ref'])
         elif kind=='PARTIAL_READING_DOMAIN':live=valid_domain(state,row)
         else:live=host_live(state,row)
         records.append([row,live])
@@ -141,8 +141,10 @@ def observe_constraints(state,region):
     runtime=current(state)
     if runtime is None:return
     scope=runtime.input_signature()
+    from .function_inventory import execution_condition
+    condition=execution_condition(state)
     runtime.dispatcher.observe('CONSTRAINT_SET',{'region_ref':region.region_id,'task_scope':scope,
-        'signature':constraint_signature(state,region.region_id,scope)})
+        'condition':condition,'signature':constraint_signature(state,region.region_id,scope,condition)})
 
 
 def accepts_bundle(state,region,tokens,bundle):

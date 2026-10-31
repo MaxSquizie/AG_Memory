@@ -25,7 +25,7 @@ class CompositionSession:
         self.selector,self.morph=selector,morph
         self.original={e.token_id:deepcopy(e) for e in state.evidence}
         self.area_inputs=None;self.morphology_scope=None;self.domain_feedback=None
-        self.structural_shell_tasks={};self.structural_frontiers={}
+        self.structural_shell_tasks={};self.structural_lexical_tasks={};self.structural_frontiers={}
         self.tasks.capture_context=self.capture_context
         self.tasks.restore_context=self.restore_context
         from .composition_sources import CompositionSources

@@ -45,3 +45,7 @@ def reopen(runtime):
     for task in runtime.structural_shell_tasks.values():
         if task.get('result') and task['result']['status']=='OPEN':
             reopen(task['runtime']);task['diagnostics_begin']=len(task['state'].diagnostics)
+    for task in getattr(runtime,'structural_lexical_tasks',{}).values():
+        if any(not source['execution_complete'] or any(d['code'] in RESOURCE_CODES for d in source['diagnostics'])
+               for source in task['sources'].values()):
+            reopen(task['runtime']);task['diagnostics_begin']=len(task['state'].diagnostics)

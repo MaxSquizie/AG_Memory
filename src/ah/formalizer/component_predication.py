@@ -129,6 +129,17 @@ def _compose_alternatives(state, release, selector, region, tokens, predicates, 
     # source interpretation. Each complete choice includes every child frame.
     from .partial_readings import bundles as common_readings
     reading_domains=common_readings(state,region,complete)
+    if cfg.get('_retain_lexical_bundles'):
+        # A conditional producer retains alternatives; it does not decide a
+        # scalar winner or invent a semantic OR between interpretations.
+        for bundle in bundles:
+            for frame in bundle:
+                frame.semantic['composition_bundle_root']=bundle[-1].frame_id
+            bundle[-1].semantic['lexical_bundle']={
+                'frame_refs':[f.frame_id for f in bundle],
+                'candidate_complete':bundle in complete,
+                'reading_domains':reading_domains}
+        return frames
     needs_probe = len(bundles) > 1 or any(f.semantic['requires_attachment_probe'] for f in frames)
     chosen = complete[0][-1].frame_id if len(complete) == 1 and not needs_probe else None
     from .component_source import view

@@ -23,20 +23,24 @@ def valid(state,kind,value):
         from .refinement_host_proof import live
         return live(state,value)
     if kind=='CONSTRAINT_SET':
+        from .structural_conditions import historical
+        if value.get('condition') is not None and not historical(state,value['condition']):return False
         from .component_constraints import constraint_signature
-        return constraint_signature(state,value['region_ref'],value['task_scope'])==value['signature']
+        return constraint_signature(state,value['region_ref'],value['task_scope'],value.get('condition'))==value['signature']
     if kind=='PROOF':
         from .structural_tasks import licensed
         return licensed(state,value['proof'],**value['expected_payload'])
     if kind=='INVENTORY_QUERY':
         from .function_inventory import live
         return any(r.get('inventory_kind')==value['kind'] and r.get('inventory_tokens')==value['refs']
-            and r.get('inventory_signature')==value['signature'] and live(state,r) for r in state.syntax_trace)
+            and r.get('inventory_signature')==value['signature'] and live(state,r,condition=value.get('condition')) for r in state.syntax_trace)
     if kind=='INVENTORY':
         from .function_inventory import live
+        ref=value.get('inventory_ref') if isinstance(value,dict) else value
+        condition=value.get('condition') if isinstance(value,dict) else None
         row=next((r for r in reversed(state.syntax_trace) if r.get('kind')=='FUNCTION_INVENTORY'
-            and r.get('inventory_ref')==value),None)
-        return row is not None and live(state,row)
+            and r.get('inventory_ref')==ref),None)
+        return row is not None and live(state,row,condition=condition)
     if kind=='NOMINAL_HOST':
         from .component_constraints import host_live
         return host_live(state,value)
@@ -61,6 +65,27 @@ def evidence_probe_refs(state,kind,value):
     if kind in {'PROOF','CONDITIONAL_PROOF'}:
         pending.append(('proof',value.get('proof')))
         if kind=='CONDITIONAL_PROOF':pending.append(('condition',value.get('condition')))
+    elif kind in {'INVENTORY','INVENTORY_QUERY'}:
+        condition=value.get('condition') if isinstance(value,dict) else None
+        pending.append(('condition',condition))
+        if kind=='INVENTORY':
+            ref=value.get('inventory_ref') if isinstance(value,dict) else value
+            records=[r for r in state.syntax_trace if r.get('kind')=='FUNCTION_INVENTORY'
+                     and r.get('inventory_ref')==ref]
+        else:
+            records=[r for r in state.syntax_trace if r.get('kind')=='FUNCTION_INVENTORY'
+                     and r.get('inventory_kind')==value['kind'] and r.get('inventory_tokens')==value['refs']
+                     and r.get('inventory_signature')==value['signature']]
+        for row in records:
+            pending.extend(('proof',p) for p in row.get('proofs',()))
+            pending.append(('condition',row.get('branch_condition')))
+    elif kind=='CONSTRAINT_SET':
+        pending.append(('condition',value.get('condition')))
+        for row in state.syntax_trace:
+            if row.get('region_ref')!=value['region_ref'] or row.get('task_scope')!=value['task_scope']:continue
+            if row.get('kind')=='ESTABLISHED_PREDICATE_ROLE':pending.append(('proof',row.get('proof')))
+            elif row.get('kind')=='PARTIAL_READING_DOMAIN':pending.append(('proof',row))
+            elif row.get('kind')=='NOMINAL_HOST_QUESTION' and row.get('decision_ref'):refs.add(row['decision_ref'])
     elif kind=='READING_DOMAIN':pending.append(('proof',value))
     elif kind=='STRUCTURAL_FOREST':pending.append(('proof',value.get('membership')))
     elif kind=='PARTITION_EXCLUSION':

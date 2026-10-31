@@ -1036,3 +1036,55 @@ missing-parent, current-generation, BFS и local-resource guards; финальн
 без скрытого рекурсивного обхода и с зависимыми дочерними задачами; затем специальные
 отношения, альтернативные boundaries/NEXT, владельцы, binder/reference domains,
 источники и publication gate. Схемы повторения и арифметические кванторы — DEFER.
+
+
+## 2026-10-31 — OF2.2-L, приватные лексические источники и граница дочерней композиции
+
+Выделен общий lexical_component из boundary=None пути component_refinement.
+Обычный singleton путь использует тот же алгоритм. Conditional producer отдельно
+вызывает grammar reuse/project и component производство; неоднозначные component
+bundles сохраняются до scalar selection, без семантического OR. Источники независимы:
+child demand компонентного пути не уничтожает произведённый grammar вариант.
+
+lexical_demands перехватывает compose_area до morphology/project/area/dispatcher.
+Снимок содержит точные source refs, InputSlot, attachment/controller, cfg, condition,
+context и parent feedback; приватная task хранит исходные типизированные tokens с
+variants и полную invocation. Это PENDING_SCHEDULER, а не исполненный ребёнок.
+
+structural_lexical хранит отдельные результаты, не фиктивные relation shells.
+Каждый источник имеет frames/bundles, diagnostics/obligations, execution_complete;
+producer_complete/structure_complete/write_eligible остаются false. Полнота источника
+не выводится из пустоты, cardinality, успешного return или отсутствия diagnostics.
+Все результаты PENDING_VALIDATION; исторический validator и передача child demands
+в frontier ещё не реализованы. Source snapshot не служит completion cache.
+
+Согласованы scoped execution reads для inventories nominal/temporal функций и
+установленных ролей. Inventory хранит branch_condition; live с явной condition
+проверяет цепочку даже при пустом наборе proofs, а default/public live отвергает
+условный receipt. Cache observations хранят explicit condition, включая пустой
+constraint set; aggregate dependency traversal сохраняет адреса proofs и ancestry.
+Публичный frame_live и обычный licensed не расширены до условных утверждений.
+
+Resource exception lexical source теперь даёт frontier PENDING_RESOURCE;
+повторный запуск после изменения ресурса reopen-ит private dispatcher.
+Reviewer выявил и проверил исправления resource propagation, точной invocation,
+пустых условных inventories, подписок кеша и пустого scoped constraint set.
+
+Проверки выполняются с реальным native pipeline и сценарными ответами, без live LLM.
+AND/OR root достигает четырёх приватных lexical результатов с grammar и component
+frames. Инфинитив останавливается на точном дочернем запросе без скрытого запуска.
+NOT цепочка проходит разрешённое окно до уровня 5 и lexical frames. AH отсутствуют.
+Старая test_infinitive_producer_remains_available_inside_reported_content падает
+на текущем дереве и на отдельном неизменённом c263463: ожидает старые component_attachment
+слоты Infinitive area/контроль вместо текущего протокола. Эталон не изменён; этот
+прогон не засчитан как успех или новая регрессия.
+
+Остаток OF2.2-L: историческая проверка происхождения frames/bundles и зависимостей;
+явные состояния conflict/unknown/stale; законченный source cache/resume и задачи
+детей в общем frontier; остальные scoped lexical consumers; parent slot constraints.
+Далее специальные relation producers и остальные блоки F05_STATUS. Все шесть
+блоков F05 остаются открытыми. DEFER схем повторения и арифметических кванторов сохранён.
+
+Финальный целевой пакет: 25 passed in 62.67s (structural_lexical, open_forest,
+windows, native all-source union, четыре scalar action-description маршрута).
+compileall и git diff --check прошли. Остальные suites не запускались.

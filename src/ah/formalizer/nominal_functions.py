@@ -15,7 +15,7 @@ def rows(state,tokens,kind=None):
     unique={}
     for row in state.syntax_trace:
         if (row.get('kind')=='NOMINAL_FUNCTION' and not row.get('superseded') and set(row['anchor_refs'])<=allowed
-                and (kind is None or row['function']==kind) and unit_live(state,row)):
+                and (kind is None or row['function']==kind) and unit_live(state,row,scoped=True)):
             unique[row['unit_ref']]=row
     return list(unique.values())
 

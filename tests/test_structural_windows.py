@@ -33,7 +33,8 @@ def test_native_window_continues_not_chain_with_unknown_sibling(tmp_path,monkeyp
     assert snapshot['windows'] and snapshot['windows'][0]['first_depth']==4
     assert snapshot['windows'][0]['last_depth']==6
     assert snapshot['cost']['constraint_checks'] and snapshot['cost']['production_seconds']>0
-    assert any(r.get('reason')=='RELATION_PRODUCER_NOT_CONNECTED' for r in state.syntax_trace)
+    assert state.observation.get('structural_lexical_results')
+    assert all(not r['structure_complete'] for r in state.observation['structural_lexical_results'].values())
     assert not result['assertions']['ah'] and not snapshot['structure_complete']
 
 
