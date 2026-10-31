@@ -219,7 +219,7 @@ def child(state,release,selector,region,tokens,cfg,compose,request,contract):
     return frames,root
 
 
-def compose(state,release,selector,region,tokens,cfg,request,compose_child):
+def select_relation(state,release,selector,region,tokens,cfg,request):
     if request and request.output_sort=='EVENT_DESCRIPTION':return None
     from .composition_session import current
     runtime=current(state)
@@ -250,13 +250,21 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child):
         'The full content option requires both the parent predicate and dependent content to be present in this text. '
         'A reference to content or an omitted but understood content uses the content-reference option; an omitted participant alone does not. '
         'Numeric quantification is deferred.')
+    return result
+
+
+def compose(state,release,selector,region,tokens,cfg,request,compose_child):
+    if request and request.output_sort=='EVENT_DESCRIPTION':return None
+    result=select_relation(state,release,selector,region,tokens,cfg,request)
     if not result:return block(state,region)
     from .partial_readings import SupportedDomain
     if isinstance(result,SupportedDomain):
         from .structural_forest import retain
         forest=retain(state,region,tokens,request,cfg,result)
-        from .structural_shells import produce
-        produce(state,release,selector,region,tokens,cfg,request,forest)
+        from .structural_frontier import start
+        from .composition_session import current
+        runtime=current(state)
+        if runtime:start(runtime,region,tokens,cfg,request,forest)
         return block(state,region,reason='STRUCTURAL_FOREST_OPEN')
     option,proof=result;kind=option['relation']
     if kind=='LEXICAL':

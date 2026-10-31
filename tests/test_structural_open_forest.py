@@ -10,12 +10,15 @@ from ah.formalizer.structural_forest import current_domains,live
 from ah.formalizer.structural_tasks import licensed
 
 
-def native(tmp_path,monkeypatch,choices,answer=None):
+def native(tmp_path,monkeypatch,choices,answer=None,text=None):
     captured=[];prompts=[]
     def generate(self,prompt,**kw):
         prompts.append(prompt)
         slot=re.search(r'Decision slot: (\S+)',prompt).group(1)
-        if slot!='structural_relation':return answer(slot,prompt) if answer else '?'
+        from ah.formalizer.composition_session import _current
+        runtime=_current.get()
+        if slot!='structural_relation' or (runtime and getattr(runtime,'structural_child_edge',None)):
+            return answer(slot,prompt) if answer else '?'
         labels=re.findall(r'^(\d+)\. (.*)$',prompt,re.M)
         selected=[n for n,label in labels if any(label.startswith(RELATIONS[c]) for c in choices)]
         return ','.join(selected) if selected else '0'
@@ -25,7 +28,7 @@ def native(tmp_path,monkeypatch,choices,answer=None):
         return original(state,*a,**kw)
     monkeypatch.setattr(ChatBackend,'generate',generate)
     monkeypatch.setattr(v7_pipeline,'build_plan',capture)
-    text='Иван пришёл или Мария спит.'
+    text=text or 'Иван пришёл или Мария спит.'
     payload={'raw_input':{'text':text,'source_id':'forest-test','revision':1,
         'range':[0,len(text)],'language':'ru','request_kind':'ASSERTION','batch_kind':'MESSAGE'}}
     session=Session([payload],tmp_path/'journal.log');session.observer_contract='v7-observer-1'

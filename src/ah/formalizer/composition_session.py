@@ -25,6 +25,7 @@ class CompositionSession:
         self.selector,self.morph=selector,morph
         self.original={e.token_id:deepcopy(e) for e in state.evidence}
         self.area_inputs=None;self.morphology_scope=None;self.domain_feedback=None
+        self.structural_shell_tasks={};self.structural_frontiers={}
         self.tasks.capture_context=self.capture_context
         self.tasks.restore_context=self.restore_context
         from .composition_sources import CompositionSources
@@ -233,3 +234,11 @@ def child_key(region,tokens,attachment,infinitive,request):
         if isinstance(v,(set,frozenset)):return sorted(canonical(x) for x in v)
         return v
     return digest(canonical([region.source_range,tokens,attachment,infinitive,request]))
+
+
+@contextmanager
+def activate(runtime):
+    """Resume an owned session without replacing its caches or reader checkpoint."""
+    token=_current.set(runtime)
+    try:yield runtime
+    finally:_current.reset(token)

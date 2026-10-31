@@ -5,7 +5,7 @@ from types import SimpleNamespace
 import pytest
 from test_structural_open_forest import native
 from ah.formalizer.structural_shells import live,evidence_state
-from ah.formalizer.structural_conditions import applicable,branch,origin
+from ah.formalizer.structural_conditions import applicable,branch,origin,resolve
 from ah.formalizer.structural_tasks import licensed,licensed_in_scope
 
 
@@ -27,7 +27,7 @@ def shells(state):return [r for r in state.syntax_trace if r.get('kind')=='STRUC
 
 def runtime_for(monkeypatch,state,shell):
     from ah.formalizer import composition_session
-    basis=origin(state,shell['condition']['forest']['membership']['domain_ref'])
+    basis=origin(state,resolve(state,shell['condition']).forest['membership']['domain_ref'])
     ctx=deepcopy(basis['context'])
     runtime=SimpleNamespace(area_inputs=(None,None,ctx['request']),
         tasks=SimpleNamespace(feedback=ctx['parent_feedback']),
@@ -69,7 +69,7 @@ def test_membership_and_partition_revocation_invalidate_shell(tmp_path,monkeypat
     assert not live(state,selected)
     assert live(state,rows[1])
     state.syntax_trace.append({'kind':'DEPENDENCY_REJECTED',
-        'decision_ref':selected['condition']['forest']['membership']['decision_ref']})
+        'decision_ref':resolve(state,selected['condition']).forest['membership']['decision_ref']})
     assert not any(live(state,r) for r in rows)
 
 
@@ -77,7 +77,7 @@ def test_condition_cannot_escape_branch_or_change_context(tmp_path,monkeypatch):
     state,_,_=native(tmp_path,monkeypatch,('AND','OR'),boundaries)
     first,second=shells(state);local=evidence_state(state,first)
     runtime,cfg=runtime_for(monkeypatch,local,first)
-    forest=first['condition']['forest'];hyp=next(h for h in forest['hypotheses'] if h['hypothesis_ref']==first['hypothesis_ref'])
+    forest=resolve(local,first['condition']).forest;hyp=next(h for h in forest['hypotheses'] if h['hypothesis_ref']==first['hypothesis_ref'])
     assert applicable(local,forest,cfg)
     # observe is irrelevant to this standalone consumer check.
     monkeypatch.setattr('ah.formalizer.dispatch_evidence.observe',lambda *a,**kw:None)
@@ -96,7 +96,7 @@ def test_unknown_and_unconnected_relation_keep_open_members(tmp_path,monkeypatch
     state,result,_=native(tmp_path,monkeypatch,('AND','OR','FORALL'))
     rows=shells(state)
     assert len(rows)==2 and all(r['status']=='OPEN' and not r['children'] for r in rows)
-    forest=rows[0]['condition']['forest']
+    forest=resolve(state,rows[0]['condition']).forest
     assert {h['candidate']['relation'] for h in forest['hypotheses']}=={'AND','OR','FORALL'}
     assert not result['assertions']['ah']
 
@@ -105,7 +105,7 @@ def test_unknown_and_unconnected_relation_keep_open_members(tmp_path,monkeypatch
 def test_original_execution_basis_is_required(tmp_path,monkeypatch,change):
     state,_,_=native(tmp_path,monkeypatch,('AND','OR'),boundaries)
     row=shells(state)[0];runtime,cfg=runtime_for(monkeypatch,state,row)
-    forest=row['condition']['forest']
+    forest=resolve(state,row['condition']).forest
     assert applicable(state,forest,cfg)
     if change=='parent':runtime.input_signature=lambda:'different-slot'
     if change=='morphology':runtime.morphology_scope={'different':'reading'}
@@ -195,5 +195,15 @@ def test_child_slot_must_follow_parent_even_with_recomputed_checksum(tmp_path,mo
     from ah.formalizer.canonical_ledger import digest
     state,_,_=native(tmp_path,monkeypatch,('AND','OR'),boundaries)
     row=deepcopy(shells(state)[0]);row['children'][0]['input_slot']['inside_attitude']=True
+    row['receipt_digest']=digest({k:v for k,v in row.items() if k!='receipt_digest'})
+    assert not live(state,row)
+
+
+def test_reconstructed_evidence_cannot_reuse_outer_validation_memo(tmp_path,monkeypatch):
+    from ah.formalizer.canonical_ledger import digest
+    state,_,_=native(tmp_path,monkeypatch,('AND','OR'),boundaries)
+    row=deepcopy(shells(state)[0]);condition=resolve(state,row['condition'])
+    row['evidence']['trace'].append({'kind':'DEPENDENCY_REJECTED',
+        'decision_ref':condition.forest['membership']['decision_ref']})
     row['receipt_digest']=digest({k:v for k,v in row.items() if k!='receipt_digest'})
     assert not live(state,row)

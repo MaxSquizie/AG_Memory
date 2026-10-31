@@ -278,6 +278,12 @@ def _choose_impl(state,release,selector,region,cfg,slot,options,question,*,empty
 
 
 def _licensed(state,proof,*,_visiting=None,_branch=None,**expected):
+    from .structural_conditions import validation_scope
+    with validation_scope():
+        return _licensed_impl(state,proof,_visiting=_visiting,_branch=_branch,**expected)
+
+
+def _licensed_impl(state,proof,*,_visiting=None,_branch=None,**expected):
     """Validate the finite dependency graph without recursive Python calls."""
     if not isinstance(proof,dict):return False
     from .partial_readings import retired_refs
@@ -309,8 +315,8 @@ def _licensed(state,proof,*,_visiting=None,_branch=None,**expected):
         if row is None or not row.get('enumeration_complete'):return False
         condition=row.get('branch_condition')
         if condition is not None:
-            from .structural_conditions import historical
-            if (_branch is None or condition!=_branch or not historical(state,condition)
+            from .structural_conditions import historical,allows
+            if (_branch is None or not allows(state,condition,_branch) or not historical(state,condition)
                     or domains[domain].get('branch_condition')!=condition):return False
         if (current.get('selection_purpose')!=row.get('selection_purpose')
                 or current.get('selection_purpose')!=domains[domain].get('selection_purpose')):return False
