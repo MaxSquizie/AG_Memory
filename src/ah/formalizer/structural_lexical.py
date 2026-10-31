@@ -101,10 +101,14 @@ def produce(state,release,selector,region,tokens,cfg,request,forest):
                             contexts.update(source_reads.get('contexts',()))
                             contexts.update('context:'+digest(r) for r in packet['context_reads'])
                             source_reads['contexts']=sorted(contexts)
+                            from .context_receipts import associate
+                            receipts,unmapped=associate(runtime.reader,sorted(contexts),local.context_reads)
+                            source_reads['unmapped_contexts']=unmapped
+                            packet['context_receipts']=receipts
                             ref=issuer.issue(task['sources'][source],condition.record(),execution_basis(local,cfg),
                                 {'token_refs':[t.token_id for t in tokens],
                                  'input_slot':canonical(request),'source_range':list(region.source_range)},
-                                source_reads,packet)
+                                source_reads,packet,getattr(runtime.reader,'validate_context_receipts',None))
                             task['sources'][source]['issuance_ref']=ref
             finally:parent.dispatcher.spent+=runtime.dispatcher.spent-before
         registry(state).update(deepcopy(registry(local)))

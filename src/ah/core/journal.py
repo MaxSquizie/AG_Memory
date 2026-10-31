@@ -138,6 +138,14 @@ class JournalChannel:
     def read_global_head(self):
         with self.atomic(): return len(self._read(repair_tail=True))
 
+    def verified_snapshot(self, *, payload_kinds=None):
+        """Read a verified stream without repairing tails or advancing head."""
+        with self.atomic():
+            records = self._read(repair_tail=False)
+            kinds = frozenset(payload_kinds) if payload_kinds is not None else None
+            return {'head': len(records), 'records': deepcopy([
+                r for r in records if kinds is None or r['payload'].get('kind') in kinds])}
+
     def scan_unprocessed(self, after_seq=0, channel=None, *, payload_kinds=None):
         with self.atomic():
             # Verify the complete stream first, then copy only requested rows.

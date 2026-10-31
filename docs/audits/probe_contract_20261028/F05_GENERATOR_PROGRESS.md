@@ -1141,3 +1141,48 @@ child-demand scheduling остаются открытыми. Все шесть �
 6 source-read capture checks, 2 existing dispatcher regressions, resource resume
 и scalar all-source union. Проверки используют сценарные ответы и отдельные
 scheduler fixtures; это не live-model evidence. compileall/diff --check прошли.
+
+
+## 2026-10-31 — L3-C: историческая проверка использованного memory context
+
+Добавлен Journal.verified_snapshot: проверяет полный поток WAL без repair_tail,
+изменения head или импорта snapshot. context_receipts.validate работает под
+journal/store locks; проверяет уникальность CONTEXT_READ по run_id/ordinal,
+канал, полный request и request_hash, полный result и result_hash. Чистая project
+общая для _deliver и проверки: нельзя подтвердить изменённые rows/proofs старым
+hash полного результата, а изменение attention_after ловится full-result hash.
+
+Проверяются frozen memory hash и текущий release. Если в журнале есть ещё не
+загруженный canonical_unit, validator возвращает CANONICAL_REFRESH_REQUIRED;
+сам refresh, replay, поиск, seed/tick и публикацию внимания не выполняет.
+Torn tail остаётся неизменным и даёт UNAVAILABLE. Отдельное продвижение live
+attention не отзывает исторический ответ frozen reader.
+
+Исправлен и основной read: memory_hash проверяется перед replay _restore_result,
+а не только перед новым чтением. Изменённая canonical память больше не позволяет
+восстановить старую projection внимания по сохранённому WAL receipt.
+
+В private Issuer сохраняется bound verifier исходного reader отдельно от
+копируемого evidence packet. Cached GOAL_CONTEXT/source-history refs связываются
+с точными receipts по reader.run_id: одинаковый goal key у родителя и fork не
+смешивает их основания. Неотображённая ссылка или отсутствие capability остаётся
+CONTEXT_REVALIDATION_PENDING. Условные результаты с подтверждённым контекстом
+теперь могут быть PRODUCED_EVIDENCE_CURRENT; это не completion или write eligibility.
+search_incomplete и global_search_complete сохраняются без повышения.
+
+Проверки: основной пакет 27 passed in 97.38s (context receipts, real nonempty AH
+fork, replay regression, lexical issuance/cached native sources); дополнительный
+full-result-hash contrast 1 passed in 0.47s. Итого 28 различных целевых проверок.
+Включены mutation request/rows/proofs/hash/run/ordinal, wrong sibling reader,
+canonical/release changes, torn tail без ремонта, duplicate receipt, parent goal
+collision, unseen canonical refresh, missing verifier и stale replay без возврата
+старого внимания. Сценарные native ответы, не испытание качества живой модели.
+compileall и diff --check прошли. Coordinator/reviewer новых блокеров контекстного
+шлюза не нашли; семантическую полноту L3 это не подтверждает.
+
+Следующий шлюз L3-S: явные historical region/scope/condition проверки всех
+ESTABLISHED_PREDICATE_ROLE/NO_DIRECT_ROLE uses, целых reading domains, сохранения
+REFERENCE/QUANTITY функций и inventory membership. Stale, неизвестные признаки
+и доказанный конфликт bundle должны различаться; owner/relative/control пока
+остаются именованными обязательствами. После этого — дальнейшие L3 contracts,
+source cache/L4 child scheduling. Все шесть блоков F05 открыты.

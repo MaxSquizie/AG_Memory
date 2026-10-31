@@ -49,10 +49,13 @@
   Результат пока PENDING_VALIDATION. Добавлена проверка происхождения отдельного
   source output по приватному issuer, точным typed payloads и реально прочитанным
   зависимостям; snapshot разделяет STALE_EVIDENCE, PRODUCED_EVIDENCE_CURRENT и
-  CONTEXT_REVALIDATION_PENDING. Последний статус сохраняется при cache hits.
+  CONTEXT_REVALIDATION_PENDING. Контекст теперь проверяется по полному WAL receipt,
+  точной delivery projection и актуальной canonical memory/release через reader
+  исходной ветви; cache hits сохраняют те же зависимости. Неоднозначная/отсутствующая
+  квитанция, недоступный verifier или необходимость refresh сохраняют pending.
   Общие чистые lexical/typed-slot проверки показывают конфликт конкретного bundle
-  отдельно от неизвестного признака. Полная семантическая проверка, проверка чтений
-  памяти, доказательство полноты источников и исполнение child demands ещё открыты.
+  отдельно от неизвестного признака. Полная семантическая проверка, доказательство
+  полноты источников и исполнение child demands ещё открыты.
   Модальность, CONTENT/CONTENT_REFERENCE, NOMINAL_DESCRIPTION и кванторы пока pending.
 - Потребители: relation_composition, PartitionDomain, ChildTasks, composition_tree,
   native compiler. structural_forest/structural_shells сохраняют открытые домены и условные оболочки.

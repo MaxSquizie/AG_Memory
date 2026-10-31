@@ -17,18 +17,25 @@ def fingerprint(value):
 
 class Issuer:
     def __init__(self):
-        self.__prefix=uuid4().hex;self.__records={}
+        self.__prefix=uuid4().hex;self.__records={};self.__context_verifiers={}
 
     def __deepcopy__(self,memo):
         # Private validation views share authority, never mutable record values.
         return self
 
-    def issue(self,source,condition,basis,invocation,reads,evidence):
+    def issue(self,source,condition,basis,invocation,reads,evidence,context_verifier=None):
         ref='lexical-issuance:'+self.__prefix+':'+str(len(self.__records))
         self.__records[ref]=deepcopy({'source_hash':fingerprint(source),
             'condition':condition,'basis':basis,'invocation':invocation,
             'reads':reads,'evidence':evidence})
+        if context_verifier is not None:self.__context_verifiers[ref]=context_verifier
         return ref
+
+    def check_context(self,ref):
+        record=self.__records[ref];verify=self.__context_verifiers.get(ref)
+        if verify is None or record["reads"].get("unmapped_contexts"):
+            return {"status":"UNAVAILABLE","reason":"CONTEXT_RECEIPT_CAPABILITY_MISSING"}
+        return verify(deepcopy(record["evidence"].get("context_receipts",[])))
 
     def get(self,ref):
         return deepcopy(self.__records.get(ref))
@@ -75,7 +82,10 @@ def inspect(state,result,source):
         if valid(local,read['kind'],read['value'])!=read.get('expected',True):
             return failure('DEPENDENCY_CHANGED:'+read['kind'])
     if issued['evidence'].get('context_reads') or issued['reads'].get('contexts'):
-        return {'status':'CONTEXT_REVALIDATION_PENDING','reason':'CONTEXT_READ_VALIDATOR_NOT_CONNECTED','write_eligible':False}
+        context=issuer.check_context(source['issuance_ref'])
+        if context['status']=='STALE':return failure(context['reason'])
+        if context['status']!='CURRENT':
+            return {'status':'CONTEXT_REVALIDATION_PENDING','reason':context['reason'],'write_eligible':False}
     return {'status':'PRODUCED_EVIDENCE_CURRENT','reason':None,'write_eligible':False}
 
 

@@ -35,6 +35,12 @@ def test_forks_isolate_nonempty_attention_and_replay(tmp_path):
         'region_ref':'root','cue_token_refs':[e.token_id for e in state.evidence],'proof_goals':[]}
     result=left.read(state,request)
     assert entity in {r['entity_ref'] for r in result['rows']}
+    wal_before=store._journal.path.read_bytes();ordinal=left.ordinal
+    branch_before=attention_snapshot(left.engine)
+    assert left.validate_context_receipts(state.context_reads)['status']=='CURRENT'
+    assert left.ordinal==ordinal and attention_snapshot(left.engine)==branch_before
+    assert store._journal.path.read_bytes()==wal_before
+    assert right.validate_context_receipts(state.context_reads)['status']=='STALE'
     assert attention_snapshot(parent.engine)==before==attention_snapshot(right.engine)
     assert attention_snapshot(live_engine)==live_before
     assert parent.ordinal==right.ordinal==0 and not parent.read_token_refs

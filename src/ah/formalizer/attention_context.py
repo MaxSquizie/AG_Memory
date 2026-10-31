@@ -142,6 +142,8 @@ class AttentionContextReader:
         store = self.store
         with store._journal.atomic(), store._store._lock:
             store._refresh()
+            if memory_hash(store) != self.base['memory_hash']:
+                raise ContextReadError('CONTEXT_SNAPSHOT_STALE')
             previous = [r['payload'] for r in store._journal.scan_unprocessed()
                         if r.get('run_id') == self.run_id and r['payload'].get('kind') == 'CONTEXT_READ'
                         and r['payload'].get('ordinal') == ordinal]
@@ -156,8 +158,6 @@ class AttentionContextReader:
                 # transient focus projection still at its previous state.
                 self._publish(result)
                 return self._deliver(state, request, result)
-            if memory_hash(store) != self.base['memory_hash']:
-                raise ContextReadError('CONTEXT_SNAPSHOT_STALE')
             evidence = {e.token_id: e for e in state.evidence}
             events = []
             # Token-addressed progression is independent of transport chunks,
@@ -254,8 +254,10 @@ class AttentionContextReader:
 
     @staticmethod
     def _deliver(state, request, result):
-        state.context_reads.append({'request': request, 'result_hash': digest(result),
-                                    'scope': result['scope'], 'events': result['events'],
-                                    'rows': result['rows'],'proof_results':result.get('proof_results',[]),
-                                    'search_incomplete':result.get('search_incomplete',False), 'global_search_complete': False})
+        from .context_receipts import project
+        state.context_reads.append(project(request,result))
         return result
+
+    def validate_context_receipts(self,receipts):
+        from .context_receipts import validate
+        return validate(self,receipts)

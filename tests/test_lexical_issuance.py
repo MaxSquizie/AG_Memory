@@ -17,7 +17,7 @@ def test_native_both_sources_check_outside_session(issued):
     state,rows,result=issued
     for row in rows:
         for source in row['sources']:
-            expected='PRODUCED_EVIDENCE_CURRENT' if source['source']=='GRAMMAR' else 'CONTEXT_REVALIDATION_PENDING'
+            expected='PRODUCED_EVIDENCE_CURRENT'
             assert inspect(state,row,source)['status']==expected,(source['source'],inspect(state,row,source))
     assert not result['assertions']['ah']
 
@@ -108,4 +108,13 @@ def test_native_cached_source_keeps_prior_context_obligation(tmp_path,monkeypatc
     row=repeated[0][0];source=row['sources'][1]
     record=state._lexical_issuer.get(source['issuance_ref'])
     assert record['reads']['contexts']
-    assert inspect(state,row,source)['status']=='CONTEXT_REVALIDATION_PENDING'
+    assert inspect(state,row,source)['status']=='PRODUCED_EVIDENCE_CURRENT'
+
+
+def test_missing_context_verifier_preserves_pending(tmp_path,monkeypatch):
+    from ah.formalizer.attention_context import AttentionContextReader
+    monkeypatch.setattr(AttentionContextReader,'validate_context_receipts',None)
+    state,_,_=native(tmp_path,monkeypatch,('AND','OR'),lexical_answer)
+    row=next(iter(state.observation['structural_lexical_results'].values()))
+    assert inspect(state,row,row['sources'][0])['status']=='PRODUCED_EVIDENCE_CURRENT'
+    assert inspect(state,row,row['sources'][1])['status']=='CONTEXT_REVALIDATION_PENDING'
