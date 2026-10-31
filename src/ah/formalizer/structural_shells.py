@@ -137,16 +137,15 @@ def evidence_state(state,shell,*,read_only=False):
 
 
 def live(state,shell):
-    from .structural_conditions import validation_scope
-    with validation_scope():return _live(state,shell)
+    from .validation_graph import validate
+    return validate('SHELL',state,shell)
 
 
 def _live(state,shell):
     """Historical shell evidence, not write eligibility or current applicability."""
-    from .structural_conditions import historical
-    from .structural_tasks import _licensed
     if shell.get('receipt_digest')!=digest({k:v for k,v in shell.items() if k!='receipt_digest'}):return False
-    if not historical(state,shell['condition']):return False
+    from .validation_graph import request,overlay
+    if not (yield request('CONDITION',state,shell['condition'])):return False
     if shell['status']!='SHELL_PRODUCED':return False
     condition=resolve(state,shell['condition']);forest=condition.forest
     if (shell['hypothesis_ref']!=condition.hypothesis_ref or shell['forest_ref']!=forest['forest_ref']
@@ -157,15 +156,14 @@ def _live(state,shell):
         if child['input_slot']!=slot or child['inherited_context']!=forest['context']:return False
         if child['child_ref']!='structural-child:'+digest([shell['hypothesis_ref'],shell['partition_proof'],
                 index,child['token_refs'],slot]):return False
-    local=evidence_state(state,shell,read_only=True)
+    local=overlay(state,shell['evidence'])
     from .selection_domains import valid as enumeration_live
     from .partial_readings import retired_refs
     retired=retired_refs(local.syntax_trace)
     if not shell['dependencies'] or not all(r['task_ref'] not in retired and enumeration_live(local,r,retired)
         and r.get('branch_condition')==shell['condition'] for r in shell['dependencies']):return False
-    if not _licensed(local,shell['partition_proof'],_branch=shell['condition'],relation=shell['relation']):return False
-    # The partition's selected payload must match every materialized child slot.
-    return _licensed(local,shell['partition_proof'],_branch=shell['condition'],
-        combination_ref=shell.get('combination_ref'),
+    # One exact selected-proof obligation; expected fields are part of its key.
+    return (yield request('PROOF',local,shell['partition_proof'],_branch=shell['condition'],
+        relation=shell['relation'],combination_ref=shell.get('combination_ref'),
         operands=[c['token_refs'] for c in shell['children']],marker_refs=shell['marker_refs'],
-        shared_material=shell['shared_material'])
+        shared_material=shell['shared_material']))

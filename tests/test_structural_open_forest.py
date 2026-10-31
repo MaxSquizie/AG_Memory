@@ -107,7 +107,8 @@ def test_parent_feedback_has_separate_address(tmp_path,monkeypatch):
     domain=SupportedDomain(tuple(membership['alternatives']),membership['decision_ref'],membership['domain_ref'])
     region=SimpleNamespace(region_id=row['region_ref'],source_range=row['source_range'])
     tokens=[e for e in state.evidence if e.token_id in row['token_refs']]
-    runtime=SimpleNamespace(tasks=SimpleNamespace(feedback={'contract':'PROPOSITION'}),
+    from ah.formalizer.composition_dispatcher import Dispatcher
+    runtime=SimpleNamespace(dispatcher=Dispatcher(state,1000),tasks=SimpleNamespace(feedback={'contract':'PROPOSITION'}),
         morphology_scope=None,domain_feedback=None,context_signature=lambda:None,
         input_signature=lambda:row['input_scope'])
     monkeypatch.setattr(composition_session,'current',lambda _:runtime)

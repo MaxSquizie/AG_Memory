@@ -66,7 +66,12 @@ def intercept(monkeypatch,hook):
 
 
 def test_repeat_and_local_then_root_fingerprint_revocation(tmp_path,monkeypatch):
+    checked=[]
     def check(driver):
+        # The injected fingerprint fault creates a real negative observation;
+        # restoring it can replay the enclosing dispatcher. Inject only once.
+        if checked:return
+        checked.append(True)
         calls=driver.state.budget.llm_calls
         first=driver.snapshot();assert driver.run()==first
         assert driver.state.budget.llm_calls==calls

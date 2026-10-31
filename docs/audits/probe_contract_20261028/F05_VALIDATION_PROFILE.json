@@ -1,0 +1,172 @@
+{
+  "baseline_commit": "8beabfa562c9097e7244673039b6ab1ce138ba15",
+  "date": "2026-10-31",
+  "scope": "scripted native producers and isolated proof validation; not model quality or language completeness",
+  "timing_notes": "Single runs, not statistical benchmarks. Depth3/8 chain profiles used intermediate structural memo; depth16 uses final type-preserving memo and public subscriptions. Do not treat production times as an isolated asymptotic comparison.",
+  "before_bfs3": {
+    "native_bfs3": {
+      "seconds": 162.8754,
+      "calls": {
+        "source_signature": 14149,
+        "historical": 68133,
+        "evidence_state": 16787,
+        "_licensed": 10538,
+        "live": 4800
+      },
+      "maximum_validation_call_nesting": 10
+    },
+    "shell_json_bytes": 310173,
+    "registry_json_bytes": 85681,
+    "pure_shell": {
+      "seconds": 0.1118,
+      "calls": {
+        "live": 7,
+        "historical": 91,
+        "evidence_state": 21,
+        "source_signature": 14,
+        "_licensed": 14
+      },
+      "maximum_validation_call_nesting": 10
+    },
+    "repeat_shell": {
+      "seconds": 0.1159,
+      "calls": {
+        "live": 7,
+        "historical": 91,
+        "evidence_state": 21,
+        "source_signature": 14,
+        "_licensed": 14
+      },
+      "maximum_validation_call_nesting": 10
+    }
+  },
+  "after_bfs3": {
+    "native_bfs3": {
+      "seconds": 78.614,
+      "calls": {
+        "source_signature": 4601,
+        "historical": 1407,
+        "_licensed": 938,
+        "live": 52,
+        "evidence_state": 42
+      },
+      "maximum_validation_call_nesting": 2,
+      "graph": {
+        "obligations": 30108,
+        "cache_hits": 23114,
+        "views": 2425,
+        "view_hits": 11560,
+        "maximum_pending": 7
+      }
+    },
+    "shell_json_bytes": 310173,
+    "registry_json_bytes": 85681,
+    "pure_shell": {
+      "seconds": 0.095,
+      "calls": {
+        "live": 1,
+        "source_signature": 1
+      },
+      "maximum_validation_call_nesting": 2,
+      "graph": {
+        "obligations": 56,
+        "cache_hits": 27,
+        "views": 14,
+        "view_hits": 7,
+        "maximum_pending": 11
+      }
+    },
+    "repeat_shell": {
+      "seconds": 0.0631,
+      "calls": {
+        "live": 1,
+        "source_signature": 1
+      },
+      "maximum_validation_call_nesting": 2,
+      "graph": {
+        "obligations": 56,
+        "cache_hits": 27,
+        "views": 14,
+        "view_hits": 7,
+        "maximum_pending": 11
+      }
+    }
+  },
+  "chains": {
+    "3": {
+      "depth": 3,
+      "production_seconds": 40.6374,
+      "shell_bytes": 306953,
+      "pure": {
+        "seconds": 0.0913,
+        "obligations": 31,
+        "cache_hits": 26,
+        "views": 2,
+        "view_hits": 12,
+        "maximum_pending": 7
+      },
+      "repeat": {
+        "seconds": 0.0534,
+        "obligations": 31,
+        "cache_hits": 26,
+        "views": 2,
+        "view_hits": 12,
+        "maximum_pending": 7
+      }
+    },
+    "8": {
+      "depth": 8,
+      "production_seconds": 131.72,
+      "shell_bytes": 325692,
+      "pure": {
+        "seconds": 0.1606,
+        "obligations": 91,
+        "cache_hits": 91,
+        "views": 2,
+        "view_hits": 42,
+        "maximum_pending": 12
+      },
+      "repeat": {
+        "seconds": 0.184,
+        "obligations": 91,
+        "cache_hits": 91,
+        "views": 2,
+        "view_hits": 42,
+        "maximum_pending": 12
+      }
+    },
+    "16": {
+      "depth": 16,
+      "production_seconds": 579.8837,
+      "shell_bytes": 352523,
+      "pure": {
+        "seconds": 0.3933,
+        "obligations": 187,
+        "cache_hits": 195,
+        "views": 2,
+        "view_hits": 90,
+        "maximum_pending": 20,
+        "python_frames_min": 7,
+        "python_frames_max": 7
+      },
+      "repeat": {
+        "seconds": 0.4034,
+        "obligations": 187,
+        "cache_hits": 195,
+        "views": 2,
+        "view_hits": 90,
+        "maximum_pending": 20,
+        "python_frames_min": 7,
+        "python_frames_max": 7
+      },
+      "ancestor_revoked": {
+        "seconds": 0.0427,
+        "obligations": 25,
+        "cache_hits": 0,
+        "views": 1,
+        "view_hits": 7,
+        "maximum_pending": 11
+      }
+    }
+  }
+}

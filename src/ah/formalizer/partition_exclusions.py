@@ -37,11 +37,15 @@ def offer(state,region,tokens,cfg,option):
 
 
 def live(state,receipt):
+    from .validation_graph import validate
+    return validate('EXCLUSION',state,receipt)
+
+
+def _live(state,receipt):
+    from .validation_graph import request,source
     """Validate a negative CONFIRM receipt without invoking selected-proof logic."""
     from .partial_readings import retired_refs
     from .selection_domains import valid,fingerprint
-    from .structural_probe_inputs import source_signature
-    from .structural_tasks import _licensed
     try:
         if receipt.get('kind')!='STRUCTURAL_PARTITION_EXCLUSION':return False
         if receipt.get('exclusion_ref')!='partition-exclusion:'+digest({k:v for k,v in receipt.items() if k!='exclusion_ref'}):return False
@@ -50,9 +54,9 @@ def live(state,receipt):
         if candidate['combination_ref']!='partition-combination:'+digest(core):return False
         if payload.get('combination_ref')!=candidate['combination_ref'] or semantic(payload)!=candidate['proposal']:return False
         if (candidate['source_uid']!=state.source_uid or candidate['interpretation_version']!=state.interpretation_version
-            or candidate['basis']['source_basis']!=source_signature(state)
+            or candidate['basis']['source_basis']!=source(state)
             or candidate['basis']['context_version']!=state.context_version):return False
-        if condition and not historical(state,condition):return False
+        if condition and not (yield request('CONDITION',state,condition)):return False
         retired=retired_refs(state.syntax_trace)
         domain=next((r for r in reversed(state.syntax_trace) if r.get('kind')=='TASK_DOMAIN'
                      and r.get('task_ref')==receipt['domain_ref']),None)
@@ -80,7 +84,7 @@ def live(state,receipt):
         for premise in domain.get('prerequisites',()):
             prior=state.decisions.get(premise['proof'].get('decision_ref'))
             if (prior is None or prior.slot_id!=premise['slot'] or digest(premise['value'])!=premise['proof'].get('payload_hash')
-                or not _licensed(state,premise['proof'],_branch=condition)):return False
+                or not (yield request('PROOF',state,premise['proof'],_branch=condition))):return False
         return True
     except (KeyError,TypeError,ValueError):return False
 

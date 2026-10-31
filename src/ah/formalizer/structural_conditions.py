@@ -7,7 +7,6 @@ from .canonical_ledger import digest
 from .composition_dispatcher import canonical
 
 _active=ContextVar('structural_hypothesis',default=None)
-_verified=ContextVar('structural_conditions_verified',default=None)
 
 
 def registry(state):
@@ -79,23 +78,6 @@ class ConditionalHypothesis:
     def live(self,state):
         return historical(state,self.record())
 
-    def local_live(self,state):
-        if bool(self.parent_condition_ref)!=bool(self.parent_shell_ref and self.child_ref):return False
-        from .structural_shells import evidence_state
-        packet=state.observation.get('structural_condition_evidence',{}).get(self.record()['condition_ref'])
-        if packet is None:return False
-        state=evidence_state(state,{'evidence':packet},read_only=True)
-        from .structural_forest import live
-        from .structural_probe_inputs import source_signature
-        domain=next((r for r in reversed(state.syntax_trace) if r.get('kind')=='TASK_DOMAIN'
-            and r.get('task_ref')==self.forest['membership']['domain_ref']),{})
-        expected={'condition_ref':self.parent_condition_ref} if self.parent_condition_ref else None
-        return (domain.get('branch_condition')==expected and live(state,self.forest) and self.basis==origin(state,self.forest['membership']['domain_ref'])
-            and self.basis.get('source_basis')==source_signature(state)
-            and self.basis.get('context_version')==state.context_version
-            and any(h['hypothesis_ref']==self.hypothesis_ref and h['candidate']==self.candidate
-                    for h in self.forest['hypotheses']))
-
     def wording(self):
         return ('\nInvestigate this interpretation CONDITIONALLY: '+self.candidate['label']+
                 '. It is one admissible hypothesis, not a selected fact. All answers here apply only under this hypothesis.')
@@ -136,34 +118,36 @@ def current_runtime(state):
 
 
 def historical(state,record):
-    verified=_verified.get();outer=verified is None
-    token=_verified.set({}) if outer else None
-    views=_verified.get()
-    # Keep the view alive: Python may otherwise reuse its id during this check.
-    owner,verified=views.setdefault(id(state),(state,set()))
-    chain=[];seen=set()
+    from .validation_graph import validate
+    return validate('CONDITION',state,record)
+
+
+def _historical(state,record):
+    from .validation_graph import request,overlay,source
     try:
-        ref=record.get('condition_ref')
-        while ref:
-            if ref in seen:return False
-            if ref in verified:break
-            seen.add(ref);node=resolve(state,{'condition_ref':ref})
-            chain.append((ref,node));ref=node.parent_condition_ref
-        for ref,node in reversed(chain):
-            if not node.local_live(state):return False
-            if node.parent_condition_ref:
-                shell=state.observation.get('structural_shell_registry',{}).get(node.parent_shell_ref)
-                if shell is None or shell['condition']!={'condition_ref':node.parent_condition_ref}:return False
-                from .structural_shells import live
-                if not live(state,shell):return False
-                child=next((c for c in shell['children'] if c['child_ref']==node.child_ref),None)
-                if child is None or child['token_refs']!=node.forest['token_refs']:return False
-                if child['input_slot']!=node.basis['context']['request']:return False
-            verified.add(ref)
-        return bool(record.get('condition_ref'))
+        node=resolve(state,record)
+        if bool(node.parent_condition_ref)!=bool(node.parent_shell_ref and node.child_ref):return False
+        packet=state.observation.get('structural_condition_evidence',{}).get(record['condition_ref'])
+        if packet is None:return False
+        local=overlay(state,packet)
+        domain=next((r for r in reversed(local.syntax_trace) if r.get('kind')=='TASK_DOMAIN'
+                    and r.get('task_ref')==node.forest['membership']['domain_ref']),{})
+        expected={'condition_ref':node.parent_condition_ref} if node.parent_condition_ref else None
+        if (domain.get('branch_condition')!=expected or node.basis!=origin(local,node.forest['membership']['domain_ref'])
+            or node.basis.get('source_basis')!=source(local)
+            or node.basis.get('context_version')!=local.context_version
+            or not any(h['hypothesis_ref']==node.hypothesis_ref and h['candidate']==node.candidate for h in node.forest['hypotheses'])):return False
+        if not (yield request('FOREST',local,node.forest)):return False
+        if node.parent_condition_ref:
+            if not (yield request('CONDITION',state,expected)):return False
+            shell=state.observation.get('structural_shell_registry',{}).get(node.parent_shell_ref)
+            if shell is None or shell['condition']!=expected:return False
+            if not (yield request('SHELL',state,shell)):return False
+            child=next((c for c in shell['children'] if c['child_ref']==node.child_ref),None)
+            if child is None or child['token_refs']!=node.forest['token_refs']:return False
+            if child['input_slot']!=node.basis['context']['request']:return False
+        return True
     except (TypeError,KeyError,ValueError):return False
-    finally:
-        if outer:_verified.reset(token)
 
 
 def allows(state,required,current):
@@ -209,8 +193,6 @@ def inherit_scope(source,target,cfg,condition=None):
 
 @contextmanager
 def validation_scope():
-    """Share verified ancestors only during one synchronous read-only check."""
-    token=_verified.set({}) if _verified.get() is None else None
-    try:yield
-    finally:
-        if token is not None:_verified.reset(token)
+    """One synchronous read-only obligation graph; never a persistent cache."""
+    from .validation_graph import scope
+    with scope():yield

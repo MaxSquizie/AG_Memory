@@ -29,7 +29,8 @@ def runtime_for(monkeypatch,state,shell):
     from ah.formalizer import composition_session
     basis=origin(state,resolve(state,shell['condition']).forest['membership']['domain_ref'])
     ctx=deepcopy(basis['context'])
-    runtime=SimpleNamespace(area_inputs=(None,None,ctx['request']),
+    from ah.formalizer.composition_dispatcher import Dispatcher
+    runtime=SimpleNamespace(dispatcher=Dispatcher(state,1000),area_inputs=(None,None,ctx['request']),
         tasks=SimpleNamespace(feedback=ctx['parent_feedback']),
         morphology_scope=ctx['morphology_scope'],domain_feedback=ctx['domain_feedback'],
         input_signature=lambda:basis['input_scope'],context_signature=lambda:ctx['memory_context'])

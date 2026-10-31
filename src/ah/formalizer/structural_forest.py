@@ -49,13 +49,22 @@ def retain(state,region,tokens,request,cfg,domain):
 
 
 def live(state,row):
+    from .validation_graph import validate
+    result=validate('FOREST',state,row)
+    from .dispatch_evidence import observe
+    observe(state,'STRUCTURAL_FOREST',row,result)
+    return result
+
+
+def _live(state,row):
+    from .validation_graph import request
     """Check immutable evidence, not structural readiness or current area match."""
     payload={k:v for k,v in row.items() if k!='receipt_digest'}
     if not (row.get('kind')=='STRUCTURAL_OPEN_DOMAIN'
         and row.get('receipt_digest')==digest(payload)
         and row.get('source_uid')==state.source_uid
         and row.get('interpretation_version')==state.interpretation_version
-        and valid_domain(state,row.get('membership',{}))):return False
+        and (yield request('DOMAIN',state,row.get('membership',{})))):return False
     membership=row['membership']
     receipt=next((r for r in reversed(state.syntax_trace)
         if r.get('kind')=='TASK_DOMAIN' and r.get('task_ref')==membership['domain_ref']),None)

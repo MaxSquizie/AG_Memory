@@ -744,3 +744,90 @@ historical → shell.live → evidence_state → conditional proof → historica
 роста стека заменить взаимную рекурсию итеративными проверочными обязательствами,
 сохранив разные evidence views, циклы, fingerprints и отзыв ancestor/sibling.
 До этого frontier остаётся в окне 1–3; G4-B не подключается.
+
+
+## 31 октября 2026 — OF1-G4-P: общий итеративный обход оснований
+
+Измерение от 8beabfa разделило производство и проверку готового результата.
+Baseline BFS3: 162,8754 с, 68133 вызова historical, 16787 evidence_state,
+14149 source signatures. Одна готовая оболочка третьего уровня: 91 historical,
+21 evidence view, 14 source signatures, вложенность наблюдаемых вызовов 10;
+0,1118 с, повтор 0,1159 с. Повтор полностью повторял обход.
+
+Причина: локальный while в historical не устранял взаимные вызовы shell.live,
+conditional proof, forest/domain и prerequisites. Кеш на одном condition_ref
+небезопасен: разные evidence views могут содержать разные отказы/fingerprints.
+
+Новый validation_graph исполняет явные обязательства CONDITION/FOREST/DOMAIN/
+SHELL/PROOF/EXCLUSION через генераторы и итеративную очередь DFS. Завершённый
+результат кешируется только после зависимостей; общий DAG допустим, цикл — нет.
+Ожидаемый payload, разрешение условной ветви и visiting-set входят в transient
+identity. Сериализация для этого ключа сохраняет типы Python контейнеров и не
+затрагивает persistent proof digests; десериализации внешних данных нет.
+
+Private views объединяются лишь по данным, которые читают валидаторы: тот же
+неизменный base state, decisions/probes, последние domain/task rows (включая
+оба вида адреса task), все retirement events. Текущие записи имеют приоритет
+над вложенным packet. Исполняемые states/trace не нормализуются и не переписываются.
+Кеш и source signature живут только в одной синхронной read-only проверке.
+Повреждённое evidence возвращает False, reentrant entry остаётся ошибкой контура.
+
+Публичные valid_domain/forest.live сохраняют True/False subscriptions через
+READING_DOMAIN/STRUCTURAL_FOREST. Внутренние validators не создают observations.
+Discard читает точные domain/page/prerequisite/condition/shell dependency refs,
+включая registry-only evidence и последние packet revisions; unrelated reads
+не удаляются. CONDITIONAL_PROOF и PARTITION_EXCLUSION также участвуют в этом
+адресном снятии заменённых предпосылок.
+
+Независимый reviewer выявил недостающий latest-task lookup в view key, различия
+list/tuple в expected payload, set canonicalization, обработку ошибок дочерних
+generators и неполный сбор вложенных refs для discard. Исправления проверены.
+Дополнительно восстановлены публичные subscriptions, которые раньше возникали
+неявно через вызов prerequisite.errors. Финальный readonly review — без найденных
+конкретных блокеров в проверенном контуре.
+
+После: тот же BFS3 78,614 с; source signatures 4601, вложенность наблюдаемых
+validation calls 2. Размер shell 310173 bytes и registry 85681 bytes не изменился.
+Pure shell: 0,095 с, повтор 0,0631 с; 56 явных obligations. Это один сценарий,
+не универсальная оценка скорости. Измерение сделано до добавления aggregate
+public subscriptions; последующие проверки покрывают их корректность.
+
+Test-only harness строит длинную цепочку настоящими producers вне production
+планировщика. Окно runtime остаётся 1–3. На глубинах 3/8/16 получены соответственно
+31/91/187 obligations и 7/12/20 pending work items. Для глубины 16 Python frames
+на входе в каждый obligation постоянны: 7..7; два private views, 90 reuse.
+Проверка готовой глубины 16: 0,3933 с, повтор 0,4034 с; отзыв основания в середине
+цепочки отвергает результат за 0,0427 с. Производство: 579,8837 с, shell 352523 bytes.
+Глубины 3/8 измерялись на промежуточном варианте memo: нельзя выдавать их production
+время за чистое асимптотическое сравнение. Глубина 32 не запускалась из-за стоимости.
+Подробные цифры сохранены в F05_VALIDATION_PROFILE.json.
+
+На отдельном синтетическом графе планировщика 2000 зависимостей не увеличивают
+Python stack; общий DAG и цикл различаются. Это проверка scheduler, не 2000
+уровней естественного языка. Реальные контрасты: nested-evidence retirement,
+changed fingerprint без retirement event, permission/expected payload mismatch,
+малформированный shell, membership→partition→condition cycle, независимость sibling,
+negative evidence, resource resume, public cache True→False→True и exact discard.
+
+Проверки: исходный пакет 70 — 63 passed и 7 ошибок fixture без dispatcher после
+введения публичных observations. Fixtures подключены к настоящему Dispatcher;
+пакет graph/G2/openforest — 30 passed in 38.21s (включая все семь исправленных).
+Новый native-cycle — 1 passed in 2.31s. Три resource/context frontier сценария
+прошли; local-then-root injection повторно выполнялся на уже STALE очереди из-за
+закономерного replay по новой negative observation. Трасса показала успешные
+первые assertions и второй вызов hook; инъекция сделана одноразовой, исходные
+проверки сохранены. Повтор — 1 passed in 19.18s. Всего 76 различных целевых тестов
+проверены группами, это не единый 76-test run. Native NOT4/18 и shared-alternative
+четыре сценария также прошли. Все ответы исполнителя scripted, не live LLM.
+
+Устранена взаимная рекурсия проверки; дороговизна производства длинной цепочки
+остаётся отдельной установленной границей. G4-B не подключён. Все шесть блоков
+F05 открыты; ни разрешения следующего окна, ни publication gate здесь нет.
+
+Координатор принял ограниченный G4-P после измерений и ревью; сводные проверки
+завершены. Следующий пакет G4-B: snapshot проверки актуальных exclusions/оснований,
+адресное разрешение одного справедливо выбранного продолжения (до трёх уровней),
+общий бюджет и точный остаток, проверка разрешения перед каждым запуском.
+В диагностику добавить отдельную стоимость проверки и производства. Первый native
+сценарий — небольшой выход на уровень 4; полный размер окна проверять дешёвым
+fixture. Не подключать публикацию и не объявлять полноту генераторов.

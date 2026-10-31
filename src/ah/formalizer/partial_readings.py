@@ -24,6 +24,15 @@ def retired_refs(trace):
 
 
 def valid_domain(state,record):
+    from .validation_graph import validate
+    result=validate('DOMAIN',state,record)
+    from .dispatch_evidence import observe
+    observe(state,'READING_DOMAIN',record,result)
+    return result
+
+
+def _valid_domain(state,record):
+    from .validation_graph import request
     if (record.get('multiplicity')!='ALTERNATIVE_READINGS'
             or record.get('selection_purpose')!='ALTERNATIVE_READING'):return False
     retired=retired_refs(state.syntax_trace)
@@ -40,8 +49,10 @@ def valid_domain(state,record):
             if not valid_enumeration(state,row,retired):return False
             from .task_contracts import SelectionPurpose
             if row.get('selection_purpose')!=SelectionPurpose.ALTERNATIVE.value:return False
-            from .probe_prerequisites import errors,restored
-            if errors(state,restored(row.get('prerequisites',()))):return False
+            for premise in row.get('prerequisites',()):
+                prior=state.decisions.get(premise['proof'].get('decision_ref'))
+                if prior is None or prior.slot_id!=premise['slot'] or digest(premise['value'])!=premise['proof'].get('payload_hash'):return False
+                if not (yield request('PROOF',state,premise['proof'],_branch=row.get('branch_condition'))):return False
             return (row.get('search_complete') is True and row.get('source_complete') is True
                 and not retired.intersection(row.get('page_refs',()))
                 and ids<=set(row['supported_ids'])
