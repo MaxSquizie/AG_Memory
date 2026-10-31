@@ -11,6 +11,7 @@ from .composition_tree import InputSlot,expression,internalize,leaves
 from .composition_children import select_child
 from .structural_tasks import choose,choose_open
 from .partition_domain import ContentRequired,PartitionDomain
+from .structural_relations import child_request
 import unicodedata
 
 
@@ -64,7 +65,7 @@ def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof
     if shared_material is not None and kind not in {'OR','XOR'}:return None
     if not shared_valid(state,groups,shared_material):return None
     used=set(refs);markers=[t for t in tokens if t.token_id not in used]
-    from .structural_tasks import licensed
+    from .structural_tasks import licensed_in_scope as licensed
     owner=None
     if kind=='CONTENT':
         if (not owner_choice or len(groups)!=2
@@ -298,7 +299,7 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child):
         if not selected:return block(state,region)
         body=selected[0].groups[0]
         frames,root=child(state,release,selector,region,body,cfg,compose_child,
-            replace(request or InputSlot(),inside_attitude=True),'GROUP content')
+            child_request(kind,request),'GROUP content')
         if root is None:return block(state,region,frames)
         state.syntax_trace.append({'kind':'STRUCTURAL_RELATION_COMPOSED','relation':kind,
             'region_ref':region.region_id,'source_range':list(region.source_range),'tree':expression(root),
@@ -314,8 +315,7 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child):
         proposal,partition=selected;groups=proposal.groups
         frames=[];operands=[]
         for group in groups:
-            slot=request or InputSlot()
-            slot=replace(slot,surrounding_relations=(*slot.surrounding_relations,kind))
+            slot=child_request(kind,request)
             children,root=child(state,release,selector,region,group,cfg,compose_child,slot,kind+' operand')
             frames.extend(children)
             if root is None:return block(state,region,frames)
@@ -331,8 +331,8 @@ def compose(state,release,selector,region,tokens,cfg,request,compose_child):
         selected=PartitionDomain(state,release,selector,region,tokens,cfg,kind,proof).resolve(propose)
         if not selected:return block(state,region)
         proposal,partition=selected;owned=proposal.groups[0];markers=partition[0]
-        slot=request or InputSlot()
-        slot=replace(slot,surrounding_relations=(*slot.surrounding_relations,kind))
+        slot=(child_request(kind,request) if kind in {'NOT','QUERY'} else
+              replace(request or InputSlot(),surrounding_relations=(*(request or InputSlot()).surrounding_relations,kind)))
         if kind in {'POSSIBLE','NECESSARY'}:
             slot=replace(slot,description_context=True)
         governors=[t for t in markers if any(v.pos=='ADJS' or v.pos=='VERB' and v.mood!='imperative' for v in t.variants)]

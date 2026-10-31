@@ -27,15 +27,19 @@ def answer(slot,prompt):
     return '?'
 
 
-def test_native_breadth_three_and_frontier_four(tmp_path,monkeypatch):
+def test_native_breadth_three_and_authorized_frontier_four(tmp_path,monkeypatch):
     state,result,_=native(tmp_path,monkeypatch,('AND','OR'),answer,text=TEXT)
     events=[r for r in state.syntax_trace if r.get('kind')=='STRUCTURAL_FRONTIER_EVENT']
     started=[r['depth'] for r in events if r['event']=='started']
-    assert started==sorted(started) and set(started)=={1,2,3},started
+    initial=[d for d in started if d<=3]
+    assert initial==sorted(initial) and set(initial)=={1,2,3},started
+    assert 4 in started,started
     snapshots=state.observation['structural_frontiers'];assert len(snapshots)==1
     snapshot=next(iter(snapshots.values()))
-    assert any(j['depth']==4 and j['status']=='QUEUED' for j in snapshot['jobs']),snapshot
-    assert not any(j['depth']==4 and j['status']!='QUEUED' for j in snapshot['jobs'])
+    assert snapshot['windows'] and all(w['last_depth']==w['first_depth']+2 for w in snapshot['windows'])
+    authorized={w['root_job_ref'] for w in snapshot['windows']}
+    assert all(j['job_ref'] in authorized for j in snapshot['jobs'] if j['depth']==4),snapshot
+    assert any(r['event']=='constraints_checked' and r['check']['check_complete'] for r in events)
     assert all(j['status']=='PRODUCED' for j in snapshot['jobs'] if j['depth']<=3),snapshot
     assert not result['assertions']['ah']
     registry=state.observation['structural_condition_registry']

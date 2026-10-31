@@ -1,10 +1,11 @@
-"""Isolated conditional AND/OR partition production; no child execution or IR."""
+"""Isolated conditional relation-shell production; no child execution or IR."""
 from copy import deepcopy,copy
-from dataclasses import asdict,replace
+from dataclasses import asdict
 from .canonical_ledger import digest
 from .composition_dispatcher import canonical,DispatchBlocked
 from .composition_tree import InputSlot
 from .structural_conditions import branch,applicable,resolve,inherit_scope,registry
+from .structural_relations import CONTRACTS,producer,child_request
 
 
 def execution_order(forest):
@@ -15,7 +16,6 @@ def execution_order(forest):
 def produce(state,release,selector,region,tokens,cfg,request,forest):
     from .composition_session import current,CompositionSession,activate
     from .partition_domain import PartitionDomain
-    from .relation_partitions import binary
     parent=current(state)
     from .structural_conditions import active
     inherited=active(state)
@@ -25,7 +25,7 @@ def produce(state,release,selector,region,tokens,cfg,request,forest):
     # shared; conditional choices, revisions, diagnostics and frames cannot leak.
     for hypothesis in execution_order(forest):
         kind=hypothesis['candidate']['relation']
-        if kind not in {'AND','OR'}:
+        if kind not in CONTRACTS:
             state.syntax_trace.append({'kind':'STRUCTURAL_SHELL_PENDING',
                 'hypothesis_ref':hypothesis['hypothesis_ref'],'reason':'RELATION_PRODUCER_NOT_CONNECTED',
                 'structure_complete':False,'write_eligible':False})
@@ -69,7 +69,7 @@ def produce(state,release,selector,region,tokens,cfg,request,forest):
             try:
                 with inherit_scope(state,local,cfg,inherited), branch(local,forest,hypothesis,cfg) as condition:
                     proof={'condition':condition.record(),'hypothesis_ref':condition.hypothesis_ref}
-                    selected=PartitionDomain(local,release,selector,region,tokens,cfg,kind,proof).resolve(binary)
+                    selected=PartitionDomain(local,release,selector,region,tokens,cfg,kind,proof).resolve(producer(kind))
             except DispatchBlocked:
                 pass
             finally:parent.dispatcher.spent+=runtime.dispatcher.spent-spent_before
@@ -90,8 +90,7 @@ def produce(state,release,selector,region,tokens,cfg,request,forest):
             combination=next(v['combination_ref'] for v in selected_row['alternatives'] if v['candidate_id']=='PARTITION')
             row.update(status='SHELL_PRODUCED',combination_ref=combination,partition_proof=deepcopy(partition[1]),
                 marker_refs=[t.token_id for t in partition[0]],shared_material=deepcopy(proposal.shared_material))
-            slot=request or InputSlot()
-            slot=replace(slot,surrounding_relations=(*slot.surrounding_relations,kind))
+            slot=child_request(kind,request)
             for index,group in enumerate(proposal.groups):
                 refs=[t.token_id for t in group]
                 row['children'].append({'child_ref':'structural-child:'+digest([
@@ -150,9 +149,10 @@ def _live(state,shell):
     condition=resolve(state,shell['condition']);forest=condition.forest
     if (shell['hypothesis_ref']!=condition.hypothesis_ref or shell['forest_ref']!=forest['forest_ref']
             or shell['relation']!=condition.candidate['relation']
-            or shell['relation'] not in {'AND','OR'} or len(shell['children'])<2):return False
-    slot=deepcopy(forest['context']['request']) or canonical(InputSlot())
-    slot['surrounding_relations']=[*slot['surrounding_relations'],shell['relation']]
+            or shell['relation'] not in CONTRACTS
+            or not CONTRACTS[shell['relation']].accepts(len(shell['children']))):return False
+    parent=deepcopy(forest['context']['request'])
+    slot=canonical(child_request(shell['relation'],InputSlot(**parent) if parent else None))
     for index,child in enumerate(shell['children']):
         if child['input_slot']!=slot or child['inherited_context']!=forest['context']:return False
         if child['child_ref']!='structural-child:'+digest([shell['hypothesis_ref'],shell['partition_proof'],

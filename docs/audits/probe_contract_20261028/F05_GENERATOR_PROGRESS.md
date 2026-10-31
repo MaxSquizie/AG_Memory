@@ -974,3 +974,65 @@ F05_COLLECTED_PARTS_PROFILE.json. Live модель в этом этапе не 
 NEXT, subset sharing, полнота генераторов и G4-B. Схемы повторения остаются DEFER;
 все шесть блоков F05 открыты. Сценарные ответы не доказывают надёжность языкового
 различения плоской группы и вложенности у целевой модели.
+
+### 2026-10-31 — OF2: общие простые оболочки и адресованные окна G4-B
+
+structural_relations содержит единый контракт 12 простых отношений:
+AND/OR/XOR (>=2 части), IMPLIES/COUNTERFACTUAL/BEFORE/AFTER/DURING (2),
+IF_ELSE (3), NOT/QUERY/GROUP (1). Producer использует существующие разбиения;
+scalar compose, shell producer/live и frontier используют один вывод child_request.
+Для GROUP сохраняется inside_attitude без generic surrounding append. Проверяются
+точная арность, child refs, slots и exact partition payload; при отзыве partition
+оболочка теряет основание. owner/shared-function проверки confirm_partition
+переведены на scoped license для будущих специальных производителей; это само
+по себе не подключает CONTENT или кванторы.
+
+Нельзя просто распространить тот же контракт на остальные 8 отношений:
+POSSIBLE/NECESSARY требуют governor и правил agreement inheritance;
+CONTENT — owner/role и зависимого от результата родителя controller;
+FORALL/EXISTS — quantifier kind, binder head, shared functions и целый body;
+LEXICAL/NOMINAL_DESCRIPTION/CONTENT_REFERENCE — отдельные результаты и obligations.
+Эти производители остаются pending capability, не объявляются невозможными.
+
+G4-B: после начального окна 1–3 structural_windows.inspect проверяет всю
+доступную цепочку предков, current forest/shell evidence и действующие exact
+partition exclusions. Пробел parent chain запрещает продолжение. Разрешение
+связано с generation, job, immutable ancestor check и локальными уровнями
+root..root+2; наличие собственного нового forest не меняет input basis разрешения,
+но его живость проверяется. Перед стартом повторяются permit identity, root check,
+job check и текущие source/context/feedback/memory context. Изменение generation
+останавливает последующие старты и очищает permits. Retired exclusion не блокирует
+ветвь, но непроверенное/противоречивое основание не считается допуском.
+
+Готовая очередь выбирается по (depth, job_ref) ДО admission: более глубокий
+разрешённый job не обходит более близкого соседа без permit. Локальный неизменившийся
+resource stop исключает только соответствующий job из ready; доступные siblings
+продолжаются. Общий исчерпанный бюджет останавливает весь проход. Кеш, dispatcher
+spent, reader checkpoints и остаток сохраняются. Snapshot содержит permits,
+parent job refs и blocked checks. cost.validation_seconds измеряет именно вызовы
+constraint inspection, production_seconds — блок исполнения producer; это не
+полная разбивка всех liveness/snapshot расходов.
+
+Проверки: 30 passed in 68.28s на адаптерах, direct parts и open forest до завершения
+G4-B; native frontier suite 11 passed in 444.60s (на промежуточном scheduler до
+последнего исправления fairness/local-resource). На конечном scheduler 7 новых
+window tests passed in 16.49s, 3 resource/context regression passed in 62.34s.
+Итого 48 различных pytest-проверок; три последних повторяют часть frontier suite.
+Новые native tests: NOT до глубины 5, unknown/capability sibling сохранён,
+retirement между grant и start, смена feedback во время production, независимый
+прогресс siblings при локальном resource stop. Отдельно scheduler fixtures
+проверяют окно 4–6 без уровня 7, permit/ancestry corruption, exact exclusion
+vs unrelated/retired и действительный run с обратным порядком вставки jobs.
+Корректность negative receipt не подменяется verifier stub: это отдельный
+проверяемый контракт G4-A. Ни один открытый лес не публикует AH assertions.
+
+Во время работы среда временно отключалась. Первый незавершённый frontier прогон
+не засчитан; после восстановления файлы проверены и suite запущена заново.
+Независимый reviewer последовательно выявил и проверил исправления permit,
+missing-parent, current-generation, BFS и local-resource guards; финальных
+блокеров scheduling не нашёл. Все ответы сценарные, не live LLM.
+
+Все шесть F05 остаются открытыми. Следующий шлюз — условный lexical producer
+без скрытого рекурсивного обхода и с зависимыми дочерними задачами; затем специальные
+отношения, альтернативные boundaries/NEXT, владельцы, binder/reference domains,
+источники и publication gate. Схемы повторения и арифметические кванторы — DEFER.

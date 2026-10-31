@@ -1,11 +1,11 @@
 """Session-owned breadth-first structural window; no pruning or publication."""
 from copy import deepcopy
-from dataclasses import replace
 from .canonical_ledger import digest
 from .composition_dispatcher import DispatchBlocked,canonical
-from .composition_tree import InputSlot
 from .structural_conditions import child_scope,execution_basis
 from .structural_shells import produce,live,evidence_state
+from .structural_relations import CONTRACTS,child_request
+from time import perf_counter
 
 REGISTRIES=('structural_condition_registry','structural_condition_evidence','structural_shell_registry')
 RESOURCE_CODES={'COMPOSITION_DISPATCH_INCOMPLETE','COMPUTATION_LIMIT','STRUCTURAL_TASK_SEARCH_INCOMPLETE'}
@@ -30,6 +30,7 @@ def one_level(state,runtime,region,tokens,cfg,request):
 class StructuralFrontier:
     def __init__(self,runtime,region,tokens,cfg,request,forest):
         self.runtime=runtime;self.state=runtime.state;self.jobs={}
+        self.windows=[];self.cost={'constraint_checks':0,'validation_seconds':0.0,'production_seconds':0.0}
         self.generation_ref='structural-generation:'+digest([forest['receipt_digest'],execution_basis(self.state,cfg)])
         self.basis=execution_basis(self.state,cfg);self.context=runtime.capture_context()
         self.add({'job_ref':self.generation_ref+':root','depth':1,'state':self.state,
@@ -76,8 +77,7 @@ class StructuralFrontier:
             if child['child_ref'] in self.jobs:continue
             local=evidence_state(job['state'],shell);local.budget=self.state.budget
             by_id={t.token_id:t for t in local.evidence};tokens=[by_id[r] for r in child['token_refs']]
-            request=replace(job['request'] or InputSlot(),
-                surrounding_relations=(*(job['request'] or InputSlot()).surrounding_relations,shell['relation']))
+            request=child_request(shell['relation'],job['request'])
             if canonical(request)!=child['input_slot']:raise ValueError('STRUCTURAL_CHILD_CONTRACT_MISMATCH')
             cfg={k:v for k,v in job['cfg'].items() if k not in
                  {'_task_constraints','_task_constraints_text','_ownership_feedback','_partition_rejections'}}
@@ -93,7 +93,7 @@ class StructuralFrontier:
             if feedback and feedback.get('target_child',child['child_ref'])==child['child_ref']:
                 runtime.tasks.feedback=deepcopy(feedback)
             runtime.area_inputs=(region,tokens,request)
-            self.add({'job_ref':child['child_ref'],'depth':job['depth']+1,'state':local,
+            self.add({'job_ref':child['child_ref'],'parent_job_ref':job['job_ref'],'depth':job['depth']+1,'state':local,
                 'runtime':runtime,'region':region,'tokens':tokens,'cfg':cfg,'request':request,
                 'forest':None,'parent_shell':deepcopy(shell),'child':deepcopy(child),
                 'status':'QUEUED' if can_fork else 'PENDING_CAPABILITY','results':[]})
@@ -101,17 +101,35 @@ class StructuralFrontier:
     def available(self):
         return self.runtime.dispatcher.spent<self.runtime.dispatcher.limit and not self.state.budget.llm_exhausted
 
+    def check(self,job):
+        from .structural_windows import inspect
+        before=perf_counter()
+        result=inspect(self,job)
+        self.cost['constraint_checks']+=1;self.cost['validation_seconds']+=perf_counter()-before
+        self.event(job,'constraints_checked',check=result)
+        return result
+
+    def generation_current(self):
+        from .structural_probe_inputs import source_signature
+        return (canonical(self.runtime.capture_context())==canonical(self.context)
+                and canonical(self.runtime.tasks.feedback)==self.basis['context']['parent_feedback']
+                and source_signature(self.state)==self.basis['source_basis']
+                and self.state.context_version==self.basis['context_version']
+                and self.runtime.context_signature()==self.basis['context']['memory_context'])
+
+    def retire_generation(self):
+        self.windows.clear()
+        for job in self.jobs.values():
+            if job['status']!='STALE':
+                job['status']='STALE';self.event(job,'pending',reason='GENERATION_CHANGED')
+
     def run(self):
         from contextlib import nullcontext
         from .composition_session import activate
-        from .structural_probe_inputs import source_signature
         from .structural_resume import reopen,resource_stamp
+        from .structural_windows import admitted,authorize,permit_for
         # The source/meaning context is immutable for one frontier generation.
-        stale=(canonical(self.runtime.capture_context())!=canonical(self.context)
-               or canonical(self.runtime.tasks.feedback)!=self.basis['context']['parent_feedback']
-               or source_signature(self.state)!=self.basis['source_basis']
-               or self.state.context_version!=self.basis['context_version']
-               or self.runtime.context_signature()!=self.basis['context']['memory_context'])
+        stale=not self.generation_current()
         for job in order(self.jobs.values()):
             self.sync(job)
             from .structural_forest import live as domain_live
@@ -120,25 +138,52 @@ class StructuralFrontier:
                 if job['status']!='STALE':job['status']='STALE';self.event(job,'pending',reason='BASIS_RETIRED')
             elif job['status']=='PRODUCED' and any(not live(job['state'],r) for r in job['results']):
                 job['status']='PENDING_EVIDENCE';self.event(job,'pending',reason='RESULT_BASIS_RETIRED')
-        if any(j['status']=='PENDING_RESOURCE' and j.get('resource_stamp')==resource_stamp(self.runtime,j['cfg'])
-               for j in self.jobs.values()):return self.save_snapshot()
+            elif job.get('blocked_check') and job['status']=='PENDING_EVIDENCE':
+                checked=self.check(job)
+                if checked['check_complete']:
+                    job.pop('blocked_check',None);job['status']='QUEUED'
         while True:
-            candidates=order(j for j in self.jobs.values() if j['depth']<=3 and (j['status']=='QUEUED' or (j['status']=='PENDING_RESOURCE' and
-                j.get('resource_stamp')!=resource_stamp(self.runtime,j['cfg']))))
-            if not candidates:break
-            job=candidates[0]
+            if not self.generation_current():
+                self.retire_generation();break
+            ready=order(j for j in self.jobs.values() if j['status']=='QUEUED' or (j['status']=='PENDING_RESOURCE' and
+                j.get('resource_stamp')!=resource_stamp(self.runtime,j['cfg'])))
+            if not ready:break
+            job=ready[0]
             if not self.available():
                 job['status']='PENDING_RESOURCE';job['resource_stamp']=resource_stamp(self.runtime,job['cfg'])
                 self.event(job,'pending',reason='RESOURCE_EXHAUSTED');break
+            if not admitted(self,job):
+                # BFS order chooses the shallowest waiting branch regardless of
+                # dict insertion order. A grant is local to this ancestry only.
+                check=self.check(job)
+                if not check['check_complete']:
+                    job['status']='PENDING_EVIDENCE';job['blocked_check']=check
+                    self.event(job,'pending',reason=check['reason']);continue
+                if not self.generation_current():
+                    self.retire_generation();break
+                authorize(self,job,check)
+                continue
             self.sync(job)
-            if job['parent_shell'] is not None and not live(job['state'],job['parent_shell']):
-                job['status']='STALE';self.event(job,'pending',reason='BASIS_RETIRED');continue
+            if job['depth']>3:
+                permit=permit_for(self,job)
+                root_check=self.check(self.jobs[permit['root_job_ref']]) if permit else None
+                if root_check is None or not root_check['check_complete'] or root_check['check_ref']!=permit['check_ref']:
+                    if permit:self.windows.remove(permit)
+                    self.event(job,'window_revoked',permit=permit)
+                    continue
+            check=self.check(job)
+            if not check['check_complete']:
+                job['status']='PENDING_EVIDENCE';job['blocked_check']=check
+                self.event(job,'pending',reason=check['reason']);continue
+            if not self.generation_current():
+                self.retire_generation();break
             state=job['state'];runtime=job['runtime'];before=runtime.dispatcher.spent
             if job['status']=='PENDING_RESOURCE':reopen(runtime)
             if runtime is not self.runtime:
                 runtime.dispatcher.limit=before+max(0,self.runtime.dispatcher.limit-self.runtime.dispatcher.spent)
             begin=len(state.syntax_trace);diag_begin=len(state.diagnostics)
             job['status']='RUNNING';self.event(job,'started')
+            production_begin=perf_counter()
             try:
                 with activate(runtime):
                     scope=child_scope(state,job['parent_shell'],job['child'],job['cfg']) if job['parent_shell'] else nullcontext()
@@ -152,13 +197,14 @@ class StructuralFrontier:
                 codes.update(d['code'] for r in job['results'] for d in r['evidence']['diagnostics'])
                 if codes & RESOURCE_CODES:job['status']='PENDING_RESOURCE'
                 elif job['results'] and any(r['status']=='SHELL_PRODUCED' for r in job['results']):job['status']='PRODUCED'
-                elif job['forest'] and all(h['candidate']['relation'] not in {'AND','OR'} for h in job['forest']['hypotheses']):
+                elif job['forest'] and all(h['candidate']['relation'] not in CONTRACTS for h in job['forest']['hypotheses']):
                     job['status']='PENDING_CAPABILITY'
                 elif any(r.get('kind')=='STRUCTURAL_SHELL_PENDING' and r.get('reason')=='CONTEXT_READER_FORK_UNAVAILABLE'
                          for r in state.syntax_trace[begin:]):job['status']='PENDING_CAPABILITY'
                 else:job['status']='PENDING_EVIDENCE'
             except DispatchBlocked:job['status']='PENDING_RESOURCE'
             finally:
+                self.cost['production_seconds']+=perf_counter()-production_begin
                 if runtime is not self.runtime:self.runtime.dispatcher.spent+=runtime.dispatcher.spent-before
             self.publish_diagnostics(job,begin)
             for shell in job['results']:
@@ -166,7 +212,7 @@ class StructuralFrontier:
             self.event(job,'completed' if job['status']=='PRODUCED' else 'pending',status=job['status'],
                 result_refs=[s['shell_ref'] for s in job['results']])
             if job['status']=='PENDING_RESOURCE':
-                job['resource_stamp']=resource_stamp(self.runtime,job['cfg']);break
+                job['resource_stamp']=resource_stamp(self.runtime,job['cfg'])
         return self.save_snapshot()
 
     def save_snapshot(self):
@@ -183,8 +229,11 @@ class StructuralFrontier:
                 refs.update(r['candidate']['combination_ref'] for r in result['evidence']['trace']
                     if r.get('kind')=='STRUCTURAL_PARTITION_EXCLUSION' and exclusion_live(local,r))
             return sorted(refs) if job['status']!='STALE' else []
-        return {'generation_ref':self.generation_ref,'window_depth':3,'structure_complete':False,'write_eligible':False,
+        return {'generation_ref':self.generation_ref,'window_depth':3,'windows':deepcopy(self.windows),
+            'cost':dict(self.cost),'structure_complete':False,'write_eligible':False,
             'jobs':[{'job_ref':j['job_ref'],'depth':j['depth'],'status':j['status'],
+                'parent_job_ref':j.get('parent_job_ref'),
+                'blocked_check':deepcopy(j.get('blocked_check')),
                 'parent_shell_ref':j['parent_shell']['shell_ref'] if j['parent_shell'] else None,
                 'condition_ref':j['parent_shell']['condition']['condition_ref'] if j['parent_shell'] else None,
                 'token_refs':[t.token_id for t in j['tokens']], 'input_slot':canonical(j['request']),
