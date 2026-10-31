@@ -24,6 +24,7 @@ class PartitionProposal:
     shared_functions: tuple = ()
     owner_choice: object = None
     shared_material: object = None
+    arity_proof: object = None
 
 
 class PartitionDomain:
@@ -139,7 +140,7 @@ class PartitionDomain:
                 result=confirm_partition(self.state,self.release,self.selector,self.region,
                     self.tokens,self.cfg,self.kind,proposal.groups,self.proof,
                     shared_functions=proposal.shared_functions,owner_choice=proposal.owner_choice,marker_roles=self.markers,
-                    shared_material=proposal.shared_material)
+                    shared_material=proposal.shared_material,arity_proof=proposal.arity_proof)
                 if on_check:on_check(proposal,result)
                 return proposal,result
             if runtime:

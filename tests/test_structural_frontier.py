@@ -14,6 +14,8 @@ def answer(slot,prompt):
     if slot=='structural_relation':
         return next((n for n,label in labels if 'Conjunction:' in label),'0')
     if 'Optional search:' in prompt:return '0'
+    if slot=='structural_operand_count':
+        return next((n for n,label in labels if label.startswith('2 direct content parts')),'0')
     if slot in {'structural_partition','relation_marker_role'}:return '1'
     connectors=[i for i,t in enumerate(tokens) if t.span=='и']
     if not connectors:return '?'

@@ -20,9 +20,9 @@ RELATIONS={
     'NOT':'Negation of a proposition (not lexical opposition)',
     'POSSIBLE':'Possibility or ability; does not assert occurrence',
     'NECESSARY':'Necessity or obligation; preserve its scope',
-    'AND':'Conjunction: the text connects both propositions together within the current scope',
-    'OR':'Inclusive alternative between propositions; the text permits both',
-    'XOR':'Exclusive alternative: the text presents exactly one of the propositions',
+    'AND':'Conjunction: the text connects two or more propositions together within the current scope',
+    'OR':'Inclusive alternative between two or more propositions; the text permits more than one',
+    'XOR':'Exclusive alternative: the text presents exactly one of two or more propositions',
     'IMPLIES':'One conditional rule: a condition implies a consequence; no alternative outcome for when that condition fails',
     'IF_ELSE':'Conditional with two branches: one outcome when a condition holds, another when that SAME condition does not hold',
     'COUNTERFACTUAL':'Counterfactual condition and its consequence; not material implication',
@@ -58,13 +58,20 @@ def attach_tree(frames,tree,region):
     return frames
 
 
-def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof,*,shared_functions=(),owner_choice=None,marker_roles=None,shared_material=None):
+def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof,*,shared_functions=(),owner_choice=None,marker_roles=None,shared_material=None,arity_proof=None):
     refs=[t.token_id for group in groups for t in group]
     from .shared_proposition_material import validate as shared_valid
     if shared_material is not None and kind not in {'OR','XOR'}:return None
     if not shared_valid(state,groups,shared_material):return None
     used=set(refs);markers=[t for t in tokens if t.token_id not in used]
     from .structural_tasks import licensed
+    if arity_proof is not None:
+        from .structural_tasks import licensed_in_scope
+        count_decision=state.decisions.get(arity_proof.get('decision_ref'))
+        if (kind not in {'AND','OR','XOR'} or len(groups)<2
+                or count_decision is None or count_decision.slot_id!='structural_operand_count'
+                or not licensed_in_scope(state,arity_proof,
+                                relation=kind,operand_count=len(groups))):return None
     owner=None
     if kind=='CONTENT':
         if (not owner_choice or len(groups)!=2
@@ -120,6 +127,7 @@ def confirm_partition(state,release,selector,region,tokens,cfg,kind,groups,proof
     premise_proofs=list(marker_roles.values())+[s['proof'] for s in shared_functions]
     if owner_choice:premise_proofs.append(owner_choice[1])
     if proof.get('decision_ref'):premise_proofs.append(proof)
+    if arity_proof is not None:premise_proofs.append(arity_proof)
     if shared_material is not None:
         premise_proofs.extend([shared_material['scope_proof'],*shared_material['collection']['proofs']])
     requirements=tuple(from_proof(state,p) for p in premise_proofs)

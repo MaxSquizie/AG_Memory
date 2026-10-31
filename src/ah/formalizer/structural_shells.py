@@ -149,7 +149,8 @@ def _live(state,shell):
     if shell['status']!='SHELL_PRODUCED':return False
     condition=resolve(state,shell['condition']);forest=condition.forest
     if (shell['hypothesis_ref']!=condition.hypothesis_ref or shell['forest_ref']!=forest['forest_ref']
-            or shell['relation']!=condition.candidate['relation'] or len(shell['children'])!=2):return False
+            or shell['relation']!=condition.candidate['relation']
+            or shell['relation'] not in {'AND','OR'} or len(shell['children'])<2):return False
     slot=deepcopy(forest['context']['request']) or canonical(InputSlot())
     slot['surrounding_relations']=[*slot['surrounding_relations'],shell['relation']]
     for index,child in enumerate(shell['children']):

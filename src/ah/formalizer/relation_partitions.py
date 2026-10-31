@@ -33,21 +33,46 @@ def unary(domain):
 
 
 def binary(domain):
+    """Legacy entry point for multi-part relations, including n-ary groups."""
     from .relation_composition import RELATIONS,function_ownership
     state,release,selector,region,tokens,cfg,kind=inputs(domain)
     contracts=(['condition being checked','outcome when that condition holds','outcome when that condition does not hold']
         if kind=='IF_ELSE' else ['condition being checked','outcome when that condition holds']
         if kind in {'IMPLIES','COUNTERFACTUAL'} else ['first proposition','second proposition'])
+    arity_proof=None;requirements=()
+    if kind in {'AND','OR','XOR'}:
+        from .structural_tasks import choose
+        from .probe_prerequisites import accepted,from_proof
+        # Each explicit part has a distinct nonempty source contribution, even
+        # with shared wording. Source size is a conservative upper bound, not
+        # a morphological or punctuation-based guess at clause count.
+        premises=(from_proof(state,domain.proof),) if domain.proof.get('decision_ref') else ()
+        arity=choose(state,release,selector,region,cfg,'structural_operand_count',[
+            {'candidate_id':'PARTS_'+str(n),'operand_count':n,'relation':kind,
+             'label':str(n)+' direct content parts connected by the selected outer relation in the current scope'}
+            for n in range(2,len(tokens)+1)],
+            'Selected outer relation: '+RELATIONS[kind]+'. How many direct content parts does '
+            'THIS relation connect in the target? Count parts of one group, not words, linking occurrences '
+            'or all predicates anywhere inside it. A part may contain its own nested relation. '
+            'Do not create nested groups merely to encode a list as first item plus the rest. '
+            'Preserve grouping required by content ownership, negation, modality and other scopes. '
+            'This chooses only the number of direct parts; their source boundaries are selected next. '
+            'If the source leaves different counts possible, select their alternative readings; '
+            '? means insufficient evidence, 0 means none of the offered counts fits.',prerequisites=premises)
+        if arity is None:return None
+        arity_proof=arity[1];requirements=(accepted('structural_operand_count',arity),)
+        contracts=['direct content part '+str(i+1) for i in range(arity[0]['operand_count'])]
     def select(i,groups):
         contract=contracts[i]
         return domain.span(tokens,'structural_operand_'+str(i+1),
             kind+' ('+RELATIONS[kind]+'): select the complete '+contract+'. '+
             ('Include only what is being checked, not what happens as a result. ' if contract=='condition being checked' else
              'Include only this outcome, not the condition or the alternative outcome. ' if contract.startswith('outcome') else '')+
-            'Exclude words linking the two outer parts. Keep any relations nested inside this part.'+
+            'Exclude words linking the outer parts. Keep any relations nested inside this part.'+
             (' Already selected: '+'; '.join(contracts[j]+': «'+' '.join(t.span for t in group)+'»' for j,group in enumerate(groups))+'.' if groups else ''),
             exclude=[t.token_id for g in groups for t in g],
-            covered=[t.token_id for g in groups for t in g],remaining_parts=len(contracts)-i-1)
+            covered=[t.token_id for g in groups for t in g],remaining_parts=len(contracts)-i-1,
+            prerequisites=requirements)
     from .partition_sequences import select_parts
     groups=select_parts(domain,contracts,select)
     if groups is None:return None
@@ -58,8 +83,8 @@ def binary(domain):
         shared=sharing(domain,groups)
         if shared is None:return None
         groups,witness=shared
-        return PartitionProposal(groups,shared_material=witness)
-    return PartitionProposal(groups)
+        return PartitionProposal(groups,shared_material=witness,arity_proof=arity_proof)
+    return PartitionProposal(groups,arity_proof=arity_proof)
 
 
 def content(domain):
