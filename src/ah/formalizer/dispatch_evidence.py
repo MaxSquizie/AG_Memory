@@ -1,6 +1,50 @@
 """Typed external reads for run-local composition tasks; not a second store."""
 
 
+KINDS=frozenset({
+    'MORPHOLOGY_PROVENANCE','MORPHOLOGY_ORIGINAL','READING_QUERY','READING_USE',
+    'READING_DECISION','BUNDLE_CONSTRAINTS','READING_DOMAIN','STRUCTURAL_FOREST',
+    'PARTITION_EXCLUSION','CONDITIONAL_PROOF','REFINEMENT_HOST','CONSTRAINT_SET',
+    'PROOF','INVENTORY_QUERY','INVENTORY','INVENTORY_UNIT','NOMINAL_HOST','RECOVERY_QUERY',
+})
+
+
+DIRECT_QUERIES=frozenset({'CONSTRAINT_SET','READING_QUERY','RECOVERY_QUERY','INVENTORY_QUERY'})
+
+def observation_address(kind,value,expected=True):
+    """Only direct addressed queries supersede their own previous snapshots.
+
+    Exact witness assessments stay cumulative. Cached child obligations are
+    frozen separately and never enter this chronological direct-read map.
+    """
+    from copy import deepcopy
+    if kind not in KINDS:raise ValueError('DISPATCH_EVIDENCE_KIND_UNKNOWN')
+    address=deepcopy(value)
+    if kind in {'CONSTRAINT_SET','READING_QUERY','RECOVERY_QUERY'}:address.pop('signature',None)
+    if kind in DIRECT_QUERIES:return address
+    return [address,expected]
+
+
+def read_record(state,kind,value,expected=True):
+    """Freeze ancestry at consumption, before a repair replaces current rows."""
+    from copy import deepcopy
+    return {'kind':kind,'value':deepcopy(value),'expected':expected,
+            'probe_refs':sorted(evidence_probe_refs(state,kind,value))}
+
+
+def retain_read(previous,current):
+    if previous and current['kind'] not in DIRECT_QUERIES:
+        current['probe_refs']=sorted(set(previous.get('probe_refs',())) | set(current['probe_refs']))
+    return current
+
+
+def read_probe_refs(state,read):
+    # Preserve consumed ancestry AND dependencies used by current replay.
+    # Example: ORIGINAL can acquire a recovery publication as its live source
+    # projection while its requested original reading stays unchanged.
+    return set(read.get('probe_refs',())) | evidence_probe_refs(state,read['kind'],read['value'])
+
+
 def observe(state,kind,value,expected=True):
     from .composition_session import current
     runtime=current(state)
@@ -8,6 +52,9 @@ def observe(state,kind,value,expected=True):
 
 
 def valid(state,kind,value,*,provider_results=None):
+    if kind=='RECOVERY_QUERY':
+        from .recovery_constraints import inspect,signature
+        return signature(inspect(state,value['token_refs'],value.get('condition')))==value['signature']
     if kind=='MORPHOLOGY_PROVENANCE':
         from .morphology_provenance import _live
         return _live(state,value['row'],provider_results)
@@ -40,7 +87,7 @@ def valid(state,kind,value,*,provider_results=None):
     if kind=='CONDITIONAL_PROOF':
         from .structural_conditions import historical
         from .structural_tasks import _licensed
-        return historical(state,value['condition']) and _licensed(state,value['proof'],
+        return (value.get('condition') is None or historical(state,value['condition'])) and _licensed(state,value['proof'],
             _branch=value['condition'],**value['expected_payload'])
     if kind=='REFINEMENT_HOST':
         from .refinement_host_proof import live
@@ -53,6 +100,9 @@ def valid(state,kind,value,*,provider_results=None):
     if kind=='PROOF':
         from .structural_tasks import licensed
         return licensed(state,value['proof'],**value['expected_payload'])
+    if kind=='INVENTORY_UNIT':
+        from .function_inventory import _unit_live
+        return _unit_live(state,value['unit'],condition=value.get('condition'))
     if kind=='INVENTORY_QUERY':
         from .function_inventory import live
         return any(r.get('inventory_kind')==value['kind'] and r.get('inventory_tokens')==value['refs']
@@ -78,7 +128,19 @@ def probe_stamp(state,key):
 
 
 def evidence_probe_refs(state,kind,value):
+    from .evidence_ancestry import collect
+    return collect(state,lambda:_evidence_probe_refs(state,kind,value))
+
+
+def _evidence_probe_refs(state,kind,value):
     """Addresses an explicitly replaced assumption; no validation or observers."""
+    if kind not in KINDS:raise ValueError('DISPATCH_EVIDENCE_KIND_UNKNOWN')
+    if kind=='RECOVERY_QUERY':
+        from .recovery_constraints import probe_refs
+        return probe_refs(state,value['token_refs'],value.get('condition'))
+    if kind=='INVENTORY_UNIT':
+        return evidence_probe_refs(state,'INVENTORY',{'inventory_ref':value['unit'].get('inventory_ref'),
+            'condition':value.get('condition')})
     if kind=='MORPHOLOGY_ORIGINAL':
         from .morphology_provenance import probe_refs
         return set().union(*(probe_refs(state,r) for r in state.syntax_trace
@@ -95,6 +157,9 @@ def evidence_probe_refs(state,kind,value):
         refs=evidence_probe_refs(state,'CONDITIONAL_PROOF',{'proof':proof,'condition':json.loads(w['address']['condition_json'])})
         for parent in (json.loads(w['payload_json']) or {}).get('reading_parent_proofs',()):
             refs.update(evidence_probe_refs(state,'CONDITIONAL_PROOF',{'proof':parent,'condition':value.get('condition')}))
+        if value.get('transfer'):
+            from .morphology_provenance import probe_refs
+            for row in value['transfer'].values():refs.update(probe_refs(state,row))
         return refs
     if kind=='READING_DECISION':
         refs={value['decision_ref']}
@@ -114,11 +179,19 @@ def evidence_probe_refs(state,kind,value):
             for ref in required_inventory_refs(state,value['region_ref'],value['task_scope'],value['token_refs'],frames,value.get('condition')):
                 refs.update(evidence_probe_refs(state,'INVENTORY',{'inventory_ref':ref,'condition':value.get('condition')}))
         return refs
-    if kind in {'NOMINAL_HOST','REFINEMENT_HOST'}:return {value['decision_ref']}
+    if kind=='NOMINAL_HOST':return {value['decision_ref']}
+    if kind=='REFINEMENT_HOST':
+        refs={value['decision_ref']}
+        for proof in value.get('premises',()):
+            refs.update(evidence_probe_refs(state,'PROOF',{'proof':proof}))
+        return refs
+    tasks={(r.get('decision_ref'),r.get('selected')):r for r in state.syntax_trace if r.get('kind')=='STRUCTURAL_TASK'}
     domains={r['task_ref']:r for r in state.syntax_trace if r.get('kind')=='TASK_DOMAIN'}
     def include_packet(packet):
         latest={r['task_ref']:r for r in packet.get('trace',()) if r.get('kind')=='TASK_DOMAIN'}
         for ref,row in latest.items():domains.setdefault(ref,row)
+        selected={(r.get('decision_ref'),r.get('selected')):r for r in packet.get('trace',()) if r.get('kind')=='STRUCTURAL_TASK'}
+        for ref,row in selected.items():tasks.setdefault(ref,row)
     pending=[];refs=set();seen=set()
     if kind in {'PROOF','CONDITIONAL_PROOF'}:
         pending.append(('proof',value.get('proof')))
@@ -156,7 +229,13 @@ def evidence_probe_refs(state,kind,value):
         if item is None:continue
         if typ=='proof':
             if not isinstance(item,dict):continue
+            identity=(item.get('decision_ref'),item.get('candidate_id'))
+            if ('proof',identity) in seen:continue
+            seen.add(('proof',identity))
             if item.get('decision_ref'):refs.add(item['decision_ref'])
+            row=tasks.get(identity,{})
+            pending.extend(('proof',p.get('proof')) for p in row.get('prerequisites',()))
+            pending.append(('condition',row.get('branch_condition')))
             pending.append(('domain',item.get('domain_ref')))
             continue
         key=item if typ=='domain' else item.get('condition_ref')

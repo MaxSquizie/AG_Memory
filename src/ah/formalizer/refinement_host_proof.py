@@ -24,9 +24,8 @@ def live(state,proof):
     if result:
         from .structural_tasks import licensed
         result=all(licensed(state,p) for p in proof.get('premises',()))
-    if result:
-        from .dispatch_evidence import observe
-        observe(state,'REFINEMENT_HOST',proof)
+    from .dispatch_evidence import observe
+    observe(state,'REFINEMENT_HOST',proof,result)
     return result
 
 

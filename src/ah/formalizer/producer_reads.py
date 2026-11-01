@@ -16,13 +16,13 @@ class Reads:
     def __init__(self,dispatcher):
         self.dispatcher=dispatcher;self.external={};self.roots={}
 
-    def observe(self,kind,value,expected=True):
-        address=deepcopy(value)
-        # A source can establish its own roles after observing the initial
-        # empty set. The final read of that same addressed set supersedes it.
-        if kind=='CONSTRAINT_SET':address.pop('signature',None)
+    def observe(self,kind,value,expected=True,record=None):
+        from .dispatch_evidence import observation_address
+        address=observation_address(kind,value,expected)
         key=sha256(dumps([kind,address],protocol=5)).hexdigest()
-        self.external[key]={'kind':kind,'value':deepcopy(value),'expected':expected}
+        from .dispatch_evidence import read_record,retain_read
+        record=deepcopy(record) if record is not None else read_record(self.dispatcher.state,kind,value,expected)
+        self.external[key]=retain_read(self.external.get(key),record)
 
     def task(self,key):
         # Nested and abandoned attempts are represented only by the final
@@ -40,11 +40,11 @@ class Reads:
         self.roots.setdefault(key,{})[revision]=nodes
 
     def discard(self,refs):
-        from .dispatch_evidence import evidence_probe_refs
+        from .dispatch_evidence import read_probe_refs
         refs=set(refs)
         for ref in refs:self.roots.pop(ref,None)
         def depends(row):
-            return {'probe:'+ref for ref in evidence_probe_refs(self.dispatcher.state,row['kind'],row['value'])} & refs
+            return {'probe:'+ref for ref in read_probe_refs(self.dispatcher.state,row)} & refs
         for root,versions in self.roots.items():
             for nodes in versions.values():
                 for ref in refs:nodes.pop(ref,None)
@@ -59,7 +59,7 @@ class Reads:
                 for ref in list(nodes):
                     if ref not in reachable:nodes.pop(ref)
         for key,row in list(self.external.items()):
-            used={'probe:'+ref for ref in evidence_probe_refs(self.dispatcher.state,row['kind'],row['value'])}
+            used={'probe:'+ref for ref in read_probe_refs(self.dispatcher.state,row)}
             if used & refs:self.external.pop(key)
 
     def snapshot(self):
@@ -89,10 +89,15 @@ def capture(dispatcher):
     finally:_active.reset(token)
 
 
-def observe(dispatcher,kind,value,expected):
+def capturing(dispatcher):
+    reads=_active.get()
+    return reads is not None and reads.dispatcher is dispatcher
+
+
+def observe(dispatcher,kind,value,expected,record=None):
     reads=_active.get()
     if reads is not None and reads.dispatcher is dispatcher and not dispatcher.checking_evidence and not dispatcher.stack:
-        reads.observe(kind,value,expected)
+        reads.observe(kind,value,expected,record)
 
 
 def task(dispatcher,key):

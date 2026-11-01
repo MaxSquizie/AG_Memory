@@ -195,6 +195,13 @@ readings и дополнительных мест из inventory) зарегис
 
 ### P04. Связать все чтения оснований с кешем, включая отсутствие данных
 
+**2026-11-01: ACCEPT P04, тот же судья.** Все 18 observation kinds:
+runtime/history, capture/cache replay, query/exact snapshots, frozen+current
+ancestry, адресный discard, provider DAG. Реестр, изменения, проверки и baseline:
+[F05_P04_EVIDENCE_READS.md](F05_P04_EVIDENCE_READS.md).
+Следующий пункт — P05. GUI boundary revision относится к P06/P08;
+P20-validation, performance и весь F05 остаются OPEN.
+
 **Тип:** D/G/V. **Блоки:** 5–6. **Зависимости:** P03.
 **Места:** `dispatch_evidence.valid/evidence_probe_refs`,
 `composition_dispatcher.observe/evidence_valid`, `producer_reads`,

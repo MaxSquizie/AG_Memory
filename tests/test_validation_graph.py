@@ -26,7 +26,7 @@ def test_iterative_deep_dag_and_cycle(monkeypatch):
 
 
 def test_view_identity_preserves_both_task_lookup_orders_and_retirement():
-    state=SimpleNamespace(decisions={},component_probe_records={},syntax_trace=[])
+    state=SimpleNamespace(decisions={},component_probe_records={},morphology_records={},syntax_trace=[])
     a={'kind':'STRUCTURAL_TASK','decision_ref':'D','selected':None,'alternatives':[]}
     b={'kind':'STRUCTURAL_TASK','decision_ref':'D','selected':'PARTITION','alternatives':[]}
     def packet(rows):return {'decisions':{},'probes':{},'trace':rows}
