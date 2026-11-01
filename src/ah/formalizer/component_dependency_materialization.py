@@ -28,6 +28,7 @@ def prepare_candidate(frame,state,release):
     d=frame.semantic['dependency_evidence'];evidence={e.token_id:e for e in state.evidence}
     head,host=d['head_ref'],d['host_ref'];reading=d['morph']
     valid=attested(state,head,reading)
+    if d.get('host_morph'):valid &= attested(state,host,d['host_morph'])
     valid &= frame.semantic['proposed_roles']=={host:cfg['nominal_host_role'],head:cfg['preposition_nominal_role']}
     if kind=='GENITIVE': valid &= 'gen' in reading['cases']
     elif kind=='CASE_DEPENDENCY':

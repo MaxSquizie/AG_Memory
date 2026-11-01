@@ -39,7 +39,7 @@ def resolve(state, release, selector, region, left, right, cfg):
     for row in options.values():
         token=evidence[row['token_ref']]
         values=offer(state,token,[variant(v) for v in row['variants']],
-                     'COORDINATION_CASE',[row['peer_ref']])
+                     'COORDINATION_CASE',[row['peer_ref']],release=release)
         rows.append({**row,'variants':[_morph(v) for v in values]})
     return rows
 

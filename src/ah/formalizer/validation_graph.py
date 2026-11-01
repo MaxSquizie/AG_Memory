@@ -74,6 +74,8 @@ class ValidationGraph:
         # Preserve current authority: packet data only fills absent decisions.
         local=copy(state);local.decisions=dict(state.decisions)
         local.component_probe_records=dict(state.component_probe_records)
+        local.morphology_records=dict(state.morphology_records)
+        for key,value in evidence.get('morphology_records',{}).items():local.morphology_records.setdefault(key,value)
         for key,raw in evidence['decisions'].items():
             if key not in local.decisions:
                 local.decisions[key]=Decision(**{**raw,'grounds':[Ground(**g) for g in raw['grounds']]})
@@ -87,6 +89,8 @@ class ValidationGraph:
                 latest_tasks[row.get('decision_ref')]=row
         base=self.view_keys.get(id(state),(id(state),))[0]
         signature=(base,
+            tuple(sorted(local.morphology_records.items())),
+            tuple(self.hashed(r) for r in local.syntax_trace if r.get('morphology_ref')),
             tuple(sorted((k,self.hashed(v)) for k,v in local.decisions.items())),
             tuple(sorted((k,self.hashed(v)) for k,v in local.component_probe_records.items())),
             frozenset((k,self.hashed(v)) for k,v in domains.items()),

@@ -3,10 +3,10 @@ from .component_policy import _features, _morph, compatible
 from .state import MorphVariant
 
 
-def units(tokens, missing, frame, established):
+def units(tokens, missing, frame, established,*,state):
     covered={t for u in established for t in u['refs']}
     from .nominal_readings import description_heads
-    readings=description_heads(frame)
+    readings=description_heads(frame,state=state)
     for token in tokens:
         if token.token_id not in missing-covered: continue
         for variant in token.variants:

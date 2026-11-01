@@ -8,6 +8,12 @@ def observe(state,kind,value,expected=True):
 
 
 def valid(state,kind,value,*,provider_results=None):
+    if kind=='MORPHOLOGY_PROVENANCE':
+        from .morphology_provenance import _live
+        return _live(state,value['row'],provider_results)
+    if kind=='MORPHOLOGY_ORIGINAL':
+        from .morphology_provenance import _original
+        return _original(state,value['token_ref'],value['reading'])
     if kind=='READING_QUERY':
         from .reading_producers import query_snapshot
         return query_snapshot(state,value['token_ref'],value.get('scope'),value.get('reading'))==value['signature']
@@ -73,6 +79,13 @@ def probe_stamp(state,key):
 
 def evidence_probe_refs(state,kind,value):
     """Addresses an explicitly replaced assumption; no validation or observers."""
+    if kind=='MORPHOLOGY_ORIGINAL':
+        from .morphology_provenance import probe_refs
+        return set().union(*(probe_refs(state,r) for r in state.syntax_trace
+            if r.get('kind')=='MORPHOLOGY_PUBLICATION' and r.get('token_ref')==value['token_ref']))
+    if kind=='MORPHOLOGY_PROVENANCE':
+        from .morphology_provenance import probe_refs
+        return probe_refs(state,value['row'])
     if kind=='READING_QUERY':
         from .reading_producers import query_refs
         return query_refs(state,value['token_ref'],value.get('scope'),value.get('reading'))

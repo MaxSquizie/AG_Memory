@@ -92,7 +92,7 @@ def produce(state,release,selector,region,tokens,cfg,request,forest):
                                 'diagnostics':diagnostics,'obligations':obligations+[
                                     {'kind':'SOURCE_CLOSURE_UNESTABLISHED','source':source}]}
                             from .structural_conditions import execution_basis
-                            packet={'trace':deepcopy(local.syntax_trace),
+                            packet={'morphology_records':dict(local.morphology_records),'trace':deepcopy(local.syntax_trace),
                                 'decisions':{k:asdict(v) for k,v in local.decisions.items()},
                                 'probes':deepcopy(local.component_probe_records),
                                 'context_reads':deepcopy(local.context_reads[context_start:])}
@@ -120,7 +120,7 @@ def produce(state,release,selector,region,tokens,cfg,request,forest):
              'input_slot':canonical(request),'sources':deepcopy(list(task['sources'].values())),
              'status':'PENDING_VALIDATION','producer_complete':False,'structure_complete':False,
              'write_eligible':False,'obligations':[{'kind':'LEXICAL_EVIDENCE_VALIDATION_PENDING'}],
-             'evidence':{'trace':deepcopy(local.syntax_trace[task['begin']:]),
+             'evidence':{'morphology_records':dict(local.morphology_records),'trace':deepcopy(local.syntax_trace[task['begin']:]),
                  'decisions':{k:asdict(v) for k,v in local.decisions.items()},
                  'probes':deepcopy(local.component_probe_records),
                  'diagnostics':[asdict(d) for d in local.diagnostics[task['diagnostics_begin']:]],

@@ -11,8 +11,9 @@ from .task_contracts import SelectionPurpose, required_selection_purpose
 
 def source_signature(state):
     from .composition_dispatcher import canonical
-    return digest(canonical([state.source_uid,state.interpretation_version,state.text,
-                             state.evidence]))
+    from .morphology_provenance import normalized
+    return digest(normalized(canonical([state.source_uid,state.interpretation_version,state.text,
+                             state.evidence])))
 
 
 def parent_signature(state):

@@ -15,6 +15,7 @@ def resource_stamp(runtime,cfg):
 def synchronize(source,target):
     """Current authoritative proofs override saved branch snapshots."""
     if source is target:return
+    target.morphology_records.update(source.morphology_records)
     target.decisions.update(deepcopy(source.decisions))
     target.component_probe_records.update(deepcopy(source.component_probe_records))
     def identity(row):

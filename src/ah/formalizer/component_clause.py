@@ -50,7 +50,7 @@ def _build_clause(state,release,selector,region,tokens,p,cfg, *, select=True, at
     candidates=enumerate_candidates(state,release,cfg,region,tokens,p,temporal,nominals,groups,selector=selector,attachment=attachment,nominal_groups=nominal_groups,infinitive=infinitive,proposition_slots=proposition_slots,agreement_source=agreement_source,pending_roles=pending_roles,qualitative_groups=qualitative_groups,description_context=description_context,required_pending_roles=required_pending_roles)
     for f in candidates:
         from .nominal_readings import attach_groups
-        attach_groups(f,qualitative_groups)
+        attach_groups(f,qualitative_groups,state=state)
         f.semantic['relative_temporal']=[]  # legacy reader field, no new producer
     if not select: return candidates
     if not candidates: return []

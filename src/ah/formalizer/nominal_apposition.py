@@ -34,6 +34,7 @@ def licensed(state, evidence, dependent, cfg):
     rule=next((r for r in rules(cfg) if r['rule_id']==d.get('apposition_rule','LEGACY_NOMINATIVE')),None)
     if not rule or not marker or marker.span not in rule['markers']:return False
     if not evidence[d['host_ref']].end<=marker.start<marker.end<=evidence[d['head_ref']].start:return False
+    if not attested(state,d['head_ref'],d['morph']):return False
     reading=variant(d['morph'])
     if rule['mode']=='NOMINATIVE':return 'nom' in reading.cases
     host=d.get('host_morph')

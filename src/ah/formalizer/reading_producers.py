@@ -4,6 +4,7 @@ from copy import deepcopy
 from . import reading_witnesses as rw
 from .canonical_ledger import digest
 from .morphology_domain import clean,proposed
+from .reading_decisions import UNSPECIFIED,condition_for
 from .composition_dispatcher import canonical
 
 
@@ -27,15 +28,16 @@ def attach(option,bindings):
 
 
 def frame_bindings(state,release,region,frames,*,family,contract=None):
-    from .morphology_domain import frame_readings
+    from .reading_locations import locations
     result=[]
     for f in frames:
-        for location,tid,reading in frame_readings(f):
-            if not proposed(reading):continue
-            use={'kind':family,'frame_ref':f.frame_id,'location':location,
-                 'predicate_ref':f.predicate_token_ref,'role':f.semantic.get('proposed_roles',{}).get(tid),
-                 'parent_contract':contract}
-            result.append(binding(state,release,region,tid,reading,use))
+        for entry in locations(f):
+            if not entry.selected or not proposed(entry.reading):continue
+            use={'kind':family,'frame_ref':f.frame_id,'location':entry.path,
+                 'predicate_ref':f.predicate_token_ref,'role':entry.context.get('role'),
+                 'location_context':entry.context,'parent_contract':contract}
+            result.append(binding(state,release,region,entry.token_ref,entry.reading,use))
+
     return result
 
 
@@ -76,11 +78,11 @@ def issue(state,decision_ref,candidate_id,entries,*,domain=None):
         license_use(state,entry['token_ref'],entry['reading'],decision_ref,candidate_id,witness=w)
 
 
-def assessment(state,w):
+def assessment(state,w,*,condition=UNSPECIFIED):
     """Production wrapper observes both successful and failed strict reads."""
     from .dispatch_evidence import observe
     from .function_inventory import execution_condition
-    condition=execution_condition(state)
+    condition=condition_for(state,condition)
     scope=use_scope(state)
     transfer=transfer_receipt(state,w,scope)
     result=evaluate(state,w,condition,scope,transfer)
@@ -102,15 +104,15 @@ def function_entries(state,release,region,*,kind,head_ref,function_refs,case=Non
     by_id={t.token_id:t for t in state.evidence};refs=list(function_refs);marker=by_id[refs[0]]
     result=[]
     if kind=='RELATION':
-        proposals=offer(state,marker,[MorphVariant(' '.join(by_id[r].span for r in refs),'PREP',origin='CONTEXTUAL')],'RELATION_FUNCTION',refs)
+        proposals=offer(state,marker,[MorphVariant(' '.join(by_id[r].span for r in refs),'PREP',origin='CONTEXTUAL')],'RELATION_FUNCTION',refs,release=release)
     elif kind=='QUANTITY_CASE':
-        proposals=offer(state,marker,[MorphVariant(marker.span,'NUMR',frozenset({case}),origin='CONTEXTUAL')],'QUANTITY_FUNCTION',refs)
+        proposals=offer(state,marker,[MorphVariant(marker.span,'NUMR',frozenset({case}),origin='CONTEXTUAL')],'QUANTITY_FUNCTION',refs,release=release)
     else:proposals=()
     for v in proposals:result.append(binding(state,release,region,marker.token_id,v,
         {'kind':kind,'head_ref':head_ref,'function_refs':refs,'external_case':case}))
     if kind=='SHARED_NOMINAL':
         token=by_id[head_ref]
-        for v in offer(state,token,[MorphVariant(token.span.casefold(),'NOUN',origin='CONTEXTUAL')],'SHARED_NOMINAL_FUNCTION',refs):
+        for v in offer(state,token,[MorphVariant(token.span.casefold(),'NOUN',origin='CONTEXTUAL')],'SHARED_NOMINAL_FUNCTION',refs,release=release):
             result.append(binding(state,release,region,head_ref,v,{'kind':kind,'head_ref':head_ref,'function_refs':refs}))
     return result
 
@@ -144,11 +146,12 @@ def query_rows(state,token_ref,scope,reading=None):
     for r in state.syntax_trace:
         if r.get('token_ref')!=token_ref:continue
         kind=r.get('kind')
-        if reading is not None and kind in {'MORPHOLOGY_USE','MORPHOLOGY_PROPOSAL'} and r.get('reading')!=clean(reading):continue
+        if reading is not None and kind in {'MORPHOLOGY_USE','MORPHOLOGY_PROPOSAL'} and clean(r.get('reading',{}))!=clean(reading):continue
+        if reading is not None and kind=='MORPHOLOGY_DOMAIN' and clean(reading) not in [clean(v) for v in r.get('proposals',())]:continue
         if kind=='MORPHOLOGY_USE':
             if scope is not None and r.get('witness',{}).get('address',{}).get('input_scope')!=scope['input_scope']:
                 if not r.get('witness') or transfer_receipt(state,restore(r['witness']),scope) is None:continue
-        elif kind in {'MORPHOLOGY_PROPOSAL','MORPHOLOGY_FUNCTION_RESTRICTION','MORPHOLOGY_FUNCTION_IMPORT'}:
+        elif kind in {'MORPHOLOGY_DOMAIN','MORPHOLOGY_PROPOSAL','MORPHOLOGY_FUNCTION_RESTRICTION','MORPHOLOGY_FUNCTION_IMPORT'}:
             if scope is not None and r.get('task_scope') not in (None,scope['morphology_scope']):
                 if kind!='MORPHOLOGY_FUNCTION_RESTRICTION' or digest(r) not in imported_refs:continue
         else:continue
@@ -209,6 +212,8 @@ def oov_transfer(state,w,scope,transfer,provider_results=None):
     if transfer is None or transfer!=transfer_receipt(state,w,scope):return False
     if w.token_ref not in scope['token_refs']:return False
     imported=transfer['import'];row=transfer['restriction'];address=row.get('address',{})
+    from .morphology_provenance import _live
+    if not _live(state,imported,provider_results) or not _live(state,row,provider_results):return False
     if not provider_live(state,imported,provider_results):return False
     if (address.get('token_ref')!=w.token_ref or address.get('source_range')!=list(w.source_range)
         or address.get('source_uid')!=state.source_uid
@@ -235,3 +240,54 @@ def memberships(state,domain):
             if checked.permission!='DOMAIN_MEMBERSHIP':raise ValueError('READING_DOMAIN_MEMBERSHIP_UNGROUNDED')
             result.append(asdict(w))
     return result
+
+
+def location_supported(state,frame,entry,frames=(),condition=UNSPECIFIED):
+    """Check explicit control transfers with an iterative parent walk."""
+    from .control_arguments import inherited_role
+    from .reading_locations import locations
+    parents={f.frame_id:f for f in [*state.frames,*frames]}
+    pending=[(frame,entry)];seen=set()
+    while pending:
+        owner,location=pending.pop()
+        address=(owner.frame_id,location.path,location.token_ref)
+        if address in seen:continue
+        seen.add(address)
+        if _location_direct(state,owner,location,condition):return True
+        binding=owner.semantic.get('control_binding')
+        if not binding:continue
+        parent=parents.get(binding['frame_ref'])
+        if parent and inherited_role(owner,location.token_ref,parents):
+            pending.extend((parent,source) for source in locations(parent)
+                if source.path=='morph_bindings' and source.token_ref==location.token_ref
+                and clean(source.reading)==clean(location.reading))
+    return False
+
+
+def _location_direct(state,frame,entry,condition):
+    import json
+    from .morphology_provenance import live
+    for row in query_rows(state,entry.token_ref,use_scope(state),entry.reading):
+        if row.get('kind')!='MORPHOLOGY_USE' or not live(state,row):continue
+        w=restore(row['witness'])
+        if not assessment(state,w,condition=condition).selected_use:continue
+        use=json.loads(w.use_json);kind=use['kind']
+        if kind in {'OOV_POS','RELATION','SHARED_NOMINAL','QUANTITY_CASE','QUANTITY_INTERNAL'}:
+            # These establish morphological availability, not a new participant role.
+            return True
+        if kind in {'BUNDLE','CHILD_OUTPUT'}:
+            if (use.get('frame_ref')==frame.frame_id and use.get('location')==entry.path
+                and use.get('predicate_ref')==frame.predicate_token_ref
+                and use.get('role')==entry.context.get('role')
+                and use.get('location_context')==entry.context):return True
+        if kind=='DEPENDENCY':
+            attachment=use['attachment']
+            if use.get('predicate_ref')!=frame.predicate_token_ref:continue
+            if attachment['kind']=='ROOT':
+                if attachment['role']==entry.context.get('role'):return True
+            elif all(attachment.get(k)==entry.context.get(k) for k in ('kind','host_ref','host_layer','case')):return True
+        if kind=='BINDER':
+            b=frame.semantic.get('quantifier_restriction',{})
+            if (use.get('head_ref')==entry.token_ref and use.get('binding_slot')==b.get('binding_slot')
+                and use.get('role')==entry.context.get('role')):return True
+    return False

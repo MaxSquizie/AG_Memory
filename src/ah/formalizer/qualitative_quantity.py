@@ -25,6 +25,8 @@ def agrees(predicate):
 
 def resolve(state, release, selector, region, tokens, cfg):
     if not cfg.get('nominal_host_role'):return tokens, []
+    from .morphology_provenance import capture
+    capture(state,release=release)
     from .nominal_functions import prepared,rows
     from .function_inventory import current
     if current(state,'NOMINAL',tokens,cfg.get('_task_constraints'),require=True) is not None:return general_groups(state,release,tokens,rows(state,tokens,'QUANTITY'))
@@ -75,6 +77,12 @@ def resolve(state, release, selector, region, tokens, cfg):
              'quantity_token_refs':[t.token_id for t in r['quantity_tokens']],
              'quantity_surface':state.text[start:r['quantity_tokens'][-1].end],
              'quantity_expression':r['expression']}
+        row['kind']='QUANTITY_COMPOSITION'
+        row['external_cases']=cases
+        from .reading_decisions import receipt
+        row['selection_receipt']=receipt(state,key)
+        from .morphology_provenance import issue as issue_record
+        issue_record(state,row,[head.token_id,*row['quantity_token_refs']],release=release)
         groups.append(row)
         readings[head.token_id]=tuple(MorphVariant(nouns[0].lemma,'NOUN',frozenset({c}),
             features=frozenset({'NOUN','QUALITATIVE_GROUP'}),origin='CONTEXTUAL',
@@ -101,7 +109,7 @@ def general_groups(state,release,tokens,sources):
         # This contextual NUMR is the selected quantity-unit function. It
         # does not claim a dictionary lemma, cardinal value, gender or number.
         variants=offer(state,marker,[MorphVariant(marker.span,'NUMR',frozenset({case}),origin='CONTEXTUAL')],
-                       'QUANTITY_FUNCTION',refs)
+                       'QUANTITY_FUNCTION',refs,release=release)
         from .reading_producers import issue,proof_entries
         issue(state,key,case,proof_entries(state,source['case_proof']))
         internals=[_morph(v) for v in nouns]
@@ -114,7 +122,13 @@ def general_groups(state,release,tokens,sources):
         external=[MorphVariant(v.lemma,'NOUN',frozenset({case}),features=frozenset({'NOUN','QUALITATIVE_GROUP'}),
                               origin='CONTEXTUAL',evidence_refs=(key,marker.token_id,head.token_id)) for v in nouns]
         readings[head.token_id]=tuple({digest(_morph(v)):v for v in external}.values())
-        groups.append(row);state.syntax_trace.append({'kind':'QUANTITY_COMPOSITION',**row})
+        from .morphology_provenance import issue as issue_record
+        row['kind']='QUANTITY_COMPOSITION'
+        row['source_proofs']=source['proofs']
+        from .reading_decisions import receipt
+        row['selection_receipt']=receipt(state,key)
+        issue_record(state,row,[head.token_id,*refs],release=release)
+        groups.append(row);state.syntax_trace.append(row)
     return [replace(t,variants=readings[t.token_id]) if t.token_id in readings else t for t in tokens],groups
 
 

@@ -15,6 +15,8 @@ def distance(a,b):
 
 
 def resolve(state,release,selector,morph,*,areas=None):
+    from .morphology_provenance import capture,issue
+    capture(state,release=release)
     cfg=policy(release) or {};rule=cfg.get('agreement_recovery')
     if not rule:return
     from .pipeline import MorphProvider
@@ -49,7 +51,7 @@ def resolve(state,release,selector,morph,*,areas=None):
                 state.diag('LEXICAL_RECOVERY_INCOMPLETE',key);continue
             from .probe_wording import reading as reading_text
             choices=[{'candidate_id':'KEEP','label':'Keep «'+token.span+'» as written; no licensed correction established'}]
-            choices += [{'candidate_id':cid,'label':'Explicit inflection correction «'+token.span+'» → «'+surface+'»; same dictionary lexeme; '+reading_text(_morph(v))} for cid,(surface,v) in candidates.items()]
+            choices += [{'candidate_id':cid,'replacement_surface':surface,'replacement_reading':_morph(v),'head_ref':head.token_id,'head_readings':[_morph(n) for n in nouns],'label':'Explicit inflection correction «'+token.span+'» → «'+surface+'»; same dictionary lexeme; '+reading_text(_morph(v))} for cid,(surface,v) in candidates.items()]
             from .component_source import view,probe_context
             context,target=probe_context(state,region,cfg,view(state,region,tokens))
             chosen=_probe(state,selector,release,key,'lexical_recovery',choices,context,region.source_range,
@@ -64,4 +66,15 @@ def resolve(state,release,selector,morph,*,areas=None):
                 'original_variants':[_morph(x) for x in token.variants]}
             token.variants=(replace(v,origin='RECOVERED',evidence_refs=(*v.evidence_refs,head.token_id,key)),)
             token.lemma=v.lemma;token.pos=v.pos;token.cases=v.cases;token.lex_status='RECOVERY_SELECTED'
-            row.update(recovered_reading=clean(token.variants[0]),lexical_recovery=token.lexical_recovery)
+            from .reading_decisions import receipt
+            row.update(recovered_reading=clean(token.variants[0]),lexical_recovery=token.lexical_recovery,
+                       selection_receipt=receipt(state,key),resource_sha256=release.sha256,rule=dict(rule))
+            issue(state,row,[token.token_id,head.token_id],release=release)
+            if any(token is source for source in state.evidence):
+                # The legacy whole-document adapter mutates the public token;
+                # scoped composition publishes only its final selected copies.
+                from .morphology_provenance import token_source
+                publication={'kind':'MORPHOLOGY_PUBLICATION','token_ref':token.token_id,
+                    'recovery_ref':row['morphology_ref'],'published':token_source(token)}
+                issue(state,publication,[token.token_id],release=release)
+                state.syntax_trace.append(publication)

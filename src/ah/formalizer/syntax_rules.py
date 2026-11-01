@@ -522,6 +522,9 @@ def _identity(match, state):
 def run_srl(state, release, morph):
     from .pipeline import MorphProvider
     provider = morph or MorphProvider()
+    state.morphology_manifest=(provider.provenance() if callable(getattr(provider,'provenance',None)) else
+        {'provider':type(provider).__module__+'.'+type(provider).__qualname__,
+         'authority':'DECLARED_SOURCE_ADAPTER','provider_version':getattr(provider,'version',None)})
     for token in state.evidence:
         from .morph_evidence import partition
         token.variants = partition(token, provider.analyze(token.span))

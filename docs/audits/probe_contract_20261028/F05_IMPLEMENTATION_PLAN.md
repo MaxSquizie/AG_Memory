@@ -167,6 +167,11 @@ fallback. Каждый адаптер проверен на wrong token, whole r
 
 ### P03. Неизменяемые morphology witnesses и полный обход потребителей
 
+**2026-11-01: ACCEPT P03, тот же судья.**
+Покрытие producers/origins/typed locations/historical packets/late gates и границы
+доказательств: [F05_P03_MORPHOLOGY_PROVENANCE.md](F05_P03_MORPHOLOGY_PROVENANCE.md).
+Полный аудит кеша остаётся P04; P20-validation и весь F05 открыты.
+
 **Тип:** D/G. **Блоки:** 2–6. **Зависимости:** P01–P02.
 **Места:** `morphology_domain.project/attested/function_restrictions`,
 `nominal_readings.attested`, `composition_morphology.publish_recoveries`,

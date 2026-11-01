@@ -38,9 +38,18 @@ def inspect(state,key,condition=None):
     return {'selected':None if retired else selected,'stamp':stamp,'proof':proof}
 
 
-def selected(state,key):
-    from .function_inventory import execution_condition
-    condition=execution_condition(state)
+UNSPECIFIED=object()
+
+
+def condition_for(state,condition):
+    if condition is UNSPECIFIED:
+        from .function_inventory import execution_condition
+        return execution_condition(state)
+    return condition
+
+
+def selected(state,key,*,condition=UNSPECIFIED):
+    condition=condition_for(state,condition)
     result=inspect(state,key,condition)
     from .dispatch_evidence import observe
     observe(state,'READING_DECISION',{'decision_ref':key,'condition':condition,

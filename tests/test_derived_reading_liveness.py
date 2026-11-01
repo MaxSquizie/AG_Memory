@@ -15,25 +15,45 @@ def setup(kind):
         from test_reading_producers import prepared
         state,token,reading,_=prepared()
         return state,token,reading
-    state=t0('example');base=MorphVariant('example','ADJF',frozenset({'nom'}))
-    token=NS(token_id='t',variants=(base,),span='example',start=0,end=7)
-    state.evidence=[token]
-    cid='NOMINAL' if kind=='substantive' else 'selected'
+    from ah.formalizer.morphology_provenance import capture,issue
+    from ah.formalizer.nominal_readings import clean as cleaned
+    state=t0('example quantity');token=state.evidence[0];token.token_id='t'
+    marker=state.evidence[1];marker.token_id='q'
+    base=MorphVariant('example','ADJF' if kind!='quantity' else 'NOUN',frozenset({'nom'}),origin='DICTIONARY')
+    token.variants=(base,);marker.variants=(MorphVariant('quantity','NUMR',origin='DICTIONARY'),)
+    capture(state)
+    cid='selected'
     state.decisions['d']=Decision('nominal_attachment','f',(cid,),selected=(cid,),
         grounds=[Ground('M','scripted choice',cid)])
     if kind=='recovered':
-        value=replace(base,origin='RECOVERED',evidence_refs=('dictionary','t','d'))
-        state.syntax_trace.append(dict(kind='AGREEMENT_RECOVERY',token_ref='t',selected=cid,
-            recovered_reading=clean(value),lexical_recovery={'decision_ref':'d'}))
+        value=replace(base,origin='RECOVERED',evidence_refs=('q','d'))
+        row=dict(kind='AGREEMENT_RECOVERY',token_ref='t',head_ref='q',selected=cid,
+            original_variants=[clean(base)],recovered_reading=clean(value),
+            options=[dict(candidate_id=cid,head_ref='q',replacement_reading=clean(base),replacement_surface='example')],
+            lexical_recovery={'decision_ref':'d','surface':'example'},selection_receipt=receipt(state,'d'))
+        issue(state,row,['t','q']);state.syntax_trace.append(row)
     elif kind=='substantive':
-        value=replace(base,pos='NOUN',features=(base.features-{'ADJF'})|{'NOUN','SUBSTANTIVE'},
-                      origin='CONTEXTUAL',evidence_refs=('d','t'))
+        from ah.formalizer.contextual_substantives import overlay
+        from ah.formalizer.regions import TextRegion
+        from ah.formalizer.reading_producers import binding,attach,from_selection
+        from ah.formalizer.component_probe import _probe
+        from test_composition_dispatcher import First
+        release=NS(sha256='test');region=TextRegion('r','SENTENCE',(0,len(state.text)),('t','q'),None)
+        # Source adapters bind their release before issuing a transformation.
+        state.resource_snapshot={'snapshot_id':'test'}
+        projected=overlay(state,release,First(),region,[token],{'substantive_readings':'CONTEXTUAL_SUBSTANTIVE_V1'})
+        value=projected[0].variants[-1]
+        entry=binding(state,release,region,'t',value,{'kind':'ARGUMENT','role':'SUBJECT'})
+        assert _probe(state,First(),release,'d','nominal_attachment',
+            [attach({'candidate_id':cid,'label':'Nominal use'},[entry])],state.text,region.source_range,
+            question='Which function does this occurrence have?',target_refs=('t','q'))==cid
+        license_use(state,'t',clean(value),'d',cid,witness=from_selection(state,'d',cid,entry))
     else:
-        base=replace(base,pos='NOUN');token.variants=(base,)
         value=MorphVariant(base.lemma,'NOUN',frozenset({'nom'}),features=frozenset({'NOUN','QUALITATIVE_GROUP'}),
                           origin='CONTEXTUAL',evidence_refs=('d','q','t'))
-        state.syntax_trace.append(dict(kind='QUANTITY_COMPOSITION',head_ref='t',decision_ref='d',
-            marker_ref='q',internal_readings=[clean(base)],external_cases=['nom']))
+        row=dict(kind='QUANTITY_COMPOSITION',head_ref='t',decision_ref='d',
+            marker_ref='q',internal_readings=[clean(base)],external_cases=['nom'],selection_receipt=receipt(state,'d'))
+        issue(state,row,['t','q']);state.syntax_trace.append(row)
     return state,token,clean(value)
 
 
@@ -71,7 +91,7 @@ def test_cached_consumer_without_reexecuting_probe_observes_retirement(monkeypat
     from ah.formalizer.composition_dispatcher import Dispatcher
     from ah.formalizer import composition_session
     state,_,reading=setup('recovered');dispatcher=Dispatcher(state)
-    monkeypatch.setattr(composition_session,'current',lambda _:NS(dispatcher=dispatcher))
+    monkeypatch.setattr(composition_session,'current',lambda _:NS(dispatcher=dispatcher,release=NS(sha256=state.resource_snapshot.get('snapshot_id'))))
     calls=[]
     def compute():calls.append(1);return attested(state,'t',reading)
     assert dispatcher.run('use',[],compute,kind='TEST')

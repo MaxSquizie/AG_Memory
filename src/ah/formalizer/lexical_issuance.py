@@ -110,6 +110,9 @@ def assess(state,result,source):
             outputs.append({'root_ref':root,'status':'INVALID_PRODUCER_OUTPUT',
                             'obligations':['BUNDLE_MEMBERSHIP_INVALID']});continue
         owned=[by_id[ref] for ref in refs]
+        from .morphology_domain import validate_uses
+        try:validate_uses(local,owned,condition=result['condition'])
+        except ValueError as exc:unknown.append({'kind':str(exc)})
         try:
             referenced=set().union(*(leaves(expression(f)) for f in owned),
                 *(leaves(slot.tree) for f in owned for slot in slots(f)))

@@ -715,6 +715,9 @@ def _interpret_state(state,text,selector,release,observation,morph,context_reade
             state.frames.append(FrameCandidate(**raw))
         state.logical_roots=deepcopy(frozen_generation['logical_roots'])
         state.syntax_trace=deepcopy(frozen_generation['syntax_trace'])
+        state.morphology_records=deepcopy(frozen_generation.get('morphology_records',{}))
+        # Original evidence is freshly produced by T1; old records must match it.
+
         for raw in frozen_generation['linked_alternatives']:
             raw=deepcopy(raw); raw['provenance']=ResourceProvenance(**raw['provenance'])
             state.linked_alternatives.append(LinkedAlternative(**raw))
@@ -778,6 +781,7 @@ def _interpret_state(state,text,selector,release,observation,morph,context_reade
     prepare_spatial(state,release,selector)
     from .lexical_snapshot import freeze as freeze_lexical
     state.generation_snapshot={'resource_snapshot':release.sha256,
+        'morphology_records':deepcopy(state.morphology_records),
         'document_scopes':deepcopy(state.document_scopes),
         'lexical_decisions':freeze_lexical(state.evidence),
         'component_probe_records':deepcopy(state.component_probe_records),
@@ -854,6 +858,13 @@ def _interpret_state(state,text,selector,release,observation,morph,context_reade
     candidate_specs={}
     parent_frames={f.frame_id:f for f in state.frames}
     for frame in state.frames:
+        from .morphology_domain import validate_uses
+        try:validate_uses(state,[frame])
+        except ValueError as error:
+            frame.semantic['structural_unresolved']=True
+            state.diag(str(error),frame.frame_id)
+            candidate_specs[frame.frame_id]=[]
+            continue
         from .structural_tasks import licensed as task_licensed
         from .content_reference_functions import validate_reference
         if any(not validate_reference(state,frame,role,slot) for role,slot in frame.semantic.get('proposition_args',{}).items()):
@@ -1033,6 +1044,7 @@ def _interpret_state(state,text,selector,release,observation,morph,context_reade
     # The clarification snapshot includes the full prepared gap inventory.
     state.generation_snapshot['frames']=[asdict(f) for f in state.frames]
     state.generation_snapshot['syntax_trace']=deepcopy(state.syntax_trace)
+    state.generation_snapshot['morphology_records']=deepcopy(state.morphology_records)
     state.generation_snapshot['component_probe_records']=deepcopy(state.component_probe_records)
     structural_seal(state)
     resolve_references(state,reference_slots,selector,release)

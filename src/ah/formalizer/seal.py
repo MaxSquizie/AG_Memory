@@ -55,6 +55,7 @@ def _canonical_records(state: FormalizationState) -> list[dict]:
             rec["_kind"] = tag
             records.append(rec)
     records.extend({**rec, '_kind': 'syntax_trace'} for rec in state.syntax_trace)
+    records.append({'_kind':'morphology_sources','source':state.morphology_source,'manifest':state.morphology_manifest,'records':state.morphology_records})
     records.extend({'_kind':'logical_root','tree':rec} for rec in state.logical_roots)
     if state.query_intents:
         records.extend({'_kind':'query_intent',**rec} for rec in state.query_intents)
@@ -93,6 +94,9 @@ def structural_hash(state: FormalizationState) -> str:
 
 def validate_closure(state: FormalizationState) -> tuple[str, ...]:
     """Return descriptions of dangling references (empty when the set is self-contained)."""
+    from .morphology_domain import validate_uses
+    try:validate_uses(state,[f for f in state.frames if not f.semantic.get('structural_unresolved')])
+    except ValueError as exc:return (str(exc),)
     from .scope_boundaries import validate as validate_scope_boundaries
     try:
         validate_scope_boundaries([f for f in state.frames if not f.semantic.get('structural_unresolved')])

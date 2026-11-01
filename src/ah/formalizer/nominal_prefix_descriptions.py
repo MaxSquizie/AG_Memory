@@ -12,9 +12,9 @@ def pending_refs(frame,tokens):
             and not functional(evidence[t]) and any(v.pos in {'ADJF','PRTF'} for v in evidence[t].variants)}
 
 
-def units(tokens,missing,frame):
+def units(tokens,missing,frame,*,state):
     from .nominal_readings import description_heads
-    readings=description_heads(frame)
+    readings=description_heads(frame,state=state)
     for i,head in enumerate(tokens):
         raw=readings.get(head.token_id)
         if not raw or raw['pos'] not in {'NOUN','NPRO'}:continue

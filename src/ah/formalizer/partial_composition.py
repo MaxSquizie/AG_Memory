@@ -89,6 +89,8 @@ def validate(state,record,frames):
         for child in edges[ref]:visit(child,active|{ref})
         done.add(ref)
     for ref in edges:visit(ref,set())
+    from .morphology_domain import validate_uses
+    validate_uses(state,[by_id[ref] for ref in seen],domains=record['reading_domains'])
     return True
 
 

@@ -103,7 +103,7 @@ def produce(state,release,selector,region,tokens,cfg,request,forest):
         else:row['obligations'].append({'kind':'PARTITION_PRODUCTION_PENDING'})
         # Conditional evidence is nested, not merged into globally selectable
         # state. Each record keeps enough provenance for inspection and replay.
-        row['evidence']={'trace':deepcopy(local.syntax_trace[begin:]),
+        row['evidence']={'morphology_records':dict(local.morphology_records),'trace':deepcopy(local.syntax_trace[begin:]),
             'decisions':{k:asdict(v) for k,v in local.decisions.items() if k not in old_decisions},
             'probes':{k:deepcopy(v) for k,v in local.component_probe_records.items() if k not in old_probes},
             'diagnostics':[asdict(d) for d in local.diagnostics[diagnostics_begin:]],
@@ -128,6 +128,8 @@ def evidence_state(state,shell,*,read_only=False):
     local=copy(state) if read_only else deepcopy(state);evidence=shell['evidence']
     if read_only:
         local.decisions=dict(state.decisions);local.component_probe_records=dict(state.component_probe_records)
+    local.morphology_records=dict(state.morphology_records)
+    for key,value in evidence.get('morphology_records',{}).items():local.morphology_records.setdefault(key,value)
     for key,raw in evidence['decisions'].items():
         raw=deepcopy(raw);raw['grounds']=[Ground(**g) for g in raw['grounds']]
         local.decisions.setdefault(key,Decision(**raw))

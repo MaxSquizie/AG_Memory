@@ -1,5 +1,12 @@
 # F05: текущий контрольный реестр
 
+2026-11-01: **P03 принят тем же судьёй**.
+[F05_P03_MORPHOLOGY_PROVENANCE.md](F05_P03_MORPHOLOGY_PROVENANCE.md): immutable
+source/producer records, typed parent dependencies, registry consumers, conditional
+permissions, historical packets и поздний отзыв перед записью. Новые cache reads
+подключены, отрицательный candidate query и адресные зависимости проверены.
+Следующий этап — P04; P20-validation и все шесть блоков F05 остаются OPEN.
+
 2026-11-01: **P02 принят тем же судьёй**.
 [F05_P02_PRODUCER_WITNESSES.md](F05_P02_PRODUCER_WITNESSES.md): все семь reading-use
 producer adapters и два partial-domain producer переведены на typed witnesses.

@@ -23,6 +23,8 @@ cfg={'max_candidates':8,'context_chars':2000}
 def run(readings,answer='1'):
     s=t0('каждый студент');s.budget.llm_limit=20
     a,t=s.evidence;a.variants=(marker,);t.variants=tuple(readings)
+    from ah.formalizer.morphology_provenance import capture
+    capture(s,release=release)
     r=TextRegion('r','SENTENCE',(0,len(s.text)),tuple(x.token_id for x in s.evidence),None)
     frames=[FrameCandidate('f'+str(i),'FLAT','body',(),argument_token_refs=(t.token_id,),
         semantic={'morph_bindings':{t.token_id:clean(v)}}) for i,v in enumerate(readings)]

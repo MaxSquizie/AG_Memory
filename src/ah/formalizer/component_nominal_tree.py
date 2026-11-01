@@ -23,7 +23,7 @@ def bundles(state,release,selector,region,tokens,frame,cfg):
         # description's attachment to a different nominal.
         units=[]
         from .nominal_residual_descriptions import units as residual_units
-        if cfg.get('nominal_host_role'):units.extend(list(residual_units(tokens,missing,frame,units)))
+        if cfg.get('nominal_host_role'):units.extend(list(residual_units(tokens,missing,frame,units,state=state)))
         from .implicit_descriptions import units as implicit_units
         if cfg.get('nominal_host_role'):units.extend(implicit_units(tokens,missing,frame,cfg))
         from .qualitative_quantity import units as quantity_units

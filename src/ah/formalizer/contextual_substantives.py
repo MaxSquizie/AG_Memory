@@ -17,6 +17,8 @@ def nominal_use(token, reading):
 
 def overlay(state,release,selector,region,tokens,cfg):
     if cfg.get('substantive_readings')!='CONTEXTUAL_SUBSTANTIVE_V1':return tokens
+    from .morphology_provenance import capture,issue
+    capture(state,release=release)
     result=[]
     for e in tokens:
         variants=[v for v in e.variants if v.pos=='ADJF' and not v.features & {'Anum','Apro'}]
@@ -25,7 +27,10 @@ def overlay(state,release,selector,region,tokens,cfg):
             result.append(e);continue
         readings=tuple(nominal_use(e,v) for v in variants)
         result.append(replace(e,variants=(*e.variants,*readings)))
-        state.syntax_trace.append({'kind':'MORPHOLOGY_DOMAIN','region_ref':region.region_id,
+        from .morphology_domain import scope_fields
+        row={'kind':'MORPHOLOGY_DOMAIN',**scope_fields(state),'region_ref':region.region_id,
             'token_ref':e.token_id,'source_variants':[_morph(v) for v in e.variants],
-            'proposals':[_morph(v) for v in readings]})
+            'proposals':[_morph(v) for v in readings]}
+        issue(state,row,[e.token_id],release=release)
+        state.syntax_trace.append(row)
     return result

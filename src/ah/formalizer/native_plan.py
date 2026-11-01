@@ -27,6 +27,8 @@ def build_plan(state,release,store):
         if fid in active: raise ValueError('CYCLIC_PROPOSITION_ARGUMENT')
         active=active|{fid}
         f=frames[fid]
+        from .morphology_domain import validate_uses
+        validate_uses(state,[f])
         from .function_inventory import frame_live
         if not frame_live(state,f):raise ValueError('FUNCTION_INVENTORY_UNRESOLVED')
         from .component_constraints import frame_hosts_live

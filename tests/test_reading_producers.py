@@ -59,7 +59,7 @@ def test_negative_cached_query_is_invalidated_when_exact_use_is_issued(monkeypat
     from ah.formalizer.composition_dispatcher import Dispatcher
     from ah.formalizer import composition_session
     state,token,reading,w=prepared(issue_use=False);dispatcher=Dispatcher(state)
-    monkeypatch.setattr(composition_session,'current',lambda _:NS(dispatcher=dispatcher))
+    monkeypatch.setattr(composition_session,'current',lambda _:NS(dispatcher=dispatcher,release=NS(sha256=state.resource_snapshot.get('snapshot_id'))))
     calls=[]
     def compute():calls.append(1);return attested(state,token,reading)
     assert not dispatcher.run('consumer',[],compute,kind='TEST')

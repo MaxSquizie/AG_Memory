@@ -41,9 +41,12 @@ def prepare(runtime,region,tokens,request,cfg):
     scope=runtime.morphology_scope
     for row in inherited:
         ref=digest(row);provider,version=origins[ref]
-        state.syntax_trace.append({'kind':'MORPHOLOGY_FUNCTION_IMPORT','task_scope':scope,
+        from .morphology_provenance import issue
+        imported={'kind':'MORPHOLOGY_FUNCTION_IMPORT','task_scope':scope,
             'token_ref':row['token_ref'],'function_ref':ref,'via_scope':parent_scope,
-            'parent_task':provider,'parent_revision':version})
+            'parent_task':provider,'parent_revision':version}
+        issue(state,imported,[row['token_ref']])
+        state.syntax_trace.append(imported)
     area={'source_range':region.source_range,'token_refs':[t.token_id for t in tokens]}
     def recover():
         local=deepcopy(source)
@@ -91,6 +94,13 @@ def publish_recoveries(state,frames):
         for row in reversed(state.syntax_trace):
             if row.get('kind')!='AGREEMENT_RECOVERY' or row['token_ref']!=token.token_id:continue
             if row.get('recovered_reading')!=clean(reading):continue
+            from .morphology_provenance import issue,token_source
+            recovery_ref=row.get('morphology_ref')
             token.variants=(variant(reading),);token.lemma=reading['lemma'];token.pos=reading['pos']
             token.cases=frozenset(reading['cases']);token.lex_status='RECOVERY_SELECTED'
-            token.lexical_recovery=deepcopy(row['lexical_recovery']);break
+            token.lexical_recovery=deepcopy(row['lexical_recovery'])
+            published={'kind':'MORPHOLOGY_PUBLICATION','token_ref':token.token_id,
+                'recovery_ref':recovery_ref,'published':token_source(token)}
+            issue(state,published,[token.token_id])
+            state.syntax_trace.append(published)
+            break

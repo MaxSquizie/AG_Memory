@@ -16,6 +16,10 @@ def valid(state,task_ref,revision):
         soft=[]
         for read in row.get('evidence_reads',()):
             transfer=read.get('value',{}).get('transfer') if read['kind']=='READING_USE' else None
+            if read['kind']=='MORPHOLOGY_PROVENANCE':
+                imported=read['value']['row']
+                if imported.get('kind')=='MORPHOLOGY_FUNCTION_IMPORT':
+                    soft.append((imported['parent_task'],imported['parent_revision']))
             if transfer:
                 imp=transfer['import'];soft.append((imp['parent_task'],imp['parent_revision']))
         return hard,soft

@@ -347,6 +347,9 @@ class FormalizationState:
     miss_reports: list[str] = field(default_factory=list)
     observation: dict = field(default_factory=dict)
     resource_snapshot: dict = field(default_factory=dict)
+    morphology_source: str = ""
+    morphology_manifest: dict = field(default_factory=dict)
+    morphology_records: dict[str,str] = field(default_factory=dict)
     syntax_trace: list[dict] = field(default_factory=list)
     grammar_search_incomplete: bool = False
     logical_roots: list[dict] = field(default_factory=list)  # formulas without lexical PREDICATE leaves

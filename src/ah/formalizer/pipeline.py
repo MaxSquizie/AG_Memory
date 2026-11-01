@@ -189,6 +189,12 @@ class MorphProvider:
 
         self._morph = MorphAnalyzer()
 
+    def provenance(self):
+        from importlib.metadata import version
+        return {'provider':type(self).__module__+'.'+type(self).__qualname__,
+                'provider_version':version('pymorphy3'),
+                'dictionary':dict(self._morph.dictionary.meta)}
+
     def analyze(self, token: str) -> tuple[MorphVariant, ...]:
         return tuple(self._variant(p,token) for p in self._morph.parse(token))
 
@@ -308,6 +314,14 @@ def t1(state: FormalizationState, morph: MorphProvider | None = None, *, preserv
             provenance=ResourceProvenance(pattern_ids=("B0_no_boundary", "B1_new_predicative_center")),
         )
         state.decisions[f"boundary|unit:{state.source_uid}"] = dec
+    from .morphology_provenance import capture
+    manifest=(provider.provenance() if callable(getattr(provider,'provenance',None)) else
+              {'provider':type(provider).__module__+'.'+type(provider).__qualname__,
+               'authority':'DECLARED_SOURCE_ADAPTER','provider_version':getattr(provider,'version',None)})
+    if preserve_variants and state.morphology_manifest:manifest=state.morphology_manifest
+    capture(state,{**manifest,'preserved_input':preserve_variants,
+                   'resource':state.resource_snapshot.copy(),
+                   'shared_form_expansion':shared_form_expansion})
     return state
 
 

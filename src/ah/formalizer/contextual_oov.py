@@ -37,7 +37,7 @@ def resolve(state,release,selector,*,areas=None):
                     v=MorphVariant(token.span.casefold(),pos,origin='CONTEXTUAL')
                     options.setdefault(digest(_morph(v)),v)
                 from .morphology_domain import offer,scope_fields
-                readings=offer(state,token,options.values(),'OOV_FUNCTION')
+                readings=offer(state,token,options.values(),'OOV_FUNCTION',release=release)
                 functions=list(dict.fromkeys(v.pos for v in readings))
                 from .morphology_domain import function_restrictions,function_support
                 inherited=function_restrictions(state,token.token_id)
@@ -56,7 +56,10 @@ def resolve(state,release,selector,*,areas=None):
                                 ref=entry['reading']['evidence_refs'][0]
                                 prior=next((r for r in state.syntax_trace if r.get('kind')=='MORPHOLOGY_PROPOSAL' and r['proposal_ref']==ref),None)
                                 if prior is not None:
+                                    from .morphology_provenance import live,issue as issue_record
+                                    if not live(state,prior):raise ValueError('MORPHOLOGY_PROPOSAL_STALE')
                                     imported={**deepcopy(prior),**scope_fields(state)}
+                                    issue_record(state,imported,[token.token_id,*prior.get('anchor_refs',())])
                                     if imported not in state.syntax_trace:state.syntax_trace.append(imported)
                             issue(state,row['decision_ref'],value['candidate_id'],value.get('reading_uses',()),domain=row['function_domain'])
                     continue
@@ -76,10 +79,13 @@ def resolve(state,release,selector,*,areas=None):
                     'Addressed source: '+marked+'\nOther equally spelled words are not selected. '
                     'Choose its function in the sentence; no lemma, case or identity is established by this answer.')
                 if selected:
-                    state.syntax_trace.append({'kind':'MORPHOLOGY_FUNCTION_RESTRICTION',**scope_fields(state),
+                    from .morphology_provenance import issue as issue_record
+                    restriction={'kind':'MORPHOLOGY_FUNCTION_RESTRICTION',**scope_fields(state),
                         'token_ref':token.token_id,'address':address,'function_domain':selected.record(),
                         'interpretation_version':state.interpretation_version,
-                        'decision_ref':selected.decision_ref})
+                        'decision_ref':selected.decision_ref}
+                    issue_record(state,restriction,[token.token_id])
+                    state.syntax_trace.append(restriction)
                     # Only the feature-unknown reading follows from a function
                     # choice. Richer proposals require their own consumer proof.
                     if len(selected.values)==1:
@@ -92,7 +98,7 @@ def resolve(state,release,selector,*,areas=None):
             if len(options)>cfg['max_candidates'] or region.source_range[1]-region.source_range[0]>cfg['context_chars']:
                 state.diag('COMPONENT_SEARCH_INCOMPLETE','oov-reading:'+token.token_id);continue
             from .morphology_domain import offer
-            offer(state,token,options.values(),'OOV_NOMINAL')
+            offer(state,token,options.values(),'OOV_NOMINAL',release=release)
             state.syntax_trace.append({'kind':'CONTEXTUAL_OOV','token_ref':token.token_id,
                 'surface':token.span,'candidates':{cid:_morph(v) for cid,v in options.items()},
                 'selection':'DEFER_TO_RELATION'})

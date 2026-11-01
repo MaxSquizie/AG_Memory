@@ -37,6 +37,8 @@ def validate(cfg):
 
 
 def project(state, release, selector, region, tokens, cfg):
+    from .morphology_provenance import capture,issue
+    capture(state,release=release)
     from .nominal_functions import prepared,rows
     from .function_inventory import current
     if current(state,'NOMINAL',tokens,cfg.get('_task_constraints'),require=True) is not None:
@@ -56,7 +58,10 @@ def project(state, release, selector, region, tokens, cfg):
                 if ref==source['head_ref']:continue  # shared bearer remains a nominal, not a detachable determiner
                 selected[ref]=tuple(replace(v,features=v.features|{MARK},origin='CONTEXTUAL',
                     evidence_refs=(*v.evidence_refs,key)) for v in evidence[ref].variants)
-            state.syntax_trace.append({'kind':'NOMINAL_REFERENCE_GROUP',**row})
+            row['kind']='NOMINAL_REFERENCE_GROUP'
+            row['source_proofs']=source['proofs']
+            issue(state,row,row['anchor_refs'],release=release)
+            state.syntax_trace.append(row)
         return [replace(t,variants=selected[t.token_id]) if t.token_id in selected else t for t in tokens],groups
     policy = cfg.get('nominal_references')
     if not policy:
@@ -113,7 +118,11 @@ def project(state, release, selector, region, tokens, cfg):
         for token, readings in [(marker, det)]+([(identity_token, identity)] if identity else []):
             selected[token.token_id] = tuple(replace(v, features=v.features|{MARK},
                 origin='CONTEXTUAL', evidence_refs=(*v.evidence_refs,key)) for r,v in readings)
-        state.syntax_trace.append({'kind':'NOMINAL_REFERENCE_GROUP', **row})
+        row['kind']='NOMINAL_REFERENCE_GROUP'
+        from .reading_decisions import receipt
+        row['selection_receipt']=receipt(state,key)
+        issue(state,row,refs,release=release)
+        state.syntax_trace.append(row)
     return [replace(t, variants=selected[t.token_id]) if t.token_id in selected else t for t in tokens], groups
 
 

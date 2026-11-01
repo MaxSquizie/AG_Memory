@@ -11,11 +11,12 @@ from .probe_prerequisites import accepted,from_proof
 
 def rows(state,tokens,kind=None):
     from .function_inventory import unit_live
+    from .morphology_provenance import live
     allowed={t.token_id for t in tokens}
     unique={}
     for row in state.syntax_trace:
         if (row.get('kind')=='NOMINAL_FUNCTION' and not row.get('superseded') and set(row['anchor_refs'])<=allowed
-                and (kind is None or row['function']==kind) and unit_live(state,row,scoped=True)):
+                and (kind is None or row['function']==kind) and unit_live(state,row,scoped=True) and live(state,row)):
             unique[row['unit_ref']]=row
     return list(unique.values())
 
@@ -27,6 +28,8 @@ def prepared(state,tokens,constraints=None):
 
 def prepare(state,release,selector,region,tokens,cfg):
     from .function_inventory import begin,complete
+    from .morphology_provenance import capture,issue
+    capture(state,release=release)
     inventory=begin(state,'NOMINAL',tokens,cfg.get('_task_constraints'))
     if inventory is None:return True
     previous=()
@@ -101,6 +104,7 @@ def prepare(state,release,selector,region,tokens,cfg):
             state.diag('NOMINAL_FUNCTION_PREMISE_RETIRED',region.region_id);return False
         last=identity[1] if kind=='REFERENCE' else case[1] if kind=='QUANTITY' else head[1]
         previous=(from_proof(state,last),)
+        issue(state,row,allrefs,release=release)
         state.syntax_trace.append(row);used.update(refs);used_by_kind[kind].update(refs)
 
 

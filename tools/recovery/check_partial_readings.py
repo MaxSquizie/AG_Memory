@@ -41,7 +41,11 @@ for domain in domains:
     assert domain['reading_witnesses']
     assert all(w['kind']=='SELECTED_DOMAIN' for w in domain['reading_witnesses'])
     assert {json.loads(w['payload_json'])['candidate_id'] for w in domain['reading_witnesses']}=={v['candidate_id'] for v in domain['alternatives']}
-state=N(**{**raw,'decisions':{k:N(**{**v,'grounds':[N(**g) for g in v['grounds']]}) for k,v in raw['decisions'].items()},'frames':[N(**f) for f in raw['frames']]})
+from ah.formalizer.state import TokenEvidence
+from ah.formalizer.nominal_readings import variant
+evidence=[TokenEvidence(**{**t,'cases':frozenset(t['cases']),'variants':tuple(variant(v) for v in t['variants']),
+    'morph_guesses':tuple(variant(v) for v in t['morph_guesses'])}) for t in raw['evidence']]
+state=N(**{**raw,'evidence':evidence,'decisions':{k:N(**{**v,'grounds':[N(**g) for g in v['grounds']]}) for k,v in raw['decisions'].items()},'frames':[N(**f) for f in raw['frames']]})
 assert state.machine_state=='PARTIAL'
 assert not r['assertions']['ah'] and not r['assertions']['journal']
 assert len(state.observation['partial_compositions'])==1

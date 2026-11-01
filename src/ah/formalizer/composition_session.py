@@ -16,6 +16,9 @@ _current=ContextVar('formalizer_composition_session',default=None)
 class CompositionSession:
     def __init__(self,state,release,reader=None,selector=None,morph=None):
         self.state,self.release,self.reader=state,release,reader
+        from .morphology_provenance import capture
+        capture(state)
+        if not state.resource_snapshot:state.resource_snapshot={'snapshot_id':release.sha256}
         from .composition_tasks import ChildTasks
         from .composition_dispatcher import Dispatcher
         from copy import deepcopy

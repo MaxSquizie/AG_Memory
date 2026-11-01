@@ -47,5 +47,5 @@ def candidates(state,release,region,tokens,cfg,request=None,selector=None,quanti
                 predicate_token_ref=e.token_id,argument_token_refs=(e.token_id,),source_range=tuple(region.source_range),
                 semantic=sem,provenance=ResourceProvenance(('COMPONENTS_V1',),{'release':release.sha256})))
     from .nominal_readings import attach_groups
-    for frame in result:attach_groups(frame,quantities)
+    for frame in result:attach_groups(frame,quantities,state=state)
     return result
