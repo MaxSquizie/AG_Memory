@@ -993,5 +993,20 @@
       "implementation": "DEFER",
       "evidence": "User decision"
     }
-  ]
+  ],
+  "checkpoints": {
+    "P01": {
+      "status": "STRICT_API_ACCEPTED",
+      "report": "F05_P01_READING_WITNESSES.md",
+      "capabilities": [
+        "C-READINGS",
+        "C-GROUNDS",
+        "C-OOV",
+        "C-HISTORY"
+      ],
+      "production_migration": "P02_PENDING",
+      "downstream": "P03_PENDING",
+      "cache_observation": "P04_PENDING"
+    }
+  }
 }

@@ -59,6 +59,7 @@ def function_restrictions(state,token_ref):
 
 
 def function_use(state,token_ref,reading,decision_ref,candidate_id):
+    """LEGACY P02 migration path; NOT the strict P01 payload-use validator."""
     decision=state.decisions.get(decision_ref)
     if decision is None or decision.slot_id!='structural_oov_function':return True
     token=next((t for t in state.evidence if t.token_id==token_ref),None)
@@ -156,3 +157,14 @@ def validate_uses(state,frames):
         for _,tid,reading in frame_readings(frame):
             if reading.get('origin') in {'CONTEXTUAL','RECOVERED'} and not reading_attested(state,tid,reading):
                 raise ValueError('MORPHOLOGY_USE_UNGROUNDED')
+
+
+def strict_use(state,witness,*,expected_address,original=None,parents=(),historical=False):
+    """Explicit uncached P01 API. Failure never falls back to function_use.
+
+    All existing producer families still require P02 adapters. Do not insert
+    this call into cached producers before P04 dependency observation exists.
+    """
+    from .reading_witnesses import historical as inspect_historical,validate
+    evaluator=inspect_historical if historical else validate
+    return evaluator(state,witness,expected_address=expected_address,original=original,parents=parents)

@@ -1,5 +1,11 @@
 # F05: текущий контрольный реестр
 
+2026-11-01: **P01 strict API принят тем же судьёй**.
+[F05_P01_READING_WITNESSES.md](F05_P01_READING_WITNESSES.md): typed witnesses,
+проверка actual payload/task/domain/page basis и отдельные permission.
+51 целевая проверка прошла; все семь producer families ещё legacy (P02).
+Следующий этап — P02; P03/P04 и весь F05 остаются OPEN.
+
 2026-11-01: **P20-contract принят тем же судьёй**.
 [F05_COMPLETION_CONTRACT.md](F05_COMPLETION_CONTRACT.md): отдельные receipts
 завершённости, stage/profile, перенос obligations, issuer/validator, cache/revoke,

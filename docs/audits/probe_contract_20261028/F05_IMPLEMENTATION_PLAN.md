@@ -109,6 +109,12 @@ relations и типы source/target, с исходной архитектурн�
 
 ### P01. Единый адрес основания и типизированный reading-use witness
 
+**ACCEPT, 2026-11-01 — общий strict API.**
+[F05_P01_READING_WITNESSES.md](F05_P01_READING_WITNESSES.md).
+Это граница P01/P02: permissive legacy путь ещё существует; строгий API
+не использует его. Все producer adapters переводятся в P02; late consumers и
+cache observations — P03/P04. Сквозная механика reading grounds остаётся OPEN.
+
 **Тип:** D/G. **Блоки:** 2–6. **Зависимости:** P00.
 **Места:** `morphology_domain.function_use/license_use/attested`,
 `reading_decisions.inspect/receipt`, `partial_readings.retain`, `probe_prerequisites`.
