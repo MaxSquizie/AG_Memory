@@ -1,0 +1,1278 @@
+{
+  "audited_commit": "f467d1355fadf0cf9e6f57b95d0948c62069eacb",
+  "mode": "static end-to-end boundary audit; runtime source unchanged",
+  "limitations": [
+    "Not a proof of all dynamic call targets or all natural language interpretations.",
+    "V items require witness reproduction before code change.",
+    "Prior test outcomes are historical evidence, not rerun in this audit."
+  ],
+  "evidence_locations": [
+    {
+      "module": "morphology_domain",
+      "symbol": "function_use",
+      "path": "src/ah/formalizer/morphology_domain.py",
+      "line": 61,
+      "end_line": 69,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "bd96206b0e49eb150c6d15848eec7e68b06268403f8fdaddeb41f059408eefed"
+    },
+    {
+      "module": "morphology_domain",
+      "symbol": "license_use",
+      "path": "src/ah/formalizer/morphology_domain.py",
+      "line": 108,
+      "end_line": 117,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "bd96206b0e49eb150c6d15848eec7e68b06268403f8fdaddeb41f059408eefed"
+    },
+    {
+      "module": "morphology_domain",
+      "symbol": "attested",
+      "path": "src/ah/formalizer/morphology_domain.py",
+      "line": 120,
+      "end_line": 139,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "bd96206b0e49eb150c6d15848eec7e68b06268403f8fdaddeb41f059408eefed"
+    },
+    {
+      "module": "morphology_domain",
+      "symbol": "project",
+      "path": "src/ah/formalizer/morphology_domain.py",
+      "line": 84,
+      "end_line": 105,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "bd96206b0e49eb150c6d15848eec7e68b06268403f8fdaddeb41f059408eefed"
+    },
+    {
+      "module": "morphology_domain",
+      "symbol": "validate_uses",
+      "path": "src/ah/formalizer/morphology_domain.py",
+      "line": 153,
+      "end_line": 158,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "bd96206b0e49eb150c6d15848eec7e68b06268403f8fdaddeb41f059408eefed"
+    },
+    {
+      "module": "reading_decisions",
+      "symbol": "inspect",
+      "path": "src/ah/formalizer/reading_decisions.py",
+      "line": 11,
+      "end_line": 38,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "0853b64928bf82f1232266169d235e9e338f60e4a80561ac540eae356b3df1a5"
+    },
+    {
+      "module": "reading_decisions",
+      "symbol": "receipt",
+      "path": "src/ah/formalizer/reading_decisions.py",
+      "line": 51,
+      "end_line": 56,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "0853b64928bf82f1232266169d235e9e338f60e4a80561ac540eae356b3df1a5"
+    },
+    {
+      "module": "nominal_readings",
+      "symbol": "attested",
+      "path": "src/ah/formalizer/nominal_readings.py",
+      "line": 56,
+      "end_line": 90,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "5c52b01f05b9cfb2e68aa592875e3276b3ddce729556acf507d86265728fac2c"
+    },
+    {
+      "module": "composition_source_union",
+      "symbol": "merge",
+      "path": "src/ah/formalizer/composition_source_union.py",
+      "line": 6,
+      "end_line": 92,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "063d135f3090a1b3852e00cb4ab0c92aedb10f20283f850b9b02a0e0d3f2bac8"
+    },
+    {
+      "module": "composition_sources",
+      "symbol": "complete",
+      "path": "src/ah/formalizer/composition_sources.py",
+      "line": 68,
+      "end_line": 69,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "9d898cb4aee12018a1999f5656d89757ee4c3fda8cdf71ee3072d1b65d42eef4"
+    },
+    {
+      "module": "composition_sources",
+      "symbol": "reuse",
+      "path": "src/ah/formalizer/composition_sources.py",
+      "line": 130,
+      "end_line": 161,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "9d898cb4aee12018a1999f5656d89757ee4c3fda8cdf71ee3072d1b65d42eef4"
+    },
+    {
+      "module": "composition_sources",
+      "symbol": "retain",
+      "path": "src/ah/formalizer/composition_sources.py",
+      "line": 199,
+      "end_line": 263,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "9d898cb4aee12018a1999f5656d89757ee4c3fda8cdf71ee3072d1b65d42eef4"
+    },
+    {
+      "module": "nominal_reference_source",
+      "symbol": "eligible_frames",
+      "path": "src/ah/formalizer/nominal_reference_source.py",
+      "line": 5,
+      "end_line": 16,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "15c4660fcdf2807fa3a432629b8ec42a62b97f7e5ed912a0595d6ee368fc0b0c"
+    },
+    {
+      "module": "nominal_reference_source",
+      "symbol": "rows",
+      "path": "src/ah/formalizer/nominal_reference_source.py",
+      "line": 19,
+      "end_line": 55,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "15c4660fcdf2807fa3a432629b8ec42a62b97f7e5ed912a0595d6ee368fc0b0c"
+    },
+    {
+      "module": "nominal_reference_domain",
+      "symbol": "inspect",
+      "path": "src/ah/formalizer/nominal_reference_domain.py",
+      "line": 10,
+      "end_line": 25,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "c5ec77c8d6fd212d014b2fc070110b4c60e5888b09766b06ffc3bb562ee20ad1"
+    },
+    {
+      "module": "nominal_reference_pages",
+      "symbol": "select",
+      "path": "src/ah/formalizer/nominal_reference_pages.py",
+      "line": 30,
+      "end_line": 87,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "20965161a28bc8804cb40d2774bccd8ac33f2cb819ad091598b4b1f6cb7e0ce7"
+    },
+    {
+      "module": "nominal_reference_pages",
+      "symbol": "live",
+      "path": "src/ah/formalizer/nominal_reference_pages.py",
+      "line": 26,
+      "end_line": 27,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "20965161a28bc8804cb40d2774bccd8ac33f2cb819ad091598b4b1f6cb7e0ce7"
+    },
+    {
+      "module": "nominal_reference_memory",
+      "symbol": "resolve",
+      "path": "src/ah/formalizer/nominal_reference_memory.py",
+      "line": 45,
+      "end_line": 121,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "e449fc1076728c752bbd50fd06c1ab3591b69702c738ebc809b068aa907a431f"
+    },
+    {
+      "module": "nominal_reference_chain",
+      "symbol": "rows",
+      "path": "src/ah/formalizer/nominal_reference_chain.py",
+      "line": 5,
+      "end_line": 23,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "edd36c476411696efa00c2cd78caa4e9c36437df661e92e769e5c1ed49a0e4db"
+    },
+    {
+      "module": "nominal_reference_chain",
+      "symbol": "finish",
+      "path": "src/ah/formalizer/nominal_reference_chain.py",
+      "line": 26,
+      "end_line": 84,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "edd36c476411696efa00c2cd78caa4e9c36437df661e92e769e5c1ed49a0e4db"
+    },
+    {
+      "module": "nominal_group_source",
+      "symbol": "domain",
+      "path": "src/ah/formalizer/nominal_group_source.py",
+      "line": 10,
+      "end_line": 74,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "43b685c0463efd3aca36dfd4fce69479e92dd33c6722ed47526563d10ed9d072"
+    },
+    {
+      "module": "bound_references",
+      "symbol": "candidates",
+      "path": "src/ah/formalizer/bound_references.py",
+      "line": 10,
+      "end_line": 38,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "084b4d67012939b3d9e08dd209471f078cfcc954d689c82af6b1031b2158199b"
+    },
+    {
+      "module": "bound_references",
+      "symbol": "resolved",
+      "path": "src/ah/formalizer/bound_references.py",
+      "line": 41,
+      "end_line": 47,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "084b4d67012939b3d9e08dd209471f078cfcc954d689c82af6b1031b2158199b"
+    },
+    {
+      "module": "structural_relations",
+      "symbol": "child_request",
+      "path": "src/ah/formalizer/structural_relations.py",
+      "line": 29,
+      "end_line": 33,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "b05d5013170139d4134e9a11f7ba818bafca2c0613a0943cf523d2a9b6709d4e"
+    },
+    {
+      "module": "structural_relations",
+      "symbol": "producer",
+      "path": "src/ah/formalizer/structural_relations.py",
+      "line": 36,
+      "end_line": 38,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "b05d5013170139d4134e9a11f7ba818bafca2c0613a0943cf523d2a9b6709d4e"
+    },
+    {
+      "module": "lexical_demands",
+      "symbol": "intercept",
+      "path": "src/ah/formalizer/lexical_demands.py",
+      "line": 25,
+      "end_line": 46,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "ea71a216dd3fc46b2a9935b653e6f16b640cc51012d9c6b41e46304b11566231"
+    },
+    {
+      "module": "structural_lexical",
+      "symbol": "produce",
+      "path": "src/ah/formalizer/structural_lexical.py",
+      "line": 27,
+      "end_line": 133,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "91cbcebafc55a5a539692823aefa41314687968d2b111a8b42a983330204b61a"
+    },
+    {
+      "module": "structural_frontier",
+      "symbol": "run",
+      "path": "src/ah/formalizer/structural_frontier.py",
+      "line": 128,
+      "end_line": 225,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "c830295e7834bc73a0cc5e1fe5602033df6fccf4df7060ab2ac33576d6806305"
+    },
+    {
+      "module": "structural_frontier",
+      "symbol": "snapshot",
+      "path": "src/ah/formalizer/structural_frontier.py",
+      "line": 232,
+      "end_line": 260,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "c830295e7834bc73a0cc5e1fe5602033df6fccf4df7060ab2ac33576d6806305"
+    },
+    {
+      "module": "structural_frontier",
+      "symbol": "enqueue_children",
+      "path": "src/ah/formalizer/structural_frontier.py",
+      "line": 72,
+      "end_line": 101,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "c830295e7834bc73a0cc5e1fe5602033df6fccf4df7060ab2ac33576d6806305"
+    },
+    {
+      "module": "structural_windows",
+      "symbol": "inspect",
+      "path": "src/ah/formalizer/structural_windows.py",
+      "line": 20,
+      "end_line": 48,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "e37f06f825743e110cb7808d207917814208250aeb18b6a43d5a94ca4e9f7445"
+    },
+    {
+      "module": "structural_windows",
+      "symbol": "authorize",
+      "path": "src/ah/formalizer/structural_windows.py",
+      "line": 67,
+      "end_line": 76,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "e37f06f825743e110cb7808d207917814208250aeb18b6a43d5a94ca4e9f7445"
+    },
+    {
+      "module": "partition_sequences",
+      "symbol": "select_parts",
+      "path": "src/ah/formalizer/partition_sequences.py",
+      "line": 9,
+      "end_line": 92,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "17f685a55e987cff93a4a10e50a06d87fa9ef9c6c2542609cfbaa56520fc2a0f"
+    },
+    {
+      "module": "shared_proposition_material",
+      "symbol": "propose",
+      "path": "src/ah/formalizer/shared_proposition_material.py",
+      "line": 8,
+      "end_line": 37,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "5a310204a493f04512d3fe4e441646de61079e53163bc61c845101201be03b19"
+    },
+    {
+      "module": "shared_proposition_material",
+      "symbol": "validate",
+      "path": "src/ah/formalizer/shared_proposition_material.py",
+      "line": 40,
+      "end_line": 53,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "5a310204a493f04512d3fe4e441646de61079e53163bc61c845101201be03b19"
+    },
+    {
+      "module": "component_refinement",
+      "symbol": "compose_area",
+      "path": "src/ah/formalizer/component_refinement.py",
+      "line": 47,
+      "end_line": 88,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "2e84c409028025d97d6c11a656a71073a0bad3d89df34fb7cf7b683a0cbe10b3"
+    },
+    {
+      "module": "component_refinement",
+      "symbol": "_compose_lexical_area",
+      "path": "src/ah/formalizer/component_refinement.py",
+      "line": 235,
+      "end_line": 480,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "2e84c409028025d97d6c11a656a71073a0bad3d89df34fb7cf7b683a0cbe10b3"
+    },
+    {
+      "module": "refinement_host_proof",
+      "symbol": "live",
+      "path": "src/ah/formalizer/refinement_host_proof.py",
+      "line": 15,
+      "end_line": 30,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "06fd087e64d96fe19746c5ffb8314daf5acb2f32e00499a7545340b6e853aa75"
+    },
+    {
+      "module": "refinement_host_proof",
+      "symbol": "frame_live",
+      "path": "src/ah/formalizer/refinement_host_proof.py",
+      "line": 33,
+      "end_line": 49,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "06fd087e64d96fe19746c5ffb8314daf5acb2f32e00499a7545340b6e853aa75"
+    },
+    {
+      "module": "refinement_host_path",
+      "symbol": "node_path",
+      "path": "src/ah/formalizer/refinement_host_path.py",
+      "line": 4,
+      "end_line": 29,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "e0cf33826038719fce6abd3fe38d0c1935b9fef9e0311fa0847aca8c8a1c5c0c"
+    },
+    {
+      "module": "relative_pronoun",
+      "symbol": "compose",
+      "path": "src/ah/formalizer/relative_pronoun.py",
+      "line": 7,
+      "end_line": 73,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "cd83309b6aee78ab859acf09d343a5a3ecf4557eaada552fd7b54afe8501f7ee"
+    },
+    {
+      "module": "relative_pronoun",
+      "symbol": "binding_live",
+      "path": "src/ah/formalizer/relative_pronoun.py",
+      "line": 96,
+      "end_line": 108,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "cd83309b6aee78ab859acf09d343a5a3ecf4557eaada552fd7b54afe8501f7ee"
+    },
+    {
+      "module": "relation_quantifiers",
+      "symbol": "compose",
+      "path": "src/ah/formalizer/relation_quantifiers.py",
+      "line": 33,
+      "end_line": 101,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "674627419bf30a82bc624042186811cc7109b9205485001c19fef05944953c8a"
+    },
+    {
+      "module": "quantifier_composition",
+      "symbol": "_bind",
+      "path": "src/ah/formalizer/quantifier_composition.py",
+      "line": 67,
+      "end_line": 176,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "58c0f4aebca64cd811b00fd2ebb99976ed40d2d1a31331275a02016e9a3964af"
+    },
+    {
+      "module": "quantifier_composition",
+      "symbol": "licensed",
+      "path": "src/ah/formalizer/quantifier_composition.py",
+      "line": 187,
+      "end_line": 223,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "58c0f4aebca64cd811b00fd2ebb99976ed40d2d1a31331275a02016e9a3964af"
+    },
+    {
+      "module": "control_arguments",
+      "symbol": "inherited_role",
+      "path": "src/ah/formalizer/control_arguments.py",
+      "line": 53,
+      "end_line": 71,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "bab3185039165d07ecacf1ebf01516bc6bffccc758ec95774ebc63e74f525208"
+    },
+    {
+      "module": "lexical_issuance",
+      "symbol": "assess",
+      "path": "src/ah/formalizer/lexical_issuance.py",
+      "line": 92,
+      "end_line": 136,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "48dd9b5701188e23b2704395098b4be0eb4876d39be72080d2017cbfe2422a90"
+    },
+    {
+      "module": "validation_graph",
+      "symbol": "overlay",
+      "path": "src/ah/formalizer/validation_graph.py",
+      "line": 71,
+      "end_line": 102,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "10c8226f7b5bc1f04b51173e051dd863c00eb4e3e0794ef69d732b2c0062f18c"
+    },
+    {
+      "module": "composition_domains",
+      "symbol": "restrict",
+      "path": "src/ah/formalizer/composition_domains.py",
+      "line": 36,
+      "end_line": 46,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "9fdabc2b0fc899094d1d056651472477c1dd1abd1d1a9c3960f7be78242de77b"
+    },
+    {
+      "module": "composition_domains",
+      "symbol": "extend",
+      "path": "src/ah/formalizer/composition_domains.py",
+      "line": 58,
+      "end_line": 69,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "9fdabc2b0fc899094d1d056651472477c1dd1abd1d1a9c3960f7be78242de77b"
+    },
+    {
+      "module": "composition_domains",
+      "symbol": "propagate",
+      "path": "src/ah/formalizer/composition_domains.py",
+      "line": 71,
+      "end_line": 102,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "9fdabc2b0fc899094d1d056651472477c1dd1abd1d1a9c3960f7be78242de77b"
+    },
+    {
+      "module": "composition_tree",
+      "symbol": "finalize",
+      "path": "src/ah/formalizer/composition_tree.py",
+      "line": 194,
+      "end_line": 234,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "370abe696c796ca0e83410184a80683a820097c69f64d3b63d77394a72407506"
+    },
+    {
+      "module": "seal",
+      "symbol": "validate_closure",
+      "path": "src/ah/formalizer/seal.py",
+      "line": 94,
+      "end_line": 142,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "dbc4ff187b13269cd3b7df9a862be0abaa970594e6cf5032a731a1d1b548041b"
+    },
+    {
+      "module": "seal",
+      "symbol": "structural_seal",
+      "path": "src/ah/formalizer/seal.py",
+      "line": 145,
+      "end_line": 164,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "dbc4ff187b13269cd3b7df9a862be0abaa970594e6cf5032a731a1d1b548041b"
+    },
+    {
+      "module": "native_plan",
+      "symbol": "build_plan",
+      "path": "src/ah/formalizer/native_plan.py",
+      "line": 11,
+      "end_line": 407,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "60af4f847c1ca20b67e4a569cdccf04695242712e297c528be78a56f0a185795"
+    },
+    {
+      "module": "commit_stage",
+      "symbol": "commit",
+      "path": "src/ah/formalizer/commit_stage.py",
+      "line": 16,
+      "end_line": 34,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "144a1e03f8e1c4bd1f72c0db0f7e00f8ccb8cc640fc8274a937f9d1f94f4d9ca"
+    },
+    {
+      "module": "implicit_plan",
+      "symbol": "emit_implicit_roles",
+      "path": "src/ah/formalizer/implicit_plan.py",
+      "line": 5,
+      "end_line": 41,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "3a1008bdb59d4a4ec7b1fa7bb2f7bd4ef7e630f0038462365fc95300eb778a67"
+    },
+    {
+      "module": "nominal_usage",
+      "symbol": "validate",
+      "path": "src/ah/formalizer/nominal_usage.py",
+      "line": 15,
+      "end_line": 31,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "3d0a7053c211deb3f25a1b7f878ff78374c27c44e470e99b44fadd871f1a467d"
+    },
+    {
+      "module": "spatial_references",
+      "symbol": "prepare",
+      "path": "src/ah/formalizer/spatial_references.py",
+      "line": 26,
+      "end_line": 103,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "3ae8967f88f29f316b67407537a96025b2f8221fa5887eaaee89b3fc8ec46d8c"
+    },
+    {
+      "module": "spatial_references",
+      "symbol": "resolve",
+      "path": "src/ah/formalizer/spatial_references.py",
+      "line": 111,
+      "end_line": 170,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "3ae8967f88f29f316b67407537a96025b2f8221fa5887eaaee89b3fc8ec46d8c"
+    },
+    {
+      "module": "spatial_plan",
+      "symbol": "emit_anchor",
+      "path": "src/ah/formalizer/spatial_plan.py",
+      "line": 6,
+      "end_line": 13,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "6570a3c1c97180ebbb2a33af885f308b4480bb19fe81d7292c302921288b2bc7"
+    },
+    {
+      "module": "spatial_plan",
+      "symbol": "emit_roles",
+      "path": "src/ah/formalizer/spatial_plan.py",
+      "line": 16,
+      "end_line": 34,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "6570a3c1c97180ebbb2a33af885f308b4480bb19fe81d7292c302921288b2bc7"
+    },
+    {
+      "module": "narrative_groups",
+      "symbol": "resolved_group",
+      "path": "src/ah/formalizer/narrative_groups.py",
+      "line": 52,
+      "end_line": 68,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "950722205dfc76c084bd793844c4fb1f8df0851d677ed2df06965d216900a558"
+    },
+    {
+      "module": "narrative_group_plan",
+      "symbol": "emit_members",
+      "path": "src/ah/formalizer/narrative_group_plan.py",
+      "line": 5,
+      "end_line": 32,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "bf8dd45e14f333bc017d18977edb9334a0c62a2cdd962103f269702dc9a51248"
+    },
+    {
+      "module": "narrative_group_plan",
+      "symbol": "validate_binding",
+      "path": "src/ah/formalizer/narrative_group_plan.py",
+      "line": 35,
+      "end_line": 55,
+      "evidence": "targeted static reading; no runtime claim",
+      "file_sha256": "bf8dd45e14f333bc017d18977edb9334a0c62a2cdd962103f269702dc9a51248"
+    }
+  ],
+  "plan_touchpoints": [
+    {
+      "module": "action_descriptions",
+      "path": "src/ah/formalizer/action_descriptions.py",
+      "file_sha256": "4f2c61c6ee7cb7c2e20eccaa7c0ca497a2ba3cd2ad87783d25f86c28742ddd3d",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "ah_adapter",
+      "path": "src/ah/formalizer/ah_adapter.py",
+      "file_sha256": "8aef52f27d8161b8307ca233563483ec37287c35d2cacf5646d43913d8921c40",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "attention_context",
+      "path": "src/ah/formalizer/attention_context.py",
+      "file_sha256": "a7dfc931593fa381102cf8ca23e499ff3682f25fc8fdecc756d0af2289a69362",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "bound_references",
+      "path": "src/ah/formalizer/bound_references.py",
+      "file_sha256": "084b4d67012939b3d9e08dd209471f078cfcc954d689c82af6b1031b2158199b",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "bundle_constraints",
+      "path": "src/ah/formalizer/bundle_constraints.py",
+      "file_sha256": "adff90f2ca90044a72a9d424c792fae6145814bca53cb04b8321a33a4519e384",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "canonical_ledger",
+      "path": "src/ah/formalizer/canonical_ledger.py",
+      "file_sha256": "02bbdb838d503f0d4c3517c6a68af6a2366e0d4f449e1fd973b9b4a0a521e012",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "commit_stage",
+      "path": "src/ah/formalizer/commit_stage.py",
+      "file_sha256": "144a1e03f8e1c4bd1f72c0db0f7e00f8ccb8cc640fc8274a937f9d1f94f4d9ca",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "component_constraints",
+      "path": "src/ah/formalizer/component_constraints.py",
+      "file_sha256": "b07afa491f987a906540e75327aecf88fba73eab692d8f81c5b71c9c7f17aebc",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "component_dependency_materialization",
+      "path": "src/ah/formalizer/component_dependency_materialization.py",
+      "file_sha256": "5f1ed33477bb453ba0d8283e2da07b852838e19e8bdc64e30c8df1c537be98c9",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "component_dependency_reduction",
+      "path": "src/ah/formalizer/component_dependency_reduction.py",
+      "file_sha256": "883023061feeeb5c9f2ef36f93089d99e3d8b5846eafc795e8878d6ede14afa3",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "component_infinitives",
+      "path": "src/ah/formalizer/component_infinitives.py",
+      "file_sha256": "1aa9f0502c677dd7d81850219c4ae56f36d2fcab8e9a20134c69d02b707c879d",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "component_predication",
+      "path": "src/ah/formalizer/component_predication.py",
+      "file_sha256": "c176331877e360144789588fd90a933b058866d8569eda9ab32a936baf31e018",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "component_refinement",
+      "path": "src/ah/formalizer/component_refinement.py",
+      "file_sha256": "2e84c409028025d97d6c11a656a71073a0bad3d89df34fb7cf7b683a0cbe10b3",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "component_temporal_scope",
+      "path": "src/ah/formalizer/component_temporal_scope.py",
+      "file_sha256": "578eb085dcc6ad1436aa99931a81bd15e99e88e25085f0bf5bf8913e99b26afb",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "composition_children",
+      "path": "src/ah/formalizer/composition_children.py",
+      "file_sha256": "5e433670996430ae99f4addec7a5af114f3b6ef283a845c3139f41650f4b99c2",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "composition_contracts",
+      "path": "src/ah/formalizer/composition_contracts.py",
+      "file_sha256": "cb6cd54fd409dbaa1abced7969ade0fdc48f2120dc643175f05c7b91e57b7b87",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "composition_dispatcher",
+      "path": "src/ah/formalizer/composition_dispatcher.py",
+      "file_sha256": "c1269fa6024c8e18e6c6bface10e67f2347def4879527cddddfa8ff591c91690",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "composition_domains",
+      "path": "src/ah/formalizer/composition_domains.py",
+      "file_sha256": "9fdabc2b0fc899094d1d056651472477c1dd1abd1d1a9c3960f7be78242de77b",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "composition_expansion",
+      "path": "src/ah/formalizer/composition_expansion.py",
+      "file_sha256": "d324fc3d0a73bc1be5eeef16df27fb29e68952b3379959a38241a883a009f960",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "composition_morphology",
+      "path": "src/ah/formalizer/composition_morphology.py",
+      "file_sha256": "2215095a41683d5ddb0b24b8691c9ac8418e3fff6c813eeb688f9fceb2970bba",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "composition_source_union",
+      "path": "src/ah/formalizer/composition_source_union.py",
+      "file_sha256": "063d135f3090a1b3852e00cb4ab0c92aedb10f20283f850b9b02a0e0d3f2bac8",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "composition_sources",
+      "path": "src/ah/formalizer/composition_sources.py",
+      "file_sha256": "9d898cb4aee12018a1999f5656d89757ee4c3fda8cdf71ee3072d1b65d42eef4",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "composition_tasks",
+      "path": "src/ah/formalizer/composition_tasks.py",
+      "file_sha256": "f9000003aef21a8b3fb5df6c01325985780bb81babc550c28b17cada3b72201e",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "composition_tree",
+      "path": "src/ah/formalizer/composition_tree.py",
+      "file_sha256": "370abe696c796ca0e83410184a80683a820097c69f64d3b63d77394a72407506",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "content_reference_functions",
+      "path": "src/ah/formalizer/content_reference_functions.py",
+      "file_sha256": "841b40c1872d3c6fc1dbe47a5cd84fc4f43db5a9c535218dc5bdf9f980bcb167",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "content_sources",
+      "path": "src/ah/formalizer/content_sources.py",
+      "file_sha256": "18996b9c37bb22b6a9a7bd24663677d5959ebbda606ce75ac00870f3ea5e1b82",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "context_receipts",
+      "path": "src/ah/formalizer/context_receipts.py",
+      "file_sha256": "992036816d75ae3c4150aa16698d10d783b06c1e9884d036ef7854f48006bcf6",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "contextual_agreement",
+      "path": "src/ah/formalizer/contextual_agreement.py",
+      "file_sha256": "c8cd6dee2a527281c050d3b9bae5e826af2e3deae0bd22ef0ba53ad5645ce6a0",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "contextual_oov",
+      "path": "src/ah/formalizer/contextual_oov.py",
+      "file_sha256": "514385e915370fc3e70cf6f80f812a0fcf978de2587c3e3c5cdb4b96b6d06b46",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "control_arguments",
+      "path": "src/ah/formalizer/control_arguments.py",
+      "file_sha256": "bab3185039165d07ecacf1ebf01516bc6bffccc758ec95774ebc63e74f525208",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "coreference",
+      "path": "src/ah/formalizer/coreference.py",
+      "file_sha256": "312037dc374fd6d8318433700fb3a72ab5da3f5187df1d80af420cad8ef8d67a",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "coverage",
+      "path": "src/ah/formalizer/coverage.py",
+      "file_sha256": "012ec5568b161be90b0019b317cc9af8996fcec111e9af4f52d3c307e1b98914",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "direct_partitions",
+      "path": "src/ah/formalizer/direct_partitions.py",
+      "file_sha256": "847e302e5b7d6e8f72e14f5c06eb5e78891d3e5b8cc686e2c26b08a5bff8278f",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "dispatch_evidence",
+      "path": "src/ah/formalizer/dispatch_evidence.py",
+      "file_sha256": "8b06819eefc4fb1c16040f55afc8a1ca6d4339ba5bf46ced4c331e9290d9b3cc",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "function_inventory",
+      "path": "src/ah/formalizer/function_inventory.py",
+      "file_sha256": "f2c6dc61908ff1b7e993440b0ef229bbdb264e7d6a3e0278d81bfbf7aaa114f2",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "grammar_domains",
+      "path": "src/ah/formalizer/grammar_domains.py",
+      "file_sha256": "a4e1e9406ec702228be7782edb8706f36dc4f319b5cace9bfa2fb50d9f385bf0",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "implicit_descriptions",
+      "path": "src/ah/formalizer/implicit_descriptions.py",
+      "file_sha256": "fdc970dac89ec7ff539c4dfd6d1005808144a2888f10a8c1ac9c306b0838e844",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "implicit_introduction",
+      "path": "src/ah/formalizer/implicit_introduction.py",
+      "file_sha256": "61fd9f96dcced1a6728a6acbed4941a6b9cca73c103d0d2412280b35bd1b360a",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "implicit_plan",
+      "path": "src/ah/formalizer/implicit_plan.py",
+      "file_sha256": "3a1008bdb59d4a4ec7b1fa7bb2f7bd4ef7e630f0038462365fc95300eb778a67",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "lexical_component",
+      "path": "src/ah/formalizer/lexical_component.py",
+      "file_sha256": "f8b858e0a59f34d06421853d9ca7f68357c516610d2e3c23e2d8a2e6340b4506",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "lexical_demands",
+      "path": "src/ah/formalizer/lexical_demands.py",
+      "file_sha256": "ea71a216dd3fc46b2a9935b653e6f16b640cc51012d9c6b41e46304b11566231",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "lexical_issuance",
+      "path": "src/ah/formalizer/lexical_issuance.py",
+      "file_sha256": "48dd9b5701188e23b2704395098b4be0eb4876d39be72080d2017cbfe2422a90",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "morphology_domain",
+      "path": "src/ah/formalizer/morphology_domain.py",
+      "file_sha256": "bd96206b0e49eb150c6d15848eec7e68b06268403f8fdaddeb41f059408eefed",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "mutation_plan",
+      "path": "src/ah/formalizer/mutation_plan.py",
+      "file_sha256": "f8ed263ce99a82bdeea29254f84889f4780eee3a0dd73817489741deb4779453",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "narrative_group_plan",
+      "path": "src/ah/formalizer/narrative_group_plan.py",
+      "file_sha256": "bf8dd45e14f333bc017d18977edb9334a0c62a2cdd962103f269702dc9a51248",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "narrative_groups",
+      "path": "src/ah/formalizer/narrative_groups.py",
+      "file_sha256": "950722205dfc76c084bd793844c4fb1f8df0851d677ed2df06965d216900a558",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "native_frontend",
+      "path": "src/ah/formalizer/native_frontend.py",
+      "file_sha256": "4922d898ba2b1b42320932b055d33ff6c5b2188f530e1a56a733889700819b69",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "native_plan",
+      "path": "src/ah/formalizer/native_plan.py",
+      "file_sha256": "60af4f847c1ca20b67e4a569cdccf04695242712e297c528be78a56f0a185795",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "nominal_apposition",
+      "path": "src/ah/formalizer/nominal_apposition.py",
+      "file_sha256": "d67c245d0af31d33cdacc23aaf9fab029f7d85ea24a76e1c03d46b4ffda21be7",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "nominal_functions",
+      "path": "src/ah/formalizer/nominal_functions.py",
+      "file_sha256": "db5e2be51a740d8fb90cd5fce841ddc7022a5e0a7ce569e172a40cc13e044baa",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "nominal_group_dependency",
+      "path": "src/ah/formalizer/nominal_group_dependency.py",
+      "file_sha256": "d5c7066ace45df0837564c3130f1b449f038e2a941bbd53f4119576c66f5e69e",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "nominal_group_source",
+      "path": "src/ah/formalizer/nominal_group_source.py",
+      "file_sha256": "43b685c0463efd3aca36dfd4fce69479e92dd33c6722ed47526563d10ed9d072",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "nominal_host_question",
+      "path": "src/ah/formalizer/nominal_host_question.py",
+      "file_sha256": "6eddc3148e5e78f280a61d58a65a8c9cf76f888d6046cc5bcbb4ef0e67406788",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "nominal_host_views",
+      "path": "src/ah/formalizer/nominal_host_views.py",
+      "file_sha256": "560f2450af2b4961f53d344048defc7bf255f5bfe559575b0e8fb32654fda11e",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "nominal_readings",
+      "path": "src/ah/formalizer/nominal_readings.py",
+      "file_sha256": "5c52b01f05b9cfb2e68aa592875e3276b3ddce729556acf507d86265728fac2c",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "nominal_reference_binding",
+      "path": "src/ah/formalizer/nominal_reference_binding.py",
+      "file_sha256": "0af5e50af5e9d6d34e1841c676b776d5501e1b7db11a8b8dcf136e8d75e7806c",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "nominal_reference_chain",
+      "path": "src/ah/formalizer/nominal_reference_chain.py",
+      "file_sha256": "edd36c476411696efa00c2cd78caa4e9c36437df661e92e769e5c1ed49a0e4db",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "nominal_reference_domain",
+      "path": "src/ah/formalizer/nominal_reference_domain.py",
+      "file_sha256": "c5ec77c8d6fd212d014b2fc070110b4c60e5888b09766b06ffc3bb562ee20ad1",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "nominal_reference_memory",
+      "path": "src/ah/formalizer/nominal_reference_memory.py",
+      "file_sha256": "e449fc1076728c752bbd50fd06c1ab3591b69702c738ebc809b068aa907a431f",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "nominal_reference_pages",
+      "path": "src/ah/formalizer/nominal_reference_pages.py",
+      "file_sha256": "20965161a28bc8804cb40d2774bccd8ac33f2cb819ad091598b4b1f6cb7e0ce7",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "nominal_reference_plan",
+      "path": "src/ah/formalizer/nominal_reference_plan.py",
+      "file_sha256": "5269861b8cb71568e67a98eb60086bc7c270ef995db395bb50db87d67c0f185f",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "nominal_reference_source",
+      "path": "src/ah/formalizer/nominal_reference_source.py",
+      "file_sha256": "15c4660fcdf2807fa3a432629b8ec42a62b97f7e5ed912a0595d6ee368fc0b0c",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "nominal_usage",
+      "path": "src/ah/formalizer/nominal_usage.py",
+      "file_sha256": "3d0a7053c211deb3f25a1b7f878ff78374c27c44e470e99b44fadd871f1a467d",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "oracle",
+      "path": "src/ah/formalizer/oracle.py",
+      "file_sha256": "0cc5db329a7d781787948df97b50c26bb296a16caf4591ba641645e252210219",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "partial_composition",
+      "path": "src/ah/formalizer/partial_composition.py",
+      "file_sha256": "8b01523ef2462e7f7f5e7486730a39cf87958a63800e932ad3d07f1ef3e37839",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "partial_readings",
+      "path": "src/ah/formalizer/partial_readings.py",
+      "file_sha256": "73e02a179e634522b67c1797c779ece96681ceaf4eb4befe4b219d214c3e38f2",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "partition_domain",
+      "path": "src/ah/formalizer/partition_domain.py",
+      "file_sha256": "084a1dab3556cc8fcd113cb0708f681a599f34b9861b8fb774764bbf1a42c1ca",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "partition_exclusions",
+      "path": "src/ah/formalizer/partition_exclusions.py",
+      "file_sha256": "ab2445b002a40f20e5273f3904ad9120bf53e2c834a5dfb3d5aabfb00e9b90b7",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "partition_role_revision",
+      "path": "src/ah/formalizer/partition_role_revision.py",
+      "file_sha256": "7c297c9076f49e226945f16a07204fd7858234f29c39b04e1881f8e45713bac6",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "partition_sequences",
+      "path": "src/ah/formalizer/partition_sequences.py",
+      "file_sha256": "17f685a55e987cff93a4a10e50a06d87fa9ef9c6c2542609cfbaa56520fc2a0f",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "predicate_functions",
+      "path": "src/ah/formalizer/predicate_functions.py",
+      "file_sha256": "2487ec8cf061d3b2d8833aba3bbc0b9a70927b8bf7387150679ccab8878a64a5",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "probe_prerequisites",
+      "path": "src/ah/formalizer/probe_prerequisites.py",
+      "file_sha256": "ab7e69764dc738ae5869ab02edcad73ff6e35cae0a3a347c24b5c91cb90fa467",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "producer_reads",
+      "path": "src/ah/formalizer/producer_reads.py",
+      "file_sha256": "1d1e9f4d49f62a6b645f94974248ce39728d91fbd825f9ca0a7a42a50b5691e2",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "qualitative_quantity",
+      "path": "src/ah/formalizer/qualitative_quantity.py",
+      "file_sha256": "c559a1ce32713bf43e05f8a1eb7de93d36888dbd95829093d1199823b0c604f4",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "quantifier_composition",
+      "path": "src/ah/formalizer/quantifier_composition.py",
+      "file_sha256": "58c0f4aebca64cd811b00fd2ebb99976ed40d2d1a31331275a02016e9a3964af",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "reading_decisions",
+      "path": "src/ah/formalizer/reading_decisions.py",
+      "file_sha256": "0853b64928bf82f1232266169d235e9e338f60e4a80561ac540eae356b3df1a5",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "recovery",
+      "path": "src/ah/formalizer/recovery.py",
+      "file_sha256": "f3b9ce677b94eb6a4b157db4269b4b9f0e9357f3c0e870045612aa54cb588c05",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "refinement_group_hosts",
+      "path": "src/ah/formalizer/refinement_group_hosts.py",
+      "file_sha256": "f5d6d23052a09c5b2a779d13a2722c42e74b5e6bc2650f9f5442f69a25e8a944",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "refinement_host_path",
+      "path": "src/ah/formalizer/refinement_host_path.py",
+      "file_sha256": "e0cf33826038719fce6abd3fe38d0c1935b9fef9e0311fa0847aca8c8a1c5c0c",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "refinement_host_proof",
+      "path": "src/ah/formalizer/refinement_host_proof.py",
+      "file_sha256": "06fd087e64d96fe19746c5ffb8314daf5acb2f32e00499a7545340b6e853aa75",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "relation_composition",
+      "path": "src/ah/formalizer/relation_composition.py",
+      "file_sha256": "9386d13108cac51ec60114427e32517211ade7ce9abe75322bde9a05b692b9f4",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "relation_partitions",
+      "path": "src/ah/formalizer/relation_partitions.py",
+      "file_sha256": "78c61c76926b3669c8793a3e4d2b93a87b3cc1f452ec215e51e882bdf98baf5b",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "relation_quantifiers",
+      "path": "src/ah/formalizer/relation_quantifiers.py",
+      "file_sha256": "674627419bf30a82bc624042186811cc7109b9205485001c19fef05944953c8a",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "relative_composition",
+      "path": "src/ah/formalizer/relative_composition.py",
+      "file_sha256": "4b6566d8a98ec7951b338515a2eff7eb8c2b2ce5615fdb4cb3a735a31c2926a4",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "relative_pronoun",
+      "path": "src/ah/formalizer/relative_pronoun.py",
+      "file_sha256": "cd83309b6aee78ab859acf09d343a5a3ecf4557eaada552fd7b54afe8501f7ee",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "replay",
+      "path": "src/ah/formalizer/replay.py",
+      "file_sha256": "f50aeabd6b41e23d67e62c416931eed8f4af8879551ae93d324a6701232780ea",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "retraction",
+      "path": "src/ah/formalizer/retraction.py",
+      "file_sha256": "21b9bf0cd990219400b2c633d70e0dbcdb6230a9dfb766915fb7dda6dc3240c0",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "rx_cache",
+      "path": "src/ah/formalizer/rx_cache.py",
+      "file_sha256": "f5b5e97bf3a5957747c2bb09b8549d42d97ee3bfdd52b295c9a443b7321fb52c",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "scope_assignment",
+      "path": "src/ah/formalizer/scope_assignment.py",
+      "file_sha256": "5b220ada34c43058c87d98b949103508e6fdb5a2a50a37586a018d93771dd796",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "seal",
+      "path": "src/ah/formalizer/seal.py",
+      "file_sha256": "dbc4ff187b13269cd3b7df9a862be0abaa970594e6cf5032a731a1d1b548041b",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "shared_proposition_material",
+      "path": "src/ah/formalizer/shared_proposition_material.py",
+      "file_sha256": "5a310204a493f04512d3fe4e441646de61079e53163bc61c845101201be03b19",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "source_collections",
+      "path": "src/ah/formalizer/source_collections.py",
+      "file_sha256": "5db59a4caa597d0457183d46c37a1588c3381f6096574c764f7e198f4d52b1f7",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "spatial_memory",
+      "path": "src/ah/formalizer/spatial_memory.py",
+      "file_sha256": "a07f70ba860f158cab8e5f4ade4dd6404bb96e78bee700c4a79c77789cb9e1af",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "spatial_plan",
+      "path": "src/ah/formalizer/spatial_plan.py",
+      "file_sha256": "6570a3c1c97180ebbb2a33af885f308b4480bb19fe81d7292c302921288b2bc7",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "spatial_references",
+      "path": "src/ah/formalizer/spatial_references.py",
+      "file_sha256": "3ae8967f88f29f316b67407537a96025b2f8221fa5887eaaee89b3fc8ec46d8c",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "structural_conditions",
+      "path": "src/ah/formalizer/structural_conditions.py",
+      "file_sha256": "e0b9d9890ed1b639d1eafd698fd013b00c6702c43121021ea5d192389c78d596",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "structural_content_time",
+      "path": "src/ah/formalizer/structural_content_time.py",
+      "file_sha256": "36d9dc1fb15fb78d133f2fff3ff326f921ea7167e40001be7716ad8f99218496",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "structural_forest",
+      "path": "src/ah/formalizer/structural_forest.py",
+      "file_sha256": "608e47942dbf816710e8b9b9e5c08a9774ed4e15f6f93e88507a72e1aad9d9d0",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "structural_frontier",
+      "path": "src/ah/formalizer/structural_frontier.py",
+      "file_sha256": "c830295e7834bc73a0cc5e1fe5602033df6fccf4df7060ab2ac33576d6806305",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "structural_lexical",
+      "path": "src/ah/formalizer/structural_lexical.py",
+      "file_sha256": "91cbcebafc55a5a539692823aefa41314687968d2b111a8b42a983330204b61a",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "structural_relations",
+      "path": "src/ah/formalizer/structural_relations.py",
+      "file_sha256": "b05d5013170139d4134e9a11f7ba818bafca2c0613a0943cf523d2a9b6709d4e",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "structural_shells",
+      "path": "src/ah/formalizer/structural_shells.py",
+      "file_sha256": "43525bfeaf996df490803b92146bcdb792d62a1abe50d2601f0f246f34b9a933",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "structural_tasks",
+      "path": "src/ah/formalizer/structural_tasks.py",
+      "file_sha256": "c6ccd2e6ede4ab2ec9511f827e4eac71c27a3e7145dce8125b8000a3c05b157e",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "structural_windows",
+      "path": "src/ah/formalizer/structural_windows.py",
+      "file_sha256": "e37f06f825743e110cb7808d207917814208250aeb18b6a43d5a94ca4e9f7445",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "t6_core",
+      "path": "src/ah/formalizer/t6_core.py",
+      "file_sha256": "a2de11096b3e23cf59183f29482884db2e477686a221b3d0aaa02662e30b8464",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "t6b_revision",
+      "path": "src/ah/formalizer/t6b_revision.py",
+      "file_sha256": "e5fb1e83f6f256a1ecc5afd35a4edc35b182818261c73557835b19f9bad20ee8",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "task_contracts",
+      "path": "src/ah/formalizer/task_contracts.py",
+      "file_sha256": "599bc423f294d6bc2a90e19f7d96fd621ce083e8873a221cfc5fb9764ddacf45",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "temporal",
+      "path": "src/ah/formalizer/temporal.py",
+      "file_sha256": "cbd88d45b22f056cad50f2ca9748c96f5240b69a1d840f69c1bc02571a453564",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "temporal_functions",
+      "path": "src/ah/formalizer/temporal_functions.py",
+      "file_sha256": "eaa88ee92841e76684a19816634c791ce43fd69546c072c59e5b94d5dbfefe1b",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "temporal_sources",
+      "path": "src/ah/formalizer/temporal_sources.py",
+      "file_sha256": "995018e3a2ef9a351ba9f9e2ecb0617ab6aea9c574e9490845e7fbb160cff377",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    },
+    {
+      "module": "validation_graph",
+      "path": "src/ah/formalizer/validation_graph.py",
+      "file_sha256": "10c8226f7b5bc1f04b51173e051dd863c00eb4e3e0794ef69d732b2c0062f18c",
+      "status": "plan touchpoint; not proof of exhaustive line coverage"
+    }
+  ],
+  "unresolved_symbols": [],
+  "isolated_observations": [
+    {
+      "id": "AUDIT-P17-PAGE-RETIRE",
+      "api": "nominal_reference_pages.live",
+      "setup": "selected page with matching stored proof; append DEPENDENCY_REJECTED without changing decision or probe record",
+      "observed": {
+        "before": true,
+        "after": true
+      },
+      "expected_after": false,
+      "scope": "isolated API counterexample; native reachability impact not asserted"
+    }
+  ]
+}
