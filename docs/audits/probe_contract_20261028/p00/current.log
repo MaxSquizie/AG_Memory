@@ -1,0 +1,669 @@
+...F........FF..FFF.FFFF..FFFFFFF.FF                                     [100%]
+=================================== FAILURES ===================================
+____ test_resolved_probe_rechecks_changed_parent_and_retains_exact_attempt _____
+
+    def test_resolved_probe_rechecks_changed_parent_and_retains_exact_attempt():
+        from ah.formalizer.component_probe import _probe
+        from ah.formalizer.composition_session import session
+        class Release:
+            sha256='test'
+            def entries(self,kind):return [{'composition':{'max_candidates':8,'context_chars':1000}}] if kind=='ProposalPolicy' else []
+        class Selector:
+            selection_reply_format='SELECT_LABELS_V1'
+            def __init__(self):self.prompts=[]
+            def select(self,p):self.prompts.append(p);return str(len(self.prompts))
+        state=t0('source');state.budget.llm_limit=10;selector=Selector()
+        options=[{'candidate_id':'a','label':'nominative'},{'candidate_id':'b','label':'dative'}]
+        with session(state,Release()) as runtime:
+            def probe():return _probe(state,selector,Release(),'same-key','test',options,'source',(0,6))
+>           assert probe()==probe()=='a' and len(selector.prompts)==1
+E           AssertionError: assert (None == 'a')
+E            +  where None = <function test_resolved_probe_rechecks_changed_parent_and_retains_exact_attempt.<locals>.probe at 0x7fc8ab0698a0>()
+
+tests/test_composition_dispatcher.py:67: AssertionError
+___ test_new_context_reopens_child_and_probe_but_unchanged_unknown_is_cached ___
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc8a9c4f2f0>
+
+    def test_new_context_reopens_child_and_probe_but_unchanged_unknown_is_cached(monkeypatch):
+        from ah.formalizer.composition_session import session
+        from ah.formalizer.component_probe import _probe
+        monkeypatch.setattr('ah.formalizer.context_proofs.compile_goals',lambda *args:[])
+        class Release:
+            sha256='test-context'
+            def entries(self,kind):return [{'composition':{'max_candidates':8,'context_chars':1000}}] if kind=='ProposalPolicy' else []
+        class Reader:
+            def read(self,state,request):return {'rows':[{'label':str(state.context_facts)}]}
+        state=t0('source');state.budget.llm_limit=10;state.context_facts=('before',)
+        selector=First('?')
+        with session(state,Release(),Reader()) as runtime:
+            def compute():
+                _probe(state,selector,Release(),'key','test',[
+                    {'candidate_id':'a','label':'first'},{'candidate_id':'b','label':'second'}],'source',(0,6))
+                return []
+            runtime.child('c',compute);runtime.child('c',compute)
+>           assert len(selector.prompts)==1
+E           assert 0 == 1
+E            +  where 0 = len([])
+E            +    where [] = <test_composition_dispatcher.First object at 0x7fc8a9c4f530>.prompts
+
+tests/test_composition_dispatcher.py:221: AssertionError
+_______________ test_real_agreement_repair_reaches_native_memory _______________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_real_agreement_repair_rea0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc8a9c4ff50>
+
+    def test_real_agreement_repair_reaches_native_memory(tmp_path,monkeypatch):
+        from test_structural_relation_tasks import run,relation
+>       result,_=run(tmp_path,monkeypatch,'Иван читает красивый книгу.',[
+            ('lexical_recovery','Explicit inflection correction «красивый» → «красивую»')]+relation('LEXICAL'))
+
+tests/test_composition_dispatcher.py:232: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_real_agreement_repair_rea0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc8a9c4ff50>
+text = 'Иван читает красивый книгу.'
+steps = [('lexical_recovery', 'Explicit inflection correction «красивый» → «красивую»'), ('structural_relation', 'LEXICAL')]
+kind = 'ASSERTION', default = '1', observer_contract = 'v7-observer-1'
+raw_extra = None
+
+    def run(tmp_path,monkeypatch,text,steps,kind='ASSERTION',default='1',observer_contract='v7-observer-1',raw_extra=None):
+        script=Script(steps,default)
+        monkeypatch.setattr(ChatBackend,'generate',lambda self,prompt,**kw:script.generate(prompt,**kw))
+        payload={'raw_input':{'text':text,'source_id':'structural-task-test','revision':1,
+            'range':[0,len(text)],'language':'ru','request_kind':kind,'batch_kind':'MESSAGE',**(raw_extra or {})}}
+        session=Session([payload],tmp_path/'journal.log');session.observer_contract=observer_contract
+        result=execute_native(session,payload,
+            {'provider':'lmstudio','model':'scripted-source-selection','structure_mode':'region_probes'})
+>       assert not script.errors,script.errors
+E       AssertionError: ['Unexpected structural_revision']
+E       assert not ['Unexpected structural_revision']
+E        +  where ['Unexpected structural_revision'] = <test_structural_relation_tasks.Script object at 0x7fc8a9c4e9c0>.errors
+
+tests/test_structural_relation_tasks.py:74: AssertionError
+___________ test_parent_feedback_does_not_reask_unchanged_descendant ___________
+
+    def test_parent_feedback_does_not_reask_unchanged_descendant():
+        from ah.formalizer.composition_session import session
+        from ah.formalizer.component_probe import _probe
+        class Release:
+            sha256='scoped-feedback'
+            def entries(self,kind):return [{'composition':{'max_candidates':8,'context_chars':1000}}] if kind=='ProposalPolicy' else []
+        state=t0('source');state.budget.llm_limit=10;selector=First();calls=[]
+        with session(state,Release()) as runtime:
+            def inner():
+                calls.append('inner')
+                _probe(state,selector,Release(),'inner-probe','test',[{'candidate_id':'a','label':'reading'}],'source',(0,6))
+                return [SimpleNamespace(frame_id='f',semantic={})]
+            def outer():return runtime.child('inner',inner)
+            runtime.child('outer',outer)
+            runtime.tasks.feedback={'target_child':'outer','parent_ref':'p','contract':'new outer role','context':'Different parent constraint.'}
+            runtime.child('outer',outer)
+>           assert calls==['inner'] and len(selector.prompts)==1
+E           AssertionError: assert (['inner'] == ['inner']
+E             
+E             Use -v to get more diff and 0 == 1)
+E            +  where 0 = len([])
+E            +    where [] = <test_composition_dispatcher.First object at 0x7fc8a8394380>.prompts
+
+tests/test_composition_dispatcher.py:296: AssertionError
+__________ test_native_unproved_forms_do_not_merge_symbols_or_events ___________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_native_unproved_forms_do_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc8a92b4e30>
+
+    def test_native_unproved_forms_do_not_merge_symbols_or_events(tmp_path,monkeypatch):
+        first=payload('Иван глоркнул книгу.','first')
+        second=payload('Мария глоркнула книгу.','second')
+        session=Session([first,second],tmp_path/'journal')
+>       a,_=execute(session,first,[function()]+relation('LEXICAL'),monkeypatch)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_oov_paradigm_forms.py:35: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+session = <tools.formalizer_v7_extended_binding.Session object at 0x7fc8a92b4830>
+item = {'raw_input': {'text': 'Иван глоркнул книгу.', 'source_id': 'first', 'revision': 1, 'range': [0, 20], ...}}
+steps = [('structural_oov_function', 'VERB:'), ('structural_relation', 'LEXICAL')]
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc8a92b4e30>
+
+    def execute(session,item,steps,monkeypatch):
+        script=Script(steps)
+        monkeypatch.setattr(ChatBackend,'generate',lambda self,prompt,**kw:script.generate(prompt,**kw))
+        result=execute_native(session,item,CONFIG)
+>       assert not script.errors,script.errors
+E       AssertionError: ['Expected structural_oov_function, got structural_relation']
+E       assert not ['Expected structural_oov_function, got structural_relation']
+E        +  where ['Expected structural_oov_function, got structural_relation'] = <test_structural_relation_tasks.Script object at 0x7fc8a92b5040>.errors
+
+tests/test_oov_paradigm_forms.py:26: AssertionError
+____________ test_analyzer_predictions_never_enter_semantic_prompts ____________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_analyzer_predictions_neve0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc8a9049640>
+
+    def test_analyzer_predictions_never_enter_semantic_prompts(tmp_path,monkeypatch):
+>       result,script=run(tmp_path,monkeypatch,'Иван глоркнул книгу.',[function()]+relation('LEXICAL'))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_oov_paradigm_forms.py:60: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_analyzer_predictions_neve0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc8a9049640>
+text = 'Иван глоркнул книгу.'
+steps = [('structural_oov_function', 'VERB:'), ('structural_relation', 'LEXICAL')]
+kind = 'ASSERTION', default = '1', observer_contract = 'v7-observer-1'
+raw_extra = None
+
+    def run(tmp_path,monkeypatch,text,steps,kind='ASSERTION',default='1',observer_contract='v7-observer-1',raw_extra=None):
+        script=Script(steps,default)
+        monkeypatch.setattr(ChatBackend,'generate',lambda self,prompt,**kw:script.generate(prompt,**kw))
+        payload={'raw_input':{'text':text,'source_id':'structural-task-test','revision':1,
+            'range':[0,len(text)],'language':'ru','request_kind':kind,'batch_kind':'MESSAGE',**(raw_extra or {})}}
+        session=Session([payload],tmp_path/'journal.log');session.observer_contract=observer_contract
+        result=execute_native(session,payload,
+            {'provider':'lmstudio','model':'scripted-source-selection','structure_mode':'region_probes'})
+>       assert not script.errors,script.errors
+E       AssertionError: ['Expected structural_oov_function, got structural_relation']
+E       assert not ['Expected structural_oov_function, got structural_relation']
+E        +  where ['Expected structural_oov_function, got structural_relation'] = <test_structural_relation_tasks.Script object at 0x7fc8a904b890>.errors
+
+tests/test_structural_relation_tasks.py:74: AssertionError
+_ test_predicted_lemma_and_features_cannot_change_the_interpretation[change0] __
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_predicted_lemma_and_featu0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc88f4fbd40>
+change = {'lemma': 'прочитать'}
+
+    @pytest.mark.parametrize('change',[{'lemma':'прочитать'},{'gender':'femn','number':'plur'}])
+    def test_predicted_lemma_and_features_cannot_change_the_interpretation(tmp_path,monkeypatch,change):
+        original=MorphProvider.analyze
+        def analyze(self,word):
+            readings=original(self,word)
+            return tuple(replace(v,**change) if v.origin=='PREDICTED' else v for v in readings) if word=='глоркнул' else readings
+        monkeypatch.setattr(MorphProvider,'analyze',analyze)
+>       result,_=run(tmp_path,monkeypatch,'Иван глоркнул книгу.',[function()]+relation('LEXICAL'))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_oov_paradigm_forms.py:85: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_predicted_lemma_and_featu0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc88f4fbd40>
+text = 'Иван глоркнул книгу.'
+steps = [('structural_oov_function', 'VERB:'), ('structural_relation', 'LEXICAL')]
+kind = 'ASSERTION', default = '1', observer_contract = 'v7-observer-1'
+raw_extra = None
+
+    def run(tmp_path,monkeypatch,text,steps,kind='ASSERTION',default='1',observer_contract='v7-observer-1',raw_extra=None):
+        script=Script(steps,default)
+        monkeypatch.setattr(ChatBackend,'generate',lambda self,prompt,**kw:script.generate(prompt,**kw))
+        payload={'raw_input':{'text':text,'source_id':'structural-task-test','revision':1,
+            'range':[0,len(text)],'language':'ru','request_kind':kind,'batch_kind':'MESSAGE',**(raw_extra or {})}}
+        session=Session([payload],tmp_path/'journal.log');session.observer_contract=observer_contract
+        result=execute_native(session,payload,
+            {'provider':'lmstudio','model':'scripted-source-selection','structure_mode':'region_probes'})
+>       assert not script.errors,script.errors
+E       AssertionError: ['Expected structural_oov_function, got structural_relation']
+E       assert not ['Expected structural_oov_function, got structural_relation']
+E        +  where ['Expected structural_oov_function, got structural_relation'] = <test_structural_relation_tasks.Script object at 0x7fc8a84f2510>.errors
+
+tests/test_structural_relation_tasks.py:74: AssertionError
+_ test_predicted_lemma_and_features_cannot_change_the_interpretation[change1] __
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_predicted_lemma_and_featu1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc8a9026450>
+change = {'gender': 'femn', 'number': 'plur'}
+
+    @pytest.mark.parametrize('change',[{'lemma':'прочитать'},{'gender':'femn','number':'plur'}])
+    def test_predicted_lemma_and_features_cannot_change_the_interpretation(tmp_path,monkeypatch,change):
+        original=MorphProvider.analyze
+        def analyze(self,word):
+            readings=original(self,word)
+            return tuple(replace(v,**change) if v.origin=='PREDICTED' else v for v in readings) if word=='глоркнул' else readings
+        monkeypatch.setattr(MorphProvider,'analyze',analyze)
+>       result,_=run(tmp_path,monkeypatch,'Иван глоркнул книгу.',[function()]+relation('LEXICAL'))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_oov_paradigm_forms.py:85: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_predicted_lemma_and_featu1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc8a9026450>
+text = 'Иван глоркнул книгу.'
+steps = [('structural_oov_function', 'VERB:'), ('structural_relation', 'LEXICAL')]
+kind = 'ASSERTION', default = '1', observer_contract = 'v7-observer-1'
+raw_extra = None
+
+    def run(tmp_path,monkeypatch,text,steps,kind='ASSERTION',default='1',observer_contract='v7-observer-1',raw_extra=None):
+        script=Script(steps,default)
+        monkeypatch.setattr(ChatBackend,'generate',lambda self,prompt,**kw:script.generate(prompt,**kw))
+        payload={'raw_input':{'text':text,'source_id':'structural-task-test','revision':1,
+            'range':[0,len(text)],'language':'ru','request_kind':kind,'batch_kind':'MESSAGE',**(raw_extra or {})}}
+        session=Session([payload],tmp_path/'journal.log');session.observer_contract=observer_contract
+        result=execute_native(session,payload,
+            {'provider':'lmstudio','model':'scripted-source-selection','structure_mode':'region_probes'})
+>       assert not script.errors,script.errors
+E       AssertionError: ['Expected structural_oov_function, got structural_relation']
+E       assert not ['Expected structural_oov_function, got structural_relation']
+E        +  where ['Expected structural_oov_function, got structural_relation'] = <test_structural_relation_tasks.Script object at 0x7fc8a90275f0>.errors
+
+tests/test_structural_relation_tasks.py:74: AssertionError
+_____________ test_surface_lexeme_keeps_negation_and_query_anchor ______________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_surface_lexeme_keeps_nega0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc8a9a0ea20>
+
+    def test_surface_lexeme_keeps_negation_and_query_anchor(tmp_path,monkeypatch):
+>       result,_=run(tmp_path,monkeypatch,'Иван не глоркнул книгу.',
+            [function()]+unary('NOT','не','не')+[function()]+relation('LEXICAL'))
+
+tests/test_oov_paradigm_forms.py:96: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_surface_lexeme_keeps_nega0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc8a9a0ea20>
+text = 'Иван не глоркнул книгу.'
+steps = [('structural_oov_function', 'VERB:'), ('structural_relation', 'NOT'), ('structural_introducer_start', 'Start at «не»'...l_introducer_end', 'End after «не»'), ('structural_partition', 'PARTITION'), ('structural_oov_function', 'VERB:'), ...]
+kind = 'ASSERTION', default = '1', observer_contract = 'v7-observer-1'
+raw_extra = None
+
+    def run(tmp_path,monkeypatch,text,steps,kind='ASSERTION',default='1',observer_contract='v7-observer-1',raw_extra=None):
+        script=Script(steps,default)
+        monkeypatch.setattr(ChatBackend,'generate',lambda self,prompt,**kw:script.generate(prompt,**kw))
+        payload={'raw_input':{'text':text,'source_id':'structural-task-test','revision':1,
+            'range':[0,len(text)],'language':'ru','request_kind':kind,'batch_kind':'MESSAGE',**(raw_extra or {})}}
+        session=Session([payload],tmp_path/'journal.log');session.observer_contract=observer_contract
+        result=execute_native(session,payload,
+            {'provider':'lmstudio','model':'scripted-source-selection','structure_mode':'region_probes'})
+>       assert not script.errors,script.errors
+E       AssertionError: ['Expected structural_oov_function, got structural_relation']
+E       assert not ['Expected structural_oov_function, got structural_relation']
+E        +  where ['Expected structural_oov_function, got structural_relation'] = <test_structural_relation_tasks.Script object at 0x7fc8a9a0dd90>.errors
+
+tests/test_structural_relation_tasks.py:74: AssertionError
+_______ test_nominal_oov_preserves_mention_without_inventing_a_paradigm ________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_nominal_oov_preserves_men0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc8a962e540>
+
+    def test_nominal_oov_preserves_mention_without_inventing_a_paradigm(tmp_path,monkeypatch):
+        item=payload('Флырка пришла.','noun');session=Session([item],tmp_path/'nominal-journal')
+>       result,_=execute(session,item,[function('NOUN')]+relation('LEXICAL'),monkeypatch)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_oov_paradigm_forms.py:121: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+session = <tools.formalizer_v7_extended_binding.Session object at 0x7fc8a962c5f0>
+item = {'raw_input': {'text': 'Флырка пришла.', 'source_id': 'noun', 'revision': 1, 'range': [0, 14], ...}}
+steps = [('structural_oov_function', 'NOUN:'), ('structural_relation', 'LEXICAL')]
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc8a962e540>
+
+    def execute(session,item,steps,monkeypatch):
+        script=Script(steps)
+        monkeypatch.setattr(ChatBackend,'generate',lambda self,prompt,**kw:script.generate(prompt,**kw))
+        result=execute_native(session,item,CONFIG)
+>       assert not script.errors,script.errors
+E       AssertionError: ['Expected structural_oov_function, got structural_relation']
+E       assert not ['Expected structural_oov_function, got structural_relation']
+E        +  where ['Expected structural_oov_function, got structural_relation'] = <test_structural_relation_tasks.Script object at 0x7fc8a838b6b0>.errors
+
+tests/test_oov_paradigm_forms.py:26: AssertionError
+_ test_nominal_predicate_uses_subject_and_copula_agreement[\u0418\u0432\u0430\u043d \u2014 \u0432\u0440\u0430\u0447.-ivan] _
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_nominal_predicate_uses_su0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc8a835e8d0>
+text = 'Иван — врач.', person = 'ivan'
+
+    @pytest.mark.parametrize('text,person',[
+        ('Иван — врач.','ivan'),('Мария врач.','maria'),
+        ('Мария была врачом.','maria'),('Иван был врач.','ivan'),
+    ])
+    def test_nominal_predicate_uses_subject_and_copula_agreement(tmp_path,monkeypatch,text,person):
+>       result,script=run(tmp_path,monkeypatch,text,relation('LEXICAL')+[
+            ('component_attachment','врач [NOUN]')])
+
+tests/test_nominal_predication_tasks.py:12: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_nominal_predicate_uses_su0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc8a835e8d0>
+text = 'Иван — врач.'
+steps = [('structural_relation', 'LEXICAL'), ('component_attachment', 'врач [NOUN]')]
+kind = 'ASSERTION', default = '1', observer_contract = 'v7-observer-1'
+raw_extra = None
+
+    def run(tmp_path,monkeypatch,text,steps,kind='ASSERTION',default='1',observer_contract='v7-observer-1',raw_extra=None):
+        script=Script(steps,default)
+        monkeypatch.setattr(ChatBackend,'generate',lambda self,prompt,**kw:script.generate(prompt,**kw))
+        payload={'raw_input':{'text':text,'source_id':'structural-task-test','revision':1,
+            'range':[0,len(text)],'language':'ru','request_kind':kind,'batch_kind':'MESSAGE',**(raw_extra or {})}}
+        session=Session([payload],tmp_path/'journal.log');session.observer_contract=observer_contract
+        result=execute_native(session,payload,
+            {'provider':'lmstudio','model':'scripted-source-selection','structure_mode':'region_probes'})
+        assert not script.errors,script.errors
+>       assert not script.steps,list(script.steps)
+E       AssertionError: [('component_attachment', 'врач [NOUN]')]
+E       assert not deque([('component_attachment', 'врач [NOUN]')])
+E        +  where deque([('component_attachment', 'врач [NOUN]')]) = <test_structural_relation_tasks.Script object at 0x7fc8a835e720>.steps
+
+tests/test_structural_relation_tasks.py:75: AssertionError
+_ test_nominal_predicate_uses_subject_and_copula_agreement[\u041c\u0430\u0440\u0438\u044f \u0432\u0440\u0430\u0447.-maria] _
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_nominal_predicate_uses_su1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc88f57c4d0>
+text = 'Мария врач.', person = 'maria'
+
+    @pytest.mark.parametrize('text,person',[
+        ('Иван — врач.','ivan'),('Мария врач.','maria'),
+        ('Мария была врачом.','maria'),('Иван был врач.','ivan'),
+    ])
+    def test_nominal_predicate_uses_subject_and_copula_agreement(tmp_path,monkeypatch,text,person):
+>       result,script=run(tmp_path,monkeypatch,text,relation('LEXICAL')+[
+            ('component_attachment','врач [NOUN]')])
+
+tests/test_nominal_predication_tasks.py:12: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_nominal_predicate_uses_su1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc88f57c4d0>
+text = 'Мария врач.'
+steps = [('structural_relation', 'LEXICAL'), ('component_attachment', 'врач [NOUN]')]
+kind = 'ASSERTION', default = '1', observer_contract = 'v7-observer-1'
+raw_extra = None
+
+    def run(tmp_path,monkeypatch,text,steps,kind='ASSERTION',default='1',observer_contract='v7-observer-1',raw_extra=None):
+        script=Script(steps,default)
+        monkeypatch.setattr(ChatBackend,'generate',lambda self,prompt,**kw:script.generate(prompt,**kw))
+        payload={'raw_input':{'text':text,'source_id':'structural-task-test','revision':1,
+            'range':[0,len(text)],'language':'ru','request_kind':kind,'batch_kind':'MESSAGE',**(raw_extra or {})}}
+        session=Session([payload],tmp_path/'journal.log');session.observer_contract=observer_contract
+        result=execute_native(session,payload,
+            {'provider':'lmstudio','model':'scripted-source-selection','structure_mode':'region_probes'})
+        assert not script.errors,script.errors
+>       assert not script.steps,list(script.steps)
+E       AssertionError: [('component_attachment', 'врач [NOUN]')]
+E       assert not deque([('component_attachment', 'врач [NOUN]')])
+E        +  where deque([('component_attachment', 'врач [NOUN]')]) = <test_structural_relation_tasks.Script object at 0x7fc88f57eed0>.steps
+
+tests/test_structural_relation_tasks.py:75: AssertionError
+_ test_nominal_predicate_uses_subject_and_copula_agreement[\u041c\u0430\u0440\u0438\u044f \u0431\u044b\u043b\u0430 \u0432\u0440\u0430\u0447\u043e\u043c.-maria] _
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_nominal_predicate_uses_su2')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc8a8e5a570>
+text = 'Мария была врачом.', person = 'maria'
+
+    @pytest.mark.parametrize('text,person',[
+        ('Иван — врач.','ivan'),('Мария врач.','maria'),
+        ('Мария была врачом.','maria'),('Иван был врач.','ivan'),
+    ])
+    def test_nominal_predicate_uses_subject_and_copula_agreement(tmp_path,monkeypatch,text,person):
+>       result,script=run(tmp_path,monkeypatch,text,relation('LEXICAL')+[
+            ('component_attachment','врач [NOUN]')])
+
+tests/test_nominal_predication_tasks.py:12: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_nominal_predicate_uses_su2')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc8a8e5a570>
+text = 'Мария была врачом.'
+steps = [('structural_relation', 'LEXICAL'), ('component_attachment', 'врач [NOUN]')]
+kind = 'ASSERTION', default = '1', observer_contract = 'v7-observer-1'
+raw_extra = None
+
+    def run(tmp_path,monkeypatch,text,steps,kind='ASSERTION',default='1',observer_contract='v7-observer-1',raw_extra=None):
+        script=Script(steps,default)
+        monkeypatch.setattr(ChatBackend,'generate',lambda self,prompt,**kw:script.generate(prompt,**kw))
+        payload={'raw_input':{'text':text,'source_id':'structural-task-test','revision':1,
+            'range':[0,len(text)],'language':'ru','request_kind':kind,'batch_kind':'MESSAGE',**(raw_extra or {})}}
+        session=Session([payload],tmp_path/'journal.log');session.observer_contract=observer_contract
+        result=execute_native(session,payload,
+            {'provider':'lmstudio','model':'scripted-source-selection','structure_mode':'region_probes'})
+        assert not script.errors,script.errors
+>       assert not script.steps,list(script.steps)
+E       AssertionError: [('component_attachment', 'врач [NOUN]')]
+E       assert not deque([('component_attachment', 'врач [NOUN]')])
+E        +  where deque([('component_attachment', 'врач [NOUN]')]) = <test_structural_relation_tasks.Script object at 0x7fc8a8e58950>.steps
+
+tests/test_structural_relation_tasks.py:75: AssertionError
+_ test_nominal_predicate_uses_subject_and_copula_agreement[\u0418\u0432\u0430\u043d \u0431\u044b\u043b \u0432\u0440\u0430\u0447.-ivan] _
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_nominal_predicate_uses_su3')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc8a9418080>
+text = 'Иван был врач.', person = 'ivan'
+
+    @pytest.mark.parametrize('text,person',[
+        ('Иван — врач.','ivan'),('Мария врач.','maria'),
+        ('Мария была врачом.','maria'),('Иван был врач.','ivan'),
+    ])
+    def test_nominal_predicate_uses_subject_and_copula_agreement(tmp_path,monkeypatch,text,person):
+>       result,script=run(tmp_path,monkeypatch,text,relation('LEXICAL')+[
+            ('component_attachment','врач [NOUN]')])
+
+tests/test_nominal_predication_tasks.py:12: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_nominal_predicate_uses_su3')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc8a9418080>
+text = 'Иван был врач.'
+steps = [('structural_relation', 'LEXICAL'), ('component_attachment', 'врач [NOUN]')]
+kind = 'ASSERTION', default = '1', observer_contract = 'v7-observer-1'
+raw_extra = None
+
+    def run(tmp_path,monkeypatch,text,steps,kind='ASSERTION',default='1',observer_contract='v7-observer-1',raw_extra=None):
+        script=Script(steps,default)
+        monkeypatch.setattr(ChatBackend,'generate',lambda self,prompt,**kw:script.generate(prompt,**kw))
+        payload={'raw_input':{'text':text,'source_id':'structural-task-test','revision':1,
+            'range':[0,len(text)],'language':'ru','request_kind':kind,'batch_kind':'MESSAGE',**(raw_extra or {})}}
+        session=Session([payload],tmp_path/'journal.log');session.observer_contract=observer_contract
+        result=execute_native(session,payload,
+            {'provider':'lmstudio','model':'scripted-source-selection','structure_mode':'region_probes'})
+        assert not script.errors,script.errors
+>       assert not script.steps,list(script.steps)
+E       AssertionError: [('component_attachment', 'врач [NOUN]')]
+E       assert not deque([('component_attachment', 'врач [NOUN]')])
+E        +  where deque([('component_attachment', 'врач [NOUN]')]) = <test_structural_relation_tasks.Script object at 0x7fc8a923f500>.steps
+
+tests/test_structural_relation_tasks.py:75: AssertionError
+_____ test_nominal_predicate_under_question_is_not_forced_to_be_event_noun _____
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_nominal_predicate_under_q0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc8a83357f0>
+
+    def test_nominal_predicate_under_question_is_not_forced_to_be_event_noun(tmp_path,monkeypatch):
+        steps=unary('QUERY','Верно','что')+[('structural_event_head','PROPOSITION')]+relation('LEXICAL')+[
+            ('component_attachment','врач [NOUN]')]
+>       result,_=run(tmp_path,monkeypatch,'Верно ли, что Иван — врач?',steps,kind='QUERY')
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_nominal_predication_tasks.py:23: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_nominal_predicate_under_q0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc8a83357f0>
+text = 'Верно ли, что Иван — врач?'
+steps = [('structural_relation', 'QUERY'), ('structural_introducer_start', 'Start at «Верно»'), ('structural_introducer_end', ...structural_partition', 'PARTITION'), ('structural_event_head', 'PROPOSITION'), ('structural_relation', 'LEXICAL'), ...]
+kind = 'QUERY', default = '1', observer_contract = 'v7-observer-1'
+raw_extra = None
+
+    def run(tmp_path,monkeypatch,text,steps,kind='ASSERTION',default='1',observer_contract='v7-observer-1',raw_extra=None):
+        script=Script(steps,default)
+        monkeypatch.setattr(ChatBackend,'generate',lambda self,prompt,**kw:script.generate(prompt,**kw))
+        payload={'raw_input':{'text':text,'source_id':'structural-task-test','revision':1,
+            'range':[0,len(text)],'language':'ru','request_kind':kind,'batch_kind':'MESSAGE',**(raw_extra or {})}}
+        session=Session([payload],tmp_path/'journal.log');session.observer_contract=observer_contract
+        result=execute_native(session,payload,
+            {'provider':'lmstudio','model':'scripted-source-selection','structure_mode':'region_probes'})
+        assert not script.errors,script.errors
+>       assert not script.steps,list(script.steps)
+E       AssertionError: [('component_attachment', 'врач [NOUN]')]
+E       assert not deque([('component_attachment', 'врач [NOUN]')])
+E        +  where deque([('component_attachment', 'врач [NOUN]')]) = <test_structural_relation_tasks.Script object at 0x7fc8a8334290>.steps
+
+tests/test_structural_relation_tasks.py:75: AssertionError
+_______________ test_reported_nominal_predicate_is_only_content ________________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_reported_nominal_predicat0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc8aa19c320>
+
+    def test_reported_nominal_predicate_is_only_content(tmp_path,monkeypatch):
+        steps=content_steps('сказал','Мария','врач')+[('structural_event_head','PROPOSITION')]+relation('LEXICAL')+[
+            ('component_attachment','врач [NOUN]')]
+>       result,_=run(tmp_path,monkeypatch,'Иван сказал, что Мария врач.',steps)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_nominal_predication_tasks.py:32: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_reported_nominal_predicat0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc8aa19c320>
+text = 'Иван сказал, что Мария врач.'
+steps = [('structural_relation', 'CONTENT'), ('structural_content_start', 'Start at «Мария»'), ('structural_content_end', 'End...), ('structural_parent_end', 'End after «сказал»'), ('structural_owner', 'Content belongs to predicate «сказал»'), ...]
+kind = 'ASSERTION', default = '1', observer_contract = 'v7-observer-1'
+raw_extra = None
+
+    def run(tmp_path,monkeypatch,text,steps,kind='ASSERTION',default='1',observer_contract='v7-observer-1',raw_extra=None):
+        script=Script(steps,default)
+        monkeypatch.setattr(ChatBackend,'generate',lambda self,prompt,**kw:script.generate(prompt,**kw))
+        payload={'raw_input':{'text':text,'source_id':'structural-task-test','revision':1,
+            'range':[0,len(text)],'language':'ru','request_kind':kind,'batch_kind':'MESSAGE',**(raw_extra or {})}}
+        session=Session([payload],tmp_path/'journal.log');session.observer_contract=observer_contract
+        result=execute_native(session,payload,
+            {'provider':'lmstudio','model':'scripted-source-selection','structure_mode':'region_probes'})
+        assert not script.errors,script.errors
+>       assert not script.steps,list(script.steps)
+E       AssertionError: [('component_attachment', 'врач [NOUN]')]
+E       assert not deque([('component_attachment', 'врач [NOUN]')])
+E        +  where deque([('component_attachment', 'врач [NOUN]')]) = <test_structural_relation_tasks.Script object at 0x7fc8aa19c290>.steps
+
+tests/test_structural_relation_tasks.py:75: AssertionError
+_ test_incomplete_or_mismatched_nominal_predication_cannot_assert[\u041c\u0430\u0440\u0438\u044f \u0432\u0440\u0430\u0447\u043e\u043c.] _
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_incomplete_or_mismatched_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc8a835d880>
+text = 'Мария врачом.'
+
+    @pytest.mark.parametrize('text',['Мария врачом.','Мария был врачом.','Врач.'])
+    def test_incomplete_or_mismatched_nominal_predication_cannot_assert(tmp_path,monkeypatch,text):
+>       result,_=run(tmp_path,monkeypatch,text,relation('LEXICAL')+[('structural_revision','DEFER')])
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_nominal_predication_tasks.py:40: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_incomplete_or_mismatched_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc8a835d880>
+text = 'Мария врачом.'
+steps = [('structural_relation', 'LEXICAL'), ('structural_revision', 'DEFER')]
+kind = 'ASSERTION', default = '1', observer_contract = 'v7-observer-1'
+raw_extra = None
+
+    def run(tmp_path,monkeypatch,text,steps,kind='ASSERTION',default='1',observer_contract='v7-observer-1',raw_extra=None):
+        script=Script(steps,default)
+        monkeypatch.setattr(ChatBackend,'generate',lambda self,prompt,**kw:script.generate(prompt,**kw))
+        payload={'raw_input':{'text':text,'source_id':'structural-task-test','revision':1,
+            'range':[0,len(text)],'language':'ru','request_kind':kind,'batch_kind':'MESSAGE',**(raw_extra or {})}}
+        session=Session([payload],tmp_path/'journal.log');session.observer_contract=observer_contract
+        result=execute_native(session,payload,
+            {'provider':'lmstudio','model':'scripted-source-selection','structure_mode':'region_probes'})
+        assert not script.errors,script.errors
+>       assert not script.steps,list(script.steps)
+E       AssertionError: [('structural_revision', 'DEFER')]
+E       assert not deque([('structural_revision', 'DEFER')])
+E        +  where deque([('structural_revision', 'DEFER')]) = <test_structural_relation_tasks.Script object at 0x7fc8a835e510>.steps
+
+tests/test_structural_relation_tasks.py:75: AssertionError
+_ test_incomplete_or_mismatched_nominal_predication_cannot_assert[\u0412\u0440\u0430\u0447.] _
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_incomplete_or_mismatched_2')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc8a900b440>
+text = 'Врач.'
+
+    @pytest.mark.parametrize('text',['Мария врачом.','Мария был врачом.','Врач.'])
+    def test_incomplete_or_mismatched_nominal_predication_cannot_assert(tmp_path,monkeypatch,text):
+>       result,_=run(tmp_path,monkeypatch,text,relation('LEXICAL')+[('structural_revision','DEFER')])
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_nominal_predication_tasks.py:40: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_incomplete_or_mismatched_2')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc8a900b440>
+text = 'Врач.'
+steps = [('structural_relation', 'LEXICAL'), ('structural_revision', 'DEFER')]
+kind = 'ASSERTION', default = '1', observer_contract = 'v7-observer-1'
+raw_extra = None
+
+    def run(tmp_path,monkeypatch,text,steps,kind='ASSERTION',default='1',observer_contract='v7-observer-1',raw_extra=None):
+        script=Script(steps,default)
+        monkeypatch.setattr(ChatBackend,'generate',lambda self,prompt,**kw:script.generate(prompt,**kw))
+        payload={'raw_input':{'text':text,'source_id':'structural-task-test','revision':1,
+            'range':[0,len(text)],'language':'ru','request_kind':kind,'batch_kind':'MESSAGE',**(raw_extra or {})}}
+        session=Session([payload],tmp_path/'journal.log');session.observer_contract=observer_contract
+        result=execute_native(session,payload,
+            {'provider':'lmstudio','model':'scripted-source-selection','structure_mode':'region_probes'})
+        assert not script.errors,script.errors
+>       assert not script.steps,list(script.steps)
+E       AssertionError: [('structural_revision', 'DEFER')]
+E       assert not deque([('structural_revision', 'DEFER')])
+E        +  where deque([('structural_revision', 'DEFER')]) = <test_structural_relation_tasks.Script object at 0x7fc8a9008320>.steps
+
+tests/test_structural_relation_tasks.py:75: AssertionError
+__________________ test_model_can_reject_nominal_predication ___________________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_model_can_reject_nominal_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc8a9390b00>
+
+    def test_model_can_reject_nominal_predication(tmp_path,monkeypatch):
+>       result,_=run(tmp_path,monkeypatch,'Иван — врач.',relation('LEXICAL')+[
+            ('component_attachment','0'),('structural_revision','DEFER')])
+
+tests/test_nominal_predication_tasks.py:45: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_model_can_reject_nominal_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc8a9390b00>
+text = 'Иван — врач.'
+steps = [('structural_relation', 'LEXICAL'), ('component_attachment', '0'), ('structural_revision', 'DEFER')]
+kind = 'ASSERTION', default = '1', observer_contract = 'v7-observer-1'
+raw_extra = None
+
+    def run(tmp_path,monkeypatch,text,steps,kind='ASSERTION',default='1',observer_contract='v7-observer-1',raw_extra=None):
+        script=Script(steps,default)
+        monkeypatch.setattr(ChatBackend,'generate',lambda self,prompt,**kw:script.generate(prompt,**kw))
+        payload={'raw_input':{'text':text,'source_id':'structural-task-test','revision':1,
+            'range':[0,len(text)],'language':'ru','request_kind':kind,'batch_kind':'MESSAGE',**(raw_extra or {})}}
+        session=Session([payload],tmp_path/'journal.log');session.observer_contract=observer_contract
+        result=execute_native(session,payload,
+            {'provider':'lmstudio','model':'scripted-source-selection','structure_mode':'region_probes'})
+        assert not script.errors,script.errors
+>       assert not script.steps,list(script.steps)
+E       AssertionError: [('structural_revision', 'DEFER')]
+E       assert not deque([('structural_revision', 'DEFER')])
+E        +  where deque([('structural_revision', 'DEFER')]) = <test_structural_relation_tasks.Script object at 0x7fc8a9392a50>.steps
+
+tests/test_structural_relation_tasks.py:75: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_composition_dispatcher.py::test_resolved_probe_rechecks_changed_parent_and_retains_exact_attempt
+FAILED tests/test_composition_dispatcher.py::test_new_context_reopens_child_and_probe_but_unchanged_unknown_is_cached
+FAILED tests/test_composition_dispatcher.py::test_real_agreement_repair_reaches_native_memory
+FAILED tests/test_composition_dispatcher.py::test_parent_feedback_does_not_reask_unchanged_descendant
+FAILED tests/test_oov_paradigm_forms.py::test_native_unproved_forms_do_not_merge_symbols_or_events
+FAILED tests/test_oov_paradigm_forms.py::test_analyzer_predictions_never_enter_semantic_prompts
+FAILED tests/test_oov_paradigm_forms.py::test_predicted_lemma_and_features_cannot_change_the_interpretation[change0]
+FAILED tests/test_oov_paradigm_forms.py::test_predicted_lemma_and_features_cannot_change_the_interpretation[change1]
+FAILED tests/test_oov_paradigm_forms.py::test_surface_lexeme_keeps_negation_and_query_anchor
+FAILED tests/test_oov_paradigm_forms.py::test_nominal_oov_preserves_mention_without_inventing_a_paradigm
+FAILED tests/test_nominal_predication_tasks.py::test_nominal_predicate_uses_subject_and_copula_agreement[\u0418\u0432\u0430\u043d \u2014 \u0432\u0440\u0430\u0447.-ivan]
+FAILED tests/test_nominal_predication_tasks.py::test_nominal_predicate_uses_subject_and_copula_agreement[\u041c\u0430\u0440\u0438\u044f \u0432\u0440\u0430\u0447.-maria]
+FAILED tests/test_nominal_predication_tasks.py::test_nominal_predicate_uses_subject_and_copula_agreement[\u041c\u0430\u0440\u0438\u044f \u0431\u044b\u043b\u0430 \u0432\u0440\u0430\u0447\u043e\u043c.-maria]
+FAILED tests/test_nominal_predication_tasks.py::test_nominal_predicate_uses_subject_and_copula_agreement[\u0418\u0432\u0430\u043d \u0431\u044b\u043b \u0432\u0440\u0430\u0447.-ivan]
+FAILED tests/test_nominal_predication_tasks.py::test_nominal_predicate_under_question_is_not_forced_to_be_event_noun
+FAILED tests/test_nominal_predication_tasks.py::test_reported_nominal_predicate_is_only_content
+FAILED tests/test_nominal_predication_tasks.py::test_incomplete_or_mismatched_nominal_predication_cannot_assert[\u041c\u0430\u0440\u0438\u044f \u0432\u0440\u0430\u0447\u043e\u043c.]
+FAILED tests/test_nominal_predication_tasks.py::test_incomplete_or_mismatched_nominal_predication_cannot_assert[\u0412\u0440\u0430\u0447.]
+FAILED tests/test_nominal_predication_tasks.py::test_model_can_reject_nominal_predication
+19 failed, 17 passed in 40.26s

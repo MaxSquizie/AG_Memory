@@ -1,0 +1,997 @@
+{
+  "version": 1,
+  "commit": "6ee7e648f182ef74d29f44d1991e021cb88455db",
+  "capabilities": [
+    {
+      "id": "R-LEXICAL",
+      "blocks": [
+        2,
+        4,
+        5,
+        6
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §§4.5–4.7,6.1–6.3",
+      "route": "relation_composition → LexicalRoute/component_predication; structural_lexical → lexical_demands → lexical_issuance",
+      "cards": [
+        "P09",
+        "P10",
+        "P11",
+        "P16",
+        "P20",
+        "P21",
+        "P23"
+      ],
+      "acceptance_contrast": "Singleton vs multiple; branch retirement; same source with scope contrast; pending producer never rejects candidate. One lexical predication or nominal description; no logical operator or dependent clause inside the target. A separately supplied content slot may remain open",
+      "implementation": "SCALAR + CONDITIONAL_BUNDLE; child scheduling/closure OPEN",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "R-NOMINAL_DESCRIPTION",
+      "blocks": [
+        2,
+        4,
+        5,
+        6
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §§4.5–4.7,6.1–6.3",
+      "route": "relation_composition → refinement_boundaries.general_boundary → component_refinement → refinement_host_proof",
+      "cards": [
+        "P09",
+        "P10",
+        "P11",
+        "P16",
+        "P20",
+        "P21",
+        "P23"
+      ],
+      "acceptance_contrast": "Singleton vs multiple; branch retirement; same source with scope contrast; pending producer never rejects candidate. A parent clause contains a nominal described by another clause or predicative phrase inside this target",
+      "implementation": "SCALAR; conditional staged producer PENDING",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "R-NOT",
+      "blocks": [
+        2,
+        4,
+        5,
+        6
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §§4.5–4.7,6.1–6.3",
+      "route": "relation_composition.compose → relation_partitions → structural_relations.CONTRACTS/structural_shells → structural_frontier → composition_tree",
+      "cards": [
+        "P09",
+        "P10",
+        "P11",
+        "P16",
+        "P20",
+        "P21",
+        "P23"
+      ],
+      "acceptance_contrast": "Singleton vs multiple; branch retirement; same source with scope contrast; pending producer never rejects candidate. Negation of a proposition (not lexical opposition)",
+      "implementation": "SCALAR + CONDITIONAL_SHELL; closure OPEN",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "R-POSSIBLE",
+      "blocks": [
+        2,
+        4,
+        5,
+        6
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §§4.5–4.7,6.1–6.3",
+      "route": "relation_composition → action_descriptions/control_arguments → composition_children",
+      "cards": [
+        "P09",
+        "P10",
+        "P11",
+        "P16",
+        "P20",
+        "P21",
+        "P23"
+      ],
+      "acceptance_contrast": "Singleton vs multiple; branch retirement; same source with scope contrast; pending producer never rejects candidate. Possibility or ability; does not assert occurrence",
+      "implementation": "SCALAR; conditional staged producer PENDING",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "R-NECESSARY",
+      "blocks": [
+        2,
+        4,
+        5,
+        6
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §§4.5–4.7,6.1–6.3",
+      "route": "relation_composition → action_descriptions/control_arguments → composition_children",
+      "cards": [
+        "P09",
+        "P10",
+        "P11",
+        "P16",
+        "P20",
+        "P21",
+        "P23"
+      ],
+      "acceptance_contrast": "Singleton vs multiple; branch retirement; same source with scope contrast; pending producer never rejects candidate. Necessity or obligation; preserve its scope",
+      "implementation": "SCALAR; conditional staged producer PENDING",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "R-AND",
+      "blocks": [
+        2,
+        4,
+        5,
+        6
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §§4.5–4.7,6.1–6.3",
+      "route": "relation_composition.compose → relation_partitions → structural_relations.CONTRACTS/structural_shells → structural_frontier → composition_tree",
+      "cards": [
+        "P09",
+        "P10",
+        "P11",
+        "P16",
+        "P20",
+        "P21",
+        "P23"
+      ],
+      "acceptance_contrast": "Singleton vs multiple; branch retirement; same source with scope contrast; pending producer never rejects candidate. Conjunction: the text connects two or more propositions together within the current scope",
+      "implementation": "SCALAR + CONDITIONAL_SHELL; closure OPEN",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "R-OR",
+      "blocks": [
+        2,
+        4,
+        5,
+        6
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §§4.5–4.7,6.1–6.3",
+      "route": "relation_composition.compose → relation_partitions → structural_relations.CONTRACTS/structural_shells → structural_frontier → composition_tree",
+      "cards": [
+        "P09",
+        "P10",
+        "P11",
+        "P16",
+        "P20",
+        "P21",
+        "P23"
+      ],
+      "acceptance_contrast": "Singleton vs multiple; branch retirement; same source with scope contrast; pending producer never rejects candidate. Inclusive alternative between two or more propositions; the text permits more than one",
+      "implementation": "SCALAR + CONDITIONAL_SHELL; closure OPEN",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "R-XOR",
+      "blocks": [
+        2,
+        4,
+        5,
+        6
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §§4.5–4.7,6.1–6.3",
+      "route": "relation_composition.compose → relation_partitions → structural_relations.CONTRACTS/structural_shells → structural_frontier → composition_tree",
+      "cards": [
+        "P09",
+        "P10",
+        "P11",
+        "P16",
+        "P20",
+        "P21",
+        "P23"
+      ],
+      "acceptance_contrast": "Singleton vs multiple; branch retirement; same source with scope contrast; pending producer never rejects candidate. Exclusive alternative: the text presents exactly one of two or more propositions",
+      "implementation": "SCALAR + CONDITIONAL_SHELL; closure OPEN",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "R-IMPLIES",
+      "blocks": [
+        2,
+        4,
+        5,
+        6
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §§4.5–4.7,6.1–6.3",
+      "route": "relation_composition.compose → relation_partitions → structural_relations.CONTRACTS/structural_shells → structural_frontier → composition_tree",
+      "cards": [
+        "P09",
+        "P10",
+        "P11",
+        "P16",
+        "P20",
+        "P21",
+        "P23"
+      ],
+      "acceptance_contrast": "Singleton vs multiple; branch retirement; same source with scope contrast; pending producer never rejects candidate. One conditional rule: a condition implies a consequence; no alternative outcome for when that condition fails",
+      "implementation": "SCALAR + CONDITIONAL_SHELL; closure OPEN",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "R-IF_ELSE",
+      "blocks": [
+        2,
+        4,
+        5,
+        6
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §§4.5–4.7,6.1–6.3",
+      "route": "relation_composition.compose → relation_partitions → structural_relations.CONTRACTS/structural_shells → structural_frontier → composition_tree",
+      "cards": [
+        "P09",
+        "P10",
+        "P11",
+        "P16",
+        "P20",
+        "P21",
+        "P23"
+      ],
+      "acceptance_contrast": "Singleton vs multiple; branch retirement; same source with scope contrast; pending producer never rejects candidate. Conditional with two branches: one outcome when a condition holds, another when that SAME condition does not hold",
+      "implementation": "SCALAR + CONDITIONAL_SHELL; closure OPEN",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "R-COUNTERFACTUAL",
+      "blocks": [
+        2,
+        4,
+        5,
+        6
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §§4.5–4.7,6.1–6.3",
+      "route": "relation_composition.compose → relation_partitions → structural_relations.CONTRACTS/structural_shells → structural_frontier → composition_tree",
+      "cards": [
+        "P09",
+        "P10",
+        "P11",
+        "P16",
+        "P20",
+        "P21",
+        "P23"
+      ],
+      "acceptance_contrast": "Singleton vs multiple; branch retirement; same source with scope contrast; pending producer never rejects candidate. Counterfactual condition and its consequence; not material implication",
+      "implementation": "SCALAR + CONDITIONAL_SHELL; closure OPEN",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "R-BEFORE",
+      "blocks": [
+        2,
+        4,
+        5,
+        6
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §§4.5–4.7,6.1–6.3",
+      "route": "relation_composition.compose → relation_partitions → structural_relations.CONTRACTS/structural_shells → structural_frontier → composition_tree",
+      "cards": [
+        "P09",
+        "P10",
+        "P11",
+        "P16",
+        "P20",
+        "P21",
+        "P23"
+      ],
+      "acceptance_contrast": "Singleton vs multiple; branch retirement; same source with scope contrast; pending producer never rejects candidate. First event/proposition occurs before the second",
+      "implementation": "SCALAR + CONDITIONAL_SHELL; closure OPEN",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "R-AFTER",
+      "blocks": [
+        2,
+        4,
+        5,
+        6
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §§4.5–4.7,6.1–6.3",
+      "route": "relation_composition.compose → relation_partitions → structural_relations.CONTRACTS/structural_shells → structural_frontier → composition_tree",
+      "cards": [
+        "P09",
+        "P10",
+        "P11",
+        "P16",
+        "P20",
+        "P21",
+        "P23"
+      ],
+      "acceptance_contrast": "Singleton vs multiple; branch retirement; same source with scope contrast; pending producer never rejects candidate. First event/proposition occurs after the second",
+      "implementation": "SCALAR + CONDITIONAL_SHELL; closure OPEN",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "R-DURING",
+      "blocks": [
+        2,
+        4,
+        5,
+        6
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §§4.5–4.7,6.1–6.3",
+      "route": "relation_composition.compose → relation_partitions → structural_relations.CONTRACTS/structural_shells → structural_frontier → composition_tree",
+      "cards": [
+        "P09",
+        "P10",
+        "P11",
+        "P16",
+        "P20",
+        "P21",
+        "P23"
+      ],
+      "acceptance_contrast": "Singleton vs multiple; branch retirement; same source with scope contrast; pending producer never rejects candidate. First event/proposition occurs during the second",
+      "implementation": "SCALAR + CONDITIONAL_SHELL; closure OPEN",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "R-CONTENT",
+      "blocks": [
+        2,
+        4,
+        5,
+        6
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §§4.5–4.7,6.1–6.3",
+      "route": "relation_composition.content → owner/role/boundary → composition_children",
+      "cards": [
+        "P09",
+        "P10",
+        "P11",
+        "P16",
+        "P20",
+        "P21",
+        "P23"
+      ],
+      "acceptance_contrast": "Singleton vs multiple; branch retirement; same source with scope contrast; pending producer never rejects candidate. The target contains BOTH a parent predicate AND its dependent content: speech, thought, quotation or a controlled infinitive",
+      "implementation": "SCALAR; conditional staged producer PENDING",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "R-FORALL",
+      "blocks": [
+        2,
+        4,
+        5,
+        6
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §§4.5–4.7,6.1–6.3",
+      "route": "relation_composition → relation_quantifiers → quantifier_composition → bound_references",
+      "cards": [
+        "P09",
+        "P10",
+        "P11",
+        "P16",
+        "P20",
+        "P21",
+        "P23"
+      ],
+      "acceptance_contrast": "Singleton vs multiple; branch retirement; same source with scope contrast; pending producer never rejects candidate. Universal nonnumeric quantification over a restricted variable",
+      "implementation": "SCALAR; conditional staged producer PENDING",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "R-EXISTS",
+      "blocks": [
+        2,
+        4,
+        5,
+        6
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §§4.5–4.7,6.1–6.3",
+      "route": "relation_composition → relation_quantifiers → quantifier_composition → bound_references",
+      "cards": [
+        "P09",
+        "P10",
+        "P11",
+        "P16",
+        "P20",
+        "P21",
+        "P23"
+      ],
+      "acceptance_contrast": "Singleton vs multiple; branch retirement; same source with scope contrast; pending producer never rejects candidate. Existential nonnumeric quantification; no particular witness identity",
+      "implementation": "SCALAR; conditional staged producer PENDING",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "R-QUERY",
+      "blocks": [
+        2,
+        4,
+        5,
+        6
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §§4.5–4.7,6.1–6.3",
+      "route": "relation_composition.compose → relation_partitions → structural_relations.CONTRACTS/structural_shells → structural_frontier → composition_tree",
+      "cards": [
+        "P09",
+        "P10",
+        "P11",
+        "P16",
+        "P20",
+        "P21",
+        "P23"
+      ],
+      "acceptance_contrast": "Singleton vs multiple; branch retirement; same source with scope contrast; pending producer never rejects candidate. A question about content; no assertion of the content",
+      "implementation": "SCALAR + CONDITIONAL_SHELL; closure OPEN",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "R-GROUP",
+      "blocks": [
+        2,
+        4,
+        5,
+        6
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §§4.5–4.7,6.1–6.3",
+      "route": "relation_composition.compose → relation_partitions → structural_relations.CONTRACTS/structural_shells → structural_frontier → composition_tree",
+      "cards": [
+        "P09",
+        "P10",
+        "P11",
+        "P16",
+        "P20",
+        "P21",
+        "P23"
+      ],
+      "acceptance_contrast": "Singleton vs multiple; branch retirement; same source with scope contrast; pending producer never rejects candidate. Parentheses group an entire proposition without changing its logical meaning",
+      "implementation": "SCALAR + CONDITIONAL_SHELL; closure OPEN",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "R-CONTENT_REFERENCE",
+      "blocks": [
+        2,
+        4,
+        5,
+        6
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §§4.5–4.7,6.1–6.3",
+      "route": "relation_composition → content_reference_functions.compose → content_sources",
+      "cards": [
+        "P09",
+        "P10",
+        "P11",
+        "P16",
+        "P20",
+        "P21",
+        "P23"
+      ],
+      "acceptance_contrast": "Singleton vs multiple; branch retirement; same source with scope contrast; pending producer never rejects candidate. A predicate takes content referred to elsewhere: an explicit pointer to a proposition/action, or omitted but understood propositional content. The content itself is not expressed inside this target",
+      "implementation": "SCALAR; conditional staged producer PENDING",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "C-READINGS",
+      "blocks": [
+        6
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §§4.2,4.7",
+      "route": "morphology_domain/nominal_readings → morphology-use witness → composition_tree/late consumers",
+      "cards": [
+        "P01",
+        "P02",
+        "P03",
+        "P04"
+      ],
+      "acceptance_contrast": "Whole reading vs mixed features; unchanged morphology with changed owner; current vs retired source",
+      "implementation": "PARTIAL",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "C-OOV",
+      "blocks": [
+        4,
+        6
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §§4.2,4.7",
+      "route": "MorphProvider PREDICTED audit → contextual_oov → morphology_domain → open lexical/native",
+      "cards": [
+        "P01",
+        "P02",
+        "P03",
+        "P16",
+        "P23"
+      ],
+      "acceptance_contrast": "Unknown lemma vs guessed lemma; same spelling/different lexical identity; nominal/verb/query/negation",
+      "implementation": "PARTIAL",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "C-GROUNDS",
+      "blocks": [
+        6
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §§1.1,4.5,5.2",
+      "route": "probe inputs → selector decision → reading_decisions → historical consumers",
+      "cards": [
+        "P01",
+        "P02",
+        "P03",
+        "P13",
+        "P19"
+      ],
+      "acceptance_contrast": "Same decision ID with changed payload/source/condition; synthetic selected decision without license",
+      "implementation": "PARTIAL",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "C-ROLES",
+      "blocks": [
+        3,
+        4
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §§4.3,4.7",
+      "route": "predicate_functions.binding → component_constraints → component_candidates/lexical validation",
+      "cards": [
+        "P02",
+        "P12",
+        "P15",
+        "P16"
+      ],
+      "acceptance_contrast": "ATTRIBUTE vs direct role; NO_DIRECT_ROLE vs unknown; role proof revoked after selection",
+      "implementation": "PARTIAL",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "C-LEXICAL",
+      "blocks": [
+        2,
+        4
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §§4.7,6.1",
+      "route": "grammar/component alternatives → lexical bundles → lexical_issuance → tree",
+      "cards": [
+        "P05",
+        "P09",
+        "P10",
+        "P16"
+      ],
+      "acceptance_contrast": "Predicate head before canonical meaning; copula vs event; noun predicate vs description",
+      "implementation": "PARTIAL",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "C-SOURCES",
+      "blocks": [
+        5
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §§4.5,5.1–5.3",
+      "route": "grammar_domains/composition_sources/composition_source_union → domains → completion",
+      "cards": [
+        "P05",
+        "P20"
+      ],
+      "acceptance_contrast": "One candidate plus open producer vs one candidate with every producer closed",
+      "implementation": "PARTIAL",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "C-PAGES",
+      "blocks": [
+        5
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §5.2–5.3",
+      "route": "structural_tasks/nominal_reference_pages → domain receipts → consumers",
+      "cards": [
+        "P05",
+        "P06",
+        "P17",
+        "P20"
+      ],
+      "acceptance_contrast": "0 on first page vs domain exhaustion; ? vs multiple; joint set vs alternative readings",
+      "implementation": "PARTIAL",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "C-PARTITION",
+      "blocks": [
+        2
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §§4.5–4.7",
+      "route": "PartitionDomain/partition_sequences → boundaries/NEXT → child requests",
+      "cards": [
+        "P06",
+        "P08",
+        "P11"
+      ],
+      "acceptance_contrast": "Alternative boundaries and sibling starts; flat 20 siblings vs depth 20",
+      "implementation": "PARTIAL",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "C-SHARING",
+      "blocks": [
+        2,
+        3
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §§4.5,4.7",
+      "route": "shared_proposition_material → partition confirmation → every affected child",
+      "cards": [
+        "P07",
+        "P13"
+      ],
+      "acceptance_contrast": "Shared subset of 2 among 3 vs shared by all vs no sharing; exact occurrences",
+      "implementation": "PARTIAL",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "C-RETRACT",
+      "blocks": [
+        2,
+        5,
+        6
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §§4.5,5.4,7",
+      "route": "exclusions/decision retirement → domain rebuild → dependent invalidation",
+      "cards": [
+        "P08",
+        "P19",
+        "P22"
+      ],
+      "acceptance_contrast": "Revoked negative restores candidate; independent live proof preserves result",
+      "implementation": "PARTIAL",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "C-CHILD",
+      "blocks": [
+        2,
+        4
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §§4.5–4.7",
+      "route": "ChildDemand → scheduler/frontier → task_contracts.child_result → parent",
+      "cards": [
+        "P09",
+        "P10",
+        "P11"
+      ],
+      "acceptance_contrast": "Demand discovered mid lexical producer; resume exactly once; source remains open while child pending",
+      "implementation": "PARTIAL",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "C-WINDOW",
+      "blocks": [
+        2,
+        4,
+        5
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §4.5 + F05_STATUS §2; user window agreement",
+      "route": "ChildTasks/StructuralFrontier → addressed +3 continuation → parent",
+      "cards": [
+        "P10",
+        "P11",
+        "P20"
+      ],
+      "acceptance_contrast": "Depth3/4/7; flat operands do not consume depth; resource exhaustion preserves frontier",
+      "implementation": "PARTIAL",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "C-OWNERS",
+      "blocks": [
+        3
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §4.7",
+      "route": "refinement_boundaries/nominal_hosts → host proof/path → descriptions",
+      "cards": [
+        "P12",
+        "P13"
+      ],
+      "acceptance_contrast": "Two possible hosts; group host; same token in distinct frames/scopes; unexpressed role",
+      "implementation": "PARTIAL",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "C-BINDER",
+      "blocks": [
+        4
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §6.2",
+      "route": "relation_quantifiers/quantifier_composition → binder domains → bound_references",
+      "cards": [
+        "P14",
+        "P15"
+      ],
+      "acceptance_contrast": "Unknown case vs contradiction; two whole readings; nested binders and shadowing; no invented entity",
+      "implementation": "PARTIAL",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "C-CONTROL",
+      "blocks": [
+        4
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §§4.7,6.1–6.3",
+      "route": "control_arguments/content roles → child InputSlot → bound/content consumers",
+      "cards": [
+        "P09",
+        "P10",
+        "P15",
+        "P16"
+      ],
+      "acceptance_contrast": "Intention vs realized event; actor vs recipient; controller outside child remains readable",
+      "implementation": "PARTIAL",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "C-TEMPORAL",
+      "blocks": [
+        4,
+        6
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §6.3",
+      "route": "temporal functions/units + modality → typed scope → native plan",
+      "cards": [
+        "P15",
+        "P16",
+        "P18",
+        "P21"
+      ],
+      "acceptance_contrast": "Time/interval vs entity; nested modal and temporal scope; question never asserts content",
+      "implementation": "PARTIAL",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "C-REF-UNION",
+      "blocks": [
+        1,
+        5
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §§4.6,5.1,6.3",
+      "route": "nominal_reference_domain.inspect → local/memory/groups/chain union → pages",
+      "cards": [
+        "P05",
+        "P17",
+        "P18"
+      ],
+      "acceptance_contrast": "Absent memory source vs empty completed source; different producers for same entity",
+      "implementation": "PARTIAL",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "T-ENTITY",
+      "blocks": [
+        1
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §§3,5.1,7.1",
+      "route": "nominal_reference_source → local_nominal_anchor → nominal_reference_binding/plan",
+      "cards": [
+        "P17",
+        "P18",
+        "P22"
+      ],
+      "acceptance_contrast": "Local M vs established memory entity; same surface different refs; independent grounding paths",
+      "implementation": "PARTIAL",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "T-GROUP",
+      "blocks": [
+        1,
+        2
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §§4.7,6.3",
+      "route": "nominal_group_source → local_group_anchor/K → group binding/native",
+      "cards": [
+        "P17",
+        "P18",
+        "P22"
+      ],
+      "acceptance_contrast": "Closed K of distinct identities vs unresolved/repeated identity; no collapse to one entity",
+      "implementation": "PARTIAL",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "T-MENTION",
+      "blocks": [
+        1
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §§4.6,6.3",
+      "route": "nominal_reference_chain → NOMINAL_REFERENCE anchor → chain.finish",
+      "cards": [
+        "P17",
+        "P18"
+      ],
+      "acceptance_contrast": "Two alternative parents vs joint compatible edges; grounded DAG vs ungrounded cycle",
+      "implementation": "PARTIAL",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "T-GROUP-MENTION",
+      "blocks": [
+        1,
+        2
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §§4.7,6.3",
+      "route": "nominal_group_source → GROUP_MENTION dependency (terminal/reference members) → group plan",
+      "cards": [
+        "P17",
+        "P18",
+        "P22"
+      ],
+      "acceptance_contrast": "Mixed terminal+reference members; group-valued member; missing member; alternate support",
+      "implementation": "PARTIAL",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "T-PLACE",
+      "blocks": [
+        1,
+        5
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §§4.7,6.3",
+      "route": "nominal_reference_local/memory spatial rows → spatial_reference → native places",
+      "cards": [
+        "P17",
+        "P18",
+        "P19"
+      ],
+      "acceptance_contrast": "Local relative place vs committed place; missing anchor vs no coordinates; retired anchor",
+      "implementation": "PARTIAL",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "T-BOUND",
+      "blocks": [
+        1,
+        4
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §6.2",
+      "route": "bound_references → state.observation[bound_reference_bindings] → lexical/native variable consumer",
+      "cards": [
+        "P14",
+        "P15",
+        "P18"
+      ],
+      "acceptance_contrast": "Bound variable vs referential M; scope escape; multiple scoped candidates",
+      "implementation": "PARTIAL",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "T-CONTENT",
+      "blocks": [
+        1,
+        4
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §§6.1,6.3",
+      "route": "content_sources/content_reference_functions → proposition/action target → parent role",
+      "cards": [
+        "P09",
+        "P15",
+        "P18"
+      ],
+      "acceptance_contrast": "Explicit pointer vs omitted content; action description vs occurrence; quoted content not true",
+      "implementation": "PARTIAL",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "T-NARRATIVE",
+      "blocks": [
+        1,
+        2
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §§4.6–4.7",
+      "route": "narrative_groups/implicit_plan/implicit_introduction → open narrative group → late native",
+      "cards": [
+        "P18",
+        "P19",
+        "P22"
+      ],
+      "acceptance_contrast": "Open narrative group vs closed K; multiple grounding paths; member identity not invented",
+      "implementation": "PARTIAL",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "C-CACHE",
+      "blocks": [
+        5,
+        6
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §§1.1,4.5,5.4",
+      "route": "dispatcher/producer_reads/context_receipts → cache replay → every reader",
+      "cards": [
+        "P04",
+        "P19"
+      ],
+      "acceptance_contrast": "Positive/empty/negative reads; source/memory/release/condition changes; unrelated branch remains cached",
+      "implementation": "PARTIAL",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "C-HISTORY",
+      "blocks": [
+        6
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §§1.1,7",
+      "route": "issuer/validation_graph/historical views → scoped revalidation → discharge",
+      "cards": [
+        "P03",
+        "P13",
+        "P19",
+        "P20"
+      ],
+      "acceptance_contrast": "Historical evidence checked in original condition; public unconditional proof must still reject conditional",
+      "implementation": "PARTIAL",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "C-CLOSURE",
+      "blocks": [
+        5,
+        6
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §§4.3,4.5,5.3",
+      "route": "source receipts + child results + obligations → convergence certificate",
+      "cards": [
+        "P05",
+        "P16",
+        "P20"
+      ],
+      "acceptance_contrast": "Execution returned vs interpretation complete; singleton open forest vs certified completion",
+      "implementation": "PARTIAL",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "C-PUBLICATION",
+      "blocks": [
+        6
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §§4.3,7.2–7.3",
+      "route": "partial_composition → composition_tree.finalize/seal → native_plan → commit_stage",
+      "cards": [
+        "P20",
+        "P21"
+      ],
+      "acceptance_contrast": "PARTIAL no silent write; unresolved sibling blocks publication; chosen conditional branch discharged",
+      "implementation": "PARTIAL",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "C-DURABLE",
+      "blocks": [
+        6
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md §§7.2–7.4",
+      "route": "native witnesses → journal/ledger → restart/revoke → downstream facts",
+      "cards": [
+        "P21",
+        "P22"
+      ],
+      "acceptance_contrast": "Restart with changed evidence; retract one of two supports vs last support; callbacks not durable proof",
+      "implementation": "PARTIAL",
+      "evidence": "STATIC; acceptance OPEN"
+    },
+    {
+      "id": "D-PATTERN",
+      "blocks": [
+        2,
+        5
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md F05_IMPLEMENTATION_PLAN §1; user DEFER",
+      "route": "Parameterized language-pattern reuse",
+      "cards": [
+        "P23"
+      ],
+      "acceptance_contrast": "Never replace source-specific proof by a cached pattern",
+      "implementation": "DEFER",
+      "evidence": "User decision; not implemented acceptance"
+    },
+    {
+      "id": "D-ARITHMETIC",
+      "blocks": [
+        4
+      ],
+      "architecture": "docs/FORMALIZER_ARCHITECTURE_V7.md F05_IMPLEMENTATION_PLAN §1",
+      "route": "Arithmetic quantifiers outside this F05 scope",
+      "cards": [
+        "P23"
+      ],
+      "acceptance_contrast": "FORALL/EXISTS remain in scope",
+      "implementation": "DEFER",
+      "evidence": "User decision"
+    }
+  ]
+}

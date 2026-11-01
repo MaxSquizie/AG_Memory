@@ -85,6 +85,11 @@ P12/P14/P17 можно проектировать заранее, но не де
 
 ### P00. Зафиксировать входную спецификацию и разделить ошибки проверок
 
+**ACCEPT, 2026-11-01 — только инвентаризация.**
+Результат: [F05_P00_BASELINE.md](F05_P00_BASELINE.md),
+реестр: [F05_CAPABILITIES.md](F05_CAPABILITIES.md).
+Каждая последующая карточка ссылается на capability ID; INVESTIGATE не закрывает runtime.
+
 **Тип:** V. **Блоки:** 1–6. **Зависимости:** нет.
 **Места:** F05_STATUS.md, FORMALIZER_ARCHITECTURE_V7.md, F05_MECHANISM_COVERAGE.md;
 `tests/test_composition_dispatcher.py`, `test_oov_paradigm_forms.py`,

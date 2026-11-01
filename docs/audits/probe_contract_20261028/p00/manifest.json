@@ -1,0 +1,38 @@
+{
+  "commit": "6ee7e648f182ef74d29f44d1991e021cb88455db",
+  "baseline_commit": "9b15de4",
+  "command": "PYTHONPATH=.:src:tests:/workspace/scratch/cbcb79b8cb00/ag_memory_deps F05_CAPTURE_OUTPUT=/tmp/f05_p00_capture.json python -m pytest -q -p tools.recovery.f05_p00_capture tests/test_composition_dispatcher.py tests/test_oov_paradigm_forms.py tests/test_nominal_predication_tasks.py",
+  "evidence_kind": "SCRIPTED_NATIVE_AND_DIRECT_API; no live model",
+  "files": {
+    "docs/audits/probe_contract_20261028/p00/reading-baseline.log": "5205021dac5c79960f3539e0cb11b30c1a8b185d0329622e3d00b949a55520a9",
+    "docs/audits/probe_contract_20261028/p00/current_capture.json.gz": "e00a0599ea2410f9563a99ad781f6190c10e0db69ec9994ade70149b330de330",
+    "docs/audits/probe_contract_20261028/p00/reading-nominal-baseline.log": "762d7b180bc0bf8dfad3eb9e416b3e1210ed8ff40d56b2b8506588cde17bb113",
+    "docs/audits/probe_contract_20261028/p00/current.log": "4180523589abb5a68482f2fbe48668bedbc730b41a87aa4914f435a6483c0073",
+    "tools/recovery/f05_p00_capture.py": "4524cb04345dec97ed069559cefade86a74ef27fafb8226fcf5f3b1aa5dda29f",
+    "tests/test_structural_relation_tasks.py": "5f1c64ee327b81d6ab78c49c1497b742e2807e083d98709a29278ea11e97b75f",
+    "tools/formalizer_component_fixture.py": "5bb2b257f5cdd21bd56f95e0f1b6046bba7b2c614546a5b9ad6152b5dd89c2ca",
+    "tools/formalizer_v7_native_binding.py": "5a3ef640e285e8b565fd6b7b8dba25ac225d820dfa4e30ddca7daa2a1f9c4f19",
+    "tests/test_composition_dispatcher.py": "500bcf5fff3204e4cb80f486699ab9fa1af168597c59182e23a2a16176de0dc5",
+    "tests/test_oov_paradigm_forms.py": "80218115a616c8273e5b68adc8a96a75102eefdeaa661b507f3cf59b93757607",
+    "tests/test_nominal_predication_tasks.py": "c591e11d7a16f3b6eba0519c0980905c9cfa986a880b4a5d7a5abf311547c94e",
+    "src/ah/formalizer/component_probe.py": "2104d75eb7b7fb4a71901e1cdc0896ea08d9d9dc8f82e67e39b6ca8dfa137975",
+    "src/ah/formalizer/component_candidates.py": "ec811ed0562ae8430cc0e153bad7171ad0b1cc833352bd36bc560b4dce41c22a",
+    "src/ah/formalizer/component_predication.py": "c176331877e360144789588fd90a933b058866d8569eda9ab32a936baf31e018",
+    "src/ah/formalizer/predicate_functions.py": "2487ec8cf061d3b2d8833aba3bbc0b9a70927b8bf7387150679ccab8878a64a5",
+    "src/ah/formalizer/probe_wording.py": "cc8532c5f460dce7a3d407568919a833cf1e7bfe3c60e76239bba892018c64ab",
+    "src/ah/formalizer/relation_composition.py": "9386d13108cac51ec60114427e32517211ade7ce9abe75322bde9a05b692b9f4",
+    "src/ah/formalizer/structural_relations.py": "b05d5013170139d4134e9a11f7ba818bafca2c0613a0943cf523d2a9b6709d4e",
+    "src/ah/formalizer/nominal_reference_domain.py": "c5ec77c8d6fd212d014b2fc070110b4c60e5888b09766b06ffc3bb562ee20ad1",
+    "src/ah/formalizer/nominal_group_source.py": "43b685c0463efd3aca36dfd4fce69479e92dd33c6722ed47526563d10ed9d072"
+  },
+  "release_hashes": [
+    "34d0aeee4344aab805260a9696c415679b9d31539c6526d376a1f2623952b4ee"
+  ],
+  "resource_construction": "execute_native: fixture(session.core, known), затем with_full_composition для structure_mode=region_probes; source hashes ниже. Direct API Release sha=test/test-context/scoped-feedback; диагностируется до selector.",
+  "packages": {
+    "pytest": "9.1.1",
+    "pymorphy3": "2.0.6",
+    "pymorphy3-dicts-ru": "2.4.417150.4580142"
+  },
+  "capture_notes": "probe_returns frozen using deepcopy at return; no live model calls; raw Script responses preserved"
+}
