@@ -86,6 +86,8 @@ def publish_recoveries(state,frames):
         readings=selected.get(token.token_id,{})
         if len(readings)!=1:continue
         reading=next(iter(readings.values()))
+        from .nominal_readings import attested
+        if not attested(state,token.token_id,reading):continue
         for row in reversed(state.syntax_trace):
             if row.get('kind')!='AGREEMENT_RECOVERY' or row['token_ref']!=token.token_id:continue
             if row.get('recovered_reading')!=clean(reading):continue

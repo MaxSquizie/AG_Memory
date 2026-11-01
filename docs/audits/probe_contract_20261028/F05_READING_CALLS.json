@@ -1,0 +1,2423 @@
+{
+  "base_commit": "9b15de437d9fda1aeec550e5aca20b33e0d7c4e4",
+  "source_digest": "c355c071ccbd78c8494652e8f9c9b4e8606f9789002509f777b87e27cdd69a73",
+  "source_scope": "sorted src/ah/formalizer/**/*.py path and UTF-8 contents",
+  "method": "AST import-alias call candidates; lexical cache/memo candidates",
+  "limitations": [
+    "Function-local aliases may shadow each other; these are navigation candidates.",
+    "Attribute calls, injected callbacks, dynamic imports and indirect calls require separate review.",
+    "Presence does not prove reachability; absence does not prove no dependency."
+  ],
+  "calls": [
+    {
+      "file": "src/ah/formalizer/attitude_composition.py",
+      "line": 88,
+      "module": "component_probe",
+      "symbol": "_probe"
+    },
+    {
+      "file": "src/ah/formalizer/bundle_constraints.py",
+      "line": 164,
+      "module": "composition_dispatcher",
+      "symbol": "canonical"
+    },
+    {
+      "file": "src/ah/formalizer/bundle_constraints.py",
+      "line": 96,
+      "module": "structural_tasks",
+      "symbol": "_licensed"
+    },
+    {
+      "file": "src/ah/formalizer/bundle_constraints.py",
+      "line": 92,
+      "module": "partial_readings",
+      "symbol": "valid_domain"
+    },
+    {
+      "file": "src/ah/formalizer/bundle_constraints.py",
+      "line": 117,
+      "module": "morphology_domain",
+      "symbol": "clean"
+    },
+    {
+      "file": "src/ah/formalizer/bundle_constraints.py",
+      "line": 117,
+      "module": "morphology_domain",
+      "symbol": "clean"
+    },
+    {
+      "file": "src/ah/formalizer/component_candidates.py",
+      "line": 116,
+      "module": "morphology_domain",
+      "symbol": "proposed"
+    },
+    {
+      "file": "src/ah/formalizer/component_clause.py",
+      "line": 53,
+      "module": "nominal_readings",
+      "symbol": "attach_groups"
+    },
+    {
+      "file": "src/ah/formalizer/component_clause.py",
+      "line": 76,
+      "module": "component_probe",
+      "symbol": "_probe"
+    },
+    {
+      "file": "src/ah/formalizer/component_constraints.py",
+      "line": 45,
+      "module": "dispatch_evidence",
+      "symbol": "observe"
+    },
+    {
+      "file": "src/ah/formalizer/component_constraints.py",
+      "line": 69,
+      "module": "selection_domains",
+      "symbol": "fingerprint"
+    },
+    {
+      "file": "src/ah/formalizer/component_constraints.py",
+      "line": 75,
+      "module": "dispatch_evidence",
+      "symbol": "observe"
+    },
+    {
+      "file": "src/ah/formalizer/component_constraints.py",
+      "line": 106,
+      "module": "composition_dispatcher",
+      "symbol": "canonical"
+    },
+    {
+      "file": "src/ah/formalizer/component_constraints.py",
+      "line": 70,
+      "module": "partial_readings",
+      "symbol": "retired_refs"
+    },
+    {
+      "file": "src/ah/formalizer/component_constraints.py",
+      "line": 102,
+      "module": "structural_tasks",
+      "symbol": "_licensed"
+    },
+    {
+      "file": "src/ah/formalizer/component_constraints.py",
+      "line": 103,
+      "module": "partial_readings",
+      "symbol": "valid_domain"
+    },
+    {
+      "file": "src/ah/formalizer/component_coordination.py",
+      "line": 32,
+      "module": "structural_tasks",
+      "symbol": "choose"
+    },
+    {
+      "file": "src/ah/formalizer/component_coordination.py",
+      "line": 72,
+      "module": "structural_tasks",
+      "symbol": "licensed"
+    },
+    {
+      "file": "src/ah/formalizer/component_dependency_domains.py",
+      "line": 49,
+      "module": "nominal_readings",
+      "symbol": "expand"
+    },
+    {
+      "file": "src/ah/formalizer/component_dependency_domains.py",
+      "line": 19,
+      "module": "nominal_readings",
+      "symbol": "clean"
+    },
+    {
+      "file": "src/ah/formalizer/component_dependency_domains.py",
+      "line": 27,
+      "module": "nominal_readings",
+      "symbol": "clean"
+    },
+    {
+      "file": "src/ah/formalizer/component_dependency_domains.py",
+      "line": 36,
+      "module": "nominal_readings",
+      "symbol": "heads"
+    },
+    {
+      "file": "src/ah/formalizer/component_dependency_domains.py",
+      "line": 42,
+      "module": "nominal_readings",
+      "symbol": "clean"
+    },
+    {
+      "file": "src/ah/formalizer/component_dependency_domains.py",
+      "line": 46,
+      "module": "nominal_readings",
+      "symbol": "clean"
+    },
+    {
+      "file": "src/ah/formalizer/component_dependency_domains.py",
+      "line": 39,
+      "module": "nominal_readings",
+      "symbol": "clean"
+    },
+    {
+      "file": "src/ah/formalizer/component_dependency_domains.py",
+      "line": 39,
+      "module": "nominal_readings",
+      "symbol": "clean"
+    },
+    {
+      "file": "src/ah/formalizer/component_dependency_materialization.py",
+      "line": 30,
+      "module": "nominal_readings",
+      "symbol": "attested"
+    },
+    {
+      "file": "src/ah/formalizer/component_dependency_materialization.py",
+      "line": 16,
+      "module": "nominal_readings",
+      "symbol": "variant"
+    },
+    {
+      "file": "src/ah/formalizer/component_dependency_reduction.py",
+      "line": 87,
+      "module": "structural_tasks",
+      "symbol": "choose_domain"
+    },
+    {
+      "file": "src/ah/formalizer/component_dependency_reduction.py",
+      "line": 44,
+      "module": "morphology_domain",
+      "symbol": "proposed"
+    },
+    {
+      "file": "src/ah/formalizer/component_dependency_reduction.py",
+      "line": 110,
+      "module": "morphology_domain",
+      "symbol": "license_use"
+    },
+    {
+      "file": "src/ah/formalizer/component_dependency_reduction.py",
+      "line": 97,
+      "module": "partial_readings",
+      "symbol": "retain"
+    },
+    {
+      "file": "src/ah/formalizer/component_infinitives.py",
+      "line": 18,
+      "module": "structural_tasks",
+      "symbol": "choose"
+    },
+    {
+      "file": "src/ah/formalizer/component_infinitives.py",
+      "line": 27,
+      "module": "structural_tasks",
+      "symbol": "source_set"
+    },
+    {
+      "file": "src/ah/formalizer/component_infinitives.py",
+      "line": 63,
+      "module": "structural_tasks",
+      "symbol": "choose"
+    },
+    {
+      "file": "src/ah/formalizer/component_nominal_groups.py",
+      "line": 56,
+      "module": "structural_tasks",
+      "symbol": "enabled"
+    },
+    {
+      "file": "src/ah/formalizer/component_nominal_groups.py",
+      "line": 93,
+      "module": "component_probe",
+      "symbol": "_probe"
+    },
+    {
+      "file": "src/ah/formalizer/component_nominal_questions.py",
+      "line": 13,
+      "module": "component_probe",
+      "symbol": "_probe"
+    },
+    {
+      "file": "src/ah/formalizer/component_nominal_questions.py",
+      "line": 115,
+      "module": "component_probe_replay",
+      "symbol": "supersede"
+    },
+    {
+      "file": "src/ah/formalizer/component_nominal_questions.py",
+      "line": 126,
+      "module": "selection_domains",
+      "symbol": "fingerprint"
+    },
+    {
+      "file": "src/ah/formalizer/component_nominal_utterance.py",
+      "line": 50,
+      "module": "nominal_readings",
+      "symbol": "attach_groups"
+    },
+    {
+      "file": "src/ah/formalizer/component_participants.py",
+      "line": 112,
+      "module": "component_probe",
+      "symbol": "_probe"
+    },
+    {
+      "file": "src/ah/formalizer/component_predication.py",
+      "line": 134,
+      "module": "partial_readings",
+      "symbol": "bundles"
+    },
+    {
+      "file": "src/ah/formalizer/component_predication.py",
+      "line": 205,
+      "module": "component_probe",
+      "symbol": "_probe"
+    },
+    {
+      "file": "src/ah/formalizer/component_predication.py",
+      "line": 238,
+      "module": "morphology_domain",
+      "symbol": "license_use"
+    },
+    {
+      "file": "src/ah/formalizer/component_probe.py",
+      "line": 203,
+      "module": "component_probe_replay",
+      "symbol": "restore_decision"
+    },
+    {
+      "file": "src/ah/formalizer/component_probe.py",
+      "line": 172,
+      "module": "component_probe_replay",
+      "symbol": "execute"
+    },
+    {
+      "file": "src/ah/formalizer/component_refinement.py",
+      "line": 93,
+      "module": "structural_tasks",
+      "symbol": "enabled"
+    },
+    {
+      "file": "src/ah/formalizer/component_refinement.py",
+      "line": 362,
+      "module": "component_probe",
+      "symbol": "_probe"
+    },
+    {
+      "file": "src/ah/formalizer/component_refinement.py",
+      "line": 55,
+      "module": "morphology_domain",
+      "symbol": "project"
+    },
+    {
+      "file": "src/ah/formalizer/component_refinement.py",
+      "line": 204,
+      "module": "structural_tasks",
+      "symbol": "choose"
+    },
+    {
+      "file": "src/ah/formalizer/component_refinement.py",
+      "line": 213,
+      "module": "component_probe_replay",
+      "symbol": "supersede"
+    },
+    {
+      "file": "src/ah/formalizer/component_refinement.py",
+      "line": 405,
+      "module": "structural_tasks",
+      "symbol": "choose"
+    },
+    {
+      "file": "src/ah/formalizer/component_refinement.py",
+      "line": 446,
+      "module": "structural_tasks",
+      "symbol": "choose"
+    },
+    {
+      "file": "src/ah/formalizer/component_temporal_scope.py",
+      "line": 25,
+      "module": "component_probe",
+      "symbol": "_probe"
+    },
+    {
+      "file": "src/ah/formalizer/components.py",
+      "line": 44,
+      "module": "structural_tasks",
+      "symbol": "enabled"
+    },
+    {
+      "file": "src/ah/formalizer/composition_boundaries.py",
+      "line": 52,
+      "module": "component_probe",
+      "symbol": "_probe"
+    },
+    {
+      "file": "src/ah/formalizer/composition_children.py",
+      "line": 31,
+      "module": "structural_tasks",
+      "symbol": "enabled"
+    },
+    {
+      "file": "src/ah/formalizer/composition_children.py",
+      "line": 41,
+      "module": "structural_tasks",
+      "symbol": "choose"
+    },
+    {
+      "file": "src/ah/formalizer/composition_children.py",
+      "line": 45,
+      "module": "component_probe",
+      "symbol": "_probe"
+    },
+    {
+      "file": "src/ah/formalizer/composition_children.py",
+      "line": 77,
+      "module": "morphology_domain",
+      "symbol": "frame_readings"
+    },
+    {
+      "file": "src/ah/formalizer/composition_children.py",
+      "line": 77,
+      "module": "morphology_domain",
+      "symbol": "license_use"
+    },
+    {
+      "file": "src/ah/formalizer/composition_contracts.py",
+      "line": 78,
+      "module": "structural_tasks",
+      "symbol": "licensed"
+    },
+    {
+      "file": "src/ah/formalizer/composition_contracts.py",
+      "line": 76,
+      "module": "structural_tasks",
+      "symbol": "licensed"
+    },
+    {
+      "file": "src/ah/formalizer/composition_contracts.py",
+      "line": 19,
+      "module": "structural_tasks",
+      "symbol": "licensed"
+    },
+    {
+      "file": "src/ah/formalizer/composition_contracts.py",
+      "line": 62,
+      "module": "structural_tasks",
+      "symbol": "licensed"
+    },
+    {
+      "file": "src/ah/formalizer/composition_contracts.py",
+      "line": 65,
+      "module": "structural_tasks",
+      "symbol": "licensed"
+    },
+    {
+      "file": "src/ah/formalizer/composition_dispatcher.py",
+      "line": 48,
+      "module": "producer_reads",
+      "symbol": "observe"
+    },
+    {
+      "file": "src/ah/formalizer/composition_dispatcher.py",
+      "line": 108,
+      "module": "producer_reads",
+      "symbol": "discard"
+    },
+    {
+      "file": "src/ah/formalizer/composition_dispatcher.py",
+      "line": 201,
+      "module": "producer_reads",
+      "symbol": "task"
+    },
+    {
+      "file": "src/ah/formalizer/composition_dispatcher.py",
+      "line": 74,
+      "module": "dispatch_evidence",
+      "symbol": "probe_stamp"
+    },
+    {
+      "file": "src/ah/formalizer/composition_dispatcher.py",
+      "line": 193,
+      "module": "dispatch_evidence",
+      "symbol": "probe_stamp"
+    },
+    {
+      "file": "src/ah/formalizer/composition_dispatcher.py",
+      "line": 57,
+      "module": "dispatch_evidence",
+      "symbol": "valid"
+    },
+    {
+      "file": "src/ah/formalizer/composition_dispatcher.py",
+      "line": 117,
+      "module": "dispatch_evidence",
+      "symbol": "evidence_probe_refs"
+    },
+    {
+      "file": "src/ah/formalizer/composition_equivalence.py",
+      "line": 54,
+      "module": "morphology_domain",
+      "symbol": "clean"
+    },
+    {
+      "file": "src/ah/formalizer/composition_expansion.py",
+      "line": 33,
+      "module": "composition_dispatcher",
+      "symbol": "canonical"
+    },
+    {
+      "file": "src/ah/formalizer/composition_expansion.py",
+      "line": 41,
+      "module": "composition_dispatcher",
+      "symbol": "canonical"
+    },
+    {
+      "file": "src/ah/formalizer/composition_expansion.py",
+      "line": 41,
+      "module": "composition_dispatcher",
+      "symbol": "canonical"
+    },
+    {
+      "file": "src/ah/formalizer/composition_morphology.py",
+      "line": 38,
+      "module": "composition_dispatcher",
+      "symbol": "canonical"
+    },
+    {
+      "file": "src/ah/formalizer/composition_morphology.py",
+      "line": 58,
+      "module": "morphology_domain",
+      "symbol": "project"
+    },
+    {
+      "file": "src/ah/formalizer/composition_morphology.py",
+      "line": 83,
+      "module": "morphology_domain",
+      "symbol": "frame_readings"
+    },
+    {
+      "file": "src/ah/formalizer/composition_morphology.py",
+      "line": 23,
+      "module": "morphology_domain",
+      "symbol": "function_restrictions"
+    },
+    {
+      "file": "src/ah/formalizer/composition_morphology.py",
+      "line": 34,
+      "module": "morphology_domain",
+      "symbol": "function_support"
+    },
+    {
+      "file": "src/ah/formalizer/composition_morphology.py",
+      "line": 68,
+      "module": "composition_dispatcher",
+      "symbol": "canonical"
+    },
+    {
+      "file": "src/ah/formalizer/composition_morphology.py",
+      "line": 90,
+      "module": "nominal_readings",
+      "symbol": "attested"
+    },
+    {
+      "file": "src/ah/formalizer/composition_morphology.py",
+      "line": 93,
+      "module": "morphology_domain",
+      "symbol": "clean"
+    },
+    {
+      "file": "src/ah/formalizer/composition_morphology.py",
+      "line": 94,
+      "module": "nominal_readings",
+      "symbol": "variant"
+    },
+    {
+      "file": "src/ah/formalizer/composition_morphology.py",
+      "line": 84,
+      "module": "morphology_domain",
+      "symbol": "clean"
+    },
+    {
+      "file": "src/ah/formalizer/composition_session.py",
+      "line": 23,
+      "module": "composition_dispatcher",
+      "symbol": "Dispatcher"
+    },
+    {
+      "file": "src/ah/formalizer/composition_session.py",
+      "line": 236,
+      "module": "composition_dispatcher",
+      "symbol": "canonical"
+    },
+    {
+      "file": "src/ah/formalizer/composition_session.py",
+      "line": 74,
+      "module": "composition_dispatcher",
+      "symbol": "canonical"
+    },
+    {
+      "file": "src/ah/formalizer/composition_session.py",
+      "line": 231,
+      "module": "composition_dispatcher",
+      "symbol": "canonical"
+    },
+    {
+      "file": "src/ah/formalizer/composition_session.py",
+      "line": 232,
+      "module": "composition_dispatcher",
+      "symbol": "canonical"
+    },
+    {
+      "file": "src/ah/formalizer/composition_session.py",
+      "line": 233,
+      "module": "composition_dispatcher",
+      "symbol": "canonical"
+    },
+    {
+      "file": "src/ah/formalizer/composition_session.py",
+      "line": 234,
+      "module": "composition_dispatcher",
+      "symbol": "canonical"
+    },
+    {
+      "file": "src/ah/formalizer/composition_sources.py",
+      "line": 219,
+      "module": "morphology_domain",
+      "symbol": "frame_readings"
+    },
+    {
+      "file": "src/ah/formalizer/composition_sources.py",
+      "line": 137,
+      "module": "morphology_domain",
+      "symbol": "clean"
+    },
+    {
+      "file": "src/ah/formalizer/composition_sources.py",
+      "line": 167,
+      "module": "morphology_domain",
+      "symbol": "clean"
+    },
+    {
+      "file": "src/ah/formalizer/composition_sources.py",
+      "line": 222,
+      "module": "morphology_domain",
+      "symbol": "clean"
+    },
+    {
+      "file": "src/ah/formalizer/composition_sources.py",
+      "line": 242,
+      "module": "composition_dispatcher",
+      "symbol": "canonical"
+    },
+    {
+      "file": "src/ah/formalizer/composition_sources.py",
+      "line": 78,
+      "module": "morphology_domain",
+      "symbol": "clean"
+    },
+    {
+      "file": "src/ah/formalizer/composition_sources.py",
+      "line": 91,
+      "module": "morphology_domain",
+      "symbol": "clean"
+    },
+    {
+      "file": "src/ah/formalizer/composition_sources.py",
+      "line": 221,
+      "module": "morphology_domain",
+      "symbol": "clean"
+    },
+    {
+      "file": "src/ah/formalizer/composition_sources.py",
+      "line": 168,
+      "module": "morphology_domain",
+      "symbol": "clean"
+    },
+    {
+      "file": "src/ah/formalizer/composition_sources.py",
+      "line": 139,
+      "module": "morphology_domain",
+      "symbol": "clean"
+    },
+    {
+      "file": "src/ah/formalizer/composition_tasks.py",
+      "line": 40,
+      "module": "composition_dispatcher",
+      "symbol": "DispatchBlocked"
+    },
+    {
+      "file": "src/ah/formalizer/composition_tasks.py",
+      "line": 69,
+      "module": "composition_dispatcher",
+      "symbol": "canonical"
+    },
+    {
+      "file": "src/ah/formalizer/composition_tasks.py",
+      "line": 53,
+      "module": "composition_dispatcher",
+      "symbol": "DispatchBlocked"
+    },
+    {
+      "file": "src/ah/formalizer/composition_tree.py",
+      "line": 223,
+      "module": "morphology_domain",
+      "symbol": "validate_uses"
+    },
+    {
+      "file": "src/ah/formalizer/content_reference_functions.py",
+      "line": 41,
+      "module": "structural_tasks",
+      "symbol": "choose"
+    },
+    {
+      "file": "src/ah/formalizer/content_reference_functions.py",
+      "line": 79,
+      "module": "structural_tasks",
+      "symbol": "choose"
+    },
+    {
+      "file": "src/ah/formalizer/content_reference_functions.py",
+      "line": 139,
+      "module": "partial_readings",
+      "symbol": "retired_refs"
+    },
+    {
+      "file": "src/ah/formalizer/content_reference_functions.py",
+      "line": 171,
+      "module": "structural_tasks",
+      "symbol": "choose"
+    },
+    {
+      "file": "src/ah/formalizer/content_reference_functions.py",
+      "line": 19,
+      "module": "structural_tasks",
+      "symbol": "choose"
+    },
+    {
+      "file": "src/ah/formalizer/content_reference_functions.py",
+      "line": 27,
+      "module": "structural_tasks",
+      "symbol": "source_set"
+    },
+    {
+      "file": "src/ah/formalizer/content_reference_functions.py",
+      "line": 66,
+      "module": "structural_tasks",
+      "symbol": "licensed"
+    },
+    {
+      "file": "src/ah/formalizer/content_reference_functions.py",
+      "line": 92,
+      "module": "structural_tasks",
+      "symbol": "choose"
+    },
+    {
+      "file": "src/ah/formalizer/content_reference_functions.py",
+      "line": 145,
+      "module": "structural_tasks",
+      "symbol": "licensed"
+    },
+    {
+      "file": "src/ah/formalizer/content_reference_functions.py",
+      "line": 146,
+      "module": "structural_tasks",
+      "symbol": "licensed"
+    },
+    {
+      "file": "src/ah/formalizer/content_reference_functions.py",
+      "line": 147,
+      "module": "structural_tasks",
+      "symbol": "licensed"
+    },
+    {
+      "file": "src/ah/formalizer/content_reference_functions.py",
+      "line": 148,
+      "module": "structural_tasks",
+      "symbol": "licensed"
+    },
+    {
+      "file": "src/ah/formalizer/content_reference_functions.py",
+      "line": 149,
+      "module": "structural_tasks",
+      "symbol": "licensed"
+    },
+    {
+      "file": "src/ah/formalizer/content_reference_functions.py",
+      "line": 151,
+      "module": "structural_tasks",
+      "symbol": "licensed"
+    },
+    {
+      "file": "src/ah/formalizer/content_reference_functions.py",
+      "line": 104,
+      "module": "structural_tasks",
+      "symbol": "licensed"
+    },
+    {
+      "file": "src/ah/formalizer/content_reference_functions.py",
+      "line": 141,
+      "module": "structural_tasks",
+      "symbol": "licensed"
+    },
+    {
+      "file": "src/ah/formalizer/context_receipts.py",
+      "line": 46,
+      "module": "composition_dispatcher",
+      "symbol": "canonical"
+    },
+    {
+      "file": "src/ah/formalizer/context_receipts.py",
+      "line": 46,
+      "module": "composition_dispatcher",
+      "symbol": "canonical"
+    },
+    {
+      "file": "src/ah/formalizer/context_receipts.py",
+      "line": 43,
+      "module": "composition_dispatcher",
+      "symbol": "canonical"
+    },
+    {
+      "file": "src/ah/formalizer/context_receipts.py",
+      "line": 43,
+      "module": "composition_dispatcher",
+      "symbol": "canonical"
+    },
+    {
+      "file": "src/ah/formalizer/contextual_agreement.py",
+      "line": 46,
+      "module": "morphology_domain",
+      "symbol": "scope_fields"
+    },
+    {
+      "file": "src/ah/formalizer/contextual_agreement.py",
+      "line": 55,
+      "module": "component_probe",
+      "symbol": "_probe"
+    },
+    {
+      "file": "src/ah/formalizer/contextual_agreement.py",
+      "line": 67,
+      "module": "morphology_domain",
+      "symbol": "clean"
+    },
+    {
+      "file": "src/ah/formalizer/contextual_name_case.py",
+      "line": 41,
+      "module": "morphology_domain",
+      "symbol": "offer"
+    },
+    {
+      "file": "src/ah/formalizer/contextual_name_case.py",
+      "line": 41,
+      "module": "nominal_readings",
+      "symbol": "variant"
+    },
+    {
+      "file": "src/ah/formalizer/contextual_oov.py",
+      "line": 32,
+      "module": "structural_tasks",
+      "symbol": "enabled"
+    },
+    {
+      "file": "src/ah/formalizer/contextual_oov.py",
+      "line": 87,
+      "module": "morphology_domain",
+      "symbol": "offer"
+    },
+    {
+      "file": "src/ah/formalizer/contextual_oov.py",
+      "line": 40,
+      "module": "morphology_domain",
+      "symbol": "offer"
+    },
+    {
+      "file": "src/ah/formalizer/contextual_oov.py",
+      "line": 43,
+      "module": "morphology_domain",
+      "symbol": "function_restrictions"
+    },
+    {
+      "file": "src/ah/formalizer/contextual_oov.py",
+      "line": 63,
+      "module": "structural_tasks",
+      "symbol": "choose_domain"
+    },
+    {
+      "file": "src/ah/formalizer/contextual_oov.py",
+      "line": 45,
+      "module": "morphology_domain",
+      "symbol": "function_support"
+    },
+    {
+      "file": "src/ah/formalizer/contextual_oov.py",
+      "line": 60,
+      "module": "morphology_domain",
+      "symbol": "scope_fields"
+    },
+    {
+      "file": "src/ah/formalizer/contextual_oov.py",
+      "line": 69,
+      "module": "morphology_domain",
+      "symbol": "scope_fields"
+    },
+    {
+      "file": "src/ah/formalizer/contextual_oov.py",
+      "line": 54,
+      "module": "morphology_domain",
+      "symbol": "license_use"
+    },
+    {
+      "file": "src/ah/formalizer/contextual_oov.py",
+      "line": 79,
+      "module": "morphology_domain",
+      "symbol": "license_use"
+    },
+    {
+      "file": "src/ah/formalizer/contextual_preposition_case.py",
+      "line": 52,
+      "module": "morphology_domain",
+      "symbol": "offer"
+    },
+    {
+      "file": "src/ah/formalizer/coreference.py",
+      "line": 270,
+      "module": "component_probe",
+      "symbol": "_probe"
+    },
+    {
+      "file": "src/ah/formalizer/direct_partitions.py",
+      "line": 41,
+      "module": "structural_tasks",
+      "symbol": "choose"
+    },
+    {
+      "file": "src/ah/formalizer/direct_partitions.py",
+      "line": 71,
+      "module": "structural_tasks",
+      "symbol": "licensed_in_scope"
+    },
+    {
+      "file": "src/ah/formalizer/directional_goal.py",
+      "line": 36,
+      "module": "component_probe",
+      "symbol": "_probe"
+    },
+    {
+      "file": "src/ah/formalizer/discourse_scopes.py",
+      "line": 78,
+      "module": "component_probe",
+      "symbol": "_probe"
+    },
+    {
+      "file": "src/ah/formalizer/discourse_scopes.py",
+      "line": 124,
+      "module": "component_probe",
+      "symbol": "_probe"
+    },
+    {
+      "file": "src/ah/formalizer/dispatch_evidence.py",
+      "line": 62,
+      "module": "selection_domains",
+      "symbol": "fingerprint"
+    },
+    {
+      "file": "src/ah/formalizer/dispatch_evidence.py",
+      "line": 21,
+      "module": "validation_graph",
+      "symbol": "validate"
+    },
+    {
+      "file": "src/ah/formalizer/dispatch_evidence.py",
+      "line": 40,
+      "module": "structural_tasks",
+      "symbol": "licensed"
+    },
+    {
+      "file": "src/ah/formalizer/dispatch_evidence.py",
+      "line": 61,
+      "module": "partial_readings",
+      "symbol": "retired_refs"
+    },
+    {
+      "file": "src/ah/formalizer/dispatch_evidence.py",
+      "line": 28,
+      "module": "structural_tasks",
+      "symbol": "_licensed"
+    },
+    {
+      "file": "src/ah/formalizer/dispatch_evidence.py",
+      "line": 13,
+      "module": "reading_decisions",
+      "symbol": "inspect"
+    },
+    {
+      "file": "src/ah/formalizer/dispatch_evidence.py",
+      "line": 17,
+      "module": "reading_decisions",
+      "symbol": "inspect"
+    },
+    {
+      "file": "src/ah/formalizer/document_scopes.py",
+      "line": 44,
+      "module": "component_probe",
+      "symbol": "_probe"
+    },
+    {
+      "file": "src/ah/formalizer/function_inventory.py",
+      "line": 66,
+      "module": "dispatch_evidence",
+      "symbol": "observe"
+    },
+    {
+      "file": "src/ah/formalizer/function_inventory.py",
+      "line": 45,
+      "module": "structural_tasks",
+      "symbol": "_licensed"
+    },
+    {
+      "file": "src/ah/formalizer/function_inventory.py",
+      "line": 47,
+      "module": "dispatch_evidence",
+      "symbol": "observe"
+    },
+    {
+      "file": "src/ah/formalizer/function_inventory.py",
+      "line": 71,
+      "module": "dispatch_evidence",
+      "symbol": "observe"
+    },
+    {
+      "file": "src/ah/formalizer/function_inventory.py",
+      "line": 121,
+      "module": "dispatch_evidence",
+      "symbol": "observe"
+    },
+    {
+      "file": "src/ah/formalizer/function_inventory.py",
+      "line": 147,
+      "module": "dispatch_evidence",
+      "symbol": "observe"
+    },
+    {
+      "file": "src/ah/formalizer/function_inventory.py",
+      "line": 44,
+      "module": "structural_tasks",
+      "symbol": "licensed"
+    },
+    {
+      "file": "src/ah/formalizer/function_inventory.py",
+      "line": 57,
+      "module": "structural_tasks",
+      "symbol": "licensed_in_scope"
+    },
+    {
+      "file": "src/ah/formalizer/function_inventory.py",
+      "line": 104,
+      "module": "structural_tasks",
+      "symbol": "licensed_in_scope"
+    },
+    {
+      "file": "src/ah/formalizer/grammar_domains.py",
+      "line": 19,
+      "module": "morphology_domain",
+      "symbol": "clean"
+    },
+    {
+      "file": "src/ah/formalizer/lexical_component.py",
+      "line": 41,
+      "module": "structural_tasks",
+      "symbol": "enabled"
+    },
+    {
+      "file": "src/ah/formalizer/lexical_demands.py",
+      "line": 35,
+      "module": "composition_dispatcher",
+      "symbol": "canonical"
+    },
+    {
+      "file": "src/ah/formalizer/lexical_demands.py",
+      "line": 35,
+      "module": "composition_dispatcher",
+      "symbol": "canonical"
+    },
+    {
+      "file": "src/ah/formalizer/lexical_demands.py",
+      "line": 36,
+      "module": "composition_dispatcher",
+      "symbol": "canonical"
+    },
+    {
+      "file": "src/ah/formalizer/lexical_demands.py",
+      "line": 36,
+      "module": "composition_dispatcher",
+      "symbol": "canonical"
+    },
+    {
+      "file": "src/ah/formalizer/lexical_demands.py",
+      "line": 38,
+      "module": "composition_dispatcher",
+      "symbol": "canonical"
+    },
+    {
+      "file": "src/ah/formalizer/lexical_demands.py",
+      "line": 39,
+      "module": "composition_dispatcher",
+      "symbol": "canonical"
+    },
+    {
+      "file": "src/ah/formalizer/lexical_issuance.py",
+      "line": 82,
+      "module": "dispatch_evidence",
+      "symbol": "valid"
+    },
+    {
+      "file": "src/ah/formalizer/lexical_issuance.py",
+      "line": 80,
+      "module": "dispatch_evidence",
+      "symbol": "probe_stamp"
+    },
+    {
+      "file": "src/ah/formalizer/morphology_domain.py",
+      "line": 115,
+      "module": "reading_decisions",
+      "symbol": "receipt"
+    },
+    {
+      "file": "src/ah/formalizer/morphology_domain.py",
+      "line": 44,
+      "module": "partial_readings",
+      "symbol": "valid_domain"
+    },
+    {
+      "file": "src/ah/formalizer/morphology_domain.py",
+      "line": 89,
+      "module": "nominal_readings",
+      "symbol": "variant"
+    },
+    {
+      "file": "src/ah/formalizer/morphology_domain.py",
+      "line": 111,
+      "module": "reading_decisions",
+      "symbol": "selected"
+    },
+    {
+      "file": "src/ah/formalizer/morphology_domain.py",
+      "line": 136,
+      "module": "reading_decisions",
+      "symbol": "receipt_live"
+    },
+    {
+      "file": "src/ah/formalizer/morphology_domain.py",
+      "line": 137,
+      "module": "reading_decisions",
+      "symbol": "selected"
+    },
+    {
+      "file": "src/ah/formalizer/morphology_domain.py",
+      "line": 102,
+      "module": "reading_decisions",
+      "symbol": "selected"
+    },
+    {
+      "file": "src/ah/formalizer/morphology_domain.py",
+      "line": 157,
+      "module": "nominal_readings",
+      "symbol": "attested"
+    },
+    {
+      "file": "src/ah/formalizer/native_frontend.py",
+      "line": 570,
+      "module": "component_probe",
+      "symbol": "_probe"
+    },
+    {
+      "file": "src/ah/formalizer/native_frontend.py",
+      "line": 1077,
+      "module": "component_probe",
+      "symbol": "_probe"
+    },
+    {
+      "file": "src/ah/formalizer/native_frontend.py",
+      "line": 864,
+      "module": "structural_tasks",
+      "symbol": "licensed"
+    },
+    {
+      "file": "src/ah/formalizer/nominal_apposition.py",
+      "line": 37,
+      "module": "nominal_readings",
+      "symbol": "variant"
+    },
+    {
+      "file": "src/ah/formalizer/nominal_apposition.py",
+      "line": 40,
+      "module": "nominal_readings",
+      "symbol": "attested"
+    },
+    {
+      "file": "src/ah/formalizer/nominal_apposition.py",
+      "line": 28,
+      "module": "nominal_readings",
+      "symbol": "heads"
+    },
+    {
+      "file": "src/ah/formalizer/nominal_apposition.py",
+      "line": 40,
+      "module": "nominal_readings",
+      "symbol": "variant"
+    },
+    {
+      "file": "src/ah/formalizer/nominal_apposition.py",
+      "line": 24,
+      "module": "nominal_readings",
+      "symbol": "clean"
+    },
+    {
+      "file": "src/ah/formalizer/nominal_apposition.py",
+      "line": 29,
+      "module": "nominal_readings",
+      "symbol": "clean"
+    },
+    {
+      "file": "src/ah/formalizer/nominal_coordination_source.py",
+      "line": 45,
+      "module": "structural_tasks",
+      "symbol": "choose"
+    },
+    {
+      "file": "src/ah/formalizer/nominal_coordination_source.py",
+      "line": 73,
+      "module": "structural_tasks",
+      "symbol": "source_set"
+    },
+    {
+      "file": "src/ah/formalizer/nominal_coordination_source.py",
+      "line": 91,
+      "module": "structural_tasks",
+      "symbol": "choose"
+    },
+    {
+      "file": "src/ah/formalizer/nominal_coordination_source.py",
+      "line": 100,
+      "module": "structural_tasks",
+      "symbol": "source_set"
+    },
+    {
+      "file": "src/ah/formalizer/nominal_coordination_source.py",
+      "line": 14,
+      "module": "structural_tasks",
+      "symbol": "licensed"
+    },
+    {
+      "file": "src/ah/formalizer/nominal_coordination_source.py",
+      "line": 19,
+      "module": "structural_tasks",
+      "symbol": "licensed"
+    },
+    {
+      "file": "src/ah/formalizer/nominal_coordination_source.py",
+      "line": 21,
+      "module": "structural_tasks",
+      "symbol": "licensed"
+    },
+    {
+      "file": "src/ah/formalizer/nominal_coordination_source.py",
+      "line": 30,
+      "module": "structural_tasks",
+      "symbol": "licensed"
+    },
+    {
+      "file": "src/ah/formalizer/nominal_functions.py",
+      "line": 137,
+      "module": "morphology_domain",
+      "symbol": "offer"
+    },
+    {
+      "file": "src/ah/formalizer/nominal_functions.py",
+      "line": 35,
+      "module": "structural_tasks",
+      "symbol": "choose"
+    },
+    {
+      "file": "src/ah/formalizer/nominal_functions.py",
+      "line": 53,
+      "module": "structural_tasks",
+      "symbol": "source_set"
+    },
+    {
+      "file": "src/ah/formalizer/nominal_functions.py",
+      "line": 59,
+      "module": "structural_tasks",
+      "symbol": "choose"
+    },
+    {
+      "file": "src/ah/formalizer/nominal_functions.py",
+      "line": 139,
+      "module": "morphology_domain",
+      "symbol": "license_use"
+    },
+    {
+      "file": "src/ah/formalizer/nominal_functions.py",
+      "line": 83,
+      "module": "structural_tasks",
+      "symbol": "choose"
+    },
+    {
+      "file": "src/ah/formalizer/nominal_functions.py",
+      "line": 91,
+      "module": "structural_tasks",
+      "symbol": "choose"
+    },
+    {
+      "file": "src/ah/formalizer/nominal_functions.py",
+      "line": 116,
+      "module": "morphology_domain",
+      "symbol": "offer"
+    },
+    {
+      "file": "src/ah/formalizer/nominal_functions.py",
+      "line": 118,
+      "module": "morphology_domain",
+      "symbol": "license_use"
+    },
+    {
+      "file": "src/ah/formalizer/nominal_functions.py",
+      "line": 98,
+      "module": "structural_tasks",
+      "symbol": "licensed_in_scope"
+    },
+    {
+      "file": "src/ah/formalizer/nominal_prefix_descriptions.py",
+      "line": 17,
+      "module": "nominal_readings",
+      "symbol": "description_heads"
+    },
+    {
+      "file": "src/ah/formalizer/nominal_readings.py",
+      "line": 66,
+      "module": "morphology_domain",
+      "symbol": "proposed"
+    },
+    {
+      "file": "src/ah/formalizer/nominal_readings.py",
+      "line": 66,
+      "module": "morphology_domain",
+      "symbol": "attested"
+    },
+    {
+      "file": "src/ah/formalizer/nominal_readings.py",
+      "line": 75,
+      "module": "reading_decisions",
+      "symbol": "selected"
+    },
+    {
+      "file": "src/ah/formalizer/nominal_readings.py",
+      "line": 70,
+      "module": "reading_decisions",
+      "symbol": "selected"
+    },
+    {
+      "file": "src/ah/formalizer/nominal_reference_chain.py",
+      "line": 19,
+      "module": "composition_dispatcher",
+      "symbol": "canonical"
+    },
+    {
+      "file": "src/ah/formalizer/nominal_reference_groups.py",
+      "line": 92,
+      "module": "component_probe",
+      "symbol": "_probe"
+    },
+    {
+      "file": "src/ah/formalizer/nominal_reference_pages.py",
+      "line": 54,
+      "module": "component_probe",
+      "symbol": "_probe"
+    },
+    {
+      "file": "src/ah/formalizer/nominal_reference_source.py",
+      "line": 43,
+      "module": "composition_dispatcher",
+      "symbol": "canonical"
+    },
+    {
+      "file": "src/ah/formalizer/nominal_residual_descriptions.py",
+      "line": 9,
+      "module": "nominal_readings",
+      "symbol": "description_heads"
+    },
+    {
+      "file": "src/ah/formalizer/partial_composition.py",
+      "line": 110,
+      "module": "partial_readings",
+      "symbol": "bundles"
+    },
+    {
+      "file": "src/ah/formalizer/partial_composition.py",
+      "line": 58,
+      "module": "partial_readings",
+      "symbol": "valid_domain"
+    },
+    {
+      "file": "src/ah/formalizer/partial_readings.py",
+      "line": 28,
+      "module": "validation_graph",
+      "symbol": "validate"
+    },
+    {
+      "file": "src/ah/formalizer/partial_readings.py",
+      "line": 30,
+      "module": "dispatch_evidence",
+      "symbol": "observe"
+    },
+    {
+      "file": "src/ah/formalizer/partial_readings.py",
+      "line": 49,
+      "module": "selection_domains",
+      "symbol": "valid"
+    },
+    {
+      "file": "src/ah/formalizer/partial_readings.py",
+      "line": 125,
+      "module": "morphology_domain",
+      "symbol": "clean"
+    },
+    {
+      "file": "src/ah/formalizer/partial_readings.py",
+      "line": 114,
+      "module": "morphology_domain",
+      "symbol": "clean"
+    },
+    {
+      "file": "src/ah/formalizer/partial_readings.py",
+      "line": 55,
+      "module": "validation_graph",
+      "symbol": "request"
+    },
+    {
+      "file": "src/ah/formalizer/partition_domain.py",
+      "line": 112,
+      "module": "structural_tasks",
+      "symbol": "source_set"
+    },
+    {
+      "file": "src/ah/formalizer/partition_exclusions.py",
+      "line": 41,
+      "module": "validation_graph",
+      "symbol": "validate"
+    },
+    {
+      "file": "src/ah/formalizer/partition_exclusions.py",
+      "line": 105,
+      "module": "dispatch_evidence",
+      "symbol": "observe"
+    },
+    {
+      "file": "src/ah/formalizer/partition_exclusions.py",
+      "line": 60,
+      "module": "partial_readings",
+      "symbol": "retired_refs"
+    },
+    {
+      "file": "src/ah/formalizer/partition_exclusions.py",
+      "line": 57,
+      "module": "validation_graph",
+      "symbol": "source"
+    },
+    {
+      "file": "src/ah/formalizer/partition_exclusions.py",
+      "line": 63,
+      "module": "selection_domains",
+      "symbol": "valid"
+    },
+    {
+      "file": "src/ah/formalizer/partition_exclusions.py",
+      "line": 77,
+      "module": "selection_domains",
+      "symbol": "fingerprint"
+    },
+    {
+      "file": "src/ah/formalizer/partition_exclusions.py",
+      "line": 59,
+      "module": "validation_graph",
+      "symbol": "request"
+    },
+    {
+      "file": "src/ah/formalizer/partition_exclusions.py",
+      "line": 87,
+      "module": "validation_graph",
+      "symbol": "request"
+    },
+    {
+      "file": "src/ah/formalizer/partition_role_revision.py",
+      "line": 58,
+      "module": "structural_tasks",
+      "symbol": "choose"
+    },
+    {
+      "file": "src/ah/formalizer/partition_role_revision.py",
+      "line": 15,
+      "module": "structural_tasks",
+      "symbol": "licensed_in_scope"
+    },
+    {
+      "file": "src/ah/formalizer/partition_role_revision.py",
+      "line": 87,
+      "module": "component_probe_replay",
+      "symbol": "supersede"
+    },
+    {
+      "file": "src/ah/formalizer/partition_sequences.py",
+      "line": 62,
+      "module": "structural_tasks",
+      "symbol": "choose"
+    },
+    {
+      "file": "src/ah/formalizer/partition_sequences.py",
+      "line": 40,
+      "module": "composition_dispatcher",
+      "symbol": "canonical"
+    },
+    {
+      "file": "src/ah/formalizer/partition_sequences.py",
+      "line": 78,
+      "module": "component_probe_replay",
+      "symbol": "supersede"
+    },
+    {
+      "file": "src/ah/formalizer/predicate_functions.py",
+      "line": 22,
+      "module": "structural_tasks",
+      "symbol": "choose"
+    },
+    {
+      "file": "src/ah/formalizer/predicate_functions.py",
+      "line": 77,
+      "module": "structural_tasks",
+      "symbol": "choose"
+    },
+    {
+      "file": "src/ah/formalizer/predicate_functions.py",
+      "line": 138,
+      "module": "partial_readings",
+      "symbol": "BindingDomain"
+    },
+    {
+      "file": "src/ah/formalizer/predicate_functions.py",
+      "line": 35,
+      "module": "structural_tasks",
+      "symbol": "licensed"
+    },
+    {
+      "file": "src/ah/formalizer/predicate_functions.py",
+      "line": 100,
+      "module": "structural_tasks",
+      "symbol": "choose"
+    },
+    {
+      "file": "src/ah/formalizer/predicate_functions.py",
+      "line": 58,
+      "module": "composition_dispatcher",
+      "symbol": "canonical"
+    },
+    {
+      "file": "src/ah/formalizer/predicate_functions.py",
+      "line": 124,
+      "module": "structural_tasks",
+      "symbol": "choose_domain"
+    },
+    {
+      "file": "src/ah/formalizer/predicate_functions.py",
+      "line": 131,
+      "module": "partial_readings",
+      "symbol": "retain"
+    },
+    {
+      "file": "src/ah/formalizer/predicate_functions.py",
+      "line": 125,
+      "module": "morphology_domain",
+      "symbol": "clean"
+    },
+    {
+      "file": "src/ah/formalizer/probe_prerequisites.py",
+      "line": 24,
+      "module": "structural_tasks",
+      "symbol": "licensed_in_scope"
+    },
+    {
+      "file": "src/ah/formalizer/producer_reads.py",
+      "line": 62,
+      "module": "dispatch_evidence",
+      "symbol": "evidence_probe_refs"
+    },
+    {
+      "file": "src/ah/formalizer/producer_reads.py",
+      "line": 47,
+      "module": "dispatch_evidence",
+      "symbol": "evidence_probe_refs"
+    },
+    {
+      "file": "src/ah/formalizer/qualitative_quantity.py",
+      "line": 53,
+      "module": "component_probe",
+      "symbol": "_probe"
+    },
+    {
+      "file": "src/ah/formalizer/qualitative_quantity.py",
+      "line": 99,
+      "module": "morphology_domain",
+      "symbol": "offer"
+    },
+    {
+      "file": "src/ah/formalizer/qualitative_quantity.py",
+      "line": 64,
+      "module": "morphology_domain",
+      "symbol": "license_use"
+    },
+    {
+      "file": "src/ah/formalizer/qualitative_quantity.py",
+      "line": 101,
+      "module": "morphology_domain",
+      "symbol": "license_use"
+    },
+    {
+      "file": "src/ah/formalizer/quantifier_composition.py",
+      "line": 129,
+      "module": "component_probe_replay",
+      "symbol": "supersede"
+    },
+    {
+      "file": "src/ah/formalizer/quantifier_composition.py",
+      "line": 158,
+      "module": "morphology_domain",
+      "symbol": "license_use"
+    },
+    {
+      "file": "src/ah/formalizer/quantifier_composition.py",
+      "line": 221,
+      "module": "nominal_readings",
+      "symbol": "attested"
+    },
+    {
+      "file": "src/ah/formalizer/quantifier_composition.py",
+      "line": 141,
+      "module": "component_probe",
+      "symbol": "_probe"
+    },
+    {
+      "file": "src/ah/formalizer/quantifier_composition.py",
+      "line": 195,
+      "module": "structural_tasks",
+      "symbol": "licensed"
+    },
+    {
+      "file": "src/ah/formalizer/quantifier_composition.py",
+      "line": 201,
+      "module": "structural_tasks",
+      "symbol": "licensed"
+    },
+    {
+      "file": "src/ah/formalizer/quantifier_composition.py",
+      "line": 217,
+      "module": "morphology_domain",
+      "symbol": "clean"
+    },
+    {
+      "file": "src/ah/formalizer/quantifier_composition.py",
+      "line": 134,
+      "module": "structural_tasks",
+      "symbol": "licensed"
+    },
+    {
+      "file": "src/ah/formalizer/quantifier_composition.py",
+      "line": 194,
+      "module": "structural_tasks",
+      "symbol": "enabled"
+    },
+    {
+      "file": "src/ah/formalizer/quantifier_composition.py",
+      "line": 194,
+      "module": "structural_tasks",
+      "symbol": "licensed"
+    },
+    {
+      "file": "src/ah/formalizer/quantifier_composition.py",
+      "line": 197,
+      "module": "structural_tasks",
+      "symbol": "licensed"
+    },
+    {
+      "file": "src/ah/formalizer/quantifier_composition.py",
+      "line": 74,
+      "module": "structural_tasks",
+      "symbol": "licensed"
+    },
+    {
+      "file": "src/ah/formalizer/quantifier_composition.py",
+      "line": 87,
+      "module": "morphology_domain",
+      "symbol": "clean"
+    },
+    {
+      "file": "src/ah/formalizer/quantifier_composition.py",
+      "line": 104,
+      "module": "morphology_domain",
+      "symbol": "clean"
+    },
+    {
+      "file": "src/ah/formalizer/quantifier_composition.py",
+      "line": 86,
+      "module": "morphology_domain",
+      "symbol": "clean"
+    },
+    {
+      "file": "src/ah/formalizer/quantifier_composition.py",
+      "line": 90,
+      "module": "morphology_domain",
+      "symbol": "clean"
+    },
+    {
+      "file": "src/ah/formalizer/reading_clarifications.py",
+      "line": 52,
+      "module": "partial_readings",
+      "symbol": "retired_refs"
+    },
+    {
+      "file": "src/ah/formalizer/reading_clarifications.py",
+      "line": 65,
+      "module": "selection_domains",
+      "symbol": "valid_frozen"
+    },
+    {
+      "file": "src/ah/formalizer/reading_clarifications.py",
+      "line": 25,
+      "module": "partial_readings",
+      "symbol": "valid_domain"
+    },
+    {
+      "file": "src/ah/formalizer/reading_decisions.py",
+      "line": 46,
+      "module": "dispatch_evidence",
+      "symbol": "observe"
+    },
+    {
+      "file": "src/ah/formalizer/reading_decisions.py",
+      "line": 63,
+      "module": "dispatch_evidence",
+      "symbol": "observe"
+    },
+    {
+      "file": "src/ah/formalizer/reading_decisions.py",
+      "line": 17,
+      "module": "partial_readings",
+      "symbol": "retired_refs"
+    },
+    {
+      "file": "src/ah/formalizer/reading_decisions.py",
+      "line": 36,
+      "module": "composition_dispatcher",
+      "symbol": "canonical"
+    },
+    {
+      "file": "src/ah/formalizer/reading_decisions.py",
+      "line": 31,
+      "module": "structural_tasks",
+      "symbol": "_licensed"
+    },
+    {
+      "file": "src/ah/formalizer/reference_structure.py",
+      "line": 11,
+      "module": "composition_dispatcher",
+      "symbol": "canonical"
+    },
+    {
+      "file": "src/ah/formalizer/refinement_boundaries.py",
+      "line": 9,
+      "module": "structural_tasks",
+      "symbol": "source_set"
+    },
+    {
+      "file": "src/ah/formalizer/refinement_boundaries.py",
+      "line": 14,
+      "module": "structural_tasks",
+      "symbol": "choose"
+    },
+    {
+      "file": "src/ah/formalizer/refinement_boundaries.py",
+      "line": 106,
+      "module": "component_probe",
+      "symbol": "_probe"
+    },
+    {
+      "file": "src/ah/formalizer/refinement_boundaries.py",
+      "line": 23,
+      "module": "structural_tasks",
+      "symbol": "choose"
+    },
+    {
+      "file": "src/ah/formalizer/refinement_boundaries.py",
+      "line": 75,
+      "module": "structural_tasks",
+      "symbol": "choose"
+    },
+    {
+      "file": "src/ah/formalizer/refinement_boundaries.py",
+      "line": 30,
+      "module": "structural_tasks",
+      "symbol": "extend_source_set"
+    },
+    {
+      "file": "src/ah/formalizer/refinement_host_proof.py",
+      "line": 9,
+      "module": "selection_domains",
+      "symbol": "fingerprint"
+    },
+    {
+      "file": "src/ah/formalizer/refinement_host_proof.py",
+      "line": 29,
+      "module": "dispatch_evidence",
+      "symbol": "observe"
+    },
+    {
+      "file": "src/ah/formalizer/refinement_host_proof.py",
+      "line": 20,
+      "module": "partial_readings",
+      "symbol": "retired_refs"
+    },
+    {
+      "file": "src/ah/formalizer/refinement_host_proof.py",
+      "line": 22,
+      "module": "selection_domains",
+      "symbol": "fingerprint"
+    },
+    {
+      "file": "src/ah/formalizer/refinement_host_proof.py",
+      "line": 26,
+      "module": "structural_tasks",
+      "symbol": "licensed"
+    },
+    {
+      "file": "src/ah/formalizer/refinement_host_proof.py",
+      "line": 41,
+      "module": "structural_tasks",
+      "symbol": "licensed"
+    },
+    {
+      "file": "src/ah/formalizer/refinement_host_proof.py",
+      "line": 41,
+      "module": "morphology_domain",
+      "symbol": "clean"
+    },
+    {
+      "file": "src/ah/formalizer/region_probes.py",
+      "line": 45,
+      "module": "component_probe",
+      "symbol": "_probe"
+    },
+    {
+      "file": "src/ah/formalizer/relation_composition.py",
+      "line": 133,
+      "module": "structural_tasks",
+      "symbol": "choose"
+    },
+    {
+      "file": "src/ah/formalizer/relation_composition.py",
+      "line": 255,
+      "module": "structural_tasks",
+      "symbol": "choose_open"
+    },
+    {
+      "file": "src/ah/formalizer/relation_composition.py",
+      "line": 406,
+      "module": "structural_tasks",
+      "symbol": "choose"
+    },
+    {
+      "file": "src/ah/formalizer/relation_composition.py",
+      "line": 491,
+      "module": "structural_tasks",
+      "symbol": "choose"
+    },
+    {
+      "file": "src/ah/formalizer/relation_composition.py",
+      "line": 188,
+      "module": "structural_tasks",
+      "symbol": "choose"
+    },
+    {
+      "file": "src/ah/formalizer/relation_composition.py",
+      "line": 391,
+      "module": "structural_tasks",
+      "symbol": "choose"
+    },
+    {
+      "file": "src/ah/formalizer/relation_composition.py",
+      "line": 445,
+      "module": "structural_tasks",
+      "symbol": "choose"
+    },
+    {
+      "file": "src/ah/formalizer/relation_composition.py",
+      "line": 215,
+      "module": "structural_tasks",
+      "symbol": "choose"
+    },
+    {
+      "file": "src/ah/formalizer/relation_composition.py",
+      "line": 354,
+      "module": "structural_tasks",
+      "symbol": "choose"
+    },
+    {
+      "file": "src/ah/formalizer/relation_composition.py",
+      "line": 422,
+      "module": "structural_tasks",
+      "symbol": "licensed"
+    },
+    {
+      "file": "src/ah/formalizer/relation_composition.py",
+      "line": 72,
+      "module": "structural_tasks",
+      "symbol": "licensed"
+    },
+    {
+      "file": "src/ah/formalizer/relation_composition.py",
+      "line": 78,
+      "module": "structural_tasks",
+      "symbol": "licensed"
+    },
+    {
+      "file": "src/ah/formalizer/relation_markers.py",
+      "line": 43,
+      "module": "structural_tasks",
+      "symbol": "choose"
+    },
+    {
+      "file": "src/ah/formalizer/relation_quantifiers.py",
+      "line": 24,
+      "module": "structural_tasks",
+      "symbol": "choose"
+    },
+    {
+      "file": "src/ah/formalizer/relation_quantifiers.py",
+      "line": 45,
+      "module": "structural_tasks",
+      "symbol": "choose"
+    },
+    {
+      "file": "src/ah/formalizer/relation_quantifiers.py",
+      "line": 61,
+      "module": "structural_tasks",
+      "symbol": "choose"
+    },
+    {
+      "file": "src/ah/formalizer/relative_composition.py",
+      "line": 40,
+      "module": "component_probe",
+      "symbol": "_probe"
+    },
+    {
+      "file": "src/ah/formalizer/relative_pronoun.py",
+      "line": 22,
+      "module": "structural_tasks",
+      "symbol": "choose"
+    },
+    {
+      "file": "src/ah/formalizer/relative_pronoun.py",
+      "line": 28,
+      "module": "structural_tasks",
+      "symbol": "choose"
+    },
+    {
+      "file": "src/ah/formalizer/relative_pronoun.py",
+      "line": 47,
+      "module": "component_probe",
+      "symbol": "_probe"
+    },
+    {
+      "file": "src/ah/formalizer/relative_pronoun.py",
+      "line": 57,
+      "module": "structural_tasks",
+      "symbol": "licensed"
+    },
+    {
+      "file": "src/ah/formalizer/relative_pronoun.py",
+      "line": 102,
+      "module": "structural_tasks",
+      "symbol": "licensed"
+    },
+    {
+      "file": "src/ah/formalizer/scope_assignment.py",
+      "line": 184,
+      "module": "component_probe_replay",
+      "symbol": "supersede"
+    },
+    {
+      "file": "src/ah/formalizer/scope_assignment.py",
+      "line": 196,
+      "module": "component_probe",
+      "symbol": "_probe"
+    },
+    {
+      "file": "src/ah/formalizer/selection_domains.py",
+      "line": 42,
+      "module": "partial_readings",
+      "symbol": "retired_refs"
+    },
+    {
+      "file": "src/ah/formalizer/shared_proposition_material.py",
+      "line": 12,
+      "module": "structural_tasks",
+      "symbol": "choose"
+    },
+    {
+      "file": "src/ah/formalizer/shared_proposition_material.py",
+      "line": 25,
+      "module": "structural_tasks",
+      "symbol": "source_set"
+    },
+    {
+      "file": "src/ah/formalizer/shared_proposition_material.py",
+      "line": 48,
+      "module": "structural_tasks",
+      "symbol": "licensed_in_scope"
+    },
+    {
+      "file": "src/ah/formalizer/soft_clause_boundaries.py",
+      "line": 34,
+      "module": "component_probe",
+      "symbol": "_probe"
+    },
+    {
+      "file": "src/ah/formalizer/source_areas.py",
+      "line": 41,
+      "module": "structural_tasks",
+      "symbol": "choose"
+    },
+    {
+      "file": "src/ah/formalizer/source_assertions.py",
+      "line": 62,
+      "module": "component_probe",
+      "symbol": "_probe"
+    },
+    {
+      "file": "src/ah/formalizer/source_collections.py",
+      "line": 44,
+      "module": "structural_tasks",
+      "symbol": "licensed_in_scope"
+    },
+    {
+      "file": "src/ah/formalizer/source_collections.py",
+      "line": 37,
+      "module": "structural_tasks",
+      "symbol": "licensed_in_scope"
+    },
+    {
+      "file": "src/ah/formalizer/spatial_references.py",
+      "line": 150,
+      "module": "component_probe",
+      "symbol": "_probe"
+    },
+    {
+      "file": "src/ah/formalizer/spatial_references.py",
+      "line": 41,
+      "module": "component_probe",
+      "symbol": "_probe"
+    },
+    {
+      "file": "src/ah/formalizer/spatial_references.py",
+      "line": 59,
+      "module": "component_probe",
+      "symbol": "_probe"
+    },
+    {
+      "file": "src/ah/formalizer/structural_conditions.py",
+      "line": 43,
+      "module": "composition_dispatcher",
+      "symbol": "canonical"
+    },
+    {
+      "file": "src/ah/formalizer/structural_conditions.py",
+      "line": 122,
+      "module": "validation_graph",
+      "symbol": "validate"
+    },
+    {
+      "file": "src/ah/formalizer/structural_conditions.py",
+      "line": 132,
+      "module": "validation_graph",
+      "symbol": "overlay"
+    },
+    {
+      "file": "src/ah/formalizer/structural_conditions.py",
+      "line": 198,
+      "module": "validation_graph",
+      "symbol": "scope"
+    },
+    {
+      "file": "src/ah/formalizer/structural_conditions.py",
+      "line": 172,
+      "module": "composition_dispatcher",
+      "symbol": "canonical"
+    },
+    {
+      "file": "src/ah/formalizer/structural_conditions.py",
+      "line": 137,
+      "module": "validation_graph",
+      "symbol": "source"
+    },
+    {
+      "file": "src/ah/formalizer/structural_conditions.py",
+      "line": 140,
+      "module": "validation_graph",
+      "symbol": "request"
+    },
+    {
+      "file": "src/ah/formalizer/structural_conditions.py",
+      "line": 142,
+      "module": "validation_graph",
+      "symbol": "request"
+    },
+    {
+      "file": "src/ah/formalizer/structural_conditions.py",
+      "line": 145,
+      "module": "validation_graph",
+      "symbol": "request"
+    },
+    {
+      "file": "src/ah/formalizer/structural_forest.py",
+      "line": 18,
+      "module": "composition_dispatcher",
+      "symbol": "canonical"
+    },
+    {
+      "file": "src/ah/formalizer/structural_forest.py",
+      "line": 53,
+      "module": "validation_graph",
+      "symbol": "validate"
+    },
+    {
+      "file": "src/ah/formalizer/structural_forest.py",
+      "line": 55,
+      "module": "dispatch_evidence",
+      "symbol": "observe"
+    },
+    {
+      "file": "src/ah/formalizer/structural_forest.py",
+      "line": 15,
+      "module": "partial_readings",
+      "symbol": "valid_domain"
+    },
+    {
+      "file": "src/ah/formalizer/structural_forest.py",
+      "line": 67,
+      "module": "validation_graph",
+      "symbol": "request"
+    },
+    {
+      "file": "src/ah/formalizer/structural_frontier.py",
+      "line": 26,
+      "module": "partial_readings",
+      "symbol": "SupportedDomain"
+    },
+    {
+      "file": "src/ah/formalizer/structural_frontier.py",
+      "line": 83,
+      "module": "composition_dispatcher",
+      "symbol": "canonical"
+    },
+    {
+      "file": "src/ah/formalizer/structural_frontier.py",
+      "line": 116,
+      "module": "composition_dispatcher",
+      "symbol": "canonical"
+    },
+    {
+      "file": "src/ah/formalizer/structural_frontier.py",
+      "line": 116,
+      "module": "composition_dispatcher",
+      "symbol": "canonical"
+    },
+    {
+      "file": "src/ah/formalizer/structural_frontier.py",
+      "line": 117,
+      "module": "composition_dispatcher",
+      "symbol": "canonical"
+    },
+    {
+      "file": "src/ah/formalizer/structural_frontier.py",
+      "line": 255,
+      "module": "composition_dispatcher",
+      "symbol": "canonical"
+    },
+    {
+      "file": "src/ah/formalizer/structural_lexical.py",
+      "line": 120,
+      "module": "composition_dispatcher",
+      "symbol": "canonical"
+    },
+    {
+      "file": "src/ah/formalizer/structural_lexical.py",
+      "line": 79,
+      "module": "producer_reads",
+      "symbol": "capture"
+    },
+    {
+      "file": "src/ah/formalizer/structural_lexical.py",
+      "line": 110,
+      "module": "composition_dispatcher",
+      "symbol": "canonical"
+    },
+    {
+      "file": "src/ah/formalizer/structural_probe_inputs.py",
+      "line": 14,
+      "module": "composition_dispatcher",
+      "symbol": "canonical"
+    },
+    {
+      "file": "src/ah/formalizer/structural_shells.py",
+      "line": 141,
+      "module": "validation_graph",
+      "symbol": "validate"
+    },
+    {
+      "file": "src/ah/formalizer/structural_shells.py",
+      "line": 156,
+      "module": "composition_dispatcher",
+      "symbol": "canonical"
+    },
+    {
+      "file": "src/ah/formalizer/structural_shells.py",
+      "line": 161,
+      "module": "validation_graph",
+      "symbol": "overlay"
+    },
+    {
+      "file": "src/ah/formalizer/structural_shells.py",
+      "line": 164,
+      "module": "partial_readings",
+      "symbol": "retired_refs"
+    },
+    {
+      "file": "src/ah/formalizer/structural_shells.py",
+      "line": 113,
+      "module": "partial_readings",
+      "symbol": "retired_refs"
+    },
+    {
+      "file": "src/ah/formalizer/structural_shells.py",
+      "line": 168,
+      "module": "validation_graph",
+      "symbol": "request"
+    },
+    {
+      "file": "src/ah/formalizer/structural_shells.py",
+      "line": 148,
+      "module": "validation_graph",
+      "symbol": "request"
+    },
+    {
+      "file": "src/ah/formalizer/structural_shells.py",
+      "line": 116,
+      "module": "selection_domains",
+      "symbol": "valid"
+    },
+    {
+      "file": "src/ah/formalizer/structural_shells.py",
+      "line": 99,
+      "module": "composition_dispatcher",
+      "symbol": "canonical"
+    },
+    {
+      "file": "src/ah/formalizer/structural_shells.py",
+      "line": 165,
+      "module": "selection_domains",
+      "symbol": "valid"
+    },
+    {
+      "file": "src/ah/formalizer/structural_shells.py",
+      "line": 98,
+      "module": "composition_dispatcher",
+      "symbol": "canonical"
+    },
+    {
+      "file": "src/ah/formalizer/structural_tasks.py",
+      "line": 29,
+      "module": "partial_readings",
+      "symbol": "SupportedDomain"
+    },
+    {
+      "file": "src/ah/formalizer/structural_tasks.py",
+      "line": 282,
+      "module": "validation_graph",
+      "symbol": "validate"
+    },
+    {
+      "file": "src/ah/formalizer/structural_tasks.py",
+      "line": 290,
+      "module": "partial_readings",
+      "symbol": "retired_refs"
+    },
+    {
+      "file": "src/ah/formalizer/structural_tasks.py",
+      "line": 195,
+      "module": "component_probe",
+      "symbol": "_probe"
+    },
+    {
+      "file": "src/ah/formalizer/structural_tasks.py",
+      "line": 217,
+      "module": "selection_domains",
+      "symbol": "capture"
+    },
+    {
+      "file": "src/ah/formalizer/structural_tasks.py",
+      "line": 347,
+      "module": "dispatch_evidence",
+      "symbol": "observe"
+    },
+    {
+      "file": "src/ah/formalizer/structural_tasks.py",
+      "line": 360,
+      "module": "dispatch_evidence",
+      "symbol": "observe"
+    },
+    {
+      "file": "src/ah/formalizer/structural_tasks.py",
+      "line": 311,
+      "module": "selection_domains",
+      "symbol": "valid"
+    },
+    {
+      "file": "src/ah/formalizer/structural_tasks.py",
+      "line": 129,
+      "module": "selection_domains",
+      "symbol": "valid"
+    },
+    {
+      "file": "src/ah/formalizer/structural_tasks.py",
+      "line": 271,
+      "module": "partial_readings",
+      "symbol": "SupportedDomain"
+    },
+    {
+      "file": "src/ah/formalizer/structural_tasks.py",
+      "line": 320,
+      "module": "validation_graph",
+      "symbol": "request"
+    },
+    {
+      "file": "src/ah/formalizer/structural_tasks.py",
+      "line": 325,
+      "module": "validation_graph",
+      "symbol": "request"
+    },
+    {
+      "file": "src/ah/formalizer/structural_windows.py",
+      "line": 25,
+      "module": "validation_graph",
+      "symbol": "scope"
+    },
+    {
+      "file": "src/ah/formalizer/temporal_functions.py",
+      "line": 18,
+      "module": "structural_tasks",
+      "symbol": "choose"
+    },
+    {
+      "file": "src/ah/formalizer/temporal_functions.py",
+      "line": 35,
+      "module": "structural_tasks",
+      "symbol": "source_set"
+    },
+    {
+      "file": "src/ah/formalizer/validation_graph.py",
+      "line": 30,
+      "module": "partial_readings",
+      "symbol": "_valid_domain"
+    },
+    {
+      "file": "src/ah/formalizer/validation_graph.py",
+      "line": 36,
+      "module": "structural_tasks",
+      "symbol": "_licensed_impl"
+    },
+    {
+      "file": "src/ah/formalizer/validation_graph.py",
+      "line": 95,
+      "module": "partial_readings",
+      "symbol": "retired_refs"
+    }
+  ],
+  "cache_candidates": [
+    "src/ah/formalizer/ah_adapter.py",
+    "src/ah/formalizer/attention_context.py",
+    "src/ah/formalizer/bound_references.py",
+    "src/ah/formalizer/candidate_ir.py",
+    "src/ah/formalizer/canonical_ledger.py",
+    "src/ah/formalizer/component_participants.py",
+    "src/ah/formalizer/component_probe.py",
+    "src/ah/formalizer/components.py",
+    "src/ah/formalizer/composition.py",
+    "src/ah/formalizer/composition_session.py",
+    "src/ah/formalizer/composition_tasks.py",
+    "src/ah/formalizer/context_proofs.py",
+    "src/ah/formalizer/context_receipts.py",
+    "src/ah/formalizer/coreference.py",
+    "src/ah/formalizer/coverage.py",
+    "src/ah/formalizer/goal_executor.py",
+    "src/ah/formalizer/goal_queries.py",
+    "src/ah/formalizer/grammar_domains.py",
+    "src/ah/formalizer/if_query.py",
+    "src/ah/formalizer/implicit_introduction.py",
+    "src/ah/formalizer/lexical_embedding.py",
+    "src/ah/formalizer/lexical_issuance.py",
+    "src/ah/formalizer/memory_service.py",
+    "src/ah/formalizer/memory_store.py",
+    "src/ah/formalizer/narrative_groups.py",
+    "src/ah/formalizer/native_frontend.py",
+    "src/ah/formalizer/native_queries.py",
+    "src/ah/formalizer/native_records.py",
+    "src/ah/formalizer/nominal_group_dependency.py",
+    "src/ah/formalizer/nominal_group_source.py",
+    "src/ah/formalizer/nominal_reference_binding.py",
+    "src/ah/formalizer/nominal_reference_domain.py",
+    "src/ah/formalizer/nominal_reference_local.py",
+    "src/ah/formalizer/nominal_reference_memory.py",
+    "src/ah/formalizer/nominal_reference_source.py",
+    "src/ah/formalizer/pipeline.py",
+    "src/ah/formalizer/probe_presentation.py",
+    "src/ah/formalizer/producer_reads.py",
+    "src/ah/formalizer/provider_adapter.py",
+    "src/ah/formalizer/reference_presentation.py",
+    "src/ah/formalizer/reference_source_context.py",
+    "src/ah/formalizer/replay.py",
+    "src/ah/formalizer/resources/authoring.py",
+    "src/ah/formalizer/resources/signatures.py",
+    "src/ah/formalizer/runtime_adapter.py",
+    "src/ah/formalizer/rx_cache.py",
+    "src/ah/formalizer/rx_observability.py",
+    "src/ah/formalizer/seal.py",
+    "src/ah/formalizer/spatial_entities.py",
+    "src/ah/formalizer/spatial_memory.py",
+    "src/ah/formalizer/spatial_plan.py",
+    "src/ah/formalizer/spatial_references.py",
+    "src/ah/formalizer/state.py",
+    "src/ah/formalizer/store_interface.py",
+    "src/ah/formalizer/structural_conditions.py",
+    "src/ah/formalizer/structural_forest.py",
+    "src/ah/formalizer/structural_frontier.py",
+    "src/ah/formalizer/structural_tasks.py",
+    "src/ah/formalizer/support_som.py",
+    "src/ah/formalizer/t6_core.py",
+    "src/ah/formalizer/t6b_revision.py",
+    "src/ah/formalizer/tag_source.py",
+    "src/ah/formalizer/temporal_license.py",
+    "src/ah/formalizer/tp_compact_protocol.py",
+    "src/ah/formalizer/tp_proposer.py",
+    "src/ah/formalizer/tp_readable_protocol.py",
+    "src/ah/formalizer/v7_pipeline.py",
+    "src/ah/formalizer/validation_graph.py"
+  ]
+}

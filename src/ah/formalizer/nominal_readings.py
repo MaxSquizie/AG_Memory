@@ -1,5 +1,5 @@
 """Typed boundary of a nominal phrase: external role and internal head reading."""
-from .selection_evidence import selected_candidate
+from .reading_decisions import selected as selected_reading_decision
 from dataclasses import replace
 from .canonical_ledger import digest
 from .component_policy import _morph
@@ -58,20 +58,21 @@ def attested(state, token_ref, reading, _seen=frozenset()):
     proof_key=digest([token_ref,reading])
     if proof_key in _seen:return False
     seen=_seen|{proof_key}
-    token=next(e for e in state.evidence if e.token_id==token_ref)
+    token=next((e for e in state.evidence if e.token_id==token_ref),None)
+    if token is None:return False
     same=lambda v:digest(clean(v))==digest({k:v for k,v in reading.items() if k!='score'})
-    if any(same(v) for v in token.variants):return True
+    if reading.get('origin') not in {'CONTEXTUAL','RECOVERED'} and any(same(v) for v in token.variants):return True
     from .morphology_domain import proposed, attested as nominal_use_attested
     if proposed(reading):return nominal_use_attested(state,token,reading)
     refs=reading.get('evidence_refs',())
     if reading.get('origin')=='RECOVERED' and refs:
         decision=state.decisions.get(refs[-1])
-        return bool(selected_candidate(decision) is not None and any(
+        return bool(selected_reading_decision(state,refs[-1]) is not None and any(
             row.get('kind')=='AGREEMENT_RECOVERY' and row['token_ref']==token_ref
-            and row.get('selected') in decision.selected and row.get('recovered_reading')==clean(variant(reading))
+            and row.get('selected') in decision.selected and digest(row.get('recovered_reading'))==digest({k:v for k,v in reading.items() if k!='score'})
             for row in state.syntax_trace))
     decision=state.decisions.get(refs[0]) if refs else None
-    if selected_candidate(decision) is None:return False
+    if not refs or selected_reading_decision(state,refs[0]) is None:return False
     if list(decision.selected)==['NOMINAL'] and list(refs)==[refs[0],token_ref]:
         return any(same(replace(v,pos='NOUN',features=(v.features-{'ADJF'})|{'NOUN','SUBSTANTIVE'},
                    origin='CONTEXTUAL',evidence_refs=tuple(refs)))

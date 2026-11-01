@@ -3,7 +3,7 @@
 The source evidence is immutable. Proposals are serialized, addressed records;
 only a selected relation licenses their use. A singleton is not such a license.
 """
-from .selection_evidence import selected_candidate
+from .reading_decisions import selected as selected_reading_decision
 from dataclasses import replace
 from .canonical_ledger import digest
 from .component_policy import _morph
@@ -99,7 +99,7 @@ def project(state,tokens):
         restrictions=[row for row in state.syntax_trace if row.get('kind')=='MORPHOLOGY_DOMAIN_RESTRICTION' and in_scope(state,row) and row['token_ref']==token.token_id]
         if restrictions:
             row=restrictions[-1];decision=state.decisions.get(row['decision_ref'])
-            if selected_candidate(decision) is not None and row['candidate_id'] in decision.selected:
+            if selected_reading_decision(state,row['decision_ref']) is not None and row['candidate_id'] in decision.selected:
                 readings={k:v for k,v in readings.items() if clean(v)==row['reading']}
         result.append(replace(token,variants=tuple(readings.values())))
     return result
@@ -108,10 +108,11 @@ def project(state,tokens):
 def license_use(state,token_ref,reading,decision_ref,candidate_id):
     if not proposed(reading):return
     decision=state.decisions.get(decision_ref)
-    if (selected_candidate(decision) is None or candidate_id not in decision.selected
+    if (selected_reading_decision(state,decision_ref) is None or candidate_id not in decision.selected
             or not function_use(state,token_ref,reading,decision_ref,candidate_id)):
         raise ValueError('MORPHOLOGY_USE_UNGROUNDED')
-    row={'kind':'MORPHOLOGY_USE','token_ref':token_ref,'reading':clean(reading),
+    from .reading_decisions import receipt
+    row={'selection_receipt':receipt(state,decision_ref),'kind':'MORPHOLOGY_USE','token_ref':token_ref,'reading':clean(reading),
          'decision_ref':decision_ref,'candidate_id':candidate_id}
     if row not in state.syntax_trace:state.syntax_trace.append(row)
 
@@ -131,7 +132,9 @@ def attested(state,token,reading):
     for row in state.syntax_trace:
         if row.get('kind')!='MORPHOLOGY_USE' or row['token_ref']!=token.token_id or row['reading']!=clean(reading):continue
         decision=state.decisions.get(row['decision_ref'])
-        if (selected_candidate(decision) is not None and row['candidate_id'] in decision.selected
+        from .reading_decisions import receipt_live
+        if not row.get('selection_receipt') or not receipt_live(state,row['selection_receipt']):continue
+        if (selected_reading_decision(state,row['decision_ref']) is not None and row['candidate_id'] in decision.selected
                 and function_use(state,token.token_id,reading,row['decision_ref'],row['candidate_id'])):return True
     return False
 
@@ -151,5 +154,5 @@ def validate_uses(state,frames):
     from .nominal_readings import attested as reading_attested
     for frame in frames:
         for _,tid,reading in frame_readings(frame):
-            if proposed(reading) and not reading_attested(state,tid,reading):
+            if reading.get('origin') in {'CONTEXTUAL','RECOVERED'} and not reading_attested(state,tid,reading):
                 raise ValueError('MORPHOLOGY_USE_UNGROUNDED')

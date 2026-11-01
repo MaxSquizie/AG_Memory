@@ -1229,3 +1229,31 @@ whole membership, nominal occurrences и dependency selection устранены
 Остаются NOMINAL_RELATION, owner/relative, control, temporal contracts, полнота
 источников, source cache/resume, child demands и publication gate. Следующий
 семантический этап — owner/relative evidence. Все шесть блоков F05 открыты.
+
+
+## 2026-11-01 — переход к покрытию всей заявленной механики
+
+По уточнению пользователя единица закрытия — архитектурная механика во всех
+действующих реализациях/потребителях, не локальный шлюз и не полнота ЕЯ.
+Добавлены F05_MECHANISM_COVERAGE.md со стабильными RG/CA обязанностями и статический
+F05_READING_CALLS.json с воспроизводимым inventory script, base commit/source digest.
+Все механики reading grounds/cache и все шесть блоков F05 остаются OPEN.
+
+Внесены ограниченные исправления общего чтения оснований: reading_decisions
+учитывает отзыв, branch, structural proof и stamp; MORPHOLOGY_USE сохраняет receipt.
+Потребитель существующего основания регистрирует dispatcher/source-read dependency.
+Raw probe replay и его внешний ключ включают branch condition. Recovery больше
+не обходит проверку после копирования в token.variants; публикация также проверяет
+attestation. Final gate распространяется на производные CONTEXTUAL/RECOVERED
+чтения. Nominal_dependency producer передаёт role в общий partial-reading контракт.
+
+Проверки: final derived/semantic/scalar пакет 29 passed; historical issuance smoke
+прошёл. Дополнительные service/OOV/nominal пакеты содержат 23 успешных проверки и
+19 failures; все 19 воспроизведены на нетронутом 9b15de4. Они остаются открытыми,
+не считаются успешной приёмкой и не объявлены ошибками тестов без расследования.
+Reviewer и coordinator проверили границы и реестр read-only.
+
+Не завершены typed payload→exact reading/use adapters всех producers,
+immutable witness/query dependencies, явная parent proof для deterministic binder,
+а также остальные строки общего реестра. Следующая работа должна идти по этим
+обязанностям, а не объявлять очередной локальный validator закрытием механики.

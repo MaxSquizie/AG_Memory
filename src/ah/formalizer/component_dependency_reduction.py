@@ -60,7 +60,8 @@ def reduce(state,release,selector,region,tokens,p,pv,roles,nominals,groups,cfg,*
                 if o.get('head_morph'):label+='; internal head reading: '+reading_text(o['head_morph'])
                 if o.get('host_layer')=='HEAD':label+='; agrees with internal head of quantity group'
                 options.append({'candidate_id':cid,'label':label+'; '+reading_text(reading),
-                    'reading':reading,'attachment':clean_option(o),'token_ref':tid,'predicate_ref':p.token_id})
+                    'reading':reading,'role':o.get('role') if o['kind']=='ROOT' else None,
+                    'attachment':clean_option(o),'token_ref':tid,'predicate_ref':p.token_id})
             committed=[{'dependent':evidence[t].span,'attachment':o['kind'],
                         'host':evidence[o['host_ref']].span if 'host_ref' in o else o.get('role')} for t,o in fixed.items()]
             question='Choose the immediate grammatical attachment of «'+evidence[tid].span+'» at '+str(evidence[tid].start)+'. '

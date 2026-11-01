@@ -8,6 +8,9 @@ def observe(state,kind,value,expected=True):
 
 
 def valid(state,kind,value):
+    if kind=='READING_DECISION':
+        from .reading_decisions import inspect
+        return inspect(state,value['decision_ref'],value.get('condition'))['stamp']==value['stamp']
     if kind=='BUNDLE_CONSTRAINTS':
         from .bundle_constraints import inspect,signature
         from .state import FrameCandidate
@@ -61,6 +64,12 @@ def probe_stamp(state,key):
 
 def evidence_probe_refs(state,kind,value):
     """Addresses an explicitly replaced assumption; no validation or observers."""
+    if kind=='READING_DECISION':
+        refs={value['decision_ref']}
+        required=state.component_probe_records.get(value['decision_ref'],{}).get('branch_condition')
+        refs.update(evidence_probe_refs(state,'CONDITIONAL_PROOF',{'proof':None,'condition':required}))
+        refs.update(evidence_probe_refs(state,'CONDITIONAL_PROOF',{'proof':value.get('proof'),'condition':value.get('condition')}))
+        return refs
     if kind=='BUNDLE_CONSTRAINTS':
         from .bundle_constraints import select_records,required_inventory_refs
         from .state import FrameCandidate

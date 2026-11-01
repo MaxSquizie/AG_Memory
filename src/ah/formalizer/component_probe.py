@@ -155,7 +155,8 @@ def _probe(state, selector, release, key, slot, options, context, source_range, 
     if state.text not in context:
         context+='\nFULL SOURCE (evidence only): '+state.text
         question+='\nThe target occupies characters '+str(source_range[0])+':'+str(source_range[1])+'. Broader source is readable evidence, not additional selectable material.'
-    dependency_signature=digest([release.sha256,slot,options,context,source_range,equivalent_targets,question])
+    from .function_inventory import execution_condition
+    dependency_signature=digest([execution_condition(state),release.sha256,slot,options,context,source_range,equivalent_targets,question])
     if input_record is not None:dependency_signature=digest([dependency_signature,input_record])
     from .composition_session import current
     runtime=current(state)

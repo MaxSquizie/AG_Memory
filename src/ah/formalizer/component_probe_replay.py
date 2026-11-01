@@ -7,12 +7,14 @@ from .selection_evidence import selected_candidate
 
 
 def execute(live,state,selector,release,key,slot,options,context,source_range,*,equivalent_targets=None,question=None,dependency_signature=None,offer_clarification=True):
-    signature=digest([release.sha256,slot,options,context,source_range,equivalent_targets,question])
+    from .function_inventory import execution_condition
+    condition=execution_condition(state)
+    signature=digest([condition,release.sha256,slot,options,context,source_range,equivalent_targets,question])
     frozen=state.observation.get('clarification_generation') or {}
     current=state.component_probe_records.get(key)
     prior=current or (frozen.get('component_probe_records',{}).get(key) if frozen.get('rebuild_components') else None)
     explicit=key in state.observation.get('clarification_choices',{})
-    reusable=prior is not None and prior['signature']==signature and prior.get('dependency_signature')==dependency_signature and not prior.get('superseded_by')
+    reusable=prior is not None and prior['signature']==signature and prior.get('dependency_signature')==dependency_signature and not prior.get('superseded_by') and prior.get('branch_condition')==condition
     if reusable and not explicit:
         signature=prior['signature']
         d=restore_decision(state,key,prior['decision'])
@@ -28,7 +30,7 @@ def execute(live,state,selector,release,key,slot,options,context,source_range,*,
             'previous_signature':prior['signature'],'previous_outcome':prior['decision']['outcome']})
     if result is not None:
         state.clarification_candidates[:]=[r for r in state.clarification_candidates if r['decision_ref']!=key]
-    state.component_probe_records[key]={'signature':signature,'dependency_signature':dependency_signature,
+    state.component_probe_records[key]={'signature':signature,'dependency_signature':dependency_signature,'branch_condition':condition,
                                       'decision':asdict(state.decisions[key]),'attempts':attempts}
     return result
 
