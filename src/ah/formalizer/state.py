@@ -368,6 +368,8 @@ class FormalizationState:
         rec = RejectionRecord(candidate_id=candidate_id, stage=stage, reason=reason,
                              provenance=provenance or ResourceProvenance())
         self.rejections.append(rec)
+        from .runtime_tracing import checkpoint
+        checkpoint(self, reason='candidate_rejected')
         return rec
 
     @classmethod
@@ -379,6 +381,8 @@ class FormalizationState:
 
     def diag(self, code: str, detail: str) -> None:
         self.diagnostics.append(Diagnostic(code=code, detail=detail))
+        from .runtime_tracing import checkpoint
+        checkpoint(self, reason='diagnostic')
 
     def has_diag(self, code: str) -> bool:
         return any(d.code == code for d in self.diagnostics)

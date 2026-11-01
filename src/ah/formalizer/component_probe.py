@@ -4,6 +4,7 @@ from .selection_evidence import selected_candidate
 from .selection_protocol import DecisionSchema, Relation
 from .selector_wire import build_selector_prompt
 from .provider_adapter import BudgetExceeded, IntegrityError
+from ah.diagnostics import runtime_trace
 
 def _live_probe(state, selector, release, key, slot, options, context, source_range, *, equivalent_targets=None, question=None, offer_clarification=True):
     from .probe_windows import enter
@@ -105,6 +106,41 @@ def _live_probe(state, selector, release, key, slot, options, context, source_ra
 
 
 def _probe(state, selector, release, key, slot, options, context, source_range, *, equivalent_targets=None, question=None, offer_clarification=True, inputs=None, target_refs=None):
+    if not runtime_trace.enabled():
+        return _probe_impl(state, selector, release, key, slot, options, context, source_range,
+            equivalent_targets=equivalent_targets, question=question,
+            offer_clarification=offer_clarification, inputs=inputs, target_refs=target_refs)
+    from .runtime_tracing import checkpoint, note_decision
+    with runtime_trace.bind(entity_id=key, decision_ref=key, slot=slot):
+        with runtime_trace.span('COMPONENT_PROBE', source_range=source_range) as outcome:
+            checkpoint(state, reason='probe_before')
+            runtime_trace.emit('probe_domain', options=options, context=context,
+                question=question, source_range=source_range,
+                equivalent_targets=equivalent_targets)
+            before = len(state.diagnostics)
+            completed = False
+            result = None
+            try:
+                result = _probe_impl(state, selector, release, key, slot, options, context, source_range,
+                    equivalent_targets=equivalent_targets, question=question,
+                    offer_clarification=offer_clarification, inputs=inputs, target_refs=target_refs)
+                completed = True
+                return result
+            finally:
+                checkpoint(state, reason='probe_after')
+                note_decision(state, key)
+                if completed:
+                    decision = state.decisions.get(key)
+                    codes = [diagnostic.code for diagnostic in state.diagnostics[before:]]
+                    outcome.update(status='PROVISIONAL' if result is not None else 'NO_SELECTION',
+                        result=result, diagnostic_codes=codes,
+                        selector_outcome=decision.selector_outcome if decision else None,
+                        decision_outcome=decision.outcome if decision else None)
+                    if codes:
+                        outcome['reason'] = ','.join(codes)
+
+
+def _probe_impl(state, selector, release, key, slot, options, context, source_range, *, equivalent_targets=None, question=None, offer_clarification=True, inputs=None, target_refs=None):
     # The enclosing domain owns speaker choices; a page only supplies evidence.
     state.clarification_candidates[:]=[r for r in state.clarification_candidates if r['decision_ref']!=key]
     state.syntax_trace.append({'kind':'PROBE_PAGE','decision_ref':key,'slot':slot,

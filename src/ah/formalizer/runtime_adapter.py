@@ -13,6 +13,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass, field, fields
 from copy import deepcopy
 from threading import Lock
+from .runtime_tracing import traced, report_context
 
 # Declared relation labels for the demo-boundary closed set (already declared in decision_schema_v1.json).
 _PREDICATE_LABELS = {"V1": "HAVE", "V2": "HAS_PART", "V3": "LOCATIVE", "V4": "LIKE"}
@@ -104,6 +105,9 @@ class FormalizerAdapter:
             from .probe_diagnostics import describe
             snapshot['probe_configuration']=describe(self)
         except Exception as exc:
+            from ah.diagnostics.runtime_trace import emit, error_text
+            emit('diagnostic_snapshot_failed', status='ERROR', error_type=type(exc).__name__,
+                 reason=error_text(exc), commit_terminal=report.terminal, applied=report.applied)
             snapshot = {
                 'source': 'native V7 runtime',
                 'source_text': state.text,
@@ -122,6 +126,7 @@ class FormalizerAdapter:
             self._diagnostic_snapshot = snapshot
 
     # -- V7-native entry (I01): real input committed durably on the store ---- #
+    @traced('HOST_INTERPRET')
     def interpret(self, text: str, context_facts: tuple[str, ...] = (), raw_input=None, *, version=1, observation_id=None, run_id=None) -> NativePerceptionResult:
         """Run one observation through T0..T4 -> C -> T5 gate (+binding CAS) -> T6 durable commit.
 
@@ -141,13 +146,16 @@ class FormalizerAdapter:
             ignition=self._ignition,
             structure_mode=self._structure_mode,
         )
+        report_context(rep)
         receipt = self._receipt(state, rep)
         self._capture_diagnostics(state, rep, receipt)
         return receipt
 
+    @traced('HOST_CLARIFY')
     def clarify(self, resolution_key, *, source_text=None):
         from .clarifications import resolve
         state, rep = resolve(self, resolution_key, source_text=source_text)
+        report_context(rep)
         result = self._receipt(state, rep)
         if rep.terminal in {'APPLIED', 'RESOLUTION_ONLY'}:
             rid = resolution_key.split(':')[1]
@@ -160,10 +168,12 @@ class FormalizerAdapter:
         self._capture_diagnostics(state, rep, result)
         return result
 
+    @traced('HOST_IGNORE_CLARIFICATION')
     def ignore_clarification(self, resolution_key):
         """Host explicitly reports an ignored question; no wall-clock timeout."""
         from .clarification_deferral import ignore
         state,rep=ignore(self,resolution_key)
+        report_context(rep)
         result=self._receipt(state,rep)
         self._capture_diagnostics(state,rep,result)
         return result
@@ -185,6 +195,7 @@ class FormalizerAdapter:
         )
 
     # -- public entry (mirrors AdaptivePerceptionParser.parse) -------------- #
+    @traced('HOST_PREVIEW', mode='preview')
     def parse(self, text: str, context_facts: tuple[str, ...] = ()) -> "PerceptionResult":
         from ah.formalizer.pipeline import run as _run
         from ah.formalizer.selection_protocol import load_decision_schema

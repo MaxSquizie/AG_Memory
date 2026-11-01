@@ -985,9 +985,13 @@ def t4(state: FormalizationState, schema) -> FormalizationState:
     return state
 
 
+from .runtime_tracing import traced, phase, watch_state
+
+
 # --------------------------------------------------------------------------- run
 
 
+@traced('PREVIEW_FORMALIZATION', mode='preview')
 def run(
     text: str,
     schema,
@@ -1000,21 +1004,31 @@ def run(
 ) -> FormalizationState:
     """Full Phase 1 vertical: RawInput -> T0 -> SRL -> T1 -> T2 -> TD -> [I30 closure]
     -> T3/T4. Consolidator/Canonical Memory are Phase 2; nothing here commits facts."""
-    state = t0(text)
-    state.context_facts = context_facts
-    state.memory_mentions = tuple(memory_mentions)
-    if budget is not None:
-        state.budget = budget
-    srl(state, morph=morph)
-    t1(state, morph=morph)
-    t2(state)
-    td(state)
-    structural_seal(state)  # WP1.1/§4.3: closure validation + structural hash + freeze (I30)
-    t3(state, schema, selector, attempts_per_slot=attempts_per_slot)
-    t4(state, schema)
+    with phase('T0'):
+        state = t0(text)
+        watch_state(state)
+        state.context_facts = context_facts
+        state.memory_mentions = tuple(memory_mentions)
+        if budget is not None:
+            state.budget = budget
+    with phase('SRL', state):
+        srl(state, morph=morph)
+    with phase('T1', state):
+        t1(state, morph=morph)
+    with phase('T2', state):
+        t2(state)
+    with phase('TD', state):
+        td(state)
+    with phase('STRUCTURAL_SEAL', state):
+        structural_seal(state)
+    with phase('T3', state):
+        t3(state, schema, selector, attempts_per_slot=attempts_per_slot)
+    with phase('T4', state):
+        t4(state, schema)
     return state
 
 
+@traced('PREVIEW_REVISION', mode='preview')
 def revise(
     base_state: FormalizationState,
     schema,

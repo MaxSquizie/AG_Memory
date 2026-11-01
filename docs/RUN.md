@@ -127,6 +127,12 @@ sudo apt install libxcb-xinerama0 libxcb-cursor0 libgl1
 - `logs/latest.log` — короткие строки (роли, sanitize/repair, границы хода)
 - `logs/latest.jsonl` — полные prompt/response LLM, в том числе `agent_repair`
 - `logs/session-<timestamp>-<id>.jsonl` / `.log` — тот же сеанс, не перезаписывается
+- `logs/session-<timestamp>-<id>.tsv` — runtime-события формализатора: стадии,
+  запросы/ответы, решения и причины отказов, условные ветви, план и commit receipt
+
+Oracle runner отдельно создаёт `runtime.tsv` в своём каталоге `--out`, в том
+числе при запуске из GUI. Формат, границы покрытия, чтение больших полей и план
+подключения остальных подсистем описаны в [RUNTIME_TSV_LOGGING.md](RUNTIME_TSV_LOGGING.md).
 
 ```bash
 tail -f logs/latest.log

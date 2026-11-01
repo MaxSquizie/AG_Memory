@@ -16,6 +16,10 @@ _current=ContextVar('formalizer_composition_session',default=None)
 class CompositionSession:
     def __init__(self,state,release,reader=None,selector=None,morph=None):
         self.state,self.release,self.reader=state,release,reader
+        from .runtime_tracing import register_state
+        parent = _current.get()
+        parent_state = parent.state if parent is not None and parent.state is not state else None
+        register_state(state, parent=parent_state, inherited=parent_state is not None)
         from .morphology_provenance import capture
         capture(state)
         if not state.resource_snapshot:state.resource_snapshot={'snapshot_id':release.sha256}
@@ -220,7 +224,10 @@ class CompositionSession:
 @contextmanager
 def session(state,release,reader=None,selector=None,morph=None):
     token=_current.set(CompositionSession(state,release,reader,selector,morph))
-    try:yield _current.get()
+    from .runtime_tracing import executing_state
+    try:
+        with executing_state(state):
+            yield _current.get()
     finally:_current.reset(token)
 
 
@@ -243,5 +250,8 @@ def child_key(region,tokens,attachment,infinitive,request):
 def activate(runtime):
     """Resume an owned session without replacing its caches or reader checkpoint."""
     token=_current.set(runtime)
-    try:yield runtime
+    from .runtime_tracing import executing_state
+    try:
+        with executing_state(runtime.state):
+            yield runtime
     finally:_current.reset(token)

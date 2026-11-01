@@ -22,6 +22,9 @@ def _input_changes(changes):
     return deepcopy(changes)
 
 
+from .runtime_tracing import traced
+
+@traced('REINTERPRETATION')
 def reinterpret_observation(store,binding,selector,release,*,observation_id,
                             previous_version,trigger_ref,open_template_links=(),morph=None,target_version=None,run_id=None,input_changes=None,ignition=None):
     from .v7_pipeline import interpret_full
@@ -77,6 +80,7 @@ def reinterpret_observation(store,binding,selector,release,*,observation_id,
                           raw_input=raw,context_facts=tuple(raw.get('context_facts',())),morph=morph,run_id=run_id,ignition=ignition)
 
 
+@traced('MIGRATION_PLAN')
 def plan_mass_migration(store,binding,release,*,trigger_ref,items):
     """Durably fix a declared source set and versions before any replacement.
 
@@ -138,6 +142,7 @@ def plan_mass_migration(store,binding,release,*,trigger_ref,items):
         return deepcopy(plan)
 
 
+@traced('MIGRATION_RESUME')
 def resume_mass_migration(store,binding,selector,release,*,migration_id,morph=None,ignition=None):
     import re
     from ah.core.journal import JournalChannel

@@ -4,6 +4,9 @@ import re
 from .canonical_ledger import digest
 
 
+from .runtime_tracing import traced
+
+@traced('CLARIFICATION_IGNORED')
 def ignore(adapter,resolution_key):
     from .migration import plan_mass_migration, reinterpret_observation
     match=re.fullmatch(r'v7:([0-9a-f]{64}):([0-9a-f]{64})',resolution_key)

@@ -64,6 +64,16 @@ def main(argv=None):
     # A new directory means a new execution, never silent reuse of another model's WAL.
     if a.out.exists() and any(a.out.iterdir()):p.error('output directory is not empty; choose a new --out')
     a.out.mkdir(parents=True,exist_ok=True)
+    from ah.diagnostics import runtime_trace
+    with runtime_trace.RuntimeTrace(a.out/'runtime.tsv') as writer, runtime_trace.use_trace(writer):
+        try:
+            return _run(a, selected, cases, prior, validation, config)
+        finally:
+            progress.close()
+
+
+def _run(a, selected, cases, prior, validation, config):
+    from ah.diagnostics import runtime_trace
     if a.replay_from:
         config={**prior['provider_config'],'provider':'replay'}
         # Only immutable completed provider histories are copied. Actual/gold
@@ -90,9 +100,13 @@ def main(argv=None):
             stimulus=json.loads(json.dumps(gold))
             for s in stimulus['steps']:del s['checks']
             case_started=time.monotonic()
-            with progress.context(case_id=gold['case_id'],case_index=i,**live_counts):
+            with (progress.context(case_id=gold['case_id'],case_index=i,**live_counts),
+                  runtime_trace.bind(case_id=stimulus['case_id'],case_index=i)):
                 progress.emit('case_started',title=gold['title'],tier=gold['tier'],step_total=len(stimulus['steps']))
-                try:result=adapter.run_case(stimulus,fixtures)
+                try:
+                    with runtime_trace.span('ORACLE_CASE',component='oracle') as outcome:
+                        result=adapter.run_case(stimulus,fixtures)
+                        outcome['status']=result['execution_status']
                 except Exception as exc:
                     import traceback
                     result={'schema_version':'v7-oracle-trace-1','case_id':gold['case_id'],'checkpoints':[],'execution_status':'ERROR','runtime_error':{'type':type(exc).__name__,'message':str(exc),'traceback':traceback.format_exc()}}

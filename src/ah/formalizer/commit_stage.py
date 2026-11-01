@@ -2,6 +2,7 @@
 from dataclasses import asdict,dataclass
 from .canonical_ledger import digest
 from .store_interface import CommitDecision,MaterializationMarker,JournalRecord,TerminalOutcome
+from .runtime_tracing import traced
 
 @dataclass(frozen=True)
 class CommitReport:
@@ -13,7 +14,9 @@ class CommitReport:
     committed_fragments: tuple[str,...]=()
 
 
+@traced('T5_T6_COMMIT')
 def commit(state,store,*,run_id,plan_ops=(),committed_fragments=(),pending=(),superseded=False):
+    from ah.diagnostics.runtime_trace import emit, span
     if not plan_ops or not committed_fragments:
         store.append_journal('resolution_log',JournalRecord('resolution_log',run_id,{'kind':'RESOLUTION','observation_id':state.source_uid,'version':state.interpretation_version,'outcomes':{k:d.outcome for k,d in state.decisions.items()},'diagnostics':[asdict(d) for d in state.diagnostics],'syntax_trace':state.syntax_trace,'rejections':[asdict(r) for r in state.rejections]}))
         return CommitReport(False,False,'',0,TerminalOutcome.RESOLUTION_ONLY)
@@ -22,6 +25,7 @@ def commit(state,store,*,run_id,plan_ops=(),committed_fragments=(),pending=(),su
     bh=digest(raw)
     previous=next((r for r in store.scan_unprocessed(0) if r.payload.get('kind')=='BATCH' and r.payload.get('batch_hash')==bh),None)
     prechecks=tuple(previous.payload['decision'].get('precheck_refs',())) if previous else store.gate_precheck(bh,plan_ops,run_id=run_id) if hasattr(store,'gate_precheck') else ()
+    emit('commit_prechecked', batch_hash=bh, precheck_refs=prechecks, replay=previous is not None)
     D=CommitDecision(run_id,bh,marker,digest(raw['ops']),TerminalOutcome.STALE_SUPERSEDED if superseded else TerminalOutcome.APPLIED,committed=tuple(committed_fragments),precheck_refs=prechecks)
     if previous:
         recorded=dict(previous.payload['decision']); recorded['marker']=MaterializationMarker(**recorded['marker']); recorded['outcome']=TerminalOutcome(recorded['outcome'])
@@ -29,6 +33,10 @@ def commit(state,store,*,run_id,plan_ops=(),committed_fragments=(),pending=(),su
     else:
         decision=asdict(D); decision['outcome']=D.outcome.value
         store.append_journal('observation',JournalRecord('observation',run_id,{'kind':'BATCH','batch_hash':bh,'ops':raw['ops'],'decision':decision,'observation':state.observation,'resource_snapshot':state.resource_snapshot,'syntax_trace':state.syntax_trace,'rejections':[asdict(r) for r in state.rejections]}))
-    result=store.commit_transaction(plan_ops,marker,D)
+    emit('commit_batch_ready', batch_hash=bh, replay=previous is not None, decision=D,
+         operations=plan_ops, marker=marker)
+    with span('T6_TRANSACTION', batch_hash=bh) as trace_result:
+        result=store.commit_transaction(plan_ops,marker,D)
+        trace_result.update(status=result.outcome.value, idempotent_noop=result.idempotent_noop)
     actual=store.ledger.data['decisions'].get(bh,{}) if hasattr(store,'ledger') else {}
     return CommitReport(result.outcome!=TerminalOutcome.PENDING_ADMISSION_ORDER,result.outcome==TerminalOutcome.APPLIED and not result.idempotent_noop,bh,len(plan_ops),result.outcome,tuple(actual.get('committed',())))

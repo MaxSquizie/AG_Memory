@@ -5,6 +5,7 @@ from copy import deepcopy
 from dataclasses import dataclass,asdict
 from .canonical_ledger import digest
 from .composition_dispatcher import canonical
+from .runtime_tracing import condition_scope
 
 _active=ContextVar('structural_hypothesis',default=None)
 
@@ -107,7 +108,9 @@ def branch(state,forest,hypothesis,cfg):
         parent_ref,edge[0] if edge else None,edge[1] if edge else None))
     if not condition.live(state):raise ValueError('STRUCTURAL_CONDITION_UNGROUNDED')
     token=_active.set((state,condition,deepcopy(cfg),execution_basis(state,cfg)))
-    try:yield condition
+    try:
+        with condition_scope(state, condition):
+            yield condition
     finally:_active.reset(token)
 
 
@@ -175,7 +178,9 @@ def child_scope(state,shell,child,cfg):
     previous=getattr(runtime,'structural_child_edge',None)
     runtime.structural_child_edge=(shell['shell_ref'],child['child_ref'])
     token=_active.set((state,condition,deepcopy(cfg),basis))
-    try:yield condition
+    try:
+        with condition_scope(state, condition, shell_ref=shell['shell_ref'], child_ref=child['child_ref']):
+            yield condition
     finally:
         _active.reset(token);runtime.structural_child_edge=previous
 
@@ -187,7 +192,9 @@ def inherit_scope(source,target,cfg,condition=None):
         yield
         return
     token=_active.set((target,condition,deepcopy(cfg),execution_basis(target,cfg)))
-    try:yield
+    try:
+        with condition_scope(target, condition):
+            yield
     finally:_active.reset(token)
 
 

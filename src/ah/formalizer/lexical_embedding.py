@@ -8,6 +8,7 @@ from collections import OrderedDict
 import json
 import math
 from threading import RLock
+from ah.diagnostics import runtime_trace
 
 from .canonical_ledger import digest
 from .provider_adapter import ProviderAdapter,BudgetSnapshot,ProviderUnavailable,IntegrityError
@@ -34,23 +35,68 @@ class LexicalEmbeddingRanker:
         return tuple(x/norm for x in vector)
 
     def vectors(self,texts):
-        with self.lock:return self._vectors(texts)
+        with runtime_trace.span('EMBEDDING_VECTORS', model_key=self.model_key,
+                batch_size=self.batch_size, cache_limit=self.cache_size) as outcome:
+            with self.lock:
+                vectors = self._vectors(texts)
+                outcome.update(status='READY', vector_count=len(vectors),
+                    dimension=len(vectors[0]) if vectors else None,
+                    normalization='L2_UNIT', cache_entries=len(self.cache))
+                return vectors
 
     def _vectors(self,texts):
         result={text:self.cache[text] for text in texts if text in self.cache}
         missing=list(dict.fromkeys(text for text in texts if text not in result))
+        runtime_trace.emit('embedding_cache_lookup', model_key=self.model_key,
+            status='HIT' if not missing else 'PARTIAL' if result else 'MISS',
+            hit_texts=list(result), missing_count=len(missing), cache_entries=len(self.cache))
         for start in range(0,len(missing),self.batch_size):
             batch=missing[start:start+self.batch_size]
-            vectors=self.client.embed(batch)
-            if len(vectors)!=len(batch):raise ValueError('embedding count mismatch')
-            result.update(zip(batch,(self.unit(v) for v in vectors)))
+            with runtime_trace.span('EMBEDDING_BATCH', model_key=self.model_key,
+                    batch_index=start//self.batch_size,
+                    client_type=type(self.client).__name__) as outcome:
+                runtime_trace.emit('embedding_request', model_key=self.model_key,
+                    texts=batch, text_count=len(batch))
+                vectors=self.client.embed(batch)
+                # Shape metadata describes the actual response before validation;
+                # raw high-dimensional vectors are not needed to replay scores.
+                _trace_response(vectors, self.model_key)
+                if len(vectors)!=len(batch):raise ValueError('embedding count mismatch')
+                result.update(zip(batch,(self.unit(v) for v in vectors)))
+                outcome.update(status='NORMALIZED', vector_count=len(batch),
+                    dimensions=[len(result[text]) for text in batch], normalization='L2_UNIT',
+                    dimension_validation_pending=True)
         if len({len(v) for v in result.values()})!=1:raise ValueError('embedding dimension mismatch')
         for text in texts:
             self.cache[text]=result[text];self.cache.move_to_end(text)
-        while len(self.cache)>self.cache_size:self.cache.popitem(last=False)
+        evicted = []
+        while len(self.cache)>self.cache_size:
+            text, _ = self.cache.popitem(last=False)
+            evicted.append(text)
+        if evicted:
+            runtime_trace.emit('embedding_cache_evicted', model_key=self.model_key,
+                texts=evicted, cache_entries=len(self.cache))
         return [result[text] for text in texts]
 
     def rank(self,selector,release,key,query,options):
+        with runtime_trace.bind(entity_id=key, decision_ref=key):
+            with runtime_trace.span('LEXICAL_EMBEDDING_RANK', model_key=self.model_key,
+                    algorithm=VERSION) as outcome:
+                try:
+                    ordered, scores = self._rank(selector,release,key,query,options)
+                except ProviderUnavailable as exc:
+                    outcome.update(status='UNAVAILABLE', reason=runtime_trace.error_text(exc))
+                    raise
+                except IntegrityError as exc:
+                    outcome.update(status='REJECTED', reason=runtime_trace.error_text(exc))
+                    raise
+                else:
+                    outcome.update(status='RANKED', scores=scores,
+                        ordered_candidates=[option['candidate_id'] for option in ordered],
+                        automatic_selection=False, probe_required=True)
+                    return ordered, scores
+
+    def _rank(self,selector,release,key,query,options):
         request=json.dumps({'release':release.sha256,'query':query,'options':options},ensure_ascii=False,sort_keys=True)
         if len(request)>65536:raise ProviderUnavailable('embedding input limit')
         def transport(payload):
@@ -73,14 +119,38 @@ class LexicalEmbeddingRanker:
         return ordered,scores
 
 
+def _trace_response(vectors, model_key):
+    if not runtime_trace.enabled():
+        return
+    try:
+        sequence = isinstance(vectors, (list, tuple))
+        runtime_trace.emit('embedding_response', model_key=model_key, status='RECEIVED',
+            response_type=type(vectors).__name__, vector_count=len(vectors) if sequence else None,
+            dimensions=[len(vector) if isinstance(vector, (list, tuple)) else None
+                        for vector in vectors] if sequence else None,
+            validation_pending=True, raw_vectors_recorded=False)
+    except Exception as exc:
+        runtime_trace.emit('trace_capture_failed', observer='embedding_response',
+            status='ERROR', reason=runtime_trace.error_text(exc))
+
+
 def order(state,selector,release,frame,options,context):
     ranker=getattr(selector,'lexical_ranker',None)
-    if ranker is None:return options
-    if not state.structural_closed:raise ValueError('embedding lexical selection before structural seal')
+    if ranker is None:
+        runtime_trace.emit('embedding_order_skipped',
+            status='SKIPPED', reason='RANKER_NOT_CONFIGURED')
+        return options
+    if not state.structural_closed:
+        runtime_trace.emit('embedding_order_rejected',
+            status='REJECTED', reason='STRUCTURAL_SEAL_REQUIRED')
+        raise ValueError('embedding lexical selection before structural seal')
     specs=frame.semantic['candidate_specs']
     known=[o for o in options if specs[o['candidate_id']]['sense_kind']=='KNOWN']
     other=[o for o in options if specs[o['candidate_id']]['sense_kind']!='KNOWN']
-    if not known:return options
+    if not known:
+        runtime_trace.emit('embedding_order_skipped',
+            status='SKIPPED', reason='NO_KNOWN_SENSE')
+        return options
     key=frame.frame_id+'|predicate_value'
     row={'kind':'LEXICAL_EMBEDDING_RANKING','decision_ref':key,'model_key':ranker.model_key,
          'algorithm':VERSION,'input_candidates':[o['candidate_id'] for o in options],
@@ -89,6 +159,7 @@ def order(state,selector,release,frame,options,context):
         row.update(status='SKIPPED',reason='ONE_KNOWN_SENSE_NO_ORDERING_GAIN',
                    ordered_candidates=row['input_candidates'])
         state.syntax_trace.append(row)
+        runtime_trace.emit('embedding_order_result', entity_id=key, **row)
         return options
     try:
         documents=[{'candidate_id':o['candidate_id'],'label':specs[o['candidate_id']]['label']} for o in known]
@@ -97,6 +168,7 @@ def order(state,selector,release,frame,options,context):
     except ProviderUnavailable as exc:
         row.update(status='UNAVAILABLE',reason=str(exc),ordered_candidates=row['input_candidates'])
         state.syntax_trace.append(row)
+        runtime_trace.emit('embedding_order_result', entity_id=key, **row)
         return options
     # OPEN expresses absence from the lexicon: it has no semantic prototype to
     # embed. It remains an explicit alternative, never an embedding competitor.
@@ -108,4 +180,5 @@ def order(state,selector,release,frame,options,context):
                ordered_candidates=[o['candidate_id'] for o in ordered],
                reason='UNCALIBRATED_SIMILARITY')
     state.syntax_trace.append(row)
+    runtime_trace.emit('embedding_order_result', entity_id=key, **row)
     return ordered
