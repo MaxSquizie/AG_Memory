@@ -520,6 +520,10 @@ R-X опыт отдельно от runtime memo: stage-specific priors не ос
 
 ### P20. Доказательства полноты producers и сходимости открытого леса
 
+**P20-contract ACCEPT, 2026-11-01:**
+[F05_COMPLETION_CONTRACT.md](F05_COMPLETION_CONTRACT.md).
+Принята спецификация; реализация P20-validation остаётся OPEN.
+
 **P20-contract** проектируется до P05/P09; **P20-validation** реализуется после
 их producers. Разделение спецификации и исполнения устраняет цикл зависимостей.
 

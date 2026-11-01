@@ -1,10 +1,17 @@
 # F05: текущий контрольный реестр
 
+2026-11-01: **P20-contract принят тем же судьёй**.
+[F05_COMPLETION_CONTRACT.md](F05_COMPLETION_CONTRACT.md): отдельные receipts
+завершённости, stage/profile, перенос obligations, issuer/validator, cache/revoke,
+22 контраста и 7 разобранных примеров. Это спецификация: P20-validation OPEN.
+Следующий пункт — P01 (общий типизированный witness чтения).
+
 2026-11-01: **P00 принят судьёй как инвентаризация**.
 [F05_P00_BASELINE.md](F05_P00_BASELINE.md): 19/19 исходных сбоев воспроизведены,
 первые причины отделены от дальнейших INVESTIGATE.
 [F05_CAPABILITIES.md](F05_CAPABILITIES.md): 52 ID, все 20 отношений.
-Код runtime и ожидания тестов не менялись. Следующий этап: P20-contract → P01.
+Код runtime и ожидания тестов не менялись. Порядок после P00: P20-contract → P01
+(состояние более позднего этапа указано выше).
 
 План дальнейшей реализации после аудита всего контура:
 [F05_IMPLEMENTATION_PLAN.md](F05_IMPLEMENTATION_PLAN.md). Он задаёт порядок работ;
