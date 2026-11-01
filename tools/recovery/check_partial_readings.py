@@ -34,6 +34,13 @@ from types import SimpleNamespace as N
 from ah.formalizer.partial_composition import validate
 from ah.formalizer.composition_tree import validate as canonical_validate
 raw=s.native_states[-1]
+# Both producer paths carry typed membership, never a scalar-use witness.
+domains=[r for r in raw['syntax_trace'] if r.get('kind')=='PARTIAL_READING_DOMAIN']
+assert {'nominal_dependency','predicate_argument_reading'} <= {raw['decisions'][r['decision_ref']]['slot_id'] for r in domains}
+for domain in domains:
+    assert domain['reading_witnesses']
+    assert all(w['kind']=='SELECTED_DOMAIN' for w in domain['reading_witnesses'])
+    assert {json.loads(w['payload_json'])['candidate_id'] for w in domain['reading_witnesses']}=={v['candidate_id'] for v in domain['alternatives']}
 state=N(**{**raw,'decisions':{k:N(**{**v,'grounds':[N(**g) for g in v['grounds']]}) for k,v in raw['decisions'].items()},'frames':[N(**f) for f in raw['frames']]})
 assert state.machine_state=='PARTIAL'
 assert not r['assertions']['ah'] and not r['assertions']['journal']

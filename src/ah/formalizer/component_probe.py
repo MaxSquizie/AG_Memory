@@ -167,11 +167,19 @@ def _probe(state, selector, release, key, slot, options, context, source_range, 
         question=(question or '')+memory+runtime.tasks.question(key)+runtime.input_question(slot)
         dependency_signature=digest([dependency_signature,runtime.input_signature(),question])
     from .component_probe_replay import execute
+    from copy import deepcopy
+    from .structural_probe_inputs import source_signature
+    payload_contract=deepcopy({
+        'options':options,'source_basis':source_signature(state),'source_range':list(source_range),
+        'input_scope':runtime.input_signature() if runtime else None,
+        'resource_version':release.sha256,'source_revision':state.observation.get('revision',1),
+        'context_version':state.context_version,
+        'condition':execution_condition(state),'inputs':input_record})
     def run():
         before=len(state.diagnostics)
         value=execute(_live_probe,state,selector,release,key,slot,options,context,source_range,
                       equivalent_targets=equivalent_targets,question=question,dependency_signature=dependency_signature,
-                      offer_clarification=offer_clarification)
+                      offer_clarification=offer_clarification,payload_contract=payload_contract)
         from .task_contracts import TaskResult,TaskOutcome
         d=state.decisions[key]
         after=inputs.errors(state,slot,options,source_range) if inputs is not None else ()

@@ -163,7 +163,10 @@ def _domain_basis(state,w,record):
     from .structural_probe_inputs import source_signature
     if basis.get('source_basis')!=source_signature(state):return Assessment('STALE','TASK_SOURCE_CHANGED')
     if basis.get('context_version')!=state.context_version:return Assessment('STALE','TASK_CONTEXT_CHANGED')
-    if basis.get('input_scope')!=w.address.input_scope:return Assessment('CONFLICT','TASK_INPUT_SCOPE_MISMATCH')
+    input_scope=basis.get('input_scope')
+    if input_scope is None and saved['pages']:
+        input_scope=digest(['NO_PARENT',saved['pages'][0].get('region_ref')])
+    if input_scope!=w.address.input_scope:return Assessment('CONFLICT','TASK_INPUT_SCOPE_MISMATCH')
     if tuple(domain.get('token_refs',()))!=w.address.occurrence_refs:
         return Assessment('CONFLICT','TASK_OCCURRENCES_MISMATCH')
     lo,hi=domain.get('source_range',(None,None))
@@ -190,6 +193,52 @@ def _domain_basis(state,w,record):
     return None
 
 
+def direct_basis(state,key):
+    from .reading_decisions import inspect
+    record=state.component_probe_records.get(key,{})
+    condition=record.get('branch_condition')
+    return {'direct':record.get('payload_contract'),
+            'decision_stamp':inspect(state,key,condition)['stamp'],
+            'signature':record.get('signature'),'dependency_signature':record.get('dependency_signature'),
+            'condition':condition,'signature_preimage':record.get('signature_preimage')}
+
+
+def _direct_selected(state,w,payload,proof):
+    saved=json.loads(w.basis_json)
+    if saved!=json.loads(freeze(direct_basis(state,proof['decision_ref']))):
+        return Assessment('STALE','DIRECT_SELECTION_CHANGED')
+    packet=saved.get('direct')
+    if not packet:return Assessment('UNKNOWN','DIRECT_PAYLOAD_MISSING')
+    preimage=saved.get('signature_preimage')
+    if not isinstance(preimage,list) or len(preimage)!=9 or digest(preimage)!=saved.get('signature'):
+        return Assessment('CONFLICT','DIRECT_SIGNATURE_MISMATCH')
+    if preimage[-1]!=packet or preimage[3]!=packet['options']:
+        return Assessment('CONFLICT','DIRECT_PAYLOAD_NOT_BOUND')
+    if packet.get('context_version')!=state.context_version:
+        return Assessment('STALE','DIRECT_CONTEXT_CHANGED')
+    from .structural_probe_inputs import source_signature
+    from .reading_decisions import inspect
+    if packet['source_basis']!=source_signature(state):return Assessment('STALE','DIRECT_SOURCE_CHANGED')
+    if packet.get('condition')!=saved.get('condition'):return Assessment('CONFLICT','DIRECT_CONDITION_MISMATCH')
+    if packet.get('condition') is not None:
+        from .structural_conditions import allows
+        if w.address.condition is None or not allows(state,packet['condition'],w.address.condition):
+            return Assessment('CONFLICT','DIRECT_CONDITION_MISMATCH')
+    if inspect(state,proof['decision_ref'],w.address.condition)['selected']!=proof['candidate_id']:
+        return Assessment('STALE','DIRECT_SELECTION_NOT_LIVE')
+    if payload not in packet['options']:return Assessment('CONFLICT','DIRECT_PAYLOAD_NOT_SELECTED')
+    from .structural_tasks import _licensed
+    if any(not _licensed(state,p,_branch=w.address.condition) for p in payload.get('reading_parent_proofs',())):
+        return Assessment('STALE','DIRECT_PARENT_PROOF_NOT_LIVE')
+    if (packet['resource_version'],packet['source_revision'])!=(w.address.resource_version,w.address.source_revision):
+        return Assessment('CONFLICT','DIRECT_RESOURCE_MISMATCH')
+    scope=packet['input_scope'] or digest(['NO_PARENT',w.address.region_ref])
+    if scope!=w.address.input_scope:return Assessment('CONFLICT','DIRECT_SCOPE_MISMATCH')
+    refs=packet.get('inputs',{}).get('target_refs',())
+    if not set(w.address.occurrence_refs)<=set(refs):return Assessment('CONFLICT','DIRECT_OCCURRENCES_MISMATCH')
+    return None
+
+
 def _selected(state,w,payload,proof):
     from .partial_readings import retired_refs
     if not isinstance(proof,dict):return Assessment('UNKNOWN','SELECTION_PROOF_MISSING')
@@ -200,6 +249,8 @@ def _selected(state,w,payload,proof):
         return Assessment('CONFLICT','SELECTED_PAYLOAD_MISMATCH')
     if payload.get('candidate_id')!=proof.get('candidate_id'):
         return Assessment('CONFLICT','SELECTED_CANDIDATE_MISMATCH')
+    if isinstance(json.loads(w.basis_json),dict) and json.loads(w.basis_json).get('direct') is not None:
+        return _direct_selected(state,w,payload,proof)
     failed=_domain_basis(state,w,proof)
     if failed:return failed
     from .structural_tasks import _licensed

@@ -137,6 +137,12 @@ occurrence, целое reading, вид использования, выбран�
 
 ### P02. Перевести всех производителей reading-use на общий witness
 
+**ACCEPT, 2026-11-01 — все семь producer adapters и оба partial-domain producer.**
+[F05_P02_PRODUCER_WITNESSES.md](F05_P02_PRODUCER_WITNESSES.md): 69 focused checks
+и пять recovery scenarios PASS. Synthetic binder заменён реальной адресной пробой
+с typed parent proofs; прежняя deterministic optimization не сохраняется.
+P03/P04 и общий F05 остаются OPEN.
+
 **Тип:** D. **Блоки:** 2–4. **Зависимости:** P01.
 **Места и точные адаптеры:**
 

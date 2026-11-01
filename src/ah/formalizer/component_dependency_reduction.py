@@ -40,7 +40,7 @@ def reduce(state,release,selector,region,tokens,p,pv,roles,nominals,groups,cfg,*
             return None
         tid=min(remaining,key=lambda t:(len(pool[t]),evidence[t].start))
         choices=pool[tid]
-        from .morphology_domain import proposed, license_use
+        from .morphology_domain import proposed
         needs_license=any(proposed(o.get(field,{})) for o in choices.values() for field in ('morph','head_morph'))
         # Case compatibility and a nearby comma admit these attachments; they
         # do not establish a noun complement or an explanatory description.
@@ -62,6 +62,11 @@ def reduce(state,release,selector,region,tokens,p,pv,roles,nominals,groups,cfg,*
                 options.append({'candidate_id':cid,'label':label+'; '+reading_text(reading),
                     'reading':reading,'role':o.get('role') if o['kind']=='ROOT' else None,
                     'attachment':clean_option(o),'token_ref':tid,'predicate_ref':p.token_id})
+            from .reading_producers import attach,binding,issue
+            options=[attach(o,[binding(state,release,region,tid,choices[o['candidate_id']][field],
+                {'kind':'DEPENDENCY','location':field,'predicate_ref':p.token_id,
+                 'attachment':clean_option(choices[o['candidate_id']])})
+                for field in ('morph','head_morph') if choices[o['candidate_id']].get(field)]) for o in options]
             committed=[{'dependent':evidence[t].span,'attachment':o['kind'],
                         'host':evidence[o['host_ref']].span if 'host_ref' in o else o.get('role')} for t,o in fixed.items()]
             question='Choose the immediate grammatical attachment of «'+evidence[tid].span+'» at '+str(evidence[tid].start)+'. '
@@ -106,8 +111,8 @@ def reduce(state,release,selector,region,tokens,p,pv,roles,nominals,groups,cfg,*
                 deferred[tid]=stamps[tid]
                 continue
             ground='M'
-            for field in ('morph','head_morph'):
-                license_use(state,tid,choices[cid].get(field,{}),probe_key,cid)
+            option=next(o for o in options if o['candidate_id']==cid)
+            if len(selection.values)==1:issue(state,probe_key,cid,option['reading_uses'],domain=selection.record())
         fixed[tid]=choices[cid]
         trace.append({'kind':'DEPENDENCY_READING_DOMAIN' if tid in reading_choices else 'FIXED_DEPENDENCY',
                       'token_ref':tid,'selected':None if tid in reading_choices else cid,'ground':ground,

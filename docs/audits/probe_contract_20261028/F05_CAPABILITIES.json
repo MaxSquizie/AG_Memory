@@ -1004,9 +1004,26 @@
         "C-OOV",
         "C-HISTORY"
       ],
-      "production_migration": "P02_PENDING",
+      "production_migration": "P02_ACCEPTED",
       "downstream": "P03_PENDING",
       "cache_observation": "P04_PENDING"
+    },
+    "P02": {
+      "status": "PRODUCER_MIGRATION_ACCEPTED",
+      "report": "F05_P02_PRODUCER_WITNESSES.md",
+      "capabilities": [
+        "C-READINGS",
+        "C-GROUNDS",
+        "C-OOV",
+        "C-HISTORY",
+        "C-ROLES"
+      ],
+      "producer_families": 7,
+      "partial_domain_producers": 2,
+      "focused_checks_passed": 69,
+      "recovery_scenarios_passed": 5,
+      "downstream": "P03_PENDING",
+      "full_cache_audit": "P04_PENDING"
     }
   }
 }

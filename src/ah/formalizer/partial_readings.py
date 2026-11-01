@@ -65,9 +65,12 @@ def retain(state,region,predicate,token,role,domain):
     if not valid_domain(state,record):raise ValueError('READING_DOMAIN_UNGROUNDED')
     from .composition_session import current
     runtime=current(state)
+    from .reading_producers import memberships
+    witnesses=memberships(state,domain)
     row={'kind':'PARTIAL_READING_DOMAIN','region_ref':region.region_id,
          'task_scope':runtime.input_signature() if runtime else None,
-         'predicate_ref':predicate.token_id,'token_ref':token.token_id,'role':role,**record}
+         'predicate_ref':predicate.token_id,'token_ref':token.token_id,'role':role,
+         'reading_witnesses':witnesses,**record}
     if row not in state.syntax_trace:state.syntax_trace.append(row)
     return deepcopy(row)
 

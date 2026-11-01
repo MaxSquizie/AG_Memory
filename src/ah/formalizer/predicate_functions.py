@@ -121,9 +121,12 @@ def binding(state,release,selector,region,tokens,predicate,nominals,groups,cfg,p
         else:
             from .structural_tasks import choose_domain
             from .morphology_domain import clean
+            from .reading_producers import binding
             reading=choose_domain(state,release,selector,region,cfg,'predicate_argument_reading',[
                 {'candidate_id':cid,'reading':clean(v),'token_ref':token.token_id,'predicate_ref':predicate.token_id,
-                 'role':role,'label':reading_text(_morph(v))} for cid,v in unique.items()],
+                 'role':role,'label':reading_text(_morph(v)),
+                 'reading_uses':[binding(state,release,region,token.token_id,v,
+                     {'kind':'ARGUMENT_READING','predicate_ref':predicate.token_id,'role':role})]} for cid,v in unique.items()],
                 'Predicate «'+predicate.span+'» @'+str(predicate.start)+': which whole reading of «'+token.span+'» @'+str(token.start)+' fits its selected role '+role_text(role)+'? Preserve unknown features.',
                 prerequisites=(accepted('predicate_argument_role',selected),))
             if not reading:return None

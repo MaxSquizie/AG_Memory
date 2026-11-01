@@ -47,7 +47,7 @@ class Dispatcher:
         from .producer_reads import observe
         observe(self,kind,value,expected)
         if self.checking_evidence or not self.evidence_stack:return
-        if kind not in {'READING_DECISION','BUNDLE_CONSTRAINTS','READING_DOMAIN','STRUCTURAL_FOREST','PARTITION_EXCLUSION','CONDITIONAL_PROOF','PROOF','INVENTORY','INVENTORY_QUERY','NOMINAL_HOST','CONSTRAINT_SET','REFINEMENT_HOST'}:raise ValueError('DISPATCH_EVIDENCE_KIND_UNKNOWN')
+        if kind not in {'READING_DECISION','READING_QUERY','READING_USE','BUNDLE_CONSTRAINTS','READING_DOMAIN','STRUCTURAL_FOREST','PARTITION_EXCLUSION','CONDITIONAL_PROOF','PROOF','INVENTORY','INVENTORY_QUERY','NOMINAL_HOST','CONSTRAINT_SET','REFINEMENT_HOST'}:raise ValueError('DISPATCH_EVIDENCE_KIND_UNKNOWN')
         identity=digest([kind,canonical(value),expected])
         self.evidence_stack[-1][identity]={'kind':kind,'value':deepcopy(value),'expected':expected}
 
@@ -191,7 +191,7 @@ class Dispatcher:
                 if kind=='PROBE':
                     from .dispatch_evidence import probe_stamp
                     node['probe_stamp']=probe_stamp(self.state,key.removeprefix('probe:'))
-                self.trace('DISPATCH_COMPLETED',key,revision=node['revision'],
+                self.trace('DISPATCH_COMPLETED',key,revision=node['revision'],probe_stamp=node.get('probe_stamp'),
                     contract=node['contract'],**node['receipt'],
                     dependencies=[{'task_ref':ref,'revision':v} for ref,v in reads.items()],
                     evidence_reads=deepcopy(list(evidence_reads.values())))

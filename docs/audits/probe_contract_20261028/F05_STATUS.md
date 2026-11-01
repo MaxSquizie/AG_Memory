@@ -1,5 +1,12 @@
 # F05: текущий контрольный реестр
 
+2026-11-01: **P02 принят тем же судьёй**.
+[F05_P02_PRODUCER_WITNESSES.md](F05_P02_PRODUCER_WITNESSES.md): все семь reading-use
+producer adapters и два partial-domain producer переведены на typed witnesses.
+69 focused checks и пять recovery scenarios PASS; permissive license_use удалён.
+Новые scope/import/cache dependencies проверены, весь аудит кешей не закрыт.
+Следующий этап — P03; P04, P20-validation и F05 остаются OPEN.
+
 2026-11-01: **P01 strict API принят тем же судьёй**.
 [F05_P01_READING_WITNESSES.md](F05_P01_READING_WITNESSES.md): typed witnesses,
 проверка actual payload/task/domain/page basis и отдельные permission.

@@ -6,10 +6,11 @@ from .state import Decision,Ground,ResourceProvenance
 from .selection_evidence import selected_candidate
 
 
-def execute(live,state,selector,release,key,slot,options,context,source_range,*,equivalent_targets=None,question=None,dependency_signature=None,offer_clarification=True):
+def execute(live,state,selector,release,key,slot,options,context,source_range,*,equivalent_targets=None,question=None,dependency_signature=None,offer_clarification=True,payload_contract=None):
     from .function_inventory import execution_condition
     condition=execution_condition(state)
-    signature=digest([condition,release.sha256,slot,options,context,source_range,equivalent_targets,question])
+    signature_preimage=deepcopy([condition,release.sha256,slot,options,context,source_range,equivalent_targets,question,payload_contract])
+    signature=digest(signature_preimage)
     frozen=state.observation.get('clarification_generation') or {}
     current=state.component_probe_records.get(key)
     prior=current or (frozen.get('component_probe_records',{}).get(key) if frozen.get('rebuild_components') else None)
@@ -31,7 +32,8 @@ def execute(live,state,selector,release,key,slot,options,context,source_range,*,
     if result is not None:
         state.clarification_candidates[:]=[r for r in state.clarification_candidates if r['decision_ref']!=key]
     state.component_probe_records[key]={'signature':signature,'dependency_signature':dependency_signature,'branch_condition':condition,
-                                      'decision':asdict(state.decisions[key]),'attempts':attempts}
+                                      'decision':asdict(state.decisions[key]),'attempts':attempts,
+                                      'signature_preimage':signature_preimage,'payload_contract':deepcopy(payload_contract)}
     return result
 
 

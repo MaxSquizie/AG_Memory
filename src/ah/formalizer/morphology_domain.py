@@ -59,15 +59,15 @@ def function_restrictions(state,token_ref):
 
 
 def function_use(state,token_ref,reading,decision_ref,candidate_id):
-    """LEGACY P02 migration path; NOT the strict P01 payload-use validator."""
-    decision=state.decisions.get(decision_ref)
-    if decision is None or decision.slot_id!='structural_oov_function':return True
-    token=next((t for t in state.evidence if t.token_id==token_ref),None)
-    return bool(token and reading.get('pos')==candidate_id and
-        not reading.get('cases') and all(reading.get(k) is None for k in ('number','gender','person','tense','mood'))
-        and not reading.get('features') and any(candidate_id in function_support(state,token,row)
-            for row in state.syntax_trace if row.get('kind')=='MORPHOLOGY_FUNCTION_RESTRICTION'
-            and row.get('token_ref')==token_ref and row.get('decision_ref')==decision_ref))
+    """Strict existing-use lookup; a selected decision alone grants no use."""
+    from .reading_producers import restore,assessment,observe_query,query_rows,use_scope
+    for row in query_rows(state,token_ref,use_scope(state)):
+        if (row.get('kind')=='MORPHOLOGY_USE' and row.get('token_ref')==token_ref
+            and row.get('reading')==clean(reading) and row.get('decision_ref')==decision_ref
+            and row.get('candidate_id')==candidate_id and row.get('witness')):
+            if assessment(state,restore(row['witness'])).selected_use:return True
+    observe_query(state,token_ref,reading)
+    return False
 
 
 def offer(state,token,readings,source,anchors=()):
@@ -106,20 +106,25 @@ def project(state,tokens):
     return result
 
 
-def license_use(state,token_ref,reading,decision_ref,candidate_id):
+def license_use(state,token_ref,reading,decision_ref,candidate_id,*,witness=None):
     if not proposed(reading):return
-    decision=state.decisions.get(decision_ref)
-    if (selected_reading_decision(state,decision_ref) is None or candidate_id not in decision.selected
-            or not function_use(state,token_ref,reading,decision_ref,candidate_id)):
-        raise ValueError('MORPHOLOGY_USE_UNGROUNDED')
-    from .reading_decisions import receipt
-    row={'selection_receipt':receipt(state,decision_ref),'kind':'MORPHOLOGY_USE','token_ref':token_ref,'reading':clean(reading),
-         'decision_ref':decision_ref,'candidate_id':candidate_id}
+    from dataclasses import asdict
+    from .reading_producers import assessment
+    if witness is None:raise ValueError('MORPHOLOGY_USE_WITNESS_REQUIRED')
+    import json
+    proof=json.loads(witness.proof_json) or json.loads(witness.domain_json) or {}
+    if (witness.token_ref!=token_ref or json.loads(witness.reading_json)!=clean(reading)
+        or proof.get('decision_ref')!=decision_ref or proof.get('candidate_id',candidate_id)!=candidate_id
+        or not assessment(state,witness).selected_use):raise ValueError('MORPHOLOGY_USE_UNGROUNDED')
+    row={'kind':'MORPHOLOGY_USE','token_ref':token_ref,'reading':clean(reading),
+         'decision_ref':decision_ref,'candidate_id':candidate_id,'witness':asdict(witness)}
     if row not in state.syntax_trace:state.syntax_trace.append(row)
 
 
 def attested(state,token,reading):
     if not proposed(reading):return False
+    from .reading_producers import observe_query,query_rows,use_scope
+    eligible=query_rows(state,token.token_id,use_scope(state))
     refs=reading.get('evidence_refs',())
     if refs[0].startswith('nominal-use:'):
         from .contextual_substantives import nominal_use
@@ -128,15 +133,14 @@ def attested(state,token,reading):
     else:
         generated=any(row.get('kind')=='MORPHOLOGY_PROPOSAL' and row['token_ref']==token.token_id
                       and row['proposal_ref']==refs[0] and row['reading']==clean(reading)
-                      for row in state.syntax_trace)
-    if not generated:return False
-    for row in state.syntax_trace:
+                      for row in eligible)
+    if not generated:
+        observe_query(state,token.token_id,reading)
+        return False
+    for row in eligible:
         if row.get('kind')!='MORPHOLOGY_USE' or row['token_ref']!=token.token_id or row['reading']!=clean(reading):continue
-        decision=state.decisions.get(row['decision_ref'])
-        from .reading_decisions import receipt_live
-        if not row.get('selection_receipt') or not receipt_live(state,row['selection_receipt']):continue
-        if (selected_reading_decision(state,row['decision_ref']) is not None and row['candidate_id'] in decision.selected
-                and function_use(state,token.token_id,reading,row['decision_ref'],row['candidate_id'])):return True
+        if function_use(state,token.token_id,reading,row['decision_ref'],row['candidate_id']):return True
+    observe_query(state,token.token_id,reading)
     return False
 
 
@@ -162,8 +166,8 @@ def validate_uses(state,frames):
 def strict_use(state,witness,*,expected_address,original=None,parents=(),historical=False):
     """Explicit uncached P01 API. Failure never falls back to function_use.
 
-    All existing producer families still require P02 adapters. Do not insert
-    this call into cached producers before P04 dependency observation exists.
+    Production reading-use adapters observe through reading_producers.assessment.
+    Direct callers must provide their own explicit dependency observations.
     """
     from .reading_witnesses import historical as inspect_historical,validate
     evaluator=inspect_historical if historical else validate

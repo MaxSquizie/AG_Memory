@@ -11,16 +11,17 @@ from ah.formalizer.dispatch_evidence import valid,evidence_probe_refs
 
 
 def setup(kind):
+    if kind=='proposed':
+        from test_reading_producers import prepared
+        state,token,reading,_=prepared()
+        return state,token,reading
     state=t0('example');base=MorphVariant('example','ADJF',frozenset({'nom'}))
     token=NS(token_id='t',variants=(base,),span='example',start=0,end=7)
     state.evidence=[token]
     cid='NOMINAL' if kind=='substantive' else 'selected'
     state.decisions['d']=Decision('nominal_attachment','f',(cid,),selected=(cid,),
         grounds=[Ground('M','scripted choice',cid)])
-    if kind=='proposed':
-        value=offer(state,token,[replace(base,pos='NOUN')],'TEST')[0]
-        license_use(state,'t',clean(value),'d',cid)
-    elif kind=='recovered':
+    if kind=='recovered':
         value=replace(base,origin='RECOVERED',evidence_refs=('dictionary','t','d'))
         state.syntax_trace.append(dict(kind='AGREEMENT_RECOVERY',token_ref='t',selected=cid,
             recovered_reading=clean(value),lexical_recovery={'decision_ref':'d'}))

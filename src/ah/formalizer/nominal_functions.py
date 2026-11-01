@@ -56,8 +56,10 @@ def prepare(state,release,selector,region,tokens,cfg):
         if not material:return False
         owned,proofs=material;refs=[t.token_id for t in owned]
         expression=' '.join(t.span for t in owned)
+        from .reading_producers import function_entries
         head=choose(state,release,selector,region,cfg,'nominal_function_head',[
             {'candidate_id':t.token_id,'head_ref':t.token_id,'shared_function':t.token_id in refs,
+             'reading_uses':function_entries(state,release,region,kind='RELATION' if kind=='RELATION' else 'SHARED_NOMINAL' if t.token_id in refs else 'NONE',head_ref=t.token_id,function_refs=refs),
              'label':'Nominal head «'+t.span+'» @'+str(t.start)+(' (this occurrence also carries the selected function)' if t.token_id in refs else '')}
             for t in tokens if (kind!='RELATION' or t.token_id not in refs) and any(c.isalnum() for c in t.span)],
             kind+': selected function expression is «'+expression+'». '
@@ -89,7 +91,7 @@ def prepare(state,release,selector,region,tokens,cfg):
             row['identity_constraint']=identity[0]['candidate_id'];row['proofs'].append(identity[1])
         if kind=='QUANTITY':
             case=choose(state,release,selector,region,cfg,'nominal_external_case',[
-                {'candidate_id':c,'label':label} for c,label in [('nom','Nominative case'),('gen','Genitive case'),
+                {'candidate_id':c,'label':label,'reading_uses':function_entries(state,release,region,kind='QUANTITY_CASE',head_ref=hid,function_refs=refs,case=c)} for c,label in [('nom','Nominative case'),('gen','Genitive case'),
                 ('dat','Dative case'),('acc','Accusative case'),('abl','Instrumental case'),('loc','Prepositional/locative case'),('voc','Vocative case')]],
                 target+'Which external grammatical case does this whole quantity group take here? Its inner noun can have a different case.',
                 prerequisites=(accepted('nominal_function_head',head),))
@@ -104,7 +106,7 @@ def prepare(state,release,selector,region,tokens,cfg):
 
 def prepositions(state,tokens,excluded=()):
     from .state import MorphVariant
-    from .morphology_domain import offer,license_use
+    from .morphology_domain import offer
     from .component_policy import _morph
     by_id={t.token_id:t for t in tokens};out={}
     for row in rows(state,tokens,'RELATION'):
@@ -115,7 +117,9 @@ def prepositions(state,tokens,excluded=()):
         if not variants:
             variants=offer(state,marker,[MorphVariant(' '.join(by_id[r].span for r in refs),'PREP',origin='CONTEXTUAL')],
                            'RELATION_FUNCTION',refs)
-            for v in variants:license_use(state,marker.token_id,_morph(v),row['decision_ref'],'RELATION')
+            from .reading_producers import issue,proof_entries
+            proof=row['head_proof']
+            issue(state,proof['decision_ref'],proof['candidate_id'],proof_entries(state,proof))
         out[head]={'token_ref':marker.token_id,'head_ref':head,'variants':variants,
             'anchor_refs':row['anchor_refs'],'function_refs':refs,'source_range':row['source_range'],
             'ambiguous_pos':True,'structural_license':row['proofs']}
@@ -130,11 +134,12 @@ def shared_nominal_readings(state,token,source):
     """
     from .state import MorphVariant
     from .component_policy import _morph
-    from .morphology_domain import offer,license_use
+    from .morphology_domain import offer
     values=tuple(v for v in token.variants if v.pos in {'NOUN','NPRO'})
     if values:return values
     proof=source['head_proof']
     values=offer(state,token,[MorphVariant(token.span.casefold(),'NOUN',origin='CONTEXTUAL')],
                  'SHARED_NOMINAL_FUNCTION',source['function_refs'])
-    for value in values:license_use(state,token.token_id,_morph(value),proof['decision_ref'],proof['candidate_id'])
+    from .reading_producers import issue,proof_entries
+    issue(state,proof['decision_ref'],proof['candidate_id'],proof_entries(state,proof))
     return tuple(values)

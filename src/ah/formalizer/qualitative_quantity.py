@@ -48,20 +48,24 @@ def resolve(state, release, selector, region, tokens, cfg):
         choices=[{'candidate_id':cid,'label':'Quantity child «'+state.text[row['quantity_tokens'][0].start:row['quantity_tokens'][-1].end]+
                   '» describes group «'+row['head'].span+'»; members unspecified. Preserve the expression; do not invent a number.'}
                  for cid,row in options.items()]
+        from .reading_producers import attach,binding,issue
+        choices=[attach(o,[binding(state,release,region,options[o['candidate_id']]['head'].token_id,v,
+            {'kind':'QUANTITY_INTERNAL','rule_id':options[o['candidate_id']]['rule_id'],
+             'quantity_refs':[t.token_id for t in options[o['candidate_id']]['quantity_tokens']]})
+            for v in options[o['candidate_id']]['nouns']]) for o in choices]
         choices.append({'candidate_id':'OTHER','label':'None is a quantity of this noun; retain its original morphology'})
         key=region.region_id+'|quantity:'+digest(choices)
         chosen=_probe(state,selector,release,key,'nominal_attachment',choices,
                       state.text[slice(*region.source_range)],region.source_range,
                       question='Select the full quantity child of this nominal group, including a qualifier ONLY if it qualifies the quantity, not the event. '
-                      'This is phrase attachment, not numerical calculation or identification of individual members.', target_refs=tuple(t.token_id for t in tokens if t.token_id in _))
+                      'This is phrase attachment, not numerical calculation or identification of individual members.', target_refs=tuple(region.token_refs))
         if chosen is None:
             state.diag('QUALITATIVE_QUANTITY_UNRESOLVED',region.region_id);return None,[]
         if chosen=='OTHER':continue
         r=options[chosen];marker=r['marker'];head=r['head'];nouns=r['nouns'];variants=r['variants'];cases=r['cases']
         if len({v.lemma for v in nouns})!=1:
             state.diag('QUALITATIVE_QUANTITY_UNRESOLVED',region.region_id);return None,[]
-        from .morphology_domain import license_use
-        for v in nouns:license_use(state,head.token_id,_morph(v),key,chosen)
+        issue(state,key,chosen,next(o['reading_uses'] for o in choices if o['candidate_id']==chosen))
         start=r['quantity_tokens'][0].start
         row={'head_ref':head.token_id,'marker_ref':marker.token_id,'decision_ref':key,
              'rule_id':r['rule_id'],'resource_sha256':release.sha256,
@@ -81,7 +85,7 @@ def resolve(state, release, selector, region, tokens, cfg):
 
 def general_groups(state,release,tokens,sources):
     """Compile source-selected quantities without a word/adjacency gate."""
-    from .morphology_domain import offer,license_use
+    from .morphology_domain import offer
     evidence={t.token_id:t for t in tokens};groups=[];readings={}
     for source in sources:
         head=evidence[source['head_ref']];refs=source['function_refs'];marker=evidence[refs[0]]
@@ -98,7 +102,8 @@ def general_groups(state,release,tokens,sources):
         # does not claim a dictionary lemma, cardinal value, gender or number.
         variants=offer(state,marker,[MorphVariant(marker.span,'NUMR',frozenset({case}),origin='CONTEXTUAL')],
                        'QUANTITY_FUNCTION',refs)
-        for v in variants:license_use(state,marker.token_id,_morph(v),key,case)
+        from .reading_producers import issue,proof_entries
+        issue(state,key,case,proof_entries(state,source['case_proof']))
         internals=[_morph(v) for v in nouns]
         row={'head_ref':head.token_id,'marker_ref':marker.token_id,'decision_ref':key,
             'rule_id':'SOURCE_QUANTITY_FUNCTION_V1','resource_sha256':release.sha256,

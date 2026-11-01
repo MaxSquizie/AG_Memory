@@ -36,7 +36,7 @@ def resolve(state,release,selector,*,areas=None):
                 for pos in ('NOUN','NPRO','ADJF','ADJS','COMP','VERB','INFN','PRTF','PRTS','GRND','NUMR','ADVB','PRED','PREP','CONJ','PRCL','INTJ'):
                     v=MorphVariant(token.span.casefold(),pos,origin='CONTEXTUAL')
                     options.setdefault(digest(_morph(v)),v)
-                from .morphology_domain import offer,license_use,scope_fields
+                from .morphology_domain import offer,scope_fields
                 readings=offer(state,token,options.values(),'OOV_FUNCTION')
                 functions=list(dict.fromkeys(v.pos for v in readings))
                 from .morphology_domain import function_restrictions,function_support
@@ -47,11 +47,18 @@ def resolve(state,release,selector,*,areas=None):
                     # Keep independently generated richer proposals available;
                     # the inherited function alone licenses no extra features.
                     if len(supported)==1:
-                        for reading in readings:
-                            if (reading.pos in supported and not reading.cases and reading.number is None
-                                    and reading.gender is None and reading.person is None and reading.tense is None
-                                    and reading.mood is None and not reading.features):
-                                license_use(state,token.token_id,_morph(reading),row['decision_ref'],reading.pos)
+                        from .reading_producers import issue
+                        from copy import deepcopy
+                        for value in row['function_domain']['alternatives']:
+                            for entry in value.get('reading_uses',()):
+                                # Explicit function import retains its original whole proposal,
+                                # not a newly invented richer reading in the child area.
+                                ref=entry['reading']['evidence_refs'][0]
+                                prior=next((r for r in state.syntax_trace if r.get('kind')=='MORPHOLOGY_PROPOSAL' and r['proposal_ref']==ref),None)
+                                if prior is not None:
+                                    imported={**deepcopy(prior),**scope_fields(state)}
+                                    if imported not in state.syntax_trace:state.syntax_trace.append(imported)
+                            issue(state,row['decision_ref'],value['candidate_id'],value.get('reading_uses',()),domain=row['function_domain'])
                     continue
                 # Stable source/hypothesis identity belongs in the question;
                 # the use record below is separately bound to this execution.
@@ -60,8 +67,11 @@ def resolve(state,release,selector,*,areas=None):
                          **scope_fields(state)}
                 marked=(state.text[region.source_range[0]:token.start]+'⟦'+token.span+'⟧'+
                         state.text[token.end:region.source_range[1]])
+                from .reading_producers import binding,issue
                 selected=choose_domain(state,release,selector,region,cfg,'structural_oov_function',
-                    [{'candidate_id':pos,'label':pos_description(pos),'address':address} for pos in functions],
+                    [{'candidate_id':pos,'label':pos_description(pos),'address':address,
+                      'reading_uses':[binding(state,release,region,token.token_id,v,{'kind':'OOV_POS','pos':pos})
+                        for v in readings if v.pos==pos and not v.cases and all(getattr(v,k) is None for k in ('number','gender','person','tense','mood')) and not v.features]} for pos in functions],
                     'Which part of speech does the ONE marked occurrence ⟦'+token.span+'⟧ have? '
                     'Addressed source: '+marked+'\nOther equally spelled words are not selected. '
                     'Choose its function in the sentence; no lemma, case or identity is established by this answer.')
@@ -73,10 +83,8 @@ def resolve(state,release,selector,*,areas=None):
                     # Only the feature-unknown reading follows from a function
                     # choice. Richer proposals require their own consumer proof.
                     if len(selected.values)==1:
-                        pos=selected.values[0]['candidate_id']
-                        for reading in readings:
-                            if reading.pos==pos and not reading.cases and reading.number is None and reading.gender is None and not reading.features:
-                                license_use(state,token.token_id,_morph(reading),selected.decision_ref,pos)
+                        value=selected.values[0]
+                        issue(state,selected.decision_ref,value['candidate_id'],value['reading_uses'],domain=selected.record())
                 else:state.diag('OOV_GRAMMAR_UNRESOLVED',token.token_id)
                 continue
             if not options:

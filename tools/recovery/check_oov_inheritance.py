@@ -20,7 +20,7 @@ def generate(self,prompt,**kwargs):
     targets={'structural_operand_1_start':'Start at «Я»','structural_operand_1_end':'End after «квендрик»',
              'structural_operand_2_start':'Start at «он»','structural_operand_2_end':'End after «подождать»'}
     if slot in targets:return next(n for n,label in labels.items() if label.startswith(targets[slot]))
-    if slot.endswith('_continue') or slot=='structural_function_owner':return '0'
+    if slot.endswith('_continue') or slot in {'structural_function_owner','structural_group_next'}:return '0'
     if slot in {'structural_partition','relation_marker_role'}:return '1'
     return '?'
 

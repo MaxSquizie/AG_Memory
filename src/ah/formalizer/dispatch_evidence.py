@@ -7,7 +7,16 @@ def observe(state,kind,value,expected=True):
     if runtime is not None:runtime.dispatcher.observe(kind,value,expected)
 
 
-def valid(state,kind,value):
+def valid(state,kind,value,*,provider_results=None):
+    if kind=='READING_QUERY':
+        from .reading_producers import query_snapshot
+        return query_snapshot(state,value['token_ref'],value.get('scope'),value.get('reading'))==value['signature']
+    if kind=='READING_USE':
+        from .reading_producers import restore
+        from .reading_producers import evaluate
+        from .composition_dispatcher import canonical
+        w=restore(value['witness'])
+        return canonical(evaluate(state,w,value.get('condition'),value.get('scope'),value.get('transfer'),provider_results))==value['assessment']
     if kind=='READING_DECISION':
         from .reading_decisions import inspect
         return inspect(state,value['decision_ref'],value.get('condition'))['stamp']==value['stamp']
@@ -64,6 +73,16 @@ def probe_stamp(state,key):
 
 def evidence_probe_refs(state,kind,value):
     """Addresses an explicitly replaced assumption; no validation or observers."""
+    if kind=='READING_QUERY':
+        from .reading_producers import query_refs
+        return query_refs(state,value['token_ref'],value.get('scope'),value.get('reading'))
+    if kind=='READING_USE':
+        import json
+        w=value['witness'];proof=json.loads(w['proof_json']) or json.loads(w['domain_json'])
+        refs=evidence_probe_refs(state,'CONDITIONAL_PROOF',{'proof':proof,'condition':json.loads(w['address']['condition_json'])})
+        for parent in (json.loads(w['payload_json']) or {}).get('reading_parent_proofs',()):
+            refs.update(evidence_probe_refs(state,'CONDITIONAL_PROOF',{'proof':parent,'condition':value.get('condition')}))
+        return refs
     if kind=='READING_DECISION':
         refs={value['decision_ref']}
         required=state.component_probe_records.get(value['decision_ref'],{}).get('branch_condition')

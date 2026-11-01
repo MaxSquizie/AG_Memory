@@ -11,7 +11,7 @@ from .component_source import view
 from .component_probe import _probe
 from .composition_domains import DomainNetwork
 from .state import FrameCandidate,ResourceProvenance
-from .morphology_domain import clean,license_use
+from .morphology_domain import clean
 
 
 def validate_rule(rule,roles):
@@ -128,23 +128,28 @@ def _bind(state,release,selector,region,frames,matches,cfg,spend):
         from .component_probe_replay import supersede
         supersede(state,questions.get(mid),key);questions[mid]=key
         rule=specs[mid][2]
-        if len(options)==1 and rule.get('head_license'):
-            from .structural_tasks import licensed as task_licensed
-            from .state import Decision,Ground
-            if not task_licensed(state,rule['head_license'],head_ref=options[0]['head_ref']):return None
-            chosen=options[0]['candidate_id']
-            decision=Decision('nominal_attachment',key,(chosen,),selected=(chosen,),outcome='RESOLVED',
-                lifecycle='PROVISIONAL',search_complete=True)
-            decision.grounds.append(Ground('D','Selected binder head and its single compatible whole reading; source proof '+rule['head_license']['decision_ref'],chosen))
-            state.decisions[key]=decision
-        else:
-            chosen=_probe(state,selector,release,key,'nominal_attachment',options,
-                state.text[slice(*region.source_range)],region.source_range,
-                question='The bound nominal is already selected when supplied. Select only its remaining compatible whole reading. '
-                         'Do not introduce a named entity, an existential witness or an implicit lexical restriction.', target_refs=tuple(t.token_id for t in specs[mid][1]))
+        from .reading_producers import attach,binding
+        parents=[rule[k] for k in ('structural_license','head_license','partition_license','quantifier_kind_license') if rule.get(k)]
+        options=[attach({**o,'reading_parent_proofs':parents},[
+            binding(state,release,region,o['head_ref'],o['reading'],
+                {'kind':'BINDER','head_ref':o['head_ref'],'binding_slot':mid,
+                 'operator':rule['operator'],'marker_refs':[t.token_id for t in specs[mid][1]],
+                 'role':rule['restriction_pattern']['role']})]) for o in options]
+        # A synthetic Decision with a textual Ground D is not a typed proof.
+        # Keep the existing addressed whole-reading choice even for singleton
+        # domains until a machine-verifiable deterministic derivation exists.
+        chosen=_probe(state,selector,release,key,'nominal_attachment',options,
+            state.text[slice(*region.source_range)],region.source_range,
+            question='The bound nominal is already selected when supplied. Confirm its remaining whole reading in this binder use. '
+                     'Do not introduce a named entity, an existential witness or an implicit lexical restriction.',
+            target_refs=tuple(region.token_refs))
         if chosen not in graph.domains[mid]:continue
-        selected[mid]=(graph.domains[mid][chosen],key)
+        selected[mid]=(next(o for o in options if o['candidate_id']==chosen),key)
         graph.restrict(mid,[chosen],'RESOLVED_BINDER_HEAD')
+    # Validate every selected use before mutating any body frame.
+    from .reading_producers import issue
+    for value,key in selected.values():
+        issue(state,key,value['candidate_id'],value['reading_uses'])
     state.syntax_trace.append({'kind':'QUANTIFIER_BINDING_DOMAIN','region_ref':region.region_id,
                               'constraint_state':graph.snapshot()})
     result={}
@@ -155,7 +160,6 @@ def _bind(state,release,selector,region,frames,matches,cfg,spend):
         for frame in frames:
             if head in frame.argument_token_refs and not frame.semantic.get('structural_unresolved'):
                 frame.semantic.setdefault('bound_arguments',{})[head]=variable;uses.append(frame.frame_id)
-        license_use(state,head,reading,key,value['candidate_id'])
         role=rule['restriction_pattern']['role'];token=evidence[head]
         fid='quantifier-restriction:'+digest([mid,value])
         license={'rule':deepcopy(rule),'head_ref':head,'variable':variable,'decision_ref':key,

@@ -198,6 +198,9 @@ def _compose_alternatives(state, release, selector, region, tokens, predicates, 
             options=local['options']
             state.syntax_trace.append({'kind':'LOCAL_SCOPE_CONTRAST','decision_ref':region.region_id+'|composition',
                                        **{k:v for k,v in local.items() if k not in {'options','question'}}})
+        from .reading_producers import attach,frame_bindings
+        by_bundle={b[-1].frame_id:b for b in complete}
+        options=[attach(o,frame_bindings(state,release,region,by_bundle[o['candidate_id']],family='BUNDLE')) for o in options]
         from .component_source import probe_context
         context, target_question=probe_context(state,region,cfg,raw)
         from .component_constraints import question as established_constraints
@@ -232,10 +235,11 @@ def _compose_alternatives(state, release, selector, region, tokens, predicates, 
             f.semantic['composition_bundle_root'] = bundle[-1].frame_id
             if bundle[-1].frame_id != chosen:
                 f.semantic['structural_unresolved'] = True
-            elif decision is not None:
-                from .morphology_domain import license_use
-                for tid,reading in f.semantic.get('morph_bindings',{}).items():
-                    license_use(state,tid,reading,region.region_id+'|composition',chosen)
+            elif decision is not None and options:
+                from .reading_producers import issue
+                option=next(o for o in options if o['candidate_id']==chosen)
+                issue(state,region.region_id+'|composition',chosen,
+                      [e for e in option['reading_uses'] if e['use']['frame_ref']==f.frame_id])
     return frames
 
 

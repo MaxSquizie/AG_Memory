@@ -32,6 +32,10 @@ def select_child(state,release,selector,region,frames,contract,context):
     if (not general and len(domains)>cfg['max_candidates']) or region.source_range[1]-region.source_range[0]>cfg['context_chars']:
         state.diag('COMPONENT_SEARCH_INCOMPLETE',region.region_id);return None
     options=[{'candidate_id':fid,'label':d['label'],**({'frame_refs':d['frame_refs']} if general else {})} for fid,d in domains.items()]
+    from .reading_producers import attach,frame_bindings,issue
+    options=[attach(o,frame_bindings(state,release,region,
+        [f for f in frames if f.frame_id in domains[o['candidate_id']]['frame_refs']],
+        family='CHILD_OUTPUT',contract=contract)) for o in options]
     key=region.region_id+'|child-slot:'+digest([contract,context,options])
     question=('Resolve this child under its parent constraint '+contract+'. '+context+
         ' Do not reparse accepted children or change their identities. '
@@ -73,6 +77,6 @@ def select_child(state,release,selector,region,frames,contract,context):
             frame.semantic['structural_unresolved']=False
             frame.semantic['composition_decision']=key
             frame.semantic['parent_constraint_decision']=key
-            from .morphology_domain import license_use,frame_readings
-            for _,tid,reading in frame_readings(frame):license_use(state,tid,reading,key,selected)
+            option=next(o for o in options if o['candidate_id']==selected)
+            issue(state,key,selected,[e for e in option['reading_uses'] if e['use']['frame_ref']==frame.frame_id])
     return next(f for f in frames if f.frame_id==selected)
