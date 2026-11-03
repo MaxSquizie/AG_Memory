@@ -169,6 +169,9 @@ def _probe_impl(state, selector, release, key, slot, options, context, source_ra
     state.syntax_trace.append({'kind':'PROBE_INPUT_CONTRACT','decision_ref':key,
         'slot':slot,'status':'INVALID' if errors else getattr(inputs,'declaration_status','DECLARED') if inputs is not None else 'FAMILY_DECLARED',
         'inputs':input_record,'semantic_contract':family.record() if family else None,'errors':list(errors)})
+    runtime_trace.emit('probe_input_contract', decision_ref=key, slot=slot,
+        status='INVALID' if errors else 'DECLARED',
+        semantic_contract=family.record() if family else None, errors=list(errors))
     if errors:
         # Invalidate this cached evaluation, not the stable task address for
         # all future revisions. A repaired declaration may use the same key.

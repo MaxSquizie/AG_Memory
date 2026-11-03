@@ -49,7 +49,7 @@ print('Dispatcher: proof subscriptions, unchanged reuse, transitive stale reads,
 # Absence is a read, too: a previously missing inventory becomes available.
 from ah.formalizer import function_inventory as inv
 s=t0('source');s.evidence=[TokenEvidence('source','t',0,6)];d=Dispatcher(s)
-runtime=NS(state=s,dispatcher=d,input_signature=lambda:None,context_signature=lambda:None,domain_feedback=None)
+runtime=NS(state=s,dispatcher=d,input_signature=lambda:None,context_signature=lambda:None,domain_feedback=None,area_inputs=None)
 with patch('ah.formalizer.composition_session.current',return_value=runtime):
     def available():return inv.current(s,'TEMPORAL',[]) is not None
     assert d.run('inventory-consumer',[],available,kind='GRAMMAR') is False

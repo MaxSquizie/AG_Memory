@@ -164,7 +164,8 @@ def query_snapshot(state,token_ref,scope,reading=None):
 
 
 def query_refs(state,token_ref,scope,reading=None):
-    return {r['decision_ref'] for r in query_rows(state,token_ref,scope,reading) if r.get('decision_ref')}
+    from .morphology_provenance import probe_refs
+    return set().union(*(probe_refs(state,r) for r in query_rows(state,token_ref,scope,reading)))
 
 
 def observe_query(state,token_ref,reading):

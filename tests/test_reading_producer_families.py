@@ -134,6 +134,29 @@ def test_oov_import_has_pure_receipt_and_negative_cache_tracks_parent_use(monkey
                           if r['kind']=='READING_USE' and r['value'].get('transfer')]
                 assert receipts
                 receipt=deepcopy(receipts[0]['value'])
+                # P04: the imported witness is unchanged; only its provider
+                # consumes this independent probe. Both aggregate paths must
+                # expose it to explicit repair, including frozen cache replay.
+                from ah.formalizer.dispatch_evidence import evidence_probe_refs
+                from ah.formalizer.producer_reads import capture
+                imported=receipt['transfer']['import'];d=runtime.dispatcher
+                aggregate=[('READING_USE',receipt),('MORPHOLOGY_PROVENANCE',{'row':imported})]
+                for kind,value in aggregate:
+                    assert 'independent' in evidence_probe_refs(s,kind,value)
+                def aggregate_read():
+                    for kind,value in aggregate:d.observe(kind,value)
+                    d.observe('NOMINAL_HOST',{'decision_ref':'unrelated-owner'},False)
+                    return True
+                d.run('aggregate-read',None,aggregate_read,kind='TEST')
+                with capture(d) as captured:
+                    assert d.run('aggregate-read',None,aggregate_read,kind='TEST')
+                    d.discard_reads(['probe:independent'],'REPAIRED_PROVIDER')
+                assert [r['kind'] for r in captured.snapshot()['external']]==['NOMINAL_HOST']
+                def repair():
+                    aggregate_read();d.discard_reads(['probe:independent'],'REPAIRED_PROVIDER')
+                    return True
+                assert d.run('repair-provider',None,repair,kind='TEST')
+                assert [r['kind'] for r in d.nodes['repair-provider']['evidence_reads'].values()]==['NOMINAL_HOST']
                 s.syntax_trace.remove(row)
                 calls=[]
                 def read():calls.append(1);return attested(s,local[0],reading)

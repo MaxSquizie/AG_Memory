@@ -46,12 +46,15 @@ class Dispatcher:
             queue.extend(self.consumers.get(ref,()))
 
     def observe(self,kind,value,expected=True):
-        from .producer_reads import observe
-        observe(self,kind,value,expected)
-        if self.checking_evidence or not self.evidence_stack:return
-        if kind not in {'MORPHOLOGY_PROVENANCE','MORPHOLOGY_ORIGINAL','READING_DECISION','READING_QUERY','READING_USE','BUNDLE_CONSTRAINTS','READING_DOMAIN','STRUCTURAL_FOREST','PARTITION_EXCLUSION','CONDITIONAL_PROOF','PROOF','INVENTORY','INVENTORY_QUERY','NOMINAL_HOST','CONSTRAINT_SET','REFINEMENT_HOST'}:raise ValueError('DISPATCH_EVIDENCE_KIND_UNKNOWN')
-        identity=digest([kind,canonical(value),expected])
-        self.evidence_stack[-1][identity]={'kind':kind,'value':deepcopy(value),'expected':expected}
+        from .producer_reads import observe,capturing
+        if self.checking_evidence or not (self.evidence_stack or capturing(self)):return
+        from .dispatch_evidence import observation_address,read_record,retain_read
+        identity=digest([kind,canonical(observation_address(kind,value,expected))])
+        record=read_record(self.state,kind,value,expected)
+        observe(self,kind,value,expected,record)
+        if self.evidence_stack:
+            reads=self.evidence_stack[-1]
+            reads[identity]=retain_read(reads.get(identity),record)
 
     def evidence_valid(self,reads):
         from .dispatch_evidence import valid
@@ -115,8 +118,8 @@ class Dispatcher:
             if self.evidence_stack:
                 external=self.evidence_stack[-1]
                 for identity,row in list(external.items()):
-                    from .dispatch_evidence import evidence_probe_refs
-                    addressed={'probe:'+ref for ref in evidence_probe_refs(self.state,row['kind'],row['value'])}
+                    from .dispatch_evidence import read_probe_refs
+                    addressed={'probe:'+ref for ref in read_probe_refs(self.state,row)}
                     if addressed & set(refs):external.pop(identity)
             self.trace('DISPATCH_RECHECK',key,reason=reason,discarded_reads=removed)
 

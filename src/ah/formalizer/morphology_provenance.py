@@ -250,6 +250,11 @@ def group_live(state,group,*,condition):
 
 
 def probe_refs(state,row):
+    from .evidence_ancestry import collect
+    return collect(state,lambda:_probe_refs(state,row))
+
+
+def _probe_refs(state,row):
     """Exact transformation ancestry for addressed read retirement."""
     from .morphology_domain import clean
     from .dispatch_evidence import evidence_probe_refs
@@ -258,6 +263,9 @@ def probe_refs(state,row):
         value=pending.pop();identity=frozen(value)
         if identity in seen:continue
         seen.add(identity)
+        if value.get('kind')=='MORPHOLOGY_FUNCTION_IMPORT':
+            from .evidence_ancestry import provider_refs
+            refs.update(provider_refs(state,value['parent_task'],value['parent_revision']))
         refs.update(evidence_probe_refs(state,'CONDITIONAL_PROOF',{'proof':None,'condition':value.get('condition')}))
         objects=[value]
         while objects:

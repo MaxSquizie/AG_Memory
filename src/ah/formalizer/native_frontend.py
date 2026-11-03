@@ -655,6 +655,8 @@ from .runtime_tracing import traced, watch_state, phase
 def run_native(text,selector,release,observation,morph=None,context_reader=None):
     from .kernel import BoundedExecutor,ProbeLimits
     bounded=selector if isinstance(selector,BoundedExecutor) else BoundedExecutor(selector,ProbeLimits(**observation.get('probe_limits',{})))
+    from .budget_tracing import executor_configured
+    executor_configured(bounded, reason='run_native_entry')
     state=_run_native(text,bounded,release,observation,morph,context_reader)
     state.observation['probe_metrics']={'calls':bounded.calls,'input_chars':bounded.input_chars}
     return state

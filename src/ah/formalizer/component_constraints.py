@@ -14,9 +14,10 @@ def question(state,region):
         phrase=' '.join(evidence[t].span for t in trace['phrase_refs'])
         origin='explicit user clarification' if trace.get('decision_ref') in choices else 'previous resolved local question'
         rows.append('«'+phrase+'» attaches to «'+view['surface']+'» ('+origin+')')
-    for e in state.evidence:
-        if e.lexical_recovery and region.source_range[0]<=e.start and e.end<=region.source_range[1]:
-            rows.append('explicitly selected inflection reading «'+e.span+'» → «'+e.lexical_recovery['surface']+'»; source text unchanged')
+    from .recovery_constraints import wording
+    from .function_inventory import execution_condition
+    refs=[e.token_id for e in state.evidence if region.source_range[0]<=e.start and e.end<=region.source_range[1]]
+    rows.extend(wording(state,refs,execution_condition(state)))
     if not rows:return ''
     return 'Already established interpretation constraints: '+'; '.join(rows)+'. Evaluate the remaining composition subject to these constraints; do not ask again which of those already selected hosts was intended. These constraints do not assert world facts. '
 
@@ -70,9 +71,8 @@ def host_live(state,row):
     usable=(key not in retired_refs(state.syntax_trace) and stamp is not None
         and row.get('fingerprint')==stamp and row.get('source_basis')==source_basis(state)
         and row.get('selected') is not None and selected_candidate(state.decisions.get(key))==row['selected'])
-    if usable:
-        from .dispatch_evidence import observe
-        observe(state,'NOMINAL_HOST',row)
+    from .dispatch_evidence import observe
+    observe(state,'NOMINAL_HOST',row,usable)
     return usable
 
 

@@ -79,7 +79,7 @@ class LexicalEmbeddingRanker:
         return [result[text] for text in texts]
 
     def rank(self,selector,release,key,query,options):
-        with runtime_trace.bind(entity_id=key, decision_ref=key):
+        with runtime_trace.bind(entity_id=key, decision_ref=key, request_kind='EMBEDDING_RANKING'):
             with runtime_trace.span('LEXICAL_EMBEDDING_RANK', model_key=self.model_key,
                     algorithm=VERSION) as outcome:
                 try:

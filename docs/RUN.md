@@ -133,6 +133,8 @@ sudo apt install libxcb-xinerama0 libxcb-cursor0 libgl1
 Oracle runner отдельно создаёт `runtime.tsv` в своём каталоге `--out`, в том
 числе при запуске из GUI. Формат, границы покрытия, чтение больших полей и план
 подключения остальных подсистем описаны в [RUNTIME_TSV_LOGGING.md](RUNTIME_TSV_LOGGING.md).
+Сводные TSV по пробам и бюджетам, инвентаризация старых progress-выгрузок и
+оценка независимо размеченных контролей: [PROBE_MEASUREMENTS.md](PROBE_MEASUREMENTS.md).
 
 ```bash
 tail -f logs/latest.log

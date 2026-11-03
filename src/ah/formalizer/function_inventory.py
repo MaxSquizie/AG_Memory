@@ -113,13 +113,16 @@ def complete(state,metadata,completion_proof=None):
 
 def unit_live(state,unit,*,scoped=False):
     condition=execution_condition(state) if scoped else None
+    usable=_unit_live(state,unit,condition=condition)
+    from .dispatch_evidence import observe
+    observe(state,'INVENTORY_UNIT',{'unit':unit,'condition':condition},usable)
+    return usable
+
+
+def _unit_live(state,unit,*,condition=None):
     if not active(unit) or not unit.get('inventory_ref'):return False
     receipt=next((r for r in reversed(state.syntax_trace) if r.get('inventory_ref')==unit['inventory_ref'] and completed(r)),None)
-    usable=bool(receipt and live(state,receipt,condition=condition) and receipt['unit_hashes'].get(unit.get('unit_ref'))==unit_hash(unit))
-    if usable:
-        from .dispatch_evidence import observe
-        observe(state,'INVENTORY',{'inventory_ref':receipt['inventory_ref'],'condition':condition})
-    return usable
+    return bool(receipt and live(state,receipt,condition=condition) and receipt['unit_hashes'].get(unit.get('unit_ref'))==unit_hash(unit))
 
 
 def require_unit(state,unit):

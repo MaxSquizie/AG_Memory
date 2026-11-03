@@ -301,21 +301,36 @@ class Budget:
     probe_scope_calls: dict[str, int] = field(default_factory=dict)
     probe_scope_key: str | None = None
 
+    def __post_init__(self):
+        from .budget_tracing import state_configured
+        state_configured(self, reason='created')
+
     def spend_llm(self, failed: bool = False) -> None:
+        from . import budget_tracing
+        before = budget_tracing.state_before(self)
         if self.probe_scope_limits:
-            if self.probe_scope_key not in self.probe_scope_limits: raise ValueError('PROBE_SCOPE_REQUIRED')
+            if self.probe_scope_key not in self.probe_scope_limits:
+                budget_tracing.event('state_budget_rejected', self, 'STATE_CALLS',
+                    status='BLOCKED', reason='PROBE_SCOPE_REQUIRED', scope='SOURCE_WINDOW',
+                    window_key=self.probe_scope_key, requested={'llm_calls': 1})
+                raise ValueError('PROBE_SCOPE_REQUIRED')
             key=self.probe_scope_key
             self.probe_scope_calls[key]=self.probe_scope_calls.get(key,0)+1
         self.llm_calls += 1
         if failed:
             self.llm_failed += 1
+        budget_tracing.state_charged(self, before)
 
     @property
     def llm_exhausted(self) -> bool:
         if self.probe_scope_limits:
             key=self.probe_scope_key
-            return key not in self.probe_scope_limits or (self.probe_scope_limits[key]>0 and self.probe_scope_calls.get(key,0)>=self.probe_scope_limits[key])
-        return self.llm_calls >= self.llm_limit
+            exhausted = key not in self.probe_scope_limits or (self.probe_scope_limits[key]>0 and self.probe_scope_calls.get(key,0)>=self.probe_scope_limits[key])
+        else:
+            exhausted = self.llm_calls >= self.llm_limit
+        from .budget_tracing import state_checked
+        state_checked(self, exhausted)
+        return exhausted
 
 
 @dataclass

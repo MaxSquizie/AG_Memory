@@ -115,8 +115,14 @@ class _Tracker:
             if self.states.get(state_id) is cursor:
                 self.states.pop(state_id, None)
         cursor.state = weakref.ref(state, retire)
+        budget_ref = None
+        if getattr(state, 'budget', None) is not None:
+            from .budget_tracing import state_configured, identity
+            state_configured(state.budget, reason='state_registered')
+            budget_ref = (identity(state.budget, 'STATE_CALLS') or {}).get('budget_ref')
         _runtime().emit("state_fork" if inherited else "state_registered",
                         state_ref=cursor.ref, parent_state_ref=cursor.parent,
+                        state_budget_ref=budget_ref,
                         **_identity(state),
                         inherited_counts={name: len(getattr(state, name)) for name in _STREAMS}
                         if inherited else {}, capture="checkpoint")
@@ -149,6 +155,14 @@ def report_context(report):
         if value is not None:
             identity[key] = value
     _runtime().update_context(**identity)
+
+
+@_safe
+def capture_probe_catalog():
+    """Pin the observed registry; later audits must not silently use new names."""
+    from ah.diagnostics.probe_catalog import catalog_snapshot
+    _runtime().emit("probe_catalog", catalog=catalog_snapshot(),
+                    scope="DECLARED_REGISTRY", language_coverage="NOT_EVALUATED")
 
 
 def _stream(cursor, state, name, reason):
@@ -310,7 +324,8 @@ def phase(name, state=None, **fields):
     if not enabled():
         yield {}
         return
-    with _runtime().span(name, **fields) as outcome:
+    with (_runtime().bind(pipeline_stage=name),
+          _runtime().span(name, **fields) as outcome):
         if state is not None:
             watch_state(state)
         try:
@@ -386,6 +401,8 @@ def traced(operation, *, mode="native"):
             with rt.bind(**identity):
                 with rt.span(operation, mode=mode) as outcome:
                     try:
+                        if root:
+                            capture_probe_catalog()
                         if given_state is not None:
                             watch_state(given_state)
                         inputs = {key: arguments[key] for key in (

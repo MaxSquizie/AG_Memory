@@ -26,6 +26,9 @@ def _exchange(state,selector,decision,prompt,schema,ids,maximum):
     original=prompt
     for attempt in range(2):
         record_prompt(decision,prompt)
+        # Logical format-repair attempt, distinct from the provider WAL's
+        # transport attempt for a particular ordinal.
+        runtime_trace.update_context(selection_attempt=attempt)
         runtime_trace.emit('selection_attempt', entity_id=decision.frame_id,
             slot=decision.slot_id, attempt=attempt, candidates=ids,
             prompt_chars=len(prompt))

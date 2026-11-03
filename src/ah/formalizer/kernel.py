@@ -13,6 +13,7 @@ from ah.diagnostics import runtime_trace
 
 from .provider_adapter import BudgetExceeded, capture_provider_payload
 from .runtime_tracing import traced
+from . import budget_tracing
 
 
 class ProbeExecutor(Protocol):
@@ -37,30 +38,39 @@ class BoundedExecutor:
     def __init__(self,executor,limits):
         self.executor,self.limits=executor,limits
         self.calls=0;self.input_chars=0;self.started=monotonic()
+        budget_tracing.executor_configured(self, reason='created')
 
     def __getattr__(self,key):return getattr(self.executor,key)
 
     def _charge(self,prompt):
-        size=self.executor.prompt_size(prompt) if hasattr(self.executor,'prompt_size') else len(prompt)
+        budget_tracing.executor_configured(self, reason='precheck')
+        custom_size=hasattr(self.executor,'prompt_size')
+        size=self.executor.prompt_size(prompt) if custom_size else len(prompt)
         checks=(('calls',self.calls+1,self.limits.max_calls),
                 ('prompt_chars',size,self.limits.max_prompt_chars),
                 ('input_chars',self.input_chars+size,self.limits.max_input_chars),
                 ('elapsed_seconds',monotonic()-self.started,self.limits.max_elapsed_seconds))
         for dimension,used,maximum in checks:
             if used>maximum:
-                runtime_trace.emit('executor_budget_rejected', status='BLOCKED',
+                budget_tracing.event('executor_budget_rejected', self, 'EXECUTOR', status='BLOCKED',
                     reason='COMPUTATION_LIMIT', dimension=dimension,
                     used=used, maximum=maximum, calls=self.calls,
-                    input_chars=self.input_chars)
+                    input_chars=self.input_chars, scope='EXECUTOR_LIFETIME',
+                    elapsed_seconds=checks[-1][1])
                 raise BudgetExceeded('COMPUTATION_LIMIT',f'{dimension}: {used} > {maximum}')
         self.calls+=1;self.input_chars+=size
+        budget_tracing.executor_charged(self, size, checks[-1][1],
+            'PROMPT_SIZE_HOOK' if custom_size else 'LEN_PROMPT')
 
     def _execute(self, operation, prompt):
         if not runtime_trace.enabled():
             self._charge(prompt)
             return getattr(self.executor, operation)(prompt)
-        with runtime_trace.span('EXECUTOR', operation=operation,
-                executor_type=type(self.executor).__name__) as outcome:
+        identity = budget_tracing.identity(self, 'EXECUTOR') or {}
+        with (runtime_trace.bind(executor_budget_ref=identity.get('budget_ref')),
+              runtime_trace.span('EXECUTOR', operation=operation,
+                executor_type=type(self.executor).__name__) as outcome):
+            budget_tracing.executor_configured(self, reason='request')
             with capture_provider_payload() as captured:
                 if not captured['request'] or captured.get('request_value') is not prompt:
                     runtime_trace.emit('executor_request', operation=operation,

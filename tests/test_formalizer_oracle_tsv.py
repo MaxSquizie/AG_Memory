@@ -57,8 +57,15 @@ def test_case_correlation_has_actual_execution_only_and_preserves_progress(tmp_p
     assert recorded
     assert all(json.loads(row['data_json'])['case_id']=='A04' for row in recorded)
     assert all(json.loads(row['data_json'])['case_index']==1 for row in recorded)
-    assert [row['event'] for row in recorded if row['stage']=='ORACLE_CASE']==[
-        'span_started','actual_case_call','span_finished']
+    case_events=[row for row in recorded if row['stage']=='ORACLE_CASE']
+    assert [row['event'] for row in case_events if row['event'].startswith('span_')]==[
+        'span_started','span_finished']
+    actual=next(row for row in case_events if row['event']=='actual_case_call')
+    assert int(case_events[0]['sequence']) < int(actual['sequence']) < int(case_events[-1]['sequence'])
+    # Component cases may instantiate a real Budget without issuing a probe.
+    # Its baseline is observed inside the case and contains no oracle answers.
+    assert any(row['event']=='budget_configured' and json.loads(row['data_json'])['budget_level']=='STATE_CALLS'
+               for row in case_events)
     assert recorded[-1]['status']=='EXECUTED'
     assert all('checks' not in json.loads(row['data_json']) for row in recorded)
     assert all(row['status']!='PASS' for row in recorded)

@@ -196,6 +196,10 @@ Reader явно сообщает о несовместимом заголовк�
 
 ## Проверки первого этапа
 
+Анализ вызовов, замороженный каталог проб, расход разных уровней бюджета,
+исторические ограничения и offline-оценка независимо размеченных контролей
+описаны в [PROBE_MEASUREMENTS.md](PROBE_MEASUREMENTS.md).
+
 Новые проверки находятся в `test_runtime_trace.py`,
 `test_formalizer_provider_trace.py`, `test_formalizer_runtime_trace.py`,
 `test_formalizer_oracle_tsv.py`. Они проверяют физический TSV, длинные поля,
