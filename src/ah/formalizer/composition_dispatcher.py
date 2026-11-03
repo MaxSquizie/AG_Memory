@@ -29,6 +29,8 @@ class Dispatcher:
     def trace(self,kind,key,**fields):
         self.state.syntax_trace.append({'kind':kind,'task_ref':key,
             'task_kind':self.nodes[key]['kind'],**self.nodes[key].get('area',{}),**fields})
+        from .runtime_tracing import checkpoint
+        checkpoint(self.state, reason='dispatcher')
 
     def invalidate(self,key,reason):
         queue=[key];seen=set()

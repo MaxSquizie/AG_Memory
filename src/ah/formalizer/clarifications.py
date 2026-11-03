@@ -168,6 +168,9 @@ def validate_input(store, observation):
             raise ValueError('CLARIFICATION_SELECTION_MISMATCH')
 
 
+from .runtime_tracing import traced
+
+@traced('CLARIFICATION')
 def resolve(adapter, resolution_key, *, source_text=None):
     """Replay a durable choice, or reserve one fresh replacement version."""
     from .migration import reinterpret_observation

@@ -648,9 +648,15 @@ def _bindings(frame,evidence,valency,extra_gaps=(),*,parents=None):
     return out
 
 
+from .runtime_tracing import traced, watch_state, phase
+
+
+@traced('NATIVE_FORMALIZATION')
 def run_native(text,selector,release,observation,morph=None,context_reader=None):
     from .kernel import BoundedExecutor,ProbeLimits
     bounded=selector if isinstance(selector,BoundedExecutor) else BoundedExecutor(selector,ProbeLimits(**observation.get('probe_limits',{})))
+    from .budget_tracing import executor_configured
+    executor_configured(bounded, reason='run_native_entry')
     state=_run_native(text,bounded,release,observation,morph,context_reader)
     state.observation['probe_metrics']={'calls':bounded.calls,'input_chars':bounded.input_chars}
     return state
@@ -659,18 +665,20 @@ def run_native(text,selector,release,observation,morph=None,context_reader=None)
 def _run_native(text,selector,release,observation,morph=None,context_reader=None):
     from .telemetry import emit
     emit("stage", stage="T0_T1", source_chars=len(text))
-    release.assert_integrity()
-    state=t0(text); state.source_uid=observation['observation_id']; state.interpretation_version=observation['interpretation_version']; state.observation=dict(observation)
-    state.resource_snapshot={'snapshot_id':release.sha256,'release_version':release.manifest['version']}
-    state.context_facts=tuple(observation.get('context_facts',()))
-    for diagnostic in observation.get('rx_diagnostics',()): state.diag(diagnostic,'bounded optional experience retrieval')
-    run_srl(state,release,morph)
-    t1(state,morph=morph,preserve_variants=True,shared_form_expansion=False)
-    from .regions import build_regions, reference_goal
-    state.region_forest=build_regions(text,state.evidence,state.source_uid)
-    from .probe_windows import configure, enter as enter_probe_window
-    configure(state,selector,release)
-    from .composition_session import session
+    with phase('T0_T1'):
+        release.assert_integrity()
+        state=t0(text); state.source_uid=observation['observation_id']; state.interpretation_version=observation['interpretation_version']; state.observation=dict(observation)
+        watch_state(state)
+        state.resource_snapshot={'snapshot_id':release.sha256,'release_version':release.manifest['version']}
+        state.context_facts=tuple(observation.get('context_facts',()))
+        for diagnostic in observation.get('rx_diagnostics',()): state.diag(diagnostic,'bounded optional experience retrieval')
+        run_srl(state,release,morph)
+        t1(state,morph=morph,preserve_variants=True,shared_form_expansion=False)
+        from .regions import build_regions, reference_goal
+        state.region_forest=build_regions(text,state.evidence,state.source_uid)
+        from .probe_windows import configure, enter as enter_probe_window
+        configure(state,selector,release)
+        from .composition_session import session
     with session(state,release,context_reader,selector,morph):
         return _interpret_state(state,text,selector,release,observation,morph,context_reader)
 
@@ -685,431 +693,435 @@ def _interpret_state(state,text,selector,release,observation,morph,context_reade
         preferred={(v['lemma'],v['POS']) for x in rx1 if x['surface']==ev.span for v in x['variants']}
         ev.variants=tuple(sorted(ev.variants,key=lambda v:(-int((v.lemma,v.pos) in preferred),-v.score)))
     emit("stage", stage="T2_REGIONS", tokens=len(state.evidence), regions=len(state.region_forest.regions))
-    frozen_generation=observation.get('clarification_generation')
-    if observation.get('structural_contract')=='region_probes':
-        from .document_scopes import prepare as prepare_document_scopes
-        prepare_document_scopes(state,release,selector,frozen_generation)
-    if (not frozen_generation and observation.get('structural_contract')=='region_probes'
-            and not release.entries('ProposalPolicy')[0].get('composition',{}).get('structural_tasks')):
-        from .contextual_agreement import resolve as resolve_agreement
-        resolve_agreement(state,release,selector,morph)
-        from .contextual_oov import resolve
-        resolve(state,release,selector)
-    rebuild_components=bool(frozen_generation and frozen_generation.get('rebuild_components'))
-    if rebuild_components:
-        if frozen_generation['resource_snapshot'] != release.sha256:
-            raise ValueError('CLARIFICATION_RESOURCE_STALE')
-        from .lexical_snapshot import restore as restore_lexical
-        restore_lexical(state.evidence,frozen_generation.get('lexical_decisions',()))
-    if frozen_generation and not rebuild_components:
-        from .state import RejectionRecord
-        if frozen_generation['resource_snapshot'] != release.sha256:
-            raise ValueError('CLARIFICATION_RESOURCE_STALE')
-        from .lexical_snapshot import restore as restore_lexical
-        restore_lexical(state.evidence,frozen_generation.get('lexical_decisions',()))
-        state.frames=[]
-        for raw in frozen_generation['frames']:
-            raw=deepcopy(raw)
-            raw['provenance']=ResourceProvenance(**raw['provenance'])
-            for key in ('participants','arguments','argument_token_refs','source_range'): raw[key]=tuple(raw[key])
-            state.frames.append(FrameCandidate(**raw))
-        state.logical_roots=deepcopy(frozen_generation['logical_roots'])
-        state.syntax_trace=deepcopy(frozen_generation['syntax_trace'])
-        state.morphology_records=deepcopy(frozen_generation.get('morphology_records',{}))
-        # Original evidence is freshly produced by T1; old records must match it.
+    with phase('T2_REGIONS', state):
+        frozen_generation=observation.get('clarification_generation')
+        if observation.get('structural_contract')=='region_probes':
+            from .document_scopes import prepare as prepare_document_scopes
+            prepare_document_scopes(state,release,selector,frozen_generation)
+        if (not frozen_generation and observation.get('structural_contract')=='region_probes'
+                and not release.entries('ProposalPolicy')[0].get('composition',{}).get('structural_tasks')):
+            from .contextual_agreement import resolve as resolve_agreement
+            resolve_agreement(state,release,selector,morph)
+            from .contextual_oov import resolve
+            resolve(state,release,selector)
+        rebuild_components=bool(frozen_generation and frozen_generation.get('rebuild_components'))
+        if rebuild_components:
+            if frozen_generation['resource_snapshot'] != release.sha256:
+                raise ValueError('CLARIFICATION_RESOURCE_STALE')
+            from .lexical_snapshot import restore as restore_lexical
+            restore_lexical(state.evidence,frozen_generation.get('lexical_decisions',()))
+        if frozen_generation and not rebuild_components:
+            from .state import RejectionRecord
+            if frozen_generation['resource_snapshot'] != release.sha256:
+                raise ValueError('CLARIFICATION_RESOURCE_STALE')
+            from .lexical_snapshot import restore as restore_lexical
+            restore_lexical(state.evidence,frozen_generation.get('lexical_decisions',()))
+            state.frames=[]
+            for raw in frozen_generation['frames']:
+                raw=deepcopy(raw)
+                raw['provenance']=ResourceProvenance(**raw['provenance'])
+                for key in ('participants','arguments','argument_token_refs','source_range'): raw[key]=tuple(raw[key])
+                state.frames.append(FrameCandidate(**raw))
+            state.logical_roots=deepcopy(frozen_generation['logical_roots'])
+            state.syntax_trace=deepcopy(frozen_generation['syntax_trace'])
+            state.morphology_records=deepcopy(frozen_generation.get('morphology_records',{}))
+            # Original evidence is freshly produced by T1; old records must match it.
 
-        for raw in frozen_generation['linked_alternatives']:
-            raw=deepcopy(raw); raw['provenance']=ResourceProvenance(**raw['provenance'])
-            state.linked_alternatives.append(LinkedAlternative(**raw))
-        for raw in frozen_generation['rejections']:
-            raw=deepcopy(raw); raw['provenance']=ResourceProvenance(**raw['provenance'])
-            state.rejections.append(RejectionRecord(**raw))
-        state.grammar_search_incomplete=frozen_generation['grammar_search_incomplete']
-        from .clarifications import choice, offer
-        state.clarification_candidates=deepcopy(frozen_generation.get('pending_structures',[]))
-        for row in list(state.clarification_candidates):
-            selected=choice(state,row['decision_ref'],[o['candidate_id'] for o in row['options']])
-            if selected is None: continue
-            option=next(o for o in row['options'] if o['candidate_id']==selected)
-            p=release.entries('ProposalPolicy')[0]
-            req=StructureProposalRequest('clarification:'+state.source_uid,'',tuple(e.token_id for e in state.evidence),
-                allowed_node_kinds=frozenset({'PREDICATE','ENTITY','BOUND_VAR','TIME','WH','COUNT_REQUEST','NUMERAL',*OPERATORS}),
-                allowed_edge_kinds=frozenset({'ARGUMENT','OPERAND','ATTITUDE','BIND','TIME_SCOPE','QUERY_SLOT'}),
-                allowed_role_ids=frozenset(x['role_id'] for x in release.entries('RoleRegistry')),
-                max_nodes=p['max_nodes'],max_edges=p['max_edges'],max_depth=p['max_depth'],
-                required_operators=tuple((op,anchors) for op,anchors in _required_operators(state,release)
-                                         if set(anchors)&set(option['hypothesis']['alignment'])))
-            hypotheses=parse_and_validate(req,json.dumps({'hypotheses':[option['hypothesis']]}))
-            prov=ResourceProvenance(**option.get('provenance',{'pattern_ids':['TP_VALIDATED'],'resource_versions':{'release':release.sha256}}))
-            accepted=_frames_for_hypotheses(state,hypotheses,release,{selected:prov},
-                                           {selected:option.get('morph_bindings',{})})
-            if len(accepted)!=1: raise ValueError('CLARIFICATION_STRUCTURE_STALE')
-            h, fs=accepted[0]
-            alternatives={o['candidate_id'] for o in row['options']}
-            anchors={f.predicate_token_ref for f in fs}
-            removed={f.frame_id for f in state.frames if f.semantic.get('hypothesis') in alternatives
-                     or option['stage']=='TP' and f.predicate_token_ref in anchors}
-            state.frames=[f for f in state.frames if f.frame_id not in removed]+fs
-            for other in alternatives-{selected}:
-                state.reject(other,'CLARIFICATION','explicit speaker selection: '+selected,prov)
-            if not fs:
-                state.logical_roots=[t for trace in state.syntax_trace if trace.get('literal_hypothesis')==selected for t in trace['operator_forest']]
-            state.clarification_candidates.remove(row)
-    else:
-        region_mode=observation.get('structural_contract')=='region_probes'
-        state.frames=_grammar_frames(state,release,selector if region_mode else None)
-        for frame in state.frames:
-            if any(a<frame.source_range[1] and frame.source_range[0]<b for a,b in
-                   (scope['header_range'] for scope in state.document_scopes)):
-                frame.semantic['structural_rejection']='DOCUMENT_HEADER_NOT_EVENT'
-                frame.semantic['structural_unresolved']=True
-                state.diag('DOCUMENT_HEADER_NOT_EVENT',frame.frame_id)
-        if region_mode:
-            from .temporal_token_ownership import reject_entity_overlap
-            reject_entity_overlap(state,release,state.frames)
-        if region_mode:
-            from .components import compose
-            compose(state,release,selector,context_reader=context_reader,morph=morph)
-            if not state.frames and not state.logical_roots:
-                state.diag('STRUCTURE_NOT_COVERED','region generator has no licensed complete candidate')
+            for raw in frozen_generation['linked_alternatives']:
+                raw=deepcopy(raw); raw['provenance']=ResourceProvenance(**raw['provenance'])
+                state.linked_alternatives.append(LinkedAlternative(**raw))
+            for raw in frozen_generation['rejections']:
+                raw=deepcopy(raw); raw['provenance']=ResourceProvenance(**raw['provenance'])
+                state.rejections.append(RejectionRecord(**raw))
+            state.grammar_search_incomplete=frozen_generation['grammar_search_incomplete']
+            from .clarifications import choice, offer
+            state.clarification_candidates=deepcopy(frozen_generation.get('pending_structures',[]))
+            for row in list(state.clarification_candidates):
+                selected=choice(state,row['decision_ref'],[o['candidate_id'] for o in row['options']])
+                if selected is None: continue
+                option=next(o for o in row['options'] if o['candidate_id']==selected)
+                p=release.entries('ProposalPolicy')[0]
+                req=StructureProposalRequest('clarification:'+state.source_uid,'',tuple(e.token_id for e in state.evidence),
+                    allowed_node_kinds=frozenset({'PREDICATE','ENTITY','BOUND_VAR','TIME','WH','COUNT_REQUEST','NUMERAL',*OPERATORS}),
+                    allowed_edge_kinds=frozenset({'ARGUMENT','OPERAND','ATTITUDE','BIND','TIME_SCOPE','QUERY_SLOT'}),
+                    allowed_role_ids=frozenset(x['role_id'] for x in release.entries('RoleRegistry')),
+                    max_nodes=p['max_nodes'],max_edges=p['max_edges'],max_depth=p['max_depth'],
+                    required_operators=tuple((op,anchors) for op,anchors in _required_operators(state,release)
+                                             if set(anchors)&set(option['hypothesis']['alignment'])))
+                hypotheses=parse_and_validate(req,json.dumps({'hypotheses':[option['hypothesis']]}))
+                prov=ResourceProvenance(**option.get('provenance',{'pattern_ids':['TP_VALIDATED'],'resource_versions':{'release':release.sha256}}))
+                accepted=_frames_for_hypotheses(state,hypotheses,release,{selected:prov},
+                                               {selected:option.get('morph_bindings',{})})
+                if len(accepted)!=1: raise ValueError('CLARIFICATION_STRUCTURE_STALE')
+                h, fs=accepted[0]
+                alternatives={o['candidate_id'] for o in row['options']}
+                anchors={f.predicate_token_ref for f in fs}
+                removed={f.frame_id for f in state.frames if f.semantic.get('hypothesis') in alternatives
+                         or option['stage']=='TP' and f.predicate_token_ref in anchors}
+                state.frames=[f for f in state.frames if f.frame_id not in removed]+fs
+                for other in alternatives-{selected}:
+                    state.reject(other,'CLARIFICATION','explicit speaker selection: '+selected,prov)
+                if not fs:
+                    state.logical_roots=[t for trace in state.syntax_trace if trace.get('literal_hypothesis')==selected for t in trace['operator_forest']]
+                state.clarification_candidates.remove(row)
         else:
-            _propose(state,selector,release)
-    if frozen_generation:
-        from .coordination_clarifications import apply as apply_coordination_choices
-        apply_coordination_choices(state,release)
-    from .spatial_references import prepare as prepare_spatial
-    prepare_spatial(state,release,selector)
-    from .lexical_snapshot import freeze as freeze_lexical
-    state.generation_snapshot={'resource_snapshot':release.sha256,
-        'morphology_records':deepcopy(state.morphology_records),
-        'document_scopes':deepcopy(state.document_scopes),
-        'lexical_decisions':freeze_lexical(state.evidence),
-        'component_probe_records':deepcopy(state.component_probe_records),
-        'frames':[asdict(f) for f in state.frames], 'logical_roots':deepcopy(state.logical_roots),
-        'syntax_trace':deepcopy(state.syntax_trace),
-        'linked_alternatives':[asdict(a) for a in state.linked_alternatives],
-        'rejections':[asdict(r) for r in state.rejections],
-        'pending_structures':deepcopy([r for r in state.clarification_candidates if r['kind']=='STRUCTURE']),
-        'grammar_search_incomplete':state.grammar_search_incomplete}
-    if observation.get('goal_request'):
-        from .query_requests import validate_request
-        owners=[f for f in state.frames if f.semantic.get('query_request')]
-        if len(owners)==1 or not owners and len(state.frames)==1:
-            owner=owners[0] if owners else state.frames[0]
-            try:
-                request=validate_request(observation['goal_request'])
-                old=owner.semantic.get('query_request',{})
-                if old.get('requested_roles') and request.get('requested_roles')!=old['requested_roles']:
-                    raise ValueError('QUERY_TARGET_UNBOUND')
-                owner.semantic['query_request']=request
-            except ValueError as exc:
-                owner.semantic['structural_unresolved']=True; state.diag(str(exc),'host query intent')
-    preferred_shapes={x['construction'] for rec in observation.get('rx_reads',{}).get('T2',()) for x in rec['payload'].get('structural_priors',())}
-    state.frames.sort(key=lambda f:(f.construction not in preferred_shapes,f.source_range,f.frame_id))
-    state.region_forest.attach_frames(state.frames)
-    from .components import prepare_implicit, resolve_implicit, add_memory_options
-    from .discourse_scopes import prepare as prepare_discourse
-    prepare_discourse(state,release,selector)
-    prepare_implicit(state,release)
+            region_mode=observation.get('structural_contract')=='region_probes'
+            state.frames=_grammar_frames(state,release,selector if region_mode else None)
+            for frame in state.frames:
+                if any(a<frame.source_range[1] and frame.source_range[0]<b for a,b in
+                       (scope['header_range'] for scope in state.document_scopes)):
+                    frame.semantic['structural_rejection']='DOCUMENT_HEADER_NOT_EVENT'
+                    frame.semantic['structural_unresolved']=True
+                    state.diag('DOCUMENT_HEADER_NOT_EVENT',frame.frame_id)
+            if region_mode:
+                from .temporal_token_ownership import reject_entity_overlap
+                reject_entity_overlap(state,release,state.frames)
+            if region_mode:
+                from .components import compose
+                compose(state,release,selector,context_reader=context_reader,morph=morph)
+                if not state.frames and not state.logical_roots:
+                    state.diag('STRUCTURE_NOT_COVERED','region generator has no licensed complete candidate')
+            else:
+                _propose(state,selector,release)
+        if frozen_generation:
+            from .coordination_clarifications import apply as apply_coordination_choices
+            apply_coordination_choices(state,release)
+        from .spatial_references import prepare as prepare_spatial
+        prepare_spatial(state,release,selector)
+        from .lexical_snapshot import freeze as freeze_lexical
+        state.generation_snapshot={'resource_snapshot':release.sha256,
+            'morphology_records':deepcopy(state.morphology_records),
+            'document_scopes':deepcopy(state.document_scopes),
+            'lexical_decisions':freeze_lexical(state.evidence),
+            'component_probe_records':deepcopy(state.component_probe_records),
+            'frames':[asdict(f) for f in state.frames], 'logical_roots':deepcopy(state.logical_roots),
+            'syntax_trace':deepcopy(state.syntax_trace),
+            'linked_alternatives':[asdict(a) for a in state.linked_alternatives],
+            'rejections':[asdict(r) for r in state.rejections],
+            'pending_structures':deepcopy([r for r in state.clarification_candidates if r['kind']=='STRUCTURE']),
+            'grammar_search_incomplete':state.grammar_search_incomplete}
+        if observation.get('goal_request'):
+            from .query_requests import validate_request
+            owners=[f for f in state.frames if f.semantic.get('query_request')]
+            if len(owners)==1 or not owners and len(state.frames)==1:
+                owner=owners[0] if owners else state.frames[0]
+                try:
+                    request=validate_request(observation['goal_request'])
+                    old=owner.semantic.get('query_request',{})
+                    if old.get('requested_roles') and request.get('requested_roles')!=old['requested_roles']:
+                        raise ValueError('QUERY_TARGET_UNBOUND')
+                    owner.semantic['query_request']=request
+                except ValueError as exc:
+                    owner.semantic['structural_unresolved']=True; state.diag(str(exc),'host query intent')
+        preferred_shapes={x['construction'] for rec in observation.get('rx_reads',{}).get('T2',()) for x in rec['payload'].get('structural_priors',())}
+        state.frames.sort(key=lambda f:(f.construction not in preferred_shapes,f.source_range,f.frame_id))
+        state.region_forest.attach_frames(state.frames)
+        from .components import prepare_implicit, resolve_implicit, add_memory_options
+        from .discourse_scopes import prepare as prepare_discourse
+        prepare_discourse(state,release,selector)
+        prepare_implicit(state,release)
     emit("stage", stage="CONTEXT", frames=len(state.frames))
-    if context_reader is not None:
-        arguments={tid for f in state.frames for tid in f.argument_token_refs
-                   if tid not in f.semantic.get('bound_arguments',{})}
-        context_by_mention={}
-        import re
-        policies=release.resources.get('CorefPolicy',{}).get('entries',())
-        event_rules=policies[0]['event_anaphora_rules'] if len(policies)==1 else ()
-        context_requests=[]
-        for e in state.evidence:
-            if e.token_id in state.observation.get('entity_bindings',{}):
-                continue
-            persons={v.person for v in e.variants if v.pos=='NPRO'}
-            context_key='user_ref' if persons=={'1st'} else 'self_ref' if persons=={'2nd'} else None
-            if context_key and state.observation.get('context_snapshot',{}).get(context_key):
-                continue
-            if e.token_id not in arguments or not (any(v.pos=='NPRO' for v in e.variants)
-                    or any(re.fullmatch(r['pattern'],e.span,re.I) for r in event_rules)):
-                continue
-            context_requests.append((reference_goal(state,e.token_id),e.token_id,None))
-        for frame in state.frames:
-            if frame.semantic.get('structural_unresolved'): continue
-            for role,gap in frame.semantic.get('implicit_arguments',{}).items():
-                context_requests.append(({'kind':'IMPLICIT_ARGUMENT','decision_ref':gap['gap_id'],
-                    'region_ref':frame.semantic['component_region'],'source_range':frame.source_range,
-                    'cue_token_refs':[frame.predicate_token_ref,*frame.argument_token_refs],'role':role},None,gap))
-        from .spatial_memory import requests as spatial_requests, attach as attach_spatial_memory
-        context_requests.extend((r,None,None) for r in spatial_requests(state))
-        from .nominal_reference_memory import requests as nominal_requests, attach as attach_nominal_memory
-        context_requests.extend((r,None,None) for r in nominal_requests(state))
-        for request,mention,gap in sorted(context_requests,key=lambda row:(row[0]['source_range'][1],row[0]['decision_ref'])):
-            result=context_reader.read(state,request)
-            if request['kind']=='NOMINAL_REFERENCE': attach_nominal_memory(state,request,result)
-            elif request['kind']=='SPATIAL_REFERENCE': attach_spatial_memory(state,request,result,release)
-            elif gap is None: context_by_mention[mention]=result['rows']
-            else: add_memory_options(gap,result['rows'],release)
-        state.observation['coreference_context_by_mention']=context_by_mention
-        root=state.region_forest.regions[0]
-        context_reader.read(state,{'kind':'READ_REMAINDER','decision_ref':'reading:end',
-            'region_ref':root.region_id,'source_range':root.source_range,'cue_token_refs':root.token_refs})
+    with phase('CONTEXT', state):
+        if context_reader is not None:
+            arguments={tid for f in state.frames for tid in f.argument_token_refs
+                       if tid not in f.semantic.get('bound_arguments',{})}
+            context_by_mention={}
+            import re
+            policies=release.resources.get('CorefPolicy',{}).get('entries',())
+            event_rules=policies[0]['event_anaphora_rules'] if len(policies)==1 else ()
+            context_requests=[]
+            for e in state.evidence:
+                if e.token_id in state.observation.get('entity_bindings',{}):
+                    continue
+                persons={v.person for v in e.variants if v.pos=='NPRO'}
+                context_key='user_ref' if persons=={'1st'} else 'self_ref' if persons=={'2nd'} else None
+                if context_key and state.observation.get('context_snapshot',{}).get(context_key):
+                    continue
+                if e.token_id not in arguments or not (any(v.pos=='NPRO' for v in e.variants)
+                        or any(re.fullmatch(r['pattern'],e.span,re.I) for r in event_rules)):
+                    continue
+                context_requests.append((reference_goal(state,e.token_id),e.token_id,None))
+            for frame in state.frames:
+                if frame.semantic.get('structural_unresolved'): continue
+                for role,gap in frame.semantic.get('implicit_arguments',{}).items():
+                    context_requests.append(({'kind':'IMPLICIT_ARGUMENT','decision_ref':gap['gap_id'],
+                        'region_ref':frame.semantic['component_region'],'source_range':frame.source_range,
+                        'cue_token_refs':[frame.predicate_token_ref,*frame.argument_token_refs],'role':role},None,gap))
+            from .spatial_memory import requests as spatial_requests, attach as attach_spatial_memory
+            context_requests.extend((r,None,None) for r in spatial_requests(state))
+            from .nominal_reference_memory import requests as nominal_requests, attach as attach_nominal_memory
+            context_requests.extend((r,None,None) for r in nominal_requests(state))
+            for request,mention,gap in sorted(context_requests,key=lambda row:(row[0]['source_range'][1],row[0]['decision_ref'])):
+                result=context_reader.read(state,request)
+                if request['kind']=='NOMINAL_REFERENCE': attach_nominal_memory(state,request,result)
+                elif request['kind']=='SPATIAL_REFERENCE': attach_spatial_memory(state,request,result,release)
+                elif gap is None: context_by_mention[mention]=result['rows']
+                else: add_memory_options(gap,result['rows'],release)
+            state.observation['coreference_context_by_mention']=context_by_mention
+            root=state.region_forest.regions[0]
+            context_reader.read(state,{'kind':'READ_REMAINDER','decision_ref':'reading:end',
+                'region_ref':root.region_id,'source_range':root.source_range,'cue_token_refs':root.token_refs})
     from .coreference import prepare_references,resolve_references
     emit("stage", stage="T3_CANDIDATES", frames=len(state.frames))
-    reference_slots=prepare_references(state,release)
-    evidence={e.token_id:e for e in state.evidence}
-    candidate_specs={}
-    parent_frames={f.frame_id:f for f in state.frames}
-    for frame in state.frames:
-        from .morphology_domain import validate_uses
-        try:validate_uses(state,[frame])
-        except ValueError as error:
-            frame.semantic['structural_unresolved']=True
-            state.diag(str(error),frame.frame_id)
-            candidate_specs[frame.frame_id]=[]
-            continue
-        from .structural_tasks import licensed as task_licensed
-        from .content_reference_functions import validate_reference
-        if any(not validate_reference(state,frame,role,slot) for role,slot in frame.semantic.get('proposition_args',{}).items()):
-            frame.semantic['structural_unresolved']=True
-            state.diag('CONTENT_REFERENCE_UNGROUNDED',frame.frame_id)
-            candidate_specs[frame.frame_id]=[]
-            continue
-        if any(child.get('structural_license') and not task_licensed(state,child['structural_license'],
-               owner_ref=frame.predicate_token_ref,role=role,attitude=child.get('attitude'))
-               for role,child in frame.semantic.get('proposition_args',{}).items()):
-            frame.semantic['structural_unresolved']=True
-            state.diag('STRUCTURAL_RELATION_UNGROUNDED',frame.frame_id)
-            candidate_specs[frame.frame_id]=[]
-            continue
-        from .quantifier_composition import licensed as quantifier_licensed
-        if not quantifier_licensed(state,release,frame):
-            frame.semantic['structural_unresolved']=True
-            state.diag('QUANTIFIER_RESTRICTION_UNGROUNDED',frame.frame_id)
-            candidate_specs[frame.frame_id]=[]
-            continue
-        e=evidence[frame.predicate_token_ref]
-        if frame.semantic.get('nominal_dependency_kind'):
-            from .component_dependency_materialization import prepare_candidate
-            candidate_specs[frame.frame_id]=prepare_candidate(frame,state,release)
-            continue
-        predicate_variants=_frame_variants(frame,e)
-        lemmas={v.lemma for v in predicate_variants}
-        schema_entries=[x for x in release.entries('PredicateSchema') if any(
-            x['lemma']==v.lemma and x.get('POS') in {None,v.pos} for v in predicate_variants)]
-        declared_ids={sid for x in schema_entries for sid in x.get('value_ids',())}
-        for x in schema_entries:
-            for expansion in x.get('value_expansions',()): declared_ids.update(expansion['value_ids'])
-        priors={x['sense_id'] for x in release.entries('R-X3') if x['lemma'] in lemmas}
-        priors.update(x['sense_id'] for rec in observation.get('rx_reads',{}).get('T3',()) for x in rec['payload'].get('semantic_priors',()) if x['lemma'] in lemmas)
-        # R-X ranks compatible readings; a previous occurrence cannot reopen
-        # a POS already resolved in the current morphology domain.
-        compatible_prior_ids={s['sense_id'] for s in release.entries('R-S') if any(
-            s['lemma']==v.lemma and s['POS']==v.pos for v in predicate_variants)}
-        if priors-compatible_prior_ids:
-            state.syntax_trace.append({'kind':'SEMANTIC_PRIOR_EXCLUDED','frame_ref':frame.frame_id,
-                'predicate_ref':frame.predicate_token_ref,'sense_ids':sorted(priors-compatible_prior_ids),
-                'reason':'MORPHOLOGY_INCOMPATIBLE'})
-        priors &= compatible_prior_ids
-        context_senses=set(); blocked=set(); blocked_reasons={}
-        for read in release.entries('DeclaredReads'):
-            if read['lemma'] not in lemmas: continue
-            records=observation.get('declared_reads',{}).get(read['read_id'])
-            if records is None:
-                blocked.add(4); blocked_reasons[4]='declared read unavailable:'+read['read_id']; continue
-            for r in records:
-                if r.get('source_kind') not in {'W','C'} or not r.get('source_ref') or r.get('snapshot_version')!=read['snapshot_version']:
-                    blocked.add(4); blocked_reasons[4]='declared read provenance invalid:'+read['read_id']; continue
-                context_senses.update(r.get('candidate_sense_ids',()))
-        supplied_ids=declared_ids|priors|context_senses
-        senses=[s for s in release.entries('R-S') if s['sense_id'] in supplied_ids or any(s['lemma']==v.lemma and s.get('POS') in {None,v.pos} for v in predicate_variants)]
-        lexical=frame.semantic.get('lexical_units',{}).get(frame.predicate_token_ref,{})
-        if len(lexical.get('anchor_refs',()))>1:
-            def phrase_match(s):
-                pattern=s.get('anchor_pattern')
-                anchors=lexical['anchor_refs']
-                if not isinstance(pattern,list) or len(pattern)!=len(anchors): return False
-                return all(any((not item.get('lemma') or item['lemma']==v.lemma) and (not item.get('POS') or item['POS']==v.pos)
-                               for v in _frame_variants(frame,evidence[tid])) for tid,item in zip(anchors,pattern))
-            # The complete anchor pattern licenses a lexical unit. A phrase's
-            # canonical lemma need not equal its syntactic head lemma, so a
-            # head-only prefilter must not discard the resource sense first.
-            senses=[s for s in release.entries('R-S') if phrase_match(s)]
-            allowed={s['sense_id'] for s in senses}
-            declared_ids &= allowed; priors &= allowed; context_senses &= allowed
-        else:
-            # A phrase sense is not licensed by an isolated matching head.
-            # An OOV function reading preserves the source form, not a released
-            # dictionary sense. Analyzer predictions are diagnostic only.
-            senses=[s for s in senses if not e.is_oov() and not s.get('anchor_pattern')]
-            allowed={s['sense_id'] for s in senses}
-            declared_ids &= allowed; priors &= allowed; context_senses &= allowed
-        frame.semantic['has_known_senses']=bool(senses)
-        specs=[]
-        from .implicit_descriptions import roles as implicit_frame_roles
-        for s in senses:
-            valencies=[v for v in release.entries('R-V') if v['sense_id']==s['sense_id']]
-            for v in valencies:
-                from .component_omissions import licenses_match
-                if not licenses_match(frame,v): continue
-                # A declared measured-value question can existentially bind
-                # an omitted value. This is licensed by its actual mapped T,
-                # not by an arbitrary missing mandatory predicate argument.
-                request=frame.semantic.get('query_request',{}); extra=()
-                if request.get('mode') in {'SUPERLATIVE','COMPARE'}:
-                    measures=[m for m in release.resources.get('MeasureSchema',{}).get('entries',()) if m['measure_id']==request.get('measure_id')]
-                    if len(measures)==1:
-                        measure=measures[0]
-                        mappings=[m for m in release.entries('TemplateMap') if m['sense_id']==s['sense_id'] and m['template_ref']==measure['template_ref']
-                                  and set(m['roles'])=={r['role_id'] for r in v.get('roles',())}]
-                        supplied=set(frame.semantic.get('proposed_roles',{}).values())|set(request.get('requested_roles',()))
-                        if mappings and measure['value_role'] not in supplied:
-                            extra=(measure['value_role'],)
-                implicit_roles=implicit_frame_roles(frame)
-                from .spatial_references import for_sense as spatial_slot
-                spatial=spatial_slot(frame,s['sense_id'])
-                spatial_roles=(spatial['rule']['role_id'],) if spatial else ()
-                from .action_descriptions import licensed_roles
-                description_roles=licensed_roles(frame,v) if frame.semantic.get('action_description') else ()
-                if description_roles is None:continue
-                binding_valency=v
-                if frame.semantic.get('action_description') and not frame.semantic.get('passive_predication'):
-                    from .action_descriptions import independent_roles
-                    from .component_policy import policy
-                    binding_valency={**v,'roles':independent_roles(v['roles'],policy(release) or {})}
-                try: bindings=_bindings(frame,evidence,binding_valency,(*extra,*implicit_roles,*spatial_roles,*description_roles),
-                                        parents=parent_frames)
-                except ValueError:
-                    frame.semantic['binding_budget_exhausted']=True; state.diag('COMPUTATION_LIMIT',frame.frame_id); continue
-                for bs in bindings:
-                    if set(spatial_roles) & (set(bs.values())|set(implicit_roles)|set(frame.semantic.get('proposition_args',{}))): continue
-                    mode=v.get('temporal_mode_hint') or v.get('state_class') or 'UNKNOWN'
-                    implicit=tuple(r for r in extra if r not in bs.values())
-                    cid=s['sense_id']+':'+digest([bs,v,implicit])[:16] if implicit else s['sense_id']+':'+digest([bs,v])[:16]
-                    if implicit_roles and not set(implicit_roles)<={r['role_id'] for r in v['roles']}: continue
-                    specs.append({'candidate_id':cid,'sense_id':s['sense_id'],'label':s.get('label',s['sense_id'])+'; lexical entry «'+s.get('lemma',e.span)+'»'+('; '+s['meaning_en'] if s.get('meaning_en') else ''),'sense_kind':'KNOWN','meaning_en':s.get('meaning_en',''),'roles':bs,'implicit_roles':list(implicit_roles),'spatial_roles':list(spatial_roles),'state_class':mode,'valency_ref':v.get('construction_id',digest(v)),
-                                  **({'description_roles':list(description_roles)} if frame.semantic.get('action_description') else {}),
-                                  **({'query_existential_roles':list(implicit)} if implicit else {})})
-        open_spec=None
-        complete_valencies=all(any(v['sense_id']==sense['sense_id'] for v in release.entries('R-V')) for sense in senses)
-        if complete_valencies:
-            policy=release.entries('OpenTemplatePolicy')
-            if policy and policy[0].get('allow',False):
-                bs=frame.semantic.get('proposed_roles') or {tid:'SURFACE_ARG' for tid in frame.argument_token_refs}
-                open_spec={'candidate_id':'open:'+digest([state.source_uid,frame.frame_id]),'label':'Unlisted lexical use of «'+lexical.get('surface',e.span)+'»; preserve literal structure without canonical equivalence','sense_kind':'OPEN_LEXICAL','roles':bs,'implicit_roles':list(implicit_frame_roles(frame)),'state_class':'UNKNOWN'}
-                if frame.semantic.get('action_description'):
-                    open_spec['description_roles']=list(frame.semantic['action_description']['unassigned_roles'])
-                generic_place=next((s for s in frame.semantic.get('spatial_slots',{}).values() if s['rule'].get('generic')),None)
-                if generic_place:open_spec['spatial_roles']=[generic_place['rule']['role_id']]
-                specs.append(open_spec)
-        if senses and not specs and not frame.semantic.get('structural_unresolved'): state.diag('VALENCY_UNKNOWN',frame.frame_id)
-        known_specs=[s for s in specs if s['sense_kind']=='KNOWN']
-        from .action_descriptions import schema_roles as mapped_roles
-        broken_mapping=any(not any(m['sense_id']==s['sense_id'] and set(m.get('roles',()))==mapped_roles(s,
-            set(s['roles'].values())|set(frame.semantic.get('proposition_args',{}))|set(s.get('implicit_roles',()))|set(s.get('spatial_roles',())))
-            for m in release.entries('TemplateMap')) for s in known_specs)
-        if broken_mapping:state.diag('CANONICAL_MAPPING_MISSING',frame.frame_id)
-        schema_ids=[s['candidate_id'] for s in known_specs if s['sense_id'] in declared_ids]
-        missing_valencies={x for x in priors|context_senses if not any(v['sense_id']==x for v in release.entries('R-V'))}
-        for source,values in ((3,priors),(4,context_senses)):
-            if missing_valencies & values:
-                blocked.add(source);blocked_reasons[source]='candidate source has sense without released R-V'
-        if missing_valencies:state.diag('VALENCY_UNKNOWN','candidate source has sense without released R-V:'+frame.frame_id)
-        incompatible=priors-missing_valencies-{s['sense_id'] for s in known_specs}
-        if incompatible:
-            state.syntax_trace.append({'kind':'SEMANTIC_PRIOR_EXCLUDED','frame_ref':frame.frame_id,
-                'predicate_ref':frame.predicate_token_ref,'sense_ids':sorted(incompatible),'reason':'VALENCY_INCOMPATIBLE'})
-        traces=build_source_traces(frame.frame_id,'predicate_value',schema_candidates=schema_ids,rs_senses=[s['candidate_id'] for s in known_specs],rx3_prior=[s['candidate_id'] for s in known_specs if s['sense_id'] in priors],wc_reads=[s['candidate_id'] for s in known_specs if s['sense_id'] in context_senses],rx3_applicable=True,wc_applicable=True,open_candidate=open_spec['candidate_id'] if open_spec else None,open_path_verified=True,resource_versions=(release.sha256,),blocked=blocked,blocked_reasons=blocked_reasons)
-        frame.semantic['source_blocked']=bool(blocked) or not complete_valencies or broken_mapping or frame.semantic.get('binding_budget_exhausted',False)
-        frame.semantic['candidate_specs']={s['candidate_id']:s for s in specs}
-        frame.semantic['source_traces']=traces
-        # Context and prior may rank, but never invent a canonical semantic value.
-        if 'explicit_region' in frame.semantic:
-            frame.semantic['region'],temporal_diag=frame.semantic['explicit_region'],[]
-        else:
-            from .temporal_functions import units,normalize
-            owned=frame.semantic.get('owned_token_refs') or [e.token_id for e in state.evidence
-                if frame.source_range[0]<=e.start and e.end<=frame.source_range[1]]
-            selected_times=frame.semantic.get('temporal_functions',units(state,owned))
-            values=[normalize(state,release,u) for u in selected_times]
-            temporal_diag=[code for _,errors in values for code in errors]
-            distinct={digest(value):value for value,_ in values if value is not None}
-            if len(distinct)>1:temporal_diag.append('TEMPORAL_SCOPE_UNRESOLVED')
-            frame.semantic['region']=next(iter(distinct.values())) if len(distinct)==1 else None
-        from .document_scopes import inherit as inherit_document_scope
-        frame.semantic['region'],temporal_diag=inherit_document_scope(state,frame,frame.semantic['region'],temporal_diag,release)
-        for code in temporal_diag: state.diag(code,frame.frame_id)
-        frame.semantic['temporal_unresolved']=bool(temporal_diag) and not (
-            frame.semantic['region'] and frame.semantic['region'].get('expressions') and
-            set(temporal_diag) <= {'REFERENCE_UNKNOWN','REFERENCE_AMBIGUOUS'})
-        candidate_specs[frame.frame_id]=specs
+    with phase('T3_CANDIDATES', state):
+        reference_slots=prepare_references(state,release)
+        evidence={e.token_id:e for e in state.evidence}
+        candidate_specs={}
+        parent_frames={f.frame_id:f for f in state.frames}
+        for frame in state.frames:
+            from .morphology_domain import validate_uses
+            try:validate_uses(state,[frame])
+            except ValueError as error:
+                frame.semantic['structural_unresolved']=True
+                state.diag(str(error),frame.frame_id)
+                candidate_specs[frame.frame_id]=[]
+                continue
+            from .structural_tasks import licensed as task_licensed
+            from .content_reference_functions import validate_reference
+            if any(not validate_reference(state,frame,role,slot) for role,slot in frame.semantic.get('proposition_args',{}).items()):
+                frame.semantic['structural_unresolved']=True
+                state.diag('CONTENT_REFERENCE_UNGROUNDED',frame.frame_id)
+                candidate_specs[frame.frame_id]=[]
+                continue
+            if any(child.get('structural_license') and not task_licensed(state,child['structural_license'],
+                   owner_ref=frame.predicate_token_ref,role=role,attitude=child.get('attitude'))
+                   for role,child in frame.semantic.get('proposition_args',{}).items()):
+                frame.semantic['structural_unresolved']=True
+                state.diag('STRUCTURAL_RELATION_UNGROUNDED',frame.frame_id)
+                candidate_specs[frame.frame_id]=[]
+                continue
+            from .quantifier_composition import licensed as quantifier_licensed
+            if not quantifier_licensed(state,release,frame):
+                frame.semantic['structural_unresolved']=True
+                state.diag('QUANTIFIER_RESTRICTION_UNGROUNDED',frame.frame_id)
+                candidate_specs[frame.frame_id]=[]
+                continue
+            e=evidence[frame.predicate_token_ref]
+            if frame.semantic.get('nominal_dependency_kind'):
+                from .component_dependency_materialization import prepare_candidate
+                candidate_specs[frame.frame_id]=prepare_candidate(frame,state,release)
+                continue
+            predicate_variants=_frame_variants(frame,e)
+            lemmas={v.lemma for v in predicate_variants}
+            schema_entries=[x for x in release.entries('PredicateSchema') if any(
+                x['lemma']==v.lemma and x.get('POS') in {None,v.pos} for v in predicate_variants)]
+            declared_ids={sid for x in schema_entries for sid in x.get('value_ids',())}
+            for x in schema_entries:
+                for expansion in x.get('value_expansions',()): declared_ids.update(expansion['value_ids'])
+            priors={x['sense_id'] for x in release.entries('R-X3') if x['lemma'] in lemmas}
+            priors.update(x['sense_id'] for rec in observation.get('rx_reads',{}).get('T3',()) for x in rec['payload'].get('semantic_priors',()) if x['lemma'] in lemmas)
+            # R-X ranks compatible readings; a previous occurrence cannot reopen
+            # a POS already resolved in the current morphology domain.
+            compatible_prior_ids={s['sense_id'] for s in release.entries('R-S') if any(
+                s['lemma']==v.lemma and s['POS']==v.pos for v in predicate_variants)}
+            if priors-compatible_prior_ids:
+                state.syntax_trace.append({'kind':'SEMANTIC_PRIOR_EXCLUDED','frame_ref':frame.frame_id,
+                    'predicate_ref':frame.predicate_token_ref,'sense_ids':sorted(priors-compatible_prior_ids),
+                    'reason':'MORPHOLOGY_INCOMPATIBLE'})
+            priors &= compatible_prior_ids
+            context_senses=set(); blocked=set(); blocked_reasons={}
+            for read in release.entries('DeclaredReads'):
+                if read['lemma'] not in lemmas: continue
+                records=observation.get('declared_reads',{}).get(read['read_id'])
+                if records is None:
+                    blocked.add(4); blocked_reasons[4]='declared read unavailable:'+read['read_id']; continue
+                for r in records:
+                    if r.get('source_kind') not in {'W','C'} or not r.get('source_ref') or r.get('snapshot_version')!=read['snapshot_version']:
+                        blocked.add(4); blocked_reasons[4]='declared read provenance invalid:'+read['read_id']; continue
+                    context_senses.update(r.get('candidate_sense_ids',()))
+            supplied_ids=declared_ids|priors|context_senses
+            senses=[s for s in release.entries('R-S') if s['sense_id'] in supplied_ids or any(s['lemma']==v.lemma and s.get('POS') in {None,v.pos} for v in predicate_variants)]
+            lexical=frame.semantic.get('lexical_units',{}).get(frame.predicate_token_ref,{})
+            if len(lexical.get('anchor_refs',()))>1:
+                def phrase_match(s):
+                    pattern=s.get('anchor_pattern')
+                    anchors=lexical['anchor_refs']
+                    if not isinstance(pattern,list) or len(pattern)!=len(anchors): return False
+                    return all(any((not item.get('lemma') or item['lemma']==v.lemma) and (not item.get('POS') or item['POS']==v.pos)
+                                   for v in _frame_variants(frame,evidence[tid])) for tid,item in zip(anchors,pattern))
+                # The complete anchor pattern licenses a lexical unit. A phrase's
+                # canonical lemma need not equal its syntactic head lemma, so a
+                # head-only prefilter must not discard the resource sense first.
+                senses=[s for s in release.entries('R-S') if phrase_match(s)]
+                allowed={s['sense_id'] for s in senses}
+                declared_ids &= allowed; priors &= allowed; context_senses &= allowed
+            else:
+                # A phrase sense is not licensed by an isolated matching head.
+                # An OOV function reading preserves the source form, not a released
+                # dictionary sense. Analyzer predictions are diagnostic only.
+                senses=[s for s in senses if not e.is_oov() and not s.get('anchor_pattern')]
+                allowed={s['sense_id'] for s in senses}
+                declared_ids &= allowed; priors &= allowed; context_senses &= allowed
+            frame.semantic['has_known_senses']=bool(senses)
+            specs=[]
+            from .implicit_descriptions import roles as implicit_frame_roles
+            for s in senses:
+                valencies=[v for v in release.entries('R-V') if v['sense_id']==s['sense_id']]
+                for v in valencies:
+                    from .component_omissions import licenses_match
+                    if not licenses_match(frame,v): continue
+                    # A declared measured-value question can existentially bind
+                    # an omitted value. This is licensed by its actual mapped T,
+                    # not by an arbitrary missing mandatory predicate argument.
+                    request=frame.semantic.get('query_request',{}); extra=()
+                    if request.get('mode') in {'SUPERLATIVE','COMPARE'}:
+                        measures=[m for m in release.resources.get('MeasureSchema',{}).get('entries',()) if m['measure_id']==request.get('measure_id')]
+                        if len(measures)==1:
+                            measure=measures[0]
+                            mappings=[m for m in release.entries('TemplateMap') if m['sense_id']==s['sense_id'] and m['template_ref']==measure['template_ref']
+                                      and set(m['roles'])=={r['role_id'] for r in v.get('roles',())}]
+                            supplied=set(frame.semantic.get('proposed_roles',{}).values())|set(request.get('requested_roles',()))
+                            if mappings and measure['value_role'] not in supplied:
+                                extra=(measure['value_role'],)
+                    implicit_roles=implicit_frame_roles(frame)
+                    from .spatial_references import for_sense as spatial_slot
+                    spatial=spatial_slot(frame,s['sense_id'])
+                    spatial_roles=(spatial['rule']['role_id'],) if spatial else ()
+                    from .action_descriptions import licensed_roles
+                    description_roles=licensed_roles(frame,v) if frame.semantic.get('action_description') else ()
+                    if description_roles is None:continue
+                    binding_valency=v
+                    if frame.semantic.get('action_description') and not frame.semantic.get('passive_predication'):
+                        from .action_descriptions import independent_roles
+                        from .component_policy import policy
+                        binding_valency={**v,'roles':independent_roles(v['roles'],policy(release) or {})}
+                    try: bindings=_bindings(frame,evidence,binding_valency,(*extra,*implicit_roles,*spatial_roles,*description_roles),
+                                            parents=parent_frames)
+                    except ValueError:
+                        frame.semantic['binding_budget_exhausted']=True; state.diag('COMPUTATION_LIMIT',frame.frame_id); continue
+                    for bs in bindings:
+                        if set(spatial_roles) & (set(bs.values())|set(implicit_roles)|set(frame.semantic.get('proposition_args',{}))): continue
+                        mode=v.get('temporal_mode_hint') or v.get('state_class') or 'UNKNOWN'
+                        implicit=tuple(r for r in extra if r not in bs.values())
+                        cid=s['sense_id']+':'+digest([bs,v,implicit])[:16] if implicit else s['sense_id']+':'+digest([bs,v])[:16]
+                        if implicit_roles and not set(implicit_roles)<={r['role_id'] for r in v['roles']}: continue
+                        specs.append({'candidate_id':cid,'sense_id':s['sense_id'],'label':s.get('label',s['sense_id'])+'; lexical entry «'+s.get('lemma',e.span)+'»'+('; '+s['meaning_en'] if s.get('meaning_en') else ''),'sense_kind':'KNOWN','meaning_en':s.get('meaning_en',''),'roles':bs,'implicit_roles':list(implicit_roles),'spatial_roles':list(spatial_roles),'state_class':mode,'valency_ref':v.get('construction_id',digest(v)),
+                                      **({'description_roles':list(description_roles)} if frame.semantic.get('action_description') else {}),
+                                      **({'query_existential_roles':list(implicit)} if implicit else {})})
+            open_spec=None
+            complete_valencies=all(any(v['sense_id']==sense['sense_id'] for v in release.entries('R-V')) for sense in senses)
+            if complete_valencies:
+                policy=release.entries('OpenTemplatePolicy')
+                if policy and policy[0].get('allow',False):
+                    bs=frame.semantic.get('proposed_roles') or {tid:'SURFACE_ARG' for tid in frame.argument_token_refs}
+                    open_spec={'candidate_id':'open:'+digest([state.source_uid,frame.frame_id]),'label':'Unlisted lexical use of «'+lexical.get('surface',e.span)+'»; preserve literal structure without canonical equivalence','sense_kind':'OPEN_LEXICAL','roles':bs,'implicit_roles':list(implicit_frame_roles(frame)),'state_class':'UNKNOWN'}
+                    if frame.semantic.get('action_description'):
+                        open_spec['description_roles']=list(frame.semantic['action_description']['unassigned_roles'])
+                    generic_place=next((s for s in frame.semantic.get('spatial_slots',{}).values() if s['rule'].get('generic')),None)
+                    if generic_place:open_spec['spatial_roles']=[generic_place['rule']['role_id']]
+                    specs.append(open_spec)
+            if senses and not specs and not frame.semantic.get('structural_unresolved'): state.diag('VALENCY_UNKNOWN',frame.frame_id)
+            known_specs=[s for s in specs if s['sense_kind']=='KNOWN']
+            from .action_descriptions import schema_roles as mapped_roles
+            broken_mapping=any(not any(m['sense_id']==s['sense_id'] and set(m.get('roles',()))==mapped_roles(s,
+                set(s['roles'].values())|set(frame.semantic.get('proposition_args',{}))|set(s.get('implicit_roles',()))|set(s.get('spatial_roles',())))
+                for m in release.entries('TemplateMap')) for s in known_specs)
+            if broken_mapping:state.diag('CANONICAL_MAPPING_MISSING',frame.frame_id)
+            schema_ids=[s['candidate_id'] for s in known_specs if s['sense_id'] in declared_ids]
+            missing_valencies={x for x in priors|context_senses if not any(v['sense_id']==x for v in release.entries('R-V'))}
+            for source,values in ((3,priors),(4,context_senses)):
+                if missing_valencies & values:
+                    blocked.add(source);blocked_reasons[source]='candidate source has sense without released R-V'
+            if missing_valencies:state.diag('VALENCY_UNKNOWN','candidate source has sense without released R-V:'+frame.frame_id)
+            incompatible=priors-missing_valencies-{s['sense_id'] for s in known_specs}
+            if incompatible:
+                state.syntax_trace.append({'kind':'SEMANTIC_PRIOR_EXCLUDED','frame_ref':frame.frame_id,
+                    'predicate_ref':frame.predicate_token_ref,'sense_ids':sorted(incompatible),'reason':'VALENCY_INCOMPATIBLE'})
+            traces=build_source_traces(frame.frame_id,'predicate_value',schema_candidates=schema_ids,rs_senses=[s['candidate_id'] for s in known_specs],rx3_prior=[s['candidate_id'] for s in known_specs if s['sense_id'] in priors],wc_reads=[s['candidate_id'] for s in known_specs if s['sense_id'] in context_senses],rx3_applicable=True,wc_applicable=True,open_candidate=open_spec['candidate_id'] if open_spec else None,open_path_verified=True,resource_versions=(release.sha256,),blocked=blocked,blocked_reasons=blocked_reasons)
+            frame.semantic['source_blocked']=bool(blocked) or not complete_valencies or broken_mapping or frame.semantic.get('binding_budget_exhausted',False)
+            frame.semantic['candidate_specs']={s['candidate_id']:s for s in specs}
+            frame.semantic['source_traces']=traces
+            # Context and prior may rank, but never invent a canonical semantic value.
+            if 'explicit_region' in frame.semantic:
+                frame.semantic['region'],temporal_diag=frame.semantic['explicit_region'],[]
+            else:
+                from .temporal_functions import units,normalize
+                owned=frame.semantic.get('owned_token_refs') or [e.token_id for e in state.evidence
+                    if frame.source_range[0]<=e.start and e.end<=frame.source_range[1]]
+                selected_times=frame.semantic.get('temporal_functions',units(state,owned))
+                values=[normalize(state,release,u) for u in selected_times]
+                temporal_diag=[code for _,errors in values for code in errors]
+                distinct={digest(value):value for value,_ in values if value is not None}
+                if len(distinct)>1:temporal_diag.append('TEMPORAL_SCOPE_UNRESOLVED')
+                frame.semantic['region']=next(iter(distinct.values())) if len(distinct)==1 else None
+            from .document_scopes import inherit as inherit_document_scope
+            frame.semantic['region'],temporal_diag=inherit_document_scope(state,frame,frame.semantic['region'],temporal_diag,release)
+            for code in temporal_diag: state.diag(code,frame.frame_id)
+            frame.semantic['temporal_unresolved']=bool(temporal_diag) and not (
+                frame.semantic['region'] and frame.semantic['region'].get('expressions') and
+                set(temporal_diag) <= {'REFERENCE_UNKNOWN','REFERENCE_AMBIGUOUS'})
+            candidate_specs[frame.frame_id]=specs
     emit("stage", stage="T4_RESOLUTION", frames=len(state.frames))
-    # The clarification snapshot includes the full prepared gap inventory.
-    state.generation_snapshot['frames']=[asdict(f) for f in state.frames]
-    state.generation_snapshot['syntax_trace']=deepcopy(state.syntax_trace)
-    state.generation_snapshot['morphology_records']=deepcopy(state.morphology_records)
-    state.generation_snapshot['component_probe_records']=deepcopy(state.component_probe_records)
-    structural_seal(state)
-    resolve_references(state,reference_slots,selector,release)
-    resolve_implicit(state,release,selector)
-    from .content_sources import lexical_order,inherit_lexical
-    for f in lexical_order(state.frames):
-        enter_probe_window(state,selector,f.source_range)
-        specs=candidate_specs[f.frame_id]; ids=tuple(s['candidate_id'] for s in specs)
-        d=Decision('predicate_value',f.frame_id,ids); d.source_traces=f.semantic.get('source_traces',()); state.decisions[f.frame_id+'|predicate_value']=d
-        if f.semantic.get('structural_unresolved') or f.semantic.get('structural_rejection'):
-            d.outcome='UNRESOLVED'
-            continue  # No semantic probe can repair an uncovered structural dependency.
-        from .clarifications import choice
-        selected_by_speaker = choice(state, f.frame_id+'|predicate_value', ids)
-        if f.semantic.get('source_blocked'):
-            d.outcome='UNRESOLVED'; state.diag('SEARCH_INCOMPLETE',f.frame_id); continue
-        if not specs:
-            d.outcome='UNRESOLVED' if f.semantic['has_known_senses'] else 'NO_CANDIDATE'
-            state.diag('CANDIDATE_SOURCE_EXHAUSTED' if not f.semantic['has_known_senses'] else 'VALENCY_UNKNOWN',f.frame_id); continue
-        if inherit_lexical(state,f,d,specs,selected_by_speaker):continue
-        if selected_by_speaker is not None and not f.semantic.get('structural_unresolved'):
-            d.selected=(selected_by_speaker,); d.lifecycle='PROVISIONAL'; d.outcome='RESOLVED'
-            d.grounds.append(Ground('C', 'durable explicit speaker disambiguation: '+state.observation['clarification_selection_ref'], selected_by_speaker))
-            continue
-        if len(specs)==1 and specs[0]['sense_kind']=='OPEN_LEXICAL' and not f.semantic.get('structural_unresolved'):
-            d.selected=ids; d.lifecycle='PROVISIONAL'; d.outcome='RESOLVED'
-            d.grounds.append(Ground('R' if specs[0]['sense_kind']=='KNOWN' else 'D','one compatible released sense/valency or validated literal open structure',ids[0]))
-            continue
-        if state.budget.llm_exhausted:
-            d.outcome='COMPUTATION_LIMIT'; state.diag('COMPUTATION_LIMIT',f.frame_id); continue
-        from .component_probe import _probe
-        if any(spec['sense_kind']=='KNOWN' and not spec.get('meaning_en','').strip() for spec in specs):
-            d.outcome='UNRESOLVED';state.diag('LEXICAL_DEFINITION_MISSING',f.frame_id);continue
-        options=[{'candidate_id':spec['candidate_id'],'label':spec['label']+'; '+
-            ', '.join(role+'=«'+evidence[tid].span+'»' for tid,role in spec['roles'].items())+
-            '; temporal class='+spec['state_class']} for spec in specs]
-        from .lexical_embedding import order as embedding_order
-        options=embedding_order(state,selector,release,f,options,text[slice(*f.source_range)])
-        from .lexical_probe_context import build as lexical_context
-        context,established=lexical_context(state,f)
-        from .reference_structure import focus_inputs
-        _probe(state,selector,release,f.frame_id+'|predicate_value','predicate_value',options,
-            context,f.source_range,inputs=focus_inputs(state,'predicate_value',(f.predicate_token_ref,),options),
-            question='Which lexical use applies to this occurrence in its selected structure? '+established+'Choose a catalog entry when its lexical meaning fits. Tense, date, negation and modality are handled by the structure, not new lexical senses. Choose an unlisted use only when no listed meaning fits; use ? when uncertain.')
-        d=state.decisions[f.frame_id+'|predicate_value'];d.source_traces=f.semantic.get('source_traces',())
-        from .selection_evidence import selected_candidate
-        if selected_candidate(d) in ids:
-            d.outcome='RESOLVED'
-            d.history.append({'kind':'SEMANTIC_VALIDATION','validator':'prepared_lexical_domain','candidate_id':d.selected[0]})
-    from .clarifications import offer
-    for f in state.frames:
-        d = state.decisions.get(f.frame_id+'|predicate_value')
-        if d is None or d.outcome == 'RESOLVED' or f.semantic.get('structural_unresolved') or f.semantic.get('source_blocked') or f.semantic.get('content_source_frame'):
-            continue
-        options = []
-        for cid in d.candidates:
-            spec = f.semantic['candidate_specs'][cid]
-            bindings = ', '.join(role+'='+evidence[tid].span for tid, role in sorted(spec['roles'].items()))
-            options.append({'candidate_id': cid, 'label': spec['label'] + ('; '+bindings if bindings else '')})
-        offer(state, f.frame_id+'|predicate_value', 'SEMANTIC', f.anchor_span, options)
-    from .spatial_references import resolve as resolve_spatial
-    resolve_spatial(state,release,selector)
-    from .nominal_reference_memory import resolve as resolve_nominal_references
-    resolve_nominal_references(state,release,selector)
-    from .source_assertions import resolve as resolve_source_assertions
-    resolve_source_assertions(state,release,selector)
-    state.complete_t4()
+    with phase('T4_RESOLUTION', state):
+        # The clarification snapshot includes the full prepared gap inventory.
+        state.generation_snapshot['frames']=[asdict(f) for f in state.frames]
+        state.generation_snapshot['syntax_trace']=deepcopy(state.syntax_trace)
+        state.generation_snapshot['morphology_records']=deepcopy(state.morphology_records)
+        state.generation_snapshot['component_probe_records']=deepcopy(state.component_probe_records)
+        structural_seal(state)
+        resolve_references(state,reference_slots,selector,release)
+        resolve_implicit(state,release,selector)
+        from .content_sources import lexical_order,inherit_lexical
+        for f in lexical_order(state.frames):
+            enter_probe_window(state,selector,f.source_range)
+            specs=candidate_specs[f.frame_id]; ids=tuple(s['candidate_id'] for s in specs)
+            d=Decision('predicate_value',f.frame_id,ids); d.source_traces=f.semantic.get('source_traces',()); state.decisions[f.frame_id+'|predicate_value']=d
+            if f.semantic.get('structural_unresolved') or f.semantic.get('structural_rejection'):
+                d.outcome='UNRESOLVED'
+                continue  # No semantic probe can repair an uncovered structural dependency.
+            from .clarifications import choice
+            selected_by_speaker = choice(state, f.frame_id+'|predicate_value', ids)
+            if f.semantic.get('source_blocked'):
+                d.outcome='UNRESOLVED'; state.diag('SEARCH_INCOMPLETE',f.frame_id); continue
+            if not specs:
+                d.outcome='UNRESOLVED' if f.semantic['has_known_senses'] else 'NO_CANDIDATE'
+                state.diag('CANDIDATE_SOURCE_EXHAUSTED' if not f.semantic['has_known_senses'] else 'VALENCY_UNKNOWN',f.frame_id); continue
+            if inherit_lexical(state,f,d,specs,selected_by_speaker):continue
+            if selected_by_speaker is not None and not f.semantic.get('structural_unresolved'):
+                d.selected=(selected_by_speaker,); d.lifecycle='PROVISIONAL'; d.outcome='RESOLVED'
+                d.grounds.append(Ground('C', 'durable explicit speaker disambiguation: '+state.observation['clarification_selection_ref'], selected_by_speaker))
+                continue
+            if len(specs)==1 and specs[0]['sense_kind']=='OPEN_LEXICAL' and not f.semantic.get('structural_unresolved'):
+                d.selected=ids; d.lifecycle='PROVISIONAL'; d.outcome='RESOLVED'
+                d.grounds.append(Ground('R' if specs[0]['sense_kind']=='KNOWN' else 'D','one compatible released sense/valency or validated literal open structure',ids[0]))
+                continue
+            if state.budget.llm_exhausted:
+                d.outcome='COMPUTATION_LIMIT'; state.diag('COMPUTATION_LIMIT',f.frame_id); continue
+            from .component_probe import _probe
+            if any(spec['sense_kind']=='KNOWN' and not spec.get('meaning_en','').strip() for spec in specs):
+                d.outcome='UNRESOLVED';state.diag('LEXICAL_DEFINITION_MISSING',f.frame_id);continue
+            options=[{'candidate_id':spec['candidate_id'],'label':spec['label']+'; '+
+                ', '.join(role+'=«'+evidence[tid].span+'»' for tid,role in spec['roles'].items())+
+                '; temporal class='+spec['state_class']} for spec in specs]
+            from .lexical_embedding import order as embedding_order
+            options=embedding_order(state,selector,release,f,options,text[slice(*f.source_range)])
+            from .lexical_probe_context import build as lexical_context
+            context,established=lexical_context(state,f)
+            from .reference_structure import focus_inputs
+            _probe(state,selector,release,f.frame_id+'|predicate_value','predicate_value',options,
+                context,f.source_range,inputs=focus_inputs(state,'predicate_value',(f.predicate_token_ref,),options),
+                question='Which lexical use applies to this occurrence in its selected structure? '+established+'Choose a catalog entry when its lexical meaning fits. Tense, date, negation and modality are handled by the structure, not new lexical senses. Choose an unlisted use only when no listed meaning fits; use ? when uncertain.')
+            d=state.decisions[f.frame_id+'|predicate_value'];d.source_traces=f.semantic.get('source_traces',())
+            from .selection_evidence import selected_candidate
+            if selected_candidate(d) in ids:
+                d.outcome='RESOLVED'
+                d.history.append({'kind':'SEMANTIC_VALIDATION','validator':'prepared_lexical_domain','candidate_id':d.selected[0]})
+        from .clarifications import offer
+        for f in state.frames:
+            d = state.decisions.get(f.frame_id+'|predicate_value')
+            if d is None or d.outcome == 'RESOLVED' or f.semantic.get('structural_unresolved') or f.semantic.get('source_blocked') or f.semantic.get('content_source_frame'):
+                continue
+            options = []
+            for cid in d.candidates:
+                spec = f.semantic['candidate_specs'][cid]
+                bindings = ', '.join(role+'='+evidence[tid].span for tid, role in sorted(spec['roles'].items()))
+                options.append({'candidate_id': cid, 'label': spec['label'] + ('; '+bindings if bindings else '')})
+            offer(state, f.frame_id+'|predicate_value', 'SEMANTIC', f.anchor_span, options)
+        from .spatial_references import resolve as resolve_spatial
+        resolve_spatial(state,release,selector)
+        from .nominal_reference_memory import resolve as resolve_nominal_references
+        resolve_nominal_references(state,release,selector)
+        from .source_assertions import resolve as resolve_source_assertions
+        resolve_source_assertions(state,release,selector)
+        state.complete_t4()
     return state

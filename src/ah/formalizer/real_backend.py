@@ -19,6 +19,7 @@ Contract points:
 from __future__ import annotations
 
 from dataclasses import dataclass, field, replace
+from ah.diagnostics import runtime_trace
 
 from ah.formalizer.fake_selector import ProviderUnavailableError
 from ah.formalizer.provider_adapter import BudgetSnapshot, ProviderAdapter
@@ -89,6 +90,12 @@ class RealBackendSelector:
         if audit and self.selection_reply_format=='SELECT_LABELS_V1':
             # The closed label protocol needs only a bounded list of ordinals.
             settings['max_new_tokens']=min(settings.get('max_new_tokens',4096),24+4*len(audit['candidates']))
+        runtime_trace.emit('backend_request_context', run_id=self.run_id,
+            backend_type=type(self.backend).__name__, model_key=self._adapter.model_key,
+            system=system, role=self.role, generation_settings=settings,
+            physical_request=True, request_kind='GENERATION', request_boundary='backend.generate',
+            selection_reply_format=self.selection_reply_format,
+            structure_reply_format=self.structure_reply_format)
         resp = self.backend.generate(prompt, system=system, role=self.role, override=settings)
         return resp if isinstance(resp, str) else getattr(resp, "text", "")
 
@@ -112,10 +119,14 @@ class RealBackendSelector:
         self._adapter.enter_probe_window(key)
 
     def propose_local(self, prompt):
-        return self._adapter.propose_local(prompt,self.run_id)
+        with runtime_trace.bind(request_kind='GENERATION', role=self.role,
+                provider_scope='REAL_BACKEND_SELECTOR'):
+            return self._adapter.propose_local(prompt,self.run_id)
 
     def select(self, prompt: str) -> str:
-        return self._adapter.select(prompt, self.run_id)
+        with runtime_trace.bind(request_kind='GENERATION', role=self.role,
+                provider_scope='REAL_BACKEND_SELECTOR'):
+            return self._adapter.select(prompt, self.run_id)
 
     def prompt_size(self,prompt):
         system=_SELECTION_SYSTEM if getattr(prompt,'selection_audit',None) and self.selection_reply_format=='SELECT_LABELS_V1' and self.system in {_SYSTEM,_READABLE_SYSTEM} else self.system

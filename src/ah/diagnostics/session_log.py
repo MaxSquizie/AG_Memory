@@ -90,6 +90,9 @@ class SessionLogger:
                 self.turns_path.write_text("", encoding="utf-8")
         except OSError:
             self._disabled = True
+        from .runtime_trace import RuntimeTrace
+        self.runtime_trace = RuntimeTrace(self.logs_dir / f"session-{self.session_id}.tsv",
+                                          session_id=self.session_id)
 
     def current_turn_id(self) -> str | None:
         with self._lock:
@@ -153,7 +156,10 @@ def start_session(logs_dir: Path, *, extra: dict[str, Any] | None = None) -> Ses
     logger = SessionLogger(logs_dir)
     global _active
     with _active_lock:
+        previous = _active
         _active = logger
+    if previous is not None:
+        previous.runtime_trace.close()
     logger.emit("session_start", **(extra or {}))
     return logger
 

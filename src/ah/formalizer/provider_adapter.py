@@ -16,8 +16,41 @@ Contract points enforced here:
 from __future__ import annotations
 
 import hashlib
+from contextlib import contextmanager
+from contextvars import ContextVar
+from ah.diagnostics import runtime_trace
 from .telemetry import emit
+from . import budget_tracing
 from dataclasses import dataclass, field
+
+
+_payload_capture = ContextVar('formalizer_provider_payload_capture', default=None)
+
+
+@contextmanager
+def capture_provider_payload():
+    """Let an outer executor record only payloads not observed by this adapter.
+
+    This flag belongs to one invocation, outside interpretation state and WAL.
+    It also works with executor decorators that delegate to a real provider.
+    """
+    current = _payload_capture.get()
+    if current is not None:
+        yield current
+        return
+    captured = {'request': False, 'response': False, 'provider': False}
+    token = _payload_capture.set(captured)
+    try:
+        yield captured
+    finally:
+        _payload_capture.reset(token)
+
+
+def _mark_payload(kind, value):
+    captured = _payload_capture.get()
+    if captured is not None:
+        captured[kind] = True
+        captured[kind + '_value'] = value
 
 
 class ProviderUnavailable(Exception):
@@ -72,15 +105,62 @@ class ProviderAdapter:
         self._ordinals: dict[str,int] = {}
 
     def start_run(self, run_id):
+        before = budget_tracing.provider_before(self, all_windows=True)
         self._ordinals[run_id] = 0
         if self._window_tokens is not None: self._window_tokens.reset()
         self._tokens_used = 0
         self._tp_calls_left = self.budget.tp_calls
         self._lexical_calls_left = self.budget.lexical_calls
+        budget_tracing.provider_reset(self, before, scope='RUN', reason='start_run', run_id=run_id)
         if self._log._journal:
             records = self._log._journal.scan_unprocessed(0)
             if not any(r["payload"].get("kind") == "RUN_STARTED" and r["payload"].get("run_id") == run_id for r in records):
                 self._log._journal.append("provider", {"kind":"RUN_STARTED", "run_id":run_id}, run_id=run_id)
+        runtime_trace.emit('provider_run_started', run_id=run_id, provider=self.name,
+            model_key=self.model_key, params_hash=self.params_hash, budget=self.budget,
+            **(budget_tracing.identity(self, 'PROVIDER') or {}))
+
+    @contextmanager
+    def _request_trace(self, operation, prompt, run_id, ordinal=None):
+        if not runtime_trace.enabled():
+            yield
+            return
+        identity = budget_tracing.identity(self, 'PROVIDER') or {}
+        with (runtime_trace.bind(provider_budget_ref=identity.get('budget_ref'),
+                provider_budget_epoch=identity.get('budget_epoch'), provider=self.name),
+              runtime_trace.span('PROVIDER', run_id=run_id, provider=self.name,
+                operation=operation, model_key=self.model_key) as outcome):
+            budget_tracing.provider_configured(self, reason='request', run_id=run_id)
+            captured = _payload_capture.get()
+            delegated = bool(captured and captured['request']
+                and captured.get('request_value') is prompt)
+            if captured is not None:
+                captured['provider'] = True
+            payload = {} if delegated else {'prompt': prompt,
+                'selection_audit': getattr(prompt, 'selection_audit', None)}
+            _mark_payload('request', prompt)
+            runtime_trace.emit('provider_request', run_id=run_id, provider=self.name,
+                operation=operation, requested_ordinal=ordinal,
+                payload_source='EXECUTOR' if delegated else 'PROVIDER',
+                model_key=self.model_key, params_hash=self.params_hash, **payload)
+            try:
+                yield
+            except BudgetExceeded as exc:
+                outcome.update(status='BLOCKED', reason=exc.code)
+                raise
+            except ProviderUnavailable:
+                outcome.update(status='UNAVAILABLE', reason='PROVIDER_UNAVAILABLE')
+                raise
+            except IntegrityError as exc:
+                outcome.update(status='REJECTED', reason=runtime_trace.error_text(exc))
+                raise
+            else:
+                # Returned transport bytes are not a validated semantic choice.
+                outcome['status'] = 'RETURNED'
+            finally:
+                outcome.update(tokens_used=self._tokens_used,
+                    tp_calls_left=self._tp_calls_left,
+                    lexical_calls_left=self._lexical_calls_left)
 
     def has(self, capability: str) -> bool:
         return capability in self.capabilities and self.transport is not None
@@ -91,38 +171,79 @@ class ProviderAdapter:
 
     def validate_structure(self, node_count: int, edge_count: int, depth: int) -> None:
         """PROPOSAL_BUDGET gate on the structural envelope (independent max_nodes/edges/depth limits)."""
+        budget_tracing.provider_configured(self, reason='structure_gate')
         b = self.budget
         if node_count > b.max_nodes or edge_count > b.max_edges or depth > b.max_depth:
+            budget_tracing.event('provider_structure_rejected', self, 'PROVIDER', status='BLOCKED',
+                reason='PROPOSAL_BUDGET', node_count=node_count,
+                edge_count=edge_count, depth=depth, limits=b, scope='STRUCTURAL_ENVELOPE')
             raise BudgetExceeded("PROPOSAL_BUDGET", f"nodes={node_count} edges={edge_count} depth={depth}")
 
     def configure_probe_windows(self, keys, token_limit):
         from .provider_budget import WindowTokens
+        before = budget_tracing.provider_before(self, all_windows=True)
         limit=0 if token_limit==0 else min(token_limit,self.budget.token_limit) if self.budget.token_limit else token_limit
         self._window_tokens=WindowTokens(keys,limit,self.params_hash)
+        budget_tracing.provider_reset(self, before, scope='SOURCE_WINDOW',
+            reason='configure_probe_windows', requested_window_limit=token_limit)
+        budget_tracing.event('provider_windows_configured', self, 'PROVIDER', provider=self.name,
+            window_limits=self._window_tokens.limits)
 
     def enter_probe_window(self,key):
         if self._window_tokens is None: raise ValueError('PROBE_SCOPE_UNCONFIGURED')
+        previous = self._window_tokens.key
         self._window_tokens.enter(key)
+        budget_tracing.provider_configured(self, reason='window_enter')
+        budget_tracing.event('budget_window_entered', self, 'PROVIDER', scope='SOURCE_WINDOW',
+            previous_window_key=previous, window_key=key,
+            window_limit=self._window_tokens.limits[key],
+            window_used=self._window_tokens.used[key],
+            counters={'estimated_tokens': self._tokens_used,
+                      'window_estimated_tokens': self._window_tokens.used[key]},
+            reentered=previous == key)
+        if previous != key:
+            budget_tracing.event('provider_window_entered', self, 'PROVIDER', provider=self.name,
+                window_key=key, tokens_used=self._window_tokens.used[key],
+                token_limit=self._window_tokens.limits[key])
 
-    def _check_tokens(self, cost: int) -> None:
+    def _check_tokens(self, cost: int, *, phase='PRECHECK', replay=None, exchange_outcome=None) -> None:
         if self._window_tokens is not None:
             if not self._window_tokens.available(cost):
+                budget_tracing.event('provider_budget_rejected', self, 'PROVIDER', status='BLOCKED',
+                    reason='COMPUTATION_LIMIT', budget_scope='SOURCE_WINDOW',
+                    scope='SOURCE_WINDOW', budget_phase=phase, dimension='estimated_tokens',
+                    replay=replay, exchange_outcome=exchange_outcome,
+                    cost=cost, tokens_used=self._tokens_used,
+                    window_key=self._window_tokens.key,
+                    window_tokens_used=self._window_tokens.used.get(self._window_tokens.key),
+                    window_token_limit=self._window_tokens.limits.get(self._window_tokens.key))
                 raise BudgetExceeded('COMPUTATION_LIMIT','source window token budget exhausted')
         elif self.budget.token_limit and self._tokens_used + cost > self.budget.token_limit:
+            budget_tracing.event('provider_budget_rejected', self, 'PROVIDER', status='BLOCKED',
+                reason='COMPUTATION_LIMIT', budget_scope='RUN', cost=cost,
+                scope='RUN', budget_phase=phase, dimension='estimated_tokens',
+                replay=replay, exchange_outcome=exchange_outcome,
+                tokens_used=self._tokens_used, token_limit=self.budget.token_limit)
             raise BudgetExceeded("COMPUTATION_LIMIT", f"token budget {self.budget.token_limit} exhausted")
 
-    def _charge_tokens(self,cost):
+    def _charge_tokens(self,cost,*,prompt_chars=None,response_chars=None,replay=None,exchange_outcome=None):
+        before = budget_tracing.provider_before(self)
         self._tokens_used+=cost
         if self._window_tokens is not None: self._window_tokens.charge(cost)
+        budget_tracing.provider_tokens_charged(self, before, cost,
+            prompt_chars=prompt_chars, response_chars=response_chars,
+            replay=replay, exchange_outcome=exchange_outcome)
 
-    def _consume_received(self,cost):
+    def _consume_received(self,cost,**observation):
         # Received bytes consumed resources even if they exceeded the limit.
         # Replay charges the same durable exchange; another probe cannot reuse
         # the apparently unspent allowance after an oversized response.
         try:
-            self._check_tokens(cost)
+            self._check_tokens(cost,
+                phase='FAILED_RECEIPT' if observation.get('exchange_outcome') == 'FAILED' else 'RECEIVED',
+                replay=observation.get('replay'), exchange_outcome=observation.get('exchange_outcome'))
         finally:
-            self._charge_tokens(cost)
+            self._charge_tokens(cost, **observation)
 
     def _exchange(self, capability: str, prompt: str, run_id: str, ordinal=None) -> str:
         import time
@@ -137,53 +258,93 @@ class ProviderAdapter:
         from .canonical_ledger import digest
         key = digest([str(prompt), audit]) if audit is not None else self._digest(prompt)
         params_hash=self._window_tokens.params_hash() if self._window_tokens is not None else self.params_hash
+        runtime_trace.update_context(run_id=run_id, provider=self.name,
+            ordinal=ordinal, capability=capability, request_digest=key)
         old = self._log.lookup(run_id,ordinal)
+        runtime_trace.emit('provider_exchange', run_id=run_id, provider=self.name,
+            ordinal=ordinal, capability=capability, request_digest=key,
+            params_hash=params_hash, model_key=self.model_key,
+            previous_state=old['state'] if old else None)
         if old:
+            runtime_trace.update_context(entity_id=old['id'])
             if (old['request_digest'],old.get('model_key',''),old.get('params_hash','')) != (key,self.model_key,params_hash):
                 raise IntegrityError('REPLAY_MISMATCH')
             if old['state'] == 'RECEIVED':
                 raw = old.get('raw_response')
                 if raw is None or self._digest(raw) != old['response_digest']:
                     raise IntegrityError('INTEGRITY_ERROR: missing or corrupt provider bytes')
-                cost = max(1,(len(prompt)+len(raw))//4)
-                self._consume_received(cost)
+                _mark_payload('response', raw)
+                runtime_trace.emit('provider_receipt', run_id=run_id,
+                    entity_id=old['id'], ordinal=ordinal, attempt=old['attempt'],
+                    status='REPLAYED_RECEIVED', raw_response=raw,
+                    response_digest=old['response_digest'], capability=capability)
+                prompt_chars, response_chars = len(prompt), len(raw)
+                cost = max(1,(prompt_chars+response_chars)//4)
+                self._consume_received(cost, prompt_chars=prompt_chars, response_chars=response_chars,
+                    replay=True, exchange_outcome='RECEIVED')
                 emit("probe_replayed", run_id=run_id, ordinal=ordinal, capability=capability)
                 return raw
             if old['state']=='FAILED':
                 # A durable failed exchange is part of this run's history too.
                 # Retrying it would silently change the interpretation on replay.
-                cost=max(1,len(prompt)//4)
-                self._consume_received(cost)
+                runtime_trace.emit('provider_receipt', run_id=run_id,
+                    entity_id=old['id'], ordinal=ordinal, attempt=old['attempt'],
+                    status='REPLAYED_FAILED', reason=old.get('error', ''),
+                    capability=capability)
+                prompt_chars = len(prompt)
+                cost=max(1,prompt_chars//4)
+                self._consume_received(cost, prompt_chars=prompt_chars, response_chars=0,
+                    replay=True, exchange_outcome='FAILED')
                 raise ProviderUnavailable(old.get('error','recorded provider failure'))
         self._check_tokens(max(1,len(prompt)//4))
         cid = self._log.begin(self.name,key,run_id=run_id,ordinal=ordinal,model_key=self.model_key,params_hash=params_hash,prompt=str(prompt),selection_audit=audit)
+        runtime_trace.update_context(entity_id=cid)
         started = time.monotonic()
-        emit("probe_started", run_id=run_id, ordinal=ordinal, capability=capability, prompt_chars=len(prompt))
+        emit("probe_started", run_id=run_id, ordinal=ordinal, capability=capability, prompt_chars=len(prompt),
+             entity_id=cid, attempt=cid.rsplit(':', 1)[-1])
         try:
             raw = self.transport(prompt)
             if not isinstance(raw,str): raise TypeError('provider response must be text')
         except Exception as exc:
-            self._log.failed(cid,error=str(exc))
-            emit("probe_failed", run_id=run_id, ordinal=ordinal, error=type(exc).__name__, elapsed_ms=(time.monotonic()-started)*1000)
-            self._charge_tokens(max(1,len(prompt)//4))
+            error = str(exc)
+            self._log.failed(cid,error=error)
+            emit("probe_failed", run_id=run_id, ordinal=ordinal, error=type(exc).__name__, elapsed_ms=(time.monotonic()-started)*1000,
+                 entity_id=cid, status='FAILED', reason=error)
+            prompt_chars = len(prompt)
+            self._charge_tokens(max(1,prompt_chars//4), prompt_chars=prompt_chars,
+                response_chars=0, replay=False, exchange_outcome='FAILED')
             raise ProviderUnavailable(f'provider {self.name!r} call failed') from exc
-        self._log.received(cid,response_digest=self._digest(raw),raw_response=raw,response_time_ms=(time.monotonic()-started)*1000)
-        emit("probe_finished", run_id=run_id, ordinal=ordinal, response_chars=len(raw), elapsed_ms=(time.monotonic()-started)*1000)
-        cost = max(1,(len(prompt)+len(raw))//4)
-        self._consume_received(cost)
+        response_digest = self._digest(raw)
+        self._log.received(cid,response_digest=response_digest,raw_response=raw,response_time_ms=(time.monotonic()-started)*1000)
+        _mark_payload('response', raw)
+        runtime_trace.emit('provider_receipt', run_id=run_id, entity_id=cid,
+            ordinal=ordinal, attempt=cid.rsplit(':', 1)[-1], status='RECEIVED',
+            raw_response=raw, response_digest=response_digest, capability=capability)
+        emit("probe_finished", run_id=run_id, ordinal=ordinal, response_chars=len(raw), elapsed_ms=(time.monotonic()-started)*1000,
+             entity_id=cid, status='RECEIVED')
+        prompt_chars, response_chars = len(prompt), len(raw)
+        cost = max(1,(prompt_chars+response_chars)//4)
+        self._consume_received(cost, prompt_chars=prompt_chars, response_chars=response_chars,
+            replay=False, exchange_outcome='RECEIVED')
         return raw
 
     def select(self, prompt: str, run_id: str, ordinal=None) -> str:
         """Bounded selection call (T3). Logged; replay-identical; integrity-checked."""
-        self._check_tokens(0)  # pre-check the shared token limit before spending a call
-        return self._exchange("select", prompt, run_id, ordinal)
+        with self._request_trace('select', prompt, run_id, ordinal):
+            self._check_tokens(0)  # pre-check the shared token limit before spending a call
+            return self._exchange("select", prompt, run_id, ordinal)
 
     def propose_local(self, prompt: str, run_id: str) -> str:
         """Local-structure proposal (TP). Consumes one tp_call; logged + integrity-checked."""
-        if self._tp_calls_left <= 0:
-            raise BudgetExceeded("PROPOSAL_BUDGET", "no structural proposal calls left in budget")
-        self._tp_calls_left -= 1
-        return self._exchange("propose_local", prompt, run_id)
+        with self._request_trace('propose_local', prompt, run_id):
+            if self._tp_calls_left <= 0:
+                budget_tracing.event('provider_budget_rejected', self, 'PROVIDER', status='BLOCKED',
+                    reason='PROPOSAL_BUDGET', scope='RUN', dimension='tp_calls',
+                    budget_phase='PRECHECK', remaining=self._tp_calls_left, maximum=self.budget.tp_calls)
+                raise BudgetExceeded("PROPOSAL_BUDGET", "no structural proposal calls left in budget")
+            self._tp_calls_left -= 1
+            budget_tracing.provider_proposal_charged(self, 'tp_calls')
+            return self._exchange("propose_local", prompt, run_id)
 
 
     def propose_lexical(self, prompt: str, run_id: str) -> str:
@@ -193,7 +354,12 @@ class ProviderAdapter:
         replay bytes remain identical, but spending lexical budget cannot spend
         the structural allowance (or vice versa).
         """
-        if self._lexical_calls_left <= 0:
-            raise BudgetExceeded("PROPOSAL_BUDGET", "no lexical proposal calls left in budget")
-        self._lexical_calls_left -= 1
-        return self._exchange("propose_local", prompt, run_id)
+        with self._request_trace('propose_lexical', prompt, run_id):
+            if self._lexical_calls_left <= 0:
+                budget_tracing.event('provider_budget_rejected', self, 'PROVIDER', status='BLOCKED',
+                    reason='PROPOSAL_BUDGET', scope='RUN', dimension='lexical_calls',
+                    budget_phase='PRECHECK', remaining=self._lexical_calls_left, maximum=self.budget.lexical_calls)
+                raise BudgetExceeded("PROPOSAL_BUDGET", "no lexical proposal calls left in budget")
+            self._lexical_calls_left -= 1
+            budget_tracing.provider_proposal_charged(self, 'lexical_calls')
+            return self._exchange("propose_local", prompt, run_id)

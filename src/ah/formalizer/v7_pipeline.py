@@ -7,6 +7,7 @@ from .native_frontend import run_native
 from .native_plan import build_plan
 from .commit_stage import commit
 from .pipeline import t0
+from .runtime_tracing import traced, phase
 
 @dataclass
 class InterpretationReport:
@@ -106,9 +107,12 @@ def _observation(text,*,version,observation_id=None,raw_input=None,context_facts
     return raw
 
 
+@traced('PLAN_AND_COMMIT')
 def run_from_state(state,store,binding,*,schema=None,run_id=None,version=1,observation_id=None,template_map=None,registry=None,policy=None,release=None,input_observation=None):
     original=state.observation if input_observation is None else input_observation
     obs=observation_id or state.source_uid; run_id=run_id or binding.holder(obs,version) or 'run:'+uuid4().hex
+    from ah.diagnostics.runtime_trace import update_context, emit as trace_event
+    update_context(run_id=run_id, observation_id=obs, interpretation_version=version)
     if not binding.acquire(run_id,obs,version,snapshot_hash=digest([original,state.resource_snapshot]),snapshot_data=original):
         return InterpretationReport(obs,version,run_id,False,'INTEGRITY_ERROR',diagnostics=('RUN_BINDING_FOREIGN_OWNER',))
     if release is None:
@@ -116,104 +120,119 @@ def run_from_state(state,store,binding,*,schema=None,run_id=None,version=1,obser
     release.assert_integrity()
     from .telemetry import emit
     emit("stage", stage="T5_PLAN")
-    ops,fragments,diagnostics,nodes=build_plan(state,release,store)
-    for d in diagnostics: state.diag(d.split(':',1)[0],d)
+    with phase('T5_PLAN', state):
+        ops,fragments,diagnostics,nodes=build_plan(state,release,store)
+        trace_event('plan_built', operations=ops, fragments=fragments, diagnostics=diagnostics, nodes=nodes)
+        for d in diagnostics: state.diag(d.split(':',1)[0],d)
     emit("stage", stage="T6_ADMISSION", fragments=len(fragments), operations=len(ops))
-    rep=commit(state,store,run_id=run_id,plan_ops=ops,committed_fragments=fragments)
-    D=store.ledger.data['decisions'].get(rep.batch_hash,{})
-    actual=set(D.get('committed',()))
-    node_refs=tuple(sorted({op.payload['node_ref'] for op in ops if op.op_type=='DECLARE_FRAGMENT' and op.payload['fragment_id'] in actual}))
+    with phase('T6_ADMISSION', state) as trace_outcome:
+        rep=commit(state,store,run_id=run_id,plan_ops=ops,committed_fragments=fragments)
+        D=store.ledger.data['decisions'].get(rep.batch_hash,{})
+        actual=set(D.get('committed',()))
+        node_refs=tuple(sorted({op.payload['node_ref'] for op in ops if op.op_type=='DECLARE_FRAGMENT' and op.payload['fragment_id'] in actual}))
+        trace_outcome.update(status=rep.terminal.value, applied=rep.applied, batch_hash=rep.batch_hash)
     return InterpretationReport(obs,version,run_id,True,'OK',rep.committed_fragments,rep.applied,rep.terminal.value,rep.batch_hash,tuple(diagnostics),node_refs)
 
 
+@traced('INTERPRETATION')
 def interpret_full(text,schema,selector,store,binding,*,morph=None,context_facts=(),run_id=None,version=1,observation_id=None,template_map=None,registry=None,policy=None,release=None,raw_input=None,ignition=None,structure_mode='region_probes'):
-    if release is not None: release.assert_integrity()
-    observation=_observation(text,version=version,observation_id=observation_id,raw_input=raw_input,context_facts=context_facts)
-    if structure_mode not in {'region_probes','legacy_proposal'}: raise ValueError('STRUCTURAL_CONTRACT_INVALID')
-    observation['structural_contract']=structure_mode
-    from .clarifications import validate_input
-    validate_input(store, observation)
+    from .telemetry import emit
+    emit('stage', stage='INPUT_VALIDATION')
+    with phase('INPUT_VALIDATION'):
+        if release is not None: release.assert_integrity()
+        observation=_observation(text,version=version,observation_id=observation_id,raw_input=raw_input,context_facts=context_facts)
+        if structure_mode not in {'region_probes','legacy_proposal'}: raise ValueError('STRUCTURAL_CONTRACT_INVALID')
+        observation['structural_contract']=structure_mode
+        from .clarifications import validate_input
+        validate_input(store, observation)
     obs=observation['observation_id']; run_id=run_id or binding.holder(obs,version) or 'run:'+uuid4().hex
-    frozen=binding.input_snapshot(obs,version)
-    # Pin the search-budget contract in the durable input. Old runs retain
-    # their observation-wide budget on replay; no silent contract migration.
-    if frozen is not None:
-        if 'syntax_budget_scope' in frozen:
-            observation['syntax_budget_scope'] = frozen['syntax_budget_scope']
+    from ah.diagnostics.runtime_trace import update_context, emit as trace_event
+    update_context(run_id=run_id, observation_id=obs, interpretation_version=version)
+    emit('stage', stage='RUN_BINDING')
+    with phase('RUN_BINDING'):
+        frozen=binding.input_snapshot(obs,version)
+        trace_event('run_binding_input', replay=frozen is not None,
+                    resource_snapshot=release.sha256 if release is not None else None)
+        # Pin the search-budget contract in the durable input. Old runs retain
+        # their observation-wide budget on replay; no silent contract migration.
+        if frozen is not None:
+            if 'syntax_budget_scope' in frozen:
+                observation['syntax_budget_scope'] = frozen['syntax_budget_scope']
+            else:
+                observation.pop('syntax_budget_scope', None)
         else:
-            observation.pop('syntax_budget_scope', None)
-    else:
-        observation['syntax_budget_scope'] = ('SOURCE_WINDOW_V1'
-            if structure_mode == 'region_probes' and observation['batch_kind'] == 'DOCUMENT'
-            else 'OBSERVATION')
-    # Reject source edits before selector/cache activity. Reusing an immutable
-    # source revision for different bytes is an input conflict, distinct from a
-    # provider or resource replay-integrity error.
-    previous=[binding.input_snapshot(obs,v) for v in binding.versions(obs)]
-    previous=[p for p in previous if p is not None]
-    revision=observation.get('source_revision',observation.get('revision',1))
-    conflict=None
-    for prior in previous:
-        old_revision=prior.get('source_revision',prior.get('revision',1))
-        if old_revision==revision and prior.get('text')!=text:
-            conflict='SOURCE_REVISION_TEXT_CHANGED';break
-    if conflict is None and previous:
-        latest=max(prior.get('source_revision',prior.get('revision',1)) for prior in previous)
-        if frozen is None and revision<latest:conflict='SOURCE_REVISION_REGRESSED'
-        elif frozen is not None and frozen.get('source_revision',frozen.get('revision',1))!=revision:
-            conflict='SOURCE_REVISION_REQUIRES_NEW_VERSION'
-    def conflict_result(reason):
-        from .store_interface import JournalRecord
-        body={'kind':'InvestigationReport','code':'INPUT_CONFLICT','reason':reason,
-              'observation_id':obs,'version':version,'source_revision':revision,
-              'input_hash':digest(text)}
-        with store._journal.atomic():
-            if not any(r['payload']==body for r in store._journal.scan_unprocessed()):
-                store.append_journal('resolution_log',JournalRecord('resolution_log',run_id,body))
-        state=t0(text);state.source_uid=obs;state.observation=observation
-        state.diag('INPUT_CONFLICT',reason)
-        return state,InterpretationReport(obs,version,run_id,False,'INPUT_CONFLICT',diagnostics=('INPUT_CONFLICT',))
-    if conflict is not None:return conflict_result(conflict)
-    if frozen is not None:
-        if 'rx_reads' in frozen: observation['rx_reads']=frozen['rx_reads']
-        for key in ('rx_diagnostics','coreference_context','attention_context_base'):
-            if key in frozen: observation[key]=frozen[key]
-    elif release is not None:
-        resource_snapshot={'snapshot_id':release.sha256,'release_version':release.manifest['version']}
-        from .rx_observability import lexical_keys
-        keys=lexical_keys(text,morph)
-        observation['rx_reads']={stage:list(rows) for stage,rows in store.read_cache_snapshot(resource_snapshot,lexical_keys=keys).items()}
-        observation['rx_diagnostics']=list(store.last_rx_diagnostics)
-        if ignition is not None and ignition.settings.clock_mode=='event':
-            from .attention_context import freeze_attention_base
-            observation['attention_context_base']=freeze_attention_base(store,ignition)
-        elif observation.get('coreference_sources'):
-            from .coreference import freeze_context
-            observation['coreference_context']=freeze_context(store,release,observation['coreference_sources'])
-    snapshot=digest([observation,{'snapshot_id':release.sha256,'release_version':release.manifest['version']} if release else {}])
-    from .run_binding import InputConflict
-    try: acquired=binding.acquire(run_id,obs,version,snapshot_hash=snapshot,snapshot_data=observation)
-    except InputConflict as exc:return conflict_result(exc.reason)
-    if not acquired:
-        from .store_interface import JournalRecord
-        store.append_journal('resolution_log',JournalRecord('resolution_log',run_id,{'kind':'InvestigationReport','code':'INTEGRITY_ERROR','reason':'RUN_BINDING_FOREIGN_OWNER','observation_id':obs,'version':version,'holder':binding.holder(obs,version)}))
-        state=t0(text); state.source_uid=obs; state.observation=observation
-        return state,InterpretationReport(obs,version,run_id,False,'INTEGRITY_ERROR',diagnostics=('RUN_BINDING_FOREIGN_OWNER',))
-    if release is None:
-        state=t0(text); state.source_uid=obs; state.observation=observation; state.diag('RESOURCE_MISSING','signed resource release required')
-        return state,InterpretationReport(obs,version,run_id,True,'RESOURCE_MISSING',diagnostics=('RESOURCE_MISSING',))
-    supersedes=observation.get('supersedes_version')
-    if supersedes is not None:
-        if type(supersedes) is not int or not 0<supersedes<version or not observation.get('trigger_ref'): raise ValueError('DECLARED_TRIGGER_REQUIRED')
-        # Retirement is part of T6's replacement transaction. A failed T4/T5 or
-        # an entirely rejected admission must leave the old version untouched.
-    if hasattr(selector, 'for_run'): selector = selector.for_run(run_id)
-    if hasattr(selector,'start_run'): selector.start_run(run_id)
-    context_reader=None
-    if observation.get('attention_context_base'):
-        if ignition is None: raise ValueError('CONTEXT_REPLAY_REQUIRES_IGNITION')
-        from .attention_context import AttentionContextReader
-        context_reader=AttentionContextReader(store,release,ignition,run_id,observation['attention_context_base'])
+            observation['syntax_budget_scope'] = ('SOURCE_WINDOW_V1'
+                if structure_mode == 'region_probes' and observation['batch_kind'] == 'DOCUMENT'
+                else 'OBSERVATION')
+        # Reject source edits before selector/cache activity. Reusing an immutable
+        # source revision for different bytes is an input conflict, distinct from a
+        # provider or resource replay-integrity error.
+        previous=[binding.input_snapshot(obs,v) for v in binding.versions(obs)]
+        previous=[p for p in previous if p is not None]
+        revision=observation.get('source_revision',observation.get('revision',1))
+        conflict=None
+        for prior in previous:
+            old_revision=prior.get('source_revision',prior.get('revision',1))
+            if old_revision==revision and prior.get('text')!=text:
+                conflict='SOURCE_REVISION_TEXT_CHANGED';break
+        if conflict is None and previous:
+            latest=max(prior.get('source_revision',prior.get('revision',1)) for prior in previous)
+            if frozen is None and revision<latest:conflict='SOURCE_REVISION_REGRESSED'
+            elif frozen is not None and frozen.get('source_revision',frozen.get('revision',1))!=revision:
+                conflict='SOURCE_REVISION_REQUIRES_NEW_VERSION'
+        def conflict_result(reason):
+            from .store_interface import JournalRecord
+            body={'kind':'InvestigationReport','code':'INPUT_CONFLICT','reason':reason,
+                  'observation_id':obs,'version':version,'source_revision':revision,
+                  'input_hash':digest(text)}
+            with store._journal.atomic():
+                if not any(r['payload']==body for r in store._journal.scan_unprocessed()):
+                    store.append_journal('resolution_log',JournalRecord('resolution_log',run_id,body))
+            state=t0(text);state.source_uid=obs;state.observation=observation
+            state.diag('INPUT_CONFLICT',reason)
+            return state,InterpretationReport(obs,version,run_id,False,'INPUT_CONFLICT',diagnostics=('INPUT_CONFLICT',))
+        if conflict is not None:return conflict_result(conflict)
+        if frozen is not None:
+            if 'rx_reads' in frozen: observation['rx_reads']=frozen['rx_reads']
+            for key in ('rx_diagnostics','coreference_context','attention_context_base'):
+                if key in frozen: observation[key]=frozen[key]
+        elif release is not None:
+            resource_snapshot={'snapshot_id':release.sha256,'release_version':release.manifest['version']}
+            from .rx_observability import lexical_keys
+            keys=lexical_keys(text,morph)
+            observation['rx_reads']={stage:list(rows) for stage,rows in store.read_cache_snapshot(resource_snapshot,lexical_keys=keys).items()}
+            observation['rx_diagnostics']=list(store.last_rx_diagnostics)
+            if ignition is not None and ignition.settings.clock_mode=='event':
+                from .attention_context import freeze_attention_base
+                observation['attention_context_base']=freeze_attention_base(store,ignition)
+            elif observation.get('coreference_sources'):
+                from .coreference import freeze_context
+                observation['coreference_context']=freeze_context(store,release,observation['coreference_sources'])
+        snapshot=digest([observation,{'snapshot_id':release.sha256,'release_version':release.manifest['version']} if release else {}])
+        from .run_binding import InputConflict
+        try: acquired=binding.acquire(run_id,obs,version,snapshot_hash=snapshot,snapshot_data=observation)
+        except InputConflict as exc:return conflict_result(exc.reason)
+        if not acquired:
+            from .store_interface import JournalRecord
+            store.append_journal('resolution_log',JournalRecord('resolution_log',run_id,{'kind':'InvestigationReport','code':'INTEGRITY_ERROR','reason':'RUN_BINDING_FOREIGN_OWNER','observation_id':obs,'version':version,'holder':binding.holder(obs,version)}))
+            state=t0(text); state.source_uid=obs; state.observation=observation
+            return state,InterpretationReport(obs,version,run_id,False,'INTEGRITY_ERROR',diagnostics=('RUN_BINDING_FOREIGN_OWNER',))
+        trace_event('run_bound', observation=observation, replay=frozen is not None)
+        if release is None:
+            state=t0(text); state.source_uid=obs; state.observation=observation; state.diag('RESOURCE_MISSING','signed resource release required')
+            return state,InterpretationReport(obs,version,run_id,True,'RESOURCE_MISSING',diagnostics=('RESOURCE_MISSING',))
+        supersedes=observation.get('supersedes_version')
+        if supersedes is not None:
+            if type(supersedes) is not int or not 0<supersedes<version or not observation.get('trigger_ref'): raise ValueError('DECLARED_TRIGGER_REQUIRED')
+            # Retirement is part of T6's replacement transaction. A failed T4/T5 or
+            # an entirely rejected admission must leave the old version untouched.
+        if hasattr(selector, 'for_run'): selector = selector.for_run(run_id)
+        if hasattr(selector,'start_run'): selector.start_run(run_id)
+        context_reader=None
+        if observation.get('attention_context_base'):
+            if ignition is None: raise ValueError('CONTEXT_REPLAY_REQUIRES_IGNITION')
+            from .attention_context import AttentionContextReader
+            context_reader=AttentionContextReader(store,release,ignition,run_id,observation['attention_context_base'])
     from .attention_context import ContextReadError
     try:
         state=run_native(text,selector,release,observation,morph=morph,context_reader=context_reader)

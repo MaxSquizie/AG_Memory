@@ -153,6 +153,8 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     cfg = load_config(Path(args.config))
+    from ah.diagnostics.session_log import start_session
+    start_session(cfg.paths.logs_dir, extra={"platform": "cli", "command": args.command})
     if args.command == "m2-acceptance":
         from ah.diagnostics import run_m2_attention_acceptance
 
