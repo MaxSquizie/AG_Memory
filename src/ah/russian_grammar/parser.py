@@ -385,10 +385,12 @@ def _partitions(analyses, tokens, text):
                         yield word_choice(question, [noun if link.role == 'object' else None for link in relations], context)
                 cases = {link.case for link in relations}
                 if len({link.role for link in relations}) == 1 and len(cases) > 1 and None not in cases:
-                    group = _span_label(tokens, i, noun + 1)
+                    split = any(link.rule == 'NUM.SPLIT' for link in links)
+                    group = _span_label(tokens, noun) if split else _span_label(tokens, i, noun + 1)
+                    description = f'the group counted by «{focus}»' if split else 'the whole phrase'
                     context = _clause_context(text, tokens, analyses, noun, (i,))
                     for case in sorted(cases)[:-1]:
-                        question = f'Copy «{group}» if the whole phrase is in the {CASE_NAMES[case]} case. Otherwise choose “no such word”.'
+                        question = f'Copy «{group}» if {description} is in the {CASE_NAMES[case]} case. Otherwise choose “no such word”.'
                         yield Probe(question, (group, 'no such word'), context), [
                             group if link.case == case else 'no such word' for link in relations]
         corrected = [link.recovery.corrected if link.recovery else tokens[i].surface for link in links]

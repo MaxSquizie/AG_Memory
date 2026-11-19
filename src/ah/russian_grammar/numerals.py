@@ -384,6 +384,8 @@ class Numeric:
             return frozenset({(str(noun_tag.number), str(noun_tag.gender) if noun_tag.number == 'sing' and noun_tag.gender else None)})
         if self.kind == 'both':
             return frozenset({('plur', None)})
+        if self.kind == 'query' and noun_tag.case == 'gent' and noun_tag.number == 'sing':
+            return frozenset({('sing', 'neut')})
         if self.kind == 'fraction':
             nominal = last.kind == 'denominator' and len(self.atoms) == 1
             if len(self.fractional_groups) == 1:

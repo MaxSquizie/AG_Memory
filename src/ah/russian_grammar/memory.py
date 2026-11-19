@@ -1,5 +1,6 @@
 from contextlib import contextmanager
 from dataclasses import asdict, dataclass
+from fractions import Fraction
 from uuid import uuid4
 
 from ah.model import Domain, Property
@@ -249,7 +250,7 @@ def _quantity_answer_head(question, stored, children, head):
     return amounts[0] if len(amounts) == 1 else None
 
 
-def _nominal_answer(stored, children, head):
+def _nominal_parts(stored, children, head):
     parts = [head]
     for j in parts:
         for child in children[j]:
@@ -257,6 +258,10 @@ def _nominal_answer(stored, children, head):
             if (role in NUMBER_PARTS or role in ('name_part', 'nominal_conjunct', 'coordinator', 'numeral') or
                     stored[j].get('counted') and role in ('attribute', 'possessive')):
                 parts.append(child)
+    return parts
+
+
+def _nominal_answer(stored, parts):
     words = []
     identity = []
     for j in sorted(parts):
@@ -270,6 +275,40 @@ def _nominal_answer(stored, children, head):
         elif row['role'] not in NUMBER_PARTS:
             identity.append(word.casefold())
     return tuple(identity), ' '.join(words)
+
+
+def _may_deny_participation(row):
+    if row['lemma'] in ('никто', 'ничто', 'никакой', 'ничей', 'нисколько', 'ни', 'не'):
+        return True
+    kind = row.get('quantity_kind')
+    if not kind or kind == 'ordinal':
+        return False
+    if kind == 'indefinite':
+        return row['lemma'] not in ('несколько', 'много')
+    qualifier = row.get('quantity_modifier')
+    if qualifier in ('at_most', 'less_than', 'approximate'):
+        return True
+    try:
+        lower = Fraction((row.get('quantity') or '').partition('..')[0])
+    except (ValueError, ZeroDivisionError):
+        return True
+    return lower < 0 if qualifier == 'more_than' else lower <= 0
+
+
+def _projection_requirements(rows, children, root, scoped):
+    required = set()
+    for child in children[root]:
+        argument = rows[child]['role'] in ARGUMENTS
+        if not argument and not scoped:
+            continue
+        branch = [child]
+        for node in branch:
+            branch.extend(children[node])
+        nominal = ('attribute', 'possessive', 'name_part', 'numeral')
+        if (scoped and (not argument or any(rows[node]['role'] not in nominal for node in branch[1:])) or
+                any(_may_deny_participation(rows[node]) for node in branch)):
+            required.update(branch)
+    return required
 
 
 def _extraction(rows, stored, observed, source, focus, budget):
@@ -289,8 +328,9 @@ def _extraction(rows, stored, observed, source, focus, budget):
         if row['head'] is not None and row['role'] != 'punctuation':
             surface_children[row['head']].append(j)
     children_found = [[j for j in group if stored[j]['role'] not in NUMBER_PARTS] for group in surface_children]
-    if not any(row['role'] == 'clause_relative' for row in rows):
+    if not scoped_question and not any(row['role'] == 'clause_relative' for row in rows):
         children_found = [[j for j in group if stored[j]['role'] != 'clause_relative'] for group in children_found]
+    required = _projection_requirements(stored, children_found, observed, scoped_question) if focus is not None else set()
     argument = rows[focus]['head'] if focus is not None and rows[focus]['role'] == 'numeral' else focus
     agreement_target = rows[argument]['head'] if argument is not None and rows[argument]['role'] == 'subject' else None
     order = [root]
@@ -303,7 +343,7 @@ def _extraction(rows, stored, observed, source, focus, budget):
         for mapping in states:
             pool = [observed] if i == root else children_found[mapping[row['head']]]
             for j in pool:
-                if (focus is None or scoped_question and i != focus) and len(children[i]) != len(children_found[j]):
+                if focus is None and len(children[i]) != len(children_found[j]):
                     continue
                 variable_subject = i == agreement_target or (row['role'] == 'auxiliary' and row['head'] == agreement_target)
                 if j in mapping.values() or not _compatible(rows, i, stored[j], i == focus, i == root, variable_subject):
@@ -319,9 +359,12 @@ def _extraction(rows, stored, observed, source, focus, budget):
         if any(rows[i].get(key) is not None and mapping.get(rows[i][key]) != stored[j].get(key)
                for i, j in mapping.items() for key in ('controller', 'antecedent')):
             continue
+        missing = required.difference(mapping.values()) if required else set()
         if focus is None:
             answers['Да.'] = 'Да.'
         elif stored[mapping[focus]].get('event_view'):
+            if missing:
+                continue
             reference = stored[mapping[focus]]
             target = reference['antecedent']
             if reference['event_view'] == 'event' and 'averted' in (stored[target].get('scope') or '').split('_'):
@@ -344,7 +387,10 @@ def _extraction(rows, stored, observed, source, focus, budget):
                 head = _quantity_answer_head(rows[focus], stored, surface_children, head)
                 if head is None:
                     continue
-            answer = _nominal_answer(stored, surface_children, head)
+            parts = _nominal_parts(stored, surface_children, head)
+            if missing and not missing.issubset(parts):
+                continue
+            answer = _nominal_answer(stored, parts)
             if answer:
                 identity, phrase = answer
                 answers[identity] = phrase

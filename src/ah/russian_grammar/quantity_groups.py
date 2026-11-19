@@ -13,6 +13,7 @@ from .rules import dictionary, known_forms
 _EXTERNAL_CASE = {'subject': 'nomn', 'object': 'accs', 'duration': 'accs', 'experiencer': 'datv'}
 _NOMINAL = {'subject', 'object', 'duration', 'experiencer', 'recipient', 'beneficiary', 'stimulus',
             'oblique', 'instrument', 'governed', 'nominal_conjunct', 'predicate'}
+_GAP_ROLES = _NOMINAL | {'auxiliary', 'copula', 'adverb'}
 _SUBJECT = {'masc': 'он', 'femn': 'она', 'neut': 'оно'}
 
 
@@ -26,6 +27,7 @@ class Group:
     surface: str
     subject_only: bool
     links: tuple
+    gap: range = range(0)
 
 
 @lru_cache(maxsize=4096)
@@ -74,11 +76,12 @@ def _attributes(variants, noun, expression, case):
             and (not tag.animacy or tag.animacy == noun.animacy)]
 
 
-def _groups(tokens, start, expression, budget):
+def _groups(tokens, start, expression, budget, *, nominal_start=None):
     from .parser import AnalysisBudgetExceeded, Link
 
     qualifiers = []
-    for noun in range(expression.end, len(tokens)):
+    first = expression.end if nominal_start is None else nominal_start
+    for noun in range(first, len(tokens)):
         forms = known_forms(tokens[noun].surface)
         for lemma, tag in forms:
             if tag.POS != 'NOUN' or not tag.number:
@@ -87,14 +90,15 @@ def _groups(tokens, start, expression, budget):
                 if not expression.compatible(case, tag, lemma):
                     continue
                 parts = expression.parts_for(case, tag)
-                links = [(start, Link('numeral', parts[0][0], noun, 'NUM.GROUP',
+                rule = 'NUM.GROUP' if first == expression.end else 'NUM.SPLIT'
+                links = [(start, Link('numeral', parts[0][0], noun, rule,
                                       morphology=parts[0][1], quantity=expression.value,
                                       quantity_kind=expression.kind))]
                 links.extend((i, Link('numeral_part', part, start, 'NUM.PART', morphology=morph))
                              for i, (part, morph) in enumerate(parts[1:], start + 1))
                 sizes = 1
                 options = []
-                for k, candidates in enumerate(qualifiers, expression.end):
+                for k, candidates in enumerate(qualifiers, first):
                     allowed = []
                     for adj, form in _attributes(candidates, tag, expression, case):
                         role = 'possessive' if adj in POSSESSIVES else 'attribute'
@@ -107,13 +111,26 @@ def _groups(tokens, start, expression, budget):
                 for surface, subject_only in _surfaces(tokens[noun], lemma, tag, expression, case):
                     for selected in product(*options):
                         yield Group(start, noun, lemma, from_tag(tag), case, surface, subject_only,
-                                    (*links, *selected))
+                                    (*links, *selected), range(expression.end, first))
         adjectives = [(lemma, tag) for lemma, tag in forms
                       if tag.POS == 'ADJF' and ('Apro' not in tag or lemma in POSSESSIVES)
                       and 'Anum' not in tag]
         if not adjectives:
             break
         qualifiers.append(adjectives)
+
+
+def _query_groups(tokens, start, expression, budget):
+    yield from _groups(tokens, start, expression, budget)
+    if expression.kind != 'query':
+        return
+    intervening_word = False
+    for index in range(expression.end, len(tokens)):
+        forms = known_forms(tokens[index].surface)
+        if intervening_word and any(tag.POS in {'ADJF', 'NOUN'} for _, tag in forms):
+            yield from _groups(tokens, start, expression, budget, nominal_start=index)
+        if any(tag.POS in {'VERB', 'NOUN', 'NPRO', 'ADVB'} for _, tag in forms):
+            intervening_word = True
 
 
 def _ordinary_attribute(tree, groups):
@@ -144,7 +161,7 @@ def _case_licensed(group, head, governor):
     return True
 
 
-def _restore(tree, kept, picked):
+def _restore(tree, kept, picked, fronted):
     links = {i: replace(link, **{key: kept[value] for key in ('head', 'controller', 'antecedent')
                                  if (value := getattr(link, key)) is not None})
              for i, link in zip(kept, tree)}
@@ -161,6 +178,14 @@ def _restore(tree, kept, picked):
                 case = group.case
         if case != group.case:
             return
+        if group.gap:
+            if group.start in fronted and head.role != 'governed':
+                return
+            if head.role == 'governed' and head.head >= group.start:
+                return
+            if not any(i in links and links[i].role in _GAP_ROLES
+                       for i in group.gap):
+                return
         if head.head is not None and not _case_licensed(group, head, links[head.head]):
             return
         links[group.noun] = replace(head, lemma=group.lemma, case=case, morphology=group.morphology)
@@ -178,7 +203,7 @@ def trees(tokens, local, *, budget=256):
         for expression in sorted(expressions(tokens, i), key=lambda x: x.end, reverse=True):
             if longest is not None and expression.end < longest:
                 break
-            for group in _groups(tokens, i, expression, budget):
+            for group in _query_groups(tokens, i, expression, budget):
                 longest = expression.end
                 if group not in starts[i]:
                     starts[i].append(group)
@@ -200,27 +225,34 @@ def trees(tokens, local, *, budget=256):
     groups = [g for choices in starts.values() for g in choices]
     optional = {i for i in starts if any(tag.POS in ('NOUN', 'ADJF', 'NPRO', 'ADVB', 'VERB', 'CONJ')
                                         for _, tag in known_forms(tokens[i].surface))}
-    pending = [(0, ())]
+    pending = [(0, (), frozenset())]
     results = set()
     examined = 0
     while pending:
-        index, picked = pending.pop()
-        while index < len(tokens) and index not in starts:
+        index, picked, occupied = pending.pop()
+        while index < len(tokens) and (index not in starts or index in occupied):
             index += 1
         if index < len(tokens):
             if index in optional:
-                pending.append((index + 1, picked))
-            pending.extend((g.noun + 1, (*picked, g)) for g in starts[index])
+                pending.append((index + 1, picked, occupied))
+            for group in starts[index]:
+                members = {group.noun, *(k for k, _ in group.links)}
+                if not occupied.intersection(members):
+                    pending.append((index + 1, (*picked, group), occupied | members))
             continue
         examined += 1
         if examined > budget:
             raise AnalysisBudgetExceeded('QUANTITY_BUDGET')
         heads = {g.noun: g for g in picked}
-        hidden = {i for g in picked for i in range(g.start, g.noun)}
-        kept = tuple(i for i in range(len(tokens)) if i not in hidden)
+        hidden = {i for g in picked for i, _ in g.links}
+        fronted = {g.start: g.noun for g in picked if g.gap and g.start > 0
+                   and any(tag.POS == 'PREP' for _, tag in known_forms(tokens[g.start - 1].surface))}
+        displaced = set(fronted.values())
+        kept = tuple(fronted.get(i, i) for i in range(len(tokens))
+                     if i in fronted or (i not in hidden and i not in displaced))
         words = tuple(replace(tokens[i], surface=heads[i].surface) if i in heads else tokens[i] for i in kept)
         for tree in reduced(words):
-            restored = _restore(tree, kept, picked) if picked else tree
+            restored = _restore(tree, kept, picked, fronted) if picked else tree
             if restored and restored not in results and not _ordinary_attribute(restored, groups):
                 results.add(restored)
                 if len(results) > budget:
