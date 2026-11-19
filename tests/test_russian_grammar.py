@@ -41,30 +41,50 @@ def test_ambiguous_attribute_and_exact_probe():
     assert r.status == 'AMBIGUOUS' and len(r.analyses) == 2
     probe, = r.probes
     assert probe.prompt() == (
-        text + '\nWhich occurrence does «грустную» @25 describe?\n'
-        '1. «маму» @11\n2. «сестру» @18\n0. None of these\n?. Cannot tell'
+        text + '\nWhich word does «грустную» describe?\n'
+        'маму\nсестру\nCopy one choice. Reply 0 if none fits, or ? if unsure.'
     )
-    for n, host in [('1', 'маму'), ('2', 'сестру')]:
-        resolved = analyze(text, lambda p: n)
+    for host in ['маму', 'сестру']:
+        resolved = analyze(text, lambda p: host)
         links, = resolved.analyses
         assert resolved.tokens[links[-1].head].surface == host
         assert len(resolved.probes) == 1
 
 
-def test_two_cases_two_subjects_and_repeated_surface():
-    for text in ('Мать любит дочь', 'Мать любит мать'):
-        r = analyze(text)
-        probe, = r.probes
-        assert probe.question == 'Which occurrence is the subject of «любит» @5?'
-        assert probe.options == ('«Мать» @0', f'«{r.tokens[-1].surface}» @11')
-        for n, roles in [('1', ['subject', 'predicate', 'object']),
-                         ('2', ['object', 'predicate', 'subject'])]:
-            assert [l.role for l in analyze(text, lambda p: n).analyses[0]] == roles
+@pytest.mark.parametrize('text,answers', [
+    ('Мать любит дочь', ('Мать', 'дочь')),
+    ('Мать любит мать', ('[Мать] любит', 'любит [мать]')),
+])
+def test_two_cases_two_subjects_and_repeated_surface(text, answers):
+    probe, = analyze(text).probes
+    assert probe.context == text and probe.question == 'Which word is the subject of «любит»?'
+    assert probe.options == answers
+    for answer, subject in zip(answers, (0, 2)):
+        links, = analyze(text, lambda p: answer).analyses
+        assert links[subject].role == 'subject' and links[2 - subject].role == 'object'
+
+
+def test_repeated_word_alone_cannot_choose_an_occurrence():
+    result = analyze('Мать любит мать', lambda p: 'мать')
+    assert result.reason == 'INVALID_ANSWER' and len(result.analyses) == 2
+    links, = analyze('Мать любит дочь', lambda p: '  ДОЧЬ\n').analyses
+    assert links[-1].role == 'subject'
+
+
+def test_lexical_choice_returns_the_original_word_and_preserves_other_readings():
+    text = 'Мария спала ночь'
+    probe, = analyze(text).probes
+    assert probe.options == ('спала', 'no such word') and '«спасть»' in probe.question
+    links, = analyze(text, lambda p: 'спала').analyses
+    assert links[1].lemma == 'спасть'
+    links, = analyze(text, lambda p: 'no such word').analyses
+    assert links[1].lemma == 'спать'
 
 
 @pytest.mark.parametrize('answer,expected,remaining', [
     ('?', 'OPEN_CHOICE', 2), ('0', 'OPTIONS_REJECTED', 0),
-    ('1,2', 'INVALID_ANSWER', 2), ('19', 'INVALID_ANSWER', 2),
+    ('1,2', 'INVALID_ANSWER', 2), ('1', 'INVALID_ANSWER', 2), ('2', 'INVALID_ANSWER', 2),
+    ('дочери', 'INVALID_ANSWER', 2), ('Мать и дочь', 'INVALID_ANSWER', 2),
 ])
 def test_selector_never_guesses(answer, expected, remaining):
     r = analyze('Мать любит дочь', lambda p: answer)
@@ -74,10 +94,10 @@ def test_selector_never_guesses(answer, expected, remaining):
 def test_multiple_choices_shrink_the_forest_and_preserve_unanswered_choices():
     text = 'Я встретил маму и сестру грустную печальную'
     assert len(analyze(text).analyses) == 4
-    answers = iter(['2', '?'])
+    answers = iter(['сестру', '?'])
     result = analyze(text, lambda p: next(answers))
     assert len(result.analyses) == 2 and all(a[-2].head == 4 for a in result.analyses)
-    answers = iter(['2', '1'])
+    answers = iter(['сестру', 'маму'])
     links, = analyze(text, lambda p: next(answers)).analyses
     assert (links[-2].head, links[-1].head) == (4, 2)
 
@@ -94,8 +114,9 @@ def test_provider_outage_keeps_evidence_and_source():
 def test_duration_competes_with_transitive_object():
     r = analyze('Иван читал ночь')
     probe, = r.probes
-    assert probe.options == ('What the action is directed at', 'How long the action lasts')
-    assert analyze('Иван читал ночь', lambda p: '2').analyses[0][-1].rule == 'T1'
+    assert probe.options == ('ночь', 'no such word')
+    assert analyze('Иван читал ночь', lambda p: 'no such word').analyses[0][-1].rule == 'O1'
+    assert analyze('Иван читал ночь', lambda p: 'ночь').analyses[0][-1].rule == 'T1'
     assert analyze('Я шёл день').analyses[0][-1].role == 'duration'
 
 
