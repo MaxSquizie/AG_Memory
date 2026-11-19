@@ -4,10 +4,12 @@ from collections.abc import Callable, Iterator, Mapping
 from dataclasses import dataclass, replace
 from itertools import product
 
+from .morphology import Morphology, feature_choices
 from .prepositions import CASE_NAMES, FORMS, GOVERNMENT, PREFIXES, TOKEN, group_heads
 from .probe import MAX_WORD_CHOICES, Probe
 from .recovery import CaseRecovery
 from .rules import Reading, known_forms, name_continuations, plain_person_reference, preposition_reading, attribute_agrees, readings, subject_agrees
+
 
 
 RULE_FOR_ROLE = {
@@ -36,6 +38,8 @@ class Link:
     antecedent: int | None = None
     event_view: str | None = None
     recovery: CaseRecovery | None = None
+    morphology: Morphology | None = None
+    implicit_subject: str | None = None
 
 
 class AnalysisBudgetExceeded(Exception):
@@ -276,6 +280,11 @@ def _partitions(analyses, tokens, text):
     verb = _span_label(tokens, predicates[0])
     subjects = [next((i for i, link in enumerate(a) if link.role == 'subject' and link.head == predicates[0]), None) for a in analyses]
     if len(set(subjects)) > 1:
+        lemmas = [tree[predicates[0]].lemma for tree in analyses]
+        for lemma in sorted(set(lemmas))[:-1]:
+            context = _clause_context(text, tokens, analyses, predicates[0], subjects)
+            yield word_choice(f'Copy «{verb}» if its dictionary form is «{lemma}». Otherwise choose “no such word”.',
+                              [predicates[0] if value == lemma else None for value in lemmas], context)
         yield word_choice(f'Which word is the subject of «{verb}»?', subjects)
     for i in range(len(tokens)):
         if all(a[i].role == 'attribute' for a in analyses):
@@ -337,6 +346,15 @@ def _partitions(analyses, tokens, text):
             continue
         roles = {link.role for link in links}
         focus = _span_label(tokens, i)
+        if len(roles) == 1 and all(link.morphology for link in links):
+            moods = [link.morphology.mood for link in links]
+            if 'impr' in moods and len(set(moods)) > 1:
+                yield word_choice(f'Copy «{focus}» if the speaker is giving an instruction. Otherwise choose “no such word”.',
+                                  [i if mood == 'impr' else None for mood in moods], _clause_context(text, tokens, analyses, i, ()))
+            tenses = [link.morphology.tense for link in links]
+            if set(tenses) == {'pres', 'futr'}:
+                yield word_choice(f'Copy «{focus}» if it describes a future action. Otherwise choose “no such word”.',
+                                  [i if tense == 'futr' else None for tense in tenses], _clause_context(text, tokens, analyses, i, ()))
         corrected = [link.recovery.corrected if link.recovery else tokens[i].surface for link in links]
         if len(set(corrected)) > 1:
             choices = tuple(dict.fromkeys(corrected))
@@ -417,9 +435,18 @@ def _partition(analyses, tokens, text):
             for value in (distinct if None in values else distinct[:-1]):
                 condition = template.format(CASE_NAMES.get(value, value) if attr == 'case' else value)
                 choices.append(binary(f'Copy «{focus}» if {condition}.', focus, [v == value for v in values]))
-    if not choices:
-        raise ValueError('no grammatical distinction between alternatives')
-    return min(choices, key=cost)
+        subjects = [link.implicit_subject for link in links]
+        descriptions = {'speaker': 'the speaker', 'speaker_group': 'a group including the speaker',
+                        'addressee': 'the addressee', 'addressee_group': 'the addressees',
+                        'unresolved': 'an unspecified participant'}
+        if len(set(subjects)) > 1:
+            for key in sorted(set(subjects) - {None}):
+                choices.append(binary(f'Copy «{focus}» if its unstated subject is {descriptions.get(key, key)}.',
+                                      focus, [value == key for value in subjects]))
+        if all(link.morphology for link in links):
+            for condition, flags in feature_choices([link.morphology for link in links]):
+                choices.append(binary(f'Copy «{focus}» if {condition}.', focus, flags))
+    return min(choices, key=cost, default=None)
 
 
 def _simple_trees(words, budget, fail):
@@ -484,7 +511,7 @@ def _possessor_readings(tokens, tree, budget):
         candidates = []
         for j in range(i):
             noun = tree[j]
-            if noun.role not in ('subject', 'object', 'recipient', 'experiencer', 'governed', 'nominal_conjunct'):
+            if noun.role not in ('subject', 'object', 'recipient', 'experiencer', 'beneficiary', 'stimulus', 'instrument', 'oblique', 'governed', 'nominal_conjunct'):
                 continue
             surface = noun.recovery.corrected if noun.recovery else tokens[j].surface
             for lemma, tag in known_forms(surface):
@@ -542,7 +569,7 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
     words = tokens[:-1] if tokens and tokens[-1].surface in {'.', '!', '?'} else tokens
     if not words:
         return Result(text, 'UNRESOLVED', 'EMPTY', tokens)
-    from . import clauses, infinitives, modifiers, nominal_groups, predication, recovery
+    from . import case_arguments, clauses, finite_forms, infinitives, modifiers, morphology, nominal_groups, predication, recovery
 
     failures = []
 
@@ -551,17 +578,24 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
         yield from predication.trees(part, budget=budget)
         yield from infinitives.candidates(part, budget=budget)
 
+    def governed(part):
+        yield from case_arguments.trees(part, base, budget=budget)
+
+    def finite(part):
+        yield from finite_forms.trees(part, governed, budget=budget)
+
     def modified(part):
-        for tree in modifiers.structures(part, base, budget=budget):
+        for tree in modifiers.structures(part, finite, budget=budget):
             yield from _nickname_readings(part, tree, budget)
 
     def local(part):
-        yield from nominal_groups.trees(part, modified, budget=budget)
+        for tree in nominal_groups.trees(part, modified, budget=budget):
+            yield from morphology.variants(part, tree, budget=budget)
 
     def exact(part):
         for tree in clauses.trees(part, local, budget=budget):
             if len(tree) == len(part) and _connected(tree) and (accept_tree is None or accept_tree(tree)):
-                yield tree
+                yield morphology.annotate(part, tree)
 
     structures = {}
 
@@ -569,7 +603,7 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
         for tree in candidates:
             for reading in _possessor_readings(words, tree, budget):
                 key = tuple((l.role, l.lemma, l.head, l.case, l.controller, l.scope,
-                             l.antecedent, l.event_view, l.recovery) for l in reading)
+                             l.antecedent, l.event_view, l.recovery, l.morphology, l.implicit_subject) for l in reading)
                 structures.setdefault(key, reading)
                 if len(structures) > budget:
                     raise AnalysisBudgetExceeded('ANALYSIS_BUDGET')
@@ -587,7 +621,10 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
     checked_government = set()
     while True:
         if len(analyses) > 1:
-            probe, keys = _partition(analyses, words, text)
+            partition = _partition(analyses, words, text)
+            if partition is None:
+                return Result(text, 'AMBIGUOUS', 'NO_DISTINGUISHING_PROBE', tokens, analyses, tuple(probes))
+            probe, keys = partition
         else:
             tree, = analyses
             unverified = next((j for j, link in enumerate(tree) if link.role == 'governed'

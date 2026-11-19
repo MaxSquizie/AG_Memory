@@ -20,6 +20,12 @@ def _connectives():
     return forms, max(map(len, forms))
 
 
+@cache
+def _preposed():
+    table = files(__package__).joinpath('lexicon', 'preposed-connectives.tsv')
+    return frozenset(line.split('\t')[0] for line in table.read_text(encoding='utf-8').splitlines())
+
+
 @dataclass(frozen=True)
 class Boundary:
     start: int
@@ -58,6 +64,12 @@ def _scope(boundary):
     return 'alternative' if boundary.form in ('или', 'либо') else None
 
 
+def _allows_mood(boundary, predicate):
+    if boundary.relation != 'advcl' or boundary.form not in {'если', 'когда', 'как только', 'пока'}:
+        return True
+    return predicate.morphology is None or predicate.morphology.mood != 'impr'
+
+
 def _markers(boundary, root, words):
     from .parser import Link
 
@@ -86,6 +98,8 @@ def _attachments(prefix, levels, boundary, leaf, root, words):
             if any(link and link.role == 'clause_complement' and link.head == host for link in prefix):
                 continue
         own = leaf[root - (boundary.marker if relative else boundary.stop)]
+        if not _allows_mood(boundary, own):
+            continue
         if relation == 'conj':
             role, rule = 'clause_conjunct', 'CL.CONJ'
             next_levels = levels[:level] + ((anchor, root),)
@@ -98,7 +112,7 @@ def _attachments(prefix, levels, boundary, leaf, root, words):
         scope = _scope(boundary)
         joined = list(prefix + marker_links + leaf)
         joined[root] = replace(own, role=role, rule=rule, head=host, scope=own.scope or scope)
-        host_scope = {'condition': 'conditional', 'alternative': 'alternative'}.get(scope)
+        host_scope = {'condition': 'conditional', 'alternative': 'alternative', 'adverbial': 'adverbial'}.get(scope)
         if host_scope and not joined[host].scope:
             joined[host] = replace(joined[host], scope=host_scope)
         if relative:
@@ -201,21 +215,25 @@ def trees(tokens, local, *, budget=256):
     for tree, _ in parse_region(0, size):
         yield tree
     for marker in starts[0]:
-        if marker.form != 'если' or marker.relation != 'advcl':
+        if marker.relation != 'advcl' or marker.form not in _preposed():
             continue
         for stop in range(marker.stop + 1, size):
             split = stop + (words[stop] == ',')
-            main = split + (split < size and words[split] == 'то')
+            conditional = _scope(marker) == 'condition'
+            main = split + (conditional and split < size and words[split] == 'то')
             if main >= size or (stop > 0 and words[stop - 1] == ','):
                 continue
-            for condition, child in parse_region(marker.stop, stop):
-                for consequence, root in parse_region(main, size):
-                    joined = list(_markers(marker, child, words) + condition)
+            for subordinate, child in parse_region(marker.stop, stop):
+                if not _allows_mood(marker, subordinate[child - marker.stop]):
+                    continue
+                for matrix, root in parse_region(main, size):
+                    joined = list(_markers(marker, child, words) + subordinate)
                     joined.extend(Link('punctuation' if i < split else 'clause_marker', words[i], root, 'CL.COND',
                                        scope='conditional' if i >= split else None)
                                   for i in range(stop, main))
-                    joined.extend(consequence)
+                    joined.extend(matrix)
                     joined[child] = replace(joined[child], role='clause_adverbial', head=root, rule='CL.ADV',
-                                            scope=joined[child].scope or 'condition')
-                    joined[root] = replace(joined[root], scope=joined[root].scope or 'conditional')
+                                            scope=joined[child].scope or _scope(marker))
+                    qualification = 'conditional' if conditional else 'adverbial'
+                    joined[root] = replace(joined[root], scope=joined[root].scope or qualification)
                     yield tuple(joined)

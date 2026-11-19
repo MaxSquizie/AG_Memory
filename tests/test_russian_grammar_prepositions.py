@@ -24,17 +24,18 @@ def test_group_binds_the_actual_case_and_attaches_to_the_verb(text, noun, case):
     assert prep.rule == 'P2' and tree[prep.head].role == 'predicate'
 
 
-def test_watermelon_only_needs_lexical_reading():
+def test_standing_watermelon_is_resolved_by_the_lexical_reading():
     text = 'На столе стоит арбуз'
     r = analyze(text)
     probe, = r.probes
     assert '«стоит»' in probe.question and '«стоить»' in probe.question
     assert {tree[2].lemma for tree in r.analyses} == {'стоить', 'стоять'}
-    for tree in r.analyses:
-        assert [(l.role, l.head) for l in tree] == [
-            ('preposition', 2), ('governed', 0), ('predicate', None), ('subject', 2)]
-    tree, = analyze(text, lambda p: 'no such word').analyses
-    assert tree[2].lemma == 'стоять'
+    standing = analyze(text, lambda p: 'no such word')
+    tree, = standing.analyses
+    assert len(standing.probes) == 1 and tree[2].lemma == 'стоять'
+    assert [(link.role, link.head) for link in tree] == [
+        ('preposition', 2), ('governed', 0), ('predicate', None), ('subject', 2)]
+    assert {t[-1].role for t in analyze('Нагревает чайник').analyses} == {'subject', 'object'}
 
 
 @pytest.mark.parametrize('text,modifier,noun', [

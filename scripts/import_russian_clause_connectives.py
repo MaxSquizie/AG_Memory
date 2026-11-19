@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 from pathlib import Path
 
 
-def entries(paths, *, nominal=False):
+def entries(paths, *, nominal=False, preposed=False):
     rows = set()
     for path in paths:
         for sentence in path.read_text(encoding='utf-8').split('\n\n'):
@@ -32,6 +32,8 @@ def entries(paths, *, nominal=False):
                 parts = sorted([index] + [i for i, w in words.items() if w[6] == str(index) and w[7] == 'fixed'])
                 if parts != list(range(parts[0], parts[-1] + 1)):
                     continue
+                if preposed and (relation != 'advcl' or parts[0] != min(words) or int(child[0]) >= int(governor[0])):
+                    continue
                 form = ' '.join(words[i][1].casefold().replace('ё', 'е') for i in parts)
                 head = governor[2].casefold().replace('ё', 'е') if relation == 'ccomp' else '*'
                 rows.add((form, relation, head))
@@ -42,6 +44,8 @@ if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument('corpora', nargs='+', type=Path)
     parser.add_argument('output', type=Path)
-    parser.add_argument('--nominal', action='store_true')
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument('--nominal', action='store_true')
+    mode.add_argument('--preposed', action='store_true')
     args = parser.parse_args()
-    args.output.write_text(''.join('\t'.join(row) + '\n' for row in entries(args.corpora, nominal=args.nominal)), encoding='utf-8')
+    args.output.write_text(''.join('\t'.join(row) + '\n' for row in entries(args.corpora, nominal=args.nominal, preposed=args.preposed)), encoding='utf-8')

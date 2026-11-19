@@ -57,3 +57,45 @@ nominal-connectives.tsv uses the same GSD and PUD sources and license as
 clause-connectives.tsv. It includes cc conjunctions on nominal conjuncts
 whose governing conjunct is a noun, proper name or pronoun. Regeneration:
 python scripts/import_russian_clause_connectives.py --nominal ru_gsd-ud-train.conllu ru_pud-ud-test.conllu src/ah/russian_grammar/lexicon/nominal-connectives.tsv
+
+bare_government.tsv lists licensed bare oblique cases by infinitive. The
+importer reads the two GrammarEngine infinitive files at the revision and
+SHA256 values given for infinitives.tsv above (MIT). It reads explicit case
+lists and entry declarations, including stress-marked macros. A perfective
+macro with omitted case list inherits from its named imperfective partner
+as defined in rus_infinitives.inc; an explicit INTR suppresses inheritance.
+Russian case labels are mapped to datv, ablt, gent and gen2. Cases are
+pooled across a lemma's senses. A row expresses possibilities only.
+The table also includes the case slots of the project annotations below.
+https://github.com/Koziev/GrammarEngine/blob/c70bdbdd8b41af25fa754e727ca645de90d28c23/src/dictionary.src/rus_infinitives.inc
+SHA256 (macro definitions): e9afaa2e9144c234319cd6d13e63655f8d008a020c66369eeb74321693094ce2
+python scripts/import_russian_bare_government.py rus_infinitives_sov.sol rus_infinitives_nesov.sol src/ah/russian_grammar/lexicon/bare_roles.tsv src/ah/russian_grammar/lexicon/bare_government.tsv
+
+bare_roles.tsv contains project-authored readings for selected constructions.
+Each row specifies a governor, the dependent's case and a possible semantic
+role. The genitive of quantity can realize the direct object of a transfer.
+A writing verb's instrumental allows several readings, including instrument
+and manner. A case listed by GrammarEngine alone supplies no role label.
+For comparison, FrameBank distinguishes participant roles by construction and
+groups examples by head, form and semantics of the dependent. Reference:
+https://github.com/olesar/framebank/tree/e60da2a38f645db21c55aa0e7ff9730e92e7e2ca
+FrameBank data are separately available there under GPL-3.0.
+
+preposed-connectives.tsv selects sentence-initial adverbial subordinators
+whose subordinate head precedes the main head in the same GSD and PUD
+releases as clause-connectives.tsv, under the same CC BY-SA 4.0 license.
+python scripts/import_russian_clause_connectives.py --preposed ru_gsd-ud-train.conllu ru_pud-ud-test.conllu src/ah/russian_grammar/lexicon/preposed-connectives.tsv
+
+writing_instruments.tsv contains single-noun names of implements used for
+writing, selected from English Wiktionary contributors' Russian writing
+instruments category. Container, material-only, adjective and multiword
+entries were excluded. The table provides positive lexical evidence only.
+Adapted under CC BY-SA 4.0. Entries and contributor histories:
+https://en.wiktionary.org/wiki/Category:ru:Writing_instruments
+https://creativecommons.org/licenses/by-sa/4.0/
+
+The subject-controlled modal infinitive of решить / решать in
+infinitive_control.tsv follows the intentional sense discussed in Kustova,
+Mishina and Fedoseev, Sintaksis sovremennogo russkogo yazyka (2005),
+discussion of the compound verbal predicate:
+https://www.rsuh.ru/upload/main/media/%D0%BE%D1%82%20%D0%BF%D1%80%D0%B5%D0%BF%D0%BE%D0%B4%D0%B0%D0%B2%D0%B0%D1%82%D0%B5%D0%BB%D0%B5%D0%B9/sintaksis-sovremennogo-russkogo-jazyka_kustova-g_i_-i-dr_2005-256s.pdf

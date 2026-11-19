@@ -23,7 +23,7 @@ def test_canonical_journal_recovers_scoped_observation_and_read_only_answers(tmp
         assert (reply.text, reply.observation_ref) == (expected, stored.observation_ref)
     assert submit(core, 'Мария прочитала книгу?', journal=journal).status == 'UNKNOWN'
     assert submit(core, 'Иван увидел человека с биноклем?', journal=journal).status == 'AMBIGUOUS'
-    assert submit(core, 'Прочитай книгу!', journal=journal).status == 'UNRESOLVED'
+    assert submit(core, 'Прочитай книгу!', journal=journal).status == 'DIRECTIVE'
     assert journal.read_global_head() == head
     group = core.store.get_element(Domain.H, stored.observation_ref)
     assert (group.meta['source'], group.meta['verbatim']) == ('user', original)

@@ -71,3 +71,21 @@ def test_coordination_preserves_matrix_and_embedded_subjects():
         assert [words[links[name].head] for name in ('Иван', 'Мария', 'Пётр')] == [
             'сказал', 'ушла', 'остался'
         ]
+
+
+def test_morphology_probe_is_local_and_temporal_subordinates_constrain_mood():
+    result = analyze('Анна сказала, что Олег исследует книгу.')
+    probe, = result.probes
+    assert probe.context == 'Олег исследует книгу'
+    assert probe.options == ('исследует', 'no such word') and Probe.from_prompt(probe.prompt()) == probe
+    for answer, expected in [('исследует', ('futr', 'perf')), ('no such word', ('pres', 'impf'))]:
+        links, _ = parsed(result.source, lambda _: answer)
+        form = links['исследует'].morphology
+        assert (form.tense, form.aspect) == expected
+
+    for sentence in ('Я буду держать зонт, пока вы переходите дорогу.',
+                     'Когда вы переходите дорогу, я буду держать зонт.'):
+        links, words = parsed(sentence)
+        assert links['переходите'].morphology.mood == 'indc'
+        assert words[links['буду'].head] == 'держать'
+        assert links['держать'].morphology.tense == 'futr'

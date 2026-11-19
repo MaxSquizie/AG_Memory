@@ -108,7 +108,7 @@ def readings(surface: str, preposition: str | None = None) -> tuple[Reading, ...
         else:
             continue
         person = tag.person
-        if tag.POS == 'NOUN':
+        if tag.POS == 'NOUN' or (tag.POS == 'NPRO' and tag.case == 'nomn' and person is None):
             person = '3per'
         reading = Reading(lemma, role, tag.case, tag.number, tag.gender,
                           person, tag.animacy, 'tran' in tag, name_type(tag))

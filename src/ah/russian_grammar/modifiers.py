@@ -38,9 +38,9 @@ def _apply_particles(words, links, groups, conditional):
     from .parser import Link
 
     for host, (positions, scope) in groups.items():
-        if host not in links or links[host].role not in {'predicate', 'infinitive', 'converb', 'copula'}:
+        if host not in links or links[host].role not in {'predicate', 'infinitive', 'converb', 'copula', 'auxiliary'}:
             return False
-        target = links[host].head if links[host].role == 'copula' else host
+        target = links[host].head if links[host].role in {'copula', 'auxiliary'} else host
         enclosing = links[target].scope
         if enclosing and links[target].role != 'infinitive':
             return False
@@ -217,6 +217,8 @@ def _converb_hosts(matrix, outer, start):
         if (link.role == 'subject' and link.head is not None and matrix[link.head].role == 'predicate'
                 and matrix[link.head].head is None):
             yield outer[i], outer[link.head]
+        if link.role == 'predicate' and link.head is None and link.implicit_subject:
+            yield None, outer[i]
     cut = bisect_left(outer, start)
     if cut == 0:
         return
@@ -273,7 +275,8 @@ def _structures(tokens, base_function, budget, region_budget):
                         links = {i: _remap(link, outer) for i, link in zip(outer, matrix)}
                         links.update((i, _remap(link, inner)) for i, link in zip(inner, part))
                         links[converb] = replace(links[converb], role='converb', rule='D1',
-                                                 head=head, controller=controller)
+                                                 head=head, controller=controller,
+                                                 implicit_subject=links[head].implicit_subject if controller is None else None)
                         links.update((i, Link('punctuation', ',', converb, 'D1')) for i in commas)
                         tree = tuple(links[i] for i in range(len(tokens)))
                         yield tree

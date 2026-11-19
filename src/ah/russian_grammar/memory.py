@@ -7,13 +7,14 @@ from ah.model import Domain, Property
 from .infinitives import FRAMES
 from .parser import Result, analyze
 from .prepositions import TOKEN
-from .rules import known_forms
+from .rules import dictionary, known_forms
 
 
 ROOT_KEY = 'russian_grammar.root'
 RELATIVE_KEY = 'russian_grammar.relative'
 UNKNOWN = 'Неизвестно.'
-ARGUMENTS = {'subject', 'object', 'recipient', 'experiencer'}
+ARGUMENTS = {'subject', 'object', 'recipient', 'experiencer', 'beneficiary', 'stimulus', 'instrument', 'oblique'}
+PERSONAL = {'я': 'speaker', 'ты': 'addressee', 'мы': 'speaker_group', 'вы': 'addressee_group'}
 INTERROGATIVES = frozenset('кто что какой который чей сколько где куда откуда когда почему зачем как каков'.split())
 
 
@@ -55,7 +56,7 @@ def _root(rows):
     return next(i for i, row in enumerate(rows) if row['role'] == 'predicate' and row['head'] is None)
 
 
-def _rows(result):
+def _rows(result, participants):
     rows = tuple({**asdict(token), **asdict(link)} for token, link in zip(result.tokens, result.analyses[0]))
     children = [[] for _ in rows]
     root = _root(rows)
@@ -69,8 +70,9 @@ def _rows(result):
             continue
         host = row['head']
         contexts[host] = row['scope']
-        if row['scope'] in ('condition', 'alternative') and rows[host]['head'] is not None:
-            qualifications[rows[host]['head']] = 'conditional' if row['scope'] == 'condition' else 'alternative'
+        qualification = {'condition': 'conditional', 'alternative': 'alternative', 'adverbial': 'adverbial'}.get(row['scope'])
+        if qualification and rows[host]['head'] is not None:
+            qualifications[rows[host]['head']] = qualification
     pending = [(root, None, 'asserted')]
     while pending:
         i, enclosing, governing_status = pending.pop()
@@ -81,6 +83,8 @@ def _rows(result):
             category, polarity = '', category
         role = row['role']
         boundary = contexts.get(i)
+        if (row.get('morphology') or {}).get('mood') == 'impr':
+            boundary = 'directive'
         if role in ('predicate', 'clause_conjunct', 'clause_adverbial', 'clause_complement', 'clause_relative', 'converb', 'infinitive'):
             boundary = boundary or category
             if role in ('clause_adverbial', 'clause_complement', 'infinitive'):
@@ -92,6 +96,10 @@ def _rows(result):
         row['assertion_context'] = enclosing
         row['assertion_status'] = status
         pending.extend((j, enclosing, status) for j in children[i])
+    for row in rows:
+        deixis = row.get('implicit_subject') or PERSONAL.get(row['lemma'])
+        if deixis in PERSONAL.values():
+            row['participant_ref'] = participants.get(deixis.removesuffix('_group'))
     return rows
 
 
@@ -130,21 +138,75 @@ def _lookup(core, lemma):
                 yield group, rows_of(group), group.members.index(ref)
 
 
-def _question_word(word):
-    return any(lemma in INTERROGATIVES or 'Ques' in tag for lemma, tag in known_forms(word))
+def _question_word(word, selected_lemma=None):
+    return any((selected_lemma is None or selected_lemma == lemma) and (lemma in INTERROGATIVES or 'Ques' in tag)
+               for lemma, tag in known_forms(word))
 
 
 def _argument_question(word):
     return any(lemma in ('кто', 'что') and tag.POS == 'NPRO' for lemma, tag in known_forms(word))
 
 
-def _imperative(word):
-    return any(tag.POS == 'VERB' and tag.mood == 'impr' for _, tag in known_forms(word))
+def _participants(source, speaker_ref=None, addressee_ref=None):
+    dialogue = {'user': 'agent', 'agent': 'user'}
+    return {'speaker': speaker_ref or (source if source in dialogue else None),
+            'addressee': addressee_ref or dialogue.get(source)}
+
+
+def _query_rows(rows, participants):
+    result = list(rows)
+    actors = {}
+    for i, row in enumerate(rows):
+        implicit = row.get('implicit_subject')
+        if implicit in PERSONAL.values() and row['role'] not in ('infinitive', 'converb'):
+            pronoun = next(word for word, role in PERSONAL.items() if role == implicit)
+            actors[i] = len(result)
+            result.append({'role': 'subject', 'head': i, 'surface': pronoun, 'lemma': pronoun, 'case': 'nomn',
+                           'assertion_status': row['assertion_status'], 'implicit': True,
+                           'participant_ref': row.get('participant_ref')})
+        elif row['lemma'] in PERSONAL and 'participant_ref' not in row:
+            result[i] = dict(row, participant_ref=participants.get(PERSONAL[row['lemma']].removesuffix('_group')))
+    for i, row in enumerate(rows):
+        if row['role'] in ('infinitive', 'converb') and row.get('implicit_subject') in PERSONAL.values():
+            parent = row['head']
+            while parent is not None and parent not in actors:
+                parent = rows[parent]['head']
+            if parent is not None and rows[parent].get('implicit_subject') == row['implicit_subject']:
+                result[i] = dict(row, controller=actors[parent])
+    return result
+
+
+def _case(row):
+    return (row.get('case') or (row.get('morphology') or {}).get('case') or
+            {'subject': 'nomn', 'object': 'accs'}.get(row['role']))
+
+
+def _participant_answer(row):
+    ref = row.get('participant_ref')
+    if ref is None:
+        return None
+    label = {'user': 'Пользователь', 'agent': 'Агент'}.get(ref, ref)
+    case = _case(row)
+    if case and case != 'nomn':
+        if ref not in ('user', 'agent') or row['lemma'] in ('мы', 'вы'):
+            return f"«{row['surface']}» ({label})"
+        for form in dictionary().parse(label):
+            if form.tag.POS == 'NOUN' and form.tag.animacy == 'anim':
+                inflected = form.inflect({case, 'sing'})
+                if inflected:
+                    return inflected.word.capitalize()
+    if row['lemma'] == 'мы':
+        return label + ' и другие'
+    return label if row['lemma'] != 'вы' else 'Адресат обращения «вы» (' + label + ')'
 
 
 def _extraction(rows, stored, observed, source, focus, budget):
     root = _root(rows)
-    if focus is not None and rows[root].get('scope'):
+    if any(row.get('implicit_subject') == 'unresolved' for row in rows):
+        return set()
+    scoped_question = focus is not None and bool(rows[root].get('scope'))
+    if scoped_question and not any(row['role'] == 'clause_marker' and row.get('scope') in ('condition', 'adverbial')
+                                   for row in rows):
         return set()
     children = [[] for _ in rows]
     for i, row in enumerate(rows):
@@ -156,6 +218,7 @@ def _extraction(rows, stored, observed, source, focus, budget):
             children_found[row['head']].append(j)
     if not any(row['role'] == 'clause_relative' for row in rows):
         children_found = [[j for j in group if stored[j]['role'] != 'clause_relative'] for group in children_found]
+    agreement_target = rows[focus]['head'] if focus is not None and rows[focus]['role'] == 'subject' else None
     order = [root]
     for i in order:
         order.extend(children[i])
@@ -166,9 +229,10 @@ def _extraction(rows, stored, observed, source, focus, budget):
         for mapping in states:
             pool = [observed] if i == root else children_found[mapping[row['head']]]
             for j in pool:
-                if focus is None and len(children[i]) != len(children_found[j]):
+                if (focus is None or scoped_question and i != focus) and len(children[i]) != len(children_found[j]):
                     continue
-                if j in mapping.values() or not _compatible(rows, i, stored[j], i == focus, i == root):
+                variable_subject = i == agreement_target or (row['role'] == 'auxiliary' and row['head'] == agreement_target)
+                if j in mapping.values() or not _compatible(rows, i, stored[j], i == focus, i == root, variable_subject):
                     continue
                 following.append({**mapping, i: j})
                 if len(following) > budget:
@@ -192,19 +256,25 @@ def _extraction(rows, stored, observed, source, focus, budget):
             span = [target]
             for node in span:
                 span.extend(j for j in children_found[node] if stored[j]['role'] != 'clause_relative')
+            span = [j for j in span if not stored[j].get('implicit')]
             first, last = min(span), max(span)
             included = set(span)
             if any(j not in included and stored[j]['role'] != 'punctuation' for j in range(first, last + 1)):
                 continue
             answers.add(source[stored[first]['start']:stored[last]['end']])
         else:
-            head = mapping[focus]
-            parts = [head, *(j for j in children_found[head] if stored[j]['role'] == 'name_part')]
-            answers.add(' '.join(stored[j]['surface'] for j in sorted(parts)))
+            parts = [mapping[focus]]
+            for j in parts:
+                parts.extend(child for child in children_found[j]
+                             if stored[child]['role'] in ('name_part', 'nominal_conjunct', 'coordinator'))
+            words = [_participant_answer(stored[j]) if stored[j]['lemma'] in PERSONAL else stored[j]['surface']
+                     for j in sorted(parts)]
+            if all(words):
+                answers.add(' '.join(words))
     return answers
 
 
-def _compatible(rows, i, stored, focus, root):
+def _compatible(rows, i, stored, focus, root, variable_subject):
     row = rows[i]
     if row.get('scope') != stored.get('scope') or row['assertion_status'] != stored['assertion_status']:
         return False
@@ -214,19 +284,42 @@ def _compatible(rows, i, stored, focus, root):
         if (row.get('antecedent') is None) != (stored.get('antecedent') is None):
             return False
     if row['role'] != stored['role'] and not (root and stored['role'] == 'clause_relative'):
-        if not (focus and row['role'] == 'object' and stored['role'] == 'recipient' and row['head'] is not None):
+        if not focus or row['head'] is None:
             return False
-        frame = FRAMES.get(rows[row['head']]['lemma'])
-        if frame is None or 'accs' not in frame.recipient_cases or stored.get('case') != 'accs':
+        if (row['role'], stored['role']) == ('oblique', 'instrument'):
+            if row.get('case') != 'ablt' or stored.get('case') != 'ablt':
+                return False
+        elif (row['role'], stored['role']) == ('object', 'recipient'):
+            frame = FRAMES.get(rows[row['head']]['lemma'])
+            if frame is None or 'accs' not in frame.recipient_cases or stored.get('case') != 'accs':
+                return False
+        else:
             return False
     if not focus:
+        if row['lemma'] in PERSONAL or stored['lemma'] in PERSONAL:
+            return (row['lemma'] in PERSONAL and stored['lemma'] in PERSONAL and _case(row) == _case(stored) and
+                    row.get('participant_ref') is not None and row['participant_ref'] == stored.get('participant_ref') and
+                    (row['lemma'] == stored['lemma'] or {row['lemma'], stored['lemma']} == {'я', 'ты'}))
+        left, right = row.get('morphology'), stored.get('morphology')
+        if left and right and row['lemma'] == stored['lemma'] and left.get('mood') and right.get('mood'):
+            categories = ('tense', 'aspect', 'mood', 'voice', 'transitivity')
+            if any(left.get(k) != right.get(k) for k in categories):
+                return False
+            if variable_subject:
+                return True
+            if all(left.get(k) == right.get(k) for k in ('number', 'gender')):
+                if left.get('person') == right.get('person') or {left.get('person'), right.get('person')} == {'1per', '2per'}:
+                    return True
+            return False
         actual = (stored.get('recovery') or {}).get('corrected', stored['surface'])
         wanted = (row.get('recovery') or {}).get('corrected', row['surface'])
         return row['lemma'] == stored['lemma'] and wanted.casefold() == actual.casefold()
     if stored.get('event_view'):
         return row['lemma'] == 'что'
     cases = {tag.case for lemma, tag in known_forms(row['surface']) if lemma == row['lemma'] and tag.POS == 'NPRO'}
-    actual_case = stored.get('case') or {'subject': 'nomn', 'object': 'accs'}.get(stored['role'])
+    actual_case = _case(stored)
+    if stored['lemma'] in PERSONAL:
+        return row['lemma'] == 'кто' and stored.get('participant_ref') is not None and actual_case in cases
     animacy = 'anim' if row['lemma'] == 'кто' else 'inan'
     surface = (stored.get('recovery') or {}).get('corrected', stored['surface'])
     return any(lemma == stored['lemma'] and tag.POS in ('NOUN', 'NPRO') and tag.case in cases and
@@ -234,10 +327,12 @@ def _compatible(rows, i, stored, focus, root):
                for lemma, tag in known_forms(surface))
 
 
-def _answer(view, rows, focus, budget, result):
+def _answer(view, rows, focus, budget, result, participants):
+    rows = _query_rows(rows, participants)
     answers = {}
     lemma = rows[_root(rows)]['lemma']
     for group, stored, observed in _lookup(view, lemma):
+        stored = _query_rows(stored, _participants(group.meta.get('source')))
         surfaces = _extraction(rows, stored, observed, group.meta['verbatim'], focus, budget)
         if surfaces is None:
             return GrammarReply('UNKNOWN', UNKNOWN, analysis=result)
@@ -249,36 +344,39 @@ def _answer(view, rows, focus, budget, result):
     return GrammarReply('UNKNOWN', UNKNOWN, analysis=result)
 
 
-def submit(core, text, choose=None, *, source='user', journal=None, budget=256):
+def submit(core, text, choose=None, *, source='user', speaker_ref=None, addressee_ref=None, journal=None, budget=256):
     words = TOKEN.findall(text)
     if not words:
         return GrammarReply('UNRESOLVED', 'Пустой ввод.')
-    query = words[-1] == '?' or _question_word(words[0]) or any(w.casefold() == 'ли' for w in words)
+    marked_question = words[-1] == '?'
+    query_hint = marked_question or _question_word(words[0]) or any(w.casefold() == 'ли' for w in words)
     initial_arg = _argument_question(words[0])
     if initial_arg:
         def accept(tree):
-            return tree[0].role in ARGUMENTS and tree[0].lemma in ('кто', 'что')
+            return (tree[0].role in ARGUMENTS and tree[0].lemma in ('кто', 'что') or
+                    tree[0].role == 'clause_marker')
     else:
         accept = None
     result = analyze(text, choose, budget=budget, accept_tree=accept)
     if len(result.analyses) != 1 or result.status != 'PARSED_FRAGMENT':
-        if query and result.status != 'AMBIGUOUS':
+        if query_hint and result.status != 'AMBIGUOUS':
             return GrammarReply('UNKNOWN', UNKNOWN, analysis=result)
         return GrammarReply(result.status, 'Разбор не завершён. ' + result.reason, analysis=result)
-    rows = _rows(result)
-    variables = [i for i, row in enumerate(rows) if row.get('antecedent') is None and _question_word(row['surface'])
-                 and row['role'] not in ('clause_marker', 'coordinator')]
-    if variables:
-        query = True
-    if query:
+    participants = _participants(source, speaker_ref, addressee_ref)
+    rows = _rows(result, participants)
+    variables = [i for i, row in enumerate(rows) if row.get('antecedent') is None and
+                 row['role'] not in ('clause_marker', 'coordinator') and _question_word(row['surface'], row['lemma'])]
+    if marked_question or variables or any(row['lemma'] == 'ли' and row['role'] == 'particle' for row in rows):
         if len(variables) > 1 or any(rows[i]['role'] not in ARGUMENTS or rows[i]['lemma'] not in ('кто', 'что')
                                      for i in variables):
             return GrammarReply('UNKNOWN', UNKNOWN, analysis=result)
         with _access(core, _adapter(core, journal)) as view:
-            return _answer(view, rows, next(iter(variables), None), budget, result)
+            return _answer(view, rows, next(iter(variables), None), budget, result, participants)
     root = rows[_root(rows)]
-    if _imperative(root['surface']):
-        return GrammarReply('UNRESOLVED', 'Форма допускает повелительное наклонение.', analysis=result)
+    if root['rule'] == 'V.IMP' or (root.get('morphology') or {}).get('mood') == 'impr':
+        prohibition = 'negated' in (root.get('scope') or '').split('_')
+        act = 'Распознан запрет на действие' if prohibition else 'Распознано побуждение к действию'
+        return GrammarReply('DIRECTIVE', f"{act} «{root['lemma']}».", analysis=result)
     with _access(core, _adapter(core, journal), write=True) as draft:
         reference = _remember(draft, result, rows, source)
     return GrammarReply('STORED', 'Наблюдение записано.', reference, result)

@@ -4,7 +4,7 @@ from importlib.resources import files
 from itertools import product
 
 from .prepositions import FORMS, PREFIXES
-from .rules import known_forms, readings
+from .rules import Reading, known_forms, name_continuations, name_type, readings
 
 
 POSSESSIVES = frozenset(('мой', 'наш', 'твой', 'ваш', 'свой', 'его', 'её', 'их', 'ихний'))
@@ -34,7 +34,7 @@ def _markers(tokens, start):
 class Group:
     start: int
     end: int
-    preposition: str
+    preposition: str | None
     noun: int
     lemma: str
     case: str
@@ -69,7 +69,9 @@ def _members(tokens, start, prep, case=None):
     qualifiers = []
     for i in range(start, len(tokens)):
         forms = known_forms(tokens[i].surface)
-        allowed = {(r.lemma, r.case) for r in readings(tokens[i].surface, prep) if r.role == 'governed'}
+        allowed = None
+        if prep:
+            allowed = {(r.lemma, r.case) for r in readings(tokens[i].surface, prep) if r.role == 'governed'}
         for lemma, noun in forms:
             if noun.POS not in ('NOUN', 'NPRO'):
                 continue
@@ -77,7 +79,9 @@ def _members(tokens, start, prep, case=None):
                 continue
             if case is not None and noun.case != case:
                 continue
-            if (lemma, noun.case) not in allowed and not (case is not None and noun.POS == 'NPRO' and noun.person == '3per'):
+            if prep is None and 'Af-p' in noun:
+                continue
+            if allowed is not None and (lemma, noun.case) not in allowed and not (case is not None and noun.POS == 'NPRO' and noun.person == '3per'):
                 continue
             choices = [tuple(dict.fromkeys(Link(role, adj, i, 'P.POSS' if role == 'possessive' else 'A1')
                                            for role, adj, tag in variants if _agree(tag, noun)))
@@ -91,14 +95,39 @@ def _members(tokens, start, prep, case=None):
         qualifiers.append(options)
 
 
-def _groups(tokens, start, budget):
+def _names(tokens, group):
+    from .parser import Link
+
+    noun = group.noun
+    for lemma, tag in known_forms(tokens[noun].surface):
+        kind = name_type(tag)
+        if lemma != group.lemma or tag.case != group.case or tag.number != 'sing' or not kind:
+            continue
+        first = Reading(lemma, 'oblique', tag.case, tag.number, tag.gender, None, tag.animacy, False, kind)
+        states = [(group, (first,))]
+        while states:
+            current, parts = states.pop()
+            index = current.end
+            if index < len(tokens):
+                for part in name_continuations(tokens[index].surface, parts):
+                    link = Link('name_part', part.lemma, noun, 'NAME', case=part.case)
+                    expanded = replace(current, end=index + 1, extra=(*current.extra, (index, link)))
+                    yield expanded
+                    states.append((expanded, (*parts, part)))
+
+
+def _groups(tokens, start, budget, *, bare_cases=()):
     from .parser import AnalysisBudgetExceeded, Link
 
     found = set()
-    for first, prep in _prepositions(tokens, start):
-        for noun, lemma, case, modifiers in _members(tokens, first, prep):
+    seeds = ((start, None, case) for case in sorted(bare_cases)) if bare_cases else (
+        (first, prep, None) for first, prep in _prepositions(tokens, start))
+    for first, prep, required_case in seeds:
+        for noun, lemma, case, modifiers in _members(tokens, first, prep, required_case):
             initial = Group(start, noun + 1, prep, noun, lemma, case, modifiers)
             pending = [initial]
+            if bare_cases:
+                pending.extend(_names(tokens, initial))
             while pending:
                 group = pending.pop()
                 if group in found:
@@ -106,7 +135,7 @@ def _groups(tokens, start, budget):
                 found.add(group)
                 if len(found) > budget:
                     raise AnalysisBudgetExceeded('NOMINAL_GROUP_BUDGET')
-                if any(link.role in ('nominal_conjunct', 'possessive') for _, link in group.extra):
+                if bare_cases or any(link.role in ('nominal_conjunct', 'possessive') for _, link in group.extra):
                     yield group
                 end = group.end
                 if end >= len(tokens):
@@ -128,6 +157,10 @@ def _groups(tokens, start, budget):
                             links.append((i, Link(role, tokens[i].surface.casefold(), parent, 'P.COORD')))
                         links.append((head, Link('nominal_conjunct', child, noun, 'P.COORD', case)))
                         pending.append(replace(group, end=head + 1, extra=(*links, *attrs)))
+                        if bare_cases:
+                            item = Group(stop, head + 1, prep, head, child, case, attrs)
+                            for name in _names(tokens, item):
+                                pending.append(replace(group, end=name.end, extra=(*links, *name.extra)))
 
 
 def _restore(tree, kept, groups):
