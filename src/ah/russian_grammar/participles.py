@@ -9,7 +9,7 @@ from .rules import dictionary, known_forms
 _NOMINAL = {'subject', 'object', 'recipient', 'stimulus', 'beneficiary', 'experiencer', 'instrument',
             'oblique', 'governed', 'nominal_conjunct', 'genitive_modifier', 'agent'}
 _INSIDE_NOUN = {'attribute', 'possessive', 'name_part', 'numeral', 'numeral_part', 'preposition'}
-_REFERENCE = ('head', 'controller', 'antecedent', 'coord_head', 'shared_agent')
+_REFERENCE = ('head', 'controller', 'antecedent', 'coord_head', 'shared_agent', 'shared_object')
 
 
 def _remap(link, indices):

@@ -5,6 +5,8 @@ from uuid import uuid4
 
 from ah.model import Domain, Property
 
+from . import adjuncts
+from . import homogeneous
 from .infinitives import FRAMES
 from .morphology import _common, from_tag
 from .parser import Result, analyze
@@ -12,10 +14,13 @@ from .prepositions import TOKEN
 from .rules import dictionary, known_forms
 
 
+
 ROOT_KEY = 'russian_grammar.root'
+CONJUNCT_KEY = 'russian_grammar.conjunct'
 RELATIVE_KEY = 'russian_grammar.relative'
+GAP_KEY = 'russian_grammar.gap'
 UNKNOWN = 'Неизвестно.'
-ARGUMENTS = {'subject', 'object', 'recipient', 'experiencer', 'beneficiary', 'stimulus', 'instrument', 'oblique', 'agent'}
+ARGUMENTS = {'subject', 'comparison_standard', 'object', 'recipient', 'experiencer', 'beneficiary', 'stimulus', 'instrument', 'oblique', 'agent'}
 AMOUNTS = {'cardinal', 'collective', 'both', 'fraction', 'range', 'indefinite'}
 NUMBER_PARTS = {'numeral_part', 'quantity_modifier'}
 PERSONAL = {'я': 'speaker', 'ты': 'addressee', 'мы': 'speaker_group', 'вы': 'addressee_group'}
@@ -70,6 +75,8 @@ def _rows(result, participants):
     contexts = {}
     qualifications = {}
     for i, row in enumerate(rows):
+        if row['role'] == 'parenthetical' and row.get('scope') != 'ordering':
+            qualifications[row['head']] = 'qualified'
         if row['role'] != 'clause_marker' or not row.get('scope'):
             continue
         host = row['head']
@@ -81,12 +88,23 @@ def _rows(result, participants):
     while pending:
         i, enclosing, governing_status = pending.pop()
         row = rows[i]
+        if row['rule'] == 'UTT.QUOTE':
+            row['quotation'] = i
+        elif row['head'] is not None and 'quotation' in rows[row['head']]:
+            row['quotation'] = rows[row['head']]['quotation']
         scope = row.get('scope') or ''
         category, _, polarity = scope.partition('_')
         if category in ('negated', 'averted'):
             category, polarity = '', category
         role = row['role']
         boundary = contexts.get(i)
+        if role == 'clause_relative' and row['rule'] == 'CL.REL' and not category:
+            nominal = row['head']
+            if governing_status != 'asserted':
+                boundary = governing_status
+            elif (rows[nominal].get('scope') == 'focus_negated' or
+                  any(rows[j].get('scope') in ('universal', 'negative') for j in children[nominal])):
+                boundary = 'restrictive'
         if (row.get('morphology') or {}).get('mood') == 'impr':
             boundary = 'directive'
         if role in ('predicate', 'clause_conjunct', 'clause_adverbial', 'clause_complement', 'clause_relative',
@@ -106,20 +124,24 @@ def _rows(result, participants):
     for row in rows:
         deixis = row.get('implicit_subject') or PERSONAL.get(row['lemma'])
         if deixis in PERSONAL.values():
-            row['participant_ref'] = participants.get(deixis.removesuffix('_group'))
+            row['participant_ref'] = None if 'quotation' in row else participants.get(deixis.removesuffix('_group'))
     return rows
 
 
 def _remember(core, result, rows, source):
     root = rows[_root(rows)]
+    projected = set(homogeneous.projection_members(rows, _root(rows))) - {_root(rows)}
     members = []
-    for row in rows:
+    for i, row in enumerate(rows):
         props = {}
-        if row['role'] == 'clause_relative' and row['assertion_status'] == 'asserted':
-            props[RELATIVE_KEY] = Property(RELATIVE_KEY, row['lemma'], 'str')
+        if (row['role'] == 'clause_relative' or row['rule'] == 'GAP') and row['assertion_status'] == 'asserted':
+            key = GAP_KEY if row['rule'] == 'GAP' else RELATIVE_KEY
+            props[key] = Property(key, row['lemma'], 'str')
+        if i in projected and row['assertion_status'] == 'asserted':
+            props[CONJUNCT_KEY] = Property(CONJUNCT_KEY, row['lemma'], 'str')
         members.append(core.ref(core.add_entity(Domain.H, properties=props, meta=row).uid))
     for i, row in enumerate(rows):
-        for key in ('head', 'controller', 'antecedent', 'coord_head', 'shared_agent'):
+        for key in ('head', 'controller', 'antecedent', 'coord_head', 'shared_agent', 'shared_object'):
             if row.get(key) is not None:
                 relation = 'grammar.' + (row['role'] if key == 'head' else key)
                 core.add_link(relation, members[i], members[row[key]], 1.0)
@@ -138,11 +160,25 @@ def _lookup(core, lemma):
     for ref in core.store.find_elements_with_property(ROOT_KEY, lemma):
         group = core.store.get_element(Domain.H, ref.uid)
         rows = rows_of(group)
-        yield group, rows, _root(rows)
-    for ref in core.store.find_elements_with_property(RELATIVE_KEY, lemma):
+        root = _root(rows)
+        yield group, rows, root
+        members = homogeneous.projection_members(rows, root)
+        if members and (projection := homogeneous.project(rows, members, root)):
+            yield group, *projection
+    for ref in core.store.find_elements_with_property(CONJUNCT_KEY, lemma):
         for group in core.store.groups_containing(ref.uid):
-            if group.meta.get('kind') == 'russian_grammar.observation':
-                yield group, rows_of(group), group.members.index(ref)
+            if group.meta.get('kind') != 'russian_grammar.observation':
+                continue
+            rows = rows_of(group)
+            members = homogeneous.projection_members(rows, _root(rows))
+            target = group.members.index(ref)
+            if target in members and (projection := homogeneous.project(rows, members, target)):
+                yield group, *projection
+    for key in (RELATIVE_KEY, GAP_KEY):
+        for ref in core.store.find_elements_with_property(key, lemma):
+            for group in core.store.groups_containing(ref.uid):
+                if group.meta.get('kind') == 'russian_grammar.observation':
+                    yield group, rows_of(group), group.members.index(ref)
 
 
 def _question_word(word, selected_lemma=None):
@@ -185,8 +221,9 @@ def _normalize_short_predicates(rows, result):
             result[i] = dict(result[i], morphology=dict(lexical, tense=tense, person=auxiliary.get('person'), mood=mood))
 
 
-def _expand_shared_agents(rows, result, budget):
-    shared = [(i, row['shared_agent']) for i, row in enumerate(rows) if row.get('shared_agent') is not None]
+def _expand_shared_arguments(rows, result, budget):
+    shared = [(i, row[key]) for i, row in enumerate(rows) for key in ('shared_agent', 'shared_object')
+              if row.get(key) is not None]
     if not shared:
         return True
     children = [[] for _ in rows]
@@ -209,7 +246,7 @@ def _expand_shared_agents(rows, result, budget):
             branch.extend((child, occurrence) for child in children[original])
         for occurrence in copies.values():
             row = result[occurrence]
-            for key in ('controller', 'antecedent', 'coord_head', 'shared_agent'):
+            for key in ('controller', 'antecedent', 'coord_head', 'shared_agent', 'shared_object'):
                 if row.get(key) in copies:
                     row[key] = copies[row[key]]
     return True
@@ -246,7 +283,7 @@ def _query_rows(rows, participants, budget):
             if parent is not None and rows[parent].get('implicit_subject') == row['implicit_subject']:
                 result[i] = dict(row, controller=actors[parent])
     _normalize_short_predicates(rows, result)
-    return result if _expand_shared_agents(rows, result, budget) else None
+    return result if _expand_shared_arguments(rows, result, budget) else None
 
 
 def _case(row):
@@ -317,6 +354,10 @@ def _quantity_answer_head(question, stored, children, head):
 
 def _nominal_parts(stored, children, head):
     parts = [head]
+    parent = stored[head]['head']
+    expanded = stored[head].get('rule') in ('GAP.OBJ', 'GAP.SUBJ', 'NEG.EXIST.OWNER', 'NEG.EXIST.ENTITY')
+    if parent is not None:
+        expanded = expanded or any(stored[i].get('rule') == 'GAP' for i in children[parent])
     modifiers = set()
     for j in parts:
         for child in children[j]:
@@ -324,8 +365,8 @@ def _nominal_parts(stored, children, head):
             if j in modifiers or role in ('participle', 'genitive_modifier'):
                 modifiers.add(child)
                 parts.append(child)
-            elif (role in NUMBER_PARTS or role in ('name_part', 'nominal_conjunct', 'coordinator', 'numeral') or
-                  stored[j].get('counted') and role in ('attribute', 'possessive')):
+            elif (stored[child].get('rule') == 'NP.DET' or role in NUMBER_PARTS or role in ('name_part', 'nominal_conjunct', 'coordinator', 'numeral') or
+                  (expanded or stored[j].get('counted')) and role in ('attribute', 'possessive')):
                 parts.append(child)
     return parts
 
@@ -356,6 +397,8 @@ def _nominal_answer(stored, parts, source):
 
 
 def _may_deny_participation(row):
+    if row.get('scope') in ('universal', 'negative', 'focus_negated', 'focus_exclusive'):
+        return True
     if row['lemma'] in ('никто', 'ничто', 'никакой', 'ничей', 'нисколько', 'ни', 'не'):
         return True
     kind = row.get('quantity_kind')
@@ -364,7 +407,7 @@ def _may_deny_participation(row):
     if kind == 'indefinite':
         return row['lemma'] not in ('несколько', 'много')
     qualifier = row.get('quantity_modifier')
-    if qualifier in ('at_most', 'less_than', 'approximate'):
+    if qualifier in ('at_most', 'less_than', 'approximate', 'negative_concord'):
         return True
     try:
         lower = Fraction((row.get('quantity') or '').partition('..')[0])
@@ -375,6 +418,11 @@ def _may_deny_participation(row):
 
 def _projection_requirements(rows, children, root, scoped):
     required = set()
+    subtree = _descendants(children, [root])
+    if rows[root].get('rule') == 'NEG.EXIST':
+        required.update(subtree)
+    if any(rows[j]['role'] == 'coordinator' and rows[j].get('scope') == 'alternative' for j in subtree):
+        required.update(subtree)
     for child in children[root]:
         argument = rows[child]['role'] in ARGUMENTS
         if not argument and not scoped:
@@ -450,19 +498,20 @@ def _extraction(rows, stored, observed, source, focus, budget):
     root = _root(rows)
     if any(row.get('implicit_subject') == 'unresolved' and (focus is None or i != root) for i, row in enumerate(rows)):
         return {}
-    scoped_question = focus is not None and bool(rows[root].get('scope'))
+    scoped_question = focus is not None and bool(rows[root].get('scope')) and rows[root]['rule'] != 'NEG.EXIST'
     if scoped_question and not any(row['role'] == 'clause_marker' and row.get('scope') in ('condition', 'adverbial')
                                    for row in rows):
         return {}
     children = [[] for _ in rows]
     for i, row in enumerate(rows):
-        if row['head'] is not None and row['role'] != 'punctuation' and row['role'] not in NUMBER_PARTS:
+        if row['head'] is not None and row['role'] != 'punctuation' and row['role'] not in NUMBER_PARTS and row.get('scope') != 'ordering':
             children[row['head']].append(i)
     surface_children = [[] for _ in stored]
     for j, row in enumerate(stored):
         if row['head'] is not None and row['role'] != 'punctuation':
             surface_children[row['head']].append(j)
-    children_found = [[j for j in group if stored[j]['role'] not in NUMBER_PARTS] for group in surface_children]
+    children_found = [[j for j in group if stored[j]['role'] not in NUMBER_PARTS and stored[j].get('scope') != 'ordering']
+                      for group in surface_children]
     if not scoped_question and not any(row['role'] == 'clause_relative' for row in rows):
         children_found = [[j for j in group if stored[j]['role'] != 'clause_relative'] for group in children_found]
     groups, projection = _participle_groups(stored, observed)
@@ -487,7 +536,19 @@ def _extraction(rows, stored, observed, source, focus, budget):
                     continue
                 variable_subject = i == agreement_target or (row['role'] in ('auxiliary', 'copula') and
                                                               row['head'] == agreement_target)
-                if j in mapping.values() or not _compatible(rows, i, stored[j], i == focus, i == root, variable_subject):
+                candidate = stored[j]
+                if (i == focus and not row.get('scope') and candidate.get('scope') == 'focus_exclusive'
+                        and candidate['assertion_status'] == 'asserted'):
+                    candidate = {**candidate, 'scope': None}
+                if i == focus and candidate.get('rule') == 'CL.NOMREF':
+                    target = stored[candidate['antecedent']]
+                    candidate = {**candidate, 'relative_animacy': (target.get('morphology') or {}).get('animacy')}
+                if j in mapping.values():
+                    continue
+                if i == focus and adjuncts.question(row):
+                    if not adjuncts.matches(row, stored, surface_children, j):
+                        continue
+                elif not _compatible(rows, i, candidate, i == focus, i == root, variable_subject):
                     continue
                 following.append({**mapping, i: j})
                 if len(following) > budget:
@@ -512,6 +573,12 @@ def _extraction(rows, stored, observed, source, focus, budget):
             if missing:
                 continue
             answers['Да.'] = 'Да.'
+        elif stored[mapping[focus]].get('rule') == 'UTT.QUOTE':
+            quote = mapping[focus]
+            bounds = [row for row in stored if row.get('rule') == 'UTT.QUOTE.BOUND' and row['head'] == quote]
+            if len(bounds) == 2 and all(stored[j].get('quotation') == quote for j in missing):
+                phrase = source[min(row['start'] for row in bounds):max(row['end'] for row in bounds)]
+                answers[phrase] = phrase
         elif stored[mapping[focus]].get('event_view'):
             if missing:
                 continue
@@ -533,11 +600,16 @@ def _extraction(rows, stored, observed, source, focus, budget):
             answers[phrase.casefold()] = phrase
         else:
             head = mapping[focus]
+            if stored[head].get('rule') == 'CL.NOMREF':
+                head = stored[head]['antecedent']
             if rows[focus].get('quantity_kind') == 'query':
                 head = _quantity_answer_head(rows[focus], stored, surface_children, head)
                 if head is None:
                     continue
-            parts = _nominal_parts(stored, surface_children, head)
+            parts = (_descendants(surface_children, [head]) if adjuncts.question(rows[focus])
+                     else _nominal_parts(stored, surface_children, head))
+            if stored[head].get('scope') == 'focus_exclusive' and stored[head]['assertion_status'] == 'asserted':
+                missing.difference_update(j for j in surface_children[head] if stored[j]['rule'] == 'F.NP')
             if missing and not missing.issubset(parts):
                 continue
             answer = _nominal_answer(stored, parts, source)
@@ -549,6 +621,10 @@ def _extraction(rows, stored, observed, source, focus, budget):
 
 def _compatible(rows, i, stored, focus, root, variable_subject):
     row = rows[i]
+    if focus and stored.get('rule') == 'UTT.QUOTE':
+        return row['role'] == 'object' and row['lemma'] == 'что' and 'quotation' not in row
+    if ('quotation' in row) != ('quotation' in stored):
+        return False
     if row.get('scope') != stored.get('scope') or row['assertion_status'] != stored['assertion_status']:
         return False
     if not focus:
@@ -556,7 +632,7 @@ def _compatible(rows, i, stored, focus, root, variable_subject):
             return False
         if (row.get('antecedent') is None) != (stored.get('antecedent') is None):
             return False
-    if row['role'] != stored['role'] and not (root and stored['role'] == 'clause_relative'):
+    if row['role'] != stored['role'] and not (root and (stored['role'] == 'clause_relative' or stored.get('rule') == 'GAP')):
         if not focus or row['head'] is None:
             return False
         if (row['role'], stored['role']) == ('oblique', 'instrument'):
@@ -594,6 +670,8 @@ def _compatible(rows, i, stored, focus, root, variable_subject):
                     return False
             return row['lemma'] == stored['lemma'] and _case(row) == _case(stored)
         if row['lemma'] in PERSONAL or stored['lemma'] in PERSONAL:
+            if 'quotation' in row:
+                return row['lemma'] == stored['lemma'] and _case(row) == _case(stored)
             return (row['lemma'] in PERSONAL and stored['lemma'] in PERSONAL and _case(row) == _case(stored) and
                     row.get('participant_ref') is not None and row['participant_ref'] == stored.get('participant_ref') and
                     (row['lemma'] == stored['lemma'] or {row['lemma'], stored['lemma']} == {'я', 'ты'}))
@@ -617,6 +695,8 @@ def _compatible(rows, i, stored, focus, root, variable_subject):
     if stored['lemma'] in PERSONAL:
         return row['lemma'] == 'кто' and stored.get('participant_ref') is not None and actual_case in cases
     animacy = 'anim' if row['lemma'] == 'кто' else 'inan'
+    if stored.get('rule') == 'CL.NOMREF':
+        return actual_case in cases and stored.get('relative_animacy') == animacy
     if stored.get('quantity_kind'):
         form_animacy = (stored.get('morphology') or {}).get('animacy')
         if not form_animacy and stored['quantity_kind'] == 'collective' and stored['role'] == 'subject':
@@ -674,10 +754,10 @@ def submit(core, text, choose=None, *, source='user', speaker_ref=None, addresse
         return GrammarReply(result.status, 'Разбор не завершён. ' + result.reason, analysis=result)
     participants = _participants(source, speaker_ref, addressee_ref)
     rows = _rows(result, participants)
-    variables = [i for i, row in enumerate(rows) if row.get('antecedent') is None and
+    variables = [i for i, row in enumerate(rows) if 'quotation' not in row and row.get('antecedent') is None and row['rule'] != 'CL.WH' and
                  row['role'] not in ('clause_marker', 'coordinator') and _question_word(row['surface'], row['lemma'])]
-    if marked_question or variables or any(row['lemma'] == 'ли' and row['role'] == 'particle' for row in rows):
-        if len(variables) > 1 or any(not (rows[i]['role'] in ARGUMENTS and rows[i]['lemma'] in ('кто', 'что') or
+    if marked_question or variables or any(row['lemma'] == 'ли' and row['role'] == 'particle' and 'quotation' not in row for row in rows):
+        if len(variables) > 1 or any(not (adjuncts.question(rows[i]) or rows[i]['rule'] == 'NEG.EXIST.OWNER' and rows[i]['lemma'] == 'кто' or rows[i]['role'] in ARGUMENTS and rows[i]['lemma'] in ('кто', 'что') or
                                           rows[i].get('quantity_kind') == 'query' and rows[i]['role'] in ARGUMENTS | {'numeral'})
                                      for i in variables):
             return GrammarReply('UNKNOWN', UNKNOWN, analysis=result)

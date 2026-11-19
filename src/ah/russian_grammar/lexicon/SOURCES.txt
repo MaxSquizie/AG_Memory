@@ -130,3 +130,40 @@ python scripts/import_russian_units.py units.json currencies.json src/ah/russian
 https://github.com/unicode-org/cldr-json/blob/46.0.0/cldr-json/cldr-units-full/main/ru/units.json
 https://github.com/unicode-org/cldr-json/blob/46.0.0/cldr-json/cldr-numbers-full/main/ru/currencies.json
 https://www.unicode.org/license.txt
+
+adjunct_frames.tsv is derived from the Russian FrameBank, offline dictionary
+revision e60da2a38f645db21c55aa0e7ff9730e92e7e2ca (GPL-3.0).
+Source and contributors: https://github.com/olesar/framebank/tree/e60da2a38f645db21c55aa0e7ff9730e92e7e2ca
+Olga Lyashevskaya and Egor Kashkin (2015), FrameBank: a database of Russian
+lexical constructions, CCIS 542, pp. 337–348. See FrameBank-LICENSE.txt.
+framebank_dict_cx_items.txt SHA256 e01c28c6fd3e4fbbae20df3f80ecfb054debdc5169bfe0f72c8567408da52534
+framebank_dict_cx.txt SHA256 f53ae6cff687ce9cf28db3af10f663945305ed594fd72f63e010d353b12d7213
+python scripts/import_russian_spatial_frames.py framebank_dict_cx_items.txt framebank_dict_cx.txt src/ah/russian_grammar/lexicon/adjunct_frames.tsv
+The spatial slot table uses exact place, destination and source role labels
+with corresponding case formulas. Nominals are inferred from construction
+titles containing a single preposition and a locally matching inanimate noun.
+The noun evidence retains the preposition and direction. Geographic names
+also use OpenCorpora's Geox feature. Both require a licensed governing verb.
+An adverb has a corpus reading only when it is the sole candidate in at least
+two construction titles for one role. These attestations pool senses and do
+not provide an exhaustive ontology or word sense disambiguation.
+adjunct_readings.tsv contains the project's supplemental lexical annotations
+for calendar expressions, nonspatial prepositional expressions and adverbs.
+
+attested_nouns.tsv contains exact common-noun surface readings absent from
+the installed pymorphy3 Russian dictionary and attested in the same GSD/PUD
+corpora and revisions listed for clause-connectives.tsv (CC BY-SA 4.0).
+The importer maps the annotated lemma, case, animacy, gender and number.
+No paradigms or unattested cases are inferred.
+python scripts/import_russian_attested_nouns.py ru_gsd-ud-train.conllu ru_pud-ud-test.conllu src/ah/russian_grammar/lexicon/attested_nouns.tsv
+
+quotation_governors.txt uses every FrameBank construction with a quoted clause («CL»)
+in its form. Source revision, input checksum and license as for adjunct_frames.tsv above.
+python scripts/import_russian_quotation_frames.py framebank_dict_cx_items.txt src/ah/russian_grammar/lexicon/quotation_governors.txt
+
+attested_name_parts.tsv is derived from the same GSD/PUD files, revisions and
+CC BY-SA 4.0 license as attested_nouns.tsv. The same importer selects exact
+PROPN forms attached by flat:name that are absent from the dictionary.
+These rows provide case, number and gender for a name component without
+assigning a surname category or inferring a declension paradigm.
+python scripts/import_russian_attested_nouns.py --name-parts ru_gsd-ud-train.conllu ru_pud-ud-test.conllu src/ah/russian_grammar/lexicon/attested_name_parts.tsv

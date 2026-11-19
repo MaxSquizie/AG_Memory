@@ -2,6 +2,7 @@ from bisect import bisect_left
 from dataclasses import replace
 from itertools import product
 
+from .morphology import NOMINAL_ROLES
 from .prepositions import FORMS, PREFIXES
 from .rules import Reading, known_forms
 
@@ -23,6 +24,8 @@ def _particles(words):
                 end += 1
             if end < len(words) and words[end] == 'не':
                 scope = 'averted'
+        if words[i] in {'только', 'лишь'}:
+            scope = 'exclusive'
         if scope is None and words[i] == 'не':
             end = i
             scope = 'negated'
@@ -38,7 +41,14 @@ def _apply_particles(words, links, groups, conditional):
     from .parser import Link
 
     for host, (positions, scope) in groups.items():
-        if host not in links or links[host].role not in {'predicate', 'infinitive', 'converb', 'copula', 'auxiliary'}:
+        if host not in links:
+            return False
+        if scope in {'negated', 'exclusive'} and links[host].role in NOMINAL_ROLES:
+            links[host] = replace(links[host], scope='focus_' + scope)
+            for i in positions:
+                links[i] = Link('particle', words[i], host, 'F.NP')
+            continue
+        if links[host].role not in {'predicate', 'infinitive', 'converb', 'copula', 'auxiliary'}:
             return False
         target = links[host].head if links[host].role in {'copula', 'auxiliary'} else host
         enclosing = links[target].scope
@@ -46,7 +56,7 @@ def _apply_particles(words, links, groups, conditional):
             return False
         links[target] = replace(links[target], scope=f'{enclosing}_{scope}' if enclosing else scope)
         for i in positions:
-            links[i] = Link('particle', words[i], target, 'N2' if scope == 'averted' else 'N1')
+            links[i] = Link('particle', words[i], target, {'averted': 'N2', 'exclusive': 'F.V'}.get(scope, 'N1'))
     if conditional:
         carriers = [i for i, link in links.items() if link.role in {'predicate', 'copula'}
                     and any(lemma == link.lemma and tag.POS == 'VERB' and tag.tense == 'past'
@@ -268,15 +278,17 @@ def _structures(tokens, base_function, budget, region_budget):
             outer = tuple(i for i in range(len(tokens)) if not start <= i < end and i not in commas)
             if not outer:
                 continue
-            for part in _decorate(tuple(tokens[i] for i in inner), lambda ts: _converb_trees(ts, budget), budget):
-                converb = next(i for i, link in zip(inner, part) if link.role == 'predicate')
+            for part in _converb_series(tuple(tokens[i] for i in inner), budget):
+                converbs = [i for i, link in zip(inner, part) if link.role == 'predicate']
+                converb = converbs[0]
                 for matrix in _structures(tuple(tokens[i] for i in outer), base_function, budget, region_budget):
                     for controller, head in _converb_hosts(matrix, outer, start):
                         links = {i: _remap(link, outer) for i, link in zip(outer, matrix)}
                         links.update((i, _remap(link, inner)) for i, link in zip(inner, part))
-                        links[converb] = replace(links[converb], role='converb', rule='D1',
-                                                 head=head, controller=controller,
-                                                 implicit_subject=links[head].implicit_subject if controller is None else None)
+                        for member in converbs:
+                            links[member] = replace(links[member], role='converb', rule='D1',
+                                                    head=head, controller=controller,
+                                                    implicit_subject=links[head].implicit_subject if controller is None else None)
                         links.update((i, Link('punctuation', ',', converb, 'D1')) for i in commas)
                         tree = tuple(links[i] for i in range(len(tokens)))
                         yield tree
@@ -285,3 +297,31 @@ def _structures(tokens, base_function, budget, region_budget):
                                 continue
                             for dependent, parent in ((converb, neighbor), (neighbor, converb)):
                                 yield (*tree[:dependent], replace(tree[dependent], head=parent), *tree[dependent + 1:])
+
+def _converb_series(tokens, budget):
+    from .case_arguments import trees
+    from .parser import AnalysisBudgetExceeded, Link
+
+    def single(part):
+        return _decorate(part, lambda ts: trees(ts, lambda bare: _converb_trees(bare, budget),
+                                                budget=budget, verb_pos=('GRND',)), budget)
+
+    yield from single(tokens)
+    markers = [i for i, token in enumerate(tokens) if token.surface.casefold() == 'и']
+    if not markers:
+        return
+    states = [()]
+    for start, end in zip([0, *(i + 1 for i in markers)], [*markers, len(tokens)]):
+        indices = tuple(range(start, end))
+        if not any(tag.POS == 'GRND' for i in indices for _, tag in known_forms(tokens[i].surface)):
+            return
+        following = []
+        for tree in single(tokens[start:end]):
+            root = next(i for i, link in zip(indices, tree) if link.role == 'predicate')
+            marker = (Link('coordinator', 'и', root, 'D.COORD'),) if start else ()
+            extension = marker + tuple(_remap(link, indices) for link in tree)
+            following.extend(state + extension for state in states)
+            if len(following) > budget:
+                raise AnalysisBudgetExceeded('MODIFIER_BUDGET')
+        states = following
+    yield from states

@@ -1,6 +1,7 @@
 """Dictionary evidence and agreement rules for the simple verbal clause."""
 from dataclasses import dataclass, replace
 from functools import lru_cache
+from importlib.resources import files
 
 from pymorphy3 import MorphAnalyzer
 
@@ -16,10 +17,25 @@ def dictionary():
     return MorphAnalyzer()
 
 
+@lru_cache(maxsize=2)
+def _attested_nouns(resource_name='attested_nouns.tsv'):
+    forms = {}
+    resource = files(__package__).joinpath('lexicon', resource_name)
+    for line in resource.read_text(encoding='utf-8').splitlines():
+        surface, lemma, tag = line.split('\t')
+        forms.setdefault(surface, []).append((lemma, dictionary().TagClass(tag)))
+    return {surface: tuple(readings) for surface, readings in forms.items()}
+
+
+def attested_name_parts(surface):
+    return _attested_nouns('attested_name_parts.tsv').get(surface.casefold(), ())
+
+
 @lru_cache(maxsize=4096)
 def known_forms(surface):
-    return tuple(dict.fromkeys((p.normal_form, p.tag) for p in dictionary().parse(surface)
-                               if p.is_known and 'Abbr' not in p.tag))
+    readings = tuple(dict.fromkeys((p.normal_form, p.tag) for p in dictionary().parse(surface)
+                                   if p.is_known and 'Abbr' not in p.tag))
+    return readings or _attested_nouns().get(surface.casefold(), ())
 
 
 @lru_cache(maxsize=1024)

@@ -49,6 +49,7 @@ NOMINAL_ROLES = {'subject', 'object', 'duration', 'recipient', 'experiencer', 'g
                  'nominal_conjunct', 'event_argument', 'agent', 'instrument', 'oblique'}
 PREDICATE_ROLES = {'predicate', 'clause_complement', 'clause_conjunct', 'clause_relative', 'clause_adverbial'}
 ROLE_POS = {
+    'comparative_adverb': {'COMP'}, 'comparison_marker': {'CONJ'},
     'copula': {'VERB'}, 'auxiliary': {'VERB'}, 'attribute': {'ADJF'}, 'possessive': {'ADJF'},
     'infinitive': {'INFN'}, 'converb': {'GRND'}, 'adverb': {'ADVB'}, 'coordinator': {'CONJ'},
     'clause_marker': {'CONJ', 'PRCL'}, 'particle': {'PRCL', 'ADVB'}, 'preposition': {'PREP'},
@@ -60,6 +61,8 @@ CASE_EQUIVALENTS = {'loc2': 'loct', 'gen2': 'gent'}
 def _allows(link, tag):
     pos = tag.POS
     if link.role in PREDICATE_ROLES:
+        if link.rule == 'V.CMP':
+            return pos == 'COMP'
         if link.rule == 'V2.PASS':
             return pos == 'PRTS'
         if link.rule == 'V2':

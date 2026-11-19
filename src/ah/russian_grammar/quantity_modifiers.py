@@ -14,10 +14,11 @@ for code, governed, phrases in (
     ('approximate', True, ('около', 'порядка')),
     ('exact', False, ('ровно', 'точно')),
     ('almost', False, ('почти', 'без малого', 'чуть ли не', 'едва ли не')),
+    ('negative_concord', False, ('ни',)),
     ('not_exact', False, ('не', 'не ровно', 'не точно')),
     ('just_above', True, ('чуть больше', 'немного больше', 'чуть более')),
     ('just_below', True, ('чуть меньше', 'немного меньше', 'чуть менее')),
-    ('at_least', False, ('как минимум', 'минимум', 'по меньшей мере', 'не менее чем', 'не меньше чем')),
+    ('at_least', False, ('хотя бы', 'как минимум', 'минимум', 'по меньшей мере', 'не менее чем', 'не меньше чем')),
     ('at_most', False, ('как максимум', 'максимум', 'самое большее', 'не более чем', 'не больше чем')),
     ('at_least', True, ('не менее', 'не меньше')),
     ('at_most', True, ('не более', 'не больше')),
@@ -50,6 +51,8 @@ def _first(tokens, offset):
                 continue
             numeric = [expr for expr in expressions(tokens, anchor)
                        if expr.kind not in ('ordinal', 'both')]
+            if pattern == ('ни',):
+                numeric = [expr for expr in numeric if expr.kind == 'cardinal' and expr.value == '1' and expr.end == anchor + 1]
             if numeric:
                 end = max(expr.end for expr in numeric)
                 return start, anchor, _PATTERNS[pattern], [expr for expr in numeric if expr.end == end], None
@@ -154,7 +157,8 @@ def trees(tokens, local, *, budget=256):
                 links = _map(tree, kept)
                 if links[anchor].quantity_kind and not links[anchor].quantity_modifier:
                     yield _mark(links, part, start, anchor, modifier, lower)
-            return
+            if modifier != 'negative_concord':
+                return
 
         if part[start].surface.casefold() == 'около':
             for tree in parse(part, depth + 1, anchor):
@@ -180,6 +184,8 @@ def trees(tokens, local, *, budget=256):
                 for tree in parse(reduced, depth + 1, start):
                     links = _map(tree, kept)
                     head = links[noun]
+                    if modifier == 'negative_concord' and (not group or head.role != 'object'):
+                        continue
                     if _DIRECT.get(head.role) != case or head.lemma != lemma:
                         continue
                     if group:
@@ -202,7 +208,17 @@ def trees(tokens, local, *, budget=256):
         return
     seen = set()
     for tree in parse(tokens, 0):
-        if tree not in seen:
+        for numeral in tree:
+            if numeral.quantity_modifier != 'negative_concord':
+                continue
+            host = numeral
+            while host.head is not None and host.role not in ('predicate', 'infinitive', 'converb'):
+                host = tree[host.head]
+            if 'negated' not in (host.scope or '').split('_'):
+                break
+        else:
+            if tree in seen:
+                continue
             seen.add(tree)
             if len(seen) > budget:
                 raise AnalysisBudgetExceeded('QUANTITY_BUDGET')

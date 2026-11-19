@@ -3,6 +3,7 @@ from dataclasses import dataclass, replace
 from functools import cache
 from importlib.resources import files
 
+from .ellipsis import gapped_leaves
 from .rules import known_forms
 
 
@@ -17,6 +18,7 @@ def _connectives():
     for row in table.read_text(encoding='utf-8').splitlines():
         form, relation, governor = row.split('\t')
         forms[tuple(form.split())][relation].add(governor)
+    forms[('что',)]['ccomp'].add('знать')
     return forms, max(map(len, forms))
 
 
@@ -54,6 +56,7 @@ def _shift(link, offset):
     return replace(link, head=None if link.head is None else link.head + offset,
                    coord_head=None if link.coord_head is None else link.coord_head + offset,
                    shared_agent=None if link.shared_agent is None else link.shared_agent + offset,
+                   shared_object=None if link.shared_object is None else link.shared_object + offset,
                    controller=None if link.controller is None else link.controller + offset,
                    antecedent=None if link.antecedent is None else link.antecedent + offset)
 
@@ -62,6 +65,8 @@ def _scope(boundary):
     if boundary.relation == 'ccomp':
         return 'embedded'
     if boundary.relation == 'advcl':
+        if boundary.form in ('потому что', 'так как'):
+            return 'cause'
         return 'condition' if boundary.form == 'если' else 'adverbial'
     return 'alternative' if boundary.form in ('или', 'либо') else None
 
@@ -103,7 +108,7 @@ def _attachments(prefix, levels, boundary, leaf, root, words):
         if not _allows_mood(boundary, own):
             continue
         if relation == 'conj':
-            role, rule = 'clause_conjunct', 'CL.CONJ'
+            role, rule = 'clause_conjunct', 'GAP' if own.rule == 'GAP' else 'CL.CONJ'
             next_levels = levels[:level] + ((anchor, root),)
         elif relative:
             role, rule = 'clause_relative', 'CL.REL'
@@ -205,6 +210,10 @@ def trees(tokens, local, *, budget=256):
                     if stop <= marker.stop:
                         continue
                     candidates = relative_leaves(marker, stop) if marker.relation == 'relative' else leaves(marker.stop, stop)
+                    if marker.relation == 'conj' and len(levels) == 1:
+                        gaps = tuple(gapped_leaves(tokens, marker.stop, stop, prefix, levels[0][0], budget))
+                        if gaps:
+                            candidates = gaps
                     for leaf, root in candidates:
                         for tree, scopes in _attachments(prefix, levels, marker, leaf, root, words):
                             if stop == hi:
@@ -236,6 +245,6 @@ def trees(tokens, local, *, budget=256):
                     joined.extend(matrix)
                     joined[child] = replace(joined[child], role='clause_adverbial', head=root, rule='CL.ADV',
                                             scope=joined[child].scope or _scope(marker))
-                    qualification = 'conditional' if conditional else 'adverbial'
+                    qualification = {'condition': 'conditional', 'adverbial': 'adverbial'}.get(_scope(marker))
                     joined[root] = replace(joined[root], scope=joined[root].scope or qualification)
                     yield tuple(joined)

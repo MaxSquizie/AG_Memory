@@ -25,6 +25,14 @@ def test_nominal_predicate_attribute_and_impersonal_infinitive():
     assert words[links['прочитать'].head] == 'Можно' and words[links['книгу'].head] == 'прочитать'
 
 
+def test_past_copula_with_modal_short_adjective():
+    links, words = parsed('Все граждане были обязаны работать.', lambda _: 'были')
+    assert links['обязаны'].role == 'predicate' and links['обязаны'].lemma == 'обязанный'
+    assert words[links['граждане'].head] == 'обязаны'
+    assert links['были'].role == 'copula' and words[links['были'].head] == 'обязаны'
+    assert links['работать'].role == 'infinitive' and words[links['работать'].head] == 'обязаны'
+
+
 def test_controller_choice_is_readable_and_selects_the_occurrence():
     source = 'Иван предложил Марии уехать'
     result = analyze(source)

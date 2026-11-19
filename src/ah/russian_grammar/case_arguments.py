@@ -102,9 +102,12 @@ def _attach(tokens, tree, kept, groups, government, roles, budget):
                    *((i, link.lemma) for i, link in group.extra if link.role == 'nominal_conjunct')]
         for host, verb in hosts:
             if host in governors:
-                if group.case not in FRAMES[verb].recipient_cases:
+                frame = FRAMES.get(verb)
+                if frame is None or group.case not in frame.recipient_cases:
                     continue
                 role = 'recipient'
+            elif verb in {'оказаться', 'оказываться'} and group.case == 'ablt':
+                continue
             elif group.case in government.get(verb, ()):
                 role = roles.get((verb, group.case), 'oblique')
             else:
@@ -144,12 +147,12 @@ def _attach(tokens, tree, kept, groups, government, roles, budget):
             yield from _pp_attachments(result, groups, budget)
 
 
-def trees(tokens, base, *, budget=256):
+def trees(tokens, base, *, budget=256, verb_pos=('VERB', 'INFN', 'PRTS')):
     from .parser import AnalysisBudgetExceeded
 
     yield from base(tokens)
     government, roles = _lexicon()
-    potential = {i: {case for lemma, tag in known_forms(token.surface) if tag.POS in ('VERB', 'INFN', 'PRTS')
+    potential = {i: {case for lemma, tag in known_forms(token.surface) if tag.POS in verb_pos
                      for case in government.get(lemma, ())} for i, token in enumerate(tokens)}
     potential = {i: cases for i, cases in potential.items() if cases}
     if not potential:

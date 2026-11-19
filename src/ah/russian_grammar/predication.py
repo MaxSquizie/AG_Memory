@@ -36,6 +36,7 @@ def _modifies(forms, index, noun, head_tag):
 def _decorated(tokens, forms, bindings, nominal_heads, root, subject, personal):
     from .parser import Link
 
+    instrumental = any(i == root and tag.case == 'ablt' for i, tag in nominal_heads)
     choices = []
     for i, variants in enumerate(forms):
         if i in bindings:
@@ -43,7 +44,7 @@ def _decorated(tokens, forms, bindings, nominal_heads, root, subject, personal):
             continue
         options = []
         for lemma, tag in variants:
-            if lemma == 'быть' and tag.POS == 'VERB' and tag.mood == 'indc' and _copula_agrees(tag, subject):
+            if (lemma == 'быть' or (lemma in {'оказаться', 'оказываться'} and personal and instrumental)) and tag.POS == 'VERB' and tag.mood == 'indc' and _copula_agrees(tag, subject):
                 options.append(Link('copula', lemma, root, 'V2.COP'))
             if tag.POS == 'ADVB':
                 options.append(Link('adverb', lemma, root, 'V2.MOD'))
