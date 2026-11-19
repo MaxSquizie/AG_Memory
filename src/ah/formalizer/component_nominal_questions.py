@@ -125,9 +125,10 @@ def select_hosts(state, release, selector, region, units, frame, cfg):
             runtime=current(state)
             witness={'decision_ref':decision_ref,'selected':cid,'fingerprint':fingerprint(state,decision_ref),
                 'source_basis':source_basis(state)}
-            state.syntax_trace.append({'kind':'NOMINAL_HOST_QUESTION','region_ref':region.region_id,
+            row={'kind':'NOMINAL_HOST_QUESTION','region_ref':region.region_id,
                 'phrase_refs':list(u['refs']),'pending_subtree':target,'candidate_subtrees':views,'selected':cid,
-                'task_scope':runtime.input_signature() if runtime else None,**witness})
+                'task_scope':runtime.input_signature() if runtime else None,**witness}
+            if row not in state.syntax_trace:state.syntax_trace.append(row)
             if cid is None:
                 deferred.append(u)
             else:

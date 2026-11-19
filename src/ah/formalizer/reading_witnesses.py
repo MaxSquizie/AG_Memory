@@ -139,13 +139,25 @@ def _basis(state,w,expected):
     return None
 
 
+def _distinct_pages(rows):
+    # A repeated audit event supplies the same proof. Keep different versions
+    # of a page even when they share a decision_ref.
+    pages=[]
+    for row in rows:
+        if row not in pages:pages.append(row)
+    return pages
+
+
 def selection_basis(state,record):
     """Freeze actual task/domain area, not the caller's payload declaration."""
     key=record.get('domain_ref')
     domain=next((r for r in reversed(state.syntax_trace)
                  if r.get('kind')=='TASK_DOMAIN' and r.get('task_ref')==key),None)
-    pages=[] if domain is None else [r for r in state.syntax_trace if r.get('kind')=='STRUCTURAL_TASK'
-                                     and r.get('decision_ref') in domain.get('page_refs',())]
+    pages=[]
+    if domain:
+        refs=set(domain.get('page_refs',()))
+        pages=_distinct_pages(row for row in state.syntax_trace if row.get('kind')=='STRUCTURAL_TASK'
+                              and row.get('decision_ref') in refs)
     probes={} if domain is None else {key:{field:state.component_probe_records.get(key,{}).get(field)
             for field in ('signature','dependency_signature','branch_condition')}
             for key in domain.get('page_refs',())}
@@ -156,6 +168,9 @@ def _domain_basis(state,w,record):
     if not isinstance(record,dict):return Assessment('UNKNOWN','DOMAIN_PROOF_MISSING')
     saved=json.loads(w.basis_json)
     if not isinstance(saved,dict) or not saved.get('domain'):return Assessment('UNKNOWN','TASK_BASIS_MISSING')
+    # Older V1 witnesses may contain one identical page per visit. Normalize
+    # the local comparison without modifying the frozen witness or its ref.
+    if isinstance(saved.get('pages'),list):saved['pages']=_distinct_pages(saved['pages'])
     current=selection_basis(state,record)
     if saved!=current:return Assessment('STALE','TASK_BASIS_CHANGED')
     domain=saved['domain'];basis=domain.get('execution_basis')

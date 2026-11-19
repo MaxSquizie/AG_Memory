@@ -83,12 +83,13 @@ def unsupported_route(state,region,cfg,producer,proof,explanation):
 
 def lexical_violations(frames,token_refs,*,boundaries=None):
     """Pure lexical-route compatibility; no selection, exclusion or writes."""
-    from .composition_tree import roots,expression,leaves
+    from .composition_tree import content, expression, leaves, roots, unary_modifier
     by_id={f.frame_id:f for f in frames}
     violations=[]
     for root in (roots(frames) if boundaries is None else boundaries):
         tree=expression(root)
         pending=[tree]
+        visited = set()
         while pending:
             node=pending.pop()
             if 'choice_ref' in node:
@@ -96,9 +97,23 @@ def lexical_violations(frames,token_refs,*,boundaries=None):
             if node.get('operator'):
                 violations.append({'frame_ref':root.frame_id,'relation_tree':node});continue
             for fid in leaves(node):
+                if fid not in by_id:
+                    violations.append({'owner_ref': root.frame_id, 'missing_frame_ref': fid})
+                    continue
+                if fid in visited:
+                    continue
+                visited.add(fid)
                 frame=by_id[fid]
+                nested = expression(frame)
+                if nested != {'frame_ref': fid}:
+                    pending.append(nested)
+                modifier = unary_modifier(frame)
+                if modifier is not None and modifier.metadata.get('attitude') in {None, 'UNKNOWN'}:
+                    # A lexical modifier scopes over its host. Inspect the host
+                    # itself for a clause or logical operator beneath the wrapper.
+                    pending.append(modifier.tree)
+                    continue
                 for role,slot in frame.semantic.get('proposition_args',{}).items():
-                    from .composition_tree import content
                     for child in leaves(content(slot)):
                         f=by_id.get(child)
                         if f and f.predicate_token_ref in token_refs:

@@ -47,6 +47,24 @@ def test_real_selection_validates_outside_session_and_cannot_mutate_witness():
     assert not rw.json.loads(w.payload_json)['reading_uses']==[]
 
 
+@pytest.mark.parametrize('domain',[False,True])
+def test_repeated_page_audit_does_not_invalidate_reading_but_changed_page_does(domain):
+    state,_,_,w=prepared(domain)
+    basis=rw.json.loads(w.basis_json)
+    page=deepcopy(basis['pages'][0])
+    state.syntax_trace.append(deepcopy(page))
+    basis['pages'].append(deepcopy(page))
+    old_witness=replace(w,basis_json=rw.freeze(basis))
+    for witness in [w,old_witness]:
+        assert rw.validate(state,witness,expected_address=w.address).supported
+    # Same page identity, different source area. An old selection cannot
+    # certify a reading just because its page ID still exists.
+    state.syntax_trace.append({**page,'source_range':[0,1]})
+    for witness in [w,old_witness]:
+        result=rw.validate(state,witness,expected_address=w.address)
+        assert (result.status,result.reason)==('STALE','TASK_BASIS_CHANGED')
+
+
 @pytest.mark.parametrize('change,reason',[
     ({'token_ref':'other'},'OCCURRENCE_OUTSIDE_SCOPE'),
     ({'source_range':(1,5)},'OCCURRENCE_RANGE_MISMATCH'),

@@ -94,6 +94,35 @@ class First:
     def select(self,p):self.prompts.append(p);return self.answer
 
 
+def test_revisiting_same_nominal_host_keeps_final_question_and_observation_stable():
+    from ah.formalizer.component_constraints import question
+    from ah.formalizer.component_nominal_questions import select_hosts
+    from ah.formalizer.composition_session import session
+    from ah.formalizer.state import FrameCandidate
+    state,release,region,cfg=setup_morphology('на столе стоит арбуз')
+    prep,landmark,predicate,subject=state.evidence
+    selector=First()
+    unit={'token':prep,'refs':(prep.token_id,landmark.token_id),
+          'entities':[(landmark,landmark.variants[0])],'adjectives':[]}
+    def select():
+        frame=FrameCandidate('p','FLAT',predicate.span,(subject.span,),
+            predicate_token_ref=predicate.token_id,argument_token_refs=(subject.token_id,))
+        return select_hosts(state,release,selector,region,[unit],frame,cfg)
+    with session(state,release,selector=selector) as runtime:
+        with runtime.area(region,state.evidence,None):
+            assert select()=={landmark.token_id:'EVENT'}
+            dispatcher=runtime.dispatcher
+            text=dispatcher.run('remaining-question',None,lambda:question(state,region),kind='COMPOSITION')
+            assert text.count('«на столе» attaches to «стоит арбуз»')==1
+            assert select()=={landmark.token_id:'EVENT'}
+            assert question(state,region)==text and dispatcher.valid('remaining-question')
+            rows=[r for r in state.syntax_trace if r.get('kind')=='NOMINAL_HOST_QUESTION']
+            assert len(rows)==1 and len(selector.prompts)==1
+            state.syntax_trace.append({'kind':'DEPENDENCY_REJECTED','decision_ref':rows[0]['decision_ref']})
+            assert not dispatcher.valid('remaining-question')
+            assert question(state,region)==''
+
+
 def test_oov_parent_case_change_reopens_domain_without_mutating_source():
     from ah.formalizer.composition_session import session
     from ah.formalizer.composition_morphology import prepare
