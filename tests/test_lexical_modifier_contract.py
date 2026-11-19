@@ -50,3 +50,28 @@ def test_missing_modifier_host_cannot_pass_as_a_closed_lexical_expression():
     assert lexical_violations([outer], ['modifier']) == [
         {'owner_ref': 'modifier', 'missing_frame_ref': 'missing'}
     ]
+
+
+def test_lexical_attribute_exemption_checks_host_agreement_and_child_structure():
+    parent = frame('reads')
+    parent.argument_token_refs = ('book',)
+    slot = {'host_token_ref': 'book', 'host_role': 'SUBJECT', 'frame_ref': 'new'}
+    parent.semantic['nominal_args'] = [slot]
+    child = frame('new', nominal_description=True, nominal_host_role='SUBJECT', component_child='reads',
+                  proposed_roles={'book': 'SUBJECT'}, morph_bindings={
+                      'new': {'pos': 'ADJF', 'cases': ['acc'], 'gender': 'femn', 'number': 'sing'},
+                      'book': {'pos': 'NOUN', 'cases': ['acc'], 'gender': 'femn', 'number': 'sing'}})
+    child.argument_token_refs = ('book',)
+    parent.semantic['morph_bindings'] = {'book': deepcopy(child.semantic['morph_bindings']['book'])}
+
+    def violations():
+        return lexical_violations([parent, child], ['reads', 'new', 'book'], boundaries=[parent])
+    assert not violations()
+    child.semantic['proposition_args'] = {'OBJECT': {'frame_ref': 'reads'}}
+    assert violations()
+    del child.semantic['proposition_args']
+    slot['host_token_ref'] = 'other'
+    assert violations()
+    slot['host_token_ref'] = 'book'
+    child.semantic['morph_bindings']['new']['cases'] = ['gen']
+    assert violations()

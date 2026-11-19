@@ -81,6 +81,33 @@ def unsupported_route(state,region,cfg,producer,proof,explanation):
          'token_refs':list(route.token_refs),'interpretation_rejected':False},search_complete=False)
 
 
+def lexical_adjective(parent, slot, child, token_refs):
+    """Check the explicit, single-host attributive leaf made by the nominal composer."""
+    from .component_policy import compatible
+    from .composition_tree import expression
+    host = slot.get('host_token_ref')
+    role = slot.get('host_role')
+    if child is None or not role or host not in parent.argument_token_refs or host not in token_refs:
+        return False
+    anchor = child.predicate_token_ref
+    sem = child.semantic
+    bindings = sem.get('morph_bindings', {})
+    adj = bindings.get(anchor, {})
+    noun = bindings.get(host, {})
+    return (anchor in token_refs and anchor != host
+            and slot.get('tree') is None and child.argument_token_refs == (host,)
+            and sem.get('nominal_description') and sem.get('nominal_host_role') == role
+            and sem.get('component_child') == parent.frame_id
+            and sem.get('proposed_roles') == {host: role} and not sem.get('structural_unresolved')
+            and not sem.get('proposition_args') and not sem.get('nominal_args')
+            and expression(child) == {'frame_ref': child.frame_id}
+            and not sem.get('missing_required_roles') and not sem.get('uncovered_token_refs')
+            and noun == parent.semantic.get('morph_bindings', {}).get(host)
+            and adj.get('pos') == 'ADJF' and noun.get('pos') in {'NOUN', 'NPRO'}
+            and bool(set(adj.get('cases', ())) & set(noun.get('cases', ())))
+            and compatible(adj, noun))
+
+
 def lexical_violations(frames,token_refs,*,boundaries=None):
     """Pure lexical-route compatibility; no selection, exclusion or writes."""
     from .composition_tree import content, expression, leaves, roots, unary_modifier
@@ -118,8 +145,10 @@ def lexical_violations(frames,token_refs,*,boundaries=None):
                         f=by_id.get(child)
                         if f and f.predicate_token_ref in token_refs:
                             violations.append({'owner_ref':fid,'role':role,'child_ref':child})
-                if frame.semantic.get('nominal_args'):
-                    violations.append({'owner_ref':fid,'nominal_args':frame.semantic['nominal_args']})
+                invalid = [slot for slot in frame.semantic.get('nominal_args', ())
+                           if not lexical_adjective(frame, slot, by_id.get(slot.get('frame_ref')), token_refs)]
+                if invalid:
+                    violations.append({'owner_ref': fid, 'nominal_args': invalid})
     return violations
 
 

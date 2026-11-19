@@ -15,6 +15,55 @@ def choose(state, release, selector, region, key, options, question):
         inputs=inputs(state,region,'nominal_attachment',options,question,context,0))
 
 
+def established_attribute(state, frame, unit):
+    """Reuse a fixed dependency in this frame only for its two original dictionary readings."""
+    from .nominal_readings import clean
+    from .morphology_provenance import original
+    host = unit.get('bound_host')
+    if (not host or not unit.get('host_reading') or unit['variant'].pos != 'ADJF'
+            or unit['variant'].origin != 'DICTIONARY' or unit['refs'] != (unit['token'].token_id,)
+            or unit['entities'] or unit['adjectives']):
+        return False
+    token_ref = unit['token'].token_id
+    own = clean(unit['variant'])
+    head = {k: v for k, v in unit['host_reading'].items() if k != 'score'}
+    return head['origin'] == 'DICTIONARY' and any(
+        edge['kind'] == 'ATTRIBUTE' and edge['head_ref'] == token_ref and edge['host_ref'] == host
+        and edge['morph'] == own and edge['host_morph'] == head
+        for edge in frame.semantic.get('attribute_constraints', ())
+    ) and original(state, token_ref, own) and original(state, host, head)
+
+
+def unit_question(units, evidence, frame):
+    from .probe_wording import linked_readings
+    hosts = [u.get('bound_host') for u in units.values()]
+    if (len(hosts) > 1 and all(hosts) and len(set(hosts)) == len(hosts)
+            and all(u['refs'] == (u['token'].token_id,) and not u['entities'] and not u['adjectives']
+                    for u in units.values())
+            and len({digest(_morph(u['variant'])) for u in units.values()}) == 1):
+        adjective = next(iter(units.values()))['token']
+        question = (f'Which occurrence does «{adjective.span}» @{adjective.start} describe? '
+                    'Keep alternatives if the wording supports more than one.')
+        options = []
+        for cid, unit in units.items():
+            head = evidence[unit['bound_host']]
+            options.append({'candidate_id': cid, 'label': f'«{head.span}» @{head.start}'})
+        return question, options
+    options = []
+    for cid, unit in units.items():
+        members = [(unit['token'], unit['variant']), *unit['adjectives'], *unit['entities']]
+        label = 'Whole phrase readings: ' + linked_readings({e.token_id: _morph(v) for e, v in members}, evidence)
+        if unit.get('bound_host'):
+            host = evidence[unit['bound_host']]
+            label += f'; description host: «{host.span}» @{host.start}'
+        if unit.get('implicit_host_role'):
+            label += (f"; description host: the omitted {unit['implicit_host_role']} of «{frame.anchor_span}» "
+                      "(same slot, identity unresolved)")
+        options.append({'candidate_id': cid, 'label': label})
+    return ('Which complete morphological reading fits this phrase in the source? '
+            'Do not resolve identities or replace the source words.'), options
+
+
 def select_units(state, release, selector, region, covers, frame, cfg):
     """A cover is a segmentation; whole morphology is chosen locally, never mixed."""
     grouped={}
@@ -46,6 +95,7 @@ def select_units(state, release, selector, region, covers, frame, cfg):
     for index in range(len(alternatives[0])):
         graph.connect('COVER',str(index),lambda cover,uid,index=index:cover[index]==uid,'PHRASE_BOUNDARY_READING')
     graph.propagate()
+    evidence = {e.token_id: e for e in state.evidence}
     while len(selected)<len(alternatives[0]):
         stamps={i:digest([list(graph.domains[str(i)]),list(graph.domains['COVER'])])
                 for i in range(len(alternatives[0])) if i not in selected}
@@ -53,26 +103,31 @@ def select_units(state, release, selector, region, covers, frame, cfg):
         if not pending:
             state.diag('COMPONENT_NOMINAL_SELECTION_UNRESOLVED',region.region_id);return None
         index=pending[0]
-        units={digest([_morph(u['variant']),u.get('bound_host'),u.get('implicit_host_role'),[(e.token_id,_morph(v)) for e,v in
-                [*u['entities'],*u['adjectives']]]]):u for u in (c[index] for c in alternatives)}
-        units={k:u for k,u in units.items() if k in graph.domains[str(index)]}
-        from .probe_wording import linked_readings
-        options=[{'candidate_id':k,'label':'Whole phrase readings: '+linked_readings(
-            {e.token_id:_morph(v) for e,v in [(u['token'],u['variant']),*u['adjectives'],*u['entities']]},
-            {e.token_id:e for e in state.evidence})+
-            ('; description host: «'+next(e.span+'» @'+str(e.start) for e in state.evidence if e.token_id==u['bound_host']) if u.get('bound_host') else '')+
-            ('; description host: the omitted '+u['implicit_host_role']+' of «'+frame.anchor_span+'» (same slot, identity unresolved)'
-             if u.get('implicit_host_role') else '')}
-            for k,u in units.items()]
+        permitted = graph.domains[str(index)]
+        units = {unit_key(cover[index]): cover[index] for cover in alternatives}
+        units = {key: unit for key, unit in units.items() if key in permitted}
+        if len(units) == 1:
+            unit = next(iter(units.values()))
+            if established_attribute(state, frame, unit):
+                # Propagation already fixed this variable. A deferred wider menu is obsolete.
+                previous = previous_keys.pop(index, None)
+                if previous:
+                    state.clarification_candidates[:] = [row for row in state.clarification_candidates
+                                                         if row['decision_ref'] != previous]
+                selected[index] = unit
+                row = {'kind': 'ESTABLISHED_ATTRIBUTE_REUSED', 'region_ref': region.region_id,
+                       'frame_ref': frame.frame_id, 'token_ref': unit['token'].token_id, 'host_ref': unit['bound_host']}
+                if row not in state.syntax_trace:
+                    state.syntax_trace.append(row)
+                continue
+        question, options = unit_question(units, evidence, frame)
         local_key=['morphology',alternatives[0][index]['refs']]
         decision_ref=region.region_id+'|nominal:'+digest([local_key,options])
         previous=previous_keys.get(index)
         if previous and previous!=decision_ref:
             state.clarification_candidates[:]=[row for row in state.clarification_candidates if row['decision_ref']!=previous]
         previous_keys[index]=decision_ref
-        cid=choose(state,release,selector,region,local_key,options,
-            'Which complete morphological reading fits this phrase in the source? '
-            'Do not resolve identities or replace the source words.')
+        cid=choose(state,release,selector,region,local_key,options,question)
         if cid is None:
             deferred[index]=stamps[index]
             continue

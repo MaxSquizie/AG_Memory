@@ -1,21 +1,35 @@
-"""Agreeing residual descriptions; order does not decide attachment."""
+"""Pair a description with an addressed host when the later occurrence arrives."""
 from .component_policy import _features, _morph, compatible
-from .state import MorphVariant
+from .nominal_readings import description_heads, variant
 
 
-def units(tokens, missing, frame, established,*,state):
-    covered={t for u in established for t in u['refs']}
-    from .nominal_readings import description_heads
-    readings=description_heads(frame,state=state)
+def match(description, host):
+    token, adjective = description
+    head, noun = host
+    if adjective.cases & noun.cases and compatible(_features(adjective), _features(noun)):
+        yield {'token': token, 'variant': adjective, 'refs': (token.token_id,),
+               'entities': [], 'adjectives': [], 'bound_host': head,
+               'host_reading': _morph(noun), 'requires_host_probe': True}
+
+
+def units(tokens, missing, frame, established, *, state):
+    covered = {ref for unit in established for ref in unit['refs']}
+    readings = description_heads(frame, state=state)
+    hosts = []
+    descriptions = []
     for token in tokens:
-        if token.token_id not in missing-covered: continue
-        for variant in token.variants:
-            if variant.pos not in {'ADJF','PRTF'}: continue
-            for head,raw in readings.items():
-                if raw['pos'] not in {'NOUN','NPRO'}: continue
-                noun=MorphVariant(**{**raw,'cases':frozenset(raw['cases']),
-                                     'features':frozenset(raw['features'])})
-                if not variant.cases & noun.cases or not compatible(_features(variant),_features(noun)): continue
-                yield {'token':token,'variant':variant,'refs':(token.token_id,),
-                       'entities':[],'adjectives':[],'bound_host':head,
-                       'host_reading':_morph(noun),'requires_host_probe':True}
+        head_reading = readings.get(token.token_id)
+        host = None
+        if head_reading and head_reading['pos'] in {'NOUN', 'NPRO'}:
+            host = token.token_id, variant(head_reading)
+            for description in descriptions:
+                yield from match(description, host)
+        if token.token_id in missing and token.token_id not in covered:
+            for reading in token.variants:
+                if reading.pos in {'ADJF', 'PRTF'}:
+                    description = token, reading
+                    for previous_host in hosts:
+                        yield from match(description, previous_host)
+                    descriptions.append(description)
+        if host is not None:
+            hosts.append(host)
