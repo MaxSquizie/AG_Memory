@@ -4,7 +4,7 @@ from functools import lru_cache
 
 from pymorphy3 import MorphAnalyzer
 
-from .prepositions import GOVERNMENT
+from .prepositions import CASE_NAMES, FORMS, GOVERNMENT, PREFIXES
 
 
 # Lexical evidence for the bare accusative of duration. Extensible, not exhaustive.
@@ -14,6 +14,13 @@ TIME_UNITS = frozenset('секунда минута час сутки день �
 @lru_cache(maxsize=1)
 def dictionary():
     return MorphAnalyzer()
+
+
+@lru_cache(maxsize=1024)
+def plain_person_reference(surface: str) -> bool:
+    nominatives = [p.tag for p in dictionary().parse(surface)
+                   if p.is_known and p.tag.case == 'nomn' and 'Abbr' not in p.tag]
+    return bool(nominatives) and all('Name' in tag or tag.POS == 'NPRO' for tag in nominatives)
 
 
 @dataclass(frozen=True)
@@ -28,26 +35,45 @@ class Reading:
     transitive: bool
 
 
+def preposition_reading(lemma: str, role: str) -> Reading:
+    return Reading(lemma, role, None, None, None, None, None, False)
+
+
 @lru_cache(maxsize=4096)
 def readings(surface: str, preposition: str | None = None) -> tuple[Reading, ...]:
     result = []
+    word = surface.lower()
+    if preposition is None:
+        if word in PREFIXES:
+            result.append(preposition_reading(word, 'prep_prefix'))
+        if word in FORMS:
+            result.append(preposition_reading(FORMS[word], 'preposition'))
     for parse in dictionary().parse(surface):
         tag = parse.tag
         if not parse.is_known or 'Abbr' in tag:
             continue
         if preposition is not None:
-            if tag.case not in GOVERNMENT[preposition]:
+            if tag.case not in (GOVERNMENT.get(preposition) or CASE_NAMES):
+                continue
+            # The nominative-shaped complement of в (идти в гости) is animate plural.
+            if preposition == 'в' and tag.case == 'nomn' and (
+                    tag.number != 'plur' or (tag.POS == 'NOUN' and tag.animacy != 'anim')):
                 continue
             if tag.POS == 'ADJF' and 'Apro' not in tag:
                 role = 'group_attribute'
             elif tag.POS in {'NOUN', 'NPRO'}:
-                if tag.POS == 'NPRO' and tag.person == '3per' and 'Af-p' not in tag:
+                # Dative derivative prepositions can take the plain pronoun (благодаря ему).
+                if (tag.POS == 'NPRO' and tag.person == '3per' and 'Af-p' not in tag
+                        and (tag.case != 'datv' or preposition in {'к', 'по'})):
                     continue
                 role = 'governed'
             else:
                 continue
-        elif tag.POS == 'PREP' and parse.normal_form in GOVERNMENT:
-            role = 'preposition'
+        elif tag.POS == 'PREP':
+            prep = preposition_reading(FORMS.get(word, parse.normal_form), 'preposition')
+            if prep not in result:
+                result.append(prep)
+            continue
         elif tag.POS in {'NOUN', 'NPRO'} and tag.case in ('nomn', 'accs'):
             role = 'subject' if tag.case == 'nomn' else 'object'
         elif tag.POS == 'VERB' and tag.mood == 'indc' and 'Impe' not in tag:

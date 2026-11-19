@@ -59,7 +59,7 @@ def test_probe_selects_external_head_without_reopening_the_group():
     probe, = r.probes
     assert Probe.from_prompt(probe.prompt()) == probe
     assert probe.question == 'Which word does the phrase «с тяжёлым биноклем» depend on?'
-    assert probe.context == text and probe.options == ('увидел', 'человека')
+    assert probe.context == 'увидел человека с тяжёлым\nбиноклем' and probe.options == ('увидел', 'человека')
     for answer, host in [('увидел', 1), ('человека', 2)]:
         resolved = analyze(text, lambda p: answer)
         tree, = resolved.analyses
@@ -109,3 +109,11 @@ def test_incomplete_or_incompatible_group_never_yields_a_partial_tree(text, reas
     r = analyze(text)
     assert r.status == 'UNRESOLVED' and r.reason.split()[0] == reason
     assert not r.analyses and not r.probes
+
+def test_compound_preposition_and_ordinary_reading_share_the_prefix():
+    compound, = analyze('В течение дня Иван работал').analyses
+    assert (compound[0].lemma, compound[1].role, compound[2].case) == ('в течение', 'prep_part', 'gent')
+    assert any(t[-1].lemma == 'течение' and t[-1].role == 'governed'
+               for t in analyze('Лодка попала в течение').analyses)
+    expanded = analyze('Высокий Иван увидел человека с биноклем')
+    assert expanded.probes[0].context == expanded.source

@@ -1,14 +1,28 @@
 """Simple prepositions and the attachment of completed nominal groups."""
 from collections.abc import Iterator
+from importlib.resources import files
+import re
 
 
-GOVERNMENT = {
-    'в': {'accs', 'loct', 'loc2'}, 'на': {'accs', 'loct', 'loc2'},
-    'к': {'datv'}, 'из': {'gent', 'gen2'}, 'без': {'gent', 'gen2'},
-    'с': {'gent', 'gen2', 'accs', 'ablt'}, 'под': {'accs', 'ablt'}, 'о': {'accs', 'loct'},
-}
+TOKEN = re.compile(r'[^\W\d_]+(?:[-‐‑][^\W\d_]+)*|\d+|[^\s]', re.UNICODE)
+
+
+def _load_lexicon():
+    forms, government, prefixes = {}, {}, set()
+    rows = files(__package__).joinpath('lexicon/prepositions.tsv').read_text(encoding='utf8')
+    for row in rows.splitlines():
+        form, lemma, cases = row.split('\t')
+        tokens = TOKEN.findall(form)
+        forms[' '.join(tokens)] = lemma
+        government[lemma] = frozenset() if cases == '-' else frozenset(cases.split())
+        prefixes.update(' '.join(tokens[:i]) for i in range(1, len(tokens)))
+    return forms, government, prefixes
+
+
+FORMS, GOVERNMENT, PREFIXES = _load_lexicon()
+
 CASE_NAMES = {
-    'gent': 'genitive', 'gen2': 'partitive genitive', 'datv': 'dative',
+    'nomn': 'nominative', 'gent': 'genitive', 'gen2': 'partitive genitive', 'datv': 'dative',
     'accs': 'accusative', 'ablt': 'instrumental', 'loct': 'prepositional', 'loc2': 'locative',
 }
 
@@ -22,7 +36,8 @@ def group_heads(groups, words, predicate, nominal_heads) -> Iterator[dict[int, i
             yield heads
             continue
         start, noun = groups[position]
-        local = {noun: start, **dict.fromkeys(range(start + 1, noun), noun)}
+        local = {j: start if words[j].role == 'prep_part' else noun for j in range(start + 1, noun)}
+        local[noun] = start
         j = noun + 1
         while j < len(words) and words[j].role == 'post_attribute':
             local[j] = noun

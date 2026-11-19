@@ -1,0 +1,24 @@
+prepositions.tsv contains normalized forms, dictionary lemmas and attested
+case annotations; "-" means the sources supplied no mapped case. It combines:
+
+1. The complete preposition section of GrammarEngine rus_prepositions.sol
+   (postpositions form a separate category). Copyright Ilya Koziev.
+   MIT notice: GrammarEngine-LICENSE.txt.
+   https://github.com/Koziev/GrammarEngine/blob/c70bdbdd8b41af25fa754e727ca645de90d28c23/src/dictionary.src/rus_prepositions.sol
+   SHA256 14d50810bfb2fc14dcacad6870ad5bdd3a4b0de71932b7ec5d0d85923a3fe7d3
+2. Russian prepositions from English and Russian Wiktionary contributors,
+   extracted by Tatu Ylonen's Wiktextract / Kaikki:
+   https://kaikki.org/dictionary/Russian/pos-prep/index.html
+   https://kaikki.org/ruwiktionary/Русский/pos-prep/index.html
+   Source articles and contributor histories: https://en.wiktionary.org/
+   and https://ru.wiktionary.org/ (look up the surface entry).
+   SHA256 (English JSONL) b6eb1c5c4d6de1b34b188bcd15abf53da24b45bbeb64aaf478eb776ea460bb5c
+   SHA256 (Russian JSONL) 8b828f40f4343fdcf021df7a09d33f8b24df2b08a075b39d62f0ade0fc9a7c53
+   Source data licenses: https://kaikki.org/dictionary/#copyright-and-license
+   The merged, adapted table is provided under CC BY-SA 4.0:
+   https://creativecommons.org/licenses/by-sa/4.0/
+
+Changes: case tags mapped to OpenCorpora, spelling variants linked, sources
+merged. Runtime morphology additionally uses the installed pymorphy3 dictionary.
+To regenerate from the above SOL file and the two linked JSONL lists:
+python scripts/import_russian_prepositions.py rus_prepositions.sol en.jsonl ru.jsonl src/ah/russian_grammar/lexicon/prepositions.tsv

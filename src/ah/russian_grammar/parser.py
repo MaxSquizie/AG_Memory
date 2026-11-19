@@ -2,21 +2,17 @@
 from collections.abc import Callable, Iterator, Mapping
 from dataclasses import dataclass, replace
 from itertools import product
-import re
 
-from .prepositions import CASE_NAMES, group_heads
+from .prepositions import CASE_NAMES, FORMS, GOVERNMENT, PREFIXES, TOKEN, group_heads
 from .probe import MAX_WORD_CHOICES, Probe
-from .rules import Reading, attribute_agrees, readings, subject_agrees
+from .rules import Reading, plain_person_reference, preposition_reading, attribute_agrees, readings, subject_agrees
 
 
 RULE_FOR_ROLE = {
     'predicate': 'V1', 'subject': 'S1', 'object': 'O1',
     'attribute': 'A1', 'coordinator': 'C1', 'duration': 'T1',
-    'preposition': 'P2', 'governed': 'P1', 'group_attribute': 'A1', 'post_attribute': 'A1',
+    'prep_part': 'P1', 'preposition': 'P2', 'governed': 'P1', 'group_attribute': 'A1', 'post_attribute': 'A1',
 }
-
-
-TOKEN = re.compile(r'[^\W\d_]+(?:[-‐‑][^\W\d_]+)*|\d+|[^\s]', re.UNICODE)
 
 
 @dataclass(frozen=True)
@@ -60,7 +56,15 @@ class Prefix:
 
     def next_readings(self, surface: str) -> Iterator[Reading]:
         if self.open_preposition is not None:
-            yield from readings(surface, self.words[self.open_preposition].lemma)
+            start = self.open_preposition
+            if self.words[start].role == 'prep_prefix':
+                phrase = ' '.join([*(word.lemma for word in self.words[start:]), surface.lower()])
+                if phrase in PREFIXES:
+                    yield preposition_reading(surface.lower(), 'prep_part')
+                if phrase in FORMS:
+                    yield preposition_reading(FORMS[phrase], 'prep_end')
+            else:
+                yield from readings(surface, self.words[start].lemma)
             return
         yield from readings(surface)
         if self.words and self.words[-1].role in {'governed', 'post_attribute'}:
@@ -74,15 +78,20 @@ class Prefix:
         role = reading.role
         if self.open_preposition is not None:
             start = self.open_preposition
-            if role == 'group_attribute':
+            if role == 'prep_end':
+                words = (self.words[:start] + (preposition_reading(reading.lemma, 'preposition'),)
+                         + self.words[start+1:] + (preposition_reading(reading.lemma.split()[-1], 'prep_part'),))
+                return replace(self, words=words)
+            if role in {'prep_part', 'group_attribute'}:
                 return replace(self, words=(*self.words, reading))
-            if role != 'governed' or not all(attribute_agrees(adj, reading) for adj in self.words[start + 1:]):
+            if role != 'governed' or not all(attribute_agrees(adj, reading) for adj in self.words[start + 1:]
+                                            if adj.role == 'group_attribute'):
                 return None
             return replace(self, words=(*self.words, reading), open_preposition=None,
                            groups=(*self.groups, (start, i)))
         if role == 'post_attribute':
             return replace(self, words=(*self.words, reading))
-        if role == 'preposition':
+        if role in {'preposition', 'prep_prefix'}:
             return replace(self, words=(*self.words, reading), open_preposition=i)
         subject, predicate = self.subject, self.predicate
         objects, coordinator = self.objects, self.coordinator
@@ -141,16 +150,14 @@ class Prefix:
                             for i, w in enumerate(self.words))
 
 
-def _span_label(tokens, index, end=None):
+def _label_extent(tokens, index, end):
     """Identify a word or phrase in a one-line question, including repeated spans."""
-    end = index + 1 if end is None else end
     words = [t.surface.casefold() for t in tokens]
     width = end - index
-    focus = ' '.join(t.surface for t in tokens[index:end])
     others = [j for j in range(len(words) - width + 1)
               if j != index and words[j:j+width] == words[index:end]]
     if not others:
-        return focus
+        return index, end
     for radius in range(1, len(tokens)):
         for left, right in ((0, radius), (radius, 0),
                             (min(index, radius), min(len(tokens) - end, radius))):
@@ -159,19 +166,50 @@ def _span_label(tokens, index, end=None):
                 continue
             if any(j >= left and words[j-left:j+width+right] == words[start:stop] for j in others):
                 continue
-            return ' '.join([*(t.surface for t in tokens[start:index]), f'[{focus}]',
-                             *(t.surface for t in tokens[end:stop])])
+            return start, stop
     raise ValueError('could not distinguish occurrences in the complete sentence')
+
+
+def _span_label(tokens, index, end=None):
+    end = index + 1 if end is None else end
+    start, stop = _label_extent(tokens, index, end)
+    focus = ' '.join(t.surface for t in tokens[index:end])
+    if (start, stop) == (index, end):
+        return focus
+    return ' '.join([*(t.surface for t in tokens[start:index]), f'[{focus}]',
+                     *(t.surface for t in tokens[end:stop])])
+
+
+def _attachment_context(text, tokens, analyses, hosts, start, end):
+    # Include the phrase and each candidate, plus the context needed to identify repeats.
+    spans = [_label_extent(tokens, start, end)]
+    spans.extend(_label_extent(tokens, j, j + 1) for j in set(hosts))
+    needed = {j for lo, hi in spans for j in range(lo, hi)}
+    children = {}
+    for tree in analyses:
+        for j, link in enumerate(tree):
+            children.setdefault(link.head, set()).add(j)
+    pending = list(needed)
+    while pending:
+        for child in children.get(pending.pop(), ()):
+            if child in needed:
+                continue
+            if (child not in children and all(tree[child].role == 'subject' for tree in analyses)
+                    and plain_person_reference(tokens[child].surface)):
+                continue
+            needed.add(child)
+            pending.append(child)
+    return text[tokens[min(needed)].start:tokens[max(needed)].end]
 
 
 def _partition(analyses, tokens, text):
     # Each tree has exactly one answer. Equal answers keep all matching trees.
-    def word_choice(question, indices):
+    def word_choice(question, indices, context=text):
         candidates = sorted({i for i in indices if i is not None})
         labels = {i: _span_label(tokens, i) for i in candidates}
         if None in indices:
             labels[None] = 'no such word'
-        return Probe(question, tuple(labels.values()), text), [labels[i] for i in indices]
+        return Probe(question, tuple(labels.values()), context), [labels[i] for i in indices]
 
     predicates = [next(i for i, link in enumerate(a) if link.role == 'predicate') for a in analyses]
     if len(set(predicates)) > 1:
@@ -188,6 +226,12 @@ def _partition(analyses, tokens, text):
 
     for i in range(len(tokens)):
         if all(a[i].role == 'preposition' for a in analyses):
+            boundaries = [max((j for j, link in enumerate(tree) if link.role == 'prep_part' and link.head == i),
+                              default=i) + 1 for tree in analyses]
+            if len(set(boundaries)) > 1:
+                labels = {end: _span_label(tokens, i, end) for end in sorted(set(boundaries))}
+                return (Probe('Which expression functions as the preposition here?', tuple(labels.values()), text),
+                        [labels[end] for end in boundaries])
             hosts = [a[i].head for a in analyses]
             ends = {j for a in analyses for j, link in enumerate(a) if link.role == 'governed' and link.head == i}
             if len(set(hosts)) > 1 and len(ends) == 1:
@@ -196,7 +240,8 @@ def _partition(analyses, tokens, text):
                 while end < len(tokens) and all(a[end].role == 'attribute' and a[end].head == noun for a in analyses):
                     end += 1
                 phrase = _span_label(tokens, i, end)
-                return word_choice(f'Which word does the phrase «{phrase}» depend on?', hosts)
+                context = _attachment_context(text, tokens, analyses, hosts, i, end)
+                return word_choice(f'Which word does the phrase «{phrase}» depend on?', hosts, context)
 
     durations = [next((i for i, link in enumerate(a) if link.role == 'duration'), None) for a in analyses]
     if len(set(durations)) > 1:
@@ -263,8 +308,24 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
     if not analyses:
         return Result(text, 'UNRESOLVED', 'NO_COMPLETE_CLAUSE', tokens)
     probes = []
-    while len(analyses) > 1:
-        probe, keys = _partition(analyses, words, text)
+    checked_government = set()
+    while True:
+        if len(analyses) > 1:
+            probe, keys = _partition(analyses, words, text)
+        else:
+            tree, = analyses
+            unverified = next((j for j, link in enumerate(tree) if link.role == 'governed'
+                               and not GOVERNMENT.get(tree[link.head].lemma) and j not in checked_government), None)
+            if unverified is None:
+                break
+            # The morphology dictionary knows this preposition but supplies no government.
+            # An inflected form alone cannot certify the missing lexical constraint.
+            link = tree[unverified]
+            label = _span_label(words, unverified)
+            question = f'Which word is governed by «{tree[link.head].lemma}» in the {CASE_NAMES[link.case]} case?'
+            probe = Probe(question, (label,), text)
+            keys = [label]
+            checked_government.add(unverified)
         if len(probe.options) > MAX_WORD_CHOICES:
             return Result(text, 'AMBIGUOUS', 'JEV_CHOICE_LIMIT', tokens, analyses, tuple(probes))
         probes.append(probe)

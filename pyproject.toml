@@ -41,3 +41,6 @@ gui = [
 [project.scripts]
 ah-agent = "ah.cli:main"
 ah-gui = "ah.gui.app:main"
+
+[tool.setuptools.package-data]
+"ah.russian_grammar" = ["lexicon/*.tsv", "lexicon/*.txt"]
