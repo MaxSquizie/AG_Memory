@@ -25,7 +25,10 @@ def run(frags, **kw):
     kw.setdefault("run_id", "R1")
     kw.setdefault("observation_id", "obs1")
     kw.setdefault("version", 0)
-    kw.setdefault("binding", InterpretationRunBinding())
+    if "binding" not in kw:
+        binding = InterpretationRunBinding()
+        binding.acquire(kw["run_id"], kw["observation_id"], kw["version"])
+        kw["binding"] = binding
     return t5_batch(frags, **kw)
 
 
@@ -76,6 +79,11 @@ class TestOutcomesAndRefusals(unittest.TestCase):
 
 
 class TestEligibilityAndIdempotency(unittest.TestCase):
+    def test_unbound_run_is_refused(self):
+        result = run([ok()], binding=InterpretationRunBinding())
+        self.assertEqual(result.eligibility, "INTEGRITY_ERROR")
+        self.assertEqual(result.committed_fragments, ())
+
     def test_foreign_owner_is_integrity_error(self):
         binding = InterpretationRunBinding()
         binding.acquire("OTHER", "obs1", 0)

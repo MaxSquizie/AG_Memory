@@ -162,7 +162,8 @@ def reference_action(s, a, p):
         t1(state, MorphProvider())
         retained = [e.span for e in state.evidence]
         chosen = {d.frame_id: d.selected for d in state.decisions.values() if d.slot_id == 'lex'}
-        replacements = [span for span, ids in chosen.items() if ids and ids != ('keep_as_is',)]
+        replacements = [ev.span for ev in state.evidence
+                        if chosen.get(ev.token_id) and chosen[ev.token_id] != ('keep_as_is',)]
         s.api.update({'pipeline.t0', 'pipeline.srl', 'pipeline.t1 / OOV_KEEP_AS_IS'})
         return {**s.snapshot(), 'lexical': {'retained_surfaces': retained, 'auto_replacements': replacements},
                 'runtime': {'token_hypotheses': [asdict(h) for h in state.token_hypotheses]},

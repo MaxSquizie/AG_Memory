@@ -4,6 +4,7 @@ from ah.formalizer.pipeline import t0
 from ah.formalizer.component_probe import _probe
 from ah.formalizer.selection_labels import PROTOCOL_VERSION
 from ah.formalizer.structural_tasks import choose_domain
+from ah.formalizer.structural_probe_inputs import inputs as page_inputs
 from ah.formalizer.partial_readings import valid_domain
 
 class Selector:
@@ -15,9 +16,14 @@ release=SimpleNamespace(sha256='contract',entries=lambda k:[{}])
 options=[{'candidate_id':x,'label':'Meaning '+x} for x in 'abc']
 for response in ('0','?','1,2'):
     state=t0('source');selector=Selector([response])
-    _probe(state,selector,release,'raw-page','role',options,state.text,(0,6))
+    region=SimpleNamespace(source_range=(0,6),token_refs=tuple(t.token_id for t in state.evidence))
+    question='Which meaning fits?'
+    page=page_inputs(state,region,'role',options,question,state.text,0)
+    _probe(state,selector,release,'raw-page','role',options,state.text,(0,6),
+           inputs=page,question=question)
     assert not state.clarification_candidates
-    _probe(state,selector,release,'raw-page','role',options,state.text,(0,6))
+    _probe(state,selector,release,'raw-page','role',options,state.text,(0,6),
+           inputs=page,question=question)
     assert selector.calls==1 and not state.clarification_candidates
 
 state=t0('source');selector=Selector(['1','1'])

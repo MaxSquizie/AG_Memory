@@ -56,7 +56,7 @@ later). It sees only the prompt — it cannot peek at pipeline state.
 from __future__ import annotations
 
 import re
-from dataclasses import replace
+from dataclasses import asdict, replace
 
 from ah.formalizer.selection_protocol import (
     ProtocolError,
@@ -260,14 +260,14 @@ def t1(state: FormalizationState, morph: MorphProvider | None = None, *, preserv
             # distance may rank candidates later; it never proves a correction.
             ev.lex_status = "OOV_KEEP_AS_IS"
             state.diag("OOV_KEEP_AS_IS", f"'{ev.span}' kept as-is (first-class candidate)")
-            lex = Decision(slot_id="lex", frame_id=ev.span, candidates=("keep_as_is",))
+            lex = Decision(slot_id="lex", frame_id=ev.token_id, candidates=("keep_as_is",))
             lex.selected = ("keep_as_is",)  # PROVISIONAL pick; a decision, not an error
             lex.lifecycle = "PROVISIONAL"
             lex.grounds.append(Ground(
                 "D",
                 f"'{ev.span}' kept as-is: first-class candidate; dictionary distance may rank but never prove a correction",
             ))
-            state.decisions[f"lex|{ev.span}"] = lex
+            state.decisions[f"lex|{ev.token_id}"] = lex
             if not variants: continue
         top = max(variants, key=lambda v: v.score)
         ev.variants = variants  # whole parses; nothing dropped by a score cutoff
@@ -280,8 +280,27 @@ def t1(state: FormalizationState, morph: MorphProvider | None = None, *, preserv
     # SRL consumption [Rev16/H1]: hypotheses extend the LexDecision candidate set
     # (keep-as-is stays first-class); surviving ClauseCandidates become linked
     # alternatives and a BOUNDARY decision — nothing is discarded silently (I29).
+    evidence = {ev.token_id: ev for ev in state.evidence}
+    addressed_hypotheses = []
     for hyp in state.token_hypotheses:
-        key = f"lex|{hyp.span_ref}"
+        if hyp.token_ref is None:
+            # Older producers named only the surface. It identifies an occurrence
+            # only when exactly one token in this observation has that surface.
+            matches = [ev for ev in state.evidence if ev.span == hyp.span_ref]
+            if len(matches) != 1:
+                state.diag("LEXICAL_HYPOTHESIS_OCCURRENCE_UNRESOLVED", hyp.hypothesis_id)
+                state.syntax_trace.append({
+                    "kind": "UNBOUND_LEXICAL_HYPOTHESIS",
+                    "hypothesis": asdict(hyp),
+                    "matching_token_refs": [ev.token_id for ev in matches],
+                })
+                continue
+            hyp = replace(hyp, token_ref=matches[0].token_id)
+        token = evidence.get(hyp.token_ref)
+        if token is None or token.span != hyp.span_ref:
+            raise ValueError("LEXICAL_HYPOTHESIS_OCCURRENCE_MISMATCH")
+        addressed_hypotheses.append(hyp)
+        key = f"lex|{token.token_id}"
         extra = tuple(v for v in hyp.variants if v != "keep_as_is")
         if not extra:
             continue
@@ -290,7 +309,7 @@ def t1(state: FormalizationState, morph: MorphProvider | None = None, *, preserv
             # L1 flagged an orthographic anomaly on a token that HAS dictionary parses
             # (the form still resolves in the dictionary): it becomes a LexDecision
             # anyway — keep-as-is first-class, PROVISIONAL pick; distance may rank but never prove.
-            dec = Decision(slot_id="lex", frame_id=hyp.span_ref, candidates=("keep_as_is", *extra))
+            dec = Decision(slot_id="lex", frame_id=token.token_id, candidates=("keep_as_is", *extra))
             dec.selected = ("keep_as_is",)
             dec.lifecycle = "PROVISIONAL"
             dec.grounds.append(Ground(
@@ -299,7 +318,8 @@ def t1(state: FormalizationState, morph: MorphProvider | None = None, *, preserv
             ))
             state.decisions[key] = dec
         else:
-            dec.candidates = ("keep_as_is", *extra)
+            dec.candidates = tuple(dict.fromkeys((*dec.candidates, *extra)))
+    state.token_hypotheses[:] = addressed_hypotheses
     survivors = state.clause_candidates  # Phase 1: no constraint rejects any yet — all survive
     for cc in survivors:
         state.linked_alternatives.append(LinkedAlternative(
@@ -855,6 +875,13 @@ def trace_decision(state: FormalizationState, key: str):
     before the commit stage, so in Phase 1 the chain legitimately ENDS at the Decision —
     nothing beyond it exists yet (honest incompleteness, not a missing link)."""
     dec = state.decisions[key]
+    if dec.slot_id == "lex":
+        chain = [("TokenEvidence", ev.token_id, ResourceProvenance())
+                 for ev in state.evidence if ev.token_id == dec.frame_id]
+        chain.extend(("TokenHypothesis", h.hypothesis_id, h.provenance)
+                     for h in state.token_hypotheses if h.token_ref == dec.frame_id)
+        chain.append(("Decision", key, dec.provenance))
+        return chain
     spans: set[str] = set()
     frame = next((f for f in state.frames if f.frame_id == dec.frame_id), None)
     if frame is not None:

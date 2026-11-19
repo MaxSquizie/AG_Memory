@@ -75,7 +75,8 @@ class TestB_KeepAsIs(unittest.TestCase):
         self.assertIn("L1_double_letter", hyps[0].provenance.pattern_ids)
 
     def test_b_keep_as_is_admissible_no_distance_verdict(self):
-        dec = self.state.decisions["lex|быстраяя"]
+        token = next(ev for ev in self.state.evidence if ev.span == "быстраяя")
+        dec = self.state.decisions["lex|" + token.token_id]
         self.assertIn("keep_as_is", dec.candidates)  # first-class, not an error
         self.assertEqual(dec.selected, ("keep_as_is",))  # a PROVISIONAL decision...
         self.assertEqual(dec.lifecycle, "PROVISIONAL")  # ...not a correction verdict

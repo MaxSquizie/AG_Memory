@@ -5,8 +5,9 @@ keeps exact occurrence refs. Quantities remain source expressions, not numbers.
 """
 from .canonical_ledger import digest
 from .task_contracts import SelectionPurpose
-from .structural_tasks import choose,source_set,licensed_in_scope as licensed
+from .structural_tasks import choose,licensed_in_scope as licensed
 from .probe_prerequisites import accepted,from_proof
+from .source_collections import choose_with_dependent
 
 
 def rows(state,tokens,kind=None):
@@ -26,7 +27,28 @@ def prepared(state,tokens,constraints=None):
     return current(state,'NOMINAL',tokens,constraints) is not None
 
 
+def _choose_head(state, release, selector, region, tokens, cfg, kind, owned, proofs):
+    from .reading_producers import function_entries
+
+    refs = [token.token_id for token in owned]
+    expression = ' '.join(token.span for token in owned)
+    addressed = ', '.join(f'«{token.span}» @{token.start}' for token in owned)
+    return choose(state,release,selector,region,cfg,'nominal_function_head',[
+        {'candidate_id':t.token_id,'head_ref':t.token_id,'shared_function':t.token_id in refs,
+         'reading_uses':function_entries(state,release,region,kind='RELATION' if kind=='RELATION' else 'SHARED_NOMINAL' if t.token_id in refs else 'NONE',head_ref=t.token_id,function_refs=refs),
+         'label':'Nominal head «'+t.span+'» @'+str(t.start)+(' (this occurrence also carries the selected function)' if t.token_id in refs else '')}
+        for t in tokens if (kind!='RELATION' or t.token_id not in refs) and any(c.isalnum() for c in t.span)],
+        kind+': selected function expression is «'+expression+'». '
+        +('Which noun/pronoun is its complement: the entity/place introduced BY this expression, not the outside predicate or participant it attaches to? '
+          if kind=='RELATION' else 'Which noun/pronoun is determined or counted by this expression? ')+
+        'Select the nominal bearer. A reference or quantity word may itself be that bearer; choose it only if the text supplies no separate head for this expression.',
+        empty={'candidate_id':'NO_HEAD', 'function':kind, 'function_refs':refs,
+               'label':f'No offered head fits the {kind.lower()} expression when it consists of {addressed}'},
+        prerequisites=tuple(from_proof(state,p) for p in proofs))
+
+
 def prepare(state,release,selector,region,tokens,cfg):
+    from .reading_producers import function_entries
     from .function_inventory import begin,complete
     from .morphology_provenance import capture,issue
     capture(state,release=release)
@@ -53,24 +75,19 @@ def prepare(state,release,selector,region,tokens,cfg):
             state.syntax_trace.append({'kind':'NOMINAL_FUNCTION_DOMAIN','token_refs':[t.token_id for t in tokens],
                 'decision_ref':selected[1]['decision_ref'],'search_complete':True,**inventory})
             return complete(state,inventory,selected[1])
-        material=source_set(state,release,selector,region,tokens,cfg,'nominal_function_source',
-            kind+': select ONLY the connecting/determining/quantity expression. '
-            'Exclude a separate nominal head and unrelated modifiers. Include a word that itself BOTH expresses this function and stands for its nominal bearer.',exclude=used_by_kind[kind],prerequisites=(accepted('nominal_function',selected),))
-        if not material:return False
-        owned,proofs=material;refs=[t.token_id for t in owned]
-        expression=' '.join(t.span for t in owned)
-        from .reading_producers import function_entries
-        head=choose(state,release,selector,region,cfg,'nominal_function_head',[
-            {'candidate_id':t.token_id,'head_ref':t.token_id,'shared_function':t.token_id in refs,
-             'reading_uses':function_entries(state,release,region,kind='RELATION' if kind=='RELATION' else 'SHARED_NOMINAL' if t.token_id in refs else 'NONE',head_ref=t.token_id,function_refs=refs),
-             'label':'Nominal head «'+t.span+'» @'+str(t.start)+(' (this occurrence also carries the selected function)' if t.token_id in refs else '')}
-            for t in tokens if (kind!='RELATION' or t.token_id not in refs) and any(c.isalnum() for c in t.span)],
-            kind+': selected function expression is «'+expression+'». '
-            +('Which noun/pronoun is its complement: the entity/place introduced BY this expression, not the outside predicate or participant it attaches to? '
-              if kind=='RELATION' else 'Which noun/pronoun is determined or counted by this expression? ')+
-            'Select the nominal bearer. A reference or quantity word may itself be that bearer; choose it only if the text supplies no separate head for this expression.',
-            prerequisites=tuple(from_proof(state,p) for p in proofs))
-        if not head:return False
+        def choose_head(owned, proofs):
+            return _choose_head(state, release, selector, region, tokens, cfg, kind, owned, proofs)
+        result = choose_with_dependent(
+            state, release, selector, region, tokens, cfg,
+            slot='nominal_function_source', dependent_slot='nominal_function_head',
+            empty_id='NO_HEAD', select_dependent=choose_head,
+            question=kind+': select ONLY the connecting/determining/quantity expression. '
+                'Exclude a separate nominal head and unrelated modifiers. Include a word that itself BOTH expresses this function and stands for its nominal bearer.',
+            exclude=used_by_kind[kind], prerequisites=(accepted('nominal_function',selected),))
+        if result is None:
+            return False
+        owned, proofs, head = result
+        refs = [token.token_id for token in owned]
         hid=head[0]['head_ref']
         target=('Selected expression: '+', '.join('«'+t.span+'» @'+str(t.start) for t in owned)+
             '; selected nominal bearer: '+head[0]['label']+'. ')

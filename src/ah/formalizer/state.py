@@ -167,6 +167,7 @@ class TokenHypothesis:
     span_ref: str  # the raw token this hypothesis is about
     variants: tuple[str, ...]  # includes "keep_as_is" as first-class member
     provenance: ResourceProvenance = field(default_factory=ResourceProvenance)
+    token_ref: str | None = None  # occurrence in this observation; absent in older inputs
 
 
 @dataclass

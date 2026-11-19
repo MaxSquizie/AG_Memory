@@ -544,7 +544,7 @@ def run_srl(state, release, morph):
             antecedent = output.get('antecedent')
             state.ellipsis_candidates.append(EllipsisCandidate(rid, token.span, output['gap_kind'], state.evidence[match.assignment[antecedent][0]].span if antecedent else None, provenance=prov))
         elif kind == 'TOKEN_HYPOTHESIS':
-            state.token_hypotheses.append(TokenHypothesis(rid, token.span, tuple(output['variants']), prov))
+            state.token_hypotheses.append(TokenHypothesis(rid, token.span, tuple(output['variants']), prov, token_ref=token.token_id))
         elif kind=='QUERY_INTENT':
             from .query_requests import validate_request
             request=dict(output['request'])

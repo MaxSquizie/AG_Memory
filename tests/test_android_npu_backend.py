@@ -65,11 +65,29 @@ class AndroidNpuBackendTests(unittest.TestCase):
                 android_bridge.stop()
                 register_engine(None)
 
+    def test_debug_export_excludes_turn_content_by_default(self) -> None:
+        from unittest.mock import patch
+        from ah import android_bridge
+        from ah.diagnostics.session_log import SessionLogger
+
+        with TemporaryDirectory() as td:
+            root = Path(td)
+            logger = SessionLogger(root / "sessions" / "sid" / "logs")
+            secret = "PRIVATE_ANDROID_TURN_726"
+            logger.begin_turn(secret)
+            logger.finish_turn(user_text=secret, fail_kind="perception", status="error")
+            with patch.multiple(android_bridge, _root=root, _session_id="sid", _session_logger=logger,
+                                _last_turn={"error_log": secret, "user_text": secret}):
+                output = android_bridge.debug_log()
+            self.assertIn("perception", output)
+            self.assertNotIn(secret, output)
+
     def test_bridge_logs_protocol_mismatch_across_turns(self) -> None:
+        from unittest.mock import patch
         from ah import android_bridge
 
         register_engine(lambda prompt, system, override, role: "Sure, ASSERTION")
-        with TemporaryDirectory() as td:
+        with TemporaryDirectory() as td, patch.dict("os.environ", {"AH_SESSION_LOG_CONTENT": "1"}):
             root = Path(td)
             _prepare_android_root(root)
             try:
@@ -100,7 +118,7 @@ class AndroidNpuBackendTests(unittest.TestCase):
                 self.assertIn("Привет", debug)
                 self.assertIn("Как дела?", debug)
                 self.assertIn("perception", debug)
-                turns_path = root / "sessions" / sid / "logs" / "turns.jsonl"
+                turns_path = root / "sessions" / sid / "logs" / "debug" / "turns.jsonl"
                 turns = [
                     json.loads(line)
                     for line in turns_path.read_text(encoding="utf-8").splitlines()

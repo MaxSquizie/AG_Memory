@@ -13,8 +13,8 @@ def describe(state,hypothesis):
         if node.head_anchor:label+='; head '+surface(node.head_anchor)
         for ref in node.feature_refs:
             feature=hypotheses.get(ref)
-            if feature is not None:
-                label+='; readings of '+surface(feature.span_ref)+': '+' / '.join(feature.variants)
+            if feature is not None and feature.token_ref in evidence:
+                label+='; readings of '+surface(feature.token_ref)+': '+' / '.join(feature.variants)
             else:
                 # Keep an explicit unresolved distinction; never invent a form.
                 label+='; unavailable reading description'

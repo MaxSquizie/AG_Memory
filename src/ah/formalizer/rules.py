@@ -83,7 +83,7 @@ def _l1_produce(state, evs, parses):
         s = ev.span.lower()
         if len(s) >= 3 and s[-1] == s[-2]:
             out.append(TokenHypothesis(
-                hypothesis_id=f"L{i}", span_ref=ev.span,
+                hypothesis_id=f"L{i}", span_ref=ev.span, token_ref=ev.token_id,
                 variants=("keep_as_is", ev.span[:-1]),
                 provenance=ResourceProvenance(pattern_ids=(rule_l1.rule_id,)),
             ))

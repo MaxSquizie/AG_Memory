@@ -5,6 +5,7 @@ from pathlib import Path
 from threading import Lock
 from typing import Any
 import json
+import os
 import uuid
 
 _active_lock = Lock()
@@ -68,10 +69,51 @@ def _text_summary(kind: str, payload: dict[str, Any]) -> str:
     return dumped
 
 
+# Session events may carry arbitrary model or user strings, including in errors
+# and identifiers. Only known event names, typed counters, and enum values
+# cross the metadata-only writer. Unknown future events are dropped by default.
+_EVENT_FIELDS = {
+    "session_start": (), "turn_start": ("seq",), "turn_end": ("seq", "probe_count", "assertion_count"),
+    "llm_request": ("sequence",), "agent_sanitize": ("contaminated",),
+    "agent_repair": ("attempt", "contaminated"), "agent_response_generation_failed": (),
+    "pipeline_raw": (), "pipeline_sensory": (),
+    "pipeline_candidates": ("lexical_pass", "coordination_count", "frame_dependency_count"),
+    "pipeline_lexical_recovery": ("pass_index",),
+    "pipeline_perception": ("relation_count", "conditional_count"),
+    "pipeline_candidate_ir": ("query_count", "quantified_query_count", "command_count", "relation_count", "conditional_count"),
+    "pipeline_mutation_plan": (), "pipeline_canonical_commit": (),
+    "pipeline_probe": ("accepted",), "pipeline_parse_summary": ("ok", "probe_count", "failed_count"),
+    "pipeline_unresolved_goal": (), "pipeline_perception_failed": (), "pipeline_integration_failed": (),
+    "identity_merge": (), "state_transition_projection_skipped": (),
+    "android_turn": ("probe_count",), "android_turn_failed": (), "android_snapshot_failed": (),
+    "ignition_tick": ("tick",), "gc_delete": ("tick", "deleted_count"), "lifecycle_update": ("tick", "update_count"),
+}
+_ENUM_FIELDS = {
+    "role": {"generic", "formalizer", "perception", "agent", "agent_repair", "agent_clarification"},
+    "status": {"ok", "error"},
+    "fail_kind": {"perception", "integration", "exception", "response_generation", "empty_response", "unresolved_goal"},
+}
+
+
+def _metadata(kind: str, payload: dict[str, Any]) -> dict[str, Any]:
+    record = {name: payload[name] for name in _EVENT_FIELDS[kind] if type(payload.get(name)) in (int, bool)}
+    for name, allowed in _ENUM_FIELDS.items():
+        value = payload.get(name)
+        if type(value) is str and value in allowed:
+            record[name] = value
+    if kind == "llm_request":
+        record["failed"] = bool(payload.get("error"))
+        for name in ("prompt", "response_text"):
+            if isinstance(payload.get(name), str):
+                record[name + "_chars"] = len(payload[name])
+    return record
+
+
 class SessionLogger:
     """Runtime-only append-only diagnostics. Never enters AH/H."""
-    def __init__(self, logs_dir: Path) -> None:
-        self.logs_dir = Path(logs_dir)
+    def __init__(self, logs_dir: Path, *, include_content: bool = False) -> None:
+        self.include_content = include_content
+        self.logs_dir = Path(logs_dir) / ("debug" if include_content else "telemetry")
         self.session_id = datetime.now().strftime("%Y%m%d-%H%M%S") + "-" + uuid.uuid4().hex[:8]
         self.jsonl_path = self.logs_dir / f"session-{self.session_id}.jsonl"
         self.text_path = self.logs_dir / f"session-{self.session_id}.log"
@@ -101,7 +143,7 @@ class SessionLogger:
             self._turn_id = f"{self.session_id}:{self._turn_seq}"
             turn_id = self._turn_id
             seq = self._turn_seq
-        self.emit("turn_start", turn_id=turn_id, seq=seq, user_text=user_text)
+        self._write("turn_start", {"seq": seq, "user_text": user_text}, turn_id)
         return turn_id
 
     def finish_turn(self, **payload: Any) -> None:
@@ -109,37 +151,26 @@ class SessionLogger:
             turn_id = self._turn_id
             seq = self._turn_seq
             self._turn_id = None
-        record = {
-            "ts": datetime.now().astimezone().isoformat(timespec="milliseconds"),
-            "turn_id": turn_id,
-            "seq": seq,
-            **payload,
-        }
-        if not self._disabled:
-            try:
-                with self.turns_path.open("a", encoding="utf-8") as fh:
-                    fh.write(json.dumps(record, ensure_ascii=False, default=str) + "\n")
-            except OSError:
-                self._disabled = True
-        self.emit("turn_end", **record)
+        self._write("turn_end", {**payload, "seq": seq}, turn_id)
 
     def emit(self, kind: str, **payload: Any) -> None:
-        if self._disabled:
+        self._write(kind, payload, self.current_turn_id())
+
+    def _write(self, kind: str, payload: dict[str, Any], turn_id: str | None) -> None:
+        if self._disabled or (not self.include_content and kind not in _EVENT_FIELDS):
             return
-        record = {
-            "ts": datetime.now().astimezone().isoformat(timespec="milliseconds"),
-            "session": self.session_id,
-            "kind": kind,
-            **payload,
-        }
-        with self._lock:
-            if self._turn_id and "turn_id" not in record:
-                record["turn_id"] = self._turn_id
+        fields = payload if self.include_content else _metadata(kind, payload)
+        record = {**fields, "ts": datetime.now().astimezone().isoformat(timespec="milliseconds"),
+                  "session": self.session_id, "kind": kind, "turn_id": turn_id}
         line = json.dumps(record, ensure_ascii=False, default=str)
-        summary = f"{record['ts']} {kind} {_text_summary(kind, payload)}"
+        detail = _text_summary(kind, fields) if self.include_content else json.dumps(fields)
+        summary = f"{record['ts']} {kind} {detail}"
         with self._lock:
             try:
-                for path in (self.jsonl_path, self.latest_jsonl):
+                paths = [self.jsonl_path, self.latest_jsonl]
+                if kind == "turn_end":
+                    paths.append(self.turns_path)
+                for path in paths:
                     with path.open("a", encoding="utf-8") as fh:
                         fh.write(line + "\n")
                 for path in (self.text_path, self.latest_text):
@@ -149,8 +180,11 @@ class SessionLogger:
                 self._disabled = True
 
 
-def start_session(logs_dir: Path, *, extra: dict[str, Any] | None = None) -> SessionLogger:
-    logger = SessionLogger(logs_dir)
+def start_session(logs_dir: Path, *, extra: dict[str, Any] | None = None,
+                  include_content: bool | None = None) -> SessionLogger:
+    if include_content is None:
+        include_content = os.environ.get("AH_SESSION_LOG_CONTENT") == "1"
+    logger = SessionLogger(logs_dir, include_content=include_content)
     global _active
     with _active_lock:
         _active = logger
@@ -190,22 +224,32 @@ def current_turn_id() -> str | None:
 
 
 def log_llm_request(**payload: Any) -> None:
-    response_text = payload.get("response_text")
-    if "response_preview" not in payload:
-        payload["response_preview"] = protocol_preview(
-            None if response_text is None else str(response_text)
-        )
-    turn = current_turn_id()
-    if turn:
-        payload.setdefault("turn_id", turn)
-    emit("llm_request", **payload)
+    logger = active_session()
+    if logger is None:
+        return
+    if logger.include_content and "response_preview" not in payload:
+        payload["response_preview"] = protocol_preview(payload.get("response_text"))
+    logger.emit("llm_request", **payload)
 
 
 def audit_tick_result(result: Any) -> None:
     """Emit a full runtime-only decomposition of one Ignition tick, never into AH/H."""
+    logger = active_session()
+    if logger is None:
+        return
+    if not logger.include_content:
+        tick = int(getattr(result, "tick", -1))
+        logger.emit("ignition_tick", tick=tick)
+        gc = getattr(result, "gc", None)
+        if getattr(gc, "deleted", ()):
+            logger.emit("gc_delete", tick=tick, deleted_count=len(gc.deleted))
+        lifecycle = getattr(result, "lifecycle", None)
+        if getattr(lifecycle, "updates", ()):
+            logger.emit("lifecycle_update", tick=tick, update_count=len(lifecycle.updates))
+        return
     node_transitions = getattr(result, "node_transitions", ())
     propagations = getattr(result, "propagations", ())
-    emit(
+    logger.emit(
         "ignition_tick",
         tick=int(getattr(result, "tick", -1)),
         incoming=dict(getattr(result, "incoming_consumed", {})),
@@ -258,7 +302,7 @@ def audit_tick_result(result: Any) -> None:
     )
     gc = getattr(result, "gc", None)
     if gc is not None and getattr(gc, "deleted", ()):
-        emit(
+        logger.emit(
             "gc_delete",
             tick=int(getattr(result, "tick", -1)),
             deleted=list(gc.deleted),
@@ -267,7 +311,7 @@ def audit_tick_result(result: Any) -> None:
         )
     lifecycle = getattr(result, "lifecycle", None)
     if lifecycle is not None and getattr(lifecycle, "updates", ()):
-        emit(
+        logger.emit(
             "lifecycle_update",
             tick=int(getattr(result, "tick", -1)),
             updates=[

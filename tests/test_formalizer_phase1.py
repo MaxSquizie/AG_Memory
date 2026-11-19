@@ -271,11 +271,48 @@ class Phase1MechanismTest(unittest.TestCase):
         morph = StubMorph({"Кот": (("кот", "NOUN", "nom"),)})  # 'Xyzzy' is OOV by construction
         st = t0("Кот Xyzzy.")
         t1(st, morph=morph)
-        lex = st.decisions.get("lex|Xyzzy")
+        lex = st.decisions.get("lex|" + st.evidence[1].token_id)
         self.assertIsNotNone(lex)
         self.assertEqual(lex.selected, ("keep_as_is",))  # keep-as-is is a decision, not an error
         self.assertTrue(any(g.type == "D" for g in lex.grounds))
         self.assertTrue(st.has_diag("OOV_KEEP_AS_IS"))
+
+    def test_lexical_alternatives_and_provenance_belong_to_one_occurrence(self):
+        from ah.formalizer.pipeline import trace_decision
+        from ah.formalizer.state import TokenHypothesis
+        st = t0("Люмакс Люмакс")
+        first, second = st.evidence
+        st.token_hypotheses = [
+            TokenHypothesis("h1", first.span, ("keep_as_is", "Люмак"), token_ref=first.token_id),
+            TokenHypothesis("h2", first.span, ("keep_as_is", "Люмакса"), token_ref=first.token_id),
+        ]
+        t1(st, morph=StubMorph({}))
+        self.assertEqual(st.decisions["lex|" + first.token_id].candidates,
+                         ("keep_as_is", "Люмак", "Люмакса"))
+        second_key = "lex|" + second.token_id
+        self.assertEqual(st.decisions[second_key].candidates, ("keep_as_is",))
+        self.assertEqual([(kind, ref) for kind, ref, _ in trace_decision(st, second_key)],
+                         [("TokenEvidence", second.token_id), ("Decision", second_key)])
+
+    def test_legacy_unaddressed_hypothesis_requires_a_unique_surface(self):
+        from ah.formalizer.state import TokenHypothesis
+        hypothesis = TokenHypothesis("old", "X", ("keep_as_is", "Y"))
+        st = t0("X")
+        st.token_hypotheses = [hypothesis]
+        t1(st, morph=StubMorph({}))
+        self.assertEqual(st.token_hypotheses[0].token_ref, st.evidence[0].token_id)
+        st = t0("X X. Z")
+        other = TokenHypothesis("z", "Z", ("keep_as_is", "ZZ"), token_ref=st.evidence[-1].token_id)
+        st.token_hypotheses = [hypothesis, other]
+        t1(st, morph=StubMorph({}))
+        self.assertTrue(st.has_diag("LEXICAL_HYPOTHESIS_OCCURRENCE_UNRESOLVED"))
+        self.assertEqual(st.token_hypotheses, [other])
+        for ev in st.evidence[:2]:
+            self.assertEqual(st.decisions["lex|" + ev.token_id].candidates, ("keep_as_is",))
+        self.assertEqual(st.decisions["lex|" + other.token_ref].candidates, other.variants)
+        row = next(row for row in st.syntax_trace if row["kind"] == "UNBOUND_LEXICAL_HYPOTHESIS")
+        self.assertEqual(row["matching_token_refs"], [ev.token_id for ev in st.evidence[:2]])
+        self.assertEqual(row["hypothesis"]["variants"], hypothesis.variants)
 
     def test_t1_keeps_whole_variants_union_is_index_only(self):
         """rev7b/8: linked features stay inside a variant; the case union is an index.

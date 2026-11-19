@@ -122,15 +122,9 @@ sudo apt install libxcb-xinerama0 libxcb-cursor0 libgl1
 
 ## Session logs
 
-Каждый запуск GUI/CLI пишет в `paths.logs_dir` (по умолчанию `logs/`):
+GUI и Android сохраняют счётчики вызовов, исходы и границы хода в `paths.logs_dir/telemetry/`. Файлы `latest.log` и `latest.jsonl` относятся к текущему сеансу.
 
-- `logs/latest.log` — короткие строки (роли, sanitize/repair, границы хода)
-- `logs/latest.jsonl` — полные prompt/response LLM, в том числе `agent_repair`
-- `logs/session-<timestamp>-<id>.jsonl` / `.log` — тот же сеанс, не перезаписывается
-
-```bash
-tail -f logs/latest.log
-```
+Для локального разбора запросов установите `AH_SESSION_LOG_CONTENT=1` перед запуском. Подробные журналы с исходным текстом, ответами модели и ошибками появятся в отдельном каталоге `paths.logs_dir/debug/`. Старые файлы в `paths.logs_dir` сохраняются.
 
 ## CLI (без полного диалога)
 

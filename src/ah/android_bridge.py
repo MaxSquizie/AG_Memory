@@ -17,6 +17,7 @@ import traceback
 from ah.bootstrap import RuntimeServices
 from ah.config import load_config
 from ah.diagnostics.session_log import (
+    SessionLogger,
     begin_turn,
     emit,
     finish_turn,
@@ -31,6 +32,7 @@ from ah.perception import PerceptionParseError
 _services: RuntimeServices | None = None
 _root: Path | None = None
 _session_id: str | None = None
+_session_logger: SessionLogger | None = None
 _last_turn: dict[str, Any] | None = None
 _chat_log: list[dict[str, Any]] = []
 _phase: str = "idle"
@@ -488,7 +490,7 @@ def _stop_locked() -> None:
 def start(root_dir: str, session_id: str | None = None) -> str:
     """Boot RuntimeServices for a session. Returns the active session id."""
 
-    global _services, _root, _session_id, _last_turn, _chat_log, _phase
+    global _services, _root, _session_id, _last_turn, _chat_log, _phase, _session_logger
     root = Path(root_dir).expanduser().resolve()
     _stop_locked()
     _root = root
@@ -502,7 +504,7 @@ def start(root_dir: str, session_id: str | None = None) -> str:
         sid = existing[0]["id"] if existing else new_session(str(root))
     config_path = _rewrite_config(root, sid)
     logs_dir = _session_dir(root, sid) / "logs"
-    start_session(logs_dir, extra={"platform": "android", "session_id": sid})
+    _session_logger = start_session(logs_dir, extra={"platform": "android", "session_id": sid})
     services = RuntimeServices.build(load_config(config_path))
     if isinstance(services.llm, AndroidNpuBackend):
         # Engine may already be registered by Kotlin before start().
@@ -718,14 +720,13 @@ def send(text: str) -> str:
     elif payload.get("response_error"):
         _chat_log.append({"role": "system", "text": payload["response_error"], "kind": "error"})
     session = _session_dir(_root, _session_id)
-    logs = session / "logs"
-    logs.mkdir(parents=True, exist_ok=True)
     ready = _json_ready(payload)
     (session / "chat.json").write_text(json.dumps(_chat_log, ensure_ascii=False, indent=2), encoding="utf-8")
-    (logs / "last-turn.json").write_text(
-        json.dumps(ready, ensure_ascii=False, indent=2, default=str),
-        encoding="utf-8",
-    )
+    logger = _session_logger
+    if logger is not None and logger.include_content:
+        (logger.logs_dir / "last-turn.json").write_text(
+            json.dumps(ready, ensure_ascii=False, indent=2, default=str), encoding="utf-8"
+        )
     title = user_text if _read_meta(_root, _session_id).get("title") in {"", "Новый чат"} else _read_meta(_root, _session_id)["title"]
     preview = payload.get("response_text") or payload.get("response_error") or ""
     _write_meta(
@@ -757,12 +758,15 @@ def _jsonl_tail(path: Path, *, kinds: tuple[str, ...], limit: int, chars: int) -
 def debug_log() -> str:
     """Return the latest Android runtime log so it can be copied off the device."""
 
+    logger = _session_logger
+    if logger is None:
+        return "no android logs yet"
     chunks: list[str] = []
-    if _last_turn and _last_turn.get("error_log"):
+    if logger.include_content and _last_turn and _last_turn.get("error_log"):
         chunks.append("## chat-error")
         chunks.append(str(_last_turn["error_log"]))
     if _root is not None and _session_id is not None:
-        logs = _session_dir(_root, _session_id) / "logs"
+        logs = logger.logs_dir
         turns = logs / "turns.jsonl"
         if turns.is_file():
             text = turns.read_text(encoding="utf-8")
@@ -794,12 +798,12 @@ def debug_log() -> str:
         if probes:
             chunks.append("## probes")
             chunks.append(probes)
-    if _last_turn is not None:
+    if logger.include_content and _last_turn is not None:
         chunks.append("## last-turn")
         chunks.append(json.dumps(_last_turn, ensure_ascii=False, indent=2))
     if _root is not None and _session_id is not None:
-        logs = _session_dir(_root, _session_id) / "logs"
-        for name in ("last-turn.json", "latest.log"):
+        logs = logger.logs_dir
+        for name in (("last-turn.json", "latest.log") if logger.include_content else ("latest.log",)):
             path = logs / name
             if path.is_file():
                 text = path.read_text(encoding="utf-8")[-12000:]
