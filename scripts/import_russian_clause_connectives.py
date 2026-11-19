@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 from pathlib import Path
 
 
-def entries(paths):
+def entries(paths, *, nominal=False):
     rows = set()
     for path in paths:
         for sentence in path.read_text(encoding='utf-8').split('\n\n'):
@@ -15,10 +15,16 @@ def entries(paths):
                 if word[3] not in ('CCONJ', 'SCONJ') or word[7] not in ('cc', 'mark'):
                     continue
                 child = words.get(int(word[6]))
-                if not child or child[3] not in ('VERB', 'ADJ', 'ADV', 'AUX', 'NOUN'):
+                if not child:
+                    continue
+                if not nominal and child[3] not in ('VERB', 'ADJ', 'ADV', 'AUX', 'NOUN'):
                     continue
                 governor = words.get(int(child[6]))
                 if not governor:
+                    continue
+                if nominal and (word[3] != 'CCONJ' or word[7] != 'cc' or child[7] != 'conj'
+                                or child[3] not in ('NOUN', 'PROPN', 'PRON')
+                                or governor[3] not in ('NOUN', 'PROPN', 'PRON')):
                     continue
                 relation = child[7]
                 if (word[7], relation) not in (('cc', 'conj'), ('mark', 'advcl'), ('mark', 'ccomp')):
@@ -36,5 +42,6 @@ if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument('corpora', nargs='+', type=Path)
     parser.add_argument('output', type=Path)
+    parser.add_argument('--nominal', action='store_true')
     args = parser.parse_args()
-    args.output.write_text(''.join('\t'.join(row) + '\n' for row in entries(args.corpora)), encoding='utf-8')
+    args.output.write_text(''.join('\t'.join(row) + '\n' for row in entries(args.corpora, nominal=args.nominal)), encoding='utf-8')

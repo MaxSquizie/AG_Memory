@@ -1,6 +1,8 @@
+from dataclasses import replace
 from itertools import product
 
-from .rules import known_forms
+from .prepositions import group_heads
+from .rules import known_forms, readings
 
 
 def _agree(first, second):
@@ -117,7 +119,7 @@ def _impersonal(tokens, forms, root, lemma, pred):
                     yield tree
 
 
-def trees(tokens):
+def _bare_trees(tokens):
     forms = [known_forms(token.surface) for token in tokens]
     seen = set()
     for root, variants in enumerate(forms):
@@ -133,3 +135,92 @@ def trees(tokens):
                 if tree not in seen:
                     seen.add(tree)
                     yield tree
+
+
+def _groups_at(tokens, start, budget):
+    from .parser import AnalysisBudgetExceeded, Prefix
+
+    states = (Prefix(),)
+    for i in range(start, len(tokens)):
+        following = {}
+        for state in states:
+            for word in state.next_readings(tokens[i].surface):
+                if i == start:
+                    if word.role not in {'preposition', 'prep_prefix'}:
+                        continue
+                elif state.open_preposition is None and word.role not in {'post_attribute', 'name_part'}:
+                    continue
+                extended = state.extend(word)
+                if extended is not None:
+                    following[extended] = None
+                    if len(following) > budget:
+                        raise AnalysisBudgetExceeded('ANALYSIS_BUDGET')
+        if not following:
+            return
+        for state in following:
+            if state.groups and state.open_preposition is None:
+                yield state
+        states = following
+
+
+def _layouts(tokens, budget):
+    from .parser import AnalysisBudgetExceeded
+
+    starts = {i for i, token in enumerate(tokens)
+              if any(word.role in {'preposition', 'prep_prefix'} for word in readings(token.surface))}
+    if not starts:
+        return
+    groups = {i: tuple(_groups_at(tokens, i, budget)) for i in starts}
+    required = {i for i in starts if all(tag.POS == 'PREP' for _, tag in known_forms(tokens[i].surface))}
+    stack = [(0, ())]
+    count = 0
+    while stack:
+        index, layout = stack.pop()
+        while index < len(tokens) and index not in starts:
+            index += 1
+        if index == len(tokens):
+            if layout:
+                yield layout
+            continue
+        count += 1
+        if count > budget:
+            raise AnalysisBudgetExceeded('ANALYSIS_BUDGET')
+        if index not in required:
+            stack.append((index + 1, layout))
+        for group in groups[index]:
+            stack.append((index + len(group.words), (*layout, (index, group))))
+
+
+def _attach(tokens, kept, tree, layout):
+    from .parser import Link, RULE_FOR_ROLE
+
+    mapped = [None] * len(tokens)
+    heads = {}
+    for i, link in zip(kept, tree):
+        if link.head is None:
+            root = i
+        else:
+            heads[i] = kept[link.head]
+        mapped[i] = replace(link, head=heads.get(i),
+                            controller=None if link.controller is None else kept[link.controller])
+    groups = []
+    for start, group in layout:
+        noun = start + group.groups[0][1]
+        groups.append((start, noun))
+        for i, word in enumerate(group.words, start):
+            role = 'attribute' if word.role in {'group_attribute', 'post_attribute'} else word.role
+            mapped[i] = Link(role, word.lemma, None, RULE_FOR_ROLE[word.role],
+                             word.case if role == 'governed' else None)
+            if role in {'attribute', 'name_part'}:
+                heads[i] = noun
+    for attached in group_heads(groups, mapped, root, heads):
+        yield tuple(replace(link, head=attached.get(i)) for i, link in enumerate(mapped))
+
+
+def trees(tokens, *, budget=256):
+    yield from _bare_trees(tokens)
+    for layout in _layouts(tokens, budget):
+        covered = {i for start, group in layout for i in range(start, start + len(group.words))}
+        kept = tuple(i for i in range(len(tokens)) if i not in covered)
+        for tree in _bare_trees(tuple(tokens[i] for i in kept)):
+            yield from _attach(tokens, kept, tree, layout)

@@ -11,6 +11,7 @@ from .rules import known_forms
 
 
 ROOT_KEY = 'russian_grammar.root'
+RELATIVE_KEY = 'russian_grammar.relative'
 UNKNOWN = 'Неизвестно.'
 ARGUMENTS = {'subject', 'object', 'recipient', 'experiencer'}
 INTERROGATIVES = frozenset('кто что какой который чей сколько где куда откуда когда почему зачем как каков'.split())
@@ -80,7 +81,7 @@ def _rows(result):
             category, polarity = '', category
         role = row['role']
         boundary = contexts.get(i)
-        if role in ('predicate', 'clause_conjunct', 'clause_adverbial', 'clause_complement', 'converb', 'infinitive'):
+        if role in ('predicate', 'clause_conjunct', 'clause_adverbial', 'clause_complement', 'clause_relative', 'converb', 'infinitive'):
             boundary = boundary or category
             if role in ('clause_adverbial', 'clause_complement', 'infinitive'):
                 boundary = boundary or 'embedded'
@@ -96,25 +97,37 @@ def _rows(result):
 
 def _remember(core, result, rows, source):
     root = rows[_root(rows)]
-    members = tuple(core.ref(core.add_entity(Domain.H, meta=row).uid) for row in rows)
+    members = []
+    for row in rows:
+        props = {}
+        if row['role'] == 'clause_relative' and row['assertion_status'] == 'asserted':
+            props[RELATIVE_KEY] = Property(RELATIVE_KEY, row['lemma'], 'str')
+        members.append(core.ref(core.add_entity(Domain.H, properties=props, meta=row).uid))
     for i, row in enumerate(rows):
-        for key in ('head', 'controller'):
+        for key in ('head', 'controller', 'antecedent'):
             if row.get(key) is not None:
-                relation = 'grammar.' + (row['role'] if key == 'head' else 'controller')
+                relation = 'grammar.' + (row['role'] if key == 'head' else key)
                 core.add_link(relation, members[i], members[row[key]], 1.0)
     observation = core.add_group(
-        Domain.H, members, {ROOT_KEY: Property(ROOT_KEY, root['lemma'], 'str')},
+        Domain.H, tuple(members), {ROOT_KEY: Property(ROOT_KEY, root['lemma'], 'str')},
         {'verbatim': result.source, 'source': source, 'kind': 'russian_grammar.observation',
          'root_status': root['assertion_status']},
     )
     return observation.uid
 
 
-def _lookup(core, lemmas):
-    for lemma in sorted(lemmas):
-        for ref in core.store.find_elements_with_property(ROOT_KEY, lemma):
-            group = core.store.get_element(Domain.H, ref.uid)
-            yield group.uid, tuple(core.store.get_element(Domain.H, member.uid).meta for member in group.members)
+def _lookup(core, lemma):
+    def rows_of(group):
+        return tuple(core.store.get_element(Domain.H, member.uid).meta for member in group.members)
+
+    for ref in core.store.find_elements_with_property(ROOT_KEY, lemma):
+        group = core.store.get_element(Domain.H, ref.uid)
+        rows = rows_of(group)
+        yield group, rows, _root(rows)
+    for ref in core.store.find_elements_with_property(RELATIVE_KEY, lemma):
+        for group in core.store.groups_containing(ref.uid):
+            if group.meta.get('kind') == 'russian_grammar.observation':
+                yield group, rows_of(group), group.members.index(ref)
 
 
 def _question_word(word):
@@ -129,8 +142,8 @@ def _imperative(word):
     return any(tag.POS == 'VERB' and tag.mood == 'impr' for _, tag in known_forms(word))
 
 
-def _extraction(rows, stored, focus, budget):
-    root, observed = _root(rows), _root(stored)
+def _extraction(rows, stored, observed, source, focus, budget):
+    root = _root(rows)
     if focus is not None and rows[root].get('scope'):
         return set()
     children = [[] for _ in rows]
@@ -141,8 +154,8 @@ def _extraction(rows, stored, focus, budget):
     for j, row in enumerate(stored):
         if row['head'] is not None and row['role'] != 'punctuation':
             children_found[row['head']].append(j)
-    if focus is None and sum(map(len, children)) != sum(map(len, children_found)):
-        return set()
+    if not any(row['role'] == 'clause_relative' for row in rows):
+        children_found = [[j for j in group if stored[j]['role'] != 'clause_relative'] for group in children_found]
     order = [root]
     for i in order:
         order.extend(children[i])
@@ -153,7 +166,9 @@ def _extraction(rows, stored, focus, budget):
         for mapping in states:
             pool = [observed] if i == root else children_found[mapping[row['head']]]
             for j in pool:
-                if j in mapping.values() or not _compatible(rows, i, stored[j], i == focus):
+                if focus is None and len(children[i]) != len(children_found[j]):
+                    continue
+                if j in mapping.values() or not _compatible(rows, i, stored[j], i == focus, i == root):
                     continue
                 following.append({**mapping, i: j})
                 if len(following) > budget:
@@ -163,11 +178,25 @@ def _extraction(rows, stored, focus, budget):
             break
     answers = set()
     for mapping in states:
-        if any(rows[i].get('controller') is not None and
-               mapping.get(rows[i]['controller']) != stored[j].get('controller') for i, j in mapping.items()):
+        if any(rows[i].get(key) is not None and mapping.get(rows[i][key]) != stored[j].get(key)
+               for i, j in mapping.items() for key in ('controller', 'antecedent')):
             continue
         if focus is None:
             answers.add('Да.')
+        elif stored[mapping[focus]].get('event_view'):
+            reference = stored[mapping[focus]]
+            target = reference['antecedent']
+            if reference['event_view'] == 'event' and 'averted' in (stored[target].get('scope') or '').split('_'):
+                answers.add(f"Несостоявшееся действие «{stored[target]['surface']}».")
+                continue
+            span = [target]
+            for node in span:
+                span.extend(j for j in children_found[node] if stored[j]['role'] != 'clause_relative')
+            first, last = min(span), max(span)
+            included = set(span)
+            if any(j not in included and stored[j]['role'] != 'punctuation' for j in range(first, last + 1)):
+                continue
+            answers.add(source[stored[first]['start']:stored[last]['end']])
         else:
             head = mapping[focus]
             parts = [head, *(j for j in children_found[head] if stored[j]['role'] == 'name_part')]
@@ -175,35 +204,45 @@ def _extraction(rows, stored, focus, budget):
     return answers
 
 
-def _compatible(rows, i, stored, focus):
+def _compatible(rows, i, stored, focus, root):
     row = rows[i]
     if row.get('scope') != stored.get('scope') or row['assertion_status'] != stored['assertion_status']:
         return False
-    if row['role'] != stored['role']:
+    if not focus:
+        if row.get('event_view') != stored.get('event_view'):
+            return False
+        if (row.get('antecedent') is None) != (stored.get('antecedent') is None):
+            return False
+    if row['role'] != stored['role'] and not (root and stored['role'] == 'clause_relative'):
         if not (focus and row['role'] == 'object' and stored['role'] == 'recipient' and row['head'] is not None):
             return False
         frame = FRAMES.get(rows[row['head']]['lemma'])
         if frame is None or 'accs' not in frame.recipient_cases or stored.get('case') != 'accs':
             return False
     if not focus:
-        return row['lemma'] == stored['lemma'] and row['surface'].casefold() == stored['surface'].casefold()
+        actual = (stored.get('recovery') or {}).get('corrected', stored['surface'])
+        wanted = (row.get('recovery') or {}).get('corrected', row['surface'])
+        return row['lemma'] == stored['lemma'] and wanted.casefold() == actual.casefold()
+    if stored.get('event_view'):
+        return row['lemma'] == 'что'
     cases = {tag.case for lemma, tag in known_forms(row['surface']) if lemma == row['lemma'] and tag.POS == 'NPRO'}
     actual_case = stored.get('case') or {'subject': 'nomn', 'object': 'accs'}.get(stored['role'])
     animacy = 'anim' if row['lemma'] == 'кто' else 'inan'
+    surface = (stored.get('recovery') or {}).get('corrected', stored['surface'])
     return any(lemma == stored['lemma'] and tag.POS in ('NOUN', 'NPRO') and tag.case in cases and
                (not actual_case or tag.case == actual_case) and tag.animacy == animacy
-               for lemma, tag in known_forms(stored['surface']))
+               for lemma, tag in known_forms(surface))
 
 
 def _answer(view, rows, focus, budget, result):
     answers = {}
     lemma = rows[_root(rows)]['lemma']
-    for ref, stored in _lookup(view, {lemma}):
-        surfaces = _extraction(rows, stored, focus, budget)
+    for group, stored, observed in _lookup(view, lemma):
+        surfaces = _extraction(rows, stored, observed, group.meta['verbatim'], focus, budget)
         if surfaces is None:
             return GrammarReply('UNKNOWN', UNKNOWN, analysis=result)
         for surface in surfaces:
-            answers.setdefault(surface.casefold(), (surface, ref))
+            answers.setdefault(surface.casefold(), (surface, group.uid))
     if len(answers) == 1:
         surface, ref = next(iter(answers.values()))
         return GrammarReply('ANSWER', surface, ref, result)
@@ -227,7 +266,7 @@ def submit(core, text, choose=None, *, source='user', journal=None, budget=256):
             return GrammarReply('UNKNOWN', UNKNOWN, analysis=result)
         return GrammarReply(result.status, 'Разбор не завершён. ' + result.reason, analysis=result)
     rows = _rows(result)
-    variables = [i for i, row in enumerate(rows) if _question_word(row['surface'])
+    variables = [i for i, row in enumerate(rows) if row.get('antecedent') is None and _question_word(row['surface'])
                  and row['role'] not in ('clause_marker', 'coordinator')]
     if variables:
         query = True

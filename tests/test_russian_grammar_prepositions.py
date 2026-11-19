@@ -98,7 +98,7 @@ def test_syncretic_governed_cases_remain_distinct_and_each_answer_makes_progress
 
 
 @pytest.mark.parametrize('text,reason', [
-    ('Иван пришёл к книгу', 'NO_GOVERNED_READING'),
+    ('Иван пришёл к шмумпозявке', 'NO_GOVERNED_READING'),
     ('Иван подошёл к их', 'NO_GOVERNED_READING'),
     ('Иван шёл с тяжёлой биноклем', 'GROUP_AGREEMENT'),
     ('Иван подбежал к', 'INCOMPLETE_PREPOSITIONAL_GROUP'),
@@ -117,3 +117,16 @@ def test_compound_preposition_and_ordinary_reading_share_the_prefix():
                for t in analyze('Лодка попала в течение').analyses)
     expanded = analyze('Высокий Иван увидел человека с биноклем')
     assert expanded.probes[0].context == expanded.source
+
+
+def test_case_recovery_keeps_the_original_and_partitions_valid_inflections():
+    result = analyze('Иван упал под столу')
+    probe, = result.probes
+    assert set(probe.options) == {'стол', 'столом'}
+    assert analyze(result.source, lambda _: '?').status == 'AMBIGUOUS'
+    for choice, case in [('стол', 'accs'), ('столом', 'ablt')]:
+        restored = analyze(result.source, lambda _: choice)
+        tree, = restored.analyses
+        evidence = tree[-1].recovery
+        assert restored.tokens[-1].surface == evidence.original == 'столу'
+        assert (evidence.corrected, evidence.case, evidence.lemma, evidence.preposition) == (choice, case, 'стол', 'под')

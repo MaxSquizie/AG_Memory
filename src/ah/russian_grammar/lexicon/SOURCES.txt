@@ -52,3 +52,8 @@ dictionary. Derived from the Russian Universal Dependencies treebanks:
   ru_pud-ud-test.conllu SHA256 a37e076d24f0c3cfd5d48a11bbfec36026da5dc46180b7a12dc991dc372de1ea
 Adapted table under CC BY-SA 4.0. Regeneration:
 python scripts/import_russian_clause_connectives.py ru_gsd-ud-train.conllu ru_pud-ud-test.conllu src/ah/russian_grammar/lexicon/clause-connectives.tsv
+
+nominal-connectives.tsv uses the same GSD and PUD sources and license as
+clause-connectives.tsv. It includes cc conjunctions on nominal conjuncts
+whose governing conjunct is a noun, proper name or pronoun. Regeneration:
+python scripts/import_russian_clause_connectives.py --nominal ru_gsd-ud-train.conllu ru_pud-ud-test.conllu src/ah/russian_grammar/lexicon/nominal-connectives.tsv

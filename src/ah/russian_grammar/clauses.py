@@ -3,6 +3,8 @@ from dataclasses import dataclass, replace
 from functools import cache
 from importlib.resources import files
 
+from .rules import known_forms
+
 
 def _key(word):
     return word.casefold().replace('ё', 'е')
@@ -32,6 +34,8 @@ def _boundaries(words):
     forms, width = _connectives()
     for index in range(len(words)):
         start = index - 1 if index and words[index - 1] == ',' else index
+        if words[index] == 'что' and start > 0:
+            yield Boundary(start, index, index + 1, 'что', 'relative', frozenset())
         for end in range(index + 1, min(len(words), index + width) + 1):
             phrase = words[index:end]
             for relation, governors in forms.get(phrase, {}).items():
@@ -42,7 +46,8 @@ def _boundaries(words):
 
 def _shift(link, offset):
     return replace(link, head=None if link.head is None else link.head + offset,
-                   controller=None if link.controller is None else link.controller + offset)
+                   controller=None if link.controller is None else link.controller + offset,
+                   antecedent=None if link.antecedent is None else link.antecedent + offset)
 
 
 def _scope(boundary):
@@ -57,7 +62,8 @@ def _markers(boundary, root, words):
     from .parser import Link
 
     markers = []
-    for index in range(boundary.start, boundary.stop):
+    stop = boundary.marker if boundary.relation == 'relative' else boundary.stop
+    for index in range(boundary.start, stop):
         if index < boundary.marker:
             link = Link('punctuation', words[index], root, 'CL.PUNCT')
         else:
@@ -68,6 +74,7 @@ def _markers(boundary, root, words):
 
 
 def _attachments(prefix, levels, boundary, leaf, root, words):
+    relative = boundary.relation == 'relative'
     marker_links = _markers(boundary, root, words)
     for level in range(len(levels) - 1, -1, -1):
         anchor, current = levels[level]
@@ -78,10 +85,13 @@ def _attachments(prefix, levels, boundary, leaf, root, words):
                 continue
             if any(link and link.role == 'clause_complement' and link.head == host for link in prefix):
                 continue
-        own = leaf[root - boundary.stop]
+        own = leaf[root - (boundary.marker if relative else boundary.stop)]
         if relation == 'conj':
             role, rule = 'clause_conjunct', 'CL.CONJ'
             next_levels = levels[:level] + ((anchor, root),)
+        elif relative:
+            role, rule = 'clause_relative', 'CL.REL'
+            next_levels = levels[:level + 1] + ((root, root),)
         else:
             role, rule = ('clause_complement', 'CL.COMP') if relation == 'ccomp' else ('clause_adverbial', 'CL.ADV')
             next_levels = levels[:level + 1] + ((root, root),)
@@ -91,7 +101,14 @@ def _attachments(prefix, levels, boundary, leaf, root, words):
         host_scope = {'condition': 'conditional', 'alternative': 'alternative'}.get(scope)
         if host_scope and not joined[host].scope:
             joined[host] = replace(joined[host], scope=host_scope)
-        yield tuple(joined), next_levels
+        if relative:
+            reference = leaf[0]
+            views = ('situation', 'event') if 'averted' in (prefix[host].scope or '').split('_') else ('situation',)
+            for view in views:
+                joined[boundary.marker] = replace(reference, rule='CL.REF', antecedent=host, event_view=view)
+                yield tuple(joined), next_levels
+        else:
+            yield tuple(joined), next_levels
 
 
 def trees(tokens, local, *, budget=256):
@@ -123,6 +140,31 @@ def trees(tokens, local, *, budget=256):
                     raise AnalysisBudgetExceeded('ANALYSIS_BUDGET')
         return tuple(result)
 
+    def relative_leaves(marker, stop):
+        state_roots = set()
+        for leaf, root in leaves(marker.stop, stop):
+            state = leaf[root - marker.stop]
+            if state.rule != 'V3':
+                continue
+            if not any(tag.POS == 'ADJS' and tag.gender == 'neut' for _, tag in known_forms(tokens[root].surface)):
+                continue
+            if any(link.role == 'infinitive' and link.head == root for link in leaf):
+                continue
+            reference = Link('event_argument', 'что', root, 'CL.REF')
+            state_roots.add(root)
+            yield (reference, *leaf), root
+        for leaf, root in leaves(marker.marker, stop):
+            if leaf[0].lemma != 'что' or leaf[0].role not in ('subject', 'object'):
+                continue
+            predicate = leaf[root - marker.marker]
+            if leaf[0].role == 'subject' and leaf[0].head == root:
+                if root in state_roots and predicate.rule == 'V2':
+                    continue
+                if predicate.lemma == 'быть' and any(leaf[i - marker.marker].role == 'adverb'
+                        and leaf[i - marker.marker].head == root for i in state_roots):
+                    continue
+            yield leaf, root
+
     ends = tuple(sorted({b.start for b in boundaries if b.start > 0} | {size}))
     starts = defaultdict(list)
     for boundary in boundaries:
@@ -146,7 +188,8 @@ def trees(tokens, local, *, budget=256):
                 for stop in finishes:
                     if stop <= marker.stop:
                         continue
-                    for leaf, root in leaves(marker.stop, stop):
+                    candidates = relative_leaves(marker, stop) if marker.relation == 'relative' else leaves(marker.stop, stop)
+                    for leaf, root in candidates:
                         for tree, scopes in _attachments(prefix, levels, marker, leaf, root, words):
                             if stop == hi:
                                 yield tree[lo:], scopes[0][0]

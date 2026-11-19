@@ -6,6 +6,7 @@ from itertools import product
 
 from .prepositions import CASE_NAMES, FORMS, GOVERNMENT, PREFIXES, TOKEN, group_heads
 from .probe import MAX_WORD_CHOICES, Probe
+from .recovery import CaseRecovery
 from .rules import Reading, known_forms, name_continuations, plain_person_reference, preposition_reading, attribute_agrees, readings, subject_agrees
 
 
@@ -32,6 +33,9 @@ class Link:
     case: str | None = None
     controller: int | None = None
     scope: str | None = None
+    antecedent: int | None = None
+    event_view: str | None = None
+    recovery: CaseRecovery | None = None
 
 
 class AnalysisBudgetExceeded(Exception):
@@ -236,7 +240,7 @@ def _attachment_context(text, tokens, analyses, hosts, start, end):
 
 def _clause_context(text, tokens, trees, focus, anchors):
     spans = [_label_extent(tokens, i, i + 1) for i in {focus, *anchors} if i is not None]
-    clause_roles = {'predicate', 'clause_complement', 'clause_adverbial', 'clause_conjunct'}
+    clause_roles = {'predicate', 'clause_complement', 'clause_adverbial', 'clause_conjunct', 'clause_relative'}
     for tree in trees:
         root = focus
         while tree[root].role not in clause_roles:
@@ -303,9 +307,19 @@ def _partitions(analyses, tokens, text):
                     for j in range(noun + 1, len(tokens)))
                 if depends_on_previous or undecided_modifier:
                     continue
-                end = noun + 1
-                while end < len(tokens) and all(a[end].role == 'attribute' and a[end].head == noun for a in analyses):
-                    end += 1
+                extents = []
+                for tree in analyses:
+                    end = noun + 1
+                    for j in range(noun + 1, len(tree)):
+                        anchor = j
+                        while tree[anchor].role in {'attribute', 'possessive', 'coordinator', 'nominal_conjunct',
+                                                     'name_part', 'punctuation'}:
+                            anchor = tree[anchor].head
+                        if anchor != noun:
+                            break
+                        end = j + 1
+                    extents.append(end)
+                end = min(extents)
                 phrase = _span_label(tokens, i, end)
                 context = _attachment_context(text, tokens, analyses, hosts, i, end)
                 yield word_choice(f'Which word does the phrase «{phrase}» depend on?', hosts, context)
@@ -323,6 +337,28 @@ def _partitions(analyses, tokens, text):
             continue
         roles = {link.role for link in links}
         focus = _span_label(tokens, i)
+        corrected = [link.recovery.corrected if link.recovery else tokens[i].surface for link in links]
+        if len(set(corrected)) > 1:
+            choices = tuple(dict.fromkeys(corrected))
+            yield Probe(f'Which form of «{focus}» fits the sentence here?', choices, text), corrected
+        antecedents = [link.antecedent for link in links]
+        if roles == {'possessive'} and len(set(antecedents)) > 1:
+            context = _clause_context(text, tokens, analyses, i, antecedents)
+            yield word_choice(f'Which word does the possessive «{focus}» refer to?', antecedents, context)
+        if {link.rule for link in links} == {'CL.MARK', 'CL.REF'}:
+            yield word_choice(f'Copy «{focus}» if it refers to a preceding event here. Otherwise choose “no such word”.',
+                              [i if link.rule == 'CL.REF' else None for link in links])
+        if all(link.rule == 'CL.REF' for link in links):
+            if len(set(antecedents)) > 1:
+                yield word_choice(f'Which preceding predicate does «{focus}» refer to?', antecedents)
+            elif len({link.event_view for link in links}) > 1:
+                host = antecedents[0]
+                starts = [j for j, link in enumerate(analyses[0]) if link.rule == 'N2' and link.head == host]
+                if starts:
+                    labels = {'event': _span_label(tokens, host), 'situation': _span_label(tokens, min(starts), host + 1)}
+                    question = f'Which expression does «{focus}» refer to here?'
+                    context = _clause_context(text, tokens, analyses, i, (min(starts), host))
+                    yield Probe(question, tuple(labels.values()), context), [labels[link.event_view] for link in links]
         controllers = [link.controller for link in links]
         if len(roles) == 1 and len(set(controllers)) > 1:
             context = _clause_context(text, tokens, analyses, i, controllers)
@@ -438,13 +474,52 @@ def _nickname_readings(tokens, tree, budget):
                 yield tuple(variant)
 
 
+def _possessor_readings(tokens, tree, budget):
+    slots = {}
+    size = 1
+    for i, link in enumerate(tree):
+        form = tokens[i].surface.casefold().replace('ё', 'е')
+        if link.role != 'possessive' or form not in ('его', 'ее', 'их'):
+            continue
+        candidates = []
+        for j in range(i):
+            noun = tree[j]
+            if noun.role not in ('subject', 'object', 'recipient', 'experiencer', 'governed', 'nominal_conjunct'):
+                continue
+            surface = noun.recovery.corrected if noun.recovery else tokens[j].surface
+            for lemma, tag in known_forms(surface):
+                if lemma != noun.lemma or tag.POS not in ('NOUN', 'NPRO') or tag.person in ('1per', '2per'):
+                    continue
+                case = noun.case or {'subject': 'nomn', 'object': 'accs'}.get(noun.role)
+                if case is not None and tag.case != case:
+                    continue
+                number = 'plur' if form == 'их' else 'sing'
+                genders = {'masc', 'neut'} if form == 'его' else {'femn'}
+                if tag.number == number and (number == 'plur' or tag.gender is None or tag.gender in genders):
+                    candidates.append(j)
+                    break
+        if candidates:
+            slots[i] = (*candidates, None)
+            size *= len(slots[i])
+            if size > budget:
+                raise AnalysisBudgetExceeded('ANALYSIS_BUDGET')
+    if not slots:
+        yield tree
+        return
+    for selected in product(*slots.values()):
+        result = list(tree)
+        for i, antecedent in zip(slots, selected):
+            result[i] = replace(tree[i], antecedent=antecedent)
+        yield tuple(result)
+
+
 def _connected(tree):
     roots = [i for i, link in enumerate(tree) if link.head is None]
     if len(roots) != 1 or tree[roots[0]].role != 'predicate':
         return False
     children = [[] for _ in tree]
     for i, link in enumerate(tree):
-        if link.controller is not None and not 0 <= link.controller < len(tree):
+        if any(ref is not None and not 0 <= ref < len(tree) for ref in (link.controller, link.antecedent)):
             return False
         if link.head is not None:
             if not 0 <= link.head < len(tree):
@@ -467,30 +542,42 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
     words = tokens[:-1] if tokens and tokens[-1].surface in {'.', '!', '?'} else tokens
     if not words:
         return Result(text, 'UNRESOLVED', 'EMPTY', tokens)
-    from . import clauses, infinitives, modifiers, predication
+    from . import clauses, infinitives, modifiers, nominal_groups, predication, recovery
 
     failures = []
 
     def base(part):
         yield from _simple_trees(part, budget, failures.append if part == words else lambda _: None)
-        yield from predication.trees(part)
+        yield from predication.trees(part, budget=budget)
         yield from infinitives.candidates(part, budget=budget)
 
-    def local(part):
+    def modified(part):
         for tree in modifiers.structures(part, base, budget=budget):
             yield from _nickname_readings(part, tree, budget)
 
+    def local(part):
+        yield from nominal_groups.trees(part, modified, budget=budget)
+
+    def exact(part):
+        for tree in clauses.trees(part, local, budget=budget):
+            if len(tree) == len(part) and _connected(tree) and (accept_tree is None or accept_tree(tree)):
+                yield tree
+
     structures = {}
+
+    def collect(candidates):
+        for tree in candidates:
+            for reading in _possessor_readings(words, tree, budget):
+                key = tuple((l.role, l.lemma, l.head, l.case, l.controller, l.scope,
+                             l.antecedent, l.event_view, l.recovery) for l in reading)
+                structures.setdefault(key, reading)
+                if len(structures) > budget:
+                    raise AnalysisBudgetExceeded('ANALYSIS_BUDGET')
+
     try:
-        for tree in clauses.trees(words, local, budget=budget):
-            if len(tree) != len(words) or not _connected(tree):
-                continue
-            if accept_tree is not None and not accept_tree(tree):
-                continue
-            key = tuple((l.role, l.lemma, l.head, l.case, l.controller, l.scope) for l in tree)
-            structures.setdefault(key, tree)
-            if len(structures) > budget:
-                raise AnalysisBudgetExceeded('ANALYSIS_BUDGET')
+        collect(exact(words))
+        if not structures:
+            collect(recovery.trees(words, exact, budget=budget))
     except AnalysisBudgetExceeded as error:
         return Result(text, 'UNRESOLVED', str(error) or 'ANALYSIS_BUDGET', tokens)
     analyses = tuple(structures.values())

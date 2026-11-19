@@ -46,7 +46,7 @@ def group_heads(groups, words, predicate, nominal_heads) -> Iterator[dict[int, i
         j = start - 1
         while 0 <= j < start and j != predicate:
             role = words[j].role
-            if role in {'subject', 'object', 'duration', 'governed'}:
+            if role in {'subject', 'object', 'duration', 'governed', 'experiencer', 'infinitive'}:
                 candidates.append(j)
             # A nominal at the edge can itself belong to an earlier PP.
             # Its chosen governor determines which larger phrase is still open.
