@@ -40,6 +40,9 @@ class Link:
     recovery: CaseRecovery | None = None
     morphology: Morphology | None = None
     implicit_subject: str | None = None
+    quantity: str | None = None
+    quantity_kind: str | None = None
+    quantity_modifier: str | None = None
 
 
 class AnalysisBudgetExceeded(Exception):
@@ -355,6 +358,39 @@ def _partitions(analyses, tokens, text):
             if set(tenses) == {'pres', 'futr'}:
                 yield word_choice(f'Copy «{focus}» if it describes a future action. Otherwise choose “no such word”.',
                                   [i if tense == 'futr' else None for tense in tenses], _clause_context(text, tokens, analyses, i, ()))
+        if 'quantity_modifier' in roles and 'preposition' in roles:
+            heads = [link.head for link in links]
+            context = _clause_context(text, tokens, analyses, i, heads)
+            question = f'Copy «{focus}» if it marks an approximate quantity. Otherwise choose “no such word”.'
+            yield word_choice(question, [i if link.role == 'quantity_modifier' else None for link in links], context)
+        if roles == {'numeral'}:
+            heads = [link.head for link in links]
+            if len(set(heads)) > 1:
+                context = _clause_context(text, tokens, analyses, i, heads)
+                ordinal = all(link.quantity_kind == 'ordinal' for link in links)
+                question = (f'Which word does «{focus}» put in order?' if ordinal
+                            else f'Which word names what «{focus}» counts?')
+                yield word_choice(question, heads, context)
+            elif heads[0] is not None:
+                noun = heads[0]
+                relations = [tree[noun] for tree in analyses]
+                governors = {link.head for link in relations}
+                if len(governors) == 1 and None not in governors and len({link.role for link in relations}) > 1:
+                    governor, = governors
+                    if any(link.role == 'object' for link in relations):
+                        action = _span_label(tokens, governor)
+                        context = _clause_context(text, tokens, analyses, noun, (i, governor))
+                        label = _span_label(tokens, noun)
+                        question = f'Copy «{label}» if it names the direct object of «{action}». Otherwise choose “no such word”.'
+                        yield word_choice(question, [noun if link.role == 'object' else None for link in relations], context)
+                cases = {link.case for link in relations}
+                if len({link.role for link in relations}) == 1 and len(cases) > 1 and None not in cases:
+                    group = _span_label(tokens, i, noun + 1)
+                    context = _clause_context(text, tokens, analyses, noun, (i,))
+                    for case in sorted(cases)[:-1]:
+                        question = f'Copy «{group}» if the whole phrase is in the {CASE_NAMES[case]} case. Otherwise choose “no such word”.'
+                        yield Probe(question, (group, 'no such word'), context), [
+                            group if link.case == case else 'no such word' for link in relations]
         corrected = [link.recovery.corrected if link.recovery else tokens[i].surface for link in links]
         if len(set(corrected)) > 1:
             choices = tuple(dict.fromkeys(corrected))
@@ -502,6 +538,8 @@ def _nickname_readings(tokens, tree, budget):
 
 
 def _possessor_readings(tokens, tree, budget):
+    counts = {link.head: link.quantity for link in tree if link.role == 'numeral'
+              and link.quantity_kind in ('cardinal', 'both', 'collective')}
     slots = {}
     size = 1
     for i, link in enumerate(tree):
@@ -513,11 +551,17 @@ def _possessor_readings(tokens, tree, budget):
             noun = tree[j]
             if noun.role not in ('subject', 'object', 'recipient', 'experiencer', 'beneficiary', 'stimulus', 'instrument', 'oblique', 'governed', 'nominal_conjunct'):
                 continue
+            count = counts.get(j) if noun.quantity_kind not in ('cardinal', 'both', 'collective') else noun.quantity
+            if count is not None and count.isdecimal() and count != '1':
+                if count != '0' and form == 'их':
+                    candidates.append(j)
+                continue
             surface = noun.recovery.corrected if noun.recovery else tokens[j].surface
             for lemma, tag in known_forms(surface):
                 if lemma != noun.lemma or tag.POS not in ('NOUN', 'NPRO') or tag.person in ('1per', '2per'):
                     continue
-                case = noun.case or {'subject': 'nomn', 'object': 'accs'}.get(noun.role)
+                case = (noun.morphology.case if noun.morphology and noun.morphology.case else
+                        noun.case or {'subject': 'nomn', 'object': 'accs'}.get(noun.role))
                 if case is not None and tag.case != case:
                     continue
                 number = 'plur' if form == 'их' else 'sing'
@@ -569,7 +613,7 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
     words = tokens[:-1] if tokens and tokens[-1].surface in {'.', '!', '?'} else tokens
     if not words:
         return Result(text, 'UNRESOLVED', 'EMPTY', tokens)
-    from . import case_arguments, clauses, finite_forms, infinitives, modifiers, morphology, nominal_groups, predication, recovery
+    from . import case_arguments, clauses, finite_forms, infinitives, modifiers, morphology, nominal_groups, predication, quantity_groups, quantity_modifiers, recovery, standalone_numerals
 
     failures = []
 
@@ -588,8 +632,17 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
         for tree in modifiers.structures(part, finite, budget=budget):
             yield from _nickname_readings(part, tree, budget)
 
+    def nominal(part):
+        yield from nominal_groups.trees(part, modified, budget=budget)
+
+    def counted(part):
+        yield from quantity_groups.trees(part, nominal, budget=budget)
+
+    def numbers(part):
+        yield from standalone_numerals.trees(part, counted, budget=budget)
+
     def local(part):
-        for tree in nominal_groups.trees(part, modified, budget=budget):
+        for tree in quantity_modifiers.trees(part, numbers, budget=budget):
             yield from morphology.variants(part, tree, budget=budget)
 
     def exact(part):
@@ -603,7 +656,7 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
         for tree in candidates:
             for reading in _possessor_readings(words, tree, budget):
                 key = tuple((l.role, l.lemma, l.head, l.case, l.controller, l.scope,
-                             l.antecedent, l.event_view, l.recovery, l.morphology, l.implicit_subject) for l in reading)
+                             l.antecedent, l.event_view, l.recovery, l.morphology, l.implicit_subject, l.quantity, l.quantity_kind, l.quantity_modifier) for l in reading)
                 structures.setdefault(key, reading)
                 if len(structures) > budget:
                     raise AnalysisBudgetExceeded('ANALYSIS_BUDGET')

@@ -4,7 +4,7 @@ from importlib.resources import files
 import re
 
 
-TOKEN = re.compile(r'[^\W\d_]+(?:[-‐‑][^\W\d_]+)*|\d+|[^\s]', re.UNICODE)
+TOKEN = re.compile(r'[^\W\d_]+(?:[-‐‑][^\W\d_]+)*|(?:\d{1,3}(?:[ \u00a0\u202f]\d{3}(?!\d))+|\d+)(?:[.,/]\d+|[-‐‑][а-яА-ЯёЁ]+)?|[^\s]', re.UNICODE)
 
 
 def _load_lexicon():

@@ -9,6 +9,9 @@
 дать	datv	recipient
 дать	gen2	object
 дать	gent	object
+купить	datv	beneficiary
+купить	gen2	object
+купить	gent	object
 написать	ablt	instrument
 написать	datv	recipient
 отдавать	datv	recipient
@@ -22,6 +25,7 @@
 писать	ablt	instrument
 писать	datv	recipient
 подарить	datv	recipient
+покупать	datv	beneficiary
 помогать	datv	beneficiary
 помочь	datv	beneficiary
 попросить	gent	object
