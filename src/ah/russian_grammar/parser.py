@@ -1,9 +1,10 @@
 """Left-to-right analysis within a single simple verbal clause."""
-from collections.abc import Callable, Iterator
+from collections.abc import Callable, Iterator, Mapping
 from dataclasses import dataclass
 from itertools import product
 import re
 
+from .probe import MAX_WORD_CHOICES, Probe
 from .rules import Reading, attribute_agrees, readings, subject_agrees
 
 
@@ -29,17 +30,6 @@ class Link:
     lemma: str
     head: int | None  # token index
     rule: str
-
-
-@dataclass(frozen=True)
-class Probe:
-    question: str
-    options: tuple[str, ...]
-    context: str
-
-    def prompt(self) -> str:
-        return '\n'.join((self.context, self.question, *self.options,
-                          'Copy one choice. Reply 0 if none fits, or ? if unsure.'))
 
 
 @dataclass(frozen=True)
@@ -186,7 +176,7 @@ def _partition(analyses, tokens, text):
     raise ValueError('identical structures were not merged')
 
 
-def analyze(text: str, choose: Callable[[Probe], str] | None = None, *, budget: int = 256) -> Result:
+def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *, budget: int = 256) -> Result:
     if budget < 1:
         raise ValueError('budget must be positive')
     tokens = tuple(Occurrence(m[0], m.start(), m.end()) for m in TOKEN.finditer(text))
@@ -221,11 +211,15 @@ def analyze(text: str, choose: Callable[[Probe], str] | None = None, *, budget: 
     probes = []
     while len(analyses) > 1:
         probe, keys = _partition(analyses, words, text)
+        if len(probe.options) > MAX_WORD_CHOICES:
+            return Result(text, 'AMBIGUOUS', 'JEV_CHOICE_LIMIT', tokens, analyses, tuple(probes))
         probes.append(probe)
         try:
             answer = choose(probe) if choose is not None else '?'
         except OSError:
             return Result(text, 'AMBIGUOUS', 'SELECTOR_UNAVAILABLE', tokens, analyses, tuple(probes))
+        if isinstance(answer, Mapping):
+            answer = probe.response_choice(answer)
         answer = ' '.join(answer.split()).casefold() if isinstance(answer, str) else None
         choices = {label.casefold(): label for label in probe.options}
         if answer == '0':

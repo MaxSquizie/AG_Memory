@@ -7,7 +7,7 @@ import sys
 
 import pytest
 
-from ah.russian_grammar import analyze
+from ah.russian_grammar import Probe, analyze
 from ah.russian_grammar.parser import Prefix
 from ah.russian_grammar.rules import readings
 
@@ -40,10 +40,13 @@ def test_ambiguous_attribute_and_exact_probe():
     r = analyze(text)
     assert r.status == 'AMBIGUOUS' and len(r.analyses) == 2
     probe, = r.probes
-    assert probe.prompt() == (
-        text + '\nWhich word does «грустную» describe?\n'
-        'маму\nсестру\nCopy one choice. Reply 0 if none fits, or ? if unsure.'
-    )
+    request = json.loads(probe.prompt())
+    assert request == probe.jev_request() == {
+        'model': 'jev-latest', 'state': text, 'questions': {
+            'grammar': {'type': 'choice', 'instructions': 'Which word does «грустную» describe?',
+                        'criteria': {'маму': None, 'сестру': None,
+                                     '0': 'None of the proposed answers fits.',
+                                     '?': 'The sentence leaves the choice unclear.'}}}}
     for host in ['маму', 'сестру']:
         resolved = analyze(text, lambda p: host)
         links, = resolved.analyses
@@ -153,3 +156,50 @@ runpy.run_module('ah.russian_grammar', run_name='__main__')
 """
     child = subprocess.run([sys.executable, '-c', program], env=env, check=True, capture_output=True, text=True)
     assert json.loads(child.stdout)['status'] == 'PARSED_FRAGMENT'
+
+@pytest.mark.parametrize('choice,expected', [('дочь', 'SIMPLE_CLAUSE'), ('?', 'OPEN_CHOICE'),
+                                             ('0', 'OPTIONS_REJECTED'), ('2', 'INVALID_ANSWER')])
+def test_native_choice_response_in_analyzer(choice, expected):
+    result = analyze('Мать любит дочь', lambda probe: {
+        'model': 'jev-1.13.0', 'answers': {'grammar': {'type': 'choice', 'choice': choice}},
+    })
+    assert result.reason == expected
+    if choice == 'дочь':
+        assert result.analyses[0][2].role == 'subject'
+
+
+@pytest.mark.parametrize('response', [
+    {'answers': []}, {'answers': {'wrong_id': {'type': 'choice', 'choice': 'дочь'}}},
+    {'answers': {'grammar': {'type': 'score', 'choice': 'дочь'}}},
+    {'answers': {'grammar': {'probabilities': {'дочь': 1.0}}}},
+    {'answers': {'grammar': {'type': 'choice', 'choice': []}}},
+])
+def test_malformed_jev_response_preserves_the_forest(response):
+    result = analyze('Мать любит дочь', lambda probe: response)
+    assert result.reason == 'INVALID_ANSWER' and len(result.analyses) == 2
+
+
+@pytest.mark.parametrize('text,choices', [
+    ('  Мать\nлюбит мать?', ('[Мать] любит', 'любит [мать]')),
+    ('Иван читал ночь', ('ночь', 'no such word')),
+])
+def test_cli_report_and_raw_jev_request_are_each_one_json_value(text, choices, monkeypatch, capsys):
+    from ah.russian_grammar.__main__ import main
+    monkeypatch.setattr(sys, 'argv', ['grammar', '--model', 'jev-1.13.0', text])
+    main()
+    request, = json.loads(capsys.readouterr().out)['probes']
+    monkeypatch.setattr(sys, 'argv', ['grammar', '--jev', '--model', 'jev-1.13.0', text])
+    main()
+    assert json.loads(capsys.readouterr().out) == request
+    assert request['state'] == text and request['model'] == 'jev-1.13.0'
+    assert tuple(request['questions']['grammar']['criteria']) == (*choices, '0', '?')
+    monkeypatch.setattr(sys, 'argv', ['grammar', '--jev', 'Иван читает книгу'])
+    main()
+    assert capsys.readouterr().out == ''
+
+
+def test_jev_criteria_limit_counts_control_choices():
+    words = tuple(f'word{i}' for i in range(253))
+    assert len(Probe('Pick', words, 'text').jev_request()['questions']['grammar']['criteria']) == 255
+    with pytest.raises(ValueError):
+        Probe('Pick', (*words, 'extra'), 'text').jev_request()
