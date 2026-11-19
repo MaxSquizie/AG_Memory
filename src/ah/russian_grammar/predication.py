@@ -1,0 +1,135 @@
+from itertools import product
+
+from .rules import known_forms
+
+
+def _agree(first, second):
+    number = first.number
+    return (number == second.number and number is not None
+            and (number != 'sing' or not first.gender or not second.gender or first.gender == second.gender))
+
+
+def _copula_agrees(tag, subject):
+    if subject is None:
+        return tag.number == 'sing' and tag.gender in (None, 'neut') and tag.person in (None, '3per')
+    person = subject.person if subject.POS == 'NPRO' else '3per'
+    return _agree(tag, subject) and (tag.person is None or tag.person == person)
+
+
+def _nominal(tag, case):
+    return tag.POS in ('NOUN', 'NPRO') and tag.case == case
+
+
+def _adjective(tag):
+    return tag.POS in ('ADJF', 'ADJS', 'PRTS') and 'Apro' not in tag
+
+
+def _modifies(forms, index, noun, head_tag):
+    if index >= noun or head_tag.POS != 'NOUN':
+        return False
+    return all(any(tag.POS == 'ADJF' and tag.case == head_tag.case and _agree(tag, head_tag)
+                   for _, tag in variants) for variants in forms[index+1:noun])
+
+
+def _decorated(tokens, forms, bindings, nominal_heads, root, subject, personal):
+    from .parser import Link
+
+    choices = []
+    for i, variants in enumerate(forms):
+        if i in bindings:
+            choices.append((bindings[i],))
+            continue
+        options = []
+        for lemma, tag in variants:
+            if lemma == 'быть' and tag.POS == 'VERB' and tag.mood == 'indc' and _copula_agrees(tag, subject):
+                options.append(Link('copula', lemma, root, 'V2.COP'))
+            if tag.POS == 'ADVB':
+                options.append(Link('adverb', lemma, root, 'V2.MOD'))
+            if tag.POS == 'ADJF':
+                for noun, head_tag in nominal_heads:
+                    if tag.case == head_tag.case and _agree(tag, head_tag) and _modifies(forms, i, noun, head_tag):
+                        options.append(Link('attribute', lemma, noun, 'A1'))
+        if personal and tokens[i].surface in ('—', '–', '-'):
+            subject_index = next(j for j, link in bindings.items() if link.role == 'subject')
+            if min(root, subject_index) < i < max(root, subject_index):
+                options.append(Link('punctuation', tokens[i].surface, root, 'V2.DASH'))
+        if not options:
+            return
+        choices.append(tuple(dict.fromkeys(options)))
+    for tree in product(*choices):
+        if sum(link.role == 'copula' for link in tree) <= 1 and sum(link.role == 'punctuation' for link in tree) <= 1:
+            yield tree
+
+
+def _personal(tokens, forms, root, lemma, pred):
+    from .parser import Link
+
+    for subj, variants in enumerate(forms):
+        if subj == root:
+            continue
+        for noun, tag in variants:
+            if not _nominal(tag, 'nomn') or (_adjective(pred) and not _agree(pred, tag)):
+                continue
+            rule = 'V2.PASS' if pred.POS == 'PRTS' and pred.voice == 'pssv' else 'V2'
+            bindings = {root: Link('predicate', lemma, None, rule), subj: Link('subject', noun, root, 'S1')}
+            for tree in _decorated(tokens, forms, bindings, [(subj, tag), (root, pred)], root, tag, True):
+                explicit = any(link.role == 'copula' for link in tree)
+                predicative_marker = explicit or any(link.role == 'punctuation' for link in tree)
+                if pred.case == 'ablt' and not explicit:
+                    continue
+                if not predicative_marker and root < subj and pred.POS in ('ADJF', 'NOUN'):
+                    continue
+                if not predicative_marker and 'Name' in tag and 'Surn' in pred:
+                    continue
+                yield tree
+
+
+def _impersonal(tokens, forms, root, lemma, pred):
+    from .parser import Link
+
+    infinitives = [(i, form, tag) for i, variants in enumerate(forms) if i != root
+                   for form, tag in variants if tag.POS == 'INFN']
+    datives = [(i, form, tag) for i, variants in enumerate(forms) if i != root
+               for form, tag in variants if _nominal(tag, 'datv') and 'Af-p' not in tag]
+    accusatives = [(i, form, tag) for i, variants in enumerate(forms) if i != root
+                   for form, tag in variants if _nominal(tag, 'accs') and 'Af-p' not in tag]
+    for infinitive, dat in product([None, *infinitives], [None, *datives]):
+        if infinitive and dat and infinitive[0] == dat[0]:
+            continue
+        bindings = {root: Link('predicate', lemma, None, 'V3')}
+        heads = []
+        if infinitive:
+            bindings[infinitive[0]] = Link('infinitive', infinitive[1], root, 'V3.INF')
+        if dat:
+            bindings[dat[0]] = Link('experiencer', dat[1], root, 'V3.DAT', 'datv')
+            heads.append((dat[0], dat[2]))
+        transitive = 'tran' in (infinitive[2] if infinitive else pred)
+        for obj in [None, *(accusatives if transitive else ())]:
+            if obj and obj[0] in bindings:
+                continue
+            bound = bindings.copy()
+            nominal_heads = list(heads)
+            if obj:
+                bound[obj[0]] = Link('object', obj[1], infinitive[0] if infinitive else root, 'O1')
+                nominal_heads.append((obj[0], obj[2]))
+            for tree in _decorated(tokens, forms, bound, nominal_heads, root, None, False):
+                if pred.POS != 'VERB' or not any(link.role == 'copula' for link in tree):
+                    yield tree
+
+
+def trees(tokens):
+    forms = [known_forms(token.surface) for token in tokens]
+    seen = set()
+    for root, variants in enumerate(forms):
+        for lemma, pred in variants:
+            if _adjective(pred) and pred.case in (None, 'nomn', 'ablt') or (
+                    pred.POS == 'NOUN' and pred.case in ('nomn', 'ablt')):
+                candidates = _personal(tokens, forms, root, lemma, pred)
+            elif pred.POS == 'PRED' or 'Prdx' in pred or (pred.POS == 'VERB' and 'Impe' in pred):
+                candidates = _impersonal(tokens, forms, root, lemma, pred)
+            else:
+                continue
+            for tree in candidates:
+                if tree not in seen:
+                    seen.add(tree)
+                    yield tree

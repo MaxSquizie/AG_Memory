@@ -1,4 +1,5 @@
-"""Left-to-right analysis within a single simple verbal clause."""
+"""Incremental Russian grammar analysis and selection among complete structures."""
+from collections import Counter
 from collections.abc import Callable, Iterator, Mapping
 from dataclasses import dataclass, replace
 from itertools import product
@@ -29,6 +30,12 @@ class Link:
     head: int | None  # token index
     rule: str
     case: str | None = None
+    controller: int | None = None
+    scope: str | None = None
+
+
+class AnalysisBudgetExceeded(Exception):
+    pass
 
 
 @dataclass(frozen=True)
@@ -202,7 +209,29 @@ def _attachment_context(text, tokens, analyses, hosts, start, end):
     return text[tokens[min(needed)].start:tokens[max(needed)].end]
 
 
-def _partition(analyses, tokens, text):
+def _controller_context(text, tokens, trees, focus, controllers):
+    spans = [_label_extent(tokens, i, i + 1) for i in {focus, *controllers} if i is not None]
+    clause_roles = {'predicate', 'clause_complement', 'clause_adverbial', 'clause_conjunct'}
+    for tree in trees:
+        root = focus
+        while tree[root].role not in clause_roles:
+            root = tree[root].head
+        included = {root}
+        children = {}
+        for j, link in enumerate(tree):
+            if link.role not in clause_roles and link.role != 'clause_marker' and link.rule != 'CL.PUNCT':
+                children.setdefault(link.head, []).append(j)
+        pending = [root]
+        while pending:
+            child = pending.pop()
+            included.add(child)
+            pending.extend(children.get(child, ()))
+        spans.append((min(included), max(included) + 1))
+    start, end = min(lo for lo, _ in spans), max(hi for _, hi in spans)
+    return text if (start, end) == (0, len(tokens)) else text[tokens[start].start:tokens[end - 1].end]
+
+
+def _partitions(analyses, tokens, text):
     # Each tree has exactly one answer. Equal answers keep all matching trees.
     def word_choice(question, indices, context=text):
         candidates = sorted({i for i in indices if i is not None})
@@ -211,73 +240,120 @@ def _partition(analyses, tokens, text):
             labels[None] = 'no such word'
         return Probe(question, tuple(labels.values()), context), [labels[i] for i in indices]
 
-    predicates = [next(i for i, link in enumerate(a) if link.role == 'predicate') for a in analyses]
+    predicates = [next(i for i, link in enumerate(a) if link.head is None) for a in analyses]
     if len(set(predicates)) > 1:
-        return word_choice('Which word is the verb?', predicates)
+        yield word_choice('Which word is the main predicate?', predicates)
+        return
     verb = _span_label(tokens, predicates[0])
-    subjects = [next(i for i, link in enumerate(a) if link.role == 'subject') for a in analyses]
+    subjects = [next((i for i, link in enumerate(a) if link.role == 'subject' and link.head == predicates[0]), None) for a in analyses]
     if len(set(subjects)) > 1:
-        return word_choice(f'Which word is the subject of «{verb}»?', subjects)
+        yield word_choice(f'Which word is the subject of «{verb}»?', subjects)
     for i in range(len(tokens)):
         if all(a[i].role == 'attribute' for a in analyses):
             hosts = [a[i].head for a in analyses]
             if len(set(hosts)) > 1:
-                return word_choice(f'Which word does «{_span_label(tokens, i)}» describe?', hosts)
+                yield word_choice(f'Which word does «{_span_label(tokens, i)}» describe?', hosts)
 
+    earlier_attachments = []
     for i in range(len(tokens)):
         if all(a[i].role == 'preposition' for a in analyses):
             boundaries = [max((j for j, link in enumerate(tree) if link.role == 'prep_part' and link.head == i),
                               default=i) + 1 for tree in analyses]
             if len(set(boundaries)) > 1:
                 labels = {end: _span_label(tokens, i, end) for end in sorted(set(boundaries))}
-                return (Probe('Which expression functions as the preposition here?', tuple(labels.values()), text),
+                yield (Probe('Which expression functions as the preposition here?', tuple(labels.values()), text),
                         [labels[end] for end in boundaries])
             hosts = [a[i].head for a in analyses]
             ends = {j for a in analyses for j, link in enumerate(a) if link.role == 'governed' and link.head == i}
             if len(set(hosts)) > 1 and len(ends) == 1:
                 noun = ends.pop()
+                depends_on_previous = any(
+                    len({host for host, prior in zip(hosts, previous) if prior == value}) < len(set(hosts))
+                    for previous in earlier_attachments for value in set(previous))
+                earlier_attachments.append(hosts)
+                undecided_modifier = any(
+                    all(tree[j].role == 'attribute' for tree in analyses)
+                    and len({tree[j].head for tree in analyses}) > 1
+                    and any(tree[j].head == noun for tree in analyses)
+                    for j in range(noun + 1, len(tokens)))
+                if depends_on_previous or undecided_modifier:
+                    continue
                 end = noun + 1
                 while end < len(tokens) and all(a[end].role == 'attribute' and a[end].head == noun for a in analyses):
                     end += 1
                 phrase = _span_label(tokens, i, end)
                 context = _attachment_context(text, tokens, analyses, hosts, i, end)
-                return word_choice(f'Which word does the phrase «{phrase}» depend on?', hosts, context)
+                yield word_choice(f'Which word does the phrase «{phrase}» depend on?', hosts, context)
 
-    durations = [next((i for i, link in enumerate(a) if link.role == 'duration'), None) for a in analyses]
-    if len(set(durations)) > 1:
-        return word_choice(f'Which word tells how long the action «{verb}» lasts?', durations)
+    duration_heads = sorted({link.head for tree in analyses for link in tree if link.role == 'duration'})
+    for head in duration_heads:
+        durations = [next((i for i, link in enumerate(tree) if link.role == 'duration' and link.head == head), None)
+                     for tree in analyses]
+        if len(set(durations)) > 1:
+            yield word_choice(f'Which word tells how long the action «{_span_label(tokens, head)}» lasts?', durations)
 
     for i in range(len(tokens)):
-        links = [a[i] for a in analyses]
+        links = [tree[i] for tree in analyses]
+        if len(set(links)) < 2:
+            continue
+        roles = {link.role for link in links}
+        focus = _span_label(tokens, i)
+        controllers = [link.controller for link in links]
+        if len(roles) == 1 and len(set(controllers)) > 1:
+            context = _controller_context(text, tokens, analyses, i, controllers)
+            yield word_choice(f'Who is to perform the action «{focus}»?', controllers, context)
+        heads = [link.head for link in links]
+        if roles == {'clause_conjunct'} and len(set(heads)) > 1:
+            yield word_choice(f'Which predicate is «{focus}» coordinated with?', heads)
+
+
+def _partition(analyses, tokens, text):
+    def cost(item):
+        probe, answers = item
+        return (len(probe.options) > MAX_WORD_CHOICES, max(Counter(answers).values()))
+
+    specific = list(_partitions(analyses, tokens, text))
+    if specific:
+        return min(specific, key=cost)
+
+    def binary(question, focus, flags):
+        labels = (focus, 'no such word')
+        probe = Probe(question + ' Otherwise choose “no such word”.', labels, text)
+        return probe, [focus if flag else 'no such word' for flag in flags]
+
+    choices = []
+    for i in range(len(tokens)):
+        links = [tree[i] for tree in analyses]
         if len(set(links)) == 1:
             continue
         focus = _span_label(tokens, i)
-        roles = {link.role for link in links}
+        roles = sorted({link.role for link in links})
         if len(roles) > 1:
-            role = sorted(roles)[0]
-            return word_choice(f'Copy «{focus}» if it is the {role} here. Otherwise choose “no such word”.',
-                               [i if link.role == role else None for link in links])
+            for role in roles[:-1]:
+                choices.append(binary(f'Copy «{focus}» if its role here is {role.replace("_", " ")}.', focus,
+                                      [link.role == role for link in links]))
+            continue
         heads = [link.head for link in links]
         if len(set(heads)) > 1:
-            return word_choice(f'Which word does «{focus}» depend on?', heads)
-        if len({link.lemma for link in links}) == 1:
-            case = sorted({link.case for link in links})[0]
-            return word_choice(f'Copy «{focus}» if it is in the {CASE_NAMES[case]} case. Otherwise choose “no such word”.',
-                               [i if link.case == case else None for link in links])
-        lemma = sorted({link.lemma for link in links})[0]
-        return word_choice(f'Copy «{focus}» if its dictionary form is «{lemma}». Otherwise choose “no such word”.',
-                           [i if link.lemma == lemma else None for link in links])
-    raise ValueError('identical structures were not merged')
+            labels = {j: _span_label(tokens, j) if j is not None else 'no such word' for j in heads}
+            choices.append((Probe(f'Which word does «{focus}» depend on?', tuple(dict.fromkeys(labels.values())), text),
+                            [labels[j] for j in heads]))
+        for attr, template in [('lemma', 'its dictionary form is «{}»'), ('case', 'it is in the {} case'),
+                               ('scope', 'the action has the reading «{}»')]:
+            values = [getattr(link, attr) for link in links]
+            distinct = sorted(set(values) - {None})
+            if len(set(values)) < 2:
+                continue
+            for value in (distinct if None in values else distinct[:-1]):
+                condition = template.format(CASE_NAMES.get(value, value) if attr == 'case' else value)
+                choices.append(binary(f'Copy «{focus}» if {condition}.', focus, [v == value for v in values]))
+    if not choices:
+        raise ValueError('no grammatical distinction between alternatives')
+    return min(choices, key=cost)
 
 
-def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *, budget: int = 256) -> Result:
-    if budget < 1:
-        raise ValueError('budget must be positive')
-    tokens = tuple(Occurrence(m[0], m.start(), m.end()) for m in TOKEN.finditer(text))
-    words = tokens[:-1] if tokens and tokens[-1].surface in {'.', '!', '?'} else tokens
+def _simple_trees(words, budget, fail):
     prefixes = {Prefix(): None}
-    if not words:
-        return Result(text, 'UNRESOLVED', 'EMPTY', tokens)
     for token in words:
         following = {}
         has_reading = False
@@ -288,25 +364,79 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
                 if extended is not None:
                     following[extended] = None
                     if len(following) > budget:
-                        return Result(text, 'UNRESOLVED', 'PREFIX_BUDGET', tokens)
+                        raise AnalysisBudgetExceeded('PREFIX_BUDGET')
         if not following:
             if all(prefix.open_preposition is not None for prefix in prefixes):
                 reason = 'GROUP_AGREEMENT' if has_reading else 'NO_GOVERNED_READING'
             else:
                 reason = 'NO_PREFIX' if has_reading else 'NO_RULE'
-            return Result(text, 'UNRESOLVED', f'{reason} @{token.start}', tokens)
+            fail(f'{reason} @{token.start}')
+            return
         prefixes = following
     if all(prefix.open_preposition is not None for prefix in prefixes):
-        return Result(text, 'UNRESOLVED', 'INCOMPLETE_PREPOSITIONAL_GROUP', tokens)
-    structures = {}
+        fail('INCOMPLETE_PREPOSITIONAL_GROUP')
+        return
     for prefix in prefixes:
-        for structure in prefix.structures():
-            structures[structure] = None
+        yield from prefix.structures()
+
+
+def _connected(tree):
+    roots = [i for i, link in enumerate(tree) if link.head is None]
+    if len(roots) != 1 or tree[roots[0]].role != 'predicate':
+        return False
+    children = [[] for _ in tree]
+    for i, link in enumerate(tree):
+        if link.controller is not None and not 0 <= link.controller < len(tree):
+            return False
+        if link.head is not None:
+            if not 0 <= link.head < len(tree):
+                return False
+            children[link.head].append(i)
+    pending = roots.copy()
+    count = 0
+    while pending:
+        count += 1
+        current = pending.pop()
+        pending.extend(children[current])
+    return count == len(tree)
+
+
+def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *,
+            budget: int = 256, accept_tree: Callable[[tuple[Link, ...]], bool] | None = None) -> Result:
+    if budget < 1:
+        raise ValueError('budget must be positive')
+    tokens = tuple(Occurrence(m[0], m.start(), m.end()) for m in TOKEN.finditer(text))
+    words = tokens[:-1] if tokens and tokens[-1].surface in {'.', '!', '?'} else tokens
+    if not words:
+        return Result(text, 'UNRESOLVED', 'EMPTY', tokens)
+    from . import clauses, infinitives, modifiers, predication
+
+    failures = []
+
+    def base(part):
+        yield from _simple_trees(part, budget, failures.append if part == words else lambda _: None)
+        yield from predication.trees(part)
+        yield from infinitives.candidates(part, budget=budget)
+
+    def local(part):
+        yield from modifiers.structures(part, base, budget=budget)
+
+    structures = {}
+    try:
+        for tree in clauses.trees(words, local, budget=budget):
+            if len(tree) != len(words) or not _connected(tree):
+                continue
+            if accept_tree is not None and not accept_tree(tree):
+                continue
+            key = tuple((l.role, l.lemma, l.head, l.case, l.controller, l.scope) for l in tree)
+            structures.setdefault(key, tree)
             if len(structures) > budget:
-                return Result(text, 'UNRESOLVED', 'ANALYSIS_BUDGET', tokens)
-    analyses = tuple(structures)
+                raise AnalysisBudgetExceeded('ANALYSIS_BUDGET')
+    except AnalysisBudgetExceeded as error:
+        return Result(text, 'UNRESOLVED', str(error) or 'ANALYSIS_BUDGET', tokens)
+    analyses = tuple(structures.values())
     if not analyses:
-        return Result(text, 'UNRESOLVED', 'NO_COMPLETE_CLAUSE', tokens)
+        return Result(text, 'UNRESOLVED', next(iter(failures), 'NO_COMPLETE_CLAUSE'), tokens)
     probes = []
     checked_government = set()
     while True:
@@ -343,4 +473,5 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
             reason = 'OPEN_CHOICE' if answer == '?' else 'INVALID_ANSWER'
             return Result(text, 'AMBIGUOUS', reason, tokens, analyses, tuple(probes))
         analyses = tuple(a for a, key in zip(analyses, keys) if key == choices[answer])
-    return Result(text, 'PARSED_FRAGMENT', 'SIMPLE_CLAUSE', tokens, analyses, tuple(probes))
+    reason = 'COMPLEX_CLAUSE' if any(link.role.startswith('clause_') for link in analyses[0]) else 'SIMPLE_CLAUSE'
+    return Result(text, 'PARSED_FRAGMENT', reason, tokens, analyses, tuple(probes))

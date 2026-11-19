@@ -142,6 +142,7 @@ class RuntimeServices:
     agent: LLMAgent | None
     formalizer_resource_error: str | None = None
     allow_missing_formalizer_resources: bool = False
+    grammar_only: bool = False
 
     @property
     def formalizer_status(self) -> str:
@@ -169,7 +170,7 @@ class RuntimeServices:
 
     @classmethod
     def build(cls, config: AppConfig, *, core: AHCore | None = None,
-              allow_missing_formalizer_resources: bool = False) -> "RuntimeServices":
+              allow_missing_formalizer_resources: bool = False, grammar_only: bool = False) -> "RuntimeServices":
         persistence = JsonPersistence(config.paths.persistence_file, config.persistence)
         loaded_snapshot = None
         loaded_context = None
@@ -186,6 +187,12 @@ class RuntimeServices:
             loaded_context = bundle.interaction_context
 
         core = core or AHCore()
+        if grammar_only:
+            from ah.core.journal import JournalChannel
+            from ah.formalizer.ah_adapter import AHStoreAdapter
+
+            journal = JournalChannel(config.paths.data_dir / config.formalizer.journal_filename)
+            AHStoreAdapter(core.store, journal, core=core)
         context = loaded_context or InteractionContext()
         cls._ensure_identity_context(core, context, config)
 
@@ -219,7 +226,7 @@ class RuntimeServices:
         graph_inspector = GraphInspector(core, ignition, runtime_lock=operation_lock)
         diagnostics = RuntimeDiagnostics(core, ignition, runtime_lock=operation_lock)
 
-        llm = build_llm_backend(config)
+        llm = None if grammar_only else build_llm_backend(config)
         perception, resource_error = _build_perception_service(
             config, core, llm,
             allow_missing_resources=allow_missing_formalizer_resources,
@@ -269,6 +276,7 @@ class RuntimeServices:
             agent=agent,
             formalizer_resource_error=resource_error,
             allow_missing_formalizer_resources=allow_missing_formalizer_resources,
+            grammar_only=grammar_only,
         )
 
     @staticmethod
@@ -319,7 +327,7 @@ class RuntimeServices:
         self.projector = ContextProjector(self.core, new_config.context)
 
         # Request-level generation values are read from backend.config on every call.
-        if not new_config.llm.enabled:
+        if self.grammar_only or not new_config.llm.enabled:
             if self.llm is not None:
                 self.llm.stop()
             self.llm = None

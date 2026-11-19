@@ -16,10 +16,15 @@ def dictionary():
     return MorphAnalyzer()
 
 
+@lru_cache(maxsize=4096)
+def known_forms(surface):
+    return tuple(dict.fromkeys((p.normal_form, p.tag) for p in dictionary().parse(surface)
+                               if p.is_known and 'Abbr' not in p.tag))
+
+
 @lru_cache(maxsize=1024)
 def plain_person_reference(surface: str) -> bool:
-    nominatives = [p.tag for p in dictionary().parse(surface)
-                   if p.is_known and p.tag.case == 'nomn' and 'Abbr' not in p.tag]
+    nominatives = [tag for _, tag in known_forms(surface) if tag.case == 'nomn']
     return bool(nominatives) and all('Name' in tag or tag.POS == 'NPRO' for tag in nominatives)
 
 
@@ -48,10 +53,7 @@ def readings(surface: str, preposition: str | None = None) -> tuple[Reading, ...
             result.append(preposition_reading(word, 'prep_prefix'))
         if word in FORMS:
             result.append(preposition_reading(FORMS[word], 'preposition'))
-    for parse in dictionary().parse(surface):
-        tag = parse.tag
-        if not parse.is_known or 'Abbr' in tag:
-            continue
+    for lemma, tag in known_forms(surface):
         if preposition is not None:
             if tag.case not in (GOVERNMENT.get(preposition) or CASE_NAMES):
                 continue
@@ -70,7 +72,7 @@ def readings(surface: str, preposition: str | None = None) -> tuple[Reading, ...
             else:
                 continue
         elif tag.POS == 'PREP':
-            prep = preposition_reading(FORMS.get(word, parse.normal_form), 'preposition')
+            prep = preposition_reading(FORMS.get(word, lemma), 'preposition')
             if prep not in result:
                 result.append(prep)
             continue
@@ -87,7 +89,7 @@ def readings(surface: str, preposition: str | None = None) -> tuple[Reading, ...
         person = tag.person
         if tag.POS == 'NOUN':
             person = '3per'
-        reading = Reading(parse.normal_form, role, tag.case, tag.number, tag.gender,
+        reading = Reading(lemma, role, tag.case, tag.number, tag.gender,
                           person, tag.animacy, 'tran' in tag)
         if reading not in result:
             result.append(reading)

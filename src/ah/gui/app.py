@@ -25,6 +25,7 @@ def parse_args() -> argparse.Namespace:
     if env_config:
         default = Path(env_config).expanduser()
     p.add_argument("--config", default=str(default))
+    p.add_argument("--chat-mode", choices=("v7", "grammar"), default="v7")
     return p.parse_args()
 
 
@@ -76,7 +77,7 @@ def main() -> None:
 
     args = parse_args()
     config_path = Path(args.config).expanduser().resolve()
-    provisioned = _auto_provision_formalizer_config(config_path)
+    provisioned = _auto_provision_formalizer_config(config_path) if args.chat_mode == "v7" else None
     if provisioned is not None and str(provisioned.resolve()) != str(config_path):
         # Re-exec against the isolated fixture so formalization is available; the second
         # pass finds resources present in that data_dir and proceeds without re-provisioning.
@@ -88,7 +89,7 @@ def main() -> None:
         "ollama_model": config.llm.ollama_model,
         "lmstudio_model": config.llm.lmstudio_model,
     })
-    services = RuntimeServices.build(config, allow_missing_formalizer_resources=True)
+    services = RuntimeServices.build(config, allow_missing_formalizer_resources=True, grammar_only=args.chat_mode == "grammar")
     if services.formalizer_resource_error:
         print(services.formalizer_resource_error, file=sys.stderr)
 
@@ -96,6 +97,7 @@ def main() -> None:
     app.setApplicationName("AH Agent")
     apply_theme(app)
     window = MainWindow(services, config_path)
+    window.chat_mode.setCurrentIndex(window.chat_mode.findData(args.chat_mode))
     window.show()
     raise SystemExit(app.exec())
 

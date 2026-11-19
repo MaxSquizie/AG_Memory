@@ -22,3 +22,33 @@ Changes: case tags mapped to OpenCorpora, spelling variants linked, sources
 merged. Runtime morphology additionally uses the installed pymorphy3 dictionary.
 To regenerate from the above SOL file and the two linked JSONL lists:
 python scripts/import_russian_prepositions.py rus_prepositions.sol en.jsonl ru.jsonl src/ah/russian_grammar/lexicon/prepositions.tsv
+
+infinitives.tsv contains every literal "модальный(lemma)" declaration in
+GrammarEngine's rus_infinitives_sov.sol and rus_infinitives_nesov.sol,
+revision c70bdbdd8b41af25fa754e727ca645de90d28c23 (MIT notice above).
+https://github.com/Koziev/GrammarEngine/tree/c70bdbdd8b41af25fa754e727ca645de90d28c23/src/dictionary.src
+SHA256 (sov): 5895dc0f12b955713286d8d9d1665841744ccc0b0f21897f417f488d5526719f
+SHA256 (nesov): 65a2b6c2c6d6c2ef2fd7b22528d980abd6710f531e8442bddedc05de80b574aa
+python scripts/import_russian_infinitives.py rus_infinitives_sov.sol rus_infinitives_nesov.sol src/ah/russian_grammar/lexicon/infinitives.tsv
+
+infinitive_control.tsv describes selected lexical frames applicable in a
+construction with a dependent infinitive. Fields: embedded scope, source of
+the infinitive's subject, possible case of the matrix recipient, verb lemmas.
+These are project annotations. The GrammarEngine flag licenses an infinitive
+but does not identify its subject. Background: Academy Grammar, connections
+of the verb with the infinitive, and Timberlake, A Reference Grammar of
+Russian, table 4.13:
+https://slovari.ru/default.aspx?0a0=1771&p=5315&s=0
+https://mercaba.org/SANLUIS/IDIOMAS/Ruso/Reference%20grammar%20russian.pdf
+
+clause-connectives.tsv lists observed connective forms, their dependency
+relation, and governor lemmas for selected clausal complements. Fixed
+expressions are reconstructed from contiguous tokens with the UD fixed
+relation. These are positive attestations rather than a complete valency
+dictionary. Derived from the Russian Universal Dependencies treebanks:
+- Russian GSD training set (CC BY-SA 4.0), https://universaldependencies.org/treebanks/ru_gsd/
+  ru_gsd-ud-train.conllu SHA256 0ae33a4bbda12697e2eb0a32af4971bda73af5852c8521744a974a316c02bab5
+- Russian PUD test set (CC BY-SA 3.0), https://universaldependencies.org/treebanks/ru_pud/
+  ru_pud-ud-test.conllu SHA256 a37e076d24f0c3cfd5d48a11bbfec36026da5dc46180b7a12dc991dc372de1ea
+Adapted table under CC BY-SA 4.0. Regeneration:
+python scripts/import_russian_clause_connectives.py ru_gsd-ud-train.conllu ru_pud-ud-test.conllu src/ah/russian_grammar/lexicon/clause-connectives.tsv

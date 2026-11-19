@@ -6,6 +6,7 @@ proof records. All batch / goal / retraction decisions share the journal lock.
 """
 from __future__ import annotations
 
+from contextlib import contextmanager
 from dataclasses import asdict, replace
 from copy import deepcopy
 from typing import Any, Callable, Sequence
@@ -113,6 +114,19 @@ class AHStoreAdapter(Store):
             self._store.replace_from(restored.store)
             self._core.supports.replace_from(restored.supports)
         self.ledger.validate_audit()
+
+    @contextmanager
+    def canonical_read(self):
+        with self._journal.atomic(), self._store._lock:
+            self._refresh()
+            yield self._core
+
+    @contextmanager
+    def canonical_transaction(self, tx_ref):
+        with self.canonical_read():
+            draft = self._draft()
+            yield draft
+            self._write_unit(draft, tx_ref=tx_ref)
 
     def _draft(self):
         return AHCore(self._store.clone(),self._core.uid,self._core.supports.clone(),self._core.function_registry)

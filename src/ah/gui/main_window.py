@@ -9,6 +9,7 @@ from typing import Callable
 from PySide6.QtCore import QObject, QRunnable, QProcess, QThreadPool, QTimer, Qt, Signal, Slot
 from PySide6.QtGui import QAction, QGuiApplication, QResizeEvent
 from PySide6.QtWidgets import (
+    QComboBox,
     QDockWidget,
     QFrame,
     QHBoxLayout,
@@ -46,6 +47,7 @@ from ah.diagnostics import (
 
 from .config_editor import ConfigEditor
 from .config_store import ApplyMode, ConfigDocument
+from .grammar_chat import GrammarChat
 from .graph_canvas import GraphCanvasWidget
 from .canvas_browser import CanvasBrowserWidget
 from .ignition_tuning import IgnitionTuningWidget
@@ -93,6 +95,8 @@ class MainWindow(QMainWindow):
         self.config_path = Path(config_path)
         self.thread_pool = QThreadPool.globalInstance()
         self._last_turn = None
+        self.grammar_chat = GrammarChat()
+        self._grammar_journal = None
         self._turn_sequence = 0
         self._chat_worker: FunctionWorker | None = None
         self._acceptance_worker: FunctionWorker | None = None
@@ -529,6 +533,13 @@ class MainWindow(QMainWindow):
         )
         self.m2_acceptance_button.clicked.connect(self._run_m2_acceptance)
         chat_buttons = QHBoxLayout()
+        self.chat_mode = QComboBox()
+        self.chat_mode.setAccessibleName("Обработчик диалога")
+        if not self.services.grammar_only:
+            self.chat_mode.addItem("Формализатор V7", "v7")
+        self.chat_mode.addItem("Русская грамматика", "grammar")
+        self.chat_mode.currentIndexChanged.connect(self._chat_mode_changed)
+        chat_buttons.addWidget(self.chat_mode)
         chat_buttons.addWidget(self.send_button)
         chat_buttons.addWidget(self.acceptance_button)
         m1_buttons = QHBoxLayout()
@@ -1095,7 +1106,7 @@ class MainWindow(QMainWindow):
             pass
         QProcess.startDetached(
             sys.executable,
-            ["-m", "ah.gui.app", "--config", str(self.config_path)],
+            ["-m", "ah.gui.app", "--config", str(self.config_path), "--chat-mode", self.chat_mode.currentData()],
         )
         self.close()
 
@@ -1130,6 +1141,7 @@ class MainWindow(QMainWindow):
         except Exception as exc:
             QMessageBox.critical(self, "Память", str(exc)); return
         self._last_turn = None; self._selected_uid = None; self._selected_edge_key = None
+        self.grammar_chat.reset()
         self.chat_history.clear(); self.canvas_browser.live_canvas.refresh(); self._refresh_status(force=True)
         self.statusBar().showMessage("Память очищена", 4000)
 
@@ -1148,10 +1160,11 @@ class MainWindow(QMainWindow):
         text = self.chat_input.toPlainText().strip()
         if not text:
             return
-        if self.services.formalizer_resource_error:
+        grammar = self.chat_mode.currentData() == "grammar"
+        if not grammar and self.services.formalizer_resource_error:
             QMessageBox.warning(self, 'Ресурсы формализатора', self.services.formalizer_resource_error)
             return
-        if self.services.llm is None or not self.services.llm.is_running:
+        if not grammar and (self.services.llm is None or not self.services.llm.is_running):
             QMessageBox.warning(self, "Диалог", "Сначала запустите локальную LLM.")
             return
 
@@ -1159,20 +1172,50 @@ class MainWindow(QMainWindow):
         self.chat_history.append(f"<b>{self.services.config.identity.user_name}:</b> {self._html(text)}")
         self.send_button.setEnabled(False)
         self.chat_input.setEnabled(False)
-        self.llm_panel.begin_turn(text)
-
-        def run_turn():
-            orchestrator = self.services.create_orchestrator()
-            return orchestrator.handle_user_text(text)
-
-        worker = FunctionWorker(run_turn)
+        self.chat_mode.setEnabled(False)
+        if grammar:
+            worker = FunctionWorker(lambda: self.grammar_chat.send(text, self._submit_grammar))
+            worker.signals.result.connect(self._grammar_turn_finished)
+        else:
+            self.llm_panel.begin_turn(text)
+            worker = FunctionWorker(lambda: self.services.create_orchestrator().handle_user_text(text))
+            worker.signals.result.connect(self._turn_finished)
         self._chat_worker = worker
-        worker.signals.result.connect(self._turn_finished)
         worker.signals.error.connect(self._turn_error)
         # Connect to a QObject slot owned by MainWindow instead of a bare lambda so
         # UI cleanup is always queued onto the GUI thread.
         worker.signals.finished.connect(self._chat_worker_finished)
         self.thread_pool.start(worker)
+
+    @Slot(int)
+    def _chat_mode_changed(self, index: int) -> None:
+        self.grammar_chat.reset()
+        self.chat_input.setPlaceholderText("Сообщение пользователю/агенту…")
+        self._refresh_formalizer_status()
+
+    def _refresh_formalizer_status(self):
+        if self.chat_mode.currentData() == "grammar":
+            self.formalizer_status_label.setText("Русская грамматика")
+            self.formalizer_status_label.setToolTip("Неоднозначные пробы появятся в диалоге")
+        else:
+            self.formalizer_status_label.setText(self.services.formalizer_status)
+            self.formalizer_status_label.setToolTip(self.services.formalizer_resource_error or '')
+
+    def _submit_grammar(self, text, choose):
+        from ah.core.journal import JournalChannel
+        from ah.russian_grammar.memory import submit
+
+        with self.services.operation_lock:
+            if self._grammar_journal is None:
+                config = self.services.config
+                self._grammar_journal = JournalChannel(config.paths.data_dir / config.formalizer.journal_filename)
+            return submit(self.services.core, text, choose, journal=self._grammar_journal)
+
+    @Slot(object)
+    def _grammar_turn_finished(self, text):
+        self.chat_history.append(f"<b>Русская грамматика:</b> {self._html(text)}")
+        placeholder = "Ответьте словом из вариантов, 0 или ?" if self.grammar_chat.pending else "Сообщение пользователю/агенту…"
+        self.chat_input.setPlaceholderText(placeholder)
 
     def _run_acceptance_cases(self) -> None:
         self._run_acceptance_pair(
@@ -1682,10 +1725,12 @@ class MainWindow(QMainWindow):
     @Slot()
     def _chat_worker_finished(self) -> None:
         self._chat_worker = None
+        self.chat_mode.setEnabled(True)
         self.send_button.setEnabled(True)
         self.chat_input.setEnabled(True)
         self.chat_input.setFocus()
-        self.llm_panel.finish_turn()
+        if self.chat_mode.currentData() == "v7":
+            self.llm_panel.finish_turn()
         self._refresh_status()
 
     def _turn_finished(self, result) -> None:
@@ -2148,8 +2193,7 @@ class MainWindow(QMainWindow):
         return snap if snap is not None else self.services.graph_inspector.snapshot()
 
     def _refresh_status(self, force: bool = False) -> None:
-        self.formalizer_status_label.setText(self.services.formalizer_status)
-        self.formalizer_status_label.setToolTip(self.services.formalizer_resource_error or '')
+        self._refresh_formalizer_status()
         llm_running = bool(self.services.llm and self.services.llm.is_running)
         clock = self.services.clock.stats()
         snap = self._status_snapshot()
