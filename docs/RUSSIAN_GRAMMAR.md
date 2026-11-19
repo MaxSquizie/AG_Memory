@@ -1,6 +1,6 @@
 # Русская грамматика в AG_Memory
 
-Самостоятельный вход — `ah.russian_grammar.analyze(text, choose=None)`. Для просмотра слов, связей и вопроса без провайдера запустите из установленного проекта:
+Самостоятельный вход — `ah.russian_grammar.analyze(text, choose=None)`. Для просмотра очередной пробы без провайдера запустите из установленного проекта:
 
 ```sh
 python -m ah.russian_grammar "Мать любит дочь"
@@ -31,36 +31,30 @@ python -m ah.russian_grammar "Мать любит дочь"
 
 Источники для сверки правил: [морфология русского языка](https://rusgram.ru/sites/default/files/liter/person/morphology.pdf), [синтаксис простого предложения](https://cchgeu.ru/upload/iblock/09d/k7ayodx6ne0u88ydm7fxnxu1a7aw1b78/Sintaksis-_-prostoe-predlozhenie.pdf), [согласованное определение и граница со сказуемым](https://gramota.ru/biblioteka/spravochniki/pravila-russkoy-orfografii-i-punktuatsii/znaki-prepinaniya-pri-obosoblennykh-soglasovannykh-opredeleniyakh).
 
-## Формат пробы для JEV
+## Текст пробы
 
-Каждая неоднозначность порождает один запрос System One типа `choice`. Полное исходное предложение сохраняется в `state`, включая пробелы и пунктуацию. Вопрос хранится в `instructions`, допустимые ответы — ключи объекта `criteria`. Для обычных слов достаточно самого ключа. Служебные ответы получают явное описание. [Спецификация System One](https://docs.typesafe.ai/api/system-one.md) · [Правила Choice](https://docs.typesafe.ai/primitives/choice.md)
+Команда `python -m ah.russian_grammar "Я встретил маму и сестру грустную"` и метод `probe.prompt()` дают одну и ту же пробу:
 
-Для A1 команда `python -m ah.russian_grammar --jev "Я встретил маму и сестру грустную"` печатает следующее тело запроса к `POST https://api.typesafe.ai/v1/systemone`:
+```text
+Я встретил маму и сестру грустную
 
-```json
-{
-  "model": "jev-latest",
-  "state": "Я встретил маму и сестру грустную",
-  "questions": {
-    "grammar": {
-      "type": "choice",
-      "instructions": "Which word does «грустную» describe?",
-      "criteria": {
-        "маму": null,
-        "сестру": null,
-        "0": "None of the proposed answers fits.",
-        "?": "The sentence leaves the choice unclear."
-      }
-    }
-  }
-}
+Which word does «грустную» describe?
+Answer options:
+- маму
+- сестру
+- 0 — None of the proposed answers fits.
+- ? — The sentence leaves the choice unclear.
 ```
 
-В Python `probe.jev_request(model)` возвращает объект для JSON-тела, `probe.prompt(model)` — его сериализацию. CLI принимает `--model` для выбора версии. В режиме `--jev` при отсутствии пробы stdout пуст; обычный режим печатает единый JSON-отчёт со статусом и массивом запросов в `probes`. Ограничение Choice составляет 255 ключей, включая оба служебных. При переполнении сохраняются конкурирующие деревья с причиной `JEV_CHOICE_LIMIT`.
+Первым идёт исходное предложение. После пустой строки следует вопрос, затем заголовок `Answer options:` и по одному допустимому ответу на строку. Дефис оформляет список. Ответ модели — сама словоформа, например `сестру`. Две последние строки поясняют служебные ответы `0` и `?`.
+
+`Probe.from_prompt(text)` восстанавливает предложение, вопрос и упорядоченные варианты. Парсер читает список с конца, поэтому пустые строки и даже буквальный заголовок внутри исходного предложения остаются частью контекста. Пропущенные служебные варианты или повторяющиеся ответы приводят к ошибке разбора.
+
+Для явного экспорта в System One служит `Probe.from_prompt(text).jev_request(model)` или ключ CLI `--jev`. Ключ `--report` выводит полный диагностический отчёт с текстами проб. При однозначном разборе основной режим выводит статус, а режим экспорта оставляет stdout пустым. [Спецификация System One](https://docs.typesafe.ai/api/system-one.md)
 
 Селектор `choose(probe)` может вернуть разобранный JSON-ответ API. Формализатор извлекает `answers.grammar.choice` при `type == "choice"` и проверяет точное совпадение ключа с предъявленным вариантом. Например, `"сестру"` привязывает определение к этому вхождению. Неизвестный вариант оставляет деревья открытыми с причиной `INVALID_ANSWER`. Ответ `"?"` сохраняет неоднозначность, `"0"` отвергает текущие варианты. Строковый селектор для локальных прогонов также поддерживается.
 
-| Предложение | Текст вопроса | Содержательные ключи `criteria` |
+| Предложение | Текст вопроса | Варианты ответа |
 |---|---|---|
 | Мать любит дочь | Which word is the subject of «любит»? | `Мать`, `дочь` |
 | Мать любит мать | Which word is the subject of «любит»? | `[Мать] любит`, `любит [мать]` |

@@ -40,7 +40,12 @@ def test_ambiguous_attribute_and_exact_probe():
     r = analyze(text)
     assert r.status == 'AMBIGUOUS' and len(r.analyses) == 2
     probe, = r.probes
-    request = json.loads(probe.prompt())
+    assert probe.prompt() == (
+        text + '\n\nWhich word does «грустную» describe?\nAnswer options:\n'
+        '- маму\n- сестру\n- 0 — None of the proposed answers fits.\n'
+        '- ? — The sentence leaves the choice unclear.'
+    )
+    request = Probe.from_prompt(probe.prompt()).jev_request()
     assert request == probe.jev_request() == {
         'model': 'jev-latest', 'state': text, 'questions': {
             'grammar': {'type': 'choice', 'instructions': 'Which word does «грустную» describe?',
@@ -151,7 +156,7 @@ sys.meta_path.insert(0, Isolate())
 from ah.russian_grammar import analyze
 assert analyze('Мать любит дочь', lambda p: '0').status == 'UNRESOLVED'
 assert analyze('Я читаю опфкцзык').status == 'UNRESOLVED'
-sys.argv = ['grammar', 'Иван читает книгу']
+sys.argv = ['grammar', '--report', 'Иван читает книгу']
 runpy.run_module('ah.russian_grammar', run_name='__main__')
 """
     child = subprocess.run([sys.executable, '-c', program], env=env, check=True, capture_output=True, text=True)
@@ -183,11 +188,17 @@ def test_malformed_jev_response_preserves_the_forest(response):
     ('  Мать\nлюбит мать?', ('[Мать] любит', 'любит [мать]')),
     ('Иван читал ночь', ('ночь', 'no such word')),
 ])
-def test_cli_report_and_raw_jev_request_are_each_one_json_value(text, choices, monkeypatch, capsys):
+def test_cli_emits_parseable_text_and_exports_only_on_request(text, choices, monkeypatch, capsys):
     from ah.russian_grammar.__main__ import main
-    monkeypatch.setattr(sys, 'argv', ['grammar', '--model', 'jev-1.13.0', text])
+    monkeypatch.setattr(sys, 'argv', ['grammar', text])
     main()
-    request, = json.loads(capsys.readouterr().out)['probes']
+    readable = capsys.readouterr().out
+    parsed = Probe.from_prompt(readable)
+    assert parsed.context == text and parsed.options == choices
+    request = parsed.jev_request('jev-1.13.0')
+    monkeypatch.setattr(sys, 'argv', ['grammar', '--report', text])
+    main()
+    assert json.loads(capsys.readouterr().out)['probes'] == [parsed.prompt()]
     monkeypatch.setattr(sys, 'argv', ['grammar', '--jev', '--model', 'jev-1.13.0', text])
     main()
     assert json.loads(capsys.readouterr().out) == request
@@ -203,3 +214,18 @@ def test_jev_criteria_limit_counts_control_choices():
     assert len(Probe('Pick', words, 'text').jev_request()['questions']['grammar']['criteria']) == 255
     with pytest.raises(ValueError):
         Probe('Pick', (*words, 'extra'), 'text').jev_request()
+
+def test_prompt_parser_preserves_multiline_context_even_with_literal_headers():
+    context = '  начало\r\nAnswer options:\n- маму\n\nконец  \n'
+    probe = Probe('Which word fits?', ('маму', 'сестру'), context)
+    assert Probe.from_prompt(probe.prompt()) == probe
+    windows_probe = Probe('Which word fits?', ('маму', 'сестру'), 'маму\r\nсестру')
+    wire = windows_probe.prompt().replace('\r\n', '\n').replace('\n', '\r\n')
+    assert Probe.from_prompt(wire + '\r\n') == windows_probe
+
+
+@pytest.mark.parametrize('replacement', ['- Мать\n- мать', '- 0', 'дочь', ''])
+def test_malformed_or_ambiguous_answer_lists_are_rejected(replacement):
+    prompt = analyze('Мать любит дочь').probes[0].prompt()
+    with pytest.raises(ValueError):
+        Probe.from_prompt(prompt.replace('- Мать\n- дочь', replacement))
