@@ -43,6 +43,8 @@ class Link:
     quantity: str | None = None
     quantity_kind: str | None = None
     quantity_modifier: str | None = None
+    coord_head: int | None = None
+    shared_agent: int | None = None
 
 
 class AnalysisBudgetExceeded(Exception):
@@ -223,6 +225,20 @@ def _span_label(tokens, index, end=None):
                      *(t.surface for t in tokens[end:stop])])
 
 
+def _agent_extent(tree, head):
+    members = {head}
+    pending = [head]
+    while pending:
+        parent = pending.pop()
+        for j, link in enumerate(tree):
+            if link.head == parent and link.role in {'name_part', 'nominal_conjunct', 'coordinator',
+                                                       'coordinator_part', 'attribute', 'possessive', 'punctuation'}:
+                members.add(j)
+                pending.append(j)
+    start, end = min(members), max(members) + 1
+    return (start, end) if end - start == len(members) else (head, head + 1)
+
+
 def _attachment_context(text, tokens, analyses, hosts, start, end):
     # Include the phrase and each candidate, plus the context needed to identify repeats.
     spans = [_label_extent(tokens, start, end)]
@@ -295,7 +311,35 @@ def _partitions(analyses, tokens, text):
             hosts = [a[i].head for a in analyses]
             if len(set(hosts)) > 1:
                 context = _attachment_context(text, tokens, analyses, hosts, i, i + 1) if roles == {'participle'} else text
-                yield word_choice(f'Which word does «{_span_label(tokens, i)}» describe?', hosts, context)
+                question = f'Which word does «{_span_label(tokens, i)}» describe?'
+                if roles == {'participle'}:
+                    groups = {tuple(j for j, link in enumerate(tree) if j == i or link.coord_head == i)
+                              for tree in analyses}
+                    if len(groups) == 1:
+                        group, = groups
+                        if len(group) > 1:
+                            labels = [f'«{_span_label(tokens, j)}»' for j in group]
+                            names = ', '.join(labels[:-1]) + ' and ' + labels[-1]
+                            question = f'Which word do {names} describe?'
+                yield word_choice(question, hosts, context)
+
+    agents = sorted({link.shared_agent for tree in analyses for link in tree if link.shared_agent is not None})
+    for agent in agents:
+        if not all(tree[agent].role == 'agent' for tree in analyses):
+            continue
+        readings = [tuple(sorted({tree[agent].head, *(i for i, link in enumerate(tree) if link.shared_agent == agent)}))
+                    for tree in analyses]
+        distinct = sorted(set(readings), key=lambda group: (len(group), group))
+        if len(distinct) > 1:
+            labels = {group: ' и '.join(_span_label(tokens, i) for i in group) for group in distinct}
+            hosts = {i for group in distinct for i in group}
+            nouns = {tree[i].head for tree, group in zip(analyses, readings) for i in group
+                     if tree[i].role == 'participle' and tree[i].head is not None}
+            extents = {_agent_extent(tree, agent) for tree in analyses}
+            start, end = extents.pop() if len(extents) == 1 else (agent, agent + 1)
+            context = _attachment_context(text, tokens, analyses, hosts | nouns, start, end).strip(' ,\t\r\n')
+            question = f'Which actions have «{_span_label(tokens, start, end)}» as the performer here?'
+            yield Probe(question, tuple(labels.values()), context), [labels[group] for group in readings]
 
     earlier_attachments = []
     for i in range(len(tokens)):
@@ -351,6 +395,12 @@ def _partitions(analyses, tokens, text):
             continue
         roles = {link.role for link in links}
         focus = _span_label(tokens, i)
+        if roles == {'coordinator'} and all(link.lemma == 'да' and link.rule == 'PART.COORD' for link in links):
+            readings = {'addition': 'да в значении «и»', 'contrast': 'да в значении «но»'}
+            if {link.scope for link in links} == set(readings):
+                context = _clause_context(text, tokens, analyses, i, [link.head for link in links])
+                yield Probe(f'Which reading does «{focus}» have here?', tuple(readings.values()), context), [
+                    readings[link.scope] for link in links]
         if roles == {'attribute', 'participle'}:
             heads = [link.head for link in links]
             context = _attachment_context(text, tokens, analyses, heads, i, i + 1)
@@ -612,6 +662,23 @@ def _connected(tree):
     for i, link in enumerate(tree):
         if any(ref is not None and not 0 <= ref < len(tree) for ref in (link.controller, link.antecedent)):
             return False
+        if link.coord_head is not None:
+            if link.role != 'participle' or not 0 <= link.coord_head < i:
+                return False
+            first = tree[link.coord_head]
+            if first.role != 'participle' or first.head != link.head or first.coord_head is not None:
+                return False
+        if link.shared_agent is not None:
+            if link.role != 'participle' or not 0 <= link.shared_agent < len(tree):
+                return False
+            agent = tree[link.shared_agent]
+            if agent.role != 'agent' or agent.head is None or agent.head == i or not 0 <= agent.head < len(tree):
+                return False
+            sibling = tree[agent.head]
+            first = i if link.coord_head is None else link.coord_head
+            sibling_first = agent.head if sibling.coord_head is None else sibling.coord_head
+            if sibling.role != 'participle' or sibling.head != link.head or sibling_first != first:
+                return False
         if link.head is not None:
             if not 0 <= link.head < len(tree):
                 return False
@@ -633,7 +700,7 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
     words = tokens[:-1] if tokens and tokens[-1].surface in {'.', '!', '?'} else tokens
     if not words:
         return Result(text, 'UNRESOLVED', 'EMPTY', tokens)
-    from . import case_arguments, clauses, finite_forms, infinitives, modifiers, morphology, nominal_groups, participles, predication, quantity_groups, quantity_modifiers, recovery, short_participles, standalone_numerals
+    from . import case_arguments, clauses, finite_forms, infinitives, modifiers, morphology, nominal_groups, participles, predication, quantity_groups, quantity_modifiers, recovery, shared_agents, short_participles, standalone_numerals
 
     failures = []
 
@@ -677,8 +744,11 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
 
     def exact(part):
         for tree in clauses.trees(part, local, budget=budget):
-            if len(tree) == len(part) and _connected(tree) and (accept_tree is None or accept_tree(tree)):
-                yield morphology.annotate(part, tree)
+            if len(tree) != len(part):
+                continue
+            for variant in shared_agents.variants(part, tree, budget=budget):
+                if _connected(variant) and (accept_tree is None or accept_tree(variant)):
+                    yield morphology.annotate(part, variant)
 
     structures = {}
 
@@ -686,7 +756,7 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
         for tree in candidates:
             for reading in _possessor_readings(words, tree, budget):
                 key = tuple((l.role, l.lemma, l.head, l.case, l.controller, l.scope,
-                             l.antecedent, l.event_view, l.recovery, l.morphology, l.implicit_subject, l.quantity, l.quantity_kind, l.quantity_modifier) for l in reading)
+                             l.antecedent, l.event_view, l.recovery, l.morphology, l.implicit_subject, l.quantity, l.quantity_kind, l.quantity_modifier, l.coord_head, l.shared_agent) for l in reading)
                 structures.setdefault(key, reading)
                 if len(structures) > budget:
                     raise AnalysisBudgetExceeded('ANALYSIS_BUDGET')

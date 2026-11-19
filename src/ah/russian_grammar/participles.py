@@ -1,7 +1,7 @@
 from dataclasses import replace
 from functools import cache, lru_cache
 
-from . import clauses, morphology, participle_forms
+from . import clauses, morphology, participle_coordination, participle_forms
 from .nominal_groups import _groups
 from .rules import dictionary, known_forms
 
@@ -9,7 +9,7 @@ from .rules import dictionary, known_forms
 _NOMINAL = {'subject', 'object', 'recipient', 'stimulus', 'beneficiary', 'experiencer', 'instrument',
             'oblique', 'governed', 'nominal_conjunct', 'genitive_modifier', 'agent'}
 _INSIDE_NOUN = {'attribute', 'possessive', 'name_part', 'numeral', 'numeral_part', 'preposition'}
-_REFERENCE = ('head', 'controller', 'antecedent')
+_REFERENCE = ('head', 'controller', 'antecedent', 'coord_head', 'shared_agent')
 
 
 def _remap(link, indices):
@@ -45,7 +45,7 @@ def _finite(surface, lemma, tense):
     return None
 
 
-def _regions(tokens, pivot):
+def _regions(tokens, pivot, series):
     size = len(tokens)
     forms = [known_forms(token.surface) for token in tokens]
     commas = {i for i, token in enumerate(tokens) if token.surface == ','}
@@ -62,11 +62,11 @@ def _regions(tokens, pivot):
         if any(pivot < b.marker < hi and (b.relation == 'advcl' or
                (b.relation == 'ccomp' and governors.intersection(b.governors))) for b in clauses._boundaries(words)):
             hi = size
-    for start in range(pivot, lo - 1, -1):
+    for start in range(series[0], lo - 1, -1):
         if start in commas:
             continue
         left = start - 1 in commas
-        for end in range(pivot + 1, hi + 1):
+        for end in range(series[-1] + 1, hi + 1):
             if end - 1 in commas:
                 continue
             right = end in commas
@@ -149,9 +149,20 @@ def trees(tokens, local, *, budget=256):
     def parse(part):
         return bounded(derive(part))
 
+    linked = cache(participle_coordination.linked_members)
+
     @cache
     def inside(part, pivot, form):
+        if pivot in linked(part):
+            return ()
         return bounded(_inner(part, pivot, form, parse, budget))
+
+    def branches(region, position, matches):
+        for form in matches[position]:
+            for tree in inside(region, position, form):
+                root = participle_coordination.as_modifier(tree[position], form)
+                yield (*tree[:position], root, *tree[position + 1:])
+        yield from participle_coordination.branches(region, position, matches, inside, _remap, budget)
 
     def derive(part):
         nonlocal remaining
@@ -160,7 +171,7 @@ def trees(tokens, local, *, budget=256):
         if not required:
             yield from local(part)
         for pivot in required[:1] or pivots:
-            for start, end, outer, left, right in _regions(part, pivot):
+            for start, end, outer, left, right in _regions(part, pivot, linked(part).get(pivot, (pivot,))):
                 remaining -= 1
                 if remaining < 0:
                     raise AnalysisBudgetExceeded('PARTICIPLE_BUDGET')
@@ -171,23 +182,27 @@ def trees(tokens, local, *, budget=256):
                         noun = matrix[host]
                         quantity = next((i for i, link in enumerate(matrix)
                                          if link.role == 'numeral' and link.head == host), None)
-                        matches = participle_forms.matching(
-                            part[pivot].surface, noun, quantity=matrix[quantity] if quantity is not None else None,
+                        region = part[start:end]
+                        position = pivot - start
+                        matches = {i: participle_forms.matching(
+                            word.surface, noun, quantity=matrix[quantity] if quantity is not None else None,
                             external_case=noun.case, after=after, detached=left or right,
-                            before_quantity=quantity is not None and pivot < outer[quantity])
-                        for form in matches:
-                            for branch in inside(part[start:end], pivot - start, form):
-                                anchors = {i: start + i for i in range(len(branch))}
-                                anchors[-1] = outer[host]
-                                links = {i: _remap(link, outer) for i, link in zip(outer, raw)}
-                                links.update((start + i, _remap(link, anchors)) for i, link in enumerate(branch))
-                                links[pivot] = replace(links[pivot], role='participle', head=outer[host], rule='PART.ATTR',
-                                                       case=form.morphology.case, morphology=form.morphology,
-                                                       implicit_subject=None)
-                                if left:
-                                    links[start - 1] = Link('punctuation', ',', pivot, 'PART.PUNCT')
-                                if right:
-                                    links[end] = Link('punctuation', ',', pivot, 'PART.PUNCT')
-                                yield tuple(links[i] for i in range(len(part)))
+                            before_quantity=quantity is not None and start + i < outer[quantity])
+                                   for i, word in enumerate(region) if participle_forms.readings(word.surface)}
+                        matches = {i: choices for i, choices in matches.items() if choices}
+                        if position not in matches:
+                            continue
+                        for branch in branches(region, position, matches):
+                            anchors = {i: start + i for i in range(len(branch))}
+                            anchors[-1] = outer[host]
+                            links = {i: _remap(link, outer) for i, link in zip(outer, raw)}
+                            links.update((start + i, _remap(link, anchors)) for i, link in enumerate(branch))
+                            if left:
+                                links[start - 1] = Link('punctuation', ',', pivot, 'PART.PUNCT')
+                            if right:
+                                links[end] = Link('punctuation', ',', pivot, 'PART.PUNCT')
+                            yield tuple(links[i] for i in range(len(part)))
 
-    yield from derive(tokens)
+    for tree in derive(tokens):
+        if participle_coordination.complete(tree):
+            yield tree

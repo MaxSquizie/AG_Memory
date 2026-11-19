@@ -52,6 +52,8 @@ def _boundaries(words):
 
 def _shift(link, offset):
     return replace(link, head=None if link.head is None else link.head + offset,
+                   coord_head=None if link.coord_head is None else link.coord_head + offset,
+                   shared_agent=None if link.shared_agent is None else link.shared_agent + offset,
                    controller=None if link.controller is None else link.controller + offset,
                    antecedent=None if link.antecedent is None else link.antecedent + offset)
 

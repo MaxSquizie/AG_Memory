@@ -119,7 +119,7 @@ def _remember(core, result, rows, source):
             props[RELATIVE_KEY] = Property(RELATIVE_KEY, row['lemma'], 'str')
         members.append(core.ref(core.add_entity(Domain.H, properties=props, meta=row).uid))
     for i, row in enumerate(rows):
-        for key in ('head', 'controller', 'antecedent'):
+        for key in ('head', 'controller', 'antecedent', 'coord_head', 'shared_agent'):
             if row.get(key) is not None:
                 relation = 'grammar.' + (row['role'] if key == 'head' else key)
                 core.add_link(relation, members[i], members[row[key]], 1.0)
@@ -185,7 +185,37 @@ def _normalize_short_predicates(rows, result):
             result[i] = dict(result[i], morphology=dict(lexical, tense=tense, person=auxiliary.get('person'), mood=mood))
 
 
-def _query_rows(rows, participants):
+def _expand_shared_agents(rows, result, budget):
+    shared = [(i, row['shared_agent']) for i, row in enumerate(rows) if row.get('shared_agent') is not None]
+    if not shared:
+        return True
+    children = [[] for _ in rows]
+    for i, row in enumerate(rows):
+        if row.get('head') is not None and row['role'] != 'punctuation':
+            children[row['head']].append(i)
+    for predicate, actor in shared:
+        copies = {}
+        branch = [(actor, predicate)]
+        for original, parent in branch:
+            if budget == 0:
+                return False
+            budget -= 1
+            occurrence = len(result)
+            copies[original] = occurrence
+            row = dict(result[original], head=parent, shared_occurrence=original,
+                       assertion_context=result[parent].get('assertion_context'),
+                       assertion_status=result[parent]['assertion_status'])
+            result.append(row)
+            branch.extend((child, occurrence) for child in children[original])
+        for occurrence in copies.values():
+            row = result[occurrence]
+            for key in ('controller', 'antecedent', 'coord_head', 'shared_agent'):
+                if row.get(key) in copies:
+                    row[key] = copies[row[key]]
+    return True
+
+
+def _query_rows(rows, participants, budget):
     result = list(rows)
     actors = {}
     counted = {row['head']: row for row in rows if row['role'] == 'numeral'}
@@ -216,7 +246,7 @@ def _query_rows(rows, participants):
             if parent is not None and rows[parent].get('implicit_subject') == row['implicit_subject']:
                 result[i] = dict(row, controller=actors[parent])
     _normalize_short_predicates(rows, result)
-    return result
+    return result if _expand_shared_agents(rows, result, budget) else None
 
 
 def _case(row):
@@ -301,6 +331,7 @@ def _nominal_parts(stored, children, head):
 
 
 def _nominal_answer(stored, parts, source):
+    parts = {stored[i].get('shared_occurrence', i) for i in parts}
     words = []
     identity = []
     for j in sorted(parts):
@@ -363,6 +394,58 @@ def _projection_requirements(rows, children, root, scoped):
     return required
 
 
+def _descendants(children, roots):
+    branch = list(roots)
+    for node in branch:
+        branch.extend(children[node])
+    return set(branch)
+
+
+def _coord_anchor(rows, i):
+    anchor = rows[i].get('coord_head')
+    return i if anchor is None else anchor
+
+
+def _participle_groups(rows, observed):
+    groups = {}
+    for i, row in enumerate(rows):
+        anchor = row.get('coord_head')
+        if row['role'] == 'participle' and anchor is not None:
+            groups.setdefault(anchor, {anchor}).add(i)
+    projection = set()
+    for anchor, members in groups.items():
+        if any(rows[i].get('scope') not in (None, 'negated') for i in members):
+            continue
+        host = rows[anchor]['head']
+        while host is not None:
+            row = rows[host]
+            if (row['role'] in ('clause_adverbial', 'clause_complement', 'clause_relative', 'infinitive', 'converb') or
+                    {'averted', 'negated', 'alternative', 'comparison', 'negative'}.intersection(
+                        (row.get('scope') or '').split('_'))):
+                break
+            if host == observed:
+                projection.add(anchor)
+                break
+            host = row['head']
+    return groups, projection
+
+
+def _omitted_conjuncts(groups, projection, stored, children, covered):
+    omitted = set()
+    for anchor, members in groups.items():
+        remaining = members & covered
+        if not remaining or remaining == members:
+            continue
+        if anchor not in projection:
+            return None
+        omitted.update(_descendants(children, members - remaining))
+        first = min(remaining)
+        markers = [i for i in children[first] if stored[i]['role'] == 'coordinator' and
+                   stored[i].get('scope') in ('addition', 'correction', 'contrast')]
+        omitted.update(_descendants(children, markers))
+    return omitted
+
+
 def _extraction(rows, stored, observed, source, focus, budget):
     root = _root(rows)
     if any(row.get('implicit_subject') == 'unresolved' and (focus is None or i != root) for i, row in enumerate(rows)):
@@ -382,7 +465,12 @@ def _extraction(rows, stored, observed, source, focus, budget):
     children_found = [[j for j in group if stored[j]['role'] not in NUMBER_PARTS] for group in surface_children]
     if not scoped_question and not any(row['role'] == 'clause_relative' for row in rows):
         children_found = [[j for j in group if stored[j]['role'] != 'clause_relative'] for group in children_found]
-    required = _projection_requirements(stored, children_found, observed, scoped_question) if focus is not None else set()
+    groups, projection = _participle_groups(stored, observed)
+    flexible = {j for anchor in projection for j in (stored[anchor]['head'], *groups[anchor])}
+    if focus is not None:
+        required = _projection_requirements(stored, children_found, observed, scoped_question)
+    else:
+        required = _descendants(children_found, [observed]) if projection else set()
     argument = rows[focus]['head'] if focus is not None and rows[focus]['role'] == 'numeral' else focus
     agreement_target = rows[argument]['head'] if argument is not None and rows[argument]['role'] == 'subject' else None
     order = [root]
@@ -395,7 +483,7 @@ def _extraction(rows, stored, observed, source, focus, budget):
         for mapping in states:
             pool = [observed] if i == root else children_found[mapping[row['head']]]
             for j in pool:
-                if focus is None and len(children[i]) != len(children_found[j]):
+                if focus is None and j not in flexible and len(children[i]) != len(children_found[j]):
                     continue
                 variable_subject = i == agreement_target or (row['role'] in ('auxiliary', 'copula') and
                                                               row['head'] == agreement_target)
@@ -412,8 +500,17 @@ def _extraction(rows, stored, observed, source, focus, budget):
         if any(rows[i].get(key) is not None and mapping.get(rows[i][key]) != stored[j].get(key)
                for i, j in mapping.items() for key in ('controller', 'antecedent')):
             continue
-        missing = required.difference(mapping.values()) if required else set()
+        covered = set(mapping.values())
+        if any(_coord_anchor(stored, j) != _coord_anchor(stored, mapping[rows[i]['coord_head']])
+               for i, j in mapping.items() if rows[i].get('coord_head') is not None):
+            continue
+        omitted = _omitted_conjuncts(groups, projection, stored, children_found, covered)
+        if omitted is None:
+            continue
+        missing = required - covered - omitted
         if focus is None:
+            if missing:
+                continue
             answers['Да.'] = 'Да.'
         elif stored[mapping[focus]].get('event_view'):
             if missing:
@@ -535,11 +632,15 @@ def _compatible(rows, i, stored, focus, root, variable_subject):
 
 
 def _answer(view, rows, focus, budget, result, participants):
-    rows = _query_rows(rows, participants)
+    rows = _query_rows(rows, participants, budget)
+    if rows is None:
+        return GrammarReply('UNKNOWN', UNKNOWN, analysis=result)
     answers = {}
     lemma = rows[_root(rows)]['lemma']
     for group, stored, observed in _lookup(view, lemma):
-        stored = _query_rows(stored, _participants(group.meta.get('source')))
+        stored = _query_rows(stored, _participants(group.meta.get('source')), budget)
+        if stored is None:
+            return GrammarReply('UNKNOWN', UNKNOWN, analysis=result)
         surfaces = _extraction(rows, stored, observed, group.meta['verbatim'], focus, budget)
         if surfaces is None:
             return GrammarReply('UNKNOWN', UNKNOWN, analysis=result)

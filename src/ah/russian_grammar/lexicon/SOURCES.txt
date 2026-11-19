@@ -58,6 +58,13 @@ clause-connectives.tsv. It includes cc conjunctions on nominal conjuncts
 whose governing conjunct is a noun, proper name or pronoun. Regeneration:
 python scripts/import_russian_clause_connectives.py --nominal ru_gsd-ud-train.conllu ru_pud-ud-test.conllu src/ah/russian_grammar/lexicon/nominal-connectives.tsv
 
+participle-connectives.tsv records project annotations for simple and compound
+coordinators. The parser combines these with the two UD connective inventories.
+"paired" identifies forms whose interpretation depends on a matching opener.
+Russian Academy handbook on coordination and homogeneous attributes:
+https://orfo.ruslang.ru/docs/biblio/pravila_2006.pdf
+https://gramota.ru/biblioteka/spravochniki/pravila-russkoy-orfografii-i-punktuatsii/znaki-prepinaniya-pri-odnorodnykh-chlenakh-predlozheniya
+
 predicative-instrumentals.tsv lists verb lemmas governing a nominal xcomp
 in the instrumental case in the same GSD and PUD sources. These attestations
 license an alternative to the agent reading of a passive instrumental.
