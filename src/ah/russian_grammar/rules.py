@@ -4,6 +4,8 @@ from functools import lru_cache
 
 from pymorphy3 import MorphAnalyzer
 
+from .prepositions import GOVERNMENT
+
 
 # Lexical evidence for the bare accusative of duration. Extensible, not exhaustive.
 TIME_UNITS = frozenset('секунда минута час сутки день ночь неделя месяц год век'.split())
@@ -27,13 +29,26 @@ class Reading:
 
 
 @lru_cache(maxsize=4096)
-def readings(surface: str) -> tuple[Reading, ...]:
+def readings(surface: str, preposition: str | None = None) -> tuple[Reading, ...]:
     result = []
     for parse in dictionary().parse(surface):
         tag = parse.tag
         if not parse.is_known or 'Abbr' in tag:
             continue
-        if tag.POS in {'NOUN', 'NPRO'} and tag.case in ('nomn', 'accs'):
+        if preposition is not None:
+            if tag.case not in GOVERNMENT[preposition]:
+                continue
+            if tag.POS == 'ADJF' and 'Apro' not in tag:
+                role = 'group_attribute'
+            elif tag.POS in {'NOUN', 'NPRO'}:
+                if tag.POS == 'NPRO' and tag.person == '3per' and 'Af-p' not in tag:
+                    continue
+                role = 'governed'
+            else:
+                continue
+        elif tag.POS == 'PREP' and parse.normal_form in GOVERNMENT:
+            role = 'preposition'
+        elif tag.POS in {'NOUN', 'NPRO'} and tag.case in ('nomn', 'accs'):
             role = 'subject' if tag.case == 'nomn' else 'object'
         elif tag.POS == 'VERB' and tag.mood == 'indc' and 'Impe' not in tag:
             role = 'predicate'
@@ -65,7 +80,8 @@ def subject_agrees(subject: Reading, verb: Reading) -> bool:
 
 
 def attribute_agrees(attribute: Reading, nominal: Reading) -> bool:
-    if attribute.case != nominal.case or not attribute.number or attribute.number != nominal.number:
+    case = {'loc2': 'loct', 'gen2': 'gent'}.get(nominal.case, nominal.case)
+    if attribute.case != case or not attribute.number or attribute.number != nominal.number:
         return False
     if attribute.number == 'sing' and attribute.gender != nominal.gender:
         return False
