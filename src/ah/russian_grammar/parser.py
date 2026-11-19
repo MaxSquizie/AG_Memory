@@ -6,11 +6,11 @@ from itertools import product
 
 from .prepositions import CASE_NAMES, FORMS, GOVERNMENT, PREFIXES, TOKEN, group_heads
 from .probe import MAX_WORD_CHOICES, Probe
-from .rules import Reading, plain_person_reference, preposition_reading, attribute_agrees, readings, subject_agrees
+from .rules import Reading, name_continuations, plain_person_reference, preposition_reading, attribute_agrees, readings, subject_agrees
 
 
 RULE_FOR_ROLE = {
-    'predicate': 'V1', 'subject': 'S1', 'object': 'O1',
+    'name_part': 'NAME', 'predicate': 'V1', 'subject': 'S1', 'object': 'O1',
     'attribute': 'A1', 'coordinator': 'C1', 'duration': 'T1',
     'prep_part': 'P1', 'preposition': 'P2', 'governed': 'P1', 'group_attribute': 'A1', 'post_attribute': 'A1',
 }
@@ -74,6 +74,13 @@ class Prefix:
                 yield from readings(surface, self.words[start].lemma)
             return
         yield from readings(surface)
+        start = len(self.words) - 1
+        while start >= 0 and self.words[start].role == 'name_part':
+            start -= 1
+        if start >= 0:
+            head = self.words[start]
+            if head.name_type and head.role in {'subject', 'object', 'governed'} and head.number == 'sing':
+                yield from name_continuations(surface, self.words[start:])
         if self.words and self.words[-1].role in {'governed', 'post_attribute'}:
             start, noun = self.groups[-1]
             for variant in readings(surface, self.words[start].lemma):
@@ -96,6 +103,21 @@ class Prefix:
                 return None
             return replace(self, words=(*self.words, reading), open_preposition=None,
                            groups=(*self.groups, (start, i)))
+        if role == 'name_part':
+            head = i - 1
+            while self.words[head].role == 'name_part':
+                head -= 1
+            words = self.words
+            pairs = self.pairs
+            if reading.gender and words[head].gender is None:
+                nominal = replace(words[head], gender=reading.gender)
+                if head == self.subject and self.predicate is not None and not subject_agrees(nominal, words[self.predicate]):
+                    return None
+                words = (*words[:head], nominal, *words[head + 1:])
+                pairs = tuple(pair for pair in pairs if pair[1] != head)
+                pairs += tuple((j, head) for j, word in enumerate(words)
+                               if word.role == 'attribute' and attribute_agrees(word, nominal))
+            return replace(self, words=(*words, reading), pairs=pairs)
         if role == 'post_attribute':
             return replace(self, words=(*self.words, reading))
         if role in {'preposition', 'prep_prefix'}:
@@ -142,12 +164,15 @@ class Prefix:
             if len(self.objects) != 2:
                 return
             first, second = self.objects
-            if any(w.role not in {'attribute', 'coordinator'} for w in self.words[first + 1:second]):
+            if any(w.role not in {'attribute', 'coordinator', 'name_part'} for w in self.words[first + 1:second]):
                 return
         attrs = [i for i, w in enumerate(self.words) if w.role == 'attribute']
         domains = [[host for adj, host in self.pairs if adj == i] for i in attrs]
         for chosen in product(*domains):
             heads = dict(zip(attrs, chosen))
+            for i, word in enumerate(self.words):
+                if word.role == 'name_part':
+                    heads[i] = heads[i - 1] if self.words[i - 1].role == 'name_part' else i - 1
             if self.coordinator is not None:
                 heads[self.coordinator] = self.objects[1]
             for attached in group_heads(self.groups, self.words, self.predicate, heads):

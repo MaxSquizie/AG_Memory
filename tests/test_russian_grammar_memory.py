@@ -59,3 +59,13 @@ def test_sibling_predicates_keep_local_polarity_and_enclosing_report(text, choos
     group = core.store.get_element(Domain.H, record.observation_ref)
     rows = [core.store.get_element(Domain.H, member.uid).meta for member in group.members]
     assert {row['lemma']: row['assertion_status'] for row in rows if row['lemma'] in expected} == expected
+
+
+def test_full_personal_name_is_one_subject_and_one_answer():
+    core = AHCore()
+    reply = submit(core, 'Иван Смирнов ушёл')
+    assert reply.status == 'STORED' and not reply.analysis.probes
+    tree, = reply.analysis.analyses
+    assert [(link.role, link.head) for link in tree] == [('subject', 2), ('name_part', 0), ('predicate', None)]
+    assert submit(core, 'Кто ушёл?').text == 'Иван Смирнов'
+    assert submit(core, 'Ушёл Саша Смирнова').status == 'UNRESOLVED'

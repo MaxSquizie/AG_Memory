@@ -166,7 +166,12 @@ def _extraction(rows, stored, focus, budget):
         if any(rows[i].get('controller') is not None and
                mapping.get(rows[i]['controller']) != stored[j].get('controller') for i, j in mapping.items()):
             continue
-        answers.add('Да.' if focus is None else stored[mapping[focus]]['surface'])
+        if focus is None:
+            answers.add('Да.')
+        else:
+            head = mapping[focus]
+            parts = [head, *(j for j in children_found[head] if stored[j]['role'] == 'name_part')]
+            answers.add(' '.join(stored[j]['surface'] for j in sorted(parts)))
     return answers
 
 

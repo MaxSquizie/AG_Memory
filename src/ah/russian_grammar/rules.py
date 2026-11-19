@@ -38,6 +38,27 @@ class Reading:
     person: str | None
     animacy: str | None
     transitive: bool
+    name_type: str | None = None
+
+
+def name_type(tag):
+    return next((kind for kind in ('Name', 'Patr', 'Surn') if kind in tag), None)
+
+
+def name_continuations(surface, parts):
+    first = parts[0]
+    order = tuple(part.name_type for part in parts)
+    patterns = (('Name', 'Patr', 'Surn'), ('Name', 'Surn'), ('Surn', 'Name', 'Patr'))
+    for lemma, tag in known_forms(surface):
+        kind = name_type(tag)
+        extended = (*order, kind)
+        if tag.POS != 'NOUN' or not any(pattern[:len(extended)] == extended for pattern in patterns):
+            continue
+        if tag.case != first.case or tag.number != 'sing':
+            continue
+        if any(part.gender and tag.gender and part.gender != tag.gender for part in parts):
+            continue
+        yield Reading(lemma, 'name_part', tag.case, tag.number, tag.gender, None, tag.animacy, False, kind)
 
 
 def preposition_reading(lemma: str, role: str) -> Reading:
@@ -90,7 +111,7 @@ def readings(surface: str, preposition: str | None = None) -> tuple[Reading, ...
         if tag.POS == 'NOUN':
             person = '3per'
         reading = Reading(lemma, role, tag.case, tag.number, tag.gender,
-                          person, tag.animacy, 'tran' in tag)
+                          person, tag.animacy, 'tran' in tag, name_type(tag))
         if reading not in result:
             result.append(reading)
             if role == 'object' and reading.lemma in TIME_UNITS:
