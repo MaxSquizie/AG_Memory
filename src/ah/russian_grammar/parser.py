@@ -6,7 +6,7 @@ from itertools import product
 
 from .prepositions import CASE_NAMES, FORMS, GOVERNMENT, PREFIXES, TOKEN, group_heads
 from .probe import MAX_WORD_CHOICES, Probe
-from .rules import Reading, name_continuations, plain_person_reference, preposition_reading, attribute_agrees, readings, subject_agrees
+from .rules import Reading, known_forms, name_continuations, plain_person_reference, preposition_reading, attribute_agrees, readings, subject_agrees
 
 
 RULE_FOR_ROLE = {
@@ -234,8 +234,8 @@ def _attachment_context(text, tokens, analyses, hosts, start, end):
     return text[tokens[min(needed)].start:tokens[max(needed)].end]
 
 
-def _controller_context(text, tokens, trees, focus, controllers):
-    spans = [_label_extent(tokens, i, i + 1) for i in {focus, *controllers} if i is not None]
+def _clause_context(text, tokens, trees, focus, anchors):
+    spans = [_label_extent(tokens, i, i + 1) for i in {focus, *anchors} if i is not None]
     clause_roles = {'predicate', 'clause_complement', 'clause_adverbial', 'clause_conjunct'}
     for tree in trees:
         root = focus
@@ -325,9 +325,18 @@ def _partitions(analyses, tokens, text):
         focus = _span_label(tokens, i)
         controllers = [link.controller for link in links]
         if len(roles) == 1 and len(set(controllers)) > 1:
-            context = _controller_context(text, tokens, analyses, i, controllers)
+            context = _clause_context(text, tokens, analyses, i, controllers)
             yield word_choice(f'Who is to perform the action «{focus}»?', controllers, context)
         heads = [link.head for link in links]
+        if roles == {'name_part', 'attribute'} and len(set(heads)) == 1 and heads[0] < i:
+            head = heads[0]
+            if all(all(link.role == 'name_part' and link.head == head for link in tree[head + 1:i])
+                   for tree in analyses):
+                short = _span_label(tokens, head, i)
+                full = _span_label(tokens, head, i + 1)
+                question = f'Which words form the personal name here, including «{focus}» if it is a nickname?'
+                context = _clause_context(text, tokens, analyses, i, (head,))
+                yield Probe(question, (full, short), context), [full if link.role == 'name_part' else short for link in links]
         if roles == {'clause_conjunct'} and len(set(heads)) > 1:
             yield word_choice(f'Which predicate is «{focus}» coordinated with?', heads)
 
@@ -405,6 +414,30 @@ def _simple_trees(words, budget, fail):
         yield from prefix.structures()
 
 
+def _nickname_readings(tokens, tree, budget):
+    candidates = []
+    dependents = {link.head for link in tree}
+    for i, link in enumerate(tree):
+        head = link.head
+        if link.role != 'attribute' or head is None or head >= i or i in dependents:
+            continue
+        if any(part.role != 'name_part' or part.head != head for part in tree[head + 1:i]):
+            continue
+        if any(lemma == tree[head].lemma and 'Name' in tag for lemma, tag in known_forms(tokens[head].surface)):
+            candidates.append(i)
+    if 2 ** len(candidates) > budget:
+        raise AnalysisBudgetExceeded('ANALYSIS_BUDGET')
+    yield tree
+    if candidates:
+        for choices in product((False, True), repeat=len(candidates)):
+            if any(choices):
+                variant = list(tree)
+                for i, is_name in zip(candidates, choices):
+                    if is_name:
+                        variant[i] = replace(tree[i], role='name_part', rule='NAME.EPITHET')
+                yield tuple(variant)
+
+
 def _connected(tree):
     roots = [i for i, link in enumerate(tree) if link.head is None]
     if len(roots) != 1 or tree[roots[0]].role != 'predicate':
@@ -444,7 +477,8 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
         yield from infinitives.candidates(part, budget=budget)
 
     def local(part):
-        yield from modifiers.structures(part, base, budget=budget)
+        for tree in modifiers.structures(part, base, budget=budget):
+            yield from _nickname_readings(part, tree, budget)
 
     structures = {}
     try:

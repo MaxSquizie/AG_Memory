@@ -69,3 +69,19 @@ def test_full_personal_name_is_one_subject_and_one_answer():
     assert [(link.role, link.head) for link in tree] == [('subject', 2), ('name_part', 0), ('predicate', None)]
     assert submit(core, 'Кто ушёл?').text == 'Иван Смирнов'
     assert submit(core, 'Ушёл Саша Смирнова').status == 'UNRESOLVED'
+
+
+@pytest.mark.parametrize('name,epithet', [('Иван', 'Высокий'), ('иван', 'высокий')])
+def test_postposed_adjective_can_name_or_describe_the_person(name, epithet):
+    core = AHCore()
+    full = f'{name} {epithet}'
+    text = f'{full} ушёл'
+    pending = submit(core, text)
+    assert pending.status == 'AMBIGUOUS' and pending.observation_ref is None
+    probe, = pending.analysis.probes
+    assert probe.options == (full, name) and probe.context == text
+    for answer, role in [(full, 'name_part'), (name, 'attribute')]:
+        core = AHCore()
+        written = submit(core, text, lambda _: answer)
+        assert written.analysis.analyses[0][1].role == role
+        assert submit(core, 'Кто ушёл?').text == answer
