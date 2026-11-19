@@ -58,6 +58,12 @@ clause-connectives.tsv. It includes cc conjunctions on nominal conjuncts
 whose governing conjunct is a noun, proper name or pronoun. Regeneration:
 python scripts/import_russian_clause_connectives.py --nominal ru_gsd-ud-train.conllu ru_pud-ud-test.conllu src/ah/russian_grammar/lexicon/nominal-connectives.tsv
 
+predicative-instrumentals.tsv lists verb lemmas governing a nominal xcomp
+in the instrumental case in the same GSD and PUD sources. These attestations
+license an alternative to the agent reading of a passive instrumental.
+Source revisions, attribution and CC BY-SA terms are given above.
+python scripts/import_russian_predicative_instrumentals.py ru_gsd-ud-train.conllu ru_pud-ud-test.conllu src/ah/russian_grammar/lexicon/predicative-instrumentals.tsv
+
 bare_government.tsv lists licensed bare oblique cases by infinitive. The
 importer reads the two GrammarEngine infinitive files at the revision and
 SHA256 values given for infinitives.tsv above (MIT). It reads explicit case

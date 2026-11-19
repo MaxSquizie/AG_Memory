@@ -46,7 +46,7 @@ def _common(forms):
 
 
 NOMINAL_ROLES = {'subject', 'object', 'duration', 'recipient', 'experiencer', 'governed',
-                 'nominal_conjunct', 'event_argument', 'instrument', 'oblique'}
+                 'nominal_conjunct', 'event_argument', 'agent', 'instrument', 'oblique'}
 PREDICATE_ROLES = {'predicate', 'clause_complement', 'clause_conjunct', 'clause_relative', 'clause_adverbial'}
 ROLE_POS = {
     'copula': {'VERB'}, 'auxiliary': {'VERB'}, 'attribute': {'ADJF'}, 'possessive': {'ADJF'},

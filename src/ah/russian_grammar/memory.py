@@ -6,6 +6,7 @@ from uuid import uuid4
 from ah.model import Domain, Property
 
 from .infinitives import FRAMES
+from .morphology import _common, from_tag
 from .parser import Result, analyze
 from .prepositions import TOKEN
 from .rules import dictionary, known_forms
@@ -14,7 +15,7 @@ from .rules import dictionary, known_forms
 ROOT_KEY = 'russian_grammar.root'
 RELATIVE_KEY = 'russian_grammar.relative'
 UNKNOWN = 'Неизвестно.'
-ARGUMENTS = {'subject', 'object', 'recipient', 'experiencer', 'beneficiary', 'stimulus', 'instrument', 'oblique'}
+ARGUMENTS = {'subject', 'object', 'recipient', 'experiencer', 'beneficiary', 'stimulus', 'instrument', 'oblique', 'agent'}
 AMOUNTS = {'cardinal', 'collective', 'both', 'fraction', 'range', 'indefinite'}
 NUMBER_PARTS = {'numeral_part', 'quantity_modifier'}
 PERSONAL = {'я': 'speaker', 'ты': 'addressee', 'мы': 'speaker_group', 'вы': 'addressee_group'}
@@ -88,8 +89,11 @@ def _rows(result, participants):
         boundary = contexts.get(i)
         if (row.get('morphology') or {}).get('mood') == 'impr':
             boundary = 'directive'
-        if role in ('predicate', 'clause_conjunct', 'clause_adverbial', 'clause_complement', 'clause_relative', 'converb', 'infinitive'):
+        if role in ('predicate', 'clause_conjunct', 'clause_adverbial', 'clause_complement', 'clause_relative',
+                    'converb', 'infinitive', 'participle'):
             boundary = boundary or category
+            if role == 'participle':
+                boundary = boundary or 'attributive'
             if role in ('clause_adverbial', 'clause_complement', 'infinitive'):
                 boundary = boundary or 'embedded'
             enclosing = enclosing or boundary or qualifications.get(i) or None
@@ -156,13 +160,43 @@ def _participants(source, speaker_ref=None, addressee_ref=None):
             'addressee': addressee_ref or dialogue.get(source)}
 
 
+def _attested_form(row, pos):
+    if row.get('morphology'):
+        return row['morphology']
+    forms = [from_tag(tag) for lemma, tag in known_forms(row['surface']) if lemma == row['lemma'] and tag.POS == pos]
+    form = _common(forms)
+    return asdict(form) if form else {}
+
+
+def _normalize_short_predicates(rows, result):
+    copulas = {row['head']: row for row in rows if row['role'] == 'copula'}
+    conditional = {row['head'] for row in rows if row.get('rule') == 'N3'}
+    for i, row in enumerate(rows):
+        form = row.get('morphology') or {}
+        if row.get('rule') != 'V2.PASS' and form.get('pos') != 'PRTS':
+            continue
+        if form.get('mood') == 'indc':
+            continue
+        lexical = _attested_form(row, 'PRTS')
+        auxiliary = _attested_form(copulas[i], 'VERB') if i in copulas else {}
+        tense = auxiliary.get('tense') if i in copulas else 'pres'
+        if lexical and tense:
+            mood = 'cond' if i in conditional or lexical.get('mood') == 'cond' else 'indc'
+            result[i] = dict(result[i], morphology=dict(lexical, tense=tense, person=auxiliary.get('person'), mood=mood))
+
+
 def _query_rows(rows, participants):
     result = list(rows)
     actors = {}
-    counted = {row['head']: row.get('quantity_kind') for row in rows if row['role'] == 'numeral'}
+    counted = {row['head']: row for row in rows if row['role'] == 'numeral'}
     for i, row in enumerate(rows):
         if i in counted:
-            result[i] = dict(row, counted=counted[i])
+            numeral = counted[i]
+            result[i] = dict(row, counted=numeral.get('quantity_kind'))
+            if numeral.get('quantity_kind') in ('both', 'cardinal', 'collective') and numeral.get('quantity_modifier') in (None, 'exact'):
+                value = numeral.get('quantity')
+                if value and value.isdecimal() and value != '0':
+                    result[i]['count_number'] = 'sing' if value == '1' else 'plur'
         elif row['role'] in ('attribute', 'possessive') and row['head'] in counted:
             result[i] = dict(row, count_agreement=True)
         implicit = row.get('implicit_subject')
@@ -181,6 +215,7 @@ def _query_rows(rows, participants):
                 parent = rows[parent]['head']
             if parent is not None and rows[parent].get('implicit_subject') == row['implicit_subject']:
                 result[i] = dict(row, controller=actors[parent])
+    _normalize_short_predicates(rows, result)
     return result
 
 
@@ -252,16 +287,20 @@ def _quantity_answer_head(question, stored, children, head):
 
 def _nominal_parts(stored, children, head):
     parts = [head]
+    modifiers = set()
     for j in parts:
         for child in children[j]:
             role = stored[child]['role']
-            if (role in NUMBER_PARTS or role in ('name_part', 'nominal_conjunct', 'coordinator', 'numeral') or
-                    stored[j].get('counted') and role in ('attribute', 'possessive')):
+            if j in modifiers or role in ('participle', 'genitive_modifier'):
+                modifiers.add(child)
+                parts.append(child)
+            elif (role in NUMBER_PARTS or role in ('name_part', 'nominal_conjunct', 'coordinator', 'numeral') or
+                  stored[j].get('counted') and role in ('attribute', 'possessive')):
                 parts.append(child)
     return parts
 
 
-def _nominal_answer(stored, parts):
+def _nominal_answer(stored, parts, source):
     words = []
     identity = []
     for j in sorted(parts):
@@ -274,7 +313,15 @@ def _nominal_answer(stored, parts):
             identity.append(_quantity_key(row) or word.casefold())
         elif row['role'] not in NUMBER_PARTS:
             identity.append(word.casefold())
-    return tuple(identity), ' '.join(words)
+    phrase = ' '.join(words)
+    if any(stored[j]['role'] in ('participle', 'genitive_modifier') for j in parts):
+        ordered = sorted(parts)
+        first, last = ordered[0], ordered[-1]
+        included = set(parts)
+        if (all(j in included or stored[j]['role'] == 'punctuation' for j in range(first, last + 1)) and
+                all(word == stored[j]['surface'] for word, j in zip(words, ordered))):
+            phrase = source[stored[first]['start']:stored[last]['end']]
+    return tuple(identity), phrase
 
 
 def _may_deny_participation(row):
@@ -302,12 +349,17 @@ def _projection_requirements(rows, children, root, scoped):
         if not argument and not scoped:
             continue
         branch = [child]
+        modifiers = set()
         for node in branch:
+            if rows[node]['role'] in ('participle', 'genitive_modifier') or rows[node]['head'] in modifiers:
+                modifiers.add(node)
             branch.extend(children[node])
         nominal = ('attribute', 'possessive', 'name_part', 'numeral')
-        if (scoped and (not argument or any(rows[node]['role'] not in nominal for node in branch[1:])) or
-                any(_may_deny_participation(rows[node]) for node in branch)):
+        if (scoped and (not argument or any(node not in modifiers and rows[node]['role'] not in nominal for node in branch[1:])) or
+                any(node not in modifiers and _may_deny_participation(rows[node]) for node in branch)):
             required.update(branch)
+        elif scoped or any(_may_deny_participation(rows[node]) for node in modifiers):
+            required.update(modifiers)
     return required
 
 
@@ -345,7 +397,8 @@ def _extraction(rows, stored, observed, source, focus, budget):
             for j in pool:
                 if focus is None and len(children[i]) != len(children_found[j]):
                     continue
-                variable_subject = i == agreement_target or (row['role'] == 'auxiliary' and row['head'] == agreement_target)
+                variable_subject = i == agreement_target or (row['role'] in ('auxiliary', 'copula') and
+                                                              row['head'] == agreement_target)
                 if j in mapping.values() or not _compatible(rows, i, stored[j], i == focus, i == root, variable_subject):
                     continue
                 following.append({**mapping, i: j})
@@ -390,7 +443,7 @@ def _extraction(rows, stored, observed, source, focus, budget):
             parts = _nominal_parts(stored, surface_children, head)
             if missing and not missing.issubset(parts):
                 continue
-            answer = _nominal_answer(stored, parts)
+            answer = _nominal_answer(stored, parts, source)
             if answer:
                 identity, phrase = answer
                 answers[identity] = phrase
@@ -421,8 +474,19 @@ def _compatible(rows, i, stored, focus, root, variable_subject):
     if row.get('quantity_kind'):
         return _quantity_matches(row, stored, focus)
     if not focus:
+        left, right = row.get('morphology') or {}, stored.get('morphology') or {}
+        if left.get('pos') in ('PRTF', 'PRTS') or right.get('pos') in ('PRTF', 'PRTS'):
+            if (row['lemma'] != stored['lemma'] or
+                    any(left.get(k) != right.get(k) for k in ('pos', 'voice', 'aspect', 'tense', 'mood', 'transitivity'))):
+                return False
+            if left.get('pos') == 'PRTF' or variable_subject:
+                return True
+            return all(left.get(k) == right.get(k) for k in ('number', 'gender'))
         if row.get('count_agreement') and stored.get('count_agreement'):
             return row['lemma'] == stored['lemma']
+        if not row.get('counted') and stored.get('count_number'):
+            return (row['lemma'] == stored['lemma'] and _case(row) == _case(stored) and
+                    left.get('number') == stored['count_number'])
         if row.get('counted') and stored.get('counted'):
             right = (stored.get('morphology') or {}).get('number')
             if row['counted'] == 'query' and stored['counted'] == 'fraction' and right == 'plur':
@@ -436,7 +500,6 @@ def _compatible(rows, i, stored, focus, root, variable_subject):
             return (row['lemma'] in PERSONAL and stored['lemma'] in PERSONAL and _case(row) == _case(stored) and
                     row.get('participant_ref') is not None and row['participant_ref'] == stored.get('participant_ref') and
                     (row['lemma'] == stored['lemma'] or {row['lemma'], stored['lemma']} == {'я', 'ты'}))
-        left, right = row.get('morphology'), stored.get('morphology')
         if left and right and row['lemma'] == stored['lemma'] and left.get('mood') and right.get('mood'):
             categories = ('tense', 'aspect', 'mood', 'voice', 'transitivity')
             if any(left.get(k) != right.get(k) for k in categories):

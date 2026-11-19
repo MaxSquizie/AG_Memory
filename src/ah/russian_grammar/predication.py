@@ -14,7 +14,7 @@ def _agree(first, second):
 def _copula_agrees(tag, subject):
     if subject is None:
         return tag.number == 'sing' and tag.gender in (None, 'neut') and tag.person in (None, '3per')
-    person = subject.person if subject.POS == 'NPRO' else '3per'
+    person = subject.person or '3per'
     return _agree(tag, subject) and (tag.person is None or tag.person == person)
 
 

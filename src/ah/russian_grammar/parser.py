@@ -290,10 +290,12 @@ def _partitions(analyses, tokens, text):
                               [predicates[0] if value == lemma else None for value in lemmas], context)
         yield word_choice(f'Which word is the subject of «{verb}»?', subjects)
     for i in range(len(tokens)):
-        if all(a[i].role == 'attribute' for a in analyses):
+        roles = {a[i].role for a in analyses}
+        if roles in ({'attribute'}, {'participle'}):
             hosts = [a[i].head for a in analyses]
             if len(set(hosts)) > 1:
-                yield word_choice(f'Which word does «{_span_label(tokens, i)}» describe?', hosts)
+                context = _attachment_context(text, tokens, analyses, hosts, i, i + 1) if roles == {'participle'} else text
+                yield word_choice(f'Which word does «{_span_label(tokens, i)}» describe?', hosts, context)
 
     earlier_attachments = []
     for i in range(len(tokens)):
@@ -349,6 +351,22 @@ def _partitions(analyses, tokens, text):
             continue
         roles = {link.role for link in links}
         focus = _span_label(tokens, i)
+        if roles == {'attribute', 'participle'}:
+            heads = [link.head for link in links]
+            context = _attachment_context(text, tokens, analyses, heads, i, i + 1)
+            question = f'Copy «{focus}» if it describes an action here. Otherwise choose “no such word”.'
+            yield word_choice(question, [i if link.role == 'participle' else None for link in links], context)
+        if roles == {'agent', 'oblique'} and len({link.head for link in links}) == 1:
+            host = links[0].head
+            context = _clause_context(text, tokens, analyses, i, (host,))
+            question = f'Copy «{focus}» if it names who performed the action «{_span_label(tokens, host)}». Otherwise choose “no such word”.'
+            yield word_choice(question, [i if link.role == 'agent' else None for link in links], context)
+        if len(roles) == 1 and roles <= {'adverb', 'agent', 'recipient', 'object', 'instrument', 'oblique'}:
+            heads = [link.head for link in links]
+            if len(set(heads)) > 1 and all(head is not None for head in heads) and any(
+                    tree[head].role == 'participle' for tree, head in zip(analyses, heads)):
+                context = _attachment_context(text, tokens, analyses, heads, i, i + 1)
+                yield word_choice(f'Which action does «{focus}» belong to?', heads, context)
         if len(roles) == 1 and all(link.morphology for link in links):
             moods = [link.morphology.mood for link in links]
             if 'impr' in moods and len(set(moods)) > 1:
@@ -615,7 +633,7 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
     words = tokens[:-1] if tokens and tokens[-1].surface in {'.', '!', '?'} else tokens
     if not words:
         return Result(text, 'UNRESOLVED', 'EMPTY', tokens)
-    from . import case_arguments, clauses, finite_forms, infinitives, modifiers, morphology, nominal_groups, predication, quantity_groups, quantity_modifiers, recovery, standalone_numerals
+    from . import case_arguments, clauses, finite_forms, infinitives, modifiers, morphology, nominal_groups, participles, predication, quantity_groups, quantity_modifiers, recovery, short_participles, standalone_numerals
 
     failures = []
 
@@ -627,8 +645,11 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
     def governed(part):
         yield from case_arguments.trees(part, base, budget=budget)
 
+    def passive(part):
+        yield from short_participles.trees(part, governed, budget=budget)
+
     def finite(part):
-        yield from finite_forms.trees(part, governed, budget=budget)
+        yield from finite_forms.trees(part, passive, budget=budget)
 
     def modified(part):
         for tree in modifiers.structures(part, finite, budget=budget):
@@ -643,9 +664,16 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
     def numbers(part):
         yield from standalone_numerals.trees(part, counted, budget=budget)
 
+    def qualified_numbers(part):
+        yield from quantity_modifiers.trees(part, numbers, budget=budget)
+
+    def quantified(part):
+        yield from nominal_groups.with_genitives(part, qualified_numbers, budget=budget)
+
     def local(part):
-        for tree in quantity_modifiers.trees(part, numbers, budget=budget):
-            yield from morphology.variants(part, tree, budget=budget)
+        for tree in participles.trees(part, quantified, budget=budget):
+            if short_participles.allows_copula_reading(part, tree):
+                yield from morphology.variants(part, tree, budget=budget)
 
     def exact(part):
         for tree in clauses.trees(part, local, budget=budget):

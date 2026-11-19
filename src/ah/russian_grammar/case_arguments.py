@@ -149,7 +149,7 @@ def trees(tokens, base, *, budget=256):
 
     yield from base(tokens)
     government, roles = _lexicon()
-    potential = {i: {case for lemma, tag in known_forms(token.surface) if tag.POS in ('VERB', 'INFN')
+    potential = {i: {case for lemma, tag in known_forms(token.surface) if tag.POS in ('VERB', 'INFN', 'PRTS')
                      for case in government.get(lemma, ())} for i, token in enumerate(tokens)}
     potential = {i: cases for i, cases in potential.items() if cases}
     if not potential:

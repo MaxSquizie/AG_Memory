@@ -163,6 +163,56 @@ def _groups(tokens, start, budget, *, bare_cases=()):
                                 pending.append(replace(group, end=name.end, extra=(*links, *name.extra)))
 
 
+def with_genitives(tokens, local, *, budget):
+    from .morphology import NOMINAL_ROLES
+    from .parser import AnalysisBudgetExceeded, Link
+
+    lexical_members = set()
+    for tree in local(tokens):
+        for i, link in enumerate(tree):
+            if link.role in ('prep_part', 'name_part', 'quantity_modifier', 'numeral_part'):
+                lexical_members.add(i)
+            if link.role == 'numeral' and link.quantity_kind == 'query':
+                lexical_members.add(link.head)
+        yield tree
+
+    def nominal_host(token):
+        forms = known_forms(token.surface)
+        return bool(forms) and all(tag.POS == 'NOUN' and not name_type(tag) for _, tag in forms)
+
+    spans = [group for start in range(1, len(tokens))
+             if start - 1 not in lexical_members and nominal_host(tokens[start - 1])
+             for group in _groups(tokens, start, budget, bare_cases=('gent', 'gen2'))
+             if lexical_members.isdisjoint(range(start, group.end))]
+    pending = [(0, ())]
+    examined = 0
+    while pending:
+        index, selected = pending.pop()
+        for j in range(index, len(spans)):
+            group = spans[j]
+            if selected and selected[-1].end > group.start:
+                continue
+            examined += 1
+            if examined > budget:
+                raise AnalysisBudgetExceeded('GENITIVE_GROUP_BUDGET')
+            groups = (*selected, group)
+            hidden = {k for g in groups for k in range(g.start, g.end)}
+            kept = tuple(k for k in range(len(tokens)) if k not in hidden)
+            for tree in local(tuple(tokens[k] for k in kept)):
+                links = {k: replace(link, **{field: kept[v] for field in ('head', 'controller', 'antecedent')
+                                             if (v := getattr(link, field)) is not None})
+                         for k, link in zip(kept, tree)}
+                for g in groups:
+                    host = g.start - 1
+                    if host not in links or links[host].role not in NOMINAL_ROLES | {'genitive_modifier'}:
+                        break
+                    links[g.noun] = Link('genitive_modifier', g.lemma, host, 'N.GEN', case=g.case)
+                    links.update(g.extra)
+                else:
+                    yield tuple(links[k] for k in range(len(tokens)))
+            pending.append((j + 1, groups))
+
+
 def _restore(tree, kept, groups):
     links = {}
     for i, link in zip(kept, tree):

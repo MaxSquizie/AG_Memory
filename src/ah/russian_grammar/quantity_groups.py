@@ -12,7 +12,7 @@ from .rules import dictionary, known_forms
 
 _EXTERNAL_CASE = {'subject': 'nomn', 'object': 'accs', 'duration': 'accs', 'experiencer': 'datv'}
 _NOMINAL = {'subject', 'object', 'duration', 'experiencer', 'recipient', 'beneficiary', 'stimulus',
-            'oblique', 'instrument', 'governed', 'nominal_conjunct', 'predicate'}
+            'oblique', 'agent', 'instrument', 'governed', 'nominal_conjunct', 'predicate'}
 _GAP_ROLES = _NOMINAL | {'auxiliary', 'copula', 'adverb'}
 _SUBJECT = {'masc': 'он', 'femn': 'она', 'neut': 'оно'}
 

@@ -25,6 +25,8 @@
 писать	ablt	instrument
 писать	datv	recipient
 подарить	datv	recipient
+подписать	ablt	instrument
+подписывать	ablt	instrument
 покупать	datv	beneficiary
 помогать	datv	beneficiary
 помочь	datv	beneficiary
