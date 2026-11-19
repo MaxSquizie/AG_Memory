@@ -1,0 +1,9 @@
+класть	VERB	object
+положить	VERB	object
+класть	INFN	object
+положить	INFN	object
+V.CMP	*	subject
+NEG.EXIST	*	object
+NEG.EXIST	*	preposition
+GAP	*	subject
+GAP	*	object

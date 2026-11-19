@@ -5,6 +5,7 @@ from uuid import uuid4
 
 from ah.model import Domain, Property
 
+from .valency import violation
 from . import adjuncts
 from . import homogeneous
 from .infinitives import FRAMES
@@ -768,6 +769,10 @@ def submit(core, text, choose=None, *, source='user', speaker_ref=None, addresse
         prohibition = 'negated' in (root.get('scope') or '').split('_')
         act = 'Распознан запрет на действие' if prohibition else 'Распознано побуждение к действию'
         return GrammarReply('DIRECTIVE', f"{act} «{root['lemma']}».", analysis=result)
+    reason = violation(result.tokens, result.analyses[0])
+    if reason:
+        rejected = Result(result.source, 'UNRESOLVED', reason, result.tokens, probes=result.probes, steps=result.steps)
+        return GrammarReply('UNRESOLVED', 'Разбор не завершён. ' + reason, analysis=rejected)
     with _access(core, _adapter(core, journal), write=True) as draft:
         reference = _remember(draft, result, rows, source)
     return GrammarReply('STORED', 'Наблюдение записано.', reference, result)

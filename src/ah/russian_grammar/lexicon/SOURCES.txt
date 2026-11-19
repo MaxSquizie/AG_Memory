@@ -167,3 +167,10 @@ PROPN forms attached by flat:name that are absent from the dictionary.
 These rows provide case, number and gender for a name component without
 assigning a surname category or inferring a declension paradigm.
 python scripts/import_russian_attested_nouns.py --name-parts ru_gsd-ud-train.conllu ru_pud-ud-test.conllu src/ah/russian_grammar/lexicon/attested_name_parts.tsv
+
+required_arguments.tsv is project-authored. Keys with * name a construction
+and its required immediate roles. Repeated rows are conjunctive, roles in a
+row are alternatives. The lexical entries restrict assertion of the isolated
+placement reading to an overt or shared patient. FrameBank constructions
+4193 and 4194 attest the accusative patient; the conservative admission
+policy is ours. The table is not an exhaustive Russian valency dictionary.

@@ -1,0 +1,7 @@
+RESULT Иван выше Петра. | Наблюдение записано. | probes [] | WAL 0 -> 1
+RESULT Иван выше кого? | Петра | probes [] | WAL 1 -> 1
+RESULT Иван положил. | Разбор не завершён. MISSING_REQUIRED_ARGUMENT | probes [] | WAL 1 -> 1
+RESULT Иван положил книгу. | Наблюдение записано. | probes [] | WAL 1 -> 2
+RESULT Что Иван положил? | книгу | probes [] | WAL 2 -> 2
+RESULT Иван сказал, что Мария ушла, а Пётр остался. | Разбор не завершён. OPEN_CHOICE | probes [('Which predicate is «остался» coordinated with?', ('сказал', 'ушла'))] | WAL 2 -> 2
+RESULT Иван сказал, что Мария ушла, а Пётр остался. | Наблюдение записано. | probes [('Which predicate is «остался» coordinated with?', ('сказал', 'ушла'))] | WAL 2 -> 3

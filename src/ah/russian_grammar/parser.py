@@ -53,6 +53,13 @@ class AnalysisBudgetExceeded(Exception):
 
 
 @dataclass(frozen=True)
+class ProbeStep:
+    before: int
+    after: int
+    outcome: str
+
+
+@dataclass(frozen=True)
 class Result:
     source: str
     status: str
@@ -60,6 +67,7 @@ class Result:
     tokens: tuple[Occurrence, ...]
     analyses: tuple[tuple[Link, ...], ...] = ()
     probes: tuple[Probe, ...] = ()
+    steps: tuple[ProbeStep, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -634,6 +642,19 @@ def _nickname_readings(tokens, tree, budget):
 
 
 def _possessor_readings(tokens, tree, budget):
+    if any(link.lemma == 'себя' for link in tree):
+        bound = list(tree)
+        for i, link in enumerate(tree):
+            if link.lemma != 'себя' or link.head is None:
+                continue
+            host = link.head
+            while tree[host].role == 'preposition' and tree[host].head is not None:
+                host = tree[host].head
+            actors = [j for j, item in enumerate(tree) if item.role == 'subject' and item.head == host]
+            if (len(actors) == 1 and tree[host].morphology and tree[host].morphology.pos == 'VERB'
+                    and not any(item.role == 'nominal_conjunct' and item.head == actors[0] for item in tree)):
+                bound[i] = replace(link, antecedent=actors[0])
+        tree = tuple(bound)
     counts = {link.head: link.quantity for link in tree if link.role == 'numeral'
               and link.quantity_kind in ('cardinal', 'both', 'collective')}
     slots = {}
@@ -806,6 +827,10 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
 
     def collect(candidates):
         for tree in candidates:
+            if any(link.role == 'governed' and not GOVERNMENT.get(tree[link.head].lemma) for link in tree):
+                if not failures or failures[0] != 'UNKNOWN_GOVERNMENT':
+                    failures.insert(0, 'UNKNOWN_GOVERNMENT')
+                continue
             for reading in _possessor_readings(words, tree, budget):
                 key = tuple((l.role, l.lemma, l.head, l.case, l.controller, l.scope,
                              l.antecedent, l.event_view, l.recovery, l.morphology, l.implicit_subject, l.quantity, l.quantity_kind, l.quantity_modifier, l.coord_head, l.shared_agent, l.shared_object) for l in reading)
@@ -823,43 +848,36 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
     if not analyses:
         return Result(text, 'UNRESOLVED', next(iter(failures), 'NO_COMPLETE_CLAUSE'), tokens)
     probes = []
-    checked_government = set()
+    steps = []
     while True:
         if len(analyses) > 1:
             partition = _partition(analyses, words, text)
             if partition is None:
-                return Result(text, 'AMBIGUOUS', 'NO_DISTINGUISHING_PROBE', tokens, analyses, tuple(probes))
+                return Result(text, 'AMBIGUOUS', 'NO_DISTINGUISHING_PROBE', tokens, analyses, tuple(probes), tuple(steps))
             probe, keys = partition
         else:
-            tree, = analyses
-            unverified = next((j for j, link in enumerate(tree) if link.role == 'governed'
-                               and not GOVERNMENT.get(tree[link.head].lemma) and j not in checked_government), None)
-            if unverified is None:
-                break
-            # The morphology dictionary knows this preposition but supplies no government.
-            # An inflected form alone cannot certify the missing lexical constraint.
-            link = tree[unverified]
-            label = _span_label(words, unverified)
-            question = f'Which word is governed by «{tree[link.head].lemma}» in the {CASE_NAMES[link.case]} case?'
-            probe = Probe(question, (label,), text)
-            keys = [label]
-            checked_government.add(unverified)
+            break
         if len(probe.options) > MAX_WORD_CHOICES:
-            return Result(text, 'AMBIGUOUS', 'JEV_CHOICE_LIMIT', tokens, analyses, tuple(probes))
+            return Result(text, 'AMBIGUOUS', 'JEV_CHOICE_LIMIT', tokens, analyses, tuple(probes), tuple(steps))
         probes.append(probe)
         try:
             answer = choose(probe) if choose is not None else '?'
         except OSError:
-            return Result(text, 'AMBIGUOUS', 'SELECTOR_UNAVAILABLE', tokens, analyses, tuple(probes))
+            steps.append(ProbeStep(len(analyses), len(analyses), 'unavailable'))
+            return Result(text, 'AMBIGUOUS', 'SELECTOR_UNAVAILABLE', tokens, analyses, tuple(probes), tuple(steps))
         if isinstance(answer, Mapping):
             answer = probe.response_choice(answer)
         answer = ' '.join(answer.split()).casefold() if isinstance(answer, str) else None
         choices = {label.casefold(): label for label in probe.options}
         if answer == '0':
-            return Result(text, 'UNRESOLVED', 'OPTIONS_REJECTED', tokens, (), tuple(probes))
+            steps.append(ProbeStep(len(analyses), 0, 'rejected'))
+            return Result(text, 'UNRESOLVED', 'OPTIONS_REJECTED', tokens, (), tuple(probes), tuple(steps))
         if answer not in choices:
             reason = 'OPEN_CHOICE' if answer == '?' else 'INVALID_ANSWER'
-            return Result(text, 'AMBIGUOUS', reason, tokens, analyses, tuple(probes))
+            steps.append(ProbeStep(len(analyses), len(analyses), 'open' if answer == '?' else 'invalid'))
+            return Result(text, 'AMBIGUOUS', reason, tokens, analyses, tuple(probes), tuple(steps))
+        before = len(analyses)
         analyses = tuple(a for a, key in zip(analyses, keys) if key == choices[answer])
+        steps.append(ProbeStep(before, len(analyses), 'selected'))
     reason = 'COMPLEX_CLAUSE' if any(link.role.startswith('clause_') for link in analyses[0]) else 'SIMPLE_CLAUSE'
-    return Result(text, 'PARSED_FRAGMENT', reason, tokens, analyses, tuple(probes))
+    return Result(text, 'PARSED_FRAGMENT', reason, tokens, analyses, tuple(probes), tuple(steps))
