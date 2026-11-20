@@ -7,7 +7,8 @@ from itertools import product
 from .detached_prepositions import extent as group_extent
 from .morphology import Morphology, feature_choices
 from .prepositions import CASE_NAMES, FORMS, GOVERNMENT, PREFIXES, TOKEN, group_heads
-from .probe import MAX_WORD_CHOICES, Probe
+from .probe import MAX_WORD_CHOICES, FocusChoice, Probe
+from . import modifier_focus
 from .recovery import CaseRecovery, SpellingRecovery
 from .rules import Reading, known_forms, name_continuations, plain_person_reference, preposition_reading, attribute_agrees, readings, subject_agrees
 
@@ -71,6 +72,7 @@ class Result:
     analyses: tuple[tuple[Link, ...], ...] = ()
     probes: tuple[Probe, ...] = ()
     steps: tuple[ProbeStep, ...] = ()
+    confirmed_focus: tuple[FocusChoice, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -312,6 +314,7 @@ def _partitions(analyses, tokens, text):
 
     from . import nominal_predicates
     yield from nominal_predicates.partitions(analyses, tokens, text)
+    yield from modifier_focus.partitions(analyses, tokens, text)
 
     predicates = [next(i for i, link in enumerate(a) if link.head is None) for a in analyses]
     if len(set(predicates)) > 1:
@@ -447,7 +450,7 @@ def _partitions(analyses, tokens, text):
             hosts = [a[i].head for a in analyses]
             scope_readings = {a[i].scope for a in analyses}
             if len(set(hosts)) == 1 and scope_readings == {None, 'qualification'}:
-                limits = {group_extent(a, i) for a in analyses}
+                limits = {group_extent(a, i, external_modifier=True) for a in analyses}
                 if len(limits) == 1 and None not in limits:
                     end = limits.pop()
                     probe = _qualification_probe(tokens, i, end, hosts[0], text)
@@ -480,12 +483,19 @@ def _partitions(analyses, tokens, text):
                     extents.append(end)
                 end = min(extents)
                 if all(a[i].rule == 'PP.DETACHED' for a in analyses) or any(a[i].scope == 'qualification' for a in analyses):
-                    limits = {group_extent(a, i) for a in analyses}
+                    limits = {group_extent(a, i, external_modifier=True) for a in analyses}
                     if len(limits) == 1 and None not in limits:
                         end = limits.pop()
+                has_focus = i > 0 and all(modifier_focus.site(tokens, a, i - 1) for a in analyses)
+                if has_focus:
+                    limits = [group_extent(a, i, external_modifier=True) for a in analyses]
+                    if None not in limits:
+                        end = min(limits)
                 phrase = _span_label(tokens, i, end).replace(' ,', ',')
                 context = _attachment_context(text, tokens, analyses, hosts, i, end)
-                yield word_choice(f'Which word does the phrase «{phrase}» depend on?', hosts, context)
+                question = (f'Какое действие уточняет обстоятельство «{phrase}»?' if has_focus else
+                            f'Which word does the phrase «{phrase}» depend on?')
+                yield word_choice(question, hosts, context)
 
     duration_heads = sorted({link.head for tree in analyses for link in tree if link.role == 'duration'})
     for head in duration_heads:
@@ -1044,10 +1054,11 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
                 for variant in homogeneous.object_variants(bound, budget=budget):
                     if _connected(variant):
                         for scoped in quantity_groups.age_variants(variant, budget):
-                            if accept_tree is None:
-                                yield scoped
-                            else:
-                                yield from qualification.filtered(scoped, opened, accept_tree, budget)
+                            for reading in modifier_focus.readings(part, scoped, budget):
+                                if accept_tree is None:
+                                    yield reading
+                                else:
+                                    yield from qualification.filtered(reading, opened, accept_tree, budget)
 
     structures = {}
 
@@ -1159,6 +1170,7 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
     analyses = tuple(structures.values())
     from .converb_control import needs_confirmation
     confirmed_names = set()
+    confirmed_focus = []
     if not analyses:
         return Result(text, 'UNRESOLVED', next(iter(failures), 'NO_COMPLETE_CLAUSE'), tokens, (), tuple(probes), tuple(steps))
     while True:
@@ -1214,6 +1226,8 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
         selected, stopped = select(probe, before, analyses)
         if stopped is not None:
             return stopped
+        if probe.focus_choices:
+            confirmed_focus.append(probe.focus_choices[probe.options.index(selected)])
         analyses = tuple(a for a, key in zip(analyses, keys) if key == selected)
         steps.append(ProbeStep(before, len(analyses), 'selected'))
     if accept_tree is None:
@@ -1235,4 +1249,4 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
             steps.append(ProbeStep(2, 1, 'selected', 'qualification'))
         analyses = (tree,)
     reason = 'COMPLEX_CLAUSE' if any(link.role.startswith('clause_') for link in analyses[0]) else 'SIMPLE_CLAUSE'
-    return Result(text, 'PARSED_FRAGMENT', reason, tokens, analyses, tuple(probes), tuple(steps))
+    return Result(text, 'PARSED_FRAGMENT', reason, tokens, analyses, tuple(probes), tuple(steps), tuple(confirmed_focus))

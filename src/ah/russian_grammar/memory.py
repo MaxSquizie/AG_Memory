@@ -68,6 +68,8 @@ def _root(rows):
 
 def _rows(result, participants):
     rows = tuple({**asdict(token), **asdict(link)} for token, link in zip(result.tokens, result.analyses[0]))
+    for focus in result.confirmed_focus:
+        rows[focus.modifier]['focus_offsets'] = [rows[j]['start'] for j in focus.members]
     children = [[] for _ in rows]
     root = _root(rows)
     for i, row in enumerate(rows):
@@ -161,6 +163,10 @@ def _remember(core, result, rows, source):
             if row.get(key) is not None:
                 relation = 'grammar.' + (row['role'] if key == 'head' else key)
                 core.add_link(relation, members[i], members[row[key]], 1.0)
+    for focus in result.confirmed_focus:
+        anchor = core.add_group(Domain.H, tuple(members[j] for j in focus.members),
+                                meta={'kind': 'russian_grammar.focus_anchor'})
+        core.add_link('grammar.modifier_scope', members[focus.modifier], core.ref(anchor.uid), 1.0)
     observation = core.add_group(
         Domain.H, tuple(members), {ROOT_KEY: Property(ROOT_KEY, root['lemma'], 'str')},
         {'verbatim': result.source, 'source': source, 'kind': 'russian_grammar.observation',
@@ -573,7 +579,14 @@ def _extraction(rows, stored, observed, source, focus, budget):
         if not states:
             break
     answers = {}
+    starts = {row['start']: i for i, row in enumerate(rows) if 'start' in row and 'shared_occurrence' not in row}
+    confirmed = [(i, tuple(starts.get(offset) for offset in row['focus_offsets'])) for i, row in enumerate(rows)
+                 if row.get('focus_offsets')]
     for mapping in states:
+        if any(i not in mapping or any(j not in mapping for j in target)
+               or [stored[mapping[j]].get('start') for j in target] != stored[mapping[i]].get('focus_offsets')
+               for i, target in confirmed):
+            continue
         if any(rows[i].get(key) is not None and mapping.get(rows[i][key]) != stored[j].get(key)
                for i, j in mapping.items() for key in ('controller', 'antecedent')):
             continue

@@ -82,7 +82,7 @@ def sites(tree, opened):
         nominal = tree[noun]
         if nominal.role != 'governed' or nominal.head != start or nominal.lemma not in lemmas:
             continue
-        end = extent(tree, start)
+        end = extent(tree, start, external_modifier=True)
         if end is None:
             continue
         attested = (prep.lemma, nominal.lemma) in _attestations()

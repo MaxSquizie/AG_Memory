@@ -1,6 +1,6 @@
 """Readable grammar probes and their System One adapter."""
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 DEFAULT_JEV_MODEL = 'jev-latest'
@@ -12,10 +12,17 @@ MAX_WORD_CHOICES = 255 - len(CONTROL_CHOICES)
 
 
 @dataclass(frozen=True)
+class FocusChoice:
+    modifier: int
+    members: tuple[int, ...]
+
+
+@dataclass(frozen=True)
 class Probe:
     question: str
     options: tuple[str, ...]
     context: str
+    focus_choices: tuple[FocusChoice, ...] = field(default=(), compare=False, repr=False)
 
     def jev_request(self, model: str = DEFAULT_JEV_MODEL) -> dict:
         if not 1 <= len(self.options) <= MAX_WORD_CHOICES:

@@ -5,7 +5,7 @@ from .nominal_groups import _prepositions
 from .morphology import PREDICATE_ROLES
 
 
-def extent(tree, start):
+def extent(tree, start, *, external_modifier=False):
     children = {}
     for i, link in enumerate(tree):
         if link.head is not None and link.role != 'punctuation':
@@ -16,7 +16,11 @@ def extent(tree, start):
         index = pending.pop()
         if index not in members:
             members.add(index)
-            pending.extend(children.get(index, ()))
+            for child in children.get(index, ()):
+                if (external_modifier and child == start - 1 and tree[child].role == 'adverb'
+                        and tree[index].role == 'governed' and tree[index].head == start):
+                    continue
+                pending.append(child)
     end = max(members) + 1
     if min(members) == start and all(i in members or tree[i].role == 'punctuation' for i in range(start, end)):
         return end
