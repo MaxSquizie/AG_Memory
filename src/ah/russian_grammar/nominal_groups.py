@@ -104,7 +104,7 @@ def _names(tokens, group):
             index = current.end
             if index < len(tokens):
                 for part in name_continuations(tokens[index].surface, parts):
-                    link = Link('name_part', part.lemma, noun, 'NAME', case=part.case)
+                    link = Link('name_part', part.lemma, noun, part.name_rule, case=part.case)
                     expanded = replace(current, end=index + 1, extra=(*current.extra, (index, link)))
                     yield expanded
                     states.append((expanded, (*parts, part)))

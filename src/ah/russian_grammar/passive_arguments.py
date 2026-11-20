@@ -58,7 +58,9 @@ def _phrases(tokens, start):
 
 
 def _layouts(tokens, root, aux, predicate, budget):
-    from .parser import AnalysisBudgetExceeded
+    from .nominal_mentions import _units
+    from .parser import AnalysisBudgetExceeded, Link
+    from .participle_connectives import relations
 
     remaining = budget * max(1, len(tokens))
     start = (0, {}, (), None, False)
@@ -79,6 +81,22 @@ def _layouts(tokens, root, aux, predicate, budget):
             for subject in _subject(tokens, i, predicate):
                 pending.append((i + 1, {**links, i: replace(subject, head=root)}, groups, i,
                                 extended or subject.rule == 'OPAQUE.SUBJECT'))
+            for noun, lemma, tag, attrs in _units(tokens, i, 'nomn', budget):
+                if not attrs:
+                    continue
+                for subject in _subject(tokens, noun, predicate):
+                    if subject.lemma == lemma:
+                        pending.append((noun + 1, {**links, **attrs, noun: replace(subject, head=root)},
+                                        groups, noun, True))
+        surface = tokens[i].surface
+        for lemma, tag in known_forms(surface):
+            if tag.POS == 'COMP':
+                modifier = Link('adverb', lemma, root, 'CMP.ADV', morphology=from_tag(tag))
+                pending.append((i + 1, {**links, i: modifier}, groups, actor, True))
+        if 'addition' in relations(surface.casefold()) and any(t.POS == 'PRCL' for _, t in known_forms(surface)):
+            for end, phrase in _phrases(tokens, i + 1):
+                focus = Link('particle', surface.casefold(), end, 'PART.FOCUS', scope='focus')
+                pending.append((end + 1, {**links, **phrase, i: focus}, (*groups, (i + 1, end)), actor, True))
         for end, phrase in _phrases(tokens, i):
             pending.append((end + 1, {**links, **phrase}, (*groups, (i, end)), actor, True))
 

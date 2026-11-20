@@ -58,6 +58,10 @@ def _first(tokens, offset):
                 return start, anchor, _PATTERNS[pattern], [expr for expr in numeric if expr.end == end], None
 
 
+class UnsupportedRange(Exception):
+    pass
+
+
 def unsupported_scope(tokens):
     words = tuple(token.surface.casefold() for token in tokens)
     for i, word in enumerate(words):
@@ -202,7 +206,7 @@ def trees(tokens, local, *, budget=256):
 
     failure = unsupported_scope(tokens)
     if failure:
-        raise AnalysisBudgetExceeded(failure)
+        raise UnsupportedRange(failure)
     if not _first(tokens, 0):
         yield from local(tokens)
         return

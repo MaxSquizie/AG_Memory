@@ -4,7 +4,7 @@ from importlib.resources import files
 from itertools import product
 
 from .clauses import Boundary, _attachments, _boundaries, _key
-from .morphology import from_tag
+from .morphology import NOMINAL_ROLES, from_tag
 from .nominal_groups import POSSESSIVES, _markers, _prepositions
 from .parser import AnalysisBudgetExceeded, Link
 from .predicative_groups import _groups, _nominals
@@ -95,6 +95,14 @@ def _postnominal(tokens, finite, parse):
                     continue
                 links = {**prefix, **_map(tree, range(begin, cut))}
                 tails = [(root, links)]
+                edge = cut - 1
+                visited = {root}
+                while edge in links and edge not in visited:
+                    visited.add(edge)
+                    link = links[edge]
+                    if link.role in NOMINAL_ROLES or link.role in ('infinitive', 'genitive_modifier'):
+                        tails.append((edge, links))
+                    edge = link.head
                 for j, role in enumerate(tree):
                     absolute = j + begin
                     if absolute > finite and role.case == 'ablt' and role.head == root - begin:

@@ -18,11 +18,15 @@ class BoundaryChoice(Exception):
 
 def _compatible(left, right):
     from .clause_series import ordinal_abbreviation
+    from .unlisted_attributes import predicted_attributes
 
     def nominal(surface):
         return tuple(tag for _, tag in known_forms(surface) if tag.POS in {'NOUN', 'NPRO'})
     def adjective(surface):
-        return tuple(tag for _, tag in known_forms(surface) if tag.POS in {'ADJF', 'PRTF'})
+        known = known_forms(surface)
+        return tuple(tag for _, tag in known or predicted_attributes(surface) if tag.POS in {'ADJF', 'PRTF'})
+    if nominal(left) and any(tag.case in ('gent', 'gen2') for tag in nominal(right)):
+        return True
     if ordinal_abbreviation(left, right) or left.isdecimal() and nominal(right):
         return True
     if left.casefold() in FORMS and (nominal(right) or adjective(right)):
@@ -33,6 +37,15 @@ def _compatible(left, right):
             return True
     return any(_agree(adj, noun) for a, n in ((left, right), (right, left))
                for adj in adjective(a) for noun in nominal(n))
+
+
+def coordinate_genitive(tokens, tree, i):
+    if not (0 < i < len(tree) - 1 and tree[i].rule == 'P.COORD'):
+        return False
+    right = tree[i + 1]
+    return (right.role == 'nominal_conjunct' and right.head == i - 1
+            and any(tag.POS == 'NOUN' and tag.case in ('gent', 'gen2')
+                    for _, tag in known_forms(tokens[i + 1].surface)))
 
 
 def ignored_inside_group(tree, i):

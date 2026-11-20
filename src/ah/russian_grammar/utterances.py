@@ -214,6 +214,10 @@ def trees(tokens, base, *, budget):
     from .parser import AnalysisBudgetExceeded
 
     from . import parentheses
+    from .quote_titles import spans
+
+    if any(_QUOTES.get(tokens[start].surface) != tokens[end].surface for start, end in spans(tokens)):
+        return
 
     visited = 0
 

@@ -22,10 +22,22 @@ def opaque_cases(surface):
     return frozenset(p.tag.case for p in dictionary().parse(surface) if p.tag.POS == 'NOUN' and p.tag.case)
 
 
+@lru_cache(maxsize=1024)
+def personal_accusatives(surface):
+    if not surface.istitle():
+        return ()
+    tagged = known_forms(surface)
+    if any(t.POS == 'NOUN' and t.case == 'accs' and t.animacy == 'anim' for _, t in tagged):
+        return ()
+    return tuple((lemma, replace(from_tag(tag), case='accs', animacy='anim'))
+                 for lemma, tag in tagged if 'Geox' in tag and tag.gender == 'masc'
+                 and tag.case == 'gent' and tag.number == 'sing')
+
+
 def trees(tokens, *, budget):
     from .parser import AnalysisBudgetExceeded, Link
 
-    if not any(opaque_cases(t.surface) for t in tokens):
+    if not any(opaque_cases(t.surface) or personal_accusatives(t.surface) for t in tokens):
         return
     forms = [known_forms(t.surface) for t in tokens]
     finite = [i for i, variants in enumerate(forms) if any(t.POS == 'VERB' and t.mood == 'indc' for _, t in variants)]
@@ -46,6 +58,10 @@ def trees(tokens, *, budget):
             if tag.POS == 'ADJF' and tag.case == case:
                 link = Link('nominal', lemma, None, 'ADJ.SUBSTANTIVE', case, morphology=from_tag(tag))
                 candidates.append(Phrase(i + 1, i, case, ((i, link),)))
+        if case == 'accs':
+            for lemma, form in personal_accusatives(tokens[i].surface):
+                named = Link('nominal', lemma, None, 'OPAQUE.PERSON.ACC', case, morphology=form)
+                candidates.append(Phrase(i + 1, i, case, ((i, named),)))
         opaque = opaque_cases(tokens[i].surface)
         if case in opaque:
             l = Link('nominal', tokens[i].surface, None, 'OPAQUE.NAME', case)
@@ -141,3 +157,18 @@ def trees(tokens, *, budget):
                             if host is not None:
                                 pp = {pos: Link('preposition', prep, host, 'P2')}
                                 pending.append((noun.end, actor, obj, noun.head, links | pp | interior))
+
+
+def confirmation(tokens, tree, i, text):
+    if tree[i].rule != 'OPAQUE.PERSON.ACC':
+        return None
+    from .parser import _span_label
+    from .probe import Probe
+
+    person = _span_label(tokens, i)
+    head = tree[i].head
+    question = 'Какое слово здесь обозначает человека и стоит в винительном падеже?'
+    if head is not None and tree[head].role == 'predicate':
+        action = _span_label(tokens, head)
+        question = f'Какое слово здесь называет того, на кого направлено действие «{action}»?'
+    return Probe(question, (person,), text)

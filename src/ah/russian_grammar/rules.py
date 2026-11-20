@@ -66,6 +66,10 @@ class Reading:
     name_type: str | None = None
     opaque: bool = False
 
+    @property
+    def name_rule(self):
+        return 'OPAQUE.NAME.CONTINUATION' if self.opaque else 'NAME'
+
 
 def name_type(tag):
     return next((kind for kind in ('Name', 'Patr', 'Surn') if kind in tag), None)
@@ -75,7 +79,12 @@ def name_continuations(surface, parts):
     first = parts[0]
     order = tuple(part.name_type for part in parts)
     patterns = (('Name', 'Patr', 'Surn'), ('Name', 'Surn'), ('Surn', 'Name', 'Patr'))
-    for lemma, tag in known_forms(surface):
+    forms = known_forms(surface)
+    predicted = not forms and surface.istitle()
+    if predicted:
+        forms = tuple(dict.fromkeys((surface.casefold(), p.tag) for p in dictionary().parse(surface)
+                                    if p.tag.POS == 'NOUN' and 'Surn' in p.tag))
+    for lemma, tag in forms:
         kind = name_type(tag)
         extended = (*order, kind)
         if tag.POS != 'NOUN' or not any(pattern[:len(extended)] == extended for pattern in patterns):
@@ -84,7 +93,7 @@ def name_continuations(surface, parts):
             continue
         if any(part.gender and tag.gender and part.gender != tag.gender for part in parts):
             continue
-        yield Reading(lemma, 'name_part', tag.case, tag.number, tag.gender, None, tag.animacy, False, kind)
+        yield Reading(lemma, 'name_part', tag.case, tag.number, tag.gender, None, tag.animacy, False, kind, predicted)
 
 
 def preposition_reading(lemma: str, role: str) -> Reading:

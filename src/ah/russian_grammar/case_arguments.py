@@ -88,6 +88,7 @@ def _pp_attachments(expanded, groups, budget):
 
 def _attach(tokens, tree, kept, groups, government, roles, budget):
     from .parser import AnalysisBudgetExceeded, Link
+    from .short_participles import _predicative_instrumentals
 
     links = {}
     for i, link in zip(kept, tree):
@@ -106,7 +107,15 @@ def _attach(tokens, tree, kept, groups, government, roles, budget):
         choices = []
         members = [(group.noun, group.lemma),
                    *((i, link.lemma) for i, link in group.extra if link.role == 'nominal_conjunct')]
+        reflexive_dative = group.case == 'datv' and any(
+            lemma == group.lemma and tag.POS == 'NPRO' and 'Anph' in tag and tag.case == 'datv'
+            for lemma, tag in known_forms(tokens[group.noun].surface))
         for host, verb in hosts:
+            if (reflexive_dative and links[host].role == 'infinitive'
+                    and links[host].controller is not None
+                    and any(link.role == 'object' and link.head == host for link in links.values())
+                    and group.case not in government.get(verb, ())):
+                choices.append(Link('beneficiary', group.lemma, host, 'DAT.REFLEX', case=group.case))
             if host in governors:
                 frame = FRAMES.get(verb)
                 if frame is None or group.case not in frame.recipient_cases:
@@ -123,6 +132,14 @@ def _attach(tokens, tree, kept, groups, government, roles, budget):
             if role == 'object' and group.case in ('gent', 'gen2') and not _partitive(tokens, members, group.case):
                 continue
             choices.append(Link(role, group.lemma, host, 'V.GOV', case=group.case))
+            if (role == 'oblique' and group.case == 'ablt' and links[host].rule == 'V1'
+                    and verb in _predicative_instrumentals() and any(
+                        w == verb and t.POS == 'VERB' and t.transitivity == 'intr'
+                        for w, t in known_forms(tokens[host].surface))):
+                subjects = [j for j, member in links.items() if member.role == 'subject' and member.head == host]
+                if len(subjects) == 1:
+                    choices.append(Link('predicative_complement', group.lemma, host, 'V.XCOMP', 'ablt',
+                                        controller=subjects[0]))
             if (group.case == 'datv' and role == 'oblique' and verb in dative_recipients()
                     and any(part.role == 'object' and part.head == host for part in links.values())):
                 choices.append(Link('recipient', group.lemma, host, 'V.GOV', case='datv'))
@@ -163,6 +180,11 @@ def trees(tokens, base, *, budget=256, verb_pos=('VERB', 'INFN', 'PRTS')):
     government, roles = _lexicon()
     potential = {i: {case for lemma, tag in known_forms(token.surface) if tag.POS in verb_pos
                      for case in government.get(lemma, ())} for i, token in enumerate(tokens)}
+    if any(any(tag.POS == 'NPRO' and 'Anph' in tag and tag.case == 'datv' for _, tag in known_forms(t.surface))
+           for t in tokens):
+        for i, token in enumerate(tokens):
+            if any(tag.POS == 'INFN' for _, tag in known_forms(token.surface)):
+                potential[i].add('datv')
     potential = {i: cases for i, cases in potential.items() if cases}
     if not potential:
         return

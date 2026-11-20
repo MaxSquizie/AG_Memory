@@ -85,7 +85,7 @@ def _ordinal_sites(tokens):
         if not tokens[i].surface.isdecimal():
             continue
         forms = tuple((lemma, tag) for lemma, tag in known_forms(tokens[i + 1].surface)
-                      if tag.POS == 'NOUN' and tag.case in ('loct', 'loc2') and tag.number == 'sing' and _unit(lemma))
+                      if tag.POS == 'NOUN' and tag.case in ('loct', 'loc2') and tag.number == 'sing')
         if forms and any(first == i and 'loct' in GOVERNMENT.get(prep, ()) for first, prep in _prepositions(tokens, i - 1)):
             yield i, forms
 
@@ -148,11 +148,13 @@ def confirmation(tokens, tree, i, text):
 def partitions(trees, tokens, text):
     for i in range(len(tokens) - 1):
         links = [tree[i] for tree in trees]
-        if ({link.rule for link in links} != {'NUM.UNMARKED.ORDINAL', 'NUM.GROUP'}
-                or not all(link.head == i + 1 for link in links)):
+        host = links[0].head
+        if (host is None or host <= i or not all(link.head == host for link in links)
+                or {link.rule for link in links} != {'NUM.UNMARKED.ORDINAL', 'NUM.GROUP'}
+                or any(t.surface != ',' for t in tokens[i + 1:host])):
             continue
         number = _span_label(tokens, i)
-        group = _span_label(tokens, i, i + 2)
+        group = _span_label(tokens, i, host + 1).replace(' ,', ',')
         question = (f'Что обозначает «{number}»? Если это порядковый номер, выберите сочетание '
-                    'с единицей времени. Если указано количество единиц, выберите само число.')
+                    'с существительным. Если указано количество, выберите само число.')
         yield Probe(question, (group, number), text), [group if link.quantity_kind == 'ordinal' else number for link in links]

@@ -38,9 +38,9 @@ def test_controller_choice_is_readable_and_selects_the_occurrence():
     result = analyze(source)
     probe, = result.probes
     assert probe.prompt() == (
-        'Иван предложил Марии уехать\n\nWho is to perform the action «уехать»?\nAnswer options:\n'
-        '- Иван\n- Марии\n- 0 — None of the proposed answers fits.\n'
-        '- ? — The sentence leaves the choice unclear.'
+        'Иван предложил Марии уехать\n\nКакое слово называет исполнителя действия «уехать»?\nВарианты ответа:\n'
+        '- Иван\n- Марии\n- 0 — Ни один вариант не подходит.\n'
+        '- ? — По тексту нельзя выбрать однозначно.'
     )
     assert Probe.from_prompt(probe.prompt()) == probe
     assert result.reason == 'OPEN_CHOICE' and len(result.analyses) == 2

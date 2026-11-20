@@ -73,7 +73,10 @@ def align(tokens, text, gold):
         if not inside:
             raise ValueError(f'No occurrence for {row[1]}')
         lexical = [j for j in inside if any(c.isalnum() for c in tokens[j].surface)]
-        if row[3] != 'PUNCT' and len(inside) > 1 and len(lexical) != 1:
+        numeric_pair = (row[3] == 'NUM' and len(inside) == 3 and len(lexical) == 2
+                        and inside[::2] == lexical and tokens[inside[1]].surface in ('-', '–', '—')
+                        and all(tokens[j].surface.isdecimal() for j in lexical))
+        if row[3] != 'PUNCT' and len(inside) > 1 and len(lexical) != 1 and not numeric_pair:
             raise ValueError(f'A lexical item has multiple parts: {row[1]}')
         main = lexical[0] if lexical else inside[0]
         targets[i + 1] = main
@@ -83,6 +86,8 @@ def align(tokens, text, gold):
             aligned[j] = record
             if j == main:
                 owners[j] = int(row[6])
+            elif numeric_pair and j == lexical[-1]:
+                record[2], record[6], record[7] = tokens[j].surface, str(main + 1), 'compound'
             else:
                 record[3], record[6], record[7] = 'PUNCT', str(main + 1), 'punct'
     if any(r is None for r in aligned):
@@ -96,6 +101,10 @@ def grammatical_errors(words, gold):
     errors = []
     for word, row in zip(words, gold):
         allowed = {'nsubj': {'subject'}, 'nsubj:pass': {'subject'}, 'obj': {'object'}}.get(row[7])
+        if (row[7] == 'obj' and word['rule'] == 'V.GOV' and word['role'] == 'oblique'
+                and word['case'] == 'gent' and word['head'] is not None
+                and 'Case=Gen' in row[5].split('|') and word['head'] + 1 == int(row[6])):
+            continue
         if allowed and word['role'] not in allowed:
             errors.append(f"{word['surface']}: {word['role']}, UD {row[7]}")
     return errors
@@ -187,8 +196,9 @@ def reference_answer(identity, text, probe, gold):
     if 'if it is in the accusative case' in question:
         choices = {row[1] if 'Case=Acc' in row[5].split('|') else 'no such word'
                    for row in gold if f'«{row[1]}»' in question and 'Case=' in row[5]}
-    elif 'if the verb presents the action as a bounded whole' in question:
-        choices = {row[1] if 'Aspect=Perf' in row[5].split('|') else 'no such word'
+    elif 'if the verb presents the action as a bounded whole' in question or 'Для несовершенного вида' in question:
+        imperfective = 'несовершенный вид' if 'несовершенный вид' in options else 'no such word'
+        choices = {row[1] if 'Aspect=Perf' in row[5].split('|') else imperfective
                    for row in gold if f'«{row[1]}»' in question and 'Aspect=' in row[5]}
     elif identity == 'test-s25' and '«измениться»' in question and 'its unstated subject is the speaker' in question:
         choices = {'измениться'}

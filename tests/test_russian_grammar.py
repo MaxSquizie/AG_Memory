@@ -65,7 +65,7 @@ def test_ambiguous_attribute_and_exact_probe():
 ])
 def test_two_cases_two_subjects_and_repeated_surface(text, answers):
     probe, = analyze(text).probes
-    assert probe.context == text and probe.question == 'Which word is the subject of «любит»?'
+    assert probe.context == text and probe.question == 'Какое слово служит подлежащим при «любит»?'
     assert probe.options == answers
     for answer, subject in zip(answers, (0, 2)):
         links, = analyze(text, lambda p: answer).analyses

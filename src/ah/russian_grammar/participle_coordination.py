@@ -149,7 +149,7 @@ def _relations(joins, terms, opener, budget):
 
 def as_modifier(link, form):
     return replace(link, role='participle', head=-1, rule='PART.ATTR', case=form.morphology.case,
-                   morphology=form.morphology, implicit_subject=None)
+                   controller=-1 if form.morphology.voice == 'actv' else None, morphology=form.morphology, implicit_subject=None)
 
 
 def _joined(tokens, terms, joins, opener, first_word, relations):

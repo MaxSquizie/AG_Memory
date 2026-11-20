@@ -64,14 +64,16 @@ def _decorated(tokens, forms, bindings, nominal_heads, root, subject, personal):
             yield tree
 
 
-def _personal(tokens, forms, root, lemma, pred):
+def _personal(tokens, forms, root, lemma, pred, substantive=None):
     from .parser import Link
 
     for subj, variants in enumerate(forms):
         if subj == root:
             continue
         for noun, tag in variants:
-            if not _nominal(tag, 'nomn') or (_adjective(pred) and not _agree(pred, tag)):
+            if not (_nominal(tag, 'nomn') or (subj, noun, tag) == substantive):
+                continue
+            if _adjective(pred) and not _agree(pred, tag):
                 continue
             rule = 'V2.PASS' if pred.POS == 'PRTS' and pred.voice == 'pssv' else 'V2'
             bindings = {root: Link('predicate', lemma, None, rule), subj: Link('subject', noun, root, 'S1')}
@@ -120,14 +122,14 @@ def _impersonal(tokens, forms, root, lemma, pred):
                     yield tree
 
 
-def _bare_trees(tokens):
+def _bare_trees(tokens, substantive=None):
     forms = [known_forms(token.surface) for token in tokens]
     seen = set()
     for root, variants in enumerate(forms):
         for lemma, pred in variants:
             if _adjective(pred) and pred.case in (None, 'nomn', 'ablt') or (
                     pred.POS == 'NOUN' and pred.case in ('nomn', 'ablt')):
-                candidates = _personal(tokens, forms, root, lemma, pred)
+                candidates = _personal(tokens, forms, root, lemma, pred, substantive)
             elif pred.POS == 'PRED' or 'Prdx' in pred or (pred.POS == 'VERB' and 'Impe' in pred):
                 candidates = _impersonal(tokens, forms, root, lemma, pred)
             else:

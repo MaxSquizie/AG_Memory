@@ -274,7 +274,8 @@ def trees(tokens, *, budget=256, extended=False):
             for host, coord in anchors:
                 noun = links[host]
                 for part in participle_forms.matching(words[start].surface, noun):
-                    link = Link('participle', part.lemma, host, 'PART.ATTR', part.morphology.case, coord_head=coord, morphology=part.morphology)
+                    link = Link('participle', part.lemma, host, 'PART.ATTR', part.morphology.case, coord_head=coord,
+                                controller=host if part.morphology.voice == 'actv' else None, morphology=part.morphology)
                     yield from parse(start + 1, start, actor, None, links | {start: link})
             return
 

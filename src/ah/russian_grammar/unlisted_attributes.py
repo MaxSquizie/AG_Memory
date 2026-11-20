@@ -4,6 +4,12 @@ from .rules import dictionary, known_forms
 from .utterances import _map
 
 
+def predicted_attributes(surface):
+    if not surface.isalpha() or known_forms(surface):
+        return ()
+    return tuple((p.normal_form, p.tag) for p in dictionary().parse(surface) if p.tag.POS == 'ADJF')
+
+
 def trees(tokens, parse):
     from .parser import Link
 
@@ -12,8 +18,8 @@ def trees(tokens, parse):
         if not token.surface.isalpha() or known_forms(token.surface):
             continue
         nouns = [(lemma, tag) for lemma, tag in known_forms(tokens[i + 1].surface) if tag.POS == 'NOUN']
-        variants = [(n, t, from_tag(p.tag)) for p in dictionary().parse(token.surface) if p.tag.POS == 'ADJF'
-                    for n, t in nouns if _agree(p.tag, t)]
+        variants = [(n, t, from_tag(tag)) for _, tag in predicted_attributes(token.surface)
+                    for n, t in nouns if _agree(tag, t)]
         if variants:
             sites[i] = variants
     if not sites:

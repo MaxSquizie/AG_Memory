@@ -22,7 +22,7 @@ def _names(tokens, start):
             continue
         for last in name_continuations(tokens[start + 1].surface, (first,)):
             yield start + 2, start, (first.lemma, first.case), {
-                start + 1: Link('name_part', last.lemma, start, 'NAME', case=last.case)}
+                start + 1: Link('name_part', last.lemma, start, last.name_rule, case=last.case)}
 
 
 def trees(tokens, *, budget):

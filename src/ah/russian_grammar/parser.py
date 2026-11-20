@@ -9,7 +9,7 @@ from .morphology import Morphology, feature_choices
 from .nominal_chart import NominalChart, NominalStep
 from .prepositions import CASE_NAMES, FORMS, GOVERNMENT, PREFIXES, TOKEN, group_heads
 from .probe import MAX_WORD_CHOICES, FocusChoice, Probe
-from . import modifier_focus
+from . import capitalized_nominals, modifier_focus
 from .recovery import CaseRecovery, SpellingRecovery
 from .rules import Reading, known_forms, name_continuations, plain_person_reference, preposition_reading, attribute_agrees, readings, subject_agrees
 
@@ -210,7 +210,8 @@ class Prefix:
             for attached in group_heads(self.groups, self.words, self.predicate, heads):
                 yield tuple(Link('attribute' if w.role in {'group_attribute', 'post_attribute'} else w.role,
                                  w.lemma, None if i == self.predicate else attached.get(i, self.predicate),
-                                 RULE_FOR_ROLE[w.role], w.case if w.role == 'governed' else None)
+                                 w.name_rule if w.role == 'name_part' else RULE_FOR_ROLE[w.role],
+                                 w.case if w.role == 'governed' else None)
                             for i, w in enumerate(self.words))
 
 
@@ -303,28 +304,31 @@ def _clause_context(text, tokens, trees, focus, anchors):
 
 
 def _qualification_probe(tokens, start, end, host, context):
-    phrase = _span_label(tokens, start, end)
+    phrase = _span_label(tokens, start, end).replace(' ,', ',')
     question = f'Какое сочетание передаёт оговорку к самому сообщению о действии «{_span_label(tokens, host)}»?'
     return Probe(question, (phrase, 'нет такого сочетания'), context)
 
 
 def _partitions(analyses, tokens, text):
     # Each tree has exactly one answer. Equal answers keep all matching trees.
-    def word_choice(question, indices, context=text):
+    def word_choice(question, indices, context=text, *, absent='no such word'):
         candidates = sorted({i for i in indices if i is not None})
         labels = {i: _span_label(tokens, i) for i in candidates}
         if None in indices:
-            labels[None] = 'no such word'
+            labels[None] = absent
         return Probe(question, tuple(labels.values()), context), [labels[i] for i in indices]
 
-    from . import clause_series, nominal_definitions, nominal_mentions, nominal_predicates, temporal_groups
+    from . import clause_series, finite_insertions, nominal_definitions, nominal_dimensions, nominal_mentions, nominal_predicates, temporal_groups
     from .morphology import NOMINAL_ROLES
+    yield from nominal_dimensions.partitions(analyses, tokens, text)
+    yield from finite_insertions.partitions(analyses, tokens, text)
     yield from clause_series.partitions(analyses, tokens, text)
     yield from nominal_definitions.partitions(analyses, tokens, text)
     yield from nominal_mentions.partitions(analyses, tokens, text)
     yield from temporal_groups.partitions(analyses, tokens, text)
     yield from nominal_predicates.partitions(analyses, tokens, text)
     yield from modifier_focus.partitions(analyses, tokens, text)
+    yield from capitalized_nominals.partitions(analyses, tokens, text)
 
     predicates = [next(i for i, link in enumerate(a) if link.head is None) for a in analyses]
     if len(set(predicates)) > 1:
@@ -351,7 +355,7 @@ def _partitions(analyses, tokens, text):
             context = _clause_context(text, tokens, analyses, predicates[0], subjects)
             yield word_choice(f'Copy «{verb}» if its dictionary form is «{lemma}». Otherwise choose “no such word”.',
                               [predicates[0] if value == lemma else None for value in lemmas], context)
-        yield word_choice(f'Which word is the subject of «{verb}»?', subjects)
+        yield word_choice(f'Какое слово служит подлежащим при «{verb}»?', subjects, absent='подлежащее не названо')
     for i in range(len(tokens)):
         links = [tree[i] for tree in analyses]
         roles = {link.role for link in links}
@@ -628,11 +632,13 @@ def _partitions(analyses, tokens, text):
                                for tree, actor in zip(analyses, controllers)]
             context = _clause_context(text, tokens, analyses, i, controllers)
             if len(set(controllers)) > 1:
-                question = (f'Which word names the subject of «{focus}»?' if roles == {'clause_conjunct'}
-                            else f'Who is to perform the action «{focus}»?')
-                if roles == {'clause_relative'}:
-                    question = f'Кто в этом предложении выполняет действие «{focus}»?'
-                yield word_choice(question, controllers, context)
+                if roles == {'clause_conjunct'}:
+                    yield word_choice(f'Какое слово служит подлежащим при «{focus}»?', controllers, context,
+                                      absent='подлежащее не названо')
+                else:
+                    question = (f'Кто в этом предложении выполняет действие «{focus}»?' if roles == {'clause_relative'}
+                                else f'Какое слово называет исполнителя действия «{focus}»?')
+                    yield word_choice(question, controllers, context, absent='исполнитель не назван')
         heads = [link.head for link in links]
         if roles == {'name_part', 'attribute'} and len(set(heads)) == 1 and heads[0] < i:
             head = heads[0]
@@ -698,8 +704,17 @@ def _partition(analyses, tokens, text):
                 choices.append(binary(f'Copy «{focus}» if its unstated subject is {descriptions.get(key, key)}.',
                                       focus, [value == key for value in subjects]))
         if all(link.morphology for link in links):
-            for condition, flags in feature_choices([link.morphology for link in links]):
-                choices.append(binary(f'Copy «{focus}» if {condition}.', focus, flags))
+            forms = [link.morphology for link in links]
+            if ({form.aspect for form in forms} == {'perf', 'impf'}
+                    and len({replace(form, aspect=None) for form in forms}) == 1):
+                other = 'несовершенный вид'
+                question = (f'В каком значении употреблён глагол «{focus}»? Если действие представлено '
+                            f'как единое целое, выберите «{focus}». Для несовершенного вида выберите «{other}».')
+                choices.append((Probe(question, (focus, other), text),
+                                [focus if form.aspect == 'perf' else other for form in forms]))
+            else:
+                for condition, flags in feature_choices(forms):
+                    choices.append(binary(f'Copy «{focus}» if {condition}.', focus, flags))
     return min(choices, key=cost, default=None)
 
 
@@ -764,9 +779,15 @@ def _possessor_readings(tokens, tree, budget):
             host = link.head
             while tree[host].role == 'preposition' and tree[host].head is not None:
                 host = tree[host].head
-            actors = [j for j, item in enumerate(tree) if item.role == 'subject' and item.head == host]
-            if (len(actors) == 1 and tree[host].morphology and tree[host].morphology.pos == 'VERB'
-                    and not any(item.role == 'nominal_conjunct' and item.head == actors[0] for item in tree)):
+            predicate = tree[host]
+            if predicate.role == 'infinitive' and predicate.controller is not None:
+                actors = [predicate.controller]
+            elif predicate.morphology and predicate.morphology.pos == 'VERB':
+                actors = [j for j, item in enumerate(tree) if item.role == 'subject' and item.head == host]
+            else:
+                continue
+            if len(actors) == 1 and not any(item.role == 'nominal_conjunct' and item.head == actors[0]
+                                            for item in tree):
                 bound[i] = replace(link, antecedent=actors[0])
         tree = tuple(bound)
     counts = {link.head: link.quantity for link in tree if link.role == 'numeral'
@@ -953,7 +974,12 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
         yield from standalone_numerals.trees(part, counted, budget=budget)
 
     def qualified_numbers(part):
-        yield from quantity_modifiers.trees(part, numbers, budget=budget)
+        try:
+            yield from quantity_modifiers.trees(part, numbers, budget=budget)
+        except quantity_modifiers.UnsupportedRange as error:
+            reason = str(error)
+            if part == working_words and reason not in failures:
+                failures.insert(0, reason)
 
     def quantified(part):
         chart = nominal_chart if part == words else None
@@ -976,6 +1002,7 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
         yield from local(part)
         yield from unlisted_attributes.trees(part, local)
 
+    @reuse_completed
     def coordinated(part):
         from itertools import chain
         from . import dated_clauses, detached_measures, detached_prepositions, named_arguments
@@ -1062,7 +1089,8 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
                     ordinary.append(tree)
                 if len(ordinary) > budget:
                     raise AnalysisBudgetExceeded('REGION_BUDGET')
-                suspect.update(i for i in commas if tree[i].rule == 'PP.DETACHED.COMMA')
+                suspect.update(i for i in commas if tree[i].rule == 'PP.DETACHED.COMMA'
+                               or internal_comma.coordinate_genitive(part, tree, i))
             if suspect:
                 repaired = checked_comma_readings(part, grammar, suspect)
                 option = next(repaired, None)
@@ -1090,10 +1118,11 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
                     if _connected(variant):
                         for scoped in quantity_groups.age_variants(variant, budget):
                             for reading in modifier_focus.readings(part, scoped, budget):
-                                if accept_tree is None:
-                                    yield reading
-                                else:
-                                    yield from qualification.filtered(reading, opened, accept_tree, budget)
+                                for named in capitalized_nominals.readings(part, reading, budget):
+                                    if accept_tree is None:
+                                        yield named
+                                    else:
+                                        yield from qualification.filtered(named, opened, accept_tree, budget)
 
     structures = {}
 

@@ -1,0 +1,673 @@
+{
+ "corpus_sha256": "fa3642959614db06fdab2d7464af8a0873c70d0a2b5758758231d0ef725821ea",
+ "seconds_per_stage": 30,
+ "cases": [
+  {
+   "id": "test-s42",
+   "variant": "original",
+   "text": "Входит в состав округа Шердинг.",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_RULE @23",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s42",
+   "variant": "no_punctuation",
+   "text": "Входит в состав округа Шердинг",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_RULE @23",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s42",
+   "variant": "extra_comma",
+   "text": "Входит в состав, округа Шердинг.",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_RULE @15",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s43",
+   "variant": "original",
+   "text": "Тойффелен () -- коммуна в Швейцарии, в кантоне Берн.",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s43",
+   "variant": "no_punctuation",
+   "text": "Тойффелен коммуна в Швейцарии в кантоне Берн",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_RULE @0",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s43",
+   "variant": "extra_comma",
+   "text": "Тойффелен () -- коммуна в, Швейцарии, в кантоне Берн.",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s44",
+   "variant": "original",
+   "text": "Согласно Младшей Эдде, если Тор проголодался, он мог зажарить козлов себе на угощение.",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_RULE @21",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s44",
+   "variant": "no_punctuation",
+   "text": "Согласно Младшей Эдде если Тор проголодался он мог зажарить козлов себе на угощение",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_RULE @22",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s44",
+   "variant": "extra_comma",
+   "text": "Согласно Младшей, Эдде, если Тор проголодался, он мог зажарить козлов себе на угощение.",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_GOVERNED_READING @16",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s45",
+   "variant": "original",
+   "text": "Позднее слово tempora у португальских миссионеров было распространено и на другие постные дни.",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_RULE @14",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s45",
+   "variant": "no_punctuation",
+   "text": "Позднее слово tempora у португальских миссионеров было распространено и на другие постные дни",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_RULE @14",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s45",
+   "variant": "extra_comma",
+   "text": "Позднее слово tempora у португальских, миссионеров было распространено и на другие постные дни.",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_RULE @14",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s46",
+   "variant": "original",
+   "text": "В 1 раунде рефери дисквалифицировал Диксона за повторные удары ниже пояса.",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s46",
+   "variant": "no_punctuation",
+   "text": "В 1 раунде рефери дисквалифицировал Диксона за повторные удары ниже пояса",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s46",
+   "variant": "extra_comma",
+   "text": "В 1, раунде рефери дисквалифицировал Диксона за повторные удары ниже пояса.",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_GOVERNED_READING @2",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s47",
+   "variant": "original",
+   "text": "Все произведённое является общественным достоянием, а изобилие материальных благ позволяет распределять их по потребностям.",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s47",
+   "variant": "no_punctuation",
+   "text": "Все произведённое является общественным достоянием а изобилие материальных благ позволяет распределять их по потребностям",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s47",
+   "variant": "extra_comma",
+   "text": "Все произведённое является общественным, достоянием, а изобилие материальных благ позволяет распределять их по потребностям.",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s48",
+   "variant": "original",
+   "text": "На Олипиаде-2012 победил азербайджанского боксёра Солтана Мигитинова (24-11), венгра Золтана Харчша (14-10) и британца Энтони Огого.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": [
+    {
+     "question": "Какое написание передаёт слово «Олипиаде» в этом предложении?",
+     "options": [
+      "Олипиаде",
+      "Олимпиаде"
+     ],
+     "answer": "Олипиаде",
+     "source": "verbatim"
+    },
+    {
+     "question": "Какое написание передаёт слово «Харчша» в этом предложении?",
+     "options": [
+      "Харчша",
+      "Харча"
+     ],
+     "answer": "Харчша",
+     "source": "verbatim"
+    },
+    {
+     "question": "Какое написание передаёт слово «Огого» в этом предложении?",
+     "options": [
+      "Огого",
+      "Ого-го",
+      "Оного"
+     ],
+     "answer": "Огого",
+     "source": "verbatim"
+    }
+   ]
+  },
+  {
+   "id": "test-s48",
+   "variant": "no_punctuation",
+   "text": "На Олипиаде 2012 победил азербайджанского боксёра Солтана Мигитинова 24-11 венгра Золтана Харчша 14-10 и британца Энтони Огого",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "UNSUPPORTED_QUANTITY_RANGE",
+   "empty": true,
+   "exact": false,
+   "calls": [
+    {
+     "question": "Какое написание передаёт слово «Олипиаде» в этом предложении?",
+     "options": [
+      "Олипиаде",
+      "Олимпиаде"
+     ],
+     "answer": "Олипиаде",
+     "source": "verbatim"
+    },
+    {
+     "question": "Какое написание передаёт слово «Харчша» в этом предложении?",
+     "options": [
+      "Харчша",
+      "Харча"
+     ],
+     "answer": "Харчша",
+     "source": "verbatim"
+    },
+    {
+     "question": "Какое написание передаёт слово «Огого» в этом предложении?",
+     "options": [
+      "Огого",
+      "Ого-го",
+      "Оного"
+     ],
+     "answer": "Огого",
+     "source": "verbatim"
+    }
+   ]
+  },
+  {
+   "id": "test-s48",
+   "variant": "extra_comma",
+   "text": "На Олипиаде-2012 победил азербайджанского, боксёра Солтана Мигитинова (24-11), венгра Золтана Харчша (14-10) и британца Энтони Огого.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": [
+    {
+     "question": "Какое написание передаёт слово «Олипиаде» в этом предложении?",
+     "options": [
+      "Олипиаде",
+      "Олимпиаде"
+     ],
+     "answer": "Олипиаде",
+     "source": "verbatim"
+    },
+    {
+     "question": "Какое написание передаёт слово «Харчша» в этом предложении?",
+     "options": [
+      "Харчша",
+      "Харча"
+     ],
+     "answer": "Харчша",
+     "source": "verbatim"
+    },
+    {
+     "question": "Какое написание передаёт слово «Огого» в этом предложении?",
+     "options": [
+      "Огого",
+      "Ого-го",
+      "Оного"
+     ],
+     "answer": "Огого",
+     "source": "verbatim"
+    }
+   ]
+  },
+  {
+   "id": "test-s49",
+   "variant": "original",
+   "text": "Озвучивает Пётр Иващенко (ранее озвучивал Юрий Мазихин).",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s49",
+   "variant": "no_punctuation",
+   "text": "Озвучивает Пётр Иващенко ранее озвучивал Юрий Мазихин",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "AMBIGUOUS",
+   "reason": "OPEN_CHOICE",
+   "empty": true,
+   "exact": false,
+   "calls": [
+    {
+     "question": "Copy «Мазихин» if its role here is apposition. Otherwise choose “no such word”.",
+     "options": [
+      "Мазихин",
+      "no such word"
+     ],
+     "answer": "?",
+     "source": "unanswered reference tie"
+    }
+   ]
+  },
+  {
+   "id": "test-s49",
+   "variant": "extra_comma",
+   "text": "Озвучивает, Пётр Иващенко (ранее озвучивал Юрий Мазихин).",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s50",
+   "variant": "original",
+   "text": "Пятиконечная звезда вписывается в окружность диаметром в 1/8 ширины флага, касающуюся верхней стороны квадрата.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": false,
+   "incorrect_heads": [
+    [
+     "диаметром",
+     5,
+     12
+    ]
+   ],
+   "role_scope_errors": [
+    "Lost nominal measurement",
+    "Missing participant of the attributive clause"
+   ],
+   "graph_sha256": "6e1a4e745c2a6adab20005ac2fccfe7fb4829d3f8cb85dbc75345807f8c4e95e",
+   "calls": [
+    {
+     "question": "К какому слову относится «стороны»?",
+     "options": [
+      "окружность",
+      "касающуюся"
+     ],
+     "answer": "касающуюся",
+     "source": "reference tree"
+    },
+    {
+     "question": "К какому слову относится «квадрата»?",
+     "options": [
+      "окружность",
+      "стороны"
+     ],
+     "answer": "стороны",
+     "source": "reference tree"
+    },
+    {
+     "question": "От какого из предложенных слов в этом месте текста задаётся вопрос к сочетанию «в 1/8 ширины флага»? Выберите слово, с которым оно связано непосредственно.",
+     "options": [
+      "диаметром",
+      "касающуюся"
+     ],
+     "answer": "диаметром",
+     "source": "reference tree"
+    },
+    {
+     "question": "Copy «1/8 ширины» if the whole phrase is in the accusative case. Otherwise choose “no such word”.",
+     "options": [
+      "1/8 ширины",
+      "no such word"
+     ],
+     "answer": "1/8 ширины",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое слово характеризует согласованное определение «Пятиконечная»?",
+     "options": [
+      "звезда"
+     ],
+     "answer": "звезда",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": null
+  },
+  {
+   "id": "test-s50",
+   "variant": "no_punctuation",
+   "text": "Пятиконечная звезда вписывается в окружность диаметром в 1/8 ширины флага касающуюся верхней стороны квадрата",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": false,
+   "incorrect_heads": [
+    [
+     "диаметром",
+     5,
+     11
+    ]
+   ],
+   "role_scope_errors": [
+    "Lost nominal measurement",
+    "Missing participant of the attributive clause"
+   ],
+   "graph_sha256": "6e1a4e745c2a6adab20005ac2fccfe7fb4829d3f8cb85dbc75345807f8c4e95e",
+   "calls": [
+    {
+     "question": "К какому слову относится «квадрата»?",
+     "options": [
+      "окружность",
+      "стороны"
+     ],
+     "answer": "стороны",
+     "source": "reference tree"
+    },
+    {
+     "question": "От какого из предложенных слов в этом месте текста задаётся вопрос к сочетанию «в 1/8 ширины»? Выберите слово, с которым оно связано непосредственно.",
+     "options": [
+      "диаметром",
+      "касающуюся"
+     ],
+     "answer": "диаметром",
+     "source": "reference tree"
+    },
+    {
+     "question": "Copy «1/8 ширины» if the whole phrase is in the accusative case. Otherwise choose “no such word”.",
+     "options": [
+      "1/8 ширины",
+      "no such word"
+     ],
+     "answer": "1/8 ширины",
+     "source": "reference tree"
+    },
+    {
+     "question": "К какому слову относится «флага»?",
+     "options": [
+      "ширины",
+      "касающуюся"
+     ],
+     "answer": "ширины",
+     "source": "reference tree"
+    },
+    {
+     "question": "К какому слову относится «стороны»?",
+     "options": [
+      "окружность",
+      "касающуюся"
+     ],
+     "answer": "касающуюся",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое слово характеризует согласованное определение «Пятиконечная»?",
+     "options": [
+      "звезда"
+     ],
+     "answer": "звезда",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": null
+  },
+  {
+   "id": "test-s50",
+   "variant": "extra_comma",
+   "text": "Пятиконечная, звезда вписывается в окружность диаметром в 1/8 ширины флага, касающуюся верхней стороны квадрата.",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s51",
+   "variant": "original",
+   "text": "OS -- наружный сегмент фоторецепторов",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": false,
+   "incorrect_heads": [
+    [
+     "OS",
+     4,
+     0
+    ],
+    [
+     "сегмент",
+     0,
+     1
+    ]
+   ],
+   "role_scope_errors": [
+    "OS: predicate, UD nsubj"
+   ],
+   "graph_sha256": "c20017054e60bdb743228d3b227cb42f1402da3e5c1e1809b1d30697f879422a",
+   "calls": [
+    {
+     "question": "Какое обозначение в этой фразе употреблено как существительное?",
+     "options": [
+      "OS"
+     ],
+     "answer": "OS",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": null
+  },
+  {
+   "id": "test-s51",
+   "variant": "no_punctuation",
+   "text": "OS наружный сегмент фоторецепторов",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_RULE @20",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s51",
+   "variant": "extra_comma",
+   "text": "OS -- наружный, сегмент фоторецепторов",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": false,
+   "incorrect_heads": [
+    [
+     "OS",
+     5,
+     0
+    ],
+    [
+     "сегмент",
+     0,
+     1
+    ]
+   ],
+   "role_scope_errors": [
+    "OS: predicate, UD nsubj"
+   ],
+   "graph_sha256": "c20017054e60bdb743228d3b227cb42f1402da3e5c1e1809b1d30697f879422a",
+   "calls": [
+    {
+     "question": "В каком сочетании слова связаны напрямую, несмотря на запятую между ними?",
+     "options": [
+      "наружный, сегмент",
+      "сохранить все запятые"
+     ],
+     "answer": "наружный, сегмент",
+     "source": "UD"
+    },
+    {
+     "question": "Какое обозначение в этой фразе употреблено как существительное?",
+     "options": [
+      "OS"
+     ],
+     "answer": "OS",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": null
+  }
+ ]
+}

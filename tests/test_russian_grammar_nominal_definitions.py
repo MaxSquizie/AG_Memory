@@ -38,3 +38,21 @@ def test_only_acute_after_a_russian_vowel_is_read_as_stress():
         assert TOKEN.findall(word) == [word] and unaccented(word) == 'число'
     for word in ('чис\u0301ло', 'чи\u0300сло', 'cafe\u0301'):
         assert unaccented(word) == word and TOKEN.findall(word) != [word]
+
+
+def test_fractional_measure_attaches_to_noun_with_confirmed_qualification():
+    from fractions import Fraction
+
+    core = AHCore()
+    source = 'Окружность диаметром в 1/8 ширины существует.'
+    pending = submit(core, source)
+    assert pending.status == 'AMBIGUOUS'
+    assert not core.store.elements(Domain.H)
+    assert pending.analysis.probes[0].options == ('диаметром',)
+    written = submit(core, source, lambda _: 'диаметром')
+    tree, = written.analysis.analyses
+    assert written.status == 'STORED'
+    assert tree[1].head == 0 and tree[1].role == 'measure'
+    assert tree[2].head == 1 and tree[3].head == 4
+    assert tree[4].case == 'accs' and tree[4].morphology.case == 'gent'
+    assert Fraction(tree[3].quantity) == Fraction(1, 8)

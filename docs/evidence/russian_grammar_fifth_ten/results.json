@@ -1,0 +1,1678 @@
+{
+ "corpus_sha256": "fa3642959614db06fdab2d7464af8a0873c70d0a2b5758758231d0ef725821ea",
+ "seconds_per_stage": 30,
+ "cases": [
+  {
+   "id": "test-s42",
+   "variant": "original",
+   "text": "Входит в состав округа Шердинг.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "26c44b8822351400a20de51b57b3a74921b8d206e82a3564c1745268332bbbf3",
+   "calls": [
+    {
+     "question": "Какое слово служит подлежащим при «Входит»?",
+     "options": [
+      "округа",
+      "подлежащее не названо"
+     ],
+     "answer": "подлежащее не названо",
+     "source": "reference tree"
+    },
+    {
+     "question": "Слово «Шердинг» здесь служит именем или названием? Выберите его, если да.",
+     "options": [
+      "Шердинг"
+     ],
+     "answer": "Шердинг",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s42",
+   "variant": "no_punctuation",
+   "text": "Входит в состав округа Шердинг",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "26c44b8822351400a20de51b57b3a74921b8d206e82a3564c1745268332bbbf3",
+   "calls": [
+    {
+     "question": "Какое слово служит подлежащим при «Входит»?",
+     "options": [
+      "округа",
+      "подлежащее не названо"
+     ],
+     "answer": "подлежащее не названо",
+     "source": "reference tree"
+    },
+    {
+     "question": "Слово «Шердинг» здесь служит именем или названием? Выберите его, если да.",
+     "options": [
+      "Шердинг"
+     ],
+     "answer": "Шердинг",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s42",
+   "variant": "extra_comma",
+   "text": "Входит в состав, округа Шердинг.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "26c44b8822351400a20de51b57b3a74921b8d206e82a3564c1745268332bbbf3",
+   "calls": [
+    {
+     "question": "В каком сочетании слова связаны напрямую, несмотря на запятую между ними?",
+     "options": [
+      "состав, округа",
+      "сохранить все запятые"
+     ],
+     "answer": "состав, округа",
+     "source": "UD"
+    },
+    {
+     "question": "Слово «Шердинг» здесь служит именем или названием? Выберите его, если да.",
+     "options": [
+      "Шердинг"
+     ],
+     "answer": "Шердинг",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s43",
+   "variant": "original",
+   "text": "Тойффелен () -- коммуна в Швейцарии, в кантоне Берн.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "c607ddd48436f91aae6359ea94ffeb56463f1a438f6d83e6fe3be2ee34338fb3",
+   "calls": [
+    {
+     "question": "От какого из предложенных слов в этом месте текста задаётся вопрос к сочетанию «в кантоне»? Выберите слово, с которым оно связано непосредственно.",
+     "options": [
+      "коммуна",
+      "Швейцарии"
+     ],
+     "answer": "Швейцарии",
+     "source": "reference tree"
+    },
+    {
+     "question": "Слово «Тойффелен» здесь служит именем или названием? Выберите его, если да.",
+     "options": [
+      "Тойффелен"
+     ],
+     "answer": "Тойффелен",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s43",
+   "variant": "no_punctuation",
+   "text": "Тойффелен коммуна в Швейцарии в кантоне Берн",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "c607ddd48436f91aae6359ea94ffeb56463f1a438f6d83e6fe3be2ee34338fb3",
+   "calls": [
+    {
+     "question": "От какого из предложенных слов в этом месте текста задаётся вопрос к сочетанию «в кантоне»? Выберите слово, с которым оно связано непосредственно.",
+     "options": [
+      "коммуна",
+      "Швейцарии"
+     ],
+     "answer": "Швейцарии",
+     "source": "reference tree"
+    },
+    {
+     "question": "Слово «Тойффелен» здесь служит именем или названием? Выберите его, если да.",
+     "options": [
+      "Тойффелен"
+     ],
+     "answer": "Тойффелен",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s43",
+   "variant": "extra_comma",
+   "text": "Тойффелен () -- коммуна в, Швейцарии, в кантоне Берн.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "c607ddd48436f91aae6359ea94ffeb56463f1a438f6d83e6fe3be2ee34338fb3",
+   "calls": [
+    {
+     "question": "В каком сочетании слова связаны напрямую, несмотря на запятую между ними?",
+     "options": [
+      "в, Швейцарии",
+      "сохранить все запятые"
+     ],
+     "answer": "в, Швейцарии",
+     "source": "UD"
+    },
+    {
+     "question": "От какого из предложенных слов в этом месте текста задаётся вопрос к сочетанию «в кантоне»? Выберите слово, с которым оно связано непосредственно.",
+     "options": [
+      "коммуна",
+      "Швейцарии"
+     ],
+     "answer": "Швейцарии",
+     "source": "reference tree"
+    },
+    {
+     "question": "Слово «Тойффелен» здесь служит именем или названием? Выберите его, если да.",
+     "options": [
+      "Тойффелен"
+     ],
+     "answer": "Тойффелен",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s44",
+   "variant": "original",
+   "text": "Согласно Младшей Эдде, если Тор проголодался, он мог зажарить козлов себе на угощение.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "157e76db982aacfb60b32a0d3152f56212734fb7686b412af6528180b4e0edc2",
+   "calls": [
+    {
+     "question": "От какого из предложенных слов в этом месте текста задаётся вопрос к сочетанию «на угощение»? Выберите слово, с которым оно связано непосредственно.",
+     "options": [
+      "мог",
+      "зажарить",
+      "себе"
+     ],
+     "answer": "зажарить",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какие слова здесь образуют единое собственное имя или название?",
+     "options": [
+      "Младшей Эдде",
+      "Эдде"
+     ],
+     "answer": "Младшей Эдде",
+     "source": "reference tree"
+    },
+    {
+     "question": "Как употреблено «Тор»? Если это собственное имя или название, выберите «Тор».",
+     "options": [
+      "Тор",
+      "нарицательное существительное"
+     ],
+     "answer": "Тор",
+     "source": "reference tree"
+    },
+    {
+     "question": "От какого из предложенных слов в этом месте текста задаётся вопрос к сочетанию «Согласно Младшей Эдде»? Выберите слово, с которым оно связано непосредственно.",
+     "options": [
+      "проголодался",
+      "мог"
+     ],
+     "answer": "мог",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое сочетание передаёт оговорку к самому сообщению о действии «мог»?",
+     "options": [
+      "Согласно Младшей Эдде",
+      "нет такого сочетания"
+     ],
+     "answer": "Согласно Младшей Эдде",
+     "source": "reference tree"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s44",
+   "variant": "no_punctuation",
+   "text": "Согласно Младшей Эдде если Тор проголодался он мог зажарить козлов себе на угощение",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "157e76db982aacfb60b32a0d3152f56212734fb7686b412af6528180b4e0edc2",
+   "calls": [
+    {
+     "question": "От какого из предложенных слов в этом месте текста задаётся вопрос к сочетанию «на угощение»? Выберите слово, с которым оно связано непосредственно.",
+     "options": [
+      "мог",
+      "зажарить",
+      "себе"
+     ],
+     "answer": "зажарить",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какие слова здесь образуют единое собственное имя или название?",
+     "options": [
+      "Младшей Эдде",
+      "Эдде"
+     ],
+     "answer": "Младшей Эдде",
+     "source": "reference tree"
+    },
+    {
+     "question": "Как употреблено «Тор»? Если это собственное имя или название, выберите «Тор».",
+     "options": [
+      "Тор",
+      "нарицательное существительное"
+     ],
+     "answer": "Тор",
+     "source": "reference tree"
+    },
+    {
+     "question": "От какого из предложенных слов в этом месте текста задаётся вопрос к сочетанию «Согласно Младшей Эдде»? Выберите слово, с которым оно связано непосредственно.",
+     "options": [
+      "проголодался",
+      "мог"
+     ],
+     "answer": "мог",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое сочетание передаёт оговорку к самому сообщению о действии «мог»?",
+     "options": [
+      "Согласно Младшей Эдде",
+      "нет такого сочетания"
+     ],
+     "answer": "Согласно Младшей Эдде",
+     "source": "reference tree"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s44",
+   "variant": "extra_comma",
+   "text": "Согласно Младшей, Эдде, если Тор проголодался, он мог зажарить козлов себе на угощение.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "157e76db982aacfb60b32a0d3152f56212734fb7686b412af6528180b4e0edc2",
+   "calls": [
+    {
+     "question": "В каком сочетании слова связаны напрямую, несмотря на запятую между ними?",
+     "options": [
+      "Младшей, Эдде",
+      "сохранить все запятые"
+     ],
+     "answer": "Младшей, Эдде",
+     "source": "UD"
+    },
+    {
+     "question": "От какого из предложенных слов в этом месте текста задаётся вопрос к сочетанию «на угощение»? Выберите слово, с которым оно связано непосредственно.",
+     "options": [
+      "мог",
+      "зажарить",
+      "себе"
+     ],
+     "answer": "зажарить",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какие слова здесь образуют единое собственное имя или название?",
+     "options": [
+      "Младшей, Эдде",
+      "Эдде"
+     ],
+     "answer": "Младшей, Эдде",
+     "source": "reference tree"
+    },
+    {
+     "question": "Как употреблено «Тор»? Если это собственное имя или название, выберите «Тор».",
+     "options": [
+      "Тор",
+      "нарицательное существительное"
+     ],
+     "answer": "Тор",
+     "source": "reference tree"
+    },
+    {
+     "question": "От какого из предложенных слов в этом месте текста задаётся вопрос к сочетанию «Согласно Младшей, Эдде»? Выберите слово, с которым оно связано непосредственно.",
+     "options": [
+      "проголодался",
+      "мог"
+     ],
+     "answer": "мог",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое сочетание передаёт оговорку к самому сообщению о действии «мог»?",
+     "options": [
+      "Согласно Младшей, Эдде",
+      "нет такого сочетания"
+     ],
+     "answer": "Согласно Младшей, Эдде",
+     "source": "reference tree"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s45",
+   "variant": "original",
+   "text": "Позднее слово tempora у португальских миссионеров было распространено и на другие постные дни.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "edc9bd66b09f81185cf01c8b74d517182f2e4744e7a2a9f60f5547201bd27033",
+   "calls": [
+    {
+     "question": "К каким словам относится «Позднее» в этом предложении? Если это признак предмета, выберите «слово tempora». Если уточняется действие, выберите «было распространено».",
+     "options": [
+      "слово tempora",
+      "было распространено"
+     ],
+     "answer": "было распространено",
+     "source": "reference tree"
+    },
+    {
+     "question": "От какого из предложенных слов в этом месте текста задаётся вопрос к сочетанию «у португальских миссионеров»? Выберите слово, с которым оно связано непосредственно.",
+     "options": [
+      "слово",
+      "распространено"
+     ],
+     "answer": "распространено",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое иноязычное обозначение поясняет слово «слово»?",
+     "options": [
+      "tempora"
+     ],
+     "answer": "tempora",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s45",
+   "variant": "no_punctuation",
+   "text": "Позднее слово tempora у португальских миссионеров было распространено и на другие постные дни",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "edc9bd66b09f81185cf01c8b74d517182f2e4744e7a2a9f60f5547201bd27033",
+   "calls": [
+    {
+     "question": "К каким словам относится «Позднее» в этом предложении? Если это признак предмета, выберите «слово tempora». Если уточняется действие, выберите «было распространено».",
+     "options": [
+      "слово tempora",
+      "было распространено"
+     ],
+     "answer": "было распространено",
+     "source": "reference tree"
+    },
+    {
+     "question": "От какого из предложенных слов в этом месте текста задаётся вопрос к сочетанию «у португальских миссионеров»? Выберите слово, с которым оно связано непосредственно.",
+     "options": [
+      "слово",
+      "распространено"
+     ],
+     "answer": "распространено",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое иноязычное обозначение поясняет слово «слово»?",
+     "options": [
+      "tempora"
+     ],
+     "answer": "tempora",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s45",
+   "variant": "extra_comma",
+   "text": "Позднее слово tempora у португальских, миссионеров было распространено и на другие постные дни.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "edc9bd66b09f81185cf01c8b74d517182f2e4744e7a2a9f60f5547201bd27033",
+   "calls": [
+    {
+     "question": "В каком сочетании слова связаны напрямую, несмотря на запятую между ними?",
+     "options": [
+      "португальских, миссионеров",
+      "сохранить все запятые"
+     ],
+     "answer": "португальских, миссионеров",
+     "source": "UD"
+    },
+    {
+     "question": "К каким словам относится «Позднее» в этом предложении? Если это признак предмета, выберите «слово tempora». Если уточняется действие, выберите «было распространено».",
+     "options": [
+      "слово tempora",
+      "было распространено"
+     ],
+     "answer": "было распространено",
+     "source": "reference tree"
+    },
+    {
+     "question": "От какого из предложенных слов в этом месте текста задаётся вопрос к сочетанию «у португальских, миссионеров»? Выберите слово, с которым оно связано непосредственно.",
+     "options": [
+      "слово",
+      "распространено"
+     ],
+     "answer": "распространено",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое иноязычное обозначение поясняет слово «слово»?",
+     "options": [
+      "tempora"
+     ],
+     "answer": "tempora",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s46",
+   "variant": "original",
+   "text": "В 1 раунде рефери дисквалифицировал Диксона за повторные удары ниже пояса.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "587270448f04aa1ffd24cefab5d75a8d4cc3e5f84b15a032954599d98d91ddf9",
+   "calls": [
+    {
+     "question": "Что обозначает «1»? Если это порядковый номер, выберите сочетание с существительным. Если указано количество, выберите само число.",
+     "options": [
+      "1 раунде",
+      "1"
+     ],
+     "answer": "1 раунде",
+     "source": "reference tree"
+    },
+    {
+     "question": "От какого из предложенных слов в этом месте текста задаётся вопрос к сочетанию «за повторные удары»? Выберите слово, с которым оно связано непосредственно.",
+     "options": [
+      "дисквалифицировал",
+      "Диксона"
+     ],
+     "answer": "дисквалифицировал",
+     "source": "reference tree"
+    },
+    {
+     "question": "От какого из предложенных слов в этом месте текста задаётся вопрос к сочетанию «ниже пояса»? Выберите слово, с которым оно связано непосредственно.",
+     "options": [
+      "дисквалифицировал",
+      "удары"
+     ],
+     "answer": "удары",
+     "source": "reference tree"
+    },
+    {
+     "question": "В каком значении употреблён глагол «дисквалифицировал»? Если действие представлено как единое целое, выберите «дисквалифицировал». Для несовершенного вида выберите «несовершенный вид».",
+     "options": [
+      "дисквалифицировал",
+      "несовершенный вид"
+     ],
+     "answer": "дисквалифицировал",
+     "source": "UD"
+    },
+    {
+     "question": "Какое слово здесь называет того, на кого направлено действие «дисквалифицировал»?",
+     "options": [
+      "Диксона"
+     ],
+     "answer": "Диксона",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s46",
+   "variant": "no_punctuation",
+   "text": "В 1 раунде рефери дисквалифицировал Диксона за повторные удары ниже пояса",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "587270448f04aa1ffd24cefab5d75a8d4cc3e5f84b15a032954599d98d91ddf9",
+   "calls": [
+    {
+     "question": "Что обозначает «1»? Если это порядковый номер, выберите сочетание с существительным. Если указано количество, выберите само число.",
+     "options": [
+      "1 раунде",
+      "1"
+     ],
+     "answer": "1 раунде",
+     "source": "reference tree"
+    },
+    {
+     "question": "От какого из предложенных слов в этом месте текста задаётся вопрос к сочетанию «за повторные удары»? Выберите слово, с которым оно связано непосредственно.",
+     "options": [
+      "дисквалифицировал",
+      "Диксона"
+     ],
+     "answer": "дисквалифицировал",
+     "source": "reference tree"
+    },
+    {
+     "question": "От какого из предложенных слов в этом месте текста задаётся вопрос к сочетанию «ниже пояса»? Выберите слово, с которым оно связано непосредственно.",
+     "options": [
+      "дисквалифицировал",
+      "удары"
+     ],
+     "answer": "удары",
+     "source": "reference tree"
+    },
+    {
+     "question": "В каком значении употреблён глагол «дисквалифицировал»? Если действие представлено как единое целое, выберите «дисквалифицировал». Для несовершенного вида выберите «несовершенный вид».",
+     "options": [
+      "дисквалифицировал",
+      "несовершенный вид"
+     ],
+     "answer": "дисквалифицировал",
+     "source": "UD"
+    },
+    {
+     "question": "Какое слово здесь называет того, на кого направлено действие «дисквалифицировал»?",
+     "options": [
+      "Диксона"
+     ],
+     "answer": "Диксона",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s46",
+   "variant": "extra_comma",
+   "text": "В 1, раунде рефери дисквалифицировал Диксона за повторные удары ниже пояса.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "587270448f04aa1ffd24cefab5d75a8d4cc3e5f84b15a032954599d98d91ddf9",
+   "calls": [
+    {
+     "question": "В каком сочетании слова связаны напрямую, несмотря на запятую между ними?",
+     "options": [
+      "1, раунде",
+      "сохранить все запятые"
+     ],
+     "answer": "1, раунде",
+     "source": "UD"
+    },
+    {
+     "question": "Что обозначает «1»? Если это порядковый номер, выберите сочетание с существительным. Если указано количество, выберите само число.",
+     "options": [
+      "1, раунде",
+      "1"
+     ],
+     "answer": "1, раунде",
+     "source": "reference tree"
+    },
+    {
+     "question": "От какого из предложенных слов в этом месте текста задаётся вопрос к сочетанию «за повторные удары»? Выберите слово, с которым оно связано непосредственно.",
+     "options": [
+      "дисквалифицировал",
+      "Диксона"
+     ],
+     "answer": "дисквалифицировал",
+     "source": "reference tree"
+    },
+    {
+     "question": "От какого из предложенных слов в этом месте текста задаётся вопрос к сочетанию «ниже пояса»? Выберите слово, с которым оно связано непосредственно.",
+     "options": [
+      "дисквалифицировал",
+      "удары"
+     ],
+     "answer": "удары",
+     "source": "reference tree"
+    },
+    {
+     "question": "В каком значении употреблён глагол «дисквалифицировал»? Если действие представлено как единое целое, выберите «дисквалифицировал». Для несовершенного вида выберите «несовершенный вид».",
+     "options": [
+      "дисквалифицировал",
+      "несовершенный вид"
+     ],
+     "answer": "дисквалифицировал",
+     "source": "UD"
+    },
+    {
+     "question": "Какое слово здесь называет того, на кого направлено действие «дисквалифицировал»?",
+     "options": [
+      "Диксона"
+     ],
+     "answer": "Диксона",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s47",
+   "variant": "original",
+   "text": "Все произведённое является общественным достоянием, а изобилие материальных благ позволяет распределять их по потребностям.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "dbeb5ee9eccac0602cd2a311832b78ebc46afa1211e29e0113a0644d0183522c",
+   "calls": [
+    {
+     "question": "Какое слово в творительном падеже называет, кем или чем выступает подлежащее?",
+     "options": [
+      "достоянием",
+      "нет такого слова"
+     ],
+     "answer": "достоянием",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое слово служит подлежащим при «позволяет»?",
+     "options": [
+      "произведённое",
+      "изобилие",
+      "по"
+     ],
+     "answer": "изобилие",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое слово называет исполнителя действия «распределять»?",
+     "options": [
+      "потребностям",
+      "исполнитель не назван"
+     ],
+     "answer": "исполнитель не назван",
+     "source": "reference tree"
+    },
+    {
+     "question": "От какого из предложенных слов в этом месте текста задаётся вопрос к сочетанию «по потребностям»? Выберите слово, с которым оно связано непосредственно.",
+     "options": [
+      "позволяет",
+      "распределять",
+      "их"
+     ],
+     "answer": "распределять",
+     "source": "reference tree"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s47",
+   "variant": "no_punctuation",
+   "text": "Все произведённое является общественным достоянием а изобилие материальных благ позволяет распределять их по потребностям",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "dbeb5ee9eccac0602cd2a311832b78ebc46afa1211e29e0113a0644d0183522c",
+   "calls": [
+    {
+     "question": "Какое слово в творительном падеже называет, кем или чем выступает подлежащее?",
+     "options": [
+      "достоянием",
+      "нет такого слова"
+     ],
+     "answer": "достоянием",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое слово служит подлежащим при «позволяет»?",
+     "options": [
+      "произведённое",
+      "изобилие",
+      "по"
+     ],
+     "answer": "изобилие",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое слово называет исполнителя действия «распределять»?",
+     "options": [
+      "потребностям",
+      "исполнитель не назван"
+     ],
+     "answer": "исполнитель не назван",
+     "source": "reference tree"
+    },
+    {
+     "question": "От какого из предложенных слов в этом месте текста задаётся вопрос к сочетанию «по потребностям»? Выберите слово, с которым оно связано непосредственно.",
+     "options": [
+      "позволяет",
+      "распределять",
+      "их"
+     ],
+     "answer": "распределять",
+     "source": "reference tree"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s47",
+   "variant": "extra_comma",
+   "text": "Все произведённое является общественным, достоянием, а изобилие материальных благ позволяет распределять их по потребностям.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "dbeb5ee9eccac0602cd2a311832b78ebc46afa1211e29e0113a0644d0183522c",
+   "calls": [
+    {
+     "question": "В каком сочетании слова связаны напрямую, несмотря на запятую между ними?",
+     "options": [
+      "общественным, достоянием",
+      "сохранить все запятые"
+     ],
+     "answer": "общественным, достоянием",
+     "source": "UD"
+    },
+    {
+     "question": "От какого из предложенных слов в этом месте текста задаётся вопрос к сочетанию «по потребностям»? Выберите слово, с которым оно связано непосредственно.",
+     "options": [
+      "позволяет",
+      "распределять",
+      "их"
+     ],
+     "answer": "распределять",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое слово в творительном падеже называет, кем или чем выступает подлежащее?",
+     "options": [
+      "достоянием",
+      "нет такого слова"
+     ],
+     "answer": "достоянием",
+     "source": "reference tree"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s48",
+   "variant": "original",
+   "text": "На Олипиаде-2012 победил азербайджанского боксёра Солтана Мигитинова (24-11), венгра Золтана Харчша (14-10) и британца Энтони Огого.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "c2363b2930a400e082609a0ac9751f1d4e0b2e29d61b61f37152655455455e44",
+   "calls": [
+    {
+     "question": "Какое слово управляется предлогом «На»?",
+     "options": [
+      "Олипиаде"
+     ],
+     "answer": "Олипиаде",
+     "source": "UD"
+    },
+    {
+     "question": "Какое число входит в обозначение вместе со словом «Олипиаде»?",
+     "options": [
+      "2012"
+     ],
+     "answer": "2012",
+     "source": "UD"
+    },
+    {
+     "question": "Какое слово продолжает личное имя «Солтана»?",
+     "options": [
+      "Мигитинова"
+     ],
+     "answer": "Мигитинова",
+     "source": "UD"
+    },
+    {
+     "question": "Какое сочетание здесь служит числовой пометой к слову «боксёра»?",
+     "options": [
+      "24-11"
+     ],
+     "answer": "24-11",
+     "source": "UD"
+    },
+    {
+     "question": "Какое слово продолжает личное имя «Золтана»?",
+     "options": [
+      "Харчша"
+     ],
+     "answer": "Харчша",
+     "source": "UD"
+    },
+    {
+     "question": "Какое сочетание здесь служит числовой пометой к слову «венгра»?",
+     "options": [
+      "14-10"
+     ],
+     "answer": "14-10",
+     "source": "UD"
+    },
+    {
+     "question": "Какое слово продолжает личное имя «Энтони»?",
+     "options": [
+      "Огого"
+     ],
+     "answer": "Огого",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s48",
+   "variant": "no_punctuation",
+   "text": "На Олипиаде 2012 победил азербайджанского боксёра Солтана Мигитинова 24-11 венгра Золтана Харчша 14-10 и британца Энтони Огого",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "c2363b2930a400e082609a0ac9751f1d4e0b2e29d61b61f37152655455455e44",
+   "calls": [
+    {
+     "question": "Какое слово управляется предлогом «На»?",
+     "options": [
+      "Олипиаде"
+     ],
+     "answer": "Олипиаде",
+     "source": "UD"
+    },
+    {
+     "question": "Какое число входит в обозначение вместе со словом «Олипиаде»?",
+     "options": [
+      "2012"
+     ],
+     "answer": "2012",
+     "source": "UD"
+    },
+    {
+     "question": "Какое слово продолжает личное имя «Солтана»?",
+     "options": [
+      "Мигитинова"
+     ],
+     "answer": "Мигитинова",
+     "source": "UD"
+    },
+    {
+     "question": "Какое сочетание здесь служит числовой пометой к слову «боксёра»?",
+     "options": [
+      "24-11"
+     ],
+     "answer": "24-11",
+     "source": "UD"
+    },
+    {
+     "question": "Какое слово продолжает личное имя «Золтана»?",
+     "options": [
+      "Харчша"
+     ],
+     "answer": "Харчша",
+     "source": "UD"
+    },
+    {
+     "question": "Какое сочетание здесь служит числовой пометой к слову «венгра»?",
+     "options": [
+      "14-10"
+     ],
+     "answer": "14-10",
+     "source": "UD"
+    },
+    {
+     "question": "Какое слово продолжает личное имя «Энтони»?",
+     "options": [
+      "Огого"
+     ],
+     "answer": "Огого",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s48",
+   "variant": "extra_comma",
+   "text": "На Олипиаде-2012 победил азербайджанского, боксёра Солтана Мигитинова (24-11), венгра Золтана Харчша (14-10) и британца Энтони Огого.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "c2363b2930a400e082609a0ac9751f1d4e0b2e29d61b61f37152655455455e44",
+   "calls": [
+    {
+     "question": "В каком сочетании слова связаны напрямую, несмотря на запятую между ними?",
+     "options": [
+      "азербайджанского, боксёра",
+      "сохранить все запятые"
+     ],
+     "answer": "азербайджанского, боксёра",
+     "source": "UD"
+    },
+    {
+     "question": "Какое слово управляется предлогом «На»?",
+     "options": [
+      "Олипиаде"
+     ],
+     "answer": "Олипиаде",
+     "source": "UD"
+    },
+    {
+     "question": "Какое число входит в обозначение вместе со словом «Олипиаде»?",
+     "options": [
+      "2012"
+     ],
+     "answer": "2012",
+     "source": "UD"
+    },
+    {
+     "question": "Какое слово продолжает личное имя «Солтана»?",
+     "options": [
+      "Мигитинова"
+     ],
+     "answer": "Мигитинова",
+     "source": "UD"
+    },
+    {
+     "question": "Какое сочетание здесь служит числовой пометой к слову «боксёра»?",
+     "options": [
+      "24-11"
+     ],
+     "answer": "24-11",
+     "source": "UD"
+    },
+    {
+     "question": "Какое слово продолжает личное имя «Золтана»?",
+     "options": [
+      "Харчша"
+     ],
+     "answer": "Харчша",
+     "source": "UD"
+    },
+    {
+     "question": "Какое сочетание здесь служит числовой пометой к слову «венгра»?",
+     "options": [
+      "14-10"
+     ],
+     "answer": "14-10",
+     "source": "UD"
+    },
+    {
+     "question": "Какое слово продолжает личное имя «Энтони»?",
+     "options": [
+      "Огого"
+     ],
+     "answer": "Огого",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s49",
+   "variant": "original",
+   "text": "Озвучивает Пётр Иващенко (ранее озвучивал Юрий Мазихин).",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "3c5782ac7ce17e00ae85dc0a107f973a501ce0da3db1f05981d719c81d695926",
+   "calls": [
+    {
+     "question": "Какими словами назван тот, кто совершил действие «Озвучивает»?",
+     "options": [
+      "Пётр Иващенко",
+      "Пётр"
+     ],
+     "answer": "Пётр Иващенко",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое слово продолжает личное имя «Юрий»?",
+     "options": [
+      "Мазихин"
+     ],
+     "answer": "Мазихин",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s49",
+   "variant": "no_punctuation",
+   "text": "Озвучивает Пётр Иващенко ранее озвучивал Юрий Мазихин",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "3c5782ac7ce17e00ae85dc0a107f973a501ce0da3db1f05981d719c81d695926",
+   "calls": [
+    {
+     "question": "Какое действие дано как добавочное пояснение к основному сообщению?",
+     "options": [
+      "озвучивал",
+      "нет такого пояснения"
+     ],
+     "answer": "озвучивал",
+     "source": "reference tree"
+    },
+    {
+     "question": "К какому действию относится слово «ранее»?",
+     "options": [
+      "озвучивал",
+      "Озвучивает"
+     ],
+     "answer": "озвучивал",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какими словами назван тот, кто совершил действие «Озвучивает»?",
+     "options": [
+      "Пётр Иващенко",
+      "Пётр"
+     ],
+     "answer": "Пётр Иващенко",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое слово продолжает личное имя «Юрий»?",
+     "options": [
+      "Мазихин"
+     ],
+     "answer": "Мазихин",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s49",
+   "variant": "extra_comma",
+   "text": "Озвучивает, Пётр Иващенко (ранее озвучивал Юрий Мазихин).",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "3c5782ac7ce17e00ae85dc0a107f973a501ce0da3db1f05981d719c81d695926",
+   "calls": [
+    {
+     "question": "В каком сочетании слова связаны напрямую, несмотря на запятую между ними?",
+     "options": [
+      "Озвучивает, Пётр",
+      "сохранить все запятые"
+     ],
+     "answer": "Озвучивает, Пётр",
+     "source": "UD"
+    },
+    {
+     "question": "Какими словами назван тот, кто совершил действие «Озвучивает»?",
+     "options": [
+      "Пётр Иващенко",
+      "Пётр"
+     ],
+     "answer": "Пётр Иващенко",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое слово продолжает личное имя «Юрий»?",
+     "options": [
+      "Мазихин"
+     ],
+     "answer": "Мазихин",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s50",
+   "variant": "original",
+   "text": "Пятиконечная звезда вписывается в окружность диаметром в 1/8 ширины флага, касающуюся верхней стороны квадрата.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "65398f263dbb63377566184cbd2ff339b680127ec4f597422aa814f936ca2341",
+   "calls": [
+    {
+     "question": "К какому слову относится «стороны»?",
+     "options": [
+      "окружность",
+      "касающуюся"
+     ],
+     "answer": "касающуюся",
+     "source": "reference tree"
+    },
+    {
+     "question": "К какому слову относится «квадрата»?",
+     "options": [
+      "окружность",
+      "стороны"
+     ],
+     "answer": "стороны",
+     "source": "reference tree"
+    },
+    {
+     "question": "К какому слову в этом предложении относится «диаметром»?",
+     "options": [
+      "окружность",
+      "касающуюся"
+     ],
+     "answer": "окружность",
+     "source": "reference tree"
+    },
+    {
+     "question": "К какому слову относится «флага»?",
+     "options": [
+      "окружность",
+      "ширины"
+     ],
+     "answer": "ширины",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое слово характеризует согласованное определение «Пятиконечная»?",
+     "options": [
+      "звезда"
+     ],
+     "answer": "звезда",
+     "source": "UD"
+    },
+    {
+     "question": "Какое слово называет измеряемый признак предмета «окружность»?",
+     "options": [
+      "диаметром"
+     ],
+     "answer": "диаметром",
+     "source": "control reading"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s50",
+   "variant": "no_punctuation",
+   "text": "Пятиконечная звезда вписывается в окружность диаметром в 1/8 ширины флага касающуюся верхней стороны квадрата",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "65398f263dbb63377566184cbd2ff339b680127ec4f597422aa814f936ca2341",
+   "calls": [
+    {
+     "question": "К какому слову относится «квадрата»?",
+     "options": [
+      "окружность",
+      "флага",
+      "стороны"
+     ],
+     "answer": "стороны",
+     "source": "reference tree"
+    },
+    {
+     "question": "К какому слову относится «флага»?",
+     "options": [
+      "окружность",
+      "ширины",
+      "касающуюся"
+     ],
+     "answer": "ширины",
+     "source": "reference tree"
+    },
+    {
+     "question": "К какому слову относится «стороны»?",
+     "options": [
+      "окружность",
+      "касающуюся"
+     ],
+     "answer": "касающуюся",
+     "source": "reference tree"
+    },
+    {
+     "question": "От какого из предложенных слов в этом месте текста задаётся вопрос к сочетанию «в 1/8 ширины»? Выберите слово, с которым оно связано непосредственно.",
+     "options": [
+      "диаметром",
+      "касающуюся"
+     ],
+     "answer": "диаметром",
+     "source": "reference tree"
+    },
+    {
+     "question": "К какому слову в этом предложении относится «диаметром»?",
+     "options": [
+      "окружность",
+      "касающуюся"
+     ],
+     "answer": "окружность",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое слово характеризует согласованное определение «Пятиконечная»?",
+     "options": [
+      "звезда"
+     ],
+     "answer": "звезда",
+     "source": "UD"
+    },
+    {
+     "question": "Какое слово называет измеряемый признак предмета «окружность»?",
+     "options": [
+      "диаметром"
+     ],
+     "answer": "диаметром",
+     "source": "control reading"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s50",
+   "variant": "extra_comma",
+   "text": "Пятиконечная, звезда вписывается в окружность диаметром в 1/8 ширины флага, касающуюся верхней стороны квадрата.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "65398f263dbb63377566184cbd2ff339b680127ec4f597422aa814f936ca2341",
+   "calls": [
+    {
+     "question": "В каком сочетании слова связаны напрямую, несмотря на запятую между ними?",
+     "options": [
+      "Пятиконечная, звезда",
+      "сохранить все запятые"
+     ],
+     "answer": "Пятиконечная, звезда",
+     "source": "UD"
+    },
+    {
+     "question": "К какому слову относится «стороны»?",
+     "options": [
+      "окружность",
+      "касающуюся"
+     ],
+     "answer": "касающуюся",
+     "source": "reference tree"
+    },
+    {
+     "question": "К какому слову относится «квадрата»?",
+     "options": [
+      "окружность",
+      "стороны"
+     ],
+     "answer": "стороны",
+     "source": "reference tree"
+    },
+    {
+     "question": "К какому слову в этом предложении относится «диаметром»?",
+     "options": [
+      "окружность",
+      "касающуюся"
+     ],
+     "answer": "окружность",
+     "source": "reference tree"
+    },
+    {
+     "question": "К какому слову относится «флага»?",
+     "options": [
+      "окружность",
+      "ширины"
+     ],
+     "answer": "ширины",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое слово характеризует согласованное определение «Пятиконечная»?",
+     "options": [
+      "звезда"
+     ],
+     "answer": "звезда",
+     "source": "UD"
+    },
+    {
+     "question": "Какое слово называет измеряемый признак предмета «окружность»?",
+     "options": [
+      "диаметром"
+     ],
+     "answer": "диаметром",
+     "source": "control reading"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s51",
+   "variant": "original",
+   "text": "OS -- наружный сегмент фоторецепторов",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "e05bc2043a6ec748be87147607579ca7179f75d057ce727ffd54dc36327cb0a1",
+   "calls": [
+    {
+     "question": "Каким словом или сочетанием характеризуют подлежащее в этом предложении?",
+     "options": [
+      "OS",
+      "наружный сегмент"
+     ],
+     "answer": "наружный сегмент",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое обозначение в этой фразе употреблено как существительное?",
+     "options": [
+      "OS"
+     ],
+     "answer": "OS",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s51",
+   "variant": "no_punctuation",
+   "text": "OS наружный сегмент фоторецепторов",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "e05bc2043a6ec748be87147607579ca7179f75d057ce727ffd54dc36327cb0a1",
+   "calls": [
+    {
+     "question": "Какое обозначение в этой фразе употреблено как существительное?",
+     "options": [
+      "OS"
+     ],
+     "answer": "OS",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s51",
+   "variant": "extra_comma",
+   "text": "OS -- наружный, сегмент фоторецепторов",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "e05bc2043a6ec748be87147607579ca7179f75d057ce727ffd54dc36327cb0a1",
+   "calls": [
+    {
+     "question": "В каком сочетании слова связаны напрямую, несмотря на запятую между ними?",
+     "options": [
+      "наружный, сегмент",
+      "сохранить все запятые"
+     ],
+     "answer": "наружный, сегмент",
+     "source": "UD"
+    },
+    {
+     "question": "Каким словом или сочетанием характеризуют подлежащее в этом предложении?",
+     "options": [
+      "OS",
+      "наружный, сегмент"
+     ],
+     "answer": "наружный, сегмент",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое обозначение в этой фразе употреблено как существительное?",
+     "options": [
+      "OS"
+     ],
+     "answer": "OS",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  }
+ ]
+}

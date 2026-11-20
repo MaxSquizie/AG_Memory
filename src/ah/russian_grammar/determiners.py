@@ -1,6 +1,6 @@
 from dataclasses import replace
 
-from .morphology import NOMINAL_ROLES, ROLE_CASE
+from .morphology import NOMINAL_ROLES, ROLE_CASE, from_tag
 from .nominal_groups import _agree
 from .rules import known_forms
 
@@ -13,9 +13,58 @@ SCOPES = {
 }
 
 
+def _substantive_subjects(tokens, base):
+    from .parser import Link
+    from .predication import _bare_trees, _copula_agrees
+    from .utterances import _map
+
+    for i, token in enumerate(tokens[:-1]):
+        quantifiers = [(word, tag) for word, tag in known_forms(token.surface)
+                       if word in SCOPES and tag.POS == 'ADJF' and tag.case == 'nomn']
+        if not quantifiers:
+            continue
+        head = i + 1
+        candidates = [(word, tag, det, det_tag) for word, tag in known_forms(tokens[head].surface)
+                      if tag.POS == 'PRTF' and tag.case == 'nomn'
+                      for det, det_tag in quantifiers if _agree(det_tag, tag)]
+        if not candidates:
+            continue
+        visible = tuple(j for j in range(len(tokens)) if j != i)
+        nominal_clause = tuple(tokens[j] for j in visible)
+        for word, tag, det, det_tag in candidates:
+            if SCOPES[det] == 'negative':
+                continue
+            for tree in _bare_trees(nominal_clause, substantive=(i, word, tag)):
+                if tree[i].role != 'subject' or tree[i].lemma != word:
+                    continue
+                bound = _map(tree, visible)
+                bound[i] = Link('attribute', det, head, 'NP.DET', scope=SCOPES[det], morphology=from_tag(det_tag))
+                bound[head] = replace(bound[head], rule='PART.SUBSTANTIVE', case='nomn', morphology=from_tag(tag))
+                yield tuple(bound[j] for j in range(len(tokens)))
+        kept = tuple(j for j in range(len(tokens)) if j not in (i, head))
+        for tree in base(tuple(tokens[j] for j in kept)):
+            roots = [j for j, link in enumerate(tree) if link.head is None and link.role == 'predicate'
+                     and link.rule == 'V1' and link.implicit_subject == 'unresolved']
+            if len(roots) != 1 or any(link.role.startswith('clause_') for link in tree):
+                continue
+            root = kept[roots[0]]
+            links = _map(tree, kept)
+            predicate = links[root]
+            for word, tag, det, det_tag in candidates:
+                if (not _copula_agrees(predicate.morphology, tag)
+                        or SCOPES[det] == 'negative' and 'negated' not in (predicate.scope or '').split('_')):
+                    continue
+                bound = {j: replace(link, implicit_subject=None, controller=head if j != root else link.controller)
+                         if link.implicit_subject == 'unresolved' else link for j, link in links.items()}
+                bound[i] = Link('attribute', det, head, 'NP.DET', scope=SCOPES[det], morphology=from_tag(det_tag))
+                bound[head] = Link('subject', word, root, 'PART.SUBSTANTIVE', 'nomn', morphology=from_tag(tag))
+                yield tuple(bound[j] for j in range(len(tokens)))
+
+
 def trees(tokens, base):
     from .parser import Link
 
+    yield from _substantive_subjects(tokens, base)
     groups = {}
     for i, token in enumerate(tokens[:-1]):
         forms = [(lemma, tag) for lemma, tag in known_forms(token.surface)
