@@ -27,3 +27,22 @@ def test_translated_title_does_not_assert_personal_experience():
     rows = [core.store.get_element(Domain.H, m.uid).meta for m in group.members]
     assert [(w['surface'], w['assertion_status'], w.get('participant_ref')) for w in rows
             if w['surface'] in ('Я', 'иду')] == [('Я', 'title', None), ('иду', 'title', None)]
+
+
+def test_internal_apposition_keeps_the_rest_of_the_sentence():
+    text = 'Анна читала журнал «Новый мир» вчера'
+    reply = submit(AHCore(), text, lambda p: 'Новый мир')
+    tree, = reply.analysis.analyses
+    assert reply.status == 'STORED'
+    assert tree[5].head == 2 and tree[5].scope == 'title'
+    assert tree[4].head == 5 and tree[-1].head == 1
+
+
+def test_infinitive_adverbial_accepts_plain_complement_and_omits_impersonal_actor():
+    for text, controller in [('Иван посмотрел прежде чем войти в дом', 0),
+                             ('Иван ушёл прежде чем рассветать', None)]:
+        reply = submit(AHCore(), text, lambda p: p.options[0])
+        tree, = reply.analysis.analyses
+        assert reply.status == 'STORED'
+        assert tree[4].role == 'clause_adverbial' and tree[4].head == 2
+        assert tree[4].controller == controller

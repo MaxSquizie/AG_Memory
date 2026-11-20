@@ -1,0 +1,434 @@
+{
+ "model": "gpt-5.6-luna",
+ "reasoning_effort": "low",
+ "variant": "no_punctuation",
+ "cases": [
+  {
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": false,
+   "incorrect_heads": [
+    [
+     "ССР",
+     2,
+     3
+    ]
+   ],
+   "role_scope_errors": [],
+   "graph_sha256": "bc2d39618f7ef821fb1998a6106395db0937c33fae1a652d9440e14d804681bf",
+   "id": "test-s32",
+   "variant": "no_punctuation",
+   "calls": [
+    {
+     "context": "Заслуженный деятель искусств Армянской ССР",
+     "question": "Какое слово уточняет группа «Армянской ССР» в родительном падеже?",
+     "options": [
+      "деятель",
+      "искусств"
+     ],
+     "answer": "искусств"
+    }
+   ],
+   "same_as_control_graph": false
+  },
+  {
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "9b1d6be935b621b8d4e26a962b299729ad3109dab9c657f0add02bd9922825ad",
+   "id": "test-s33",
+   "variant": "no_punctuation",
+   "calls": [
+    {
+     "context": "Стихи начал писать в 12 лет 1943",
+     "question": "Which word does the phrase «в 12 лет» depend on?",
+     "options": [
+      "начал",
+      "писать"
+     ],
+     "answer": "начал"
+    },
+    {
+     "context": "Стихи начал писать в 12 лет 1943",
+     "question": "Какое число указывает календарный год, уточняющий названное время?",
+     "options": [
+      "1943"
+     ],
+     "answer": "1943"
+    }
+   ],
+   "same_as_control_graph": true
+  },
+  {
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "7299b65be9d38a8f9d525e3f7e49bc68116bf05069194ceeab8c9a99bf5864d2",
+   "id": "test-s34",
+   "variant": "no_punctuation",
+   "calls": [
+    {
+     "context": "Ещё в XIX в её использовали для лечения ревматизма и мочекислого диатеза а сегодня это вещество синтезируют в больших количествах так как оно служит основой для производства многих лекарств",
+     "question": "Какие слова в этом фрагменте вместе вводят следующую часть предложения?",
+     "options": [
+      "нет таких слов",
+      "как",
+      "так как",
+      "так"
+     ],
+     "answer": "так как"
+    },
+    {
+     "context": "Ещё в XIX в её использовали для лечения ревматизма и мочекислого диатеза а сегодня это вещество синтезируют в больших количествах так как оно служит основой для производства многих лекарств",
+     "question": "Что уточняет слово «Ещё» в этом контексте? Выберите опорные слова обстоятельства или действия.",
+     "options": [
+      "в XIX в",
+      "использовали"
+     ],
+     "answer": "в XIX в"
+    },
+    {
+     "context": "сегодня это вещество синтезируют в больших количествах",
+     "question": "Copy «синтезируют» if it describes a future action. Otherwise choose “no such word”.",
+     "options": [
+      "синтезируют",
+      "no such word"
+     ],
+     "answer": "no such word"
+    },
+    {
+     "context": "Ещё в XIX в её использовали для лечения ревматизма и мочекислого диатеза а сегодня это вещество синтезируют в больших количествах так как оно служит основой для производства многих лекарств",
+     "question": "Какое слово в творительном падеже называет, кем или чем выступает подлежащее?",
+     "options": [
+      "основой",
+      "нет такого слова"
+     ],
+     "answer": "основой"
+    },
+    {
+     "context": "Ещё в XIX в её использовали для лечения ревматизма и мочекислого диатеза а сегодня это вещество синтезируют в больших количествах так как оно служит основой для производства многих лекарств",
+     "question": "Copy «использовали» if the verb presents the action as a bounded whole. Otherwise choose “no such word”.",
+     "options": [
+      "использовали",
+      "no such word"
+     ],
+     "answer": "no such word"
+    },
+    {
+     "context": "Ещё в XIX в её использовали для лечения ревматизма и мочекислого диатеза а сегодня это вещество синтезируют в больших количествах так как оно служит основой для производства многих лекарств",
+     "question": "Copy «больших» if its dictionary form is «больший». Otherwise choose “no such word”.",
+     "options": [
+      "больших",
+      "no such word"
+     ],
+     "answer": "больших"
+    },
+    {
+     "context": "Ещё в XIX в её использовали для лечения ревматизма и мочекислого диатеза а сегодня это вещество синтезируют в больших количествах так как оно служит основой для производства многих лекарств",
+     "question": "Какое сочетание содержит сокращение слова «век»?",
+     "options": [
+      "XIX в"
+     ],
+     "answer": "XIX в"
+    },
+    {
+     "context": "Ещё в XIX в её использовали для лечения ревматизма и мочекислого диатеза а сегодня это вещество синтезируют в больших количествах так как оно служит основой для производства многих лекарств",
+     "question": "Какое слово характеризует согласованное определение «мочекислого»?",
+     "options": [
+      "диатеза"
+     ],
+     "answer": "диатеза"
+    }
+   ],
+   "same_as_control_graph": false
+  },
+  {
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "7ff6c11e1c69b72ae9681f76076abfe9d0bf0061572b5a686c34df00987c13b9",
+   "id": "test-s35",
+   "variant": "no_punctuation",
+   "calls": [
+    {
+     "context": "Хелен Луз родилась в спортивной семье её папа был баскетбольным тренером две сестры также профессионально играли в баскетбол",
+     "question": "Кем или чем здесь назван участник «папа»? Выберите сочетание из текста.",
+     "options": [
+      "баскетбольным тренером",
+      "нет такого сочетания"
+     ],
+     "answer": "баскетбольным тренером"
+    },
+    {
+     "context": "Хелен Луз родилась в спортивной семье её папа был баскетбольным тренером две сестры также профессионально играли в баскетбол",
+     "question": "В какое сочетание входит слово «её»?",
+     "options": [
+      "семье её",
+      "её папа"
+     ],
+     "answer": "её папа"
+    },
+    {
+     "context": "Хелен Луз родилась в спортивной семье её папа был баскетбольным тренером",
+     "question": "Which word does the possessive «её» refer to?",
+     "options": [
+      "Хелен",
+      "семье",
+      "no such word"
+     ],
+     "answer": "Хелен"
+    },
+    {
+     "context": "Хелен Луз родилась в спортивной семье её папа был баскетбольным тренером две сестры также профессионально играли в баскетбол",
+     "question": "Copy «родилась» if the verb presents the action as a bounded whole. Otherwise choose “no such word”.",
+     "options": [
+      "родилась",
+      "no such word"
+     ],
+     "answer": "родилась"
+    },
+    {
+     "context": "Хелен Луз родилась в спортивной семье её папа был баскетбольным тренером две сестры также профессионально играли в баскетбол",
+     "question": "Какое слово продолжает личное имя «Хелен»?",
+     "options": [
+      "Луз"
+     ],
+     "answer": "Луз"
+    }
+   ],
+   "same_as_control_graph": true
+  },
+  {
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "b4933eb2e8377e27e374045705a7b0d6a3d9d9601dd543ad9f24856bd9cb36c6",
+   "id": "test-s36",
+   "variant": "no_punctuation",
+   "calls": [],
+   "same_as_control_graph": true
+  },
+  {
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "1d6aa54d9375dc4acb616677ffc33f0b2336ba547fc5c19f89a8608053f97b64",
+   "id": "test-s37",
+   "variant": "no_punctuation",
+   "calls": [
+    {
+     "context": "Пришел и он тот незабвенный день",
+     "question": "Какое существительное здесь поясняет, кого или что обозначает «он»?",
+     "options": [
+      "день"
+     ],
+     "answer": "день"
+    }
+   ],
+   "same_as_control_graph": true
+  },
+  {
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "2a59502c7d81eff41a650c23626c5a91060519e01c481317d2abb6669cda50c8",
+   "id": "test-s38",
+   "variant": "no_punctuation",
+   "calls": [
+    {
+     "context": "Входит в состав сельского поселения Шелковская волость",
+     "question": "Copy «Шелковская» if its dictionary form is «шелковский». Otherwise choose “no such word”.",
+     "options": [
+      "Шелковская",
+      "no such word"
+     ],
+     "answer": "Шелковская"
+    },
+    {
+     "context": "Входит в состав сельского поселения Шелковская волость",
+     "question": "Какие слова вместе образуют название?",
+     "options": [
+      "Шелковская волость"
+     ],
+     "answer": "Шелковская волость"
+    }
+   ],
+   "same_as_control_graph": true
+  },
+  {
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "2f4752e8bb148b8975ec7d5ddd6672ca749e4c2d5053b9fe38c5ebc608383348",
+   "id": "test-s39",
+   "variant": "no_punctuation",
+   "calls": [],
+   "same_as_control_graph": true
+  },
+  {
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "906ca0b6cc2e2e22d0fd3a9a3baa4fb83d0f1e363f6e674cbe64f6e48443e241",
+   "id": "test-s40",
+   "variant": "no_punctuation",
+   "calls": [
+    {
+     "context": "Отразив турецкую атаку русские войска в 8 часу утра двинулись к главному ретраншаменту турецкого лагеря",
+     "question": "Which word does the phrase «в 8 часу» depend on?",
+     "options": [
+      "войска",
+      "двинулись"
+     ],
+     "answer": "двинулись"
+    },
+    {
+     "context": "Отразив турецкую атаку русские войска в 8 часу утра двинулись к главному ретраншаменту турецкого лагеря",
+     "question": "Какое слово управляется предлогом «к» и является формой существительного «ретраншамент»?",
+     "options": [
+      "ретраншаменту"
+     ],
+     "answer": "ретраншаменту"
+    }
+   ],
+   "same_as_control_graph": true
+  },
+  {
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "0bb62a1430b4414332f5b992d6061f97d6dd38327122323208956b5e28677409",
+   "id": "test-s41",
+   "variant": "no_punctuation",
+   "calls": [
+    {
+     "context": "В возрасте десяти лет Франсуа отправился в Льеж где играл в течение десяти лет прежде чем перейти в Унион Ла Каламине",
+     "question": "Which word is the subject of «отправился»?",
+     "options": [
+      "Франсуа",
+      "no such word"
+     ],
+     "answer": "Франсуа"
+    },
+    {
+     "context": "Франсуа отправился в Льеж где играл в течение десяти лет прежде",
+     "question": "Кто в этом предложении выполняет действие «играл»?",
+     "options": [
+      "Франсуа",
+      "no such word"
+     ],
+     "answer": "Франсуа"
+    },
+    {
+     "context": "В возрасте десяти лет Франсуа отправился в Льеж где играл в течение десяти лет прежде чем перейти в Унион Ла Каламине",
+     "question": "Какие слова вместе образуют название?",
+     "options": [
+      "Унион Ла Каламине"
+     ],
+     "answer": "Унион Ла Каламине"
+    }
+   ],
+   "same_as_control_graph": true
+  }
+ ],
+ "prior_s35": {
+  "status": "STORED",
+  "reason": "COMPLEX_CLAUSE",
+  "empty": false,
+  "exact": false,
+  "incorrect_heads": [
+   [
+    "её",
+    8,
+    6
+   ],
+   [
+    "папа",
+    11,
+    9
+   ],
+   [
+    "был",
+    11,
+    3
+   ],
+   [
+    "тренером",
+    3,
+    9
+   ]
+  ],
+  "role_scope_errors": [
+   "тренером: unexpected role oblique",
+   "её: unexpected role genitive_modifier"
+  ],
+  "graph_sha256": "92cb1383e54244c6fd8c454fc9f0ade1f937b32e5e8f46e06ca8a8b543d8ae64",
+  "id": "test-s35",
+  "variant": "no_punctuation",
+  "calls": [
+   {
+    "context": "Хелен Луз родилась в спортивной семье её папа был баскетбольным тренером две сестры также профессионально играли в баскетбол",
+    "question": "Copy «родилась» if the verb presents the action as a bounded whole. Otherwise choose “no such word”.",
+    "options": [
+     "родилась",
+     "no such word"
+    ],
+    "answer": "родилась"
+   },
+   {
+    "context": "Хелен Луз родилась в спортивной семье её папа был баскетбольным тренером две сестры также профессионально играли в баскетбол",
+    "question": "Which word does «папа» depend on?",
+    "options": [
+     "был",
+     "тренером"
+    ],
+    "answer": "был"
+   },
+   {
+    "context": "Хелен Луз родилась в спортивной семье её папа был баскетбольным тренером две сестры также профессионально играли в баскетбол",
+    "question": "Copy «её» if its role here is genitive modifier. Otherwise choose “no such word”.",
+    "options": [
+     "её",
+     "no such word"
+    ],
+    "answer": "её"
+   },
+   {
+    "context": "Хелен Луз родилась в спортивной семье её папа был баскетбольным тренером две сестры также профессионально играли в баскетбол",
+    "question": "Какое слово продолжает личное имя «Хелен»?",
+    "options": [
+     "Луз"
+    ],
+    "answer": "Луз"
+   }
+  ]
+ }
+}

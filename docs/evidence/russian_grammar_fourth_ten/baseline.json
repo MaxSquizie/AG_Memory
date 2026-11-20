@@ -1,0 +1,632 @@
+{
+ "corpus_sha256": "fa3642959614db06fdab2d7464af8a0873c70d0a2b5758758231d0ef725821ea",
+ "seconds_per_stage": 12,
+ "cases": [
+  {
+   "id": "test-s32",
+   "variant": "original",
+   "text": "Заслуженный деятель искусств Армянской ССР.",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s32",
+   "variant": "no_punctuation",
+   "text": "Заслуженный деятель искусств Армянской ССР",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s32",
+   "variant": "extra_comma",
+   "text": "Заслуженный, деятель искусств Армянской ССР.",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s33",
+   "variant": "original",
+   "text": "Стихи начал писать в 12 лет (1943).",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s33",
+   "variant": "no_punctuation",
+   "text": "Стихи начал писать в 12 лет 1943",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s33",
+   "variant": "extra_comma",
+   "text": "Стихи начал писать в 12, лет (1943).",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s34",
+   "variant": "original",
+   "text": "Ещё в XIX в. её использовали для лечения ревматизма и мочекислого диатеза, а сегодня это вещество синтезируют в больших количествах, так как оно служит основой для производства многих лекарств.",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s34",
+   "variant": "no_punctuation",
+   "text": "Ещё в XIX в её использовали для лечения ревматизма и мочекислого диатеза а сегодня это вещество синтезируют в больших количествах так как оно служит основой для производства многих лекарств",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "MODIFIER_BUDGET",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s34",
+   "variant": "extra_comma",
+   "text": "Ещё в XIX, в. её использовали для лечения ревматизма и мочекислого диатеза, а сегодня это вещество синтезируют в больших количествах, так как оно служит основой для производства многих лекарств.",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s35",
+   "variant": "original",
+   "text": "Хелен Луз родилась в спортивной семье, её папа был баскетбольным тренером, две сестры также профессионально играли в баскетбол.",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s35",
+   "variant": "no_punctuation",
+   "text": "Хелен Луз родилась в спортивной семье её папа был баскетбольным тренером две сестры также профессионально играли в баскетбол",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s35",
+   "variant": "extra_comma",
+   "text": "Хелен Луз родилась в спортивной, семье, её папа был баскетбольным тренером, две сестры также профессионально играли в баскетбол.",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s36",
+   "variant": "original",
+   "text": "В 2005 году было 1467 человек.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": false,
+   "incorrect_heads": [
+    [
+     "В",
+     3,
+     2
+    ],
+    [
+     "2005",
+     3,
+     4
+    ]
+   ],
+   "role_scope_errors": [
+    "2005: expected ordinal 2005"
+   ],
+   "graph_sha256": "ca6a48169c1b1bf5dfb75c8f71daabaa788d28e9684742660a2dcb1ae7f3d71d",
+   "calls": [
+    {
+     "question": "Copy «2005» if it is in the accusative case. Otherwise choose “no such word”.",
+     "options": [
+      "2005",
+      "no such word"
+     ],
+     "answer": "no such word",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": null
+  },
+  {
+   "id": "test-s36",
+   "variant": "no_punctuation",
+   "text": "В 2005 году было 1467 человек",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": false,
+   "incorrect_heads": [
+    [
+     "В",
+     3,
+     2
+    ],
+    [
+     "2005",
+     3,
+     4
+    ]
+   ],
+   "role_scope_errors": [
+    "2005: expected ordinal 2005"
+   ],
+   "graph_sha256": "ca6a48169c1b1bf5dfb75c8f71daabaa788d28e9684742660a2dcb1ae7f3d71d",
+   "calls": [
+    {
+     "question": "Copy «2005» if it is in the accusative case. Otherwise choose “no such word”.",
+     "options": [
+      "2005",
+      "no such word"
+     ],
+     "answer": "no such word",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": null
+  },
+  {
+   "id": "test-s36",
+   "variant": "extra_comma",
+   "text": "В 2005, году было 1467 человек.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": false,
+   "incorrect_heads": [
+    [
+     "В",
+     4,
+     2
+    ],
+    [
+     "2005",
+     4,
+     5
+    ]
+   ],
+   "role_scope_errors": [
+    "2005: expected ordinal 2005"
+   ],
+   "graph_sha256": "ca6a48169c1b1bf5dfb75c8f71daabaa788d28e9684742660a2dcb1ae7f3d71d",
+   "calls": [
+    {
+     "question": "Какое сочетание передаёт оговорку к самому сообщению о действии «было»?",
+     "options": [
+      "В 2005",
+      "нет такого сочетания"
+     ],
+     "answer": "нет такого сочетания",
+     "source": "control reading"
+    },
+    {
+     "question": "Copy «2005» if it is in the accusative case. Otherwise choose “no such word”.",
+     "options": [
+      "2005",
+      "no such word"
+     ],
+     "answer": "no such word",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": null
+  },
+  {
+   "id": "test-s37",
+   "variant": "original",
+   "text": "Пришел и он, тот незабвенный день,",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s37",
+   "variant": "no_punctuation",
+   "text": "Пришел и он тот незабвенный день",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s37",
+   "variant": "extra_comma",
+   "text": "Пришел и он, тот незабвенный, день,",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_PREFIX @7",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s38",
+   "variant": "original",
+   "text": "Входит в состав сельского поселения ``Шелковская волость&#39;&#39;.",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_PREFIX @26",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s38",
+   "variant": "no_punctuation",
+   "text": "Входит в состав сельского поселения Шелковская волость",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": false,
+   "incorrect_heads": [
+    [
+     "волость",
+     5,
+     1
+    ]
+   ],
+   "role_scope_errors": [
+    "волость: unexpected role subject",
+    "волость: expected scope title"
+   ],
+   "graph_sha256": "359c3772eabb3267932a41dca124c81d063076d6528fb329907c6512b3ca5b65",
+   "calls": [
+    {
+     "question": "Copy «Шелковская» if its dictionary form is «шелковский». Otherwise choose “no such word”.",
+     "options": [
+      "Шелковская",
+      "no such word"
+     ],
+     "answer": "Шелковская",
+     "source": "reference tree"
+    }
+   ],
+   "same_as_original": null
+  },
+  {
+   "id": "test-s38",
+   "variant": "extra_comma",
+   "text": "Входит в состав сельского, поселения ``Шелковская волость&#39;&#39;.",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_RULE @25",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s39",
+   "variant": "original",
+   "text": "Составно́е число́ -- натуральное число, бо́льшее 1, не являющееся простым.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": [
+    {
+     "question": "Какое написание передаёт слово «Составно» в этом предложении?",
+     "options": [
+      "Составно",
+      "Поставно",
+      "Составное",
+      "Составной",
+      "Составном",
+      "Составною",
+      "Суставно"
+     ],
+     "answer": "Составно",
+     "source": "verbatim"
+    }
+   ]
+  },
+  {
+   "id": "test-s39",
+   "variant": "no_punctuation",
+   "text": "Составно́е число́ натуральное число бо́льшее 1 не являющееся простым",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": [
+    {
+     "question": "Какое написание передаёт слово «Составно» в этом предложении?",
+     "options": [
+      "Составно",
+      "Поставно",
+      "Составное",
+      "Составной",
+      "Составном",
+      "Составною",
+      "Суставно"
+     ],
+     "answer": "Составно",
+     "source": "verbatim"
+    }
+   ]
+  },
+  {
+   "id": "test-s39",
+   "variant": "extra_comma",
+   "text": "Составно́е, число́ -- натуральное число, бо́льшее 1, не являющееся простым.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": [
+    {
+     "question": "Какое написание передаёт слово «Составно» в этом предложении?",
+     "options": [
+      "Составно",
+      "Поставно",
+      "Составное",
+      "Составной",
+      "Составном",
+      "Составною",
+      "Суставно"
+     ],
+     "answer": "Составно",
+     "source": "verbatim"
+    }
+   ]
+  },
+  {
+   "id": "test-s40",
+   "variant": "original",
+   "text": "Отразив турецкую атаку, русские войска в 8 часу утра двинулись к главному ретраншаменту турецкого лагеря.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": [
+    {
+     "question": "Какое написание передаёт слово «ретраншаменту» в этом предложении?",
+     "options": [
+      "ретраншаменту",
+      "ретраншементу"
+     ],
+     "answer": "ретраншаменту",
+     "source": "verbatim"
+    }
+   ]
+  },
+  {
+   "id": "test-s40",
+   "variant": "no_punctuation",
+   "text": "Отразив турецкую атаку русские войска в 8 часу утра двинулись к главному ретраншаменту турецкого лагеря",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": [
+    {
+     "question": "Какое написание передаёт слово «ретраншаменту» в этом предложении?",
+     "options": [
+      "ретраншаменту",
+      "ретраншементу"
+     ],
+     "answer": "ретраншаменту",
+     "source": "verbatim"
+    }
+   ]
+  },
+  {
+   "id": "test-s40",
+   "variant": "extra_comma",
+   "text": "Отразив турецкую, атаку, русские войска в 8 часу утра двинулись к главному ретраншаменту турецкого лагеря.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": [
+    {
+     "question": "Какое написание передаёт слово «ретраншаменту» в этом предложении?",
+     "options": [
+      "ретраншаменту",
+      "ретраншементу"
+     ],
+     "answer": "ретраншаменту",
+     "source": "verbatim"
+    }
+   ]
+  },
+  {
+   "id": "test-s41",
+   "variant": "original",
+   "text": "В возрасте десяти лет Франсуа отправился в Льеж, где играл в течение десяти лет прежде, чем перейти в ``Унион Ла Каламине&#39;&#39;.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": [
+    {
+     "question": "Какое написание передаёт слово «Унион» в этом предложении?",
+     "options": [
+      "Унион",
+      "Анион",
+      "Инион",
+      "Унисон",
+      "Юнион"
+     ],
+     "answer": "Унион",
+     "source": "verbatim"
+    }
+   ]
+  },
+  {
+   "id": "test-s41",
+   "variant": "no_punctuation",
+   "text": "В возрасте десяти лет Франсуа отправился в Льеж где играл в течение десяти лет прежде чем перейти в Унион Ла Каламине",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": [
+    {
+     "question": "Какое написание передаёт слово «Унион» в этом предложении?",
+     "options": [
+      "Унион",
+      "Анион",
+      "Инион",
+      "Унисон",
+      "Юнион"
+     ],
+     "answer": "Унион",
+     "source": "verbatim"
+    }
+   ]
+  },
+  {
+   "id": "test-s41",
+   "variant": "extra_comma",
+   "text": "В возрасте десяти лет Франсуа, отправился в Льеж, где играл в течение десяти лет прежде, чем перейти в ``Унион Ла Каламине&#39;&#39;.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": [
+    {
+     "question": "Какое написание передаёт слово «Унион» в этом предложении?",
+     "options": [
+      "Унион",
+      "Анион",
+      "Инион",
+      "Унисон",
+      "Юнион"
+     ],
+     "answer": "Унион",
+     "source": "verbatim"
+    }
+   ]
+  }
+ ]
+}

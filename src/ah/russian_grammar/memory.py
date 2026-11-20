@@ -92,7 +92,7 @@ def _rows(result, participants):
     while pending:
         i, enclosing, governing_status = pending.pop()
         row = rows[i]
-        if (row['scope'] or '').split('_', 1)[0] == 'title' and row['role'] in ('apposition', 'nominal_conjunct', 'genitive_modifier'):
+        if (row['scope'] or '').split('_', 1)[0] == 'title' and row['role'] in ('apposition', 'nominal_conjunct', 'genitive_modifier', 'governed'):
             row['quotation'] = i
             enclosing = governing_status = 'title'
         elif row['rule'] == 'UTT.QUOTE':

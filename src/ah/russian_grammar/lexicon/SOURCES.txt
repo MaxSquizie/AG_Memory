@@ -213,3 +213,12 @@ See the FrameBank revision and license above.
 python scripts/import_russian_reference_abbreviations.py framebank_dict_cx.txt src/ah/russian_grammar/lexicon/reference-abbreviations.tsv
 
 The phase row in infinitive_control.tsv also includes the infinitive-taking readings of стать and бросить from N. Shapiro, Типы сказуемого, «Русский язык» 43 (2003), https://rus.1sept.ru/article.php?ID=200304304.
+
+ordinal-abbreviations.tsv contains abbreviated common nouns with an immediately
+preceding Roman ordinal modifier and a governing preposition in Russian-GSD r2.15 train (CC BY-SA 4.0).
+python scripts/import_russian_ordinal_abbreviations.py ru_gsd-ud-train.conllu src/ah/russian_grammar/lexicon/ordinal-abbreviations.tsv
+
+infinitive-connectives.tsv: pairs of an adverb and a subordinating conjunction
+attested with an adverbial infinitive clause in UD Russian-GSD r2.15 training
+data (CC BY-SA 4.0). The dependency label is preserved as an adverbial relation.
+python scripts/import_russian_infinitive_connectives.py ru_gsd-ud-train.conllu src/ah/russian_grammar/lexicon/infinitive-connectives.tsv

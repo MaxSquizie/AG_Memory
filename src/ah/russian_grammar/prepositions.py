@@ -5,7 +5,10 @@ import re
 
 
 DASHES = frozenset(('--', '—', '–', '-'))
-TOKEN = re.compile(r"(?:&#(?:0*39|[xX]0*27);|&apos;){2}|`{2}|'{2}|" r'[^\W\d_]+(?:[-‐‑][^\W\d_]+)*|(?:\d{1,3}(?:[ \u00a0\u202f]\d{3}(?!\d))+|\d+)(?:[.,/]\d+|[-‐‑][а-яА-ЯёЁ]+)?|--|[^\s]', re.UNICODE)
+STRESS = r'(?<=[аеёиоуыэюяАЕЁИОУЫЭЮЯ])[\u0301\u0341]'
+STRESSED_VOWEL = re.compile(STRESS)
+LETTERS = rf'(?:[^\W\d_](?:{STRESS})?)+'
+TOKEN = re.compile(r"(?:&#(?:0*39|[xX]0*27);|&apos;){2}|`{2}|'{2}|" rf'{LETTERS}(?:[-‐‑]{LETTERS})*|' r'(?:\d{1,3}(?:[ \u00a0\u202f]\d{3}(?!\d))+|\d+)(?:[.,/]\d+|[-‐‑][а-яА-ЯёЁ]+)?|--|[^\s]', re.UNICODE)
 
 
 def _load_lexicon():

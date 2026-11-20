@@ -22,11 +22,11 @@ def _attributes(word):
             if p.tag.POS == 'ADJF']
 
 
-def _nominals(tokens, start, cases, head, role):
+def _nominals(tokens, start, cases, head, role, *, noun_forms=known_forms):
     modifiers = []
     for index in range(start, len(tokens)):
         surface = tokens[index].surface
-        for lemma, tag in known_forms(surface):
+        for lemma, tag in noun_forms(surface):
             if tag.POS not in {'NOUN', 'NPRO'} or tag.case not in cases:
                 continue
             attrs = []

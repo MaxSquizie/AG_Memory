@@ -44,7 +44,9 @@ def readings(tokens, tree, budget):
 
 def _phrase(tree, head, prep):
     if tree[head].role == 'governed':
-        parts = [i for i in range(prep + 1, head) if tree[i].role == 'prep_part' and tree[i].head == prep]
+        parts = [i for i in range(prep + 1, head)
+                 if (tree[i].role == 'prep_part' and tree[i].head == prep
+                     or tree[i].role in {'attribute', 'numeral', 'possessive'} and tree[i].head == head)]
         return (prep, *parts, head)
     end = head + 1
     while end < len(tree) and tree[end].role == 'infinitive' and tree[end].head == end - 1 and tree[end].scope in ('phase', 'modal'):
@@ -71,9 +73,10 @@ def partitions(trees, tokens, text):
         labels = {}
         choices = []
         for members, head in ordered:
-            if len(members) != members[-1] - members[0] + 1:
+            gaps = set(range(members[0], members[-1] + 1)).difference(members)
+            if any(tree[j].role != 'punctuation' for j in gaps for tree in trees):
                 members = (head,)
-            labels[head] = _span_label(tokens, members[0], members[-1] + 1)
+            labels[head] = _span_label(tokens, members[0], members[-1] + 1).replace(' ,', ',')
             choices.append(FocusChoice(i, members))
         if len(set(labels.values())) != len(labels):
             continue

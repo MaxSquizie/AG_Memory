@@ -1,7 +1,7 @@
 from .homogeneous import _restore
 from .nominal_groups import _agree
 from .prepositions import FORMS
-from .rules import known_forms
+from .rules import known_forms, readings, subject_agrees
 
 
 class BoundaryChoice(Exception):
@@ -17,14 +17,20 @@ class BoundaryChoice(Exception):
 
 
 def _compatible(left, right):
+    from .clause_series import ordinal_abbreviation
+
     def nominal(surface):
         return tuple(tag for _, tag in known_forms(surface) if tag.POS in {'NOUN', 'NPRO'})
     def adjective(surface):
         return tuple(tag for _, tag in known_forms(surface) if tag.POS in {'ADJF', 'PRTF'})
-    if left.isdecimal() and nominal(right):
+    if ordinal_abbreviation(left, right) or left.isdecimal() and nominal(right):
         return True
     if left.casefold() in FORMS and (nominal(right) or adjective(right)):
         return True
+    for subject, verb in ((left, right), (right, left)):
+        if any(a.role == 'subject' and v.role == 'predicate' and subject_agrees(a, v)
+               for a in readings(subject) for v in readings(verb)):
+            return True
     return any(_agree(adj, noun) for a, n in ((left, right), (right, left))
                for adj in adjective(a) for noun in nominal(n))
 

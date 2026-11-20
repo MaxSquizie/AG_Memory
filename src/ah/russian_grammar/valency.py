@@ -52,9 +52,13 @@ def violation(tokens, tree):
                 return 'INVALID_GOVERNED_CASE'
         if link.rule == 'V.CMP' and (not form or form.pos != 'COMP'):
             return 'INVALID_COMPARATIVE_PREDICATE'
+        if link.rule == 'CMP.ATTR':
+            from .nominal_definitions import comparative_forms
+            if not any(lemma == link.lemma for lemma, _ in comparative_forms(token.surface)):
+                return 'INVALID_COMPARATIVE_ATTRIBUTE'
         if link.role == 'comparison_standard':
             marked = 'comparison_marker' in children[i]
-            if (link.head is None or tree[link.head].rule not in ('V.CMP', 'CMP.ADV') or
+            if (link.head is None or tree[link.head].rule not in ('V.CMP', 'CMP.ADV', 'CMP.ATTR') or
                     link.case != ('nomn' if marked else 'gent')):
                 return 'INVALID_COMPARISON'
         if link.role not in PREDICATE_ROLES | {'infinitive', 'converb', 'participle'}:

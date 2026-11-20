@@ -15,10 +15,10 @@ from ah.russian_grammar.memory import _rows, submit
 from ah.russian_grammar.parser import _partition
 
 
-def batch(path):
+def batch(path, start=22, end=31):
     if hashlib.sha256(path.read_bytes()).hexdigest() != DIGEST:
         raise ValueError('Unexpected Russian-GSD revision')
-    return [case for case in sentences(path) if 22 <= int(case[0].split('-s')[1]) <= 31]
+    return [case for case in sentences(path) if start <= int(case[0].split('-s')[1]) <= end]
 
 
 def bounds(text, rows):
@@ -167,8 +167,8 @@ def semantic_errors(identity, words):
     return errors
 
 
-def compare(words, gold, identity):
-    issues = grammatical_errors(words, gold) + semantic_errors(identity, words)
+def compare(words, gold, identity, semantics=semantic_errors):
+    issues = grammatical_errors(words, gold) + semantics(identity, words)
     projected = [word['head'] for word in words]
     for i, word in enumerate(words):
         shared = word.get('coord_head')
@@ -253,7 +253,7 @@ def projection(words, gold):
     return result
 
 
-def inspect(core, reply, text, gold, identity):
+def inspect(core, reply, text, gold, identity, *, evaluate=compare, project=projection):
     result = {'status': reply.status, 'reason': reply.analysis.reason}
     good = 'DIRECTIVE' if identity == 'test-s24' else 'STORED'
     result['empty'] = not core.store.links() and not any(core.store.elements(domain) for domain in Domain)
@@ -270,7 +270,13 @@ def inspect(core, reply, text, gold, identity):
             raise ValueError('Verbatim observation changed')
         words = [core.store.get_element(Domain.H, member.uid).meta for member in group.members]
         edges = {(e.source, e.target, e.relation_id) for e in core.store.links()}
+        starts = {w['start']: ref for w, ref in zip(words, group.members)}
         for i, w in enumerate(words):
+            if w.get('focus_offsets'):
+                anchors = [target for src, target, relation in edges if src == group.members[i] and relation == 'grammar.modifier_scope']
+                expected = tuple(starts[offset] for offset in w['focus_offsets'])
+                if len(anchors) != 1 or core.store.get_element(Domain.H, anchors[0].uid).members != expected:
+                    raise ValueError('Missing confirmed modifier focus in memory')
             for field in LINKS:
                 if w.get(field) is None:
                     continue
@@ -282,10 +288,11 @@ def inspect(core, reply, text, gold, identity):
         words = _rows(analyzed, {})
     if len(analyzed.analyses) != 1 or any(r[3] != 'PUNCT' for r in aligned[len(words):]):
         raise ValueError('Incomplete token coverage')
-    if any(w['surface'] != t.surface or text[t.start:t.end] != w['surface'] for w, t in zip(words, analyzed.tokens)):
+    if any((w['surface'], w['start'], w['end']) != (t.surface, t.start, t.end) or text[t.start:t.end] != w['surface']
+           for w, t in zip(words, analyzed.tokens)):
         raise ValueError('Bad source span')
-    heads, issues = compare(words, aligned, identity)
-    graph = projection(words, aligned)
+    heads, issues = evaluate(words, aligned, identity)
+    graph = project(words, aligned)
     result.update(exact=not heads and not issues and reply.status == good, incorrect_heads=heads,
                   role_scope_errors=issues, graph_sha256=digest(graph))
     return result, graph
@@ -304,7 +311,7 @@ def expire(*_):
     raise TimeoutError
 
 
-def run(identity, variant, text, gold, seconds):
+def run(identity, variant, text, gold, seconds, *, evaluate=compare, reference=reference_answer, project=projection, reject=False):
     record = {'id': identity, 'variant': variant, 'text': text}
     calls = []
     def choose(probe):
@@ -319,7 +326,7 @@ def run(identity, variant, text, gold, seconds):
     try:
         with time_limit(seconds):
             reply = submit(core, text, choose)
-            reading, graph = inspect(core, reply, text, gold, identity)
+            reading, graph = inspect(core, reply, text, gold, identity, evaluate=evaluate, project=project)
     except TimeoutError:
         if core.store.links() or any(core.store.elements(domain) for domain in Domain):
             raise ValueError('Timeout left a partial observation')
@@ -331,8 +338,16 @@ def run(identity, variant, text, gold, seconds):
         record['abstention_exact'] = reading['exact']
     if not calls:
         return {**record, **reading, 'calls': []}, graph
+    if reject:
+        rejected_core = AHCore()
+        with time_limit(seconds):
+            rejected = submit(rejected_core, text, lambda p: '0')
+        empty = not rejected_core.store.links() and not any(rejected_core.store.elements(domain) for domain in Domain)
+        record.update(rejection=rejected.status, rejection_reason=rejected.analysis.reason, rejection_empty=empty)
+        if not empty or rejected.analysis.reason != 'OPTIONS_REJECTED':
+            raise ValueError(f'Rejecting an offered probe changed memory or did not reject the options: {identity}')
     calls.clear()
-    selector = lambda p: reference_answer(identity, text, p, gold)
+    selector = lambda p: reference(identity, text, p, gold)
     try:
         with time_limit(seconds):
             if not reply.analysis.analyses:
@@ -346,7 +361,7 @@ def run(identity, variant, text, gold, seconds):
                 tokens = parsed.tokens[:len(trees[0])]
                 def score(tree):
                     rows = _rows(replace(parsed, analyses=(tree,)), {})
-                    heads, issues = compare(rows, aligned, identity)
+                    heads, issues = evaluate(rows, aligned, identity)
                     lemmas = sum(w['lemma'].casefold().replace('ё','е') != row[2].casefold().replace('ё','е')
                                  for w, row in zip(rows, aligned) if row[3] != 'PUNCT')
                     return len(issues), len(heads), lemmas
@@ -361,17 +376,17 @@ def run(identity, variant, text, gold, seconds):
                         optimal = {key for tree, key in zip(trees, keys) if scores[tree] == scores[target]}
                         source = 'reference tree'
                         if len(optimal) > 1:
-                            answer, source = reference_answer(identity, text, p, gold)
+                            answer, source = reference(identity, text, p, gold)
                             if answer not in optimal:
                                 return '?', 'unanswered reference tie'
                         trees = tuple(tree for tree, key in zip(trees, keys) if key == answer)
                         target = min(trees, key=scores.get)
                         return answer, source
-                    return reference_answer(identity, text, p, gold)
+                    return reference(identity, text, p, gold)
             core = AHCore()
             calls.clear()
             reply = submit(core, text, choose)
-            reading, graph = inspect(core, reply, text, gold, identity)
+            reading, graph = inspect(core, reply, text, gold, identity, evaluate=evaluate, project=project)
     except TimeoutError:
         if core.store.links() or any(core.store.elements(domain) for domain in Domain):
             raise ValueError('Timeout left a partial observation')
@@ -379,7 +394,7 @@ def run(identity, variant, text, gold, seconds):
     return {**record, **reading, 'calls':calls}, graph
 
 
-def main():
+def main(case_batch=batch, evaluate_case=run):
     parser = argparse.ArgumentParser()
     parser.add_argument('corpus', type=Path)
     parser.add_argument('output', type=Path)
@@ -389,12 +404,12 @@ def main():
     args = parser.parse_args()
     signal.signal(signal.SIGPROF, expire)
     results = []
-    for identity, raw, rows in batch(args.corpus):
+    for identity, raw, rows in case_batch(args.corpus):
         if args.ids and identity not in args.ids:
             continue
         reference = None
         for variant, text, gold in variants(raw, rows):
-            result, graph = run(identity, variant, text, gold, args.seconds)
+            result, graph = evaluate_case(identity, variant, text, gold, args.seconds)
             if variant == 'original':
                 reference = graph if result['exact'] else None
             if graph is not None:

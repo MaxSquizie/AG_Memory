@@ -312,7 +312,11 @@ def _partitions(analyses, tokens, text):
             labels[None] = 'no such word'
         return Probe(question, tuple(labels.values()), context), [labels[i] for i in indices]
 
-    from . import nominal_predicates
+    from . import clause_series, nominal_definitions, nominal_mentions, nominal_predicates, temporal_groups
+    yield from clause_series.partitions(analyses, tokens, text)
+    yield from nominal_definitions.partitions(analyses, tokens, text)
+    yield from nominal_mentions.partitions(analyses, tokens, text)
+    yield from temporal_groups.partitions(analyses, tokens, text)
     yield from nominal_predicates.partitions(analyses, tokens, text)
     yield from modifier_focus.partitions(analyses, tokens, text)
 
@@ -610,6 +614,8 @@ def _partitions(analyses, tokens, text):
             if len(set(controllers)) > 1:
                 question = (f'Which word names the subject of «{focus}»?' if roles == {'clause_conjunct'}
                             else f'Who is to perform the action «{focus}»?')
+                if roles == {'clause_relative'}:
+                    question = f'Кто в этом предложении выполняет действие «{focus}»?'
                 yield word_choice(question, controllers, context)
         heads = [link.head for link in links]
         if roles == {'name_part', 'attribute'} and len(set(heads)) == 1 and heads[0] < i:
@@ -650,6 +656,8 @@ def _partition(analyses, tokens, text):
             for role in roles[:-1]:
                 choices.append(binary(f'Copy «{focus}» if its role here is {role.replace("_", " ")}.', focus,
                                       [link.role == role for link in links]))
+            continue
+        if roles == ['punctuation']:
             continue
         heads = [link.head for link in links]
         if len(set(heads)) > 1:
@@ -990,7 +998,7 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
 
     @reuse_completed
     def remaining(part):
-        yield from sentence_regions.remaining(part, budget)
+        yield from sentence_regions.remaining(part, candidates, budget)
 
     def checked_comma_readings(part, parse, sites=None):
         if part in comma_choices and comma_choices[part] is None:
@@ -1110,11 +1118,15 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
             budget_error = None
             try:
                 collect(exact(working_words))
+            except AnalysisBudgetExceeded as error:
+                budget_error = error
+                structures.clear()
+            try:
                 if not structures:
                     collect(exact(working_words, lambda part: readings_for_region(part, remaining, None)))
-                if not structures and any(t.surface == ',' for t in working_words):
+                if not structures and budget_error is None and any(t.surface == ',' for t in working_words):
                     collect(exact(working_words, lambda part: checked_comma_readings(part, supplemented)))
-                if not structures:
+                if not structures and budget_error is None:
                     collect(recovery.trees(working_words, exact, budget=budget))
             except AnalysisBudgetExceeded as error:
                 budget_error = error

@@ -1,0 +1,1316 @@
+{
+ "corpus_sha256": "fa3642959614db06fdab2d7464af8a0873c70d0a2b5758758231d0ef725821ea",
+ "seconds_per_stage": 12,
+ "cases": [
+  {
+   "id": "test-s32",
+   "variant": "original",
+   "text": "Заслуженный деятель искусств Армянской ССР.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "ba3256447549b978dec69b513f0d0201870dcdf63b3b5396706ef517106c525e",
+   "calls": [
+    {
+     "question": "Какое слово уточняет группа «Армянской ССР» в родительном падеже?",
+     "options": [
+      "деятель",
+      "искусств"
+     ],
+     "answer": "деятель",
+     "source": "reference tree"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s32",
+   "variant": "no_punctuation",
+   "text": "Заслуженный деятель искусств Армянской ССР",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "ba3256447549b978dec69b513f0d0201870dcdf63b3b5396706ef517106c525e",
+   "calls": [
+    {
+     "question": "Какое слово уточняет группа «Армянской ССР» в родительном падеже?",
+     "options": [
+      "деятель",
+      "искусств"
+     ],
+     "answer": "деятель",
+     "source": "reference tree"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s32",
+   "variant": "extra_comma",
+   "text": "Заслуженный, деятель искусств Армянской ССР.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "ba3256447549b978dec69b513f0d0201870dcdf63b3b5396706ef517106c525e",
+   "calls": [
+    {
+     "question": "В каком сочетании слова связаны напрямую, несмотря на запятую между ними?",
+     "options": [
+      "Заслуженный, деятель",
+      "сохранить все запятые"
+     ],
+     "answer": "Заслуженный, деятель",
+     "source": "UD"
+    },
+    {
+     "question": "Какое слово уточняет группа «Армянской ССР» в родительном падеже?",
+     "options": [
+      "деятель",
+      "искусств"
+     ],
+     "answer": "деятель",
+     "source": "reference tree"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s33",
+   "variant": "original",
+   "text": "Стихи начал писать в 12 лет (1943).",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "9b1d6be935b621b8d4e26a962b299729ad3109dab9c657f0add02bd9922825ad",
+   "calls": [
+    {
+     "question": "Which word does the phrase «в 12 лет» depend on?",
+     "options": [
+      "начал",
+      "писать"
+     ],
+     "answer": "начал",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое число указывает календарный год, уточняющий названное время?",
+     "options": [
+      "1943"
+     ],
+     "answer": "1943",
+     "source": "control reading"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s33",
+   "variant": "no_punctuation",
+   "text": "Стихи начал писать в 12 лет 1943",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "9b1d6be935b621b8d4e26a962b299729ad3109dab9c657f0add02bd9922825ad",
+   "calls": [
+    {
+     "question": "Which word does the phrase «в 12 лет» depend on?",
+     "options": [
+      "начал",
+      "писать"
+     ],
+     "answer": "начал",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое число указывает календарный год, уточняющий названное время?",
+     "options": [
+      "1943"
+     ],
+     "answer": "1943",
+     "source": "control reading"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s33",
+   "variant": "extra_comma",
+   "text": "Стихи начал писать в 12, лет (1943).",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "9b1d6be935b621b8d4e26a962b299729ad3109dab9c657f0add02bd9922825ad",
+   "calls": [
+    {
+     "question": "В каком сочетании слова связаны напрямую, несмотря на запятую между ними?",
+     "options": [
+      "12, лет",
+      "сохранить все запятые"
+     ],
+     "answer": "12, лет",
+     "source": "UD"
+    },
+    {
+     "question": "Which word does the phrase «в 12, лет» depend on?",
+     "options": [
+      "начал",
+      "писать"
+     ],
+     "answer": "начал",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое число указывает календарный год, уточняющий названное время?",
+     "options": [
+      "1943"
+     ],
+     "answer": "1943",
+     "source": "control reading"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s34",
+   "variant": "original",
+   "text": "Ещё в XIX в. её использовали для лечения ревматизма и мочекислого диатеза, а сегодня это вещество синтезируют в больших количествах, так как оно служит основой для производства многих лекарств.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "2b8dfa30bfd061773798d8cec13024c96b468ef174d1d82e8f526160807cbe79",
+   "calls": [
+    {
+     "question": "Какие слова в этом фрагменте вместе вводят следующую часть предложения?",
+     "options": [
+      "так как",
+      "так"
+     ],
+     "answer": "так как",
+     "source": "reference tree"
+    },
+    {
+     "question": "Что уточняет слово «Ещё» в этом контексте? Выберите опорные слова обстоятельства или действия.",
+     "options": [
+      "в XIX в",
+      "использовали"
+     ],
+     "answer": "в XIX в",
+     "source": "reference tree"
+    },
+    {
+     "question": "Copy «синтезируют» if it describes a future action. Otherwise choose “no such word”.",
+     "options": [
+      "синтезируют",
+      "no such word"
+     ],
+     "answer": "no such word",
+     "source": "UD"
+    },
+    {
+     "question": "Какое слово в творительном падеже называет, кем или чем выступает подлежащее?",
+     "options": [
+      "основой",
+      "нет такого слова"
+     ],
+     "answer": "основой",
+     "source": "reference tree"
+    },
+    {
+     "question": "Copy «использовали» if the verb presents the action as a bounded whole. Otherwise choose “no such word”.",
+     "options": [
+      "использовали",
+      "no such word"
+     ],
+     "answer": "no such word",
+     "source": "UD"
+    },
+    {
+     "question": "Copy «больших» if its dictionary form is «больший». Otherwise choose “no such word”.",
+     "options": [
+      "больших",
+      "no such word"
+     ],
+     "answer": "no such word",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое сочетание содержит сокращение слова «век»?",
+     "options": [
+      "XIX в"
+     ],
+     "answer": "XIX в",
+     "source": "control reading"
+    },
+    {
+     "question": "Какое слово характеризует согласованное определение «мочекислого»?",
+     "options": [
+      "диатеза"
+     ],
+     "answer": "диатеза",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s34",
+   "variant": "no_punctuation",
+   "text": "Ещё в XIX в её использовали для лечения ревматизма и мочекислого диатеза а сегодня это вещество синтезируют в больших количествах так как оно служит основой для производства многих лекарств",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "2b8dfa30bfd061773798d8cec13024c96b468ef174d1d82e8f526160807cbe79",
+   "calls": [
+    {
+     "question": "Какие слова в этом фрагменте вместе вводят следующую часть предложения?",
+     "options": [
+      "нет таких слов",
+      "как",
+      "так как",
+      "так"
+     ],
+     "answer": "так как",
+     "source": "reference tree"
+    },
+    {
+     "question": "Что уточняет слово «Ещё» в этом контексте? Выберите опорные слова обстоятельства или действия.",
+     "options": [
+      "в XIX в",
+      "использовали"
+     ],
+     "answer": "в XIX в",
+     "source": "reference tree"
+    },
+    {
+     "question": "Copy «синтезируют» if it describes a future action. Otherwise choose “no such word”.",
+     "options": [
+      "синтезируют",
+      "no such word"
+     ],
+     "answer": "no such word",
+     "source": "UD"
+    },
+    {
+     "question": "Какое слово в творительном падеже называет, кем или чем выступает подлежащее?",
+     "options": [
+      "основой",
+      "нет такого слова"
+     ],
+     "answer": "основой",
+     "source": "reference tree"
+    },
+    {
+     "question": "Copy «использовали» if the verb presents the action as a bounded whole. Otherwise choose “no such word”.",
+     "options": [
+      "использовали",
+      "no such word"
+     ],
+     "answer": "no such word",
+     "source": "UD"
+    },
+    {
+     "question": "Copy «больших» if its dictionary form is «больший». Otherwise choose “no such word”.",
+     "options": [
+      "больших",
+      "no such word"
+     ],
+     "answer": "no such word",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое сочетание содержит сокращение слова «век»?",
+     "options": [
+      "XIX в"
+     ],
+     "answer": "XIX в",
+     "source": "control reading"
+    },
+    {
+     "question": "Какое слово характеризует согласованное определение «мочекислого»?",
+     "options": [
+      "диатеза"
+     ],
+     "answer": "диатеза",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s34",
+   "variant": "extra_comma",
+   "text": "Ещё в XIX, в. её использовали для лечения ревматизма и мочекислого диатеза, а сегодня это вещество синтезируют в больших количествах, так как оно служит основой для производства многих лекарств.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "2b8dfa30bfd061773798d8cec13024c96b468ef174d1d82e8f526160807cbe79",
+   "calls": [
+    {
+     "question": "В каком сочетании слова связаны напрямую, несмотря на запятую между ними?",
+     "options": [
+      "XIX, в",
+      "сохранить все запятые"
+     ],
+     "answer": "XIX, в",
+     "source": "UD"
+    },
+    {
+     "question": "Какие слова в этом фрагменте вместе вводят следующую часть предложения?",
+     "options": [
+      "так как",
+      "так"
+     ],
+     "answer": "так как",
+     "source": "reference tree"
+    },
+    {
+     "question": "Что уточняет слово «Ещё» в этом контексте? Выберите опорные слова обстоятельства или действия.",
+     "options": [
+      "в XIX, в",
+      "использовали"
+     ],
+     "answer": "в XIX, в",
+     "source": "reference tree"
+    },
+    {
+     "question": "Copy «синтезируют» if it describes a future action. Otherwise choose “no such word”.",
+     "options": [
+      "синтезируют",
+      "no such word"
+     ],
+     "answer": "no such word",
+     "source": "UD"
+    },
+    {
+     "question": "Какое слово в творительном падеже называет, кем или чем выступает подлежащее?",
+     "options": [
+      "основой",
+      "нет такого слова"
+     ],
+     "answer": "основой",
+     "source": "reference tree"
+    },
+    {
+     "question": "Copy «использовали» if the verb presents the action as a bounded whole. Otherwise choose “no such word”.",
+     "options": [
+      "использовали",
+      "no such word"
+     ],
+     "answer": "no such word",
+     "source": "UD"
+    },
+    {
+     "question": "Copy «больших» if its dictionary form is «больший». Otherwise choose “no such word”.",
+     "options": [
+      "больших",
+      "no such word"
+     ],
+     "answer": "no such word",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое сочетание содержит сокращение слова «век»?",
+     "options": [
+      "XIX, в"
+     ],
+     "answer": "XIX, в",
+     "source": "control reading"
+    },
+    {
+     "question": "Какое слово характеризует согласованное определение «мочекислого»?",
+     "options": [
+      "диатеза"
+     ],
+     "answer": "диатеза",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s35",
+   "variant": "original",
+   "text": "Хелен Луз родилась в спортивной семье, её папа был баскетбольным тренером, две сестры также профессионально играли в баскетбол.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "7ff6c11e1c69b72ae9681f76076abfe9d0bf0061572b5a686c34df00987c13b9",
+   "calls": [
+    {
+     "question": "Which word does the possessive «её» refer to?",
+     "options": [
+      "Хелен",
+      "семье",
+      "no such word"
+     ],
+     "answer": "Хелен",
+     "source": "control reading"
+    },
+    {
+     "question": "Кем или чем здесь назван участник «папа»? Выберите сочетание из текста.",
+     "options": [
+      "баскетбольным тренером",
+      "нет такого сочетания"
+     ],
+     "answer": "баскетбольным тренером",
+     "source": "reference tree"
+    },
+    {
+     "question": "Copy «родилась» if the verb presents the action as a bounded whole. Otherwise choose “no such word”.",
+     "options": [
+      "родилась",
+      "no such word"
+     ],
+     "answer": "родилась",
+     "source": "UD"
+    },
+    {
+     "question": "Какое слово продолжает личное имя «Хелен»?",
+     "options": [
+      "Луз"
+     ],
+     "answer": "Луз",
+     "source": "control reading"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s35",
+   "variant": "no_punctuation",
+   "text": "Хелен Луз родилась в спортивной семье её папа был баскетбольным тренером две сестры также профессионально играли в баскетбол",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "7ff6c11e1c69b72ae9681f76076abfe9d0bf0061572b5a686c34df00987c13b9",
+   "calls": [
+    {
+     "question": "Кем или чем здесь назван участник «папа»? Выберите сочетание из текста.",
+     "options": [
+      "баскетбольным тренером",
+      "нет такого сочетания"
+     ],
+     "answer": "баскетбольным тренером",
+     "source": "reference tree"
+    },
+    {
+     "question": "В какое сочетание входит слово «её»?",
+     "options": [
+      "семье её",
+      "её папа"
+     ],
+     "answer": "её папа",
+     "source": "reference tree"
+    },
+    {
+     "question": "Which word does the possessive «её» refer to?",
+     "options": [
+      "Хелен",
+      "семье",
+      "no such word"
+     ],
+     "answer": "Хелен",
+     "source": "control reading"
+    },
+    {
+     "question": "Copy «родилась» if the verb presents the action as a bounded whole. Otherwise choose “no such word”.",
+     "options": [
+      "родилась",
+      "no such word"
+     ],
+     "answer": "родилась",
+     "source": "UD"
+    },
+    {
+     "question": "Какое слово продолжает личное имя «Хелен»?",
+     "options": [
+      "Луз"
+     ],
+     "answer": "Луз",
+     "source": "control reading"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s35",
+   "variant": "extra_comma",
+   "text": "Хелен Луз родилась в спортивной, семье, её папа был баскетбольным тренером, две сестры также профессионально играли в баскетбол.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "7ff6c11e1c69b72ae9681f76076abfe9d0bf0061572b5a686c34df00987c13b9",
+   "calls": [
+    {
+     "question": "В каком сочетании слова связаны напрямую, несмотря на запятую между ними?",
+     "options": [
+      "спортивной, семье",
+      "сохранить все запятые"
+     ],
+     "answer": "спортивной, семье",
+     "source": "UD"
+    },
+    {
+     "question": "Which word does the possessive «её» refer to?",
+     "options": [
+      "Хелен",
+      "семье",
+      "no such word"
+     ],
+     "answer": "Хелен",
+     "source": "control reading"
+    },
+    {
+     "question": "Кем или чем здесь назван участник «папа»? Выберите сочетание из текста.",
+     "options": [
+      "баскетбольным тренером",
+      "нет такого сочетания"
+     ],
+     "answer": "баскетбольным тренером",
+     "source": "reference tree"
+    },
+    {
+     "question": "Copy «родилась» if the verb presents the action as a bounded whole. Otherwise choose “no such word”.",
+     "options": [
+      "родилась",
+      "no such word"
+     ],
+     "answer": "родилась",
+     "source": "UD"
+    },
+    {
+     "question": "Какое слово продолжает личное имя «Хелен»?",
+     "options": [
+      "Луз"
+     ],
+     "answer": "Луз",
+     "source": "control reading"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s36",
+   "variant": "original",
+   "text": "В 2005 году было 1467 человек.",
+   "abstention": "STORED",
+   "abstention_empty": false,
+   "abstention_exact": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "b4933eb2e8377e27e374045705a7b0d6a3d9d9601dd543ad9f24856bd9cb36c6",
+   "calls": [],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s36",
+   "variant": "no_punctuation",
+   "text": "В 2005 году было 1467 человек",
+   "abstention": "STORED",
+   "abstention_empty": false,
+   "abstention_exact": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "b4933eb2e8377e27e374045705a7b0d6a3d9d9601dd543ad9f24856bd9cb36c6",
+   "calls": [],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s36",
+   "variant": "extra_comma",
+   "text": "В 2005, году было 1467 человек.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "b4933eb2e8377e27e374045705a7b0d6a3d9d9601dd543ad9f24856bd9cb36c6",
+   "calls": [
+    {
+     "question": "В каком сочетании слова связаны напрямую, несмотря на запятую между ними?",
+     "options": [
+      "2005, году",
+      "сохранить все запятые"
+     ],
+     "answer": "2005, году",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s37",
+   "variant": "original",
+   "text": "Пришел и он, тот незабвенный день,",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "1d6aa54d9375dc4acb616677ffc33f0b2336ba547fc5c19f89a8608053f97b64",
+   "calls": [
+    {
+     "question": "Какое существительное здесь поясняет, кого или что обозначает «он»?",
+     "options": [
+      "день"
+     ],
+     "answer": "день",
+     "source": "control reading"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s37",
+   "variant": "no_punctuation",
+   "text": "Пришел и он тот незабвенный день",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "1d6aa54d9375dc4acb616677ffc33f0b2336ba547fc5c19f89a8608053f97b64",
+   "calls": [
+    {
+     "question": "Какое существительное здесь поясняет, кого или что обозначает «он»?",
+     "options": [
+      "день"
+     ],
+     "answer": "день",
+     "source": "control reading"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s37",
+   "variant": "extra_comma",
+   "text": "Пришел и он, тот незабвенный, день,",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "1d6aa54d9375dc4acb616677ffc33f0b2336ba547fc5c19f89a8608053f97b64",
+   "calls": [
+    {
+     "question": "В каком сочетании слова связаны напрямую, несмотря на запятую между ними?",
+     "options": [
+      "незабвенный, день",
+      "сохранить все запятые"
+     ],
+     "answer": "незабвенный, день",
+     "source": "UD"
+    },
+    {
+     "question": "Какое существительное здесь поясняет, кого или что обозначает «он»?",
+     "options": [
+      "день"
+     ],
+     "answer": "день",
+     "source": "control reading"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s38",
+   "variant": "original",
+   "text": "Входит в состав сельского поселения ``Шелковская волость&#39;&#39;.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "2a59502c7d81eff41a650c23626c5a91060519e01c481317d2abb6669cda50c8",
+   "calls": [
+    {
+     "question": "Copy «Шелковская» if its dictionary form is «шелковский». Otherwise choose “no such word”.",
+     "options": [
+      "Шелковская",
+      "no such word"
+     ],
+     "answer": "Шелковская",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какие слова вместе образуют название?",
+     "options": [
+      "Шелковская волость"
+     ],
+     "answer": "Шелковская волость",
+     "source": "control reading"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s38",
+   "variant": "no_punctuation",
+   "text": "Входит в состав сельского поселения Шелковская волость",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "2a59502c7d81eff41a650c23626c5a91060519e01c481317d2abb6669cda50c8",
+   "calls": [
+    {
+     "question": "Copy «Шелковская» if its dictionary form is «шелковский». Otherwise choose “no such word”.",
+     "options": [
+      "Шелковская",
+      "no such word"
+     ],
+     "answer": "Шелковская",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какие слова вместе образуют название?",
+     "options": [
+      "Шелковская волость"
+     ],
+     "answer": "Шелковская волость",
+     "source": "control reading"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s38",
+   "variant": "extra_comma",
+   "text": "Входит в состав сельского, поселения ``Шелковская волость&#39;&#39;.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "2a59502c7d81eff41a650c23626c5a91060519e01c481317d2abb6669cda50c8",
+   "calls": [
+    {
+     "question": "В каком сочетании слова связаны напрямую, несмотря на запятую между ними?",
+     "options": [
+      "сельского, поселения",
+      "сохранить все запятые"
+     ],
+     "answer": "сельского, поселения",
+     "source": "UD"
+    },
+    {
+     "question": "Copy «Шелковская» if its dictionary form is «шелковский». Otherwise choose “no such word”.",
+     "options": [
+      "Шелковская",
+      "no such word"
+     ],
+     "answer": "Шелковская",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какие слова вместе образуют название?",
+     "options": [
+      "Шелковская волость"
+     ],
+     "answer": "Шелковская волость",
+     "source": "control reading"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s39",
+   "variant": "original",
+   "text": "Составно́е число́ -- натуральное число, бо́льшее 1, не являющееся простым.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "2f4752e8bb148b8975ec7d5ddd6672ca749e4c2d5053b9fe38c5ebc608383348",
+   "calls": [
+    {
+     "question": "Каким словом или сочетанием характеризуют подлежащее в этом предложении?",
+     "options": [
+      "Составно́е число́",
+      "натуральное число"
+     ],
+     "answer": "натуральное число",
+     "source": "reference tree"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s39",
+   "variant": "no_punctuation",
+   "text": "Составно́е число́ натуральное число бо́льшее 1 не являющееся простым",
+   "abstention": "STORED",
+   "abstention_empty": false,
+   "abstention_exact": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "2f4752e8bb148b8975ec7d5ddd6672ca749e4c2d5053b9fe38c5ebc608383348",
+   "calls": [],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s39",
+   "variant": "extra_comma",
+   "text": "Составно́е, число́ -- натуральное число, бо́льшее 1, не являющееся простым.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "2f4752e8bb148b8975ec7d5ddd6672ca749e4c2d5053b9fe38c5ebc608383348",
+   "calls": [
+    {
+     "question": "В каком сочетании слова связаны напрямую, несмотря на запятую между ними?",
+     "options": [
+      "Составно́е, число́",
+      "сохранить все запятые"
+     ],
+     "answer": "Составно́е, число́",
+     "source": "UD"
+    },
+    {
+     "question": "Каким словом или сочетанием характеризуют подлежащее в этом предложении?",
+     "options": [
+      "Составно́е, число́",
+      "натуральное число"
+     ],
+     "answer": "натуральное число",
+     "source": "reference tree"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s40",
+   "variant": "original",
+   "text": "Отразив турецкую атаку, русские войска в 8 часу утра двинулись к главному ретраншаменту турецкого лагеря.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "906ca0b6cc2e2e22d0fd3a9a3baa4fb83d0f1e363f6e674cbe64f6e48443e241",
+   "calls": [
+    {
+     "question": "Which word does the phrase «в 8 часу» depend on?",
+     "options": [
+      "войска",
+      "двинулись"
+     ],
+     "answer": "двинулись",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое слово управляется предлогом «к» и является формой существительного «ретраншамент»?",
+     "options": [
+      "ретраншаменту"
+     ],
+     "answer": "ретраншаменту",
+     "source": "control reading"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s40",
+   "variant": "no_punctuation",
+   "text": "Отразив турецкую атаку русские войска в 8 часу утра двинулись к главному ретраншаменту турецкого лагеря",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "906ca0b6cc2e2e22d0fd3a9a3baa4fb83d0f1e363f6e674cbe64f6e48443e241",
+   "calls": [
+    {
+     "question": "Which word does the phrase «в 8 часу» depend on?",
+     "options": [
+      "войска",
+      "двинулись"
+     ],
+     "answer": "двинулись",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое слово управляется предлогом «к» и является формой существительного «ретраншамент»?",
+     "options": [
+      "ретраншаменту"
+     ],
+     "answer": "ретраншаменту",
+     "source": "control reading"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s40",
+   "variant": "extra_comma",
+   "text": "Отразив турецкую, атаку, русские войска в 8 часу утра двинулись к главному ретраншаменту турецкого лагеря.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "906ca0b6cc2e2e22d0fd3a9a3baa4fb83d0f1e363f6e674cbe64f6e48443e241",
+   "calls": [
+    {
+     "question": "В каком сочетании слова связаны напрямую, несмотря на запятую между ними?",
+     "options": [
+      "турецкую, атаку",
+      "сохранить все запятые"
+     ],
+     "answer": "турецкую, атаку",
+     "source": "UD"
+    },
+    {
+     "question": "Which word does the phrase «в 8 часу» depend on?",
+     "options": [
+      "войска",
+      "двинулись"
+     ],
+     "answer": "двинулись",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое слово управляется предлогом «к» и является формой существительного «ретраншамент»?",
+     "options": [
+      "ретраншаменту"
+     ],
+     "answer": "ретраншаменту",
+     "source": "control reading"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s41",
+   "variant": "original",
+   "text": "В возрасте десяти лет Франсуа отправился в Льеж, где играл в течение десяти лет прежде, чем перейти в ``Унион Ла Каламине&#39;&#39;.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "0bb62a1430b4414332f5b992d6061f97d6dd38327122323208956b5e28677409",
+   "calls": [
+    {
+     "question": "Which word is the subject of «отправился»?",
+     "options": [
+      "Франсуа",
+      "no such word"
+     ],
+     "answer": "Франсуа",
+     "source": "reference tree"
+    },
+    {
+     "question": "Кто в этом предложении выполняет действие «играл»?",
+     "options": [
+      "Франсуа",
+      "no such word"
+     ],
+     "answer": "Франсуа",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какие слова вместе образуют название?",
+     "options": [
+      "Унион Ла Каламине"
+     ],
+     "answer": "Унион Ла Каламине",
+     "source": "control reading"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s41",
+   "variant": "no_punctuation",
+   "text": "В возрасте десяти лет Франсуа отправился в Льеж где играл в течение десяти лет прежде чем перейти в Унион Ла Каламине",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "0bb62a1430b4414332f5b992d6061f97d6dd38327122323208956b5e28677409",
+   "calls": [
+    {
+     "question": "Which word is the subject of «отправился»?",
+     "options": [
+      "Франсуа",
+      "no such word"
+     ],
+     "answer": "Франсуа",
+     "source": "reference tree"
+    },
+    {
+     "question": "Кто в этом предложении выполняет действие «играл»?",
+     "options": [
+      "Франсуа",
+      "no such word"
+     ],
+     "answer": "Франсуа",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какие слова вместе образуют название?",
+     "options": [
+      "Унион Ла Каламине"
+     ],
+     "answer": "Унион Ла Каламине",
+     "source": "control reading"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s41",
+   "variant": "extra_comma",
+   "text": "В возрасте десяти лет Франсуа, отправился в Льеж, где играл в течение десяти лет прежде, чем перейти в ``Унион Ла Каламине&#39;&#39;.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "0bb62a1430b4414332f5b992d6061f97d6dd38327122323208956b5e28677409",
+   "calls": [
+    {
+     "question": "В каком сочетании слова связаны напрямую, несмотря на запятую между ними?",
+     "options": [
+      "Франсуа, отправился",
+      "сохранить все запятые"
+     ],
+     "answer": "Франсуа, отправился",
+     "source": "UD"
+    },
+    {
+     "question": "Which word is the subject of «отправился»?",
+     "options": [
+      "Франсуа",
+      "no such word"
+     ],
+     "answer": "Франсуа",
+     "source": "reference tree"
+    },
+    {
+     "question": "Кто в этом предложении выполняет действие «играл»?",
+     "options": [
+      "Франсуа",
+      "no such word"
+     ],
+     "answer": "Франсуа",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какие слова вместе образуют название?",
+     "options": [
+      "Унион Ла Каламине"
+     ],
+     "answer": "Унион Ла Каламине",
+     "source": "control reading"
+    }
+   ],
+   "same_as_original": true
+  }
+ ]
+}

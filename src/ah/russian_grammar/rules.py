@@ -5,16 +5,25 @@ from importlib.resources import files
 
 from pymorphy3 import MorphAnalyzer
 
-from .prepositions import CASE_NAMES, FORMS, GOVERNMENT, PREFIXES
+from .prepositions import CASE_NAMES, FORMS, GOVERNMENT, PREFIXES, STRESSED_VOWEL
 
 
 # Lexical evidence for the bare accusative of duration. Extensible, not exhaustive.
 TIME_UNITS = frozenset('секунда минута час сутки день ночь неделя месяц год век'.split())
 
 
+def unaccented(surface):
+    return STRESSED_VOWEL.sub('', surface)
+
+
+class _RussianMorphology(MorphAnalyzer):
+    def parse(self, word):
+        return super().parse(unaccented(word))
+
+
 @lru_cache(maxsize=1)
 def dictionary():
-    return MorphAnalyzer()
+    return _RussianMorphology()
 
 
 @lru_cache(maxsize=2)
@@ -28,14 +37,14 @@ def _attested_nouns(resource_name='attested_nouns.tsv'):
 
 
 def attested_name_parts(surface):
-    return _attested_nouns('attested_name_parts.tsv').get(surface.casefold(), ())
+    return _attested_nouns('attested_name_parts.tsv').get(unaccented(surface).casefold(), ())
 
 
 @lru_cache(maxsize=4096)
 def known_forms(surface):
     readings = tuple(dict.fromkeys((p.normal_form, p.tag) for p in dictionary().parse(surface)
                                    if p.is_known and 'Abbr' not in p.tag))
-    return readings or _attested_nouns().get(surface.casefold(), ())
+    return readings or _attested_nouns().get(unaccented(surface).casefold(), ())
 
 
 @lru_cache(maxsize=1024)
@@ -84,7 +93,7 @@ def preposition_reading(lemma: str, role: str) -> Reading:
 @lru_cache(maxsize=4096)
 def readings(surface: str, preposition: str | None = None) -> tuple[Reading, ...]:
     result = []
-    word = surface.lower()
+    word = unaccented(surface).lower()
     if preposition is None:
         if word in PREFIXES:
             result.append(preposition_reading(word, 'prep_prefix'))
