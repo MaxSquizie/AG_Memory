@@ -107,6 +107,13 @@ def trees(tokens, parse, budget):
                 noun = links[i + 1]
                 if noun.role != 'governed' or noun.head != i - 1 or noun.case not in ('loct', 'loc2'):
                     break
+                from .measured_series import _symbols
+                from .distribution_questions import measure_unit
+
+                symbol = _symbols().get(tokens[i + 1].surface)
+                prep = links[noun.head]
+                if symbol and prep.lemma == 'по' and prep.head is not None and measure_unit(links[prep.head].lemma, symbol):
+                    break
                 tags = [tag for lemma, tag in forms if lemma == noun.lemma]
                 if not tags:
                     break

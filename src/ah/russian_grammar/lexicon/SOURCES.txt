@@ -225,8 +225,9 @@ data (CC BY-SA 4.0). The dependency label is preserved as an adverbial relation.
 python scripts/import_russian_infinitive_connectives.py ru_gsd-ud-train.conllu src/ah/russian_grammar/lexicon/infinitive-connectives.tsv
 
 unit-symbols.tsv contains unambiguous single-token short and narrow measurement symbols
-from the Russian locale in ICU, Unicode CLDR 48.0, via ECMA-402 Intl.NumberFormat.
-node scripts/import_russian_unit_symbols.mjs src/ah/russian_grammar/lexicon/unit-symbols.tsv
+from the Russian locale in ICU, Unicode CLDR 48.0, via ECMA-402 Intl.NumberFormat,
+plus the CLDR 46.0 Russian units.json cited above for units beyond the ECMA-402 list.
+node scripts/import_russian_unit_symbols.mjs src/ah/russian_grammar/lexicon/unit-symbols.tsv units.json
 https://cldr.unicode.org/translation/units/unit-names-and-patterns
 
 clausal-addressees.tsv uses the Russian FrameBank revision and GPL-3.0 license above.
@@ -243,3 +244,13 @@ content-governors.txt uses the Russian FrameBank revision and GPL-3.0 license ab
 Each lemma has a construction with a nominative subject, a verb and a content slot
 that admits что + CL. The full pattern excludes obligatory idiomatic material.
 python scripts/import_russian_content_governors.py framebank_dict_cx.txt framebank_dict_cx_items.txt src/ah/russian_grammar/lexicon/content-governors.txt
+
+measure-questions.tsv joins FrameBank e60da2a (GPL-3.0, cited above)
+with Russian CLDR 46 measurement and currency nouns (Unicode License v3).
+For a nominal subject plus a single complement, collect all attested bare
+accusative and adverbial semantic roles per predicate. Retain a measure
+only when both realization sets have the same single mapped dimension.
+For example, FrameBank constructions 1527 and 1528 give the role «вес»
+for both ADV and Sacc in the predicate «весить». The unit identifies the
+dimension used when reading a recorded quantity; no conversion is implied.
+python scripts/import_russian_measure_questions.py framebank_dict_cx_items.txt units.json currencies.json src/ah/russian_grammar/lexicon/measure-questions.tsv

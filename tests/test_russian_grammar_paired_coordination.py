@@ -37,8 +37,13 @@ def test_member_reaches_the_original_observation_after_index_rebuild(monkeypatch
     submit(core, 'Пётр ушёл.')
     core.store.rebuild_indexes()
 
-    def no_predicate_lookup(*args):
-        pytest.fail('Поиск с заданным участником должен начинаться от участника')
+    from ah.russian_grammar.distribution_graph import CLASS_KEY, MEMBER_KEY
+
+    indexed_lookup = core.store.find_elements_with_property
+
+    def no_predicate_lookup(key, value):
+        assert key in (MEMBER_KEY, CLASS_KEY)
+        return indexed_lookup(key, value)
 
     monkeypatch.setattr(core.store, 'find_elements_with_property', no_predicate_lookup)
     for question in ('Иван ушёл?', 'Мария ушла?'):

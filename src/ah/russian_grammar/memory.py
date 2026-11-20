@@ -36,6 +36,7 @@ class GrammarReply:
     text: str
     observation_ref: str | None = None
     analysis: Result | None = None
+    support_refs: tuple[str, ...] = ()
 
 
 def _adapter(core, journal):
@@ -157,12 +158,18 @@ def _rows(result, participants):
     return rows
 
 
-def _remember(core, result, rows, source):
+def _remember(core, result, rows, source, distributions):
+    from . import distribution_graph
+
+    indexed = {index for frame in distributions for domain in frame.domains for index in domain.members}
     root = rows[_root(rows)]
     projected = set(homogeneous.projection_members(rows, _root(rows))) - {_root(rows)}
     members = []
     for i, row in enumerate(rows):
         props = {}
+        if i in indexed:
+            key = distribution_graph.MEMBER_KEY
+            props[key] = Property(key, row['lemma'], 'str')
         parts = lexical_parts.metadata(row['surface'], row['start'], row['lemma'])
         if parts:
             row['lexical_parts'] = list(parts)
@@ -175,7 +182,8 @@ def _remember(core, result, rows, source):
             props[CONJUNCT_KEY] = Property(CONJUNCT_KEY, row['lemma'], 'str')
         members.append(core.ref(core.add_entity(Domain.H, properties=props, meta=row).uid))
     for i, row in enumerate(rows):
-        for key in ('head', 'controller', 'antecedent', 'ellipsis_source', 'coord_head', 'shared_agent', 'shared_object'):
+        for key in ('head', 'controller', 'antecedent', 'ellipsis_source', 'coord_head', 'shared_agent', 'shared_object',
+                    'distribution_predicate', 'distribution_argument'):
             if row.get(key) is not None:
                 relation = 'grammar.' + (row['role'] if key == 'head' else key)
                 core.add_link(relation, members[i], members[row[key]], 1.0)
@@ -188,6 +196,7 @@ def _remember(core, result, rows, source):
         {'verbatim': result.source, 'source': source, 'kind': 'russian_grammar.observation',
          'root_status': root['assertion_status']},
     )
+    distribution_graph.write(core, observation, members, rows, distributions)
     return observation.uid
 
 
@@ -833,6 +842,14 @@ def _extraction(rows, stored, observed, source, focus, budget, subject_member=No
                       _nominal_answer(stored, parts, source))
             if answer:
                 identity, phrase = answer
+                if (rows[focus].get('quantity_kind') == 'query' and rows[focus]['role'] == 'object'
+                        and stored[head]['role'] == 'numeral'):
+                    from .distribution_questions import measure_unit
+
+                    unit = stored[stored[head]['head']]
+                    if measure_unit(rows[root]['lemma'], unit['lemma']):
+                        identity = (unit['lemma'], identity)
+                        phrase += ' ' + unit['surface']
                 answers[identity] = phrase
     return answers
 
@@ -977,11 +994,18 @@ def _answer(view, rows, focus, budget, result, participants, group_readings):
     rows = _query_rows(rows, participants, budget)
     if rows is None:
         return GrammarReply('UNKNOWN', UNKNOWN, analysis=result)
+    from . import distribution_reading
+
+    proofs = {}
     answers = {}
+    for identity, text, ref, support in distribution_reading.answers(view, rows, focus, participants, budget):
+        proofs[(text, ref)] = support
+        answers.setdefault(identity, (text, ref))
     root = _root(rows)
     lemma = rows[root]['lemma']
     subjects = [row for row in rows if row['role'] == 'subject' and row['head'] == root]
-    anchored = (focus is None and len(subjects) == 1 and subjects[0]['lemma'] not in PERSONAL
+    anchored = ((focus is None or rows[focus].get('quantity_kind') == 'query')
+                and len(subjects) == 1 and (subjects[0].get('morphology') or {}).get('pos') == 'NOUN' and subjects[0]['lemma'] not in PERSONAL
                 and not subjects[0].get('implicit') and (rows[root].get('morphology') or {}).get('pos') == 'VERB'
                 and all(row['role'] in ('predicate', 'subject', 'punctuation', 'object', 'numeral') for row in rows))
     candidates = (_subject_lookup(view, subjects[0]['lemma'], lemma) if anchored else
@@ -995,7 +1019,7 @@ def _answer(view, rows, focus, budget, result, participants, group_readings):
         if surfaces is None:
             group_readings.clear()
             return GrammarReply('UNKNOWN', UNKNOWN, analysis=result)
-        if target is not None and not surfaces:
+        if focus is None and target is not None and not surfaces:
             probe = _group_reading(view.store, group, rows, root, stored, observed, target, result.source, budget)
             if probe:
                 group_readings.setdefault(probe, group.uid)
@@ -1003,7 +1027,7 @@ def _answer(view, rows, focus, budget, result, participants, group_readings):
             answers.setdefault(identity, (surface, group.uid))
     if len(answers) == 1:
         surface, ref = next(iter(answers.values()))
-        return GrammarReply('ANSWER', surface, ref, result)
+        return GrammarReply('ANSWER', surface, ref, result, proofs.get((surface, ref), ()))
     return GrammarReply('UNKNOWN', UNKNOWN, analysis=result)
 
 
@@ -1075,6 +1099,11 @@ def submit(core, text, choose=None, *, source='user', speaker_ref=None, addresse
     if reason:
         rejected = Result(result.source, 'UNRESOLVED', reason, result.tokens, probes=result.probes, steps=result.steps)
         return GrammarReply('UNRESOLVED', 'Разбор не завершён. ' + reason, analysis=rejected)
+    from . import distribution_selection
+
+    distributions, result = distribution_selection.select(rows, result, choose, budget)
+    if result.status != 'PARSED_FRAGMENT':
+        return GrammarReply(result.status, 'Не установлена область распределения.', analysis=result)
     with _access(core, _adapter(core, journal), write=True) as draft:
-        reference = _remember(draft, result, rows, source)
+        reference = _remember(draft, result, rows, source, distributions)
     return GrammarReply('STORED', 'Наблюдение записано.', reference, result)

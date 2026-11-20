@@ -17,12 +17,15 @@ def main():
     args = parser.parse_args()
     nominal_steps = []
     spatial_steps = []
+    distribution_steps = []
     result = analyze(args.text, on_nominal_step=nominal_steps.append if args.report else None,
-                     on_spatial_step=spatial_steps.append if args.report else None)
+                     on_spatial_step=spatial_steps.append if args.report else None,
+                     on_distribution_step=distribution_steps.append if args.report else None)
     if args.report:
         report = asdict(result)
         report['nominal_steps'] = [asdict(step) for step in nominal_steps]
         report['spatial_steps'] = [asdict(step) for step in spatial_steps]
+        report['distribution_steps'] = [asdict(step) for step in distribution_steps]
         report['probes'] = [probe.prompt() for probe in result.probes]
         print(json.dumps(report, ensure_ascii=False, indent=2))
     elif result.probes:

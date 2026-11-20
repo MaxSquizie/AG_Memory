@@ -8,6 +8,7 @@ from .detached_prepositions import extent as group_extent
 from .morphology import Morphology, feature_choices
 from .nominal_chart import NominalChart, NominalStep
 from .spatial_prefix import SpatialPrefix, SpatialStep
+from .distribution_prefix import DistributionPrefix, DistributionStep
 from .prepositions import CASE_NAMES, FORMS, GOVERNMENT, PREFIXES, TOKEN, group_heads
 from .probe import MAX_WORD_CHOICES, FocusChoice, Probe
 from . import capitalized_nominals, modifier_focus
@@ -327,7 +328,8 @@ def _partitions(analyses, tokens, text):
     from . import adjuncts, attributive_series, calendar_regions, measured_series, mixed_predications, predicate_lists, utterances
     from . import personal_correlatives, spatial_prefix
     from .short_participles import voice_partitions
-    from . import collective_agreement
+    from . import collective_agreement, partitive_domains
+    yield from partitive_domains.partitions(analyses, tokens, text)
     yield from collective_agreement.partitions(analyses, tokens, text)
     yield from personal_correlatives.partitions(analyses, tokens, text)
     from . import degree_clauses
@@ -538,7 +540,8 @@ def _partitions(analyses, tokens, text):
                 question = (f'Какое действие уточняет обстоятельство «{phrase}»?' if has_focus else
                             f'От какого из предложенных слов в этом месте текста задаётся вопрос к сочетанию «{phrase}»? '
                             'Выберите слово, с которым оно связано непосредственно.')
-                yield word_choice(question, hosts, context)
+                counted = partitive_domains.quantified_attachment(analyses, tokens, hosts, i, phrase, context, text)
+                yield counted if counted is not None and not has_focus else word_choice(question, hosts, context)
 
     duration_heads = sorted({link.head for tree in analyses for link in tree if link.role == 'duration'})
     for head in duration_heads:
@@ -919,7 +922,8 @@ def _connected(tree, root_role='predicate'):
 def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *,
             budget: int = 256, accept_tree: Callable[[tuple[Link, ...]], bool] | None = None,
             on_nominal_step: Callable[[NominalStep], None] | None = None,
-            on_spatial_step: Callable[[SpatialStep], None] | None = None) -> Result:
+            on_spatial_step: Callable[[SpatialStep], None] | None = None,
+            on_distribution_step: Callable[[DistributionStep], None] | None = None) -> Result:
     if budget < 1:
         raise ValueError('budget must be positive')
     from . import internal_comma, personal_correlatives, qualification, sentence_regions
@@ -928,6 +932,7 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
     prefix_openings = []
     nominal_chart = NominalChart(budget=budget)
     spatial_index = SpatialPrefix()
+    distribution_index = DistributionPrefix()
     occurrences = []
     text_end = len(text.rstrip())
     for match in TOKEN.finditer(text):
@@ -936,6 +941,7 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
         if match.end() == text_end and surface in {'.', '!', '?'}:
             continue
         spatial_index.feed(occurrences[-1], on_spatial_step)
+        distribution_index.feed(occurrences[-1], on_distribution_step)
         prefix_openings.extend(scanner.feed(surface))
         step = nominal_chart.feed(surface)
         if on_nominal_step is not None:
@@ -1041,7 +1047,7 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
         yield from unlisted_attributes.trees(part, local)
 
     @reuse_completed
-    def coordinated(part):
+    def coordination_base(part):
         from itertools import chain
         from . import dated_clauses, detached_measures, detached_prepositions, named_arguments
 
@@ -1056,6 +1062,14 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
             yield tree
         yield from detached_prepositions.trees(part, attributed, recover=not parsed,
                                                starts_after_comma=starts_after_comma, ends_before_comma=ends_before_comma)
+
+    @reuse_completed
+    def coordinated(part):
+        from . import partitive_domains
+
+        yield from coordination_base(part)
+        yield from partitive_domains.trees(part, coordination_base, budget, distribution_index)
+        yield from partitive_domains.enumerations(part, coordination_base, budget)
 
     from . import marked_regions, nominal_entries
     group_heads_by_start = {}
@@ -1270,6 +1284,7 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
                 spellings[i] = SpellingRecovery(original, label)
                 working_words = (*working_words[:i], replace(words[i], surface=label), *working_words[i + 1:])
                 spatial_index = SpatialPrefix.from_tokens(working_words)
+                distribution_index = DistributionPrefix.from_tokens(working_words)
                 relative_hosts.clear()
                 group_heads_by_start.clear()
                 failures.clear()
@@ -1304,6 +1319,9 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
         except AnalysisBudgetExceeded as error:
             return Result(text, 'UNRESOLVED', str(error) or 'ANALYSIS_BUDGET', tokens, (), tuple(probes), tuple(steps))
     analyses = tuple(structures.values())
+    if words and words[0].surface.casefold() == 'сколько':
+        from .distribution_questions import coalesce
+        analyses = coalesce(analyses)
     from .converb_control import needs_confirmation
     confirmed_names = set()
     confirmed_options = set()

@@ -1,11 +1,11 @@
 from dataclasses import dataclass, replace
-from functools import cache
+from functools import cache, lru_cache
 from importlib.resources import files
 
 from .determiners import SCOPES
 from .homogeneous import _restore
 from .modifiers import _particles
-from .morphology import Morphology, ROLE_CASE
+from .morphology import Morphology, ROLE_CASE, from_tag
 from .nominal_groups import _agree, _markers, _members
 from .numerals import Numeric, expressions
 from .participle_connectives import relations
@@ -163,8 +163,57 @@ def _projections(member, token):
             break
 
 
+@lru_cache(maxsize=2048)
+def _counted_unit(lemma, expression):
+    for reading in dictionary().parse(lemma):
+        if reading.normal_form != lemma or reading.tag.POS != 'NOUN':
+            continue
+        noun = reading.normalized
+        if expression.kind == 'fraction':
+            form = noun.inflect({'gent', 'sing'})
+        elif expression.kind == 'cardinal' and expression.value.isdecimal():
+            form = noun.make_agree_with_number(int(expression.value))
+        else:
+            continue
+        if form and any(word == lemma and expression.compatible('accs', tag, lemma)
+                        for word, tag in known_forms(form.word) if tag.POS == 'NOUN'):
+            return form
+    return None
+
+
+def _distributive_symbols(tokens, parse):
+    units = {}
+    for prep, token in enumerate(tokens):
+        if token.surface.casefold() != 'по':
+            continue
+        for expression in expressions(tokens, prep + 1):
+            index = expression.end
+            if index >= len(tokens):
+                continue
+            lemma = _symbols().get(tokens[index].surface)
+            if lemma and (form := _counted_unit(lemma, expression)):
+                units[index] = (lemma, form.word, prep)
+    if not units:
+        return
+    expanded = tuple(replace(token, surface=units[i][1]) if i in units else token
+                     for i, token in enumerate(tokens))
+    for tree in parse(expanded):
+        result = list(tree)
+        for i, (lemma, _, prep) in units.items():
+            numeral = tree[prep + 1]
+            if (tree[i].lemma != lemma or tree[i].role != 'governed' or tree[i].head != prep
+                    or tree[i].case != 'accs' or numeral.head != i or numeral.role != 'numeral'):
+                break
+            result[prep + 1] = replace(numeral, rule='NUM.UNIT')
+            result[i] = replace(tree[i], rule='NUM.UNIT.ARG')
+        else:
+            yield tuple(result)
+
+
 def trees(tokens, parse, budget):
     symbolic = any(t.surface in _symbols() for t in tokens)
+    if symbolic:
+        yield from _distributive_symbols(tokens, parse)
     focus_sites = {i for i, t in enumerate(tokens) if t.surface.casefold() in _prenominal_particles()}
     if not symbolic and len(focus_sites) < 2:
         return
@@ -207,7 +256,9 @@ def trees(tokens, parse, budget):
                                 continue
                             links = _restore(tree, kept, len(tokens))
                             if first.measured:
-                                links[first.head] = replace(links[first.head], lemma=first.lemma, morphology=Morphology(pos='NOUN'),
+                                counted = _counted_unit(first.lemma, first.expression)
+                                morphology = from_tag(counted.tag) if counted else Morphology(pos='NOUN')
+                                links[first.head] = replace(links[first.head], lemma=first.lemma, morphology=morphology,
                                                             case=first.case, rule='NUM.UNIT.ARG')
                             for i, link in extras:
                                 links[i] = link
@@ -259,6 +310,13 @@ def confirmation(tokens, tree, i, text):
             or not any(link.rule == 'NUM.UNIT' and link.head == i for link in tree)):
         return None
     unit = tokens[i].surface
+    from .distribution_questions import measure_unit
+
+    host = tree[i].head
+    if tree[i].role == 'governed' and host is not None:
+        host = tree[host].head
+    if host is not None and measure_unit(tree[host].lemma, tree[i].lemma):
+        return None
     if known_forms(unit) or len(unit) == 1:
         focus = _span_label(tokens, i)
         return Probe(f'Какое обозначение здесь употреблено в значении «{tree[i].lemma}»?', (focus,), text)

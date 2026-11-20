@@ -19,10 +19,23 @@ def _required():
 
 
 def violation(tokens, tree):
+    from .partitive_domains import cardinality_violation
+
+    if reason := cardinality_violation(tree):
+        return reason
     children = [set() for _ in tree]
     for link in tree:
         if link.head is not None:
             children[link.head].add(link.role)
+    for i, link in enumerate(tree):
+        if link.role != 'governed' or link.case != 'accs' or 'numeral' not in children[i]:
+            continue
+        prep = tree[link.head] if link.head is not None else None
+        if prep is None or prep.role != 'preposition' or prep.lemma != 'по' or prep.head is None:
+            continue
+        governor = tree[prep.head]
+        if governor.morphology and governor.morphology.transitivity == 'tran':
+            children[prep.head].add('object')
     for i, (token, link) in enumerate(zip(tokens, tree)):
         form = link.morphology
         if link.lemma == 'себя' and link.antecedent is None:
