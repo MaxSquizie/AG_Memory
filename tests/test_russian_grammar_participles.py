@@ -122,3 +122,20 @@ def test_shared_agent_changes_only_after_a_word_choice(tmp_path):
         assert submit(reader, 'Пропало письмо, подписанное Анной?', journal=log).text == 'Да.'
         assert submit(reader, 'Пропало письмо, написанное Анной?', journal=log).text == ('Неизвестно.', 'Да.')[index]
         assert log.read_global_head() == 1
+
+
+def test_nominalized_participle_and_its_dependents_in_a_coordinated_statement():
+    from ah.model import Domain
+
+    text = 'Станки отличаются от используемых в цехе и заменяют машины оборудованные рычагами.'
+    core = AHCore()
+    saved = submit(core, text, lambda probe: 'оборудованные' if 'оборудованные' in probe.options else '?')
+    assert saved.status == 'STORED'
+    group = core.store.get_element(Domain.H, saved.observation_ref)
+    rows = [core.store.get_element(Domain.H, ref.uid).meta for ref in group.members]
+    by_surface = {row['surface']: row for row in rows}
+    assert rows[by_surface['заменяют']['controller']]['surface'] == 'Станки'
+    assert rows[by_surface['оборудованные']['head']]['surface'] == 'машины'
+    assert by_surface['используемых']['rule'] == 'PART.SUBSTANTIVE'
+    for surface in ('используемых', 'цехе', 'оборудованные', 'рычагами'):
+        assert by_surface[surface]['assertion_status'] == 'attributive'

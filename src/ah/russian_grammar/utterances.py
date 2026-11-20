@@ -9,7 +9,7 @@ from .rules import known_forms
 
 
 _QUOTES = {'«': '»', '“': '”', '„': '“', '"': '"'}
-_REFS = ('head', 'antecedent', 'controller', 'coord_head', 'shared_agent', 'shared_object')
+_REFS = ('head', 'antecedent', 'controller', 'coord_head', 'shared_agent', 'shared_object', 'ellipsis_source')
 
 
 @cache

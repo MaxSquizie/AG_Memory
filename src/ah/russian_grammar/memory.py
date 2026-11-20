@@ -90,10 +90,17 @@ def _rows(result, participants):
     while pending:
         i, enclosing, governing_status = pending.pop()
         row = rows[i]
-        if row['rule'] == 'UTT.QUOTE':
+        if (row['scope'] or '').split('_', 1)[0] == 'title' and row['role'] in ('apposition', 'nominal_conjunct', 'genitive_modifier'):
+            row['quotation'] = i
+            enclosing = governing_status = 'title'
+        elif row['rule'] == 'UTT.QUOTE':
             row['quotation'] = i
         elif row['head'] is not None and 'quotation' in rows[row['head']]:
             row['quotation'] = rows[row['head']]['quotation']
+        if row['rule'] == 'PART.SUBSTANTIVE':
+            if governing_status == 'asserted':
+                enclosing = enclosing or 'attributive'
+                governing_status = enclosing
         if row['rule'] == 'PAREN.EXPL':
             enclosing = enclosing or 'parenthetical'
             governing_status = enclosing

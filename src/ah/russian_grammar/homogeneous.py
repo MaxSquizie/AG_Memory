@@ -8,7 +8,7 @@ from .rules import known_forms
 
 ADDITIVE = {'и', 'а', 'но'}
 ALTERNATIVE = {'или', 'либо'}
-REFERENCES = ('head', 'controller', 'antecedent', 'coord_head', 'shared_agent', 'shared_object')
+REFERENCES = ('head', 'controller', 'antecedent', 'coord_head', 'shared_agent', 'shared_object', 'ellipsis_source')
 
 
 def _restore(tree, kept, size):
@@ -283,7 +283,7 @@ def projection_members(rows, root):
         markers = [m for m in rows if m['role'] == 'clause_marker' and m['head'] == i]
         if (row['assertion_status'] not in ('asserted', 'negated') or row.get('scope') not in (None, 'negated') or
                 row['rule'] == 'GAP' or
-                not markers or any(m['lemma'] not in ADDITIVE for m in markers)):
+                (row['rule'] != 'V2.CONJ' and (not markers or any(m['lemma'] not in ADDITIVE for m in markers)))):
             return ()
         members.append(i)
     return members if len(members) > 1 else ()

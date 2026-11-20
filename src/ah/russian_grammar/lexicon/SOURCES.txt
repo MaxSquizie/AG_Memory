@@ -198,3 +198,18 @@ dependent or determiner and precedes its verbal or adjectival governor.
 This is evidence for a possible detached reading, not a classification of
 the expression as a source. Selection of qualification requires a probe.
 python scripts/import_russian_detached_groups.py ru_gsd-ud-train.conllu src/ah/russian_grammar/lexicon/detached-groups.tsv
+
+initial-modifiers.tsv contains contiguous multiword expressions marked fixed
+in Russian-GSD r2.15 train, observed as comma-delimited discourse, advmod or
+parataxis dependents of verbal or adjectival heads. Forms and lemmas are
+retained from the training data (CC BY-SA 4.0).
+python scripts/import_russian_initial_modifiers.py ru_gsd-ud-train.conllu src/ah/russian_grammar/lexicon/initial-modifiers.tsv
+
+reference-abbreviations.tsv gives the Russian FrameBank head lemmas for initial
+abbreviations that also occur literally in the construction pattern. The
+importer requires the same lemma in KeyLexemes and a matching prefix. Only
+verb expansions with an imperative paradigm are used as directive readings.
+See the FrameBank revision and license above.
+python scripts/import_russian_reference_abbreviations.py framebank_dict_cx.txt src/ah/russian_grammar/lexicon/reference-abbreviations.tsv
+
+The phase row in infinitive_control.tsv also includes the infinitive-taking readings of стать and бросить from N. Shapiro, Типы сказуемого, «Русский язык» 43 (2003), https://rus.1sept.ru/article.php?ID=200304304.

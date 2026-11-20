@@ -1,0 +1,1764 @@
+{
+ "corpus_sha256": "fa3642959614db06fdab2d7464af8a0873c70d0a2b5758758231d0ef725821ea",
+ "seconds_per_stage": 12,
+ "cases": [
+  {
+   "id": "test-s22",
+   "variant": "original",
+   "text": "Имеется 4 службы такси: ``Первое&#39;&#39;, ``Курс&#39;&#39;, ``Такси +&#39;&#39;, ``Форсаж&#39;&#39;.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "fb486bd2255ec4e26f6ec1a02960a5dcbd15af33b8f93264d916b0191b2d661e",
+   "calls": [
+    {
+     "question": "Для какого слова «Первое», «Курс», «Такси +», «Форсаж» перечислены как названия?",
+     "options": [
+      "службы"
+     ],
+     "answer": "службы",
+     "source": "control reading"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s22",
+   "variant": "no_punctuation",
+   "text": "Имеется 4 службы такси Первое Курс Такси + Форсаж",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "fb486bd2255ec4e26f6ec1a02960a5dcbd15af33b8f93264d916b0191b2d661e",
+   "calls": [
+    {
+     "question": "Образуют ли «Первое», «Курс», «Такси +», «Форсаж» перечень отдельных названий? Если да, выберите весь перечень.",
+     "options": [
+      "Первое Курс Такси + Форсаж"
+     ],
+     "answer": "Первое Курс Такси + Форсаж",
+     "source": "control reading"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s22",
+   "variant": "extra_comma",
+   "text": "Имеется 4, службы такси: ``Первое&#39;&#39;, ``Курс&#39;&#39;, ``Такси +&#39;&#39;, ``Форсаж&#39;&#39;.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "fb486bd2255ec4e26f6ec1a02960a5dcbd15af33b8f93264d916b0191b2d661e",
+   "calls": [
+    {
+     "question": "В каком сочетании слова связаны напрямую, несмотря на запятую между ними?",
+     "options": [
+      "4, службы",
+      "сохранить все запятые"
+     ],
+     "answer": "4, службы",
+     "source": "UD"
+    },
+    {
+     "question": "Для какого слова «Первое», «Курс», «Такси +», «Форсаж» перечислены как названия?",
+     "options": [
+      "службы"
+     ],
+     "answer": "службы",
+     "source": "control reading"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s23",
+   "variant": "original",
+   "text": "Под вымышленными именами издавал, в частности, свои многочисленные сатирические диалоги, выдержанные в духе Лукиана, Крот Рубеан -- инициатор создания ``Писем тёмных людей&#39;&#39;.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "e8bd624316db8f3112ecc10f2d82d4cb1ed65ba6c01dea3adaf1a7c79c14a4a5",
+   "calls": [
+    {
+     "question": "В каком сочетании слова связаны напрямую, несмотря на запятую между ними?",
+     "options": [
+      "частности, свои",
+      "сохранить все запятые"
+     ],
+     "answer": "сохранить все запятые",
+     "source": "UD"
+    },
+    {
+     "question": "Copy «частности» if it is in the accusative case. Otherwise choose “no such word”.",
+     "options": [
+      "частности",
+      "no such word"
+     ],
+     "answer": "no such word",
+     "source": "UD"
+    },
+    {
+     "question": "Copy «людей» if its role here is apposition. Otherwise choose “no such word”.",
+     "options": [
+      "людей",
+      "no such word"
+     ],
+     "answer": "no such word",
+     "source": "reference tree"
+    },
+    {
+     "question": "Which word does «создания» depend on?",
+     "options": [
+      "Крот",
+      "инициатор"
+     ],
+     "answer": "инициатор",
+     "source": "reference tree"
+    },
+    {
+     "question": "Copy «Писем» if its role here is apposition. Otherwise choose “no such word”.",
+     "options": [
+      "Писем",
+      "no such word"
+     ],
+     "answer": "no such word",
+     "source": "reference tree"
+    },
+    {
+     "question": "Which word does «Писем» depend on?",
+     "options": [
+      "Крот",
+      "инициатор",
+      "создания"
+     ],
+     "answer": "создания",
+     "source": "reference tree"
+    },
+    {
+     "question": "Слово «Крот» здесь служит именем или названием? Выберите его, если да.",
+     "options": [
+      "Крот"
+     ],
+     "answer": "Крот",
+     "source": "UD"
+    },
+    {
+     "question": "Слово «Рубеан» здесь служит именем или названием? Выберите его, если да.",
+     "options": [
+      "Рубеан"
+     ],
+     "answer": "Рубеан",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s23",
+   "variant": "no_punctuation",
+   "text": "Под вымышленными именами издавал в частности свои многочисленные сатирические диалоги выдержанные в духе Лукиана Крот Рубеан инициатор создания Писем тёмных людей",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "e8bd624316db8f3112ecc10f2d82d4cb1ed65ba6c01dea3adaf1a7c79c14a4a5",
+   "calls": [
+    {
+     "question": "Which word does «создания» depend on?",
+     "options": [
+      "Крот",
+      "инициатор"
+     ],
+     "answer": "инициатор",
+     "source": "reference tree"
+    },
+    {
+     "question": "Copy «частности» if it is in the accusative case. Otherwise choose “no such word”.",
+     "options": [
+      "частности",
+      "no such word"
+     ],
+     "answer": "no such word",
+     "source": "UD"
+    },
+    {
+     "question": "Copy «Писем» if its role here is apposition. Otherwise choose “no such word”.",
+     "options": [
+      "Писем",
+      "no such word"
+     ],
+     "answer": "no such word",
+     "source": "reference tree"
+    },
+    {
+     "question": "Which word does «Писем» depend on?",
+     "options": [
+      "Крот",
+      "инициатор",
+      "создания"
+     ],
+     "answer": "создания",
+     "source": "reference tree"
+    },
+    {
+     "question": "Copy «Писем» if the action has the reading «title». Otherwise choose “no such word”.",
+     "options": [
+      "Писем",
+      "no such word"
+     ],
+     "answer": "Писем",
+     "source": "reference tree"
+    },
+    {
+     "question": "Слово «Крот» здесь служит именем или названием? Выберите его, если да.",
+     "options": [
+      "Крот"
+     ],
+     "answer": "Крот",
+     "source": "UD"
+    },
+    {
+     "question": "Слово «Рубеан» здесь служит именем или названием? Выберите его, если да.",
+     "options": [
+      "Рубеан"
+     ],
+     "answer": "Рубеан",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s23",
+   "variant": "extra_comma",
+   "text": "Под вымышленными, именами издавал, в частности, свои многочисленные сатирические диалоги, выдержанные в духе Лукиана, Крот Рубеан -- инициатор создания ``Писем тёмных людей&#39;&#39;.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "e8bd624316db8f3112ecc10f2d82d4cb1ed65ba6c01dea3adaf1a7c79c14a4a5",
+   "calls": [
+    {
+     "question": "В каком сочетании слова связаны напрямую, несмотря на запятую между ними?",
+     "options": [
+      "вымышленными, именами",
+      "частности, свои",
+      "сохранить все запятые"
+     ],
+     "answer": "вымышленными, именами",
+     "source": "UD"
+    },
+    {
+     "question": "Copy «людей» if its role here is apposition. Otherwise choose “no such word”.",
+     "options": [
+      "людей",
+      "no such word"
+     ],
+     "answer": "no such word",
+     "source": "reference tree"
+    },
+    {
+     "question": "Which word does «создания» depend on?",
+     "options": [
+      "Крот",
+      "инициатор"
+     ],
+     "answer": "инициатор",
+     "source": "reference tree"
+    },
+    {
+     "question": "Copy «частности» if it is in the accusative case. Otherwise choose “no such word”.",
+     "options": [
+      "частности",
+      "no such word"
+     ],
+     "answer": "no such word",
+     "source": "UD"
+    },
+    {
+     "question": "Copy «Писем» if its role here is apposition. Otherwise choose “no such word”.",
+     "options": [
+      "Писем",
+      "no such word"
+     ],
+     "answer": "no such word",
+     "source": "reference tree"
+    },
+    {
+     "question": "Which word does «Писем» depend on?",
+     "options": [
+      "Крот",
+      "инициатор",
+      "создания"
+     ],
+     "answer": "создания",
+     "source": "reference tree"
+    },
+    {
+     "question": "Слово «Крот» здесь служит именем или названием? Выберите его, если да.",
+     "options": [
+      "Крот"
+     ],
+     "answer": "Крот",
+     "source": "UD"
+    },
+    {
+     "question": "Слово «Рубеан» здесь служит именем или названием? Выберите его, если да.",
+     "options": [
+      "Рубеан"
+     ],
+     "answer": "Рубеан",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s24",
+   "variant": "original",
+   "text": "Ср. с иконографией ``Муж скорбей&#39;&#39;, где ангелы придерживают израненное тело Христа, но не умершего, а живого, так как это является не сценой погребения, а аллегорическим изображением.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "status": "DIRECTIVE",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": true,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "95e7c446c77523efe58a15462e99bfd0eb50d088fe1299950c5f3d98212edb2e",
+   "calls": [
+    {
+     "question": "Which word does «где» refer to?",
+     "options": [
+      "иконографией",
+      "Муж"
+     ],
+     "answer": "иконографией",
+     "source": "reference tree"
+    },
+    {
+     "question": "Copy «умершего» if it describes an action here. Otherwise choose “no such word”.",
+     "options": [
+      "умершего",
+      "no such word"
+     ],
+     "answer": "умершего",
+     "source": "reference tree"
+    },
+    {
+     "question": "Copy «ангелы» if its dictionary form is «ангел». Otherwise choose “no such word”.",
+     "options": [
+      "ангелы",
+      "no such word"
+     ],
+     "answer": "ангелы",
+     "source": "reference tree"
+    },
+    {
+     "question": "Which word does «является» depend on?",
+     "options": [
+      "придерживают",
+      "Ср"
+     ],
+     "answer": "придерживают",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое сокращение здесь означает указание «сравнить»?",
+     "options": [
+      "Ср."
+     ],
+     "answer": "Ср.",
+     "source": "control reading"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s24",
+   "variant": "no_punctuation",
+   "text": "Ср с иконографией Муж скорбей где ангелы придерживают израненное тело Христа но не умершего а живого так как это является не сценой погребения а аллегорическим изображением",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "status": "DIRECTIVE",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": true,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "95e7c446c77523efe58a15462e99bfd0eb50d088fe1299950c5f3d98212edb2e",
+   "calls": [
+    {
+     "question": "Copy «умершего» if it describes an action here. Otherwise choose “no such word”.",
+     "options": [
+      "умершего",
+      "no such word"
+     ],
+     "answer": "умершего",
+     "source": "reference tree"
+    },
+    {
+     "question": "Which word does «где» refer to?",
+     "options": [
+      "иконографией",
+      "Муж"
+     ],
+     "answer": "иконографией",
+     "source": "reference tree"
+    },
+    {
+     "question": "Copy «Муж» if its role here is apposition. Otherwise choose “no such word”.",
+     "options": [
+      "Муж",
+      "no such word"
+     ],
+     "answer": "Муж",
+     "source": "reference tree"
+    },
+    {
+     "question": "Copy «ангелы» if its dictionary form is «ангел». Otherwise choose “no such word”.",
+     "options": [
+      "ангелы",
+      "no such word"
+     ],
+     "answer": "ангелы",
+     "source": "reference tree"
+    },
+    {
+     "question": "Which word does «является» depend on?",
+     "options": [
+      "придерживают",
+      "Ср"
+     ],
+     "answer": "придерживают",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое сокращение здесь означает указание «сравнить»?",
+     "options": [
+      "Ср"
+     ],
+     "answer": "Ср",
+     "source": "control reading"
+    },
+    {
+     "question": "Какие слова вместе образуют название?",
+     "options": [
+      "Муж скорбей"
+     ],
+     "answer": "Муж скорбей",
+     "source": "control reading"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s24",
+   "variant": "extra_comma",
+   "text": "Ср. с иконографией ``Муж скорбей&#39;&#39;, где ангелы придерживают израненное, тело Христа, но не умершего, а живого, так как это является не сценой погребения, а аллегорическим изображением.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "status": "DIRECTIVE",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": true,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "95e7c446c77523efe58a15462e99bfd0eb50d088fe1299950c5f3d98212edb2e",
+   "calls": [
+    {
+     "question": "Which word does «где» refer to?",
+     "options": [
+      "иконографией",
+      "Муж"
+     ],
+     "answer": "иконографией",
+     "source": "reference tree"
+    },
+    {
+     "question": "Copy «умершего» if it describes an action here. Otherwise choose “no such word”.",
+     "options": [
+      "умершего",
+      "no such word"
+     ],
+     "answer": "умершего",
+     "source": "reference tree"
+    },
+    {
+     "question": "Copy «ангелы» if its dictionary form is «ангел». Otherwise choose “no such word”.",
+     "options": [
+      "ангелы",
+      "no such word"
+     ],
+     "answer": "ангелы",
+     "source": "reference tree"
+    },
+    {
+     "question": "Which word does «является» depend on?",
+     "options": [
+      "придерживают",
+      "Ср"
+     ],
+     "answer": "придерживают",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое сокращение здесь означает указание «сравнить»?",
+     "options": [
+      "Ср."
+     ],
+     "answer": "Ср.",
+     "source": "control reading"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s25",
+   "variant": "original",
+   "text": "В 2000 году написал автобиографию ``Not afraid to change&#39;&#39; (``Не боюсь измениться&#39;&#39;), в которой рассказывал о попытках изменить свою сексуальную ориентацию.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "df5997d37a38e15e319756d28135ebf2fd57921eba8ba70e179462bd4af143e0",
+   "calls": [
+    {
+     "question": "Copy «измениться» if its unstated subject is the speaker. Otherwise choose “no such word”.",
+     "options": [
+      "измениться",
+      "no such word"
+     ],
+     "answer": "измениться",
+     "source": "control reading"
+    },
+    {
+     "question": "Какие слова дают второй вариант названия?",
+     "options": [
+      "Не боюсь измениться"
+     ],
+     "answer": "Не боюсь измениться",
+     "source": "control reading"
+    },
+    {
+     "question": "Какое существительное поясняет действие «изменить»?",
+     "options": [
+      "попытках"
+     ],
+     "answer": "попытках",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s25",
+   "variant": "no_punctuation",
+   "text": "В 2000 году написал автобиографию Not afraid to change Не боюсь измениться в которой рассказывал о попытках изменить свою сексуальную ориентацию",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "df5997d37a38e15e319756d28135ebf2fd57921eba8ba70e179462bd4af143e0",
+   "calls": [
+    {
+     "question": "Copy «измениться» if its unstated subject is the speaker. Otherwise choose “no such word”.",
+     "options": [
+      "измениться",
+      "no such word"
+     ],
+     "answer": "измениться",
+     "source": "control reading"
+    },
+    {
+     "question": "Какие слова дают второй вариант названия?",
+     "options": [
+      "Не боюсь измениться"
+     ],
+     "answer": "Не боюсь измениться",
+     "source": "control reading"
+    },
+    {
+     "question": "Какое существительное поясняет действие «изменить»?",
+     "options": [
+      "попытках"
+     ],
+     "answer": "попытках",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s25",
+   "variant": "extra_comma",
+   "text": "В 2000, году написал автобиографию ``Not afraid to change&#39;&#39; (``Не боюсь измениться&#39;&#39;), в которой рассказывал о попытках изменить свою сексуальную ориентацию.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "df5997d37a38e15e319756d28135ebf2fd57921eba8ba70e179462bd4af143e0",
+   "calls": [
+    {
+     "question": "В каком сочетании слова связаны напрямую, несмотря на запятую между ними?",
+     "options": [
+      "2000, году",
+      "сохранить все запятые"
+     ],
+     "answer": "2000, году",
+     "source": "UD"
+    },
+    {
+     "question": "Copy «измениться» if its unstated subject is the speaker. Otherwise choose “no such word”.",
+     "options": [
+      "измениться",
+      "no such word"
+     ],
+     "answer": "измениться",
+     "source": "control reading"
+    },
+    {
+     "question": "Какие слова дают второй вариант названия?",
+     "options": [
+      "Не боюсь измениться"
+     ],
+     "answer": "Не боюсь измениться",
+     "source": "control reading"
+    },
+    {
+     "question": "Какое существительное поясняет действие «изменить»?",
+     "options": [
+      "попытках"
+     ],
+     "answer": "попытках",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s26",
+   "variant": "original",
+   "text": "Тем не менее, насущными проблемами являются недостаток образованных священнослужителей, средств для передвижения и вопросы строительства капитальных церковных зданий.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "bff62540157d353ca5c8ceaa8cb38bf5e6b703dbb64a884e1cf8d324f8b594f4",
+   "calls": [
+    {
+     "question": "Which word does the phrase «для передвижения» depend on?",
+     "options": [
+      "недостаток",
+      "священнослужителей",
+      "средств"
+     ],
+     "answer": "средств",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое слово в творительном падеже называет, кем или чем выступает подлежащее?",
+     "options": [
+      "проблемами",
+      "нет такого слова"
+     ],
+     "answer": "проблемами",
+     "source": "reference tree"
+    },
+    {
+     "question": "Как употреблено слово «зданий»? Если оно уточняет другое существительное и отвечает на вопрос «кого?» или «чего?», выберите «зданий». Если перечислены однородные члены, выберите слово, которое перечислено вместе с ним.",
+     "options": [
+      "строительства",
+      "зданий"
+     ],
+     "answer": "зданий",
+     "source": "reference tree"
+    },
+    {
+     "question": "Which word does «зданий» depend on?",
+     "options": [
+      "строительства",
+      "вопросы",
+      "недостаток"
+     ],
+     "answer": "строительства",
+     "source": "reference tree"
+    },
+    {
+     "question": "Which word does «строительства» depend on?",
+     "options": [
+      "вопросы",
+      "недостаток"
+     ],
+     "answer": "вопросы",
+     "source": "reference tree"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s26",
+   "variant": "no_punctuation",
+   "text": "Тем не менее насущными проблемами являются недостаток образованных священнослужителей средств для передвижения и вопросы строительства капитальных церковных зданий",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "bff62540157d353ca5c8ceaa8cb38bf5e6b703dbb64a884e1cf8d324f8b594f4",
+   "calls": [
+    {
+     "question": "Which word does the phrase «для передвижения» depend on?",
+     "options": [
+      "недостаток",
+      "священнослужителей",
+      "средств"
+     ],
+     "answer": "средств",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое слово в творительном падеже называет, кем или чем выступает подлежащее?",
+     "options": [
+      "проблемами",
+      "нет такого слова"
+     ],
+     "answer": "проблемами",
+     "source": "reference tree"
+    },
+    {
+     "question": "Как употреблено слово «средств»? Если оно уточняет другое существительное и отвечает на вопрос «кого?» или «чего?», выберите «средств». Если перечислены однородные члены, выберите слово, которое перечислено вместе с ним.",
+     "options": [
+      "священнослужителей",
+      "средств"
+     ],
+     "answer": "священнослужителей",
+     "source": "reference tree"
+    },
+    {
+     "question": "Как употреблено слово «зданий»? Если оно уточняет другое существительное и отвечает на вопрос «кого?» или «чего?», выберите «зданий». Если перечислены однородные члены, выберите слово, которое перечислено вместе с ним.",
+     "options": [
+      "строительства",
+      "зданий"
+     ],
+     "answer": "зданий",
+     "source": "reference tree"
+    },
+    {
+     "question": "Which word does «зданий» depend on?",
+     "options": [
+      "строительства",
+      "вопросы",
+      "недостаток"
+     ],
+     "answer": "строительства",
+     "source": "reference tree"
+    },
+    {
+     "question": "Which word does «строительства» depend on?",
+     "options": [
+      "вопросы",
+      "недостаток"
+     ],
+     "answer": "вопросы",
+     "source": "reference tree"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s26",
+   "variant": "extra_comma",
+   "text": "Тем не менее, насущными, проблемами являются недостаток образованных священнослужителей, средств для передвижения и вопросы строительства капитальных церковных зданий.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "bff62540157d353ca5c8ceaa8cb38bf5e6b703dbb64a884e1cf8d324f8b594f4",
+   "calls": [
+    {
+     "question": "В каком сочетании слова связаны напрямую, несмотря на запятую между ними?",
+     "options": [
+      "насущными, проблемами",
+      "сохранить все запятые"
+     ],
+     "answer": "насущными, проблемами",
+     "source": "UD"
+    },
+    {
+     "question": "Which word does the phrase «для передвижения» depend on?",
+     "options": [
+      "недостаток",
+      "священнослужителей",
+      "средств"
+     ],
+     "answer": "средств",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое слово в творительном падеже называет, кем или чем выступает подлежащее?",
+     "options": [
+      "проблемами",
+      "нет такого слова"
+     ],
+     "answer": "проблемами",
+     "source": "reference tree"
+    },
+    {
+     "question": "Как употреблено слово «зданий»? Если оно уточняет другое существительное и отвечает на вопрос «кого?» или «чего?», выберите «зданий». Если перечислены однородные члены, выберите слово, которое перечислено вместе с ним.",
+     "options": [
+      "строительства",
+      "зданий"
+     ],
+     "answer": "зданий",
+     "source": "reference tree"
+    },
+    {
+     "question": "Which word does «зданий» depend on?",
+     "options": [
+      "строительства",
+      "вопросы",
+      "недостаток"
+     ],
+     "answer": "строительства",
+     "source": "reference tree"
+    },
+    {
+     "question": "Which word does «строительства» depend on?",
+     "options": [
+      "вопросы",
+      "недостаток"
+     ],
+     "answer": "вопросы",
+     "source": "reference tree"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s27",
+   "variant": "original",
+   "text": "Климат приморский умеренный.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "d3bc3f67423b301bd2d9d62125fbb97def1a03e450c40093862ef164e9997498",
+   "calls": [
+    {
+     "question": "Какие слова здесь служат сказуемыми и называют признаки подлежащего?",
+     "options": [
+      "приморский умеренный",
+      "умеренный"
+     ],
+     "answer": "приморский умеренный",
+     "source": "reference tree"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s27",
+   "variant": "no_punctuation",
+   "text": "Климат приморский умеренный",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "d3bc3f67423b301bd2d9d62125fbb97def1a03e450c40093862ef164e9997498",
+   "calls": [
+    {
+     "question": "Какие слова здесь служат сказуемыми и называют признаки подлежащего?",
+     "options": [
+      "приморский умеренный",
+      "умеренный"
+     ],
+     "answer": "приморский умеренный",
+     "source": "reference tree"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s27",
+   "variant": "extra_comma",
+   "text": "Климат, приморский умеренный.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "d3bc3f67423b301bd2d9d62125fbb97def1a03e450c40093862ef164e9997498",
+   "calls": [
+    {
+     "question": "В каком сочетании слова связаны напрямую, несмотря на запятую между ними?",
+     "options": [
+      "Климат, приморский",
+      "сохранить все запятые"
+     ],
+     "answer": "Климат, приморский",
+     "source": "UD"
+    },
+    {
+     "question": "Какие слова здесь служат сказуемыми и называют признаки подлежащего?",
+     "options": [
+      "приморский умеренный",
+      "умеренный"
+     ],
+     "answer": "приморский умеренный",
+     "source": "reference tree"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s28",
+   "variant": "original",
+   "text": "Происходит, по сказаниям старинных родословцев, от Ивана Васильевича Прончища, выехавшего из Польши в 1488 году к великому князю Ивану III и пожалованного поместьями в Тарусском уезде.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "2c82cf266af05b3a801eab7ad9990c181aabd83a56234e28d7e4d6ce0d4754bc",
+   "calls": [
+    {
+     "question": "Which word does the phrase «от Ивана» depend on?",
+     "options": [
+      "Происходит",
+      "сказаниям"
+     ],
+     "answer": "Происходит",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое сочетание передаёт оговорку к самому сообщению о действии «Происходит»?",
+     "options": [
+      "по сказаниям старинных родословцев",
+      "нет такого сочетания"
+     ],
+     "answer": "по сказаниям старинных родословцев",
+     "source": "reference tree"
+    },
+    {
+     "question": "Which word does the phrase «в 1488 году» depend on?",
+     "options": [
+      "выехавшего",
+      "Польши"
+     ],
+     "answer": "выехавшего",
+     "source": "reference tree"
+    },
+    {
+     "question": "Which word does the phrase «к великому князю» depend on?",
+     "options": [
+      "выехавшего",
+      "году"
+     ],
+     "answer": "выехавшего",
+     "source": "reference tree"
+    },
+    {
+     "question": "Which word does the phrase «в Тарусском уезде» depend on?",
+     "options": [
+      "пожалованного",
+      "поместьями"
+     ],
+     "answer": "поместьями",
+     "source": "reference tree"
+    },
+    {
+     "question": "Copy «Васильевича» if its role here is apposition. Otherwise choose “no such word”.",
+     "options": [
+      "Васильевича",
+      "no such word"
+     ],
+     "answer": "no such word",
+     "source": "reference tree"
+    },
+    {
+     "question": "Copy «Васильевича» if its role here is genitive modifier. Otherwise choose “no such word”.",
+     "options": [
+      "Васильевича",
+      "no such word"
+     ],
+     "answer": "no such word",
+     "source": "reference tree"
+    },
+    {
+     "question": "Слово «Прончища» здесь служит именем или названием? Выберите его, если да.",
+     "options": [
+      "Прончища"
+     ],
+     "answer": "Прончища",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s28",
+   "variant": "no_punctuation",
+   "text": "Происходит по сказаниям старинных родословцев от Ивана Васильевича Прончища выехавшего из Польши в 1488 году к великому князю Ивану III и пожалованного поместьями в Тарусском уезде",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "2c82cf266af05b3a801eab7ad9990c181aabd83a56234e28d7e4d6ce0d4754bc",
+   "calls": [
+    {
+     "question": "Which word does the phrase «от Ивана» depend on?",
+     "options": [
+      "Происходит",
+      "сказаниям"
+     ],
+     "answer": "Происходит",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое сочетание передаёт оговорку к самому сообщению о действии «Происходит»?",
+     "options": [
+      "по сказаниям старинных родословцев",
+      "нет такого сочетания"
+     ],
+     "answer": "по сказаниям старинных родословцев",
+     "source": "reference tree"
+    },
+    {
+     "question": "Which word does the phrase «в 1488 году» depend on?",
+     "options": [
+      "выехавшего",
+      "Польши"
+     ],
+     "answer": "выехавшего",
+     "source": "reference tree"
+    },
+    {
+     "question": "Which word does the phrase «к великому князю» depend on?",
+     "options": [
+      "выехавшего",
+      "году"
+     ],
+     "answer": "выехавшего",
+     "source": "reference tree"
+    },
+    {
+     "question": "Which word does the phrase «в Тарусском уезде» depend on?",
+     "options": [
+      "пожалованного",
+      "поместьями"
+     ],
+     "answer": "поместьями",
+     "source": "reference tree"
+    },
+    {
+     "question": "Copy «Васильевича» if its role here is apposition. Otherwise choose “no such word”.",
+     "options": [
+      "Васильевича",
+      "no such word"
+     ],
+     "answer": "no such word",
+     "source": "reference tree"
+    },
+    {
+     "question": "Copy «Васильевича» if its role here is genitive modifier. Otherwise choose “no such word”.",
+     "options": [
+      "Васильевича",
+      "no such word"
+     ],
+     "answer": "no such word",
+     "source": "reference tree"
+    },
+    {
+     "question": "Слово «Прончища» здесь служит именем или названием? Выберите его, если да.",
+     "options": [
+      "Прончища"
+     ],
+     "answer": "Прончища",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s28",
+   "variant": "extra_comma",
+   "text": "Происходит, по сказаниям старинных, родословцев, от Ивана Васильевича Прончища, выехавшего из Польши в 1488 году к великому князю Ивану III и пожалованного поместьями в Тарусском уезде.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "2c82cf266af05b3a801eab7ad9990c181aabd83a56234e28d7e4d6ce0d4754bc",
+   "calls": [
+    {
+     "question": "В каком сочетании слова связаны напрямую, несмотря на запятую между ними?",
+     "options": [
+      "старинных, родословцев",
+      "сохранить все запятые"
+     ],
+     "answer": "старинных, родословцев",
+     "source": "UD"
+    },
+    {
+     "question": "Which word does the phrase «от Ивана» depend on?",
+     "options": [
+      "Происходит",
+      "сказаниям"
+     ],
+     "answer": "Происходит",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое сочетание передаёт оговорку к самому сообщению о действии «Происходит»?",
+     "options": [
+      "по сказаниям старинных , родословцев",
+      "нет такого сочетания"
+     ],
+     "answer": "по сказаниям старинных , родословцев",
+     "source": "reference tree"
+    },
+    {
+     "question": "Which word does the phrase «в 1488 году» depend on?",
+     "options": [
+      "выехавшего",
+      "Польши"
+     ],
+     "answer": "выехавшего",
+     "source": "reference tree"
+    },
+    {
+     "question": "Which word does the phrase «к великому князю» depend on?",
+     "options": [
+      "выехавшего",
+      "году"
+     ],
+     "answer": "выехавшего",
+     "source": "reference tree"
+    },
+    {
+     "question": "Which word does the phrase «в Тарусском уезде» depend on?",
+     "options": [
+      "пожалованного",
+      "поместьями"
+     ],
+     "answer": "поместьями",
+     "source": "reference tree"
+    },
+    {
+     "question": "Copy «Васильевича» if its role here is apposition. Otherwise choose “no such word”.",
+     "options": [
+      "Васильевича",
+      "no such word"
+     ],
+     "answer": "no such word",
+     "source": "reference tree"
+    },
+    {
+     "question": "Copy «Васильевича» if its role here is genitive modifier. Otherwise choose “no such word”.",
+     "options": [
+      "Васильевича",
+      "no such word"
+     ],
+     "answer": "no such word",
+     "source": "reference tree"
+    },
+    {
+     "question": "Слово «Прончища» здесь служит именем или названием? Выберите его, если да.",
+     "options": [
+      "Прончища"
+     ],
+     "answer": "Прончища",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s29",
+   "variant": "original",
+   "text": "Такси Тук-тук в большинстве своем отличаются от используемых в столице Таиланда Бангкок и представляют собой пикапы, оборудованные крышей и скамейками.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "a7ccd6dec540faa95bbd7029651585d4d742b033f9988a4d391937dd2a1b22fb",
+   "calls": [
+    {
+     "question": "Which word does «Бангкок» depend on?",
+     "options": [
+      "Таиланда",
+      "столице"
+     ],
+     "answer": "столице",
+     "source": "reference tree"
+    },
+    {
+     "question": "Copy «оборудованные» if the verb presents the action as a bounded whole. Otherwise choose “no such word”.",
+     "options": [
+      "оборудованные",
+      "no such word"
+     ],
+     "answer": "оборудованные",
+     "source": "UD"
+    },
+    {
+     "question": "Слово «Тук-тук» здесь служит именем или названием? Выберите его, если да.",
+     "options": [
+      "Тук-тук"
+     ],
+     "answer": "Тук-тук",
+     "source": "control reading"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s29",
+   "variant": "no_punctuation",
+   "text": "Такси Тук-тук в большинстве своем отличаются от используемых в столице Таиланда Бангкок и представляют собой пикапы оборудованные крышей и скамейками",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "a7ccd6dec540faa95bbd7029651585d4d742b033f9988a4d391937dd2a1b22fb",
+   "calls": [
+    {
+     "question": "Which word does «Бангкок» depend on?",
+     "options": [
+      "Таиланда",
+      "столице"
+     ],
+     "answer": "столице",
+     "source": "reference tree"
+    },
+    {
+     "question": "Copy «оборудованные» if the verb presents the action as a bounded whole. Otherwise choose “no such word”.",
+     "options": [
+      "оборудованные",
+      "no such word"
+     ],
+     "answer": "оборудованные",
+     "source": "UD"
+    },
+    {
+     "question": "Слово «Тук-тук» здесь служит именем или названием? Выберите его, если да.",
+     "options": [
+      "Тук-тук"
+     ],
+     "answer": "Тук-тук",
+     "source": "control reading"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s29",
+   "variant": "extra_comma",
+   "text": "Такси Тук-тук в большинстве, своем отличаются от используемых в столице Таиланда Бангкок и представляют собой пикапы, оборудованные крышей и скамейками.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "a7ccd6dec540faa95bbd7029651585d4d742b033f9988a4d391937dd2a1b22fb",
+   "calls": [
+    {
+     "question": "В каком сочетании слова связаны напрямую, несмотря на запятую между ними?",
+     "options": [
+      "большинстве, своем",
+      "сохранить все запятые"
+     ],
+     "answer": "большинстве, своем",
+     "source": "UD"
+    },
+    {
+     "question": "Which word does «Бангкок» depend on?",
+     "options": [
+      "Таиланда",
+      "столице"
+     ],
+     "answer": "столице",
+     "source": "reference tree"
+    },
+    {
+     "question": "Copy «оборудованные» if the verb presents the action as a bounded whole. Otherwise choose “no such word”.",
+     "options": [
+      "оборудованные",
+      "no such word"
+     ],
+     "answer": "оборудованные",
+     "source": "UD"
+    },
+    {
+     "question": "Слово «Тук-тук» здесь служит именем или названием? Выберите его, если да.",
+     "options": [
+      "Тук-тук"
+     ],
+     "answer": "Тук-тук",
+     "source": "control reading"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s30",
+   "variant": "original",
+   "text": "Но уже в начале тридцатых годов автомобили стали делать значительно более обтекаемыми и аэродинамичными (хотя нередко -- лишь визуально).",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "cecbca146d3c99de5c8f32d1a5c37e88aaa7077f5371f29b5bc127ce638fc86e",
+   "calls": [
+    {
+     "question": "Which word does the phrase «в начале» depend on?",
+     "options": [
+      "стали",
+      "делать"
+     ],
+     "answer": "стали",
+     "source": "reference tree"
+    },
+    {
+     "question": "Which word does «визуально» depend on?",
+     "options": [
+      "обтекаемыми",
+      "аэродинамичными",
+      "стали",
+      "делать"
+     ],
+     "answer": "обтекаемыми",
+     "source": "reference tree"
+    },
+    {
+     "question": "Which word does «уже» depend on?",
+     "options": [
+      "стали",
+      "начале"
+     ],
+     "answer": "начале",
+     "source": "reference tree"
+    },
+    {
+     "question": "Which word does «значительно» depend on?",
+     "options": [
+      "более",
+      "обтекаемыми"
+     ],
+     "answer": "более",
+     "source": "reference tree"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s30",
+   "variant": "no_punctuation",
+   "text": "Но уже в начале тридцатых годов автомобили стали делать значительно более обтекаемыми и аэродинамичными хотя нередко лишь визуально",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "cecbca146d3c99de5c8f32d1a5c37e88aaa7077f5371f29b5bc127ce638fc86e",
+   "calls": [
+    {
+     "question": "Which word does the phrase «в начале» depend on?",
+     "options": [
+      "стали",
+      "делать"
+     ],
+     "answer": "стали",
+     "source": "reference tree"
+    },
+    {
+     "question": "Which word does «визуально» depend on?",
+     "options": [
+      "обтекаемыми",
+      "аэродинамичными",
+      "стали",
+      "делать"
+     ],
+     "answer": "обтекаемыми",
+     "source": "reference tree"
+    },
+    {
+     "question": "Which word does «уже» depend on?",
+     "options": [
+      "стали",
+      "начале"
+     ],
+     "answer": "начале",
+     "source": "reference tree"
+    },
+    {
+     "question": "Which word does «значительно» depend on?",
+     "options": [
+      "более",
+      "обтекаемыми"
+     ],
+     "answer": "более",
+     "source": "reference tree"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s30",
+   "variant": "extra_comma",
+   "text": "Но уже в начале тридцатых, годов автомобили стали делать значительно более обтекаемыми и аэродинамичными (хотя нередко -- лишь визуально).",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "cecbca146d3c99de5c8f32d1a5c37e88aaa7077f5371f29b5bc127ce638fc86e",
+   "calls": [
+    {
+     "question": "В каком сочетании слова связаны напрямую, несмотря на запятую между ними?",
+     "options": [
+      "тридцатых, годов",
+      "сохранить все запятые"
+     ],
+     "answer": "тридцатых, годов",
+     "source": "UD"
+    },
+    {
+     "question": "Which word does the phrase «в начале» depend on?",
+     "options": [
+      "стали",
+      "делать"
+     ],
+     "answer": "стали",
+     "source": "reference tree"
+    },
+    {
+     "question": "Which word does «визуально» depend on?",
+     "options": [
+      "обтекаемыми",
+      "аэродинамичными",
+      "стали",
+      "делать"
+     ],
+     "answer": "обтекаемыми",
+     "source": "reference tree"
+    },
+    {
+     "question": "Which word does «уже» depend on?",
+     "options": [
+      "стали",
+      "начале"
+     ],
+     "answer": "начале",
+     "source": "reference tree"
+    },
+    {
+     "question": "Which word does «значительно» depend on?",
+     "options": [
+      "более",
+      "обтекаемыми"
+     ],
+     "answer": "более",
+     "source": "reference tree"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s31",
+   "variant": "original",
+   "text": "Авиабаза была создана с помощью Соединенных Штатов Америки после эвакуации авиабаз с Синая, в соответствии с Кэмп-Дэвидскими соглашениями.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "9b1b7905b9557878b6f366e226264f20792d03da8c019508fa0048a1828a14b4",
+   "calls": [
+    {
+     "question": "Which word does the phrase «после эвакуации» depend on?",
+     "options": [
+      "создана",
+      "Штатов",
+      "Америки"
+     ],
+     "answer": "создана",
+     "source": "reference tree"
+    },
+    {
+     "question": "Which word does the phrase «с Синая» depend on?",
+     "options": [
+      "создана",
+      "эвакуации",
+      "авиабаз"
+     ],
+     "answer": "эвакуации",
+     "source": "reference tree"
+    },
+    {
+     "question": "Which expression functions as the preposition here?",
+     "options": [
+      "в",
+      "в соответствии с"
+     ],
+     "answer": "в соответствии с",
+     "source": "reference tree"
+    },
+    {
+     "question": "Which word does the phrase «в соответствии с Кэмп-Дэвидскими соглашениями» depend on?",
+     "options": [
+      "создана",
+      "эвакуации",
+      "Синая"
+     ],
+     "answer": "эвакуации",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое слово характеризует согласованное определение «Кэмп-Дэвидскими»?",
+     "options": [
+      "соглашениями"
+     ],
+     "answer": "соглашениями",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s31",
+   "variant": "no_punctuation",
+   "text": "Авиабаза была создана с помощью Соединенных Штатов Америки после эвакуации авиабаз с Синая в соответствии с Кэмп-Дэвидскими соглашениями",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "9b1b7905b9557878b6f366e226264f20792d03da8c019508fa0048a1828a14b4",
+   "calls": [
+    {
+     "question": "Which word does the phrase «после эвакуации» depend on?",
+     "options": [
+      "создана",
+      "Штатов",
+      "Америки"
+     ],
+     "answer": "создана",
+     "source": "reference tree"
+    },
+    {
+     "question": "Which word does the phrase «с Синая» depend on?",
+     "options": [
+      "создана",
+      "эвакуации",
+      "авиабаз"
+     ],
+     "answer": "эвакуации",
+     "source": "reference tree"
+    },
+    {
+     "question": "Which expression functions as the preposition here?",
+     "options": [
+      "в",
+      "в соответствии с"
+     ],
+     "answer": "в соответствии с",
+     "source": "reference tree"
+    },
+    {
+     "question": "Which word does the phrase «в соответствии с Кэмп-Дэвидскими соглашениями» depend on?",
+     "options": [
+      "создана",
+      "эвакуации",
+      "Синая"
+     ],
+     "answer": "эвакуации",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое слово характеризует согласованное определение «Кэмп-Дэвидскими»?",
+     "options": [
+      "соглашениями"
+     ],
+     "answer": "соглашениями",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s31",
+   "variant": "extra_comma",
+   "text": "Авиабаза была создана с помощью Соединенных, Штатов Америки после эвакуации авиабаз с Синая, в соответствии с Кэмп-Дэвидскими соглашениями.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "9b1b7905b9557878b6f366e226264f20792d03da8c019508fa0048a1828a14b4",
+   "calls": [
+    {
+     "question": "В каком сочетании слова связаны напрямую, несмотря на запятую между ними?",
+     "options": [
+      "Соединенных, Штатов",
+      "сохранить все запятые"
+     ],
+     "answer": "Соединенных, Штатов",
+     "source": "UD"
+    },
+    {
+     "question": "Which word does the phrase «после эвакуации» depend on?",
+     "options": [
+      "создана",
+      "Штатов",
+      "Америки"
+     ],
+     "answer": "создана",
+     "source": "reference tree"
+    },
+    {
+     "question": "Which word does the phrase «с Синая» depend on?",
+     "options": [
+      "создана",
+      "эвакуации",
+      "авиабаз"
+     ],
+     "answer": "эвакуации",
+     "source": "reference tree"
+    },
+    {
+     "question": "Which expression functions as the preposition here?",
+     "options": [
+      "в",
+      "в соответствии с"
+     ],
+     "answer": "в соответствии с",
+     "source": "reference tree"
+    },
+    {
+     "question": "Which word does the phrase «в соответствии с Кэмп-Дэвидскими соглашениями» depend on?",
+     "options": [
+      "создана",
+      "эвакуации",
+      "Синая"
+     ],
+     "answer": "эвакуации",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое слово характеризует согласованное определение «Кэмп-Дэвидскими»?",
+     "options": [
+      "соглашениями"
+     ],
+     "answer": "соглашениями",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  }
+ ]
+}

@@ -310,6 +310,9 @@ def _partitions(analyses, tokens, text):
             labels[None] = 'no such word'
         return Probe(question, tuple(labels.values()), context), [labels[i] for i in indices]
 
+    from . import nominal_predicates
+    yield from nominal_predicates.partitions(analyses, tokens, text)
+
     predicates = [next(i for i, link in enumerate(a) if link.head is None) for a in analyses]
     if len(set(predicates)) > 1:
         yield word_choice('Which word is the main predicate?', predicates)
@@ -827,7 +830,7 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
             budget: int = 256, accept_tree: Callable[[tuple[Link, ...]], bool] | None = None) -> Result:
     if budget < 1:
         raise ValueError('budget must be positive')
-    from . import qualification
+    from . import internal_comma, qualification, sentence_regions
 
     scanner = qualification.GroupOpenings()
     prefix_openings = []
@@ -969,11 +972,70 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
         else:
             yield from chain((first,), variants)
 
-    def exact(part):
+    comma_choices = {}
+
+    @reuse_completed
+    def regional(part):
+        yield from sentence_regions.trees(part, candidates, budget)
+
+    @reuse_completed
+    def remaining(part):
+        yield from sentence_regions.remaining(part, budget)
+
+    def checked_comma_readings(part, parse, sites=None):
+        if part in comma_choices and comma_choices[part] is None:
+            return
+        possible = internal_comma.repairs(part, parse, budget, sites=sites)
+        if possible and part not in comma_choices:
+            raise internal_comma.BoundaryChoice(possible, part, text)
+        for index, variants in possible.items():
+            if part[index].start == comma_choices[part]:
+                yield from variants
+
+    def readings_for_region(part, grammar=regional, fallback=supplemented):
+        from itertools import chain
+
+        generated = grammar(part)
+        first = next(generated, None)
+        if first is None:
+            repaired = checked_comma_readings(part, grammar)
+            option = next(repaired, None)
+            if option is not None:
+                yield from chain((option,), repaired)
+            elif fallback is not None:
+                yield from fallback(part)
+            return
+
+        commas = {i for i, token in enumerate(part) if token.surface == ','}
+        if commas:
+            ordinary = []
+            suspect = set()
+            for tree in chain((first,), generated):
+                ignored = {i for i in commas if internal_comma.ignored_inside_group(tree, i)}
+                suspect.update(ignored)
+                if not ignored:
+                    ordinary.append(tree)
+                if len(ordinary) > budget:
+                    raise AnalysisBudgetExceeded('REGION_BUDGET')
+                suspect.update(i for i in commas if tree[i].rule == 'PP.DETACHED.COMMA')
+            if suspect:
+                repaired = checked_comma_readings(part, grammar, suspect)
+                option = next(repaired, None)
+                if option is not None:
+                    yield from chain((option,), repaired)
+                    return
+            if ordinary:
+                yield from ordinary
+            elif fallback is not None:
+                yield from fallback(part)
+        else:
+            yield from chain((first,), generated)
+
+    def exact(part, candidates_for=readings_for_region):
         opened = prefix_openings
         if accept_tree is not None and part is not words:
             opened = tuple(qualification.openings(part))
-        for tree in supplemented(part):
+        for tree in candidates_for(part):
             if len(tree) != len(part):
                 continue
             annotated = morphology.annotate(part, tree)
@@ -1038,6 +1100,10 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
             try:
                 collect(exact(working_words))
                 if not structures:
+                    collect(exact(working_words, lambda part: readings_for_region(part, remaining, None)))
+                if not structures and any(t.surface == ',' for t in working_words):
+                    collect(exact(working_words, lambda part: checked_comma_readings(part, supplemented)))
+                if not structures:
                     collect(recovery.trees(working_words, exact, budget=budget))
             except AnalysisBudgetExceeded as error:
                 budget_error = error
@@ -1065,6 +1131,14 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
                 if budget_error is not None:
                     raise budget_error
                 break
+        except internal_comma.BoundaryChoice as group:
+            count = len(group.options)
+            label, stopped = select(group.probe, count, domain='internal_comma')
+            if stopped is not None:
+                return stopped
+            comma_choices[group.part] = group.options[label]
+            steps.append(ProbeStep(count, 1, 'selected', 'internal_comma'))
+            structures.clear()
         except marked_regions.RelativeChoice as group:
             label, stopped = select(group.probe, len(group.heads), domain=group.domain)
             if stopped is not None:
@@ -1096,13 +1170,18 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
         else:
             unconfirmed = next((i for i, link in enumerate(analyses[0])
                                 if (link.rule.startswith('OPAQUE.') or link.rule in {'ELL.NOMINAL', 'NAME.TITLE'}
-                                    or needs_confirmation(analyses[0], i))
+                                    or needs_confirmation(analyses[0], i)
+                                    or sentence_regions.confirmation(words, analyses[0], i, text))
                                 and i not in confirmed_names), None)
             if unconfirmed is None:
                 break
             surface = _span_label(words, unconfirmed)
             candidate = analyses[0][unconfirmed]
-            if candidate.rule == 'ELL.NOMINAL':
+            regional_probe = sentence_regions.confirmation(words, analyses[0], unconfirmed, text)
+            if regional_probe is not None:
+                probe = regional_probe
+                keys = [probe.options[0]]
+            elif candidate.rule == 'ELL.NOMINAL':
                 noun = _span_label(words, candidate.ellipsis_source)
                 probe = Probe(f'Какое существительное подразумевается после «{surface}»?', (noun,), text)
                 keys = [noun]
