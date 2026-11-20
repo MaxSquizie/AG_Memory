@@ -41,17 +41,17 @@ def test_ambiguous_attribute_and_exact_probe():
     assert r.status == 'AMBIGUOUS' and len(r.analyses) == 2
     probe, = r.probes
     assert probe.prompt() == (
-        text + '\n\nWhich word does «грустную» describe?\nAnswer options:\n'
-        '- маму\n- сестру\n- 0 — None of the proposed answers fits.\n'
-        '- ? — The sentence leaves the choice unclear.'
+        text + '\n\nКакое слово характеризует определение «грустную»?\nВарианты ответа:\n'
+        '- маму\n- сестру\n- 0 — Ни один вариант не подходит.\n'
+        '- ? — По тексту нельзя выбрать однозначно.'
     )
     request = Probe.from_prompt(probe.prompt()).jev_request()
     assert request == probe.jev_request() == {
         'model': 'jev-latest', 'state': text, 'questions': {
-            'grammar': {'type': 'choice', 'instructions': 'Which word does «грустную» describe?',
+            'grammar': {'type': 'choice', 'instructions': 'Какое слово характеризует определение «грустную»?',
                         'criteria': {'маму': None, 'сестру': None,
-                                     '0': 'None of the proposed answers fits.',
-                                     '?': 'The sentence leaves the choice unclear.'}}}}
+                                     '0': 'Ни один вариант не подходит.',
+                                     '?': 'По тексту нельзя выбрать однозначно.'}}}}
     for host in ['маму', 'сестру']:
         resolved = analyze(text, lambda p: host)
         links, = resolved.analyses
@@ -222,6 +222,8 @@ def test_prompt_parser_preserves_multiline_context_even_with_literal_headers():
     windows_probe = Probe('Which word fits?', ('маму', 'сестру'), 'маму\r\nсестру')
     wire = windows_probe.prompt().replace('\r\n', '\n').replace('\n', '\r\n')
     assert Probe.from_prompt(wire + '\r\n') == windows_probe
+    legacy = probe.prompt().replace('Which word fits?', 'Какое слово подходит?')
+    assert Probe.from_prompt(legacy).prompt() == legacy
 
 
 @pytest.mark.parametrize('replacement', ['- Мать\n- мать', '- 0', 'дочь', ''])

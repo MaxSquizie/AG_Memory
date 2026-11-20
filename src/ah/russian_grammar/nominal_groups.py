@@ -3,6 +3,7 @@ from functools import cache
 from importlib.resources import files
 from itertools import product
 
+from .nominal_chart import NominalChart, agrees as _agree
 from .prepositions import FORMS, PREFIXES
 from .rules import Reading, known_forms, name_continuations, name_type, readings
 
@@ -54,13 +55,6 @@ def _prepositions(tokens, start):
                     yield i + 1, lemma
         if phrase not in PREFIXES:
             break
-
-
-def _agree(adj, noun):
-    case = {'loc2': 'loct', 'gen2': 'gent'}.get(noun.case, noun.case)
-    return (adj.case == case and adj.number == noun.number
-            and (noun.number == 'plur' or not noun.gender or noun.gender == adj.gender)
-            and (not adj.animacy or not noun.animacy or noun.animacy == adj.animacy))
 
 
 def _members(tokens, start, prep, case=None):
@@ -116,8 +110,8 @@ def _names(tokens, group):
                     states.append((expanded, (*parts, part)))
 
 
-def _groups(tokens, start, budget, *, bare_cases=()):
-    from .parser import AnalysisBudgetExceeded, Link
+def _groups(tokens, start, budget, *, bare_cases=(), chart=None):
+    from .parser import NominalBudgetExceeded, Link
 
     found = set()
     seeds = ((start, None, case) for case in sorted(bare_cases)) if bare_cases else (
@@ -134,12 +128,24 @@ def _groups(tokens, start, budget, *, bare_cases=()):
                     continue
                 found.add(group)
                 if len(found) > budget:
-                    raise AnalysisBudgetExceeded('NOMINAL_GROUP_BUDGET')
+                    raise NominalBudgetExceeded('NOMINAL_GROUP_BUDGET')
                 if bare_cases or any(link.role in ('nominal_conjunct', 'possessive') for _, link in group.extra):
                     yield group
                 end = group.end
                 if end >= len(tokens):
                     continue
+                if chart is not None and group.noun in chart.steps[end].attribute_hosts and all(
+                        link.role in ('attribute', 'possessive') for _, link in group.extra):
+                    noun_tags = [tag for word, tag in known_forms(tokens[group.noun].surface)
+                                 if word == group.lemma and tag.POS == 'NOUN' and tag.case == group.case]
+                    for j, attached in group.extra:
+                        adjective_tags = [tag for word, tag in known_forms(tokens[j].surface)
+                                          if word == attached.lemma and tag.POS == 'ADJF']
+                        noun_tags = [n for n in noun_tags if any(_agree(a, n) for a in adjective_tags)]
+                    for adjective, tag in known_forms(tokens[end].surface):
+                        if tag.POS == 'ADJF' and 'Apro' not in tag and any(_agree(tag, n) for n in noun_tags):
+                            link = Link('attribute', adjective, group.noun, 'A1')
+                            pending.append(replace(group, end=end + 1, extra=(*group.extra, (end, link))))
                 comma = tokens[end].surface == ','
                 next_word = end + int(comma)
                 markers = list(_markers(tokens, next_word))
@@ -163,9 +169,72 @@ def _groups(tokens, start, budget, *, bare_cases=()):
                                 pending.append(replace(group, end=name.end, extra=(*links, *name.extra)))
 
 
-def with_genitives(tokens, local, *, budget):
+def _restore_indices(link, kept):
+    fields = ('head', 'controller', 'antecedent', 'coord_head', 'shared_agent', 'shared_object', 'ellipsis_source')
+    return replace(link, **{field: kept[value] for field in fields if (value := getattr(link, field)) is not None})
+
+
+def _open_heads(links, before, allowed, *, through_preposition=False):
+    index = before - 1
+    seen = set()
+    while index in links and index not in seen:
+        seen.add(index)
+        link = links[index]
+        if index in allowed:
+            yield index
+        if link.role not in ('genitive_modifier', 'attribute', 'possessive', 'name_part'):
+            if not through_preposition or link.role not in ('governed', 'preposition'):
+                break
+        if link.head is None or link.head >= before:
+            break
+        index = link.head
+
+
+def _extensions(links, groups, chart, budget):
     from .morphology import NOMINAL_ROLES
-    from .parser import AnalysisBudgetExceeded, Link
+    from .parser import NominalBudgetExceeded, Link
+
+    nominal_roles = NOMINAL_ROLES | {'genitive_modifier'}
+    prepositions = tuple(sorted(i for i, link in links.items() if link.role == 'preposition'))
+    total = len(groups) + len(prepositions)
+    pending = [(0, links)]
+    examined = 0
+    while pending:
+        position, current = pending.pop()
+        if position == total:
+            yield tuple(current[i] for i in range(len(current)))
+            continue
+        if position >= len(groups):
+            i = prepositions[position - len(groups)]
+            link = current[i]
+            pending.append((position + 1, current))
+            hosts = tuple(_open_heads(current, i, chart.steps[i].preposition_hosts, through_preposition=True))
+            if link.head in hosts:
+                for host in hosts[:hosts.index(link.head)]:
+                    if current[host].role != 'genitive_modifier':
+                        continue
+                    examined += 1
+                    if examined > budget:
+                        raise NominalBudgetExceeded('NOMINAL_FRONTIER_BUDGET')
+                    updated = dict(current)
+                    updated[i] = replace(link, head=host)
+                    pending.append((position + 1, updated))
+            continue
+        group = groups[position]
+        for host in _open_heads(current, group.start, chart.steps[group.noun].genitive_hosts):
+            examined += 1
+            if examined > budget:
+                raise NominalBudgetExceeded('NOMINAL_FRONTIER_BUDGET')
+            if current[host].role not in nominal_roles:
+                continue
+            updated = dict(current)
+            updated[group.noun] = Link('genitive_modifier', group.lemma, host, 'N.GEN', case=group.case)
+            updated.update(group.extra)
+            pending.append((position + 1, updated))
+
+
+def with_genitives(tokens, local, *, budget, chart=None):
+    from .parser import NominalBudgetExceeded
 
     lexical_members = set()
     for tree in local(tokens):
@@ -176,14 +245,16 @@ def with_genitives(tokens, local, *, budget):
                 lexical_members.add(link.head)
         yield tree
 
-    def nominal_host(token):
-        forms = known_forms(token.surface)
-        return bool(forms) and all(tag.POS == 'NOUN' and not name_type(tag) for _, tag in forms)
-
+    if chart is None:
+        chart = NominalChart(budget)
+        for token in tokens:
+            chart.feed(token.surface)
+    if chart.overflow:
+        raise NominalBudgetExceeded('NOMINAL_FRONTIER_BUDGET')
     spans = [group for start in range(1, len(tokens))
-             if start - 1 not in lexical_members and nominal_host(tokens[start - 1])
-             for group in _groups(tokens, start, budget, bare_cases=('gent', 'gen2'))
-             if lexical_members.isdisjoint(range(start, group.end))]
+             if start - 1 not in lexical_members and chart.steps[start - 1].right_edge
+             for group in _groups(tokens, start, budget, bare_cases=('gent', 'gen2'), chart=chart)
+             if chart.steps[group.noun].genitive_hosts and lexical_members.isdisjoint(range(start, group.end))]
     pending = [(0, ())]
     examined = 0
     while pending:
@@ -194,31 +265,18 @@ def with_genitives(tokens, local, *, budget):
                 continue
             examined += 1
             if examined > budget:
-                raise AnalysisBudgetExceeded('GENITIVE_GROUP_BUDGET')
+                raise NominalBudgetExceeded('GENITIVE_GROUP_BUDGET')
             groups = (*selected, group)
             hidden = {k for g in groups for k in range(g.start, g.end)}
             kept = tuple(k for k in range(len(tokens)) if k not in hidden)
             for tree in local(tuple(tokens[k] for k in kept)):
-                links = {k: replace(link, **{field: kept[v] for field in ('head', 'controller', 'antecedent')
-                                             if (v := getattr(link, field)) is not None})
-                         for k, link in zip(kept, tree)}
-                for g in groups:
-                    host = g.start - 1
-                    if host not in links or links[host].role not in NOMINAL_ROLES | {'genitive_modifier'}:
-                        break
-                    links[g.noun] = Link('genitive_modifier', g.lemma, host, 'N.GEN', case=g.case)
-                    links.update(g.extra)
-                else:
-                    yield tuple(links[k] for k in range(len(tokens)))
+                links = {k: _restore_indices(link, kept) for k, link in zip(kept, tree)}
+                yield from _extensions(links, groups, chart, budget)
             pending.append((j + 1, groups))
 
 
 def _restore(tree, kept, groups):
-    links = {}
-    for i, link in zip(kept, tree):
-        indices = {field: kept[value] for field in ('head', 'controller', 'antecedent')
-                   if (value := getattr(link, field, None)) is not None}
-        links[i] = replace(link, **indices)
+    links = {i: _restore_indices(link, kept) for i, link in zip(kept, tree)}
     choices = []
     for group in groups:
         head = links[group.noun]
@@ -236,7 +294,7 @@ def _restore(tree, kept, groups):
 
 
 def trees(tokens, local, *, budget=256):
-    from .parser import AnalysisBudgetExceeded
+    from .parser import NominalBudgetExceeded
 
     yield from local(tokens)
     if not any(token.surface.casefold() in _coordinators() or token.surface == ','
@@ -252,7 +310,7 @@ def trees(tokens, local, *, budget=256):
         for tree in local(tuple(tokens[i] for i in kept)):
             result.append(tree)
             if len(result) > budget:
-                raise AnalysisBudgetExceeded('NOMINAL_GROUP_BUDGET')
+                raise NominalBudgetExceeded('NOMINAL_GROUP_BUDGET')
         return tuple(result)
 
     count = 0
@@ -267,7 +325,7 @@ def trees(tokens, local, *, budget=256):
                 selection = (*picked, group)
                 count += 1
                 if count > budget:
-                    raise AnalysisBudgetExceeded('NOMINAL_GROUP_BUDGET')
+                    raise NominalBudgetExceeded('NOMINAL_GROUP_BUDGET')
                 hidden = {i for block in selection for i, _ in block.extra}
                 kept = tuple(i for i in range(len(tokens)) if i not in hidden)
                 for tree in reduced(kept):

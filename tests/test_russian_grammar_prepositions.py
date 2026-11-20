@@ -59,7 +59,7 @@ def test_probe_selects_external_head_without_reopening_the_group():
     r = analyze(text)
     probe, = r.probes
     assert Probe.from_prompt(probe.prompt()) == probe
-    assert probe.question == 'Which word does the phrase «с тяжёлым биноклем» depend on?'
+    assert probe.question == 'От какого из предложенных слов в этом месте текста задаётся вопрос к сочетанию «с тяжёлым биноклем»? Выберите слово, с которым оно связано непосредственно.'
     assert probe.context == 'увидел человека с тяжёлым\nбиноклем' and probe.options == ('увидел', 'человека')
     for answer, host in [('увидел', 1), ('человека', 2)]:
         resolved = analyze(text, lambda p: answer)
@@ -84,8 +84,8 @@ def test_repeated_group_is_identified_in_each_question():
     r = analyze('Иван увидел человека с биноклем с биноклем', lambda p: 'увидел')
     assert r.status == 'PARSED_FRAGMENT'
     assert [p.question for p in r.probes] == [
-        'Which word does the phrase «[с биноклем] с» depend on?',
-        'Which word does the phrase «биноклем [с биноклем]» depend on?',
+        'От какого из предложенных слов в этом месте текста задаётся вопрос к сочетанию «[с биноклем] с»? Выберите слово, с которым оно связано непосредственно.',
+        'От какого из предложенных слов в этом месте текста задаётся вопрос к сочетанию «биноклем [с биноклем]»? Выберите слово, с которым оно связано непосредственно.',
     ]
 
 
@@ -131,3 +131,10 @@ def test_case_recovery_keeps_the_original_and_partitions_valid_inflections():
         evidence = tree[-1].recovery
         assert restored.tokens[-1].surface == evidence.original == 'столу'
         assert (evidence.corrected, evidence.case, evidence.lemma, evidence.preposition) == (choice, case, 'стол', 'под')
+
+
+def test_second_preposition_extends_only_the_branch_open_after_the_first():
+    result = analyze('Методика перевода конструкций из текста в элементы задаёт переход.')
+    attachments = {(t[3].head, t[5].head) for t in result.analyses if t[2].head == 1}
+    assert (1, 1) in attachments
+    assert (0, 1) not in attachments and (1, 2) not in attachments

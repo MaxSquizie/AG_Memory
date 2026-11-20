@@ -6,6 +6,7 @@ from itertools import product
 
 from .detached_prepositions import extent as group_extent
 from .morphology import Morphology, feature_choices
+from .nominal_chart import NominalChart, NominalStep
 from .prepositions import CASE_NAMES, FORMS, GOVERNMENT, PREFIXES, TOKEN, group_heads
 from .probe import MAX_WORD_CHOICES, FocusChoice, Probe
 from . import modifier_focus
@@ -52,6 +53,10 @@ class Link:
 
 
 class AnalysisBudgetExceeded(Exception):
+    pass
+
+
+class NominalBudgetExceeded(AnalysisBudgetExceeded):
     pass
 
 
@@ -313,6 +318,7 @@ def _partitions(analyses, tokens, text):
         return Probe(question, tuple(labels.values()), context), [labels[i] for i in indices]
 
     from . import clause_series, nominal_definitions, nominal_mentions, nominal_predicates, temporal_groups
+    from .morphology import NOMINAL_ROLES
     yield from clause_series.partitions(analyses, tokens, text)
     yield from nominal_definitions.partitions(analyses, tokens, text)
     yield from nominal_mentions.partitions(analyses, tokens, text)
@@ -347,7 +353,13 @@ def _partitions(analyses, tokens, text):
                               [predicates[0] if value == lemma else None for value in lemmas], context)
         yield word_choice(f'Which word is the subject of «{verb}»?', subjects)
     for i in range(len(tokens)):
-        roles = {a[i].role for a in analyses}
+        links = [tree[i] for tree in analyses]
+        roles = {link.role for link in links}
+        if 'genitive_modifier' in roles and roles <= NOMINAL_ROLES | {'genitive_modifier'}:
+            heads = [link.head for link in links]
+            if None not in heads and len(set(heads)) > 1:
+                context = _attachment_context(text, tokens, analyses, heads, i, i + 1)
+                yield word_choice(f'К какому слову относится «{_span_label(tokens, i)}»?', heads, context)
         if roles == {'oblique', 'recipient'} and all(a[i].case == 'datv' for a in analyses):
             hosts = {a[i].head for a in analyses}
             if len(hosts) == 1 and None not in hosts:
@@ -396,7 +408,7 @@ def _partitions(analyses, tokens, text):
             hosts = [a[i].head for a in analyses]
             if len(set(hosts)) > 1:
                 context = _attachment_context(text, tokens, analyses, hosts, i, i + 1) if roles == {'participle'} else text
-                question = f'Which word does «{_span_label(tokens, i)}» describe?'
+                question = f'Какое слово характеризует определение «{_span_label(tokens, i)}»?'
                 if roles == {'participle'}:
                     groups = {tuple(j for j, link in enumerate(tree) if j == i or link.coord_head == i)
                               for tree in analyses}
@@ -404,8 +416,8 @@ def _partitions(analyses, tokens, text):
                         group, = groups
                         if len(group) > 1:
                             labels = [f'«{_span_label(tokens, j)}»' for j in group]
-                            names = ', '.join(labels[:-1]) + ' and ' + labels[-1]
-                            question = f'Which word do {names} describe?'
+                            names = ', '.join(labels[:-1]) + ' и ' + labels[-1]
+                            question = f'Какое слово характеризуют определения {names}?'
                 yield word_choice(question, hosts, context)
 
     agents = sorted({link.shared_agent for tree in analyses for link in tree if link.shared_agent is not None})
@@ -498,7 +510,8 @@ def _partitions(analyses, tokens, text):
                 phrase = _span_label(tokens, i, end).replace(' ,', ',')
                 context = _attachment_context(text, tokens, analyses, hosts, i, end)
                 question = (f'Какое действие уточняет обстоятельство «{phrase}»?' if has_focus else
-                            f'Which word does the phrase «{phrase}» depend on?')
+                            f'От какого из предложенных слов в этом месте текста задаётся вопрос к сочетанию «{phrase}»? '
+                            'Выберите слово, с которым оно связано непосредственно.')
                 yield word_choice(question, hosts, context)
 
     duration_heads = sorted({link.head for tree in analyses for link in tree if link.role == 'duration'})
@@ -523,8 +536,11 @@ def _partitions(analyses, tokens, text):
         if roles == {'attribute', 'participle'}:
             heads = [link.head for link in links]
             context = _attachment_context(text, tokens, analyses, heads, i, i + 1)
-            question = f'Copy «{focus}» if it describes an action here. Otherwise choose “no such word”.'
-            yield word_choice(question, [i if link.role == 'participle' else None for link in links], context)
+            quality = 'только признак'
+            question = (f'Указывает ли «{focus}» здесь на действие? Если да, выберите «{focus}». '
+                        f'Если это только характеристика предмета, выберите «{quality}».')
+            yield Probe(question, (focus, quality), context), [
+                focus if link.role == 'participle' else quality for link in links]
         if roles == {'agent', 'oblique'} and len({link.head for link in links}) == 1:
             host = links[0].head
             context = _clause_context(text, tokens, analyses, i, (host,))
@@ -845,19 +861,29 @@ def _connected(tree):
 
 
 def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *,
-            budget: int = 256, accept_tree: Callable[[tuple[Link, ...]], bool] | None = None) -> Result:
+            budget: int = 256, accept_tree: Callable[[tuple[Link, ...]], bool] | None = None,
+            on_nominal_step: Callable[[NominalStep], None] | None = None) -> Result:
     if budget < 1:
         raise ValueError('budget must be positive')
     from . import internal_comma, qualification, sentence_regions
 
     scanner = qualification.GroupOpenings()
     prefix_openings = []
+    nominal_chart = NominalChart(budget=budget)
     occurrences = []
+    text_end = len(text.rstrip())
     for match in TOKEN.finditer(text):
-        occurrences.append(Occurrence(match[0], match.start(), match.end()))
-        prefix_openings.extend(scanner.feed(match[0]))
+        surface = match[0]
+        occurrences.append(Occurrence(surface, match.start(), match.end()))
+        if match.end() == text_end and surface in {'.', '!', '?'}:
+            continue
+        prefix_openings.extend(scanner.feed(surface))
+        step = nominal_chart.feed(surface)
+        if on_nominal_step is not None:
+            on_nominal_step(step)
+
     tokens = tuple(occurrences)
-    words = tokens[:-1] if tokens and tokens[-1].surface in {'.', '!', '?'} else tokens
+    words = tokens[:len(nominal_chart.steps)]
     if not words:
         return Result(text, 'UNRESOLVED', 'EMPTY', tokens)
     from . import homogeneous, case_arguments, clauses, determiners, finite_forms, infinitives, modifiers, morphology, nominal_groups, participles, predication, quantity_groups, quantity_modifiers, recovery, shared_agents, short_participles, standalone_numerals
@@ -930,7 +956,8 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
         yield from quantity_modifiers.trees(part, numbers, budget=budget)
 
     def quantified(part):
-        yield from nominal_groups.with_genitives(part, qualified_numbers, budget=budget)
+        chart = nominal_chart if part == words else None
+        yield from nominal_groups.with_genitives(part, qualified_numbers, budget=budget, chart=chart)
 
     def comparative(part):
         from . import comparatives
@@ -1119,8 +1146,9 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
             try:
                 collect(exact(working_words))
             except AnalysisBudgetExceeded as error:
+                if structures or isinstance(error, NominalBudgetExceeded):
+                    raise
                 budget_error = error
-                structures.clear()
             try:
                 if not structures:
                     collect(exact(working_words, lambda part: readings_for_region(part, remaining, None)))
@@ -1129,9 +1157,12 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
                 if not structures and budget_error is None:
                     collect(recovery.trees(working_words, exact, budget=budget))
             except AnalysisBudgetExceeded as error:
+                if structures or isinstance(error, NominalBudgetExceeded):
+                    raise
                 budget_error = error
-                structures.clear()
             if structures:
+                if working_words is words and nominal_chart.overflow:
+                    raise NominalBudgetExceeded('NOMINAL_FRONTIER_BUDGET')
                 break
             for i, forms in spelling_sites:
                 focus = _span_label(words, i)

@@ -42,9 +42,9 @@ def attested_name_parts(surface):
 
 @lru_cache(maxsize=4096)
 def known_forms(surface):
-    readings = tuple(dict.fromkeys((p.normal_form, p.tag) for p in dictionary().parse(surface)
-                                   if p.is_known and 'Abbr' not in p.tag))
-    return readings or _attested_nouns().get(unaccented(surface).casefold(), ())
+    from .lexical_parts import forms
+
+    return forms(surface) or _attested_nouns().get(unaccented(surface).casefold(), ())
 
 
 @lru_cache(maxsize=1024)
@@ -64,6 +64,7 @@ class Reading:
     animacy: str | None
     transitive: bool
     name_type: str | None = None
+    opaque: bool = False
 
 
 def name_type(tag):
@@ -136,7 +137,8 @@ def readings(surface: str, preposition: str | None = None) -> tuple[Reading, ...
         if tag.POS == 'NOUN' or (tag.POS == 'NPRO' and tag.case == 'nomn' and person is None):
             person = '3per'
         reading = Reading(lemma, role, tag.case, tag.number, tag.gender,
-                          person, tag.animacy, 'tran' in tag, name_type(tag))
+                          person, tag.animacy, 'tran' in tag, name_type(tag),
+                          'Abbr' in tag and not tag.number and lemma == surface)
         if reading not in result:
             result.append(reading)
             if role == 'object' and reading.lemma in TIME_UNITS:
@@ -145,7 +147,7 @@ def readings(surface: str, preposition: str | None = None) -> tuple[Reading, ...
 
 
 def subject_agrees(subject: Reading, verb: Reading) -> bool:
-    if not subject.number or subject.number != verb.number:
+    if subject.number != verb.number and not subject.opaque:
         return False
     if verb.person and subject.person != verb.person:
         return False
@@ -155,7 +157,11 @@ def subject_agrees(subject: Reading, verb: Reading) -> bool:
 
 def attribute_agrees(attribute: Reading, nominal: Reading) -> bool:
     case = {'loc2': 'loct', 'gen2': 'gent'}.get(nominal.case, nominal.case)
-    if attribute.case != case or not attribute.number or attribute.number != nominal.number:
+    if attribute.case != case:
+        return False
+    if nominal.opaque:
+        return True
+    if not attribute.number or attribute.number != nominal.number:
         return False
     if attribute.number == 'sing' and attribute.gender != nominal.gender:
         return False

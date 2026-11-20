@@ -7,7 +7,7 @@ from ah.model import Domain, Property
 
 from .valency import violation
 from . import adjuncts
-from . import homogeneous
+from . import homogeneous, lexical_parts
 from .infinitives import FRAMES
 from .morphology import _common, from_tag
 from .parser import Result, analyze
@@ -152,6 +152,9 @@ def _remember(core, result, rows, source):
     members = []
     for i, row in enumerate(rows):
         props = {}
+        parts = lexical_parts.metadata(row['surface'], row['start'], row['lemma'])
+        if parts:
+            row['lexical_parts'] = list(parts)
         if (row['role'] == 'clause_relative' or row['rule'] == 'GAP') and row['assertion_status'] == 'asserted':
             key = GAP_KEY if row['rule'] == 'GAP' else RELATIVE_KEY
             props[key] = Property(key, row['lemma'], 'str')

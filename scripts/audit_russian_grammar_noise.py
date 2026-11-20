@@ -74,11 +74,22 @@ def digest(graph):
     return hashlib.sha256(wire.encode()).hexdigest()
 
 
+def reference_question(question):
+    for prefix, suffix in (
+            ('От какого из предложенных слов в этом месте текста задаётся вопрос к сочетанию «',
+             '»? Выберите слово, с которым оно связано непосредственно.'),
+            ('К какому слову относится сочетание «', '»?')):
+        if question.startswith(prefix) and question.endswith(suffix):
+            phrase = question[len(prefix):-len(suffix)]
+            return f'Which word does the phrase «{phrase}» depend on?'
+    return question
+
+
 def run(identity, kind, text, gold, teacher, seconds):
     core = AHCore()
     answers = {}
     for item in teacher['calls']:
-        answers.setdefault(item['question'], set()).add(item['answer'])
+        answers.setdefault(reference_question(item['question']), set()).add(item['answer'])
     rows = teacher['rows']
     old, new = TYPOS[identity]
     open_questions = []
@@ -87,13 +98,14 @@ def run(identity, kind, text, gold, teacher, seconds):
     def choose(p):
         nonlocal probes
         probes += 1
+        question = reference_question(p.question)
         if kind == 'original':
             prior = teacher['calls'][probes - 1] if probes <= len(teacher['calls']) else {}
-            if prior.get('question') == p.question and prior.get('options') == list(p.options):
+            if reference_question(prior.get('question', '')) == question and prior.get('options') == list(p.options):
                 return prior['answer']
             open_questions.append({'question': p.question, 'options': list(p.options)})
             return '?'
-        question = p.question.replace(new, old) if 'typo' in kind else p.question
+        question = question.replace(new, old) if 'typo' in kind else question
         if identity == 'test-s12' and question == 'Какие слова здесь образуют отдельную группу меры?':
             choices = {'14 метров в охвате'}
         elif identity == 'test-s19' and question == 'Какие слова продолжают перечисление после «папе»?':

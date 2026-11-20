@@ -1,5 +1,5 @@
 from . import (
-    clause_series, named_regions, nominal_definitions, nominal_mentions, nominal_predicates,
+    clause_series, lexical_parts, named_regions, nominal_definitions, nominal_mentions, nominal_predicates,
     participial_regions, predicative_groups, quote_titles, reference_directives, temporal_groups,
 )
 
@@ -22,7 +22,7 @@ def remaining(tokens, parse, budget):
 
 
 def confirmation(tokens, tree, i, text):
-    for grammar in (quote_titles, reference_directives, nominal_mentions, temporal_groups, clause_series, named_regions):
+    for grammar in (quote_titles, reference_directives, nominal_mentions, temporal_groups, clause_series, named_regions, lexical_parts):
         probe = grammar.confirmation(tokens, tree, i, text)
         if probe is not None:
             return probe

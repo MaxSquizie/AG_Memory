@@ -15,9 +15,11 @@ def main():
     mode.add_argument('--jev', action='store_true', help='emit only the pending request, if any')
     parser.add_argument('--model', default=DEFAULT_JEV_MODEL, help='Jev model name or alias')
     args = parser.parse_args()
-    result = analyze(args.text)
+    nominal_steps = []
+    result = analyze(args.text, on_nominal_step=nominal_steps.append if args.report else None)
     if args.report:
         report = asdict(result)
+        report['nominal_steps'] = [asdict(step) for step in nominal_steps]
         report['probes'] = [probe.prompt() for probe in result.probes]
         print(json.dumps(report, ensure_ascii=False, indent=2))
     elif result.probes:
