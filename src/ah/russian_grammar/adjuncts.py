@@ -39,6 +39,15 @@ def clause_category(rows, children, index):
     markers = [rows[i] for i in children[index] if rows[i]['role'] == 'clause_marker']
     if row['rule'] == 'UTT.PURPOSE' and any(marker.get('scope') == 'purpose' for marker in markers):
         return 'зачем'
+    if row['rule'] == 'CL.ADV':
+        for i in children[index]:
+            marker = rows[i]
+            if marker.get('rule') == 'CL.SPATIAL.FREE':
+                entries, _ = _lexicon()
+                wh = marker['lemma']
+                governor = rows[row['head']]['lemma']
+                if any(('governor', wh, prep, governor) in entries for prep, _ in SPATIAL):
+                    return wh
     if row['rule'] == 'CL.ADV' and any(marker.get('scope') == 'cause' for marker in markers):
         return 'почему'
     return None

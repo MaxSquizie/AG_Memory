@@ -5,6 +5,7 @@ from importlib.resources import files
 
 from .ellipsis import gapped_leaves
 from .rules import known_forms
+from .spatial_prefix import relative_role
 
 
 def _key(word):
@@ -42,6 +43,8 @@ def _boundaries(words):
     forms, width = _connectives()
     for index in range(len(words)):
         start = index - 1 if index and words[index - 1] == ',' else index
+        if relative_role(words[index]) and 'advcl' not in forms.get((words[index],), {}):
+            yield Boundary(start, index, index + 1, words[index], 'advcl', frozenset())
         if words[index] == 'что' and start > 0:
             yield Boundary(start, index, index + 1, 'что', 'relative', frozenset())
         for end in range(index + 1, min(len(words), index + width) + 1):
@@ -59,6 +62,13 @@ def _shift(link, offset):
                    shared_object=None if link.shared_object is None else link.shared_object + offset,
                    controller=None if link.controller is None else link.controller + offset,
                    antecedent=None if link.antecedent is None else link.antecedent + offset)
+
+
+def _preposed_splits(words, body_start):
+    for end in range(body_start + 1, len(words)):
+        main = end + (words[end] == ',')
+        if main < len(words) and words[end - 1] != ',':
+            yield end, main
 
 
 def _scope(boundary):
@@ -134,7 +144,12 @@ def _level_attachments(prefix, levels, boundary, leaf, root, words):
             yield tuple(joined), next_levels
 
 
-def _attachments(prefix, levels, boundary, leaf, root, words):
+def _attachments(prefix, levels, boundary, leaf, root, words, *, tokens=None, spatial_prefix=None):
+    if boundary.relation == 'advcl' and relative_role(boundary.form):
+        from .spatial_clauses import attachments
+
+        yield from attachments(prefix, levels, boundary, leaf, root, words, tokens, spatial_prefix)
+        return
     for joined, domains in _level_attachments(prefix, levels, boundary, leaf, root, words):
         yield joined, domains
         if boundary.relation != 'advcl':
@@ -157,7 +172,7 @@ def _attachments(prefix, levels, boundary, leaf, root, words):
             yield tuple(links), domains
 
 
-def trees(tokens, local, *, budget=256):
+def trees(tokens, local, *, budget=256, spatial_prefix=None):
     from .parser import AnalysisBudgetExceeded, Link
 
     words = tuple(_key(token.surface) for token in tokens)
@@ -166,6 +181,10 @@ def trees(tokens, local, *, budget=256):
     if not boundaries:
         return
     size = len(words)
+    if any(relative_role(b.form) for b in boundaries) and spatial_prefix is None:
+        from .spatial_prefix import SpatialPrefix
+
+        spatial_prefix = SpatialPrefix.from_tokens(tokens)
     remaining = budget
 
     def spend():
@@ -175,10 +194,16 @@ def trees(tokens, local, *, budget=256):
         remaining -= 1
 
     @cache
-    def leaves(start, stop):
+    def leaves(start, stop, spatial=False):
         spend()
         result = []
-        for tree in local(tokens[start:stop]):
+        if spatial:
+            from .spatial_leaves import trees as spatial_leaves
+
+            candidates = spatial_leaves(tokens[start:stop], local, budget)
+        else:
+            candidates = local(tokens[start:stop])
+        for tree in candidates:
             roots = [i for i, link in enumerate(tree) if link.role == 'predicate' and link.head is None]
             if len(roots) == 1:
                 result.append((tuple(_shift(link, start) for link in tree), roots[0] + start))
@@ -234,13 +259,15 @@ def trees(tokens, local, *, budget=256):
                 for stop in finishes:
                     if stop <= marker.stop:
                         continue
-                    candidates = relative_leaves(marker, stop) if marker.relation == 'relative' else leaves(marker.stop, stop)
+                    candidates = relative_leaves(marker, stop) if marker.relation == 'relative' else leaves(
+                        marker.stop, stop, spatial=bool(relative_role(marker.form)))
                     if marker.relation == 'conj' and len(levels) == 1:
                         gaps = tuple(gapped_leaves(tokens, marker.stop, stop, prefix, levels[0][0], budget))
                         if gaps:
                             candidates = gaps
                     for leaf, root in candidates:
-                        for tree, scopes in _attachments(prefix, levels, marker, leaf, root, words):
+                        for tree, scopes in _attachments(prefix, levels, marker, leaf, root, words,
+                                                        tokens=tokens, spatial_prefix=spatial_prefix):
                             if stop == hi:
                                 yield tree[lo:], scopes[0][0]
                             else:
@@ -251,13 +278,19 @@ def trees(tokens, local, *, budget=256):
     for tree, _ in parse_region(0, size):
         yield tree
     for marker in starts[0]:
+        if relative_role(marker.form):
+            from .spatial_reverse import trees as reverse_trees
+
+            def components(part):
+                return trees(part, local, budget=budget, spatial_prefix=spatial_prefix)
+            yield from reverse_trees(tokens, components, budget, spatial_prefix, _preposed_splits(words, marker.stop))
+            continue
         if marker.relation != 'advcl' or marker.form not in _preposed():
             continue
-        for stop in range(marker.stop + 1, size):
-            split = stop + (words[stop] == ',')
+        for stop, split in _preposed_splits(words, marker.stop):
             conditional = _scope(marker) == 'condition'
             main = split + (conditional and split < size and words[split] == 'то')
-            if main >= size or (stop > 0 and words[stop - 1] == ','):
+            if main >= size:
                 continue
             for subordinate, child in parse_region(marker.stop, stop):
                 if not _allows_mood(marker, subordinate[child - marker.stop]):

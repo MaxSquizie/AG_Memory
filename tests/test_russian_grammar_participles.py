@@ -139,3 +139,12 @@ def test_nominalized_participle_and_its_dependents_in_a_coordinated_statement():
     assert by_surface['используемых']['rule'] == 'PART.SUBSTANTIVE'
     for surface in ('используемых', 'цехе', 'оборудованные', 'рычагами'):
         assert by_surface[surface]['assertion_status'] == 'attributive'
+
+
+def test_comma_between_modifier_and_noun_preserves_both_morphological_readings():
+    text = 'Принятое, решение изменилось.'
+    for choice, role, boundary in (('только признак', 'attribute', 'PUNCT.INTRAGROUP'),
+                                  ('Принятое', 'participle', 'PART.PUNCT')):
+        result = analyze(text, lambda _: choice)
+        tree, = result.analyses
+        assert (tree[0].role, tree[0].head, tree[1].rule) == (role, 2, boundary)

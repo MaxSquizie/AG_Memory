@@ -16,10 +16,13 @@ def main():
     parser.add_argument('--model', default=DEFAULT_JEV_MODEL, help='Jev model name or alias')
     args = parser.parse_args()
     nominal_steps = []
-    result = analyze(args.text, on_nominal_step=nominal_steps.append if args.report else None)
+    spatial_steps = []
+    result = analyze(args.text, on_nominal_step=nominal_steps.append if args.report else None,
+                     on_spatial_step=spatial_steps.append if args.report else None)
     if args.report:
         report = asdict(result)
         report['nominal_steps'] = [asdict(step) for step in nominal_steps]
+        report['spatial_steps'] = [asdict(step) for step in spatial_steps]
         report['probes'] = [probe.prompt() for probe in result.probes]
         print(json.dumps(report, ensure_ascii=False, indent=2))
     elif result.probes:

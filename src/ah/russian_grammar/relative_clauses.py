@@ -2,7 +2,7 @@ from dataclasses import replace
 from functools import lru_cache
 from itertools import chain
 
-from . import clauses
+from . import clauses, personal_correlatives
 from .morphology import ROLE_CASE, from_tag
 from .nominal_groups import _groups
 from .prepositions import FORMS, PREFIXES
@@ -94,7 +94,7 @@ def _relative_child(part, subordinate):
             yield tuple(result[i] for i in range(len(part)))
 
 
-def trees(tokens, local, *, budget):
+def trees(tokens, local, *, budget, spatial_prefix=None):
     from .parser import AnalysisBudgetExceeded, Link
 
     remaining = budget
@@ -117,7 +117,7 @@ def trees(tokens, local, *, budget):
 
     def parse(part, allow_inference):
         found = False
-        for tree in clauses.trees(part, local, budget=budget):
+        for tree in clauses.trees(part, local, budget=budget, spatial_prefix=spatial_prefix):
             found = True
             yield tree
         explicit = any(token.surface == ',' for token in part)
@@ -168,10 +168,15 @@ def trees(tokens, local, *, budget):
             if marker not in candidates:
                 continue
             lemmas = {lemma for lemma, _ in known_forms(words[marker])}
+            spatial = clauses.relative_role(words[marker])
+            if spatial and marker != begin:
+                continue
             relative = 'который' in lemmas
             if not relative and not lemmas.intersection({'кто', 'что', 'где', 'куда', 'когда', 'откуда', 'почему', 'как'}):
                 continue
-            if not relative and not any(lemma in INDIRECT for word in words[:start] for lemma, _ in known_forms(word)):
+            personal = 'кто' in lemmas and any(personal_correlatives.readings(w) for w in words[:start])
+            indirect = not relative and any(lemma in INDIRECT for w in words[:start] for lemma, _ in known_forms(w))
+            if not (relative or personal or indirect or spatial):
                 continue
             stops = [i for i in commas if i > marker]
             if inferred and not stops:
@@ -180,19 +185,37 @@ def trees(tokens, local, *, budget):
                 if resumed_verbs:
                     stops = range(marker + 1, resumed_verbs[-1] + 1)
             for end in (*stops, len(part)):
+                if spatial and end == len(part):
+                    continue
                 resume = end + (end < len(part) and words[end] == ',')
                 outside = tuple(range(start)) + tuple(range(resume, len(part)))
                 inside = tuple(range(begin, end))
                 inner = tuple(part[i] for i in inside)
                 matrix = tuple(part[i] for i in outside)
                 captions = _nominal_caption(matrix, budget) if relative and end == len(part) else ()
-                for outer in chain(component(matrix), captions):
-                    for host in _anchors(outer, start):
+                ordinary = ((tree, None, None) for tree in chain(component(matrix), captions)) if relative or indirect or spatial else ()
+                personal_matrices = personal_correlatives.matrices(matrix, start, component) if personal else ()
+                for outer, person, addressee_governor in chain(ordinary, personal_matrices):
+                    fixed_host = person if person is not None else addressee_governor
+                    for host in ((fixed_host,) if fixed_host is not None else _anchors(outer, start)):
                         if host >= start:
                             continue
-                        if relative:
+                        if spatial:
+                            from .spatial_clauses import centered
+
+                            for joined in centered(part, outside, outer, host, inside, component, spatial_prefix, budget):
+                                spend()
+                                yield joined
+                            continue
+                        if person is not None:
+                            variants = personal_correlatives.relative_forms(words[marker], outer, person)
+                        elif relative:
                             variants = _projections(part[outside[host]], outer[host], part[marker])
-                        elif outer[host].lemma in INDIRECT and outer[host].role in ('predicate', 'infinitive'):
+                        elif addressee_governor is not None or (outer[host].lemma in INDIRECT
+                                and outer[host].role in ('predicate', 'infinitive')):
+                            if personal and fixed_host is None and personal_correlatives.saturated_content(
+                                    outer, matrix, start, host):
+                                continue
                             variants = [(words[marker], None)]
                         else:
                             continue
@@ -204,7 +227,10 @@ def trees(tokens, local, *, budget):
                                 reference = child[offset]
                                 if possessor and (tag.case != 'gent' or reference.role != 'genitive_modifier'):
                                     continue
-                                if tag and (reference.lemma != outer[host].lemma or
+                                expected = 'кто' if person is not None else outer[host].lemma
+                                if person is not None and surface != words[marker]:
+                                    expected = surface
+                                if tag and (reference.lemma != expected or
                                             (reference.case or ROLE_CASE.get(reference.role)) != tag.case):
                                     continue
                                 if not tag and (reference.lemma not in lemmas or reference.role not in
@@ -222,12 +248,18 @@ def trees(tokens, local, *, budget):
                                 for i, link in zip(inside, child):
                                     merged[i] = _move(link, inside)
                                 index = inside[root]
+                                scope = merged[index].scope
+                                if person is not None:
+                                    scope = 'restrictive' if not scope else 'restrictive_' + scope
+                                elif not tag:
+                                    scope = scope or 'embedded'
                                 merged[index] = replace(merged[index], head=outside[host],
                                     role='clause_relative' if tag else 'clause_complement',
                                     rule='CL.REL' if tag else 'CL.COMP',
-                                    scope=merged[index].scope if tag else merged[index].scope or 'embedded')
+                                    scope=scope)
                                 if tag:
-                                    merged[marker] = replace(merged[marker], lemma='который', antecedent=outside[host],
+                                    merged[marker] = replace(merged[marker], lemma='кто' if person is not None else 'который',
+                                        antecedent=outside[host],
                                         morphology=from_tag(tag), case=tag.case, rule='CL.NOMREF')
                                 else:
                                     merged[marker] = replace(merged[marker], rule='CL.WH')

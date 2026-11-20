@@ -133,6 +133,7 @@ def _inner(tokens, pivot, form, local, budget):
 
 
 def trees(tokens, local, *, budget=256):
+    from .internal_comma import repairs
     from .parser import AnalysisBudgetExceeded, Link
 
     remaining = budget
@@ -166,6 +167,7 @@ def trees(tokens, local, *, budget=256):
 
     def derive(part):
         nonlocal remaining
+        ambiguous_commas = set()
         pivots = [i for i, token in enumerate(part) if participle_forms.readings(token.surface)]
         required = [i for i in pivots if all(tag.POS == 'PRTF' for _, tag in known_forms(part[i].surface))]
         if not required:
@@ -202,6 +204,15 @@ def trees(tokens, local, *, budget=256):
                             if right:
                                 links[end] = Link('punctuation', ',', pivot, 'PART.PUNCT')
                             yield tuple(links[i] for i in range(len(part)))
+                            if (right and start == pivot == end - 1 and outer[host] == end + 1
+                                    and any(tag.POS == 'ADJF' for _, tag in known_forms(part[pivot].surface))):
+                                ambiguous_commas.add(end)
+        if ambiguous_commas:
+            for comma, alternatives in repairs(part, parse, budget, sites=ambiguous_commas).items():
+                for tree in alternatives:
+                    adjective = tree[comma - 1]
+                    if adjective.role == 'attribute' and adjective.head == comma + 1:
+                        yield tree
 
     for tree in derive(tokens):
         if participle_coordination.complete(tree):

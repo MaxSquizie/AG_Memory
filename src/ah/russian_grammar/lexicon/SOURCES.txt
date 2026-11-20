@@ -228,3 +228,8 @@ unit-symbols.tsv contains unambiguous single-token short and narrow measurement 
 from the Russian locale in ICU, Unicode CLDR 48.0, via ECMA-402 Intl.NumberFormat.
 node scripts/import_russian_unit_symbols.mjs src/ah/russian_grammar/lexicon/unit-symbols.tsv
 https://cldr.unicode.org/translation/units/unit-names-and-patterns
+
+clausal-addressees.tsv uses the Russian FrameBank revision and GPL-3.0 license above.
+Each construction explicitly licenses both a bare Sacc/Sdat адресат and a distinct
+argument expressed by Rel + CL. Case belongs to the addressee in the matrix.
+python scripts/import_russian_clausal_addressees.py framebank_dict_cx_items.txt src/ah/russian_grammar/lexicon/clausal-addressees.tsv

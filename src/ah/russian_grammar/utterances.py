@@ -57,7 +57,7 @@ def _insertions(part, parse):
             continue
         for tree in parse(tuple(part[j] for j in indices)):
             host = indices[_root(tree)]
-            if any(link.role == 'clause_marker' for link in tree) and not detached:
+            if not detached and any(link.role.startswith('clause_') for link in tree):
                 continue
             for lemma, role in options:
                 if role == 'vocative':

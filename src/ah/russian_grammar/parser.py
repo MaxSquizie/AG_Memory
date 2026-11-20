@@ -7,6 +7,7 @@ from itertools import product
 from .detached_prepositions import extent as group_extent
 from .morphology import Morphology, feature_choices
 from .nominal_chart import NominalChart, NominalStep
+from .spatial_prefix import SpatialPrefix, SpatialStep
 from .prepositions import CASE_NAMES, FORMS, GOVERNMENT, PREFIXES, TOKEN, group_heads
 from .probe import MAX_WORD_CHOICES, FocusChoice, Probe
 from . import capitalized_nominals, modifier_focus
@@ -324,7 +325,10 @@ def _partitions(analyses, tokens, text):
     from . import clause_series, finite_insertions, nominal_definitions, nominal_dimensions, nominal_mentions, nominal_predicates, temporal_groups
     from .morphology import NOMINAL_ROLES
     from . import adjuncts, attributive_series, calendar_regions, measured_series, mixed_predications, predicate_lists, utterances
+    from . import personal_correlatives, spatial_prefix
     from .short_participles import voice_partitions
+    yield from personal_correlatives.partitions(analyses, tokens, text)
+    yield from spatial_prefix.partitions(analyses, tokens, text)
     yield from voice_partitions(analyses, tokens, text)
     yield from adjuncts.place_partitions(analyses, tokens, text)
     yield from attributive_series.partitions(analyses, tokens, text)
@@ -897,7 +901,8 @@ def _connected(tree):
 
 def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *,
             budget: int = 256, accept_tree: Callable[[tuple[Link, ...]], bool] | None = None,
-            on_nominal_step: Callable[[NominalStep], None] | None = None) -> Result:
+            on_nominal_step: Callable[[NominalStep], None] | None = None,
+            on_spatial_step: Callable[[SpatialStep], None] | None = None) -> Result:
     if budget < 1:
         raise ValueError('budget must be positive')
     from . import internal_comma, qualification, sentence_regions
@@ -905,6 +910,7 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
     scanner = qualification.GroupOpenings()
     prefix_openings = []
     nominal_chart = NominalChart(budget=budget)
+    spatial_index = SpatialPrefix()
     occurrences = []
     text_end = len(text.rstrip())
     for match in TOKEN.finditer(text):
@@ -912,6 +918,7 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
         occurrences.append(Occurrence(surface, match.start(), match.end()))
         if match.end() == text_end and surface in {'.', '!', '?'}:
             continue
+        spatial_index.feed(occurrences[-1], on_spatial_step)
         prefix_openings.extend(scanner.feed(surface))
         step = nominal_chart.feed(surface)
         if on_nominal_step is not None:
@@ -1046,7 +1053,7 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
                 return
             yield from nominal_entries.trees(part, text, group_heads_by_start, budget)
         yield from utterances.trees(part, lambda segment: relative_clauses.trees(
-            segment, coordinated, budget=budget), budget=budget)
+            segment, coordinated, budget=budget, spatial_prefix=spatial_index), budget=budget)
 
     def supplemented(part):
         from . import nominal_supplements
@@ -1071,7 +1078,20 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
     def checked_comma_readings(part, parse, sites=None):
         if part in comma_choices and comma_choices[part] is None:
             return
-        possible = internal_comma.repairs(part, parse, budget, sites=sites)
+        def restored(joined):
+            from .personal_correlatives import has_opening
+
+            if parse is remaining and joined and (has_opening(joined) or any(
+                    spatial_index.permits(joined[0].start, token.start) for token in joined[1:])):
+                found = False
+                for tree in supplemented(joined):
+                    found = True
+                    yield tree
+                if found:
+                    return
+            yield from parse(joined)
+
+        possible = internal_comma.repairs(part, restored, budget, sites=sites)
         if possible and part not in comma_choices:
             raise internal_comma.BoundaryChoice(possible, part, text)
         for index, variants in possible.items():
@@ -1220,6 +1240,7 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
                     continue
                 spellings[i] = SpellingRecovery(original, label)
                 working_words = (*working_words[:i], replace(words[i], surface=label), *working_words[i + 1:])
+                spatial_index = SpatialPrefix.from_tokens(working_words)
                 relative_hosts.clear()
                 group_heads_by_start.clear()
                 failures.clear()

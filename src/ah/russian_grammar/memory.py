@@ -180,11 +180,21 @@ def _remember(core, result, rows, source):
 
 def _lookup(core, lemma):
     def rows_of(group):
-        return tuple(core.store.get_element(Domain.H, member.uid).meta for member in group.members)
+        rows = tuple(core.store.get_element(Domain.H, member.uid).meta for member in group.members)
+        for member, row in zip(group.members, rows):
+            if not _correlative_reference(row):
+                continue
+            anchor = row.get('antecedent')
+            if (anchor is None or not 0 <= anchor < len(rows) or
+                    core.store.find_link('grammar.antecedent', member.uid, group.members[anchor].uid) is None):
+                return None
+        return rows
 
     for ref in core.store.find_elements_with_property(ROOT_KEY, lemma):
         group = core.store.get_element(Domain.H, ref.uid)
         rows = rows_of(group)
+        if rows is None:
+            continue
         root = _root(rows)
         yield group, rows, root
         members = homogeneous.projection_members(rows, root)
@@ -195,6 +205,8 @@ def _lookup(core, lemma):
             if group.meta.get('kind') != 'russian_grammar.observation':
                 continue
             rows = rows_of(group)
+            if rows is None:
+                continue
             members = homogeneous.projection_members(rows, _root(rows))
             target = group.members.index(ref)
             if target in members and (projection := homogeneous.project(rows, members, target)):
@@ -203,7 +215,9 @@ def _lookup(core, lemma):
         for ref in core.store.find_elements_with_property(key, lemma):
             for group in core.store.groups_containing(ref.uid):
                 if group.meta.get('kind') == 'russian_grammar.observation':
-                    yield group, rows_of(group), group.members.index(ref)
+                    rows = rows_of(group)
+                    if rows is not None:
+                        yield group, rows, group.members.index(ref)
 
 
 def _question_word(word, selected_lemma=None):
@@ -521,6 +535,47 @@ def _omitted_conjuncts(groups, projection, stored, children, covered):
     return omitted
 
 
+def _correlative_reference(row):
+    return (row.get('rule') == 'CL.SPATIAL.REF' or
+            row.get('rule') == 'CL.NOMREF' and row['lemma'] in ('кто', 'что'))
+
+
+def _correlative_restrictions(stored, children, observed):
+    anchors = {}
+    participants = {}
+    domain = _descendants(children, (observed,))
+    for i in domain:
+        reference = stored[i]
+        anchor = reference.get('antecedent')
+        if anchor not in domain or not _correlative_reference(reference):
+            continue
+        node = reference['head']
+        while node is not None and node != anchor:
+            row = stored[node]
+            if row['role'] == 'clause_relative' and row['head'] == anchor:
+                anchors.setdefault(anchor, set()).add(node)
+                if reference['rule'] == 'CL.NOMREF':
+                    participants.setdefault(anchor, set()).add(reference['lemma'])
+                break
+            node = row['head']
+    return anchors, participants
+
+
+def _restricted_answer(stored, parts, source):
+    original = sorted({stored[i].get('shared_occurrence', i) for i in parts if not stored[i].get('implicit')})
+    if not original:
+        return None
+    groups = []
+    first = previous = original[0]
+    for i in original[1:]:
+        if any(stored[j]['role'] != 'punctuation' for j in range(previous + 1, i)):
+            groups.append(source[stored[first]['start']:stored[previous]['end']])
+            first = i
+        previous = i
+    groups.append(source[stored[first]['start']:stored[previous]['end']])
+    return tuple(stored[i]['surface'].casefold() for i in original), ', '.join(groups)
+
+
 def _extraction(rows, stored, observed, source, focus, budget):
     root = _root(rows)
     if any(row.get('implicit_subject') == 'unresolved' and (focus is None or i != root) for i, row in enumerate(rows)):
@@ -547,6 +602,10 @@ def _extraction(rows, stored, observed, source, focus, budget):
         required = _projection_requirements(stored, children_found, observed, scoped_question)
     else:
         required = _descendants(children_found, [observed]) if projection else set()
+    restrictions, participants = _correlative_restrictions(stored, surface_children, observed)
+    for anchor, clauses in restrictions.items():
+        required.add(anchor)
+        required.update(_descendants(surface_children, clauses))
     argument = rows[focus]['head'] if focus is not None and rows[focus]['role'] == 'numeral' else focus
     agreement_target = rows[argument]['head'] if argument is not None and rows[argument]['role'] == 'subject' else None
     order = [root]
@@ -572,7 +631,11 @@ def _extraction(rows, stored, observed, source, focus, budget):
                     candidate = {**candidate, 'relative_animacy': (target.get('morphology') or {}).get('animacy')}
                 if j in mapping.values():
                     continue
-                if i == focus and adjuncts.question(row):
+                if i == focus and j in participants:
+                    if (participants[j] != {row['lemma']} or row['role'] != candidate['role']
+                            or _case(row) != _case(candidate) or row['assertion_status'] != candidate['assertion_status']):
+                        continue
+                elif i == focus and adjuncts.question(row):
                     if not adjuncts.matches(row, stored, surface_children, j):
                         continue
                 elif not _compatible(rows, i, candidate, i == focus, i == root, variable_subject):
@@ -642,11 +705,15 @@ def _extraction(rows, stored, observed, source, focus, budget):
                     continue
             parts = (_descendants(surface_children, [head]) if adjuncts.question(rows[focus])
                      else _nominal_parts(stored, surface_children, head))
+            parts = set(parts)
+            included_clauses = {clause for anchor in parts for clause in restrictions.get(anchor, ())}
+            parts.update(_descendants(surface_children, included_clauses))
             if stored[head].get('scope') == 'focus_exclusive' and stored[head]['assertion_status'] == 'asserted':
                 missing.difference_update(j for j in surface_children[head] if stored[j]['rule'] == 'F.NP')
             if missing and not missing.issubset(parts):
                 continue
-            answer = _nominal_answer(stored, parts, source)
+            answer = (_restricted_answer(stored, parts, source) if included_clauses else
+                      _nominal_answer(stored, parts, source))
             if answer:
                 identity, phrase = answer
                 answers[identity] = phrase
@@ -790,7 +857,7 @@ def submit(core, text, choose=None, *, source='user', speaker_ref=None, addresse
     rows = _rows(result, participants)
     fixed_expressions = {row['head'] for row in rows if row['role'] == 'fixed'}
     variables = [i for i, row in enumerate(rows) if i not in fixed_expressions and row['role'] != 'fixed' and
-                 'quotation' not in row and row.get('antecedent') is None and row['rule'] != 'CL.WH' and
+                 'quotation' not in row and row.get('antecedent') is None and row['rule'] not in ('CL.WH', 'CL.SPATIAL.WH', 'CL.SPATIAL.FREE') and
                  row['role'] not in ('clause_marker', 'coordinator') and _question_word(row['surface'], row['lemma'])]
     if marked_question or variables or any(row['lemma'] == 'ли' and row['role'] == 'particle' and 'quotation' not in row for row in rows):
         if len(variables) > 1 or any(not (adjuncts.question(rows[i]) or rows[i]['rule'] == 'NEG.EXIST.OWNER' and rows[i]['lemma'] == 'кто' or rows[i]['role'] in ARGUMENTS and rows[i]['lemma'] in ('кто', 'что') or
