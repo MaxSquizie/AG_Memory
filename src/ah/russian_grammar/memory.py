@@ -853,6 +853,8 @@ def submit(core, text, choose=None, *, source='user', speaker_ref=None, addresse
         if query_hint and result.status != 'AMBIGUOUS':
             return GrammarReply('UNKNOWN', UNKNOWN, analysis=result)
         return GrammarReply(result.status, 'Разбор не завершён. ' + result.reason, analysis=result)
+    if result.reason == 'NOMINAL_FRAGMENT':
+        return GrammarReply('PARSED_FRAGMENT', 'Распознана именная группа с уточнением.', analysis=result)
     participants = _participants(source, speaker_ref, addressee_ref)
     rows = _rows(result, participants)
     fixed_expressions = {row['head'] for row in rows if row['role'] == 'fixed'}

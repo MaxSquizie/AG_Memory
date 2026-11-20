@@ -45,6 +45,15 @@ def saturated_content(tree, tokens, start, governor):
                for i, link in enumerate(tree[:start]))
 
 
+def nominal_heads(token):
+    from .parser import Link
+
+    for lemma, tag in readings(token.surface):
+        if tag.case == 'nomn':
+            yield Link('nominal_head', lemma, None, 'NP.CORRELATE', tag.case,
+                       morphology=from_tag(tag), scope=SCOPES[lemma])
+
+
 def matrices(tokens, start, component):
     for i, token in enumerate(tokens[:start]):
         for lemma, tag in readings(token.surface):
@@ -87,8 +96,12 @@ def relative_forms(surface, tree, index):
         if lemma != 'кто' or tag.POS != 'NPRO':
             continue
         yield surface, tag
-        if plural and tag.case == 'nomn':
-            yield from ((word, tag) for word, _ in _pronoun_forms('plur', None, 'nomn', False))
+        if tag.case != 'nomn':
+            continue
+        form = host.morphology
+        if plural or (form.number == 'sing' and form.gender == 'femn'):
+            for word, _ in _pronoun_forms(form.number, form.gender, 'nomn', False):
+                yield word, tag
 
 
 def partitions(trees, tokens, text):
@@ -96,6 +109,22 @@ def partitions(trees, tokens, text):
     from .probe import Probe
 
     for i in range(len(tokens)):
+        links = [tree[i] for tree in trees]
+        cases = {link.case for link in links}
+        if len(cases) == 2 and None not in cases and all(link.rule == 'NP.CORRELATE' for link in links):
+            hosts = {link.head for link in links}
+            if len(hosts) == 1 and None not in hosts:
+                governor, = hosts
+                forms = {form.word: form.tag.case for form in dictionary().parse('кто')[0].lexeme
+                         if form.tag.case in cases}
+                if len(forms) == 2 and trees[0][governor].role != 'preposition':
+                    (first, case), (second, _) = forms.items()
+                    focus = _span_label(tokens, i)
+                    options = (focus, 'нет такого слова')
+                    question = (f'Какое слово отвечает на вопрос «{first}?» при слове «{_span_label(tokens, governor)}»? '
+                                f'Если к «{focus}» здесь задаётся вопрос «{second}?», выберите «нет такого слова».')
+                    yield Probe(question, options, text), [options[0] if link.case == case else options[1]
+                                                           for link in links]
         if not any(t[i].rule == 'CL.NOMREF' and t[i].antecedent is not None
                    and t[t[i].antecedent].rule == 'NP.CORRELATE' for t in trees):
             continue

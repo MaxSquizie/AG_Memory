@@ -854,9 +854,9 @@ def _possessor_readings(tokens, tree, budget):
         yield tuple(result)
 
 
-def _connected(tree):
+def _connected(tree, root_role='predicate'):
     roots = [i for i, link in enumerate(tree) if link.head is None]
-    if len(roots) != 1 or tree[roots[0]].role != 'predicate':
+    if len(roots) != 1 or tree[roots[0]].role != root_role:
         return False
     children = [[] for _ in tree]
     for i, link in enumerate(tree):
@@ -905,7 +905,7 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
             on_spatial_step: Callable[[SpatialStep], None] | None = None) -> Result:
     if budget < 1:
         raise ValueError('budget must be positive')
-    from . import internal_comma, qualification, sentence_regions
+    from . import internal_comma, personal_correlatives, qualification, sentence_regions
 
     scanner = qualification.GroupOpenings()
     prefix_openings = []
@@ -1138,7 +1138,7 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
         else:
             yield from chain((first,), generated)
 
-    def exact(part, candidates_for=readings_for_region):
+    def exact(part, candidates_for=readings_for_region, *, root_role='predicate'):
         opened = prefix_openings
         if accept_tree is not None and part is not words:
             opened = tuple(qualification.openings(part))
@@ -1149,7 +1149,7 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
             for agent_variant in shared_agents.variants(part, annotated, budget=budget):
                 bound = homogeneous.bindings(agent_variant)
                 for variant in homogeneous.object_variants(bound, budget=budget):
-                    if _connected(variant):
+                    if _connected(variant, root_role):
                         for scoped in quantity_groups.age_variants(variant, budget):
                             for reading in modifier_focus.readings(part, scoped, budget):
                                 for named in capitalized_nominals.readings(part, reading, budget):
@@ -1219,6 +1219,17 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
                     collect(exact(working_words, lambda part: checked_comma_readings(part, supplemented)))
                 if not structures and budget_error is None:
                     collect(recovery.trees(working_words, exact, budget=budget))
+                if not structures and budget_error is None and personal_correlatives.readings(working_words[0].surface):
+                    from .relative_clauses import trees as relative_trees
+
+                    def fragment_trees(part):
+                        return relative_trees(part, coordinated, budget=budget, spatial_prefix=spatial_index,
+                                              nominal_fragment=True)
+
+                    collect(exact(working_words, fragment_trees, root_role='nominal_head'))
+                    if not structures and any(t.surface == ',' for t in working_words):
+                        collect(exact(working_words, lambda part: checked_comma_readings(part, fragment_trees),
+                                      root_role='nominal_head'))
             except AnalysisBudgetExceeded as error:
                 if structures or isinstance(error, NominalBudgetExceeded):
                     raise
@@ -1361,5 +1372,8 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
                 tree = (*tree[:start], replace(tree[start], scope='qualification'), *tree[start + 1:])
             steps.append(ProbeStep(2, 1, 'selected', 'qualification'))
         analyses = (tree,)
-    reason = 'COMPLEX_CLAUSE' if any(link.role.startswith('clause_') for link in analyses[0]) else 'SIMPLE_CLAUSE'
+    if analyses[0][0].role == 'nominal_head':
+        reason = 'NOMINAL_FRAGMENT'
+    else:
+        reason = 'COMPLEX_CLAUSE' if any(link.role.startswith('clause_') for link in analyses[0]) else 'SIMPLE_CLAUSE'
     return Result(text, 'PARSED_FRAGMENT', reason, tokens, analyses, tuple(probes), tuple(steps), tuple(confirmed_focus))

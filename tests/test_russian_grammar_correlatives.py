@@ -161,3 +161,51 @@ def test_comma_inside_case_government_keeps_personal_reference():
     anchor = rows[marker['antecedent']]
     assert anchor['surface'] == 'тому' and anchor['case'] == 'datv'
     assert rows[marker['head']]['assertion_status'] == 'restrictive'
+
+
+@pytest.mark.parametrize('sentence,question,answer', [
+    ('Та, кто ушла, вернулась.', 'Кто вернулся?', 'Та, кто ушла'),
+    ('Та кто ушёл вернулась', 'Кто вернулся?', 'Та кто ушёл'),
+    ('Иван встретил ту, кто упала.', 'Кого встретил Иван?', 'ту, кто упала'),
+])
+def test_feminine_correlate_preserves_local_agreement(sentence, question, answer):
+    core = AHCore()
+    record = submit(core, sentence)
+    _, rows = stored(core, record)
+    assert not record.analysis.probes
+    marker = next(row for row in rows if row['surface'] == 'кто')
+    assert marker['role'] == 'subject' and marker['case'] == 'nomn'
+    assert rows[marker['antecedent']]['morphology']['gender'] == 'femn'
+    assert rows[marker['head']]['assertion_status'] == 'restrictive'
+    assert submit(core, question).text == answer
+
+
+def test_correlative_nominal_fragment_and_false_comma():
+    core = AHCore()
+    for text in ('та кто ушла', 'та, кто ушла', 'та, кто, ушла'):
+        result = submit(core, text, choose('кто, ушла'))
+        assert result.status == 'PARSED_FRAGMENT' and result.observation_ref is None
+        tree, = result.analysis.analyses
+        marker = next(link for link in tree if link.rule == 'CL.NOMREF')
+        assert tree[marker.antecedent].role == 'nominal_head'
+        assert tree[marker.head].lemma == 'уйти'
+    assert not core.store.links() and not any(list(core.store.elements(d)) for d in Domain)
+
+
+def test_local_subject_controls_gender():
+    core = AHCore()
+    for text in ('Тот, кто ушла, вернулся.', 'Та, кто ушла, вернулся.', 'Та, кого встретила Иван, ушла.'):
+        assert submit(core, text).status == 'UNRESOLVED'
+    record = submit(core, 'Та, кого встретил Иван, ушла.')
+    _, rows = stored(core, record)
+    assert next(row for row in rows if row['surface'] == 'кого')['role'] == 'object'
+
+
+def test_syncretic_feminine_correlate_asks_for_outer_case():
+    core = AHCore()
+    record = submit(core, 'Иван помог той, кто упала.', choose('той'))
+    _, rows = stored(core, record)
+    probe, = record.analysis.probes
+    assert 'кому?' in probe.question and 'кем?' in probe.question
+    assert next(row for row in rows if row['surface'] == 'той')['case'] == 'datv'
+    assert submit(core, 'Кому помог Иван?').text == 'той, кто упала'

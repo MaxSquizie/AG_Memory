@@ -45,6 +45,9 @@ def _compatible(left, right):
     if left.casefold() in FORMS and (nominal(right) or adjective(right)):
         return True
     for subject, verb in ((left, right), (right, left)):
+        if (any(lemma == 'кто' and tag.case == 'nomn' for lemma, tag in known_forms(subject))
+                and any(tag.POS in ('VERB', 'ADJS', 'PRTS') for _, tag in known_forms(verb))):
+            return True
         if any(a.role == 'subject' and v.role == 'predicate' and subject_agrees(a, v)
                for a in readings(subject) for v in readings(verb)):
             return True
@@ -60,7 +63,8 @@ def _government(left, right):
     return {(i, lemma, tag.case) for i in (0, 1)
             for lemma, verb in forms[i] if verb.POS in ('VERB', 'INFN', 'PRTS')
             for _, tag in forms[1 - i] if tag.POS in ('NOUN', 'NPRO') or 'Subx' in tag
-            if tag.case in government.get(lemma, ())}
+            if tag.case in government.get(lemma, ())
+            or (tag.case == 'accs' and verb.transitivity == 'tran')}
 
 
 def _governed_dependency(tree, left, candidates):

@@ -94,7 +94,7 @@ def _relative_child(part, subordinate):
             yield tuple(result[i] for i in range(len(part)))
 
 
-def trees(tokens, local, *, budget, spatial_prefix=None):
+def trees(tokens, local, *, budget, spatial_prefix=None, nominal_fragment=False):
     from .parser import AnalysisBudgetExceeded, Link
 
     remaining = budget
@@ -128,7 +128,7 @@ def trees(tokens, local, *, budget, spatial_prefix=None):
         if allow_inference and (not explicit or not found):
             yield from attachments(part, inferred=True)
 
-    def attachments(part, inferred):
+    def attachments(part, inferred, *, fragment=False):
         def component(tokens):
             return subordinate(tokens, inferred)
 
@@ -192,10 +192,16 @@ def trees(tokens, local, *, budget, spatial_prefix=None):
                 inside = tuple(range(begin, end))
                 inner = tuple(part[i] for i in inside)
                 matrix = tuple(part[i] for i in outside)
-                captions = _nominal_caption(matrix, budget) if relative and end == len(part) else ()
-                ordinary = ((tree, None, None) for tree in chain(component(matrix), captions)) if relative or indirect or spatial else ()
-                personal_matrices = personal_correlatives.matrices(matrix, start, component) if personal else ()
-                for outer, person, addressee_governor in chain(ordinary, personal_matrices):
+                if fragment:
+                    if not personal or len(matrix) != 1 or end != len(part):
+                        continue
+                    matrices = (((head,), 0, None) for head in personal_correlatives.nominal_heads(matrix[0]))
+                else:
+                    captions = _nominal_caption(matrix, budget) if relative and end == len(part) else ()
+                    ordinary = ((tree, None, None) for tree in chain(component(matrix), captions)) if relative or indirect or spatial else ()
+                    personal_matrices = personal_correlatives.matrices(matrix, start, component) if personal else ()
+                    matrices = chain(ordinary, personal_matrices)
+                for outer, person, addressee_governor in matrices:
                     fixed_host = person if person is not None else addressee_governor
                     for host in ((fixed_host,) if fixed_host is not None else _anchors(outer, start)):
                         if host >= start:
@@ -229,6 +235,8 @@ def trees(tokens, local, *, budget, spatial_prefix=None):
                                     continue
                                 expected = 'кто' if person is not None else outer[host].lemma
                                 if person is not None and surface != words[marker]:
+                                    if reference.role != 'subject':
+                                        continue
                                     expected = surface
                                 if tag and (reference.lemma != expected or
                                             (reference.case or ROLE_CASE.get(reference.role)) != tag.case):
@@ -268,4 +276,7 @@ def trees(tokens, local, *, budget, spatial_prefix=None):
                                         merged[i] = Link('punctuation', ',', index, 'CL.PUNCT')
                                 yield tuple(merged)
 
-    yield from parse(tokens, True)
+    if nominal_fragment:
+        yield from attachments(tokens, inferred=True, fragment=True)
+    else:
+        yield from parse(tokens, True)
