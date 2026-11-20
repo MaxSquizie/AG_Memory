@@ -191,3 +191,10 @@ python scripts/import_russian_predicative_instrumentals.py --object-adjectives r
 
 dative-recipients.tsv uses the Russian FrameBank version and GPL-3.0 license given above. Each retained construction explicitly has Sacc and a bare Sdat with Role адресат or конечный посессор. This licenses an optional recipient reading when both participants are present.
 python scripts/import_russian_dative_recipients.py framebank_dict_cx_items.txt src/ah/russian_grammar/lexicon/dative-recipients.tsv
+
+detached-groups.tsv records preposition/noun lemma pairs observed inside paired
+commas in Russian-GSD r2.15 train (CC BY-SA 4.0). The noun has a nominal
+dependent or determiner and precedes its verbal or adjectival governor.
+This is evidence for a possible detached reading, not a classification of
+the expression as a source. Selection of qualification requires a probe.
+python scripts/import_russian_detached_groups.py ru_gsd-ud-train.conllu src/ah/russian_grammar/lexicon/detached-groups.tsv

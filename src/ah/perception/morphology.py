@@ -233,55 +233,9 @@ class Pymorphy3Morphology:
         dictionary.  Adjacent transpositions are added as exact DAWG lookups and
         weighted more precisely by the recovery ranker.
         """
-        query = word.casefold()
-        if not query or max_distance < 0 or limit <= 0:
-            return ()
-        words = self._analyzer.dictionary.words
-        dictionary = words.dct
-        alphabet = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя-"
-        initial_row = tuple(range(len(query) + 1))
-        found: set[str] = set()
+        from ah.russian_grammar.dictionary_search import indexed_candidates
 
-        def visit(prefix: str, state: int, previous_row: tuple[int, ...]) -> None:
-            if len(found) >= limit:
-                return
-            for char in alphabet:
-                next_state = dictionary.follow_bytes(char.encode("utf-8"), state)
-                if next_state is None:
-                    continue
-                current = [previous_row[0] + 1]
-                for column, query_char in enumerate(query, start=1):
-                    current.append(
-                        min(
-                            current[column - 1] + 1,
-                            previous_row[column] + 1,
-                            previous_row[column - 1] + (query_char != char),
-                        )
-                    )
-                candidate = prefix + char
-                if current[-1] <= max_distance and words._has_value(next_state) is not None:
-                    found.add(candidate)
-                    if len(found) >= limit:
-                        return
-                if min(current) <= max_distance:
-                    visit(candidate, next_state, tuple(current))
-
-        visit("", dictionary.ROOT, initial_row)
-
-        # A transposition is two Levenshtein edits but one keyboard event.  Probe
-        # those O(len(word)) exact variants directly in the same compressed DAWG.
-        if max_distance >= 1:
-            chars = list(query)
-            for index in range(len(chars) - 1):
-                if chars[index] == chars[index + 1]:
-                    continue
-                swapped = chars.copy()
-                swapped[index], swapped[index + 1] = swapped[index + 1], swapped[index]
-                candidate = "".join(swapped)
-                if self._analyzer.word_is_known(candidate):
-                    found.add(candidate)
-
-        return tuple(sorted(found))
+        return indexed_candidates(self._analyzer, word, max_distance=max_distance, limit=limit)
 
     def indexed_candidates(
         self, word: str, *, max_distance: int, limit: int = 512

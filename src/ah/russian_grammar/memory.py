@@ -77,7 +77,7 @@ def _rows(result, participants):
     qualifications = {}
     for i, row in enumerate(rows):
         if (row['role'] == 'parenthetical' and row.get('scope') != 'ordering'
-                or row['rule'] == 'PP.DETACHED' and row.get('scope') == 'qualification'):
+                or row['role'] == 'preposition' and row.get('scope') == 'qualification'):
             qualifications[row['head']] = 'qualified'
         if row['role'] != 'clause_marker' or not row.get('scope'):
             continue

@@ -4,10 +4,11 @@ from collections.abc import Callable, Iterator, Mapping
 from dataclasses import dataclass, replace
 from itertools import product
 
+from .detached_prepositions import extent as group_extent
 from .morphology import Morphology, feature_choices
 from .prepositions import CASE_NAMES, FORMS, GOVERNMENT, PREFIXES, TOKEN, group_heads
 from .probe import MAX_WORD_CHOICES, Probe
-from .recovery import CaseRecovery
+from .recovery import CaseRecovery, SpellingRecovery
 from .rules import Reading, known_forms, name_continuations, plain_person_reference, preposition_reading, attribute_agrees, readings, subject_agrees
 
 
@@ -37,7 +38,7 @@ class Link:
     scope: str | None = None
     antecedent: int | None = None
     event_view: str | None = None
-    recovery: CaseRecovery | None = None
+    recovery: CaseRecovery | SpellingRecovery | None = None
     morphology: Morphology | None = None
     implicit_subject: str | None = None
     quantity: str | None = None
@@ -294,6 +295,12 @@ def _clause_context(text, tokens, trees, focus, anchors):
     return text if (start, end) == (0, len(tokens)) else text[tokens[start].start:tokens[end - 1].end]
 
 
+def _qualification_probe(tokens, start, end, host, context):
+    phrase = _span_label(tokens, start, end)
+    question = f'Какое сочетание передаёт оговорку к самому сообщению о действии «{_span_label(tokens, host)}»?'
+    return Probe(question, (phrase, 'нет такого сочетания'), context)
+
+
 def _partitions(analyses, tokens, text):
     # Each tree has exactly one answer. Equal answers keep all matching trees.
     def word_choice(question, indices, context=text):
@@ -345,6 +352,19 @@ def _partitions(analyses, tokens, text):
             if None not in subjects and len(set(subjects)) > 1:
                 yield word_choice(f'Какое слово служит подлежащим при «{_span_label(tokens, i)}»?', subjects,
                                   _clause_context(text, tokens, analyses, i, subjects))
+        if roles == {'governed', 'nominal_conjunct'} and all(
+                link.role == 'governed' or link.rule == 'P.COORD.UNMARKED' for link in links):
+            sample = next(tree for tree in analyses if tree[i].role == 'nominal_conjunct')
+            start = next(j for j, link in enumerate(sample) if link.role == 'case' and link.head == i)
+            phrase = _span_label(tokens, start, i + 1)
+            options = (phrase, 'нет такого продолжения')
+            previous = _span_label(tokens, start - 1)
+            question = f'Какие слова продолжают перечисление после «{previous}»?'
+            hosts = {tree[start].head for tree in analyses if tree[i].role == 'governed'}
+            context = _attachment_context(text, tokens, analyses, hosts | {start - 1}, start, i + 1)
+            yield Probe(question, options, context), [phrase if link.role == 'nominal_conjunct' else options[1]
+                                                       for link in links]
+            return
         if roles == {'oblique', 'experiencer'} and any(a[i].scope == 'age_holder' for a in analyses):
             focus = _span_label(tokens, i)
             options = (focus, 'нет такого слова')
@@ -422,14 +442,13 @@ def _partitions(analyses, tokens, text):
                 yield (Probe('Which expression functions as the preposition here?', tuple(labels.values()), text),
                         [labels[end] for end in boundaries])
             hosts = [a[i].head for a in analyses]
-            if (all(a[i].rule == 'PP.DETACHED' for a in analyses) and len(set(hosts)) == 1 and
-                    {a[i].scope for a in analyses} == {None, 'qualification'}):
-                end = next(j for j in range(i + 1, len(tokens)) if tokens[j].surface == ',')
-                phrase = _span_label(tokens, i, end)
-                options = (phrase, 'нет такого сочетания')
-                question = (f'Какое сочетание передаёт оговорку к самому сообщению о действии '
-                            f'«{_span_label(tokens, hosts[0])}»?')
-                yield Probe(question, options, text), [options[0] if a[i].scope else options[1] for a in analyses]
+            scope_readings = {a[i].scope for a in analyses}
+            if len(set(hosts)) == 1 and scope_readings == {None, 'qualification'}:
+                limits = {group_extent(a, i) for a in analyses}
+                if len(limits) == 1 and None not in limits:
+                    end = limits.pop()
+                    probe = _qualification_probe(tokens, i, end, hosts[0], text)
+                    yield probe, [probe.options[0] if a[i].scope else probe.options[1] for a in analyses]
             ends = {j for a in analyses for j, link in enumerate(a) if link.role == 'governed' and link.head == i}
             if len(set(hosts)) > 1 and len(ends) == 1:
                 noun = ends.pop()
@@ -457,8 +476,10 @@ def _partitions(analyses, tokens, text):
                         end = j + 1
                     extents.append(end)
                 end = min(extents)
-                if all(a[i].rule == 'PP.DETACHED' for a in analyses):
-                    end = next(j for j in range(i + 1, len(tokens)) if tokens[j].surface == ',')
+                if all(a[i].rule == 'PP.DETACHED' for a in analyses) or any(a[i].scope == 'qualification' for a in analyses):
+                    limits = {group_extent(a, i) for a in analyses}
+                    if len(limits) == 1 and None not in limits:
+                        end = limits.pop()
                 phrase = _span_label(tokens, i, end).replace(' ,', ',')
                 context = _attachment_context(text, tokens, analyses, hosts, i, end)
                 yield word_choice(f'Which word does the phrase «{phrase}» depend on?', hosts, context)
@@ -806,13 +827,26 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
             budget: int = 256, accept_tree: Callable[[tuple[Link, ...]], bool] | None = None) -> Result:
     if budget < 1:
         raise ValueError('budget must be positive')
-    tokens = tuple(Occurrence(m[0], m.start(), m.end()) for m in TOKEN.finditer(text))
+    from . import qualification
+
+    scanner = qualification.GroupOpenings()
+    prefix_openings = []
+    occurrences = []
+    for match in TOKEN.finditer(text):
+        occurrences.append(Occurrence(match[0], match.start(), match.end()))
+        prefix_openings.extend(scanner.feed(match[0]))
+    tokens = tuple(occurrences)
     words = tokens[:-1] if tokens and tokens[-1].surface in {'.', '!', '?'} else tokens
     if not words:
         return Result(text, 'UNRESOLVED', 'EMPTY', tokens)
     from . import homogeneous, case_arguments, clauses, determiners, finite_forms, infinitives, modifiers, morphology, nominal_groups, participles, predication, quantity_groups, quantity_modifiers, recovery, shared_agents, short_participles, standalone_numerals
 
     failures = []
+    working_words = words
+    starts_after_comma = {right.start for left, right in zip(words, words[1:]) if left.surface == ','}
+    ends_before_comma = {left.end for left, right in zip(words, words[1:]) if right.surface == ','}
+    spelling_sites = recovery.spelling_sites(words, budget, min(MAX_WORD_CHOICES - 1, budget))
+    spellings = {}
 
     from . import ellipsis
 
@@ -835,8 +869,8 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
 
     @reuse_completed
     def base(part):
-        yield from ellipsis.one_member(part, part == words, budget)
-        yield from _simple_trees(part, budget, failures.append if part == words else lambda _: None)
+        yield from ellipsis.one_member(part, part == working_words, budget)
+        yield from _simple_trees(part, budget, failures.append if part == working_words else lambda _: None)
         yield from predication.trees(part, budget=budget)
         yield from infinitives.candidates(part, budget=budget)
         from . import infinitive_phrases
@@ -895,16 +929,20 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
         yield from unlisted_attributes.trees(part, local)
 
     def coordinated(part):
-        from . import dated_clauses
+        from itertools import chain
+        from . import dated_clauses, detached_measures, detached_prepositions, named_arguments
+
         date = dated_clauses.full_date(part)
-        if date:
-            yield from dated_clauses.attach(part, date, coordinated)
-        from . import detached_measures, detached_prepositions
-        from . import named_arguments
-        yield from named_arguments.trees(part, budget=budget)
-        yield from homogeneous.trees(part, attributed, budget=budget)
-        yield from detached_measures.trees(part, attributed, budget)
-        yield from detached_prepositions.trees(part, attributed)
+        ordinary = chain(dated_clauses.attach(part, date, coordinated) if date else (),
+                         named_arguments.trees(part, budget=budget),
+                         homogeneous.trees(part, attributed, budget=budget),
+                         detached_measures.trees(part, attributed, budget))
+        parsed = False
+        for tree in ordinary:
+            parsed = True
+            yield tree
+        yield from detached_prepositions.trees(part, attributed, recover=not parsed,
+                                               starts_after_comma=starts_after_comma, ends_before_comma=ends_before_comma)
 
     from . import marked_regions, nominal_entries
     group_heads_by_start = {}
@@ -912,7 +950,7 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
 
     def candidates(part):
         from . import relative_clauses, utterances
-        if part is words:
+        if part is working_words:
             completed = marked_regions.complete(part, text, coordinated, relative_hosts, budget)
             if completed:
                 yield from completed
@@ -932,6 +970,9 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
             yield from chain((first,), variants)
 
     def exact(part):
+        opened = prefix_openings
+        if accept_tree is not None and part is not words:
+            opened = tuple(qualification.openings(part))
         for tree in supplemented(part):
             if len(tree) != len(part):
                 continue
@@ -941,8 +982,10 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
                 for variant in homogeneous.object_variants(bound, budget=budget):
                     if _connected(variant):
                         for scoped in quantity_groups.age_variants(variant, budget):
-                            if accept_tree is None or accept_tree(scoped):
+                            if accept_tree is None:
                                 yield scoped
+                            else:
+                                yield from qualification.filtered(scoped, opened, accept_tree, budget)
 
     structures = {}
 
@@ -952,7 +995,12 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
                 if not failures or failures[0] != 'UNKNOWN_GOVERNMENT':
                     failures.insert(0, 'UNKNOWN_GOVERNMENT')
                 continue
-            for reading in _possessor_readings(words, tree, budget):
+            if spellings:
+                if any(tree[i].recovery for i in spellings):
+                    continue
+                tree = tuple(replace(link, recovery=spellings[i]) if i in spellings else link
+                             for i, link in enumerate(tree))
+            for reading in _possessor_readings(working_words, tree, budget):
                 key = tuple((l.role, l.lemma, l.head, l.case, l.controller, l.scope,
                              l.antecedent, l.ellipsis_source, l.event_view, l.recovery, l.morphology, l.implicit_subject, l.quantity, l.quantity_kind, l.quantity_modifier, l.coord_head, l.shared_agent, l.shared_object) for l in reading)
                 structures.setdefault(key, reading)
@@ -986,16 +1034,43 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
 
     while True:
         try:
-            collect(exact(words))
-            if not structures:
-                collect(recovery.trees(words, exact, budget=budget))
-            break
+            budget_error = None
+            try:
+                collect(exact(working_words))
+                if not structures:
+                    collect(recovery.trees(working_words, exact, budget=budget))
+            except AnalysisBudgetExceeded as error:
+                budget_error = error
+                structures.clear()
+            if structures:
+                break
+            for i, forms in spelling_sites:
+                focus = _span_label(words, i)
+                original = words[i].surface
+                question = f'Какое написание передаёт слово «{focus}» в этом предложении?'
+                probe = Probe(question, (original, *forms), text)
+                label, stopped = select(probe, len(probe.options), domain='spelling')
+                if stopped is not None:
+                    return stopped
+                steps.append(ProbeStep(len(probe.options), 1, 'selected', 'spelling'))
+                if label == original:
+                    continue
+                spellings[i] = SpellingRecovery(original, label)
+                working_words = (*working_words[:i], replace(words[i], surface=label), *working_words[i + 1:])
+                relative_hosts.clear()
+                group_heads_by_start.clear()
+                failures.clear()
+                break
+            else:
+                if budget_error is not None:
+                    raise budget_error
+                break
         except marked_regions.RelativeChoice as group:
-            label, stopped = select(group.probe, len(group.heads), domain='relative_host')
+            label, stopped = select(group.probe, len(group.heads), domain=group.domain)
             if stopped is not None:
                 return stopped
             relative_hosts[group.start] = group.heads[label]
-            steps.append(ProbeStep(len(group.heads), 1, 'selected', 'relative_host'))
+            steps.append(ProbeStep(len(group.heads), 1, 'selected', group.domain))
             structures.clear()
         except nominal_entries.GroupChoice as group:
             count = len(group.heads)
@@ -1062,5 +1137,23 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
             return stopped
         analyses = tuple(a for a, key in zip(analyses, keys) if key == selected)
         steps.append(ProbeStep(before, len(analyses), 'selected'))
+    if accept_tree is None:
+        tree = analyses[0]
+        opened = prefix_openings
+        if any(link.recovery for link in tree):
+            corrected = (replace(t, surface=link.recovery.corrected) if link.recovery else t
+                         for t, link in zip(words, tree))
+            opened = qualification.openings(corrected)
+        for start, end in qualification.sites(tree, opened):
+            host = tree[start].head
+            context = _clause_context(text, words, (tree,), host, (start, end - 1))
+            probe = _qualification_probe(words, start, end, host, context)
+            selected, stopped = select(probe, 2, (tree,), 'qualification')
+            if stopped is not None:
+                return stopped
+            if selected == probe.options[0]:
+                tree = (*tree[:start], replace(tree[start], scope='qualification'), *tree[start + 1:])
+            steps.append(ProbeStep(2, 1, 'selected', 'qualification'))
+        analyses = (tree,)
     reason = 'COMPLEX_CLAUSE' if any(link.role.startswith('clause_') for link in analyses[0]) else 'SIMPLE_CLAUSE'
     return Result(text, 'PARSED_FRAGMENT', reason, tokens, analyses, tuple(probes), tuple(steps))

@@ -2,6 +2,8 @@ from dataclasses import dataclass, replace
 from functools import lru_cache
 from itertools import combinations, product
 
+from .dictionary_search import indexed_candidates
+
 from .nominal_groups import POSSESSIVES
 from .prepositions import FORMS, GOVERNMENT, PREFIXES
 from .rules import dictionary, known_forms, readings
@@ -14,6 +16,41 @@ class CaseRecovery:
     original: str
     corrected: str
     case: str
+
+
+@dataclass(frozen=True)
+class SpellingRecovery:
+    original: str
+    corrected: str
+
+
+@lru_cache(maxsize=2048)
+def _spellings(surface, limit):
+    forms = indexed_candidates(dictionary(), surface, max_distance=1, limit=limit + 1)
+    if len(forms) > limit:
+        return ()
+    return tuple(form.capitalize() if surface.istitle() else form for form in forms
+                 if form != surface.casefold() and known_forms(form))
+
+
+def spelling_sites(tokens, budget, limit):
+    from .parser import AnalysisBudgetExceeded
+
+    searched = 0
+    order = sorted(range(len(tokens)), key=lambda i: tokens[i].surface.istitle())
+    for index in order:
+        surface = tokens[index].surface
+        if (not surface.isalpha() or not (surface.islower() or surface.istitle())
+                or len(surface) > min(128, budget) or known_forms(surface)):
+            continue
+        if not all('а' <= ch <= 'я' or ch == 'ё' for ch in surface.casefold()):
+            continue
+        searched += 1
+        if searched > budget:
+            raise AnalysisBudgetExceeded('SPELLING_BUDGET')
+        forms = _spellings(surface, limit)
+        if forms:
+            yield index, forms
 
 
 @lru_cache(maxsize=2048)

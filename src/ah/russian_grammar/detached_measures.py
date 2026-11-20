@@ -26,39 +26,45 @@ def _tail(tokens, start, budget):
                     yield group, boundary, links
 
 
-def trees(tokens, parse, budget):
+def trees(tokens, parse, budget, *, inferred=False):
     from .parser import AnalysisBudgetExceeded, Link
 
     comma = next((i for i in reversed(range(1, len(tokens))) if tokens[i].surface == ','), None)
-    if comma is None or comma + 2 >= len(tokens):
-        return
-    tail = tuple(_tail(tokens, comma + 1, budget))
-    if not tail:
+    if inferred:
+        starts = range(1, len(tokens) - 2)
+    elif comma is not None:
+        starts = (comma + 1,)
+    else:
         return
     seen = set()
-    for prefix in parse(tokens[:comma]):
-        adjacent = comma - 1
-        if prefix[adjacent].role not in NOMINAL_ROLES | {'genitive_modifier'}:
+    for start in starts:
+        tail = tuple(_tail(tokens, start, budget))
+        if not tail:
             continue
-        hosts = []
-        i = adjacent
-        while i is not None:
-            if prefix[i].role in NOMINAL_ROLES | {'genitive_modifier', 'predicate', 'infinitive'}:
-                hosts.append(i)
-            i = prefix[i].head
-        for group, prep_index, links in tail:
-            for host in hosts:
-                predicate = prefix[host].role in ('predicate', 'infinitive')
-                role = 'oblique' if predicate else 'measure'
-                measure = Link(role, group.lemma, host, 'N.MEASURE', morphology=group.morphology)
-                completed = {**links, group.noun: measure,
-                             comma: Link('punctuation', ',', group.noun, 'N.MEASURE.COMMA')}
-                lower = hosts.index(host)
-                for prep_host in (group.noun, *hosts[lower:]):
-                    completed[prep_index] = Link('preposition', links[prep_index].lemma, prep_host, 'P2')
-                    tree = (*prefix, *(completed[j] for j in range(comma, len(tokens))))
-                    if tree not in seen:
-                        seen.add(tree)
-                        if len(seen) > budget:
-                            raise AnalysisBudgetExceeded('DETACHED_MEASURE_BUDGET')
-                        yield tree
+        boundary = start if inferred else comma
+        for prefix in parse(tokens[:boundary]):
+            adjacent = boundary - 1
+            if prefix[adjacent].role not in NOMINAL_ROLES | {'genitive_modifier'}:
+                continue
+            hosts = []
+            i = adjacent
+            while i is not None:
+                if prefix[i].role in NOMINAL_ROLES | {'genitive_modifier', 'predicate', 'infinitive'}:
+                    hosts.append(i)
+                i = prefix[i].head
+            for group, prep_index, links in tail:
+                for lower, host in enumerate(hosts):
+                    predicate = prefix[host].role in ('predicate', 'infinitive')
+                    role = 'oblique' if predicate else 'measure'
+                    measure = Link(role, group.lemma, host, 'N.MEASURE', morphology=group.morphology)
+                    completed = {**links, group.noun: measure}
+                    if not inferred:
+                        completed[comma] = Link('punctuation', ',', group.noun, 'N.MEASURE.COMMA')
+                    for prep_host in (group.noun, *hosts[lower:]):
+                        completed[prep_index] = Link('preposition', links[prep_index].lemma, prep_host, 'P2')
+                        tree = (*prefix, *(completed[j] for j in range(boundary, len(tokens))))
+                        if tree not in seen:
+                            seen.add(tree)
+                            if len(seen) > budget:
+                                raise AnalysisBudgetExceeded('DETACHED_MEASURE_BUDGET')
+                            yield tree

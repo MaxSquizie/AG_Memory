@@ -62,6 +62,51 @@ def _phrases(tokens, words, start, particles):
             qualifiers.append((j, attributes))
 
 
+def _boundaries(groups, words):
+    boundaries = {}
+    for left, right in zip(groups, groups[1:]):
+        if left.prep == right.prep and left.case == right.case:
+            gap = words[left.end:right.start]
+            if gap in ((), (',',)):
+                boundaries[right.start] = (left, bool(gap))
+    return boundaries
+
+
+def _groupings(boundaries, budget):
+    optional = [i for i, (_, marked) in boundaries.items() if not marked]
+    if 2 ** len(optional) > budget:
+        raise AnalysisBudgetExceeded('MODAL_GROUP_BUDGET')
+    for choices in product((False, True), repeat=len(optional)):
+        included = {i for i, selected in zip(optional, choices) if selected}
+        coordinated = {}
+        for i, (left, marked) in boundaries.items():
+            if marked or i in included:
+                coordinated[i] = coordinated.get(left.start, left.noun)
+        yield coordinated
+
+
+def _attach_groups(groups, coordinated, restored, hosts, words):
+    links = list(restored)
+    free = []
+    for group in groups:
+        for j, link in group.links:
+            links[j] = link
+        if group.start in coordinated:
+            marked = words[group.start - 1] == ','
+            if marked:
+                links[group.start - 1] = Link('punctuation', ',', group.noun, 'P.COORD')
+            rule = 'P.COORD' if marked else 'P.COORD.UNMARKED'
+            links[group.noun] = Link('nominal_conjunct', group.lemma, coordinated[group.start], rule, group.case)
+            links[group.start] = Link('case', group.prep, group.noun, 'P1')
+        else:
+            links[group.noun] = Link('governed', group.lemma, group.start, 'P1', group.case)
+            free.append(group)
+    for heads in product(hosts, repeat=len(free)):
+        for group, host in zip(free, heads):
+            links[group.start] = Link('preposition', group.prep, host, 'P2')
+        yield tuple(links)
+
+
 def trees(tokens, kernel, budget):
     infinitives = {j for j, token in enumerate(tokens)
                    if any(tag.POS == 'INFN' for _, tag in known_forms(token.surface))}
@@ -99,11 +144,8 @@ def trees(tokens, kernel, budget):
             continue
         if not (groups or opening or fixed):
             continue
-        coordinated = {}
-        for left, right in zip(groups, groups[1:]):
-            if left.prep == right.prep and left.case == right.case and words[left.end:right.start] == (',',):
-                coordinated[right.start] = coordinated.get(left.start, left.noun)
-        commas = {g.start - 1 for g in groups if g.start in coordinated}
+        boundaries = _boundaries(groups, words)
+        commas = {start - 1 for start, (_, marked) in boundaries.items() if marked}
         indices = tuple(j for j in kept if j not in commas)
         for tree in kernel(tuple(tokens[j] for j in indices)):
             restored = _restore(tree, indices, len(tokens))
@@ -118,21 +160,9 @@ def trees(tokens, kernel, budget):
                                    words[j], root if j == opening[0] else opening[0], 'C.OPEN')
             for j, link in fixed.items():
                 restored[j] = link
-            choices = []
-            for g in groups:
-                for j, link in g.links:
-                    restored[j] = link
-                if g.start in coordinated:
-                    restored[g.start - 1] = Link('punctuation', ',', g.noun, 'P.COORD')
-                    restored[g.noun] = Link('nominal_conjunct', g.lemma, coordinated[g.start], 'P.COORD', g.case)
-                    restored[g.start] = Link('case', g.prep, g.noun, 'P1')
-                else:
-                    restored[g.noun] = Link('governed', g.lemma, g.start, 'P1', g.case)
-                    choices.append((g, (root, *embedded)))
-            for heads in product(*(heads for _, heads in choices)):
-                for (g, _), host in zip(choices, heads):
-                    restored[g.start] = Link('preposition', g.prep, host, 'P2')
-                produced += 1
-                if produced > budget:
-                    raise AnalysisBudgetExceeded('MODAL_GROUP_BUDGET')
-                yield tuple(restored)
+            for coordinated in _groupings(boundaries, budget):
+                for variant in _attach_groups(groups, coordinated, restored, (root, *embedded), words):
+                    produced += 1
+                    if produced > budget:
+                        raise AnalysisBudgetExceeded('MODAL_GROUP_BUDGET')
+                    yield variant

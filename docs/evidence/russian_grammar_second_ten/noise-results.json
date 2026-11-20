@@ -1,0 +1,662 @@
+{
+  "cpu_seconds_per_case": 30,
+  "cases": [
+    {
+      "id": "test-s12",
+      "variant": "original",
+      "text": "За последние 150 лет здесь не было срублено ни одно дерево, а в нескольких километрах от парка находится знаменитый Румскулльский дуб, 14 метров в охвате, которому, по оценкам учёных, может быть 1000 лет.",
+      "status": "STORED",
+      "reason": "COMPLEX_CLAUSE",
+      "matches_original_acceptance": true,
+      "probes": 10,
+      "matches_original_probes": true,
+      "matches_reference": true,
+      "graph_sha256": "5a3d344bf9f48ad1958815c4b22832e3388ed57b170871c5d4ad2cfe9665c0c2",
+      "baseline": {
+        "status": "STORED",
+        "reason": "COMPLEX_CLAUSE",
+        "probes": 10,
+        "matches_reference": true
+      }
+    },
+    {
+      "id": "test-s12",
+      "variant": "no_punctuation",
+      "text": "За последние 150 лет здесь не было срублено ни одно дерево а в нескольких километрах от парка находится знаменитый Румскулльский дуб 14 метров в охвате которому по оценкам учёных может быть 1000 лет",
+      "status": "STORED",
+      "reason": "COMPLEX_CLAUSE",
+      "probes": 11,
+      "matches_reference": true,
+      "graph_sha256": "5a3d344bf9f48ad1958815c4b22832e3388ed57b170871c5d4ad2cfe9665c0c2",
+      "baseline": {
+        "status": "TIME_LIMIT",
+        "probes": 0
+      }
+    },
+    {
+      "id": "test-s12",
+      "variant": "typo",
+      "text": "За последние 150 лет здесь не было срублено ни одно дерево, а в нескольких километрах от парка находится знаменитый Румскулльский дуб, 14 метров в охвате, которому, по оценкм учёных, может быть 1000 лет.",
+      "status": "STORED",
+      "reason": "COMPLEX_CLAUSE",
+      "probes": 11,
+      "matches_reference": true,
+      "graph_sha256": "5a3d344bf9f48ad1958815c4b22832e3388ed57b170871c5d4ad2cfe9665c0c2",
+      "baseline": {
+        "status": "UNRESOLVED",
+        "reason": "QUANTITY_BUDGET",
+        "probes": 0
+      }
+    },
+    {
+      "id": "test-s12",
+      "variant": "no_punctuation_and_typo",
+      "text": "За последние 150 лет здесь не было срублено ни одно дерево а в нескольких километрах от парка находится знаменитый Румскулльский дуб 14 метров в охвате которому по оценкм учёных может быть 1000 лет",
+      "status": "STORED",
+      "reason": "COMPLEX_CLAUSE",
+      "probes": 12,
+      "matches_reference": true,
+      "graph_sha256": "5a3d344bf9f48ad1958815c4b22832e3388ed57b170871c5d4ad2cfe9665c0c2",
+      "baseline": {
+        "status": "UNRESOLVED",
+        "reason": "QUANTITY_BUDGET",
+        "probes": 0
+      }
+    },
+    {
+      "id": "test-s12",
+      "variant": "left_comma",
+      "text": "За последние 150 лет здесь не было срублено ни одно дерево, а в нескольких километрах от парка находится знаменитый Румскулльский дуб, 14 метров в охвате, которому, по оценкам учёных может быть 1000 лет.",
+      "status": "STORED",
+      "reason": "COMPLEX_CLAUSE",
+      "probes": 10,
+      "matches_reference": true,
+      "graph_sha256": "5a3d344bf9f48ad1958815c4b22832e3388ed57b170871c5d4ad2cfe9665c0c2",
+      "baseline": {
+        "status": "TIME_LIMIT",
+        "probes": 0
+      }
+    },
+    {
+      "id": "test-s12",
+      "variant": "right_comma",
+      "text": "За последние 150 лет здесь не было срублено ни одно дерево, а в нескольких километрах от парка находится знаменитый Румскулльский дуб, 14 метров в охвате, которому по оценкам учёных, может быть 1000 лет.",
+      "status": "STORED",
+      "reason": "COMPLEX_CLAUSE",
+      "probes": 10,
+      "matches_reference": true,
+      "graph_sha256": "5a3d344bf9f48ad1958815c4b22832e3388ed57b170871c5d4ad2cfe9665c0c2",
+      "baseline": {
+        "status": "TIME_LIMIT",
+        "probes": 0
+      }
+    },
+    {
+      "id": "test-s12",
+      "variant": "no_pair",
+      "text": "За последние 150 лет здесь не было срублено ни одно дерево, а в нескольких километрах от парка находится знаменитый Румскулльский дуб, 14 метров в охвате, которому по оценкам учёных может быть 1000 лет.",
+      "status": "STORED",
+      "reason": "COMPLEX_CLAUSE",
+      "probes": 10,
+      "matches_reference": true,
+      "graph_sha256": "5a3d344bf9f48ad1958815c4b22832e3388ed57b170871c5d4ad2cfe9665c0c2",
+      "baseline": {
+        "status": "STORED",
+        "reason": "COMPLEX_CLAUSE",
+        "probes": 9,
+        "matches_reference": false
+      }
+    },
+    {
+      "id": "test-s13",
+      "variant": "original",
+      "text": "97 -- Деятельность частных домашних хозяйств по предоставлению услуг для собственного пользования QA.",
+      "status": "STORED",
+      "reason": "SIMPLE_CLAUSE",
+      "matches_original_acceptance": true,
+      "probes": 5,
+      "matches_original_probes": true,
+      "matches_reference": true,
+      "graph_sha256": "7cd5619cfef66230590d2a5d57513319fc83c8712eef4bb7f44da74253255319",
+      "baseline": {
+        "status": "STORED",
+        "reason": "SIMPLE_CLAUSE",
+        "probes": 5,
+        "matches_reference": true
+      }
+    },
+    {
+      "id": "test-s13",
+      "variant": "no_punctuation",
+      "text": "97 Деятельность частных домашних хозяйств по предоставлению услуг для собственного пользования QA",
+      "status": "UNRESOLVED",
+      "reason": "NO_RULE @0",
+      "probes": 0,
+      "baseline": {
+        "status": "UNRESOLVED",
+        "reason": "NO_RULE @0",
+        "probes": 0
+      }
+    },
+    {
+      "id": "test-s13",
+      "variant": "typo",
+      "text": "97 -- Деятельность частных домашних хозяйств по предоствалению услуг для собственного пользования QA.",
+      "status": "STORED",
+      "reason": "SIMPLE_CLAUSE",
+      "probes": 6,
+      "matches_reference": true,
+      "graph_sha256": "7cd5619cfef66230590d2a5d57513319fc83c8712eef4bb7f44da74253255319",
+      "baseline": {
+        "status": "UNRESOLVED",
+        "reason": "NO_RULE @0",
+        "probes": 0
+      }
+    },
+    {
+      "id": "test-s13",
+      "variant": "no_punctuation_and_typo",
+      "text": "97 Деятельность частных домашних хозяйств по предоствалению услуг для собственного пользования QA",
+      "status": "UNRESOLVED",
+      "reason": "NO_RULE @0",
+      "probes": 1,
+      "baseline": {
+        "status": "UNRESOLVED",
+        "reason": "NO_RULE @0",
+        "probes": 0
+      }
+    },
+    {
+      "id": "test-s14",
+      "variant": "original",
+      "text": "Код КОАТУУ -- 6322682502.",
+      "status": "STORED",
+      "reason": "SIMPLE_CLAUSE",
+      "matches_original_acceptance": true,
+      "probes": 0,
+      "matches_original_probes": true,
+      "matches_reference": true,
+      "graph_sha256": "1f582ab0e18cb3a093d96cca15188ab35a2775dd11cf156bdbe1841ca1445ce5",
+      "baseline": {
+        "status": "STORED",
+        "reason": "SIMPLE_CLAUSE",
+        "probes": 0,
+        "matches_reference": true
+      }
+    },
+    {
+      "id": "test-s14",
+      "variant": "no_punctuation",
+      "text": "Код КОАТУУ 6322682502",
+      "status": "UNRESOLVED",
+      "reason": "NO_RULE @4",
+      "probes": 0,
+      "baseline": {
+        "status": "UNRESOLVED",
+        "reason": "NO_RULE @4",
+        "probes": 0
+      }
+    },
+    {
+      "id": "test-s14",
+      "variant": "typo",
+      "text": "Код КОАТУ -- 6322682502.",
+      "status": "STORED",
+      "reason": "SIMPLE_CLAUSE",
+      "probes": 0,
+      "matches_reference": false,
+      "graph_sha256": "d65de1d271befad33b436faba99fd865f65a47f11b941d1ab4b2bcbce986f17e",
+      "differences": [
+        {
+          "token": 2,
+          "field": "lemma",
+          "expected": "КОАТУУ",
+          "actual": "КОАТУ"
+        }
+      ],
+      "length_delta": 0,
+      "baseline": {
+        "status": "STORED",
+        "reason": "SIMPLE_CLAUSE",
+        "probes": 0,
+        "matches_reference": false
+      }
+    },
+    {
+      "id": "test-s14",
+      "variant": "no_punctuation_and_typo",
+      "text": "Код КОАТУ 6322682502",
+      "status": "UNRESOLVED",
+      "reason": "NO_RULE @4",
+      "probes": 0,
+      "baseline": {
+        "status": "UNRESOLVED",
+        "reason": "NO_RULE @4",
+        "probes": 0
+      }
+    },
+    {
+      "id": "test-s15",
+      "variant": "original",
+      "text": "30 апреля 1984 года Муамар Каддафи предложил одновременно вывести французские и ливийские войска из Чада.",
+      "status": "STORED",
+      "reason": "SIMPLE_CLAUSE",
+      "matches_original_acceptance": true,
+      "probes": 5,
+      "matches_original_probes": true,
+      "matches_reference": true,
+      "graph_sha256": "960935b77edb5e0718953203e27b4653d9b6ad2abfc189d2ab8e2c0fb9301e91",
+      "baseline": {
+        "status": "STORED",
+        "reason": "SIMPLE_CLAUSE",
+        "probes": 5,
+        "matches_reference": true
+      }
+    },
+    {
+      "id": "test-s15",
+      "variant": "no_punctuation",
+      "text": "30 апреля 1984 года Муамар Каддафи предложил одновременно вывести французские и ливийские войска из Чада",
+      "status": "STORED",
+      "reason": "SIMPLE_CLAUSE",
+      "probes": 5,
+      "matches_reference": true,
+      "graph_sha256": "960935b77edb5e0718953203e27b4653d9b6ad2abfc189d2ab8e2c0fb9301e91",
+      "baseline": {
+        "status": "STORED",
+        "reason": "SIMPLE_CLAUSE",
+        "probes": 5,
+        "matches_reference": true
+      }
+    },
+    {
+      "id": "test-s15",
+      "variant": "typo",
+      "text": "30 апрлея 1984 года Муамар Каддафи предложил одновременно вывести французские и ливийские войска из Чада.",
+      "status": "STORED",
+      "reason": "SIMPLE_CLAUSE",
+      "probes": 6,
+      "matches_reference": true,
+      "graph_sha256": "960935b77edb5e0718953203e27b4653d9b6ad2abfc189d2ab8e2c0fb9301e91",
+      "baseline": {
+        "status": "UNRESOLVED",
+        "reason": "NO_COMPLETE_CLAUSE",
+        "probes": 0
+      }
+    },
+    {
+      "id": "test-s15",
+      "variant": "no_punctuation_and_typo",
+      "text": "30 апрлея 1984 года Муамар Каддафи предложил одновременно вывести французские и ливийские войска из Чада",
+      "status": "STORED",
+      "reason": "SIMPLE_CLAUSE",
+      "probes": 6,
+      "matches_reference": true,
+      "graph_sha256": "960935b77edb5e0718953203e27b4653d9b6ad2abfc189d2ab8e2c0fb9301e91",
+      "baseline": {
+        "status": "UNRESOLVED",
+        "reason": "NO_COMPLETE_CLAUSE",
+        "probes": 0
+      }
+    },
+    {
+      "id": "test-s16",
+      "variant": "original",
+      "text": "Для возобновления деятельности аэропорта необходим капитальный ремонт существующей и строительство современной инфраструктуры аэропорта Орёл -- Южный, сделав его привлекательным для базирования операторов авиаперевозок.",
+      "status": "STORED",
+      "reason": "SIMPLE_CLAUSE",
+      "matches_original_acceptance": true,
+      "probes": 7,
+      "matches_original_probes": true,
+      "matches_reference": true,
+      "graph_sha256": "9df71e6f95455a9df64dd4e8860a4ee33597508af2e4a0c57aba034e310c2ef1",
+      "baseline": {
+        "status": "STORED",
+        "reason": "SIMPLE_CLAUSE",
+        "probes": 7,
+        "matches_reference": true
+      }
+    },
+    {
+      "id": "test-s16",
+      "variant": "no_punctuation",
+      "text": "Для возобновления деятельности аэропорта необходим капитальный ремонт существующей и строительство современной инфраструктуры аэропорта Орёл Южный сделав его привлекательным для базирования операторов авиаперевозок",
+      "status": "UNRESOLVED",
+      "reason": "MODIFIER_BUDGET",
+      "probes": 0,
+      "baseline": {
+        "status": "UNRESOLVED",
+        "reason": "MODIFIER_BUDGET",
+        "probes": 0
+      }
+    },
+    {
+      "id": "test-s16",
+      "variant": "typo",
+      "text": "Для возобновления деятельности аэропорта необходим капитальный ремнот существующей и строительство современной инфраструктуры аэропорта Орёл -- Южный, сделав его привлекательным для базирования операторов авиаперевозок.",
+      "status": "STORED",
+      "reason": "SIMPLE_CLAUSE",
+      "probes": 8,
+      "matches_reference": true,
+      "graph_sha256": "9df71e6f95455a9df64dd4e8860a4ee33597508af2e4a0c57aba034e310c2ef1",
+      "baseline": {
+        "status": "UNRESOLVED",
+        "reason": "MODIFIER_BUDGET",
+        "probes": 0
+      }
+    },
+    {
+      "id": "test-s16",
+      "variant": "no_punctuation_and_typo",
+      "text": "Для возобновления деятельности аэропорта необходим капитальный ремнот существующей и строительство современной инфраструктуры аэропорта Орёл Южный сделав его привлекательным для базирования операторов авиаперевозок",
+      "status": "UNRESOLVED",
+      "reason": "MODIFIER_BUDGET",
+      "probes": 1,
+      "baseline": {
+        "status": "UNRESOLVED",
+        "reason": "MODIFIER_BUDGET",
+        "probes": 0
+      }
+    },
+    {
+      "id": "test-s17",
+      "variant": "original",
+      "text": "Хан Золотой Орды Улу-Мухаммед поддерживал Свидригайло и неоднократно посылал ему на помощь татарские войска, но последний заключил союз с Сайид Ахмадом, внуком Тохтамыша и соперником Улу-Мухаммеда.",
+      "status": "STORED",
+      "reason": "COMPLEX_CLAUSE",
+      "matches_original_acceptance": true,
+      "probes": 10,
+      "matches_original_probes": true,
+      "matches_reference": true,
+      "graph_sha256": "209a667ccbcf9db30c3f0952cd2093235556bf3160f67ab54f7cb8f74c115f83",
+      "baseline": {
+        "status": "STORED",
+        "reason": "COMPLEX_CLAUSE",
+        "probes": 10,
+        "matches_reference": true
+      }
+    },
+    {
+      "id": "test-s17",
+      "variant": "no_punctuation",
+      "text": "Хан Золотой Орды Улу-Мухаммед поддерживал Свидригайло и неоднократно посылал ему на помощь татарские войска но последний заключил союз с Сайид Ахмадом внуком Тохтамыша и соперником Улу-Мухаммеда",
+      "status": "UNRESOLVED",
+      "reason": "NO_RULE @17",
+      "probes": 2,
+      "baseline": {
+        "status": "UNRESOLVED",
+        "reason": "NO_RULE @17",
+        "probes": 0
+      }
+    },
+    {
+      "id": "test-s17",
+      "variant": "typo",
+      "text": "Хан Золотой Орды Улу-Мухаммед поддерживал Свидригайло и неоднократно посыллал ему на помощь татарские войска, но последний заключил союз с Сайид Ахмадом, внуком Тохтамыша и соперником Улу-Мухаммеда.",
+      "status": "STORED",
+      "reason": "COMPLEX_CLAUSE",
+      "probes": 11,
+      "matches_reference": true,
+      "graph_sha256": "209a667ccbcf9db30c3f0952cd2093235556bf3160f67ab54f7cb8f74c115f83",
+      "baseline": {
+        "status": "UNRESOLVED",
+        "reason": "NO_RULE @17",
+        "probes": 0
+      }
+    },
+    {
+      "id": "test-s17",
+      "variant": "no_punctuation_and_typo",
+      "text": "Хан Золотой Орды Улу-Мухаммед поддерживал Свидригайло и неоднократно посыллал ему на помощь татарские войска но последний заключил союз с Сайид Ахмадом внуком Тохтамыша и соперником Улу-Мухаммеда",
+      "status": "UNRESOLVED",
+      "reason": "NO_RULE @17",
+      "probes": 3,
+      "baseline": {
+        "status": "UNRESOLVED",
+        "reason": "NO_RULE @17",
+        "probes": 0
+      }
+    },
+    {
+      "id": "test-s18",
+      "variant": "original",
+      "text": "Его описание дьявола (белый мужчина с пустыми глазами и низким голосом, ходит со своей охотничьей собакой) подходит к облику шерифа, который преследует бывших каторжников.",
+      "status": "STORED",
+      "reason": "COMPLEX_CLAUSE",
+      "matches_original_acceptance": true,
+      "probes": 3,
+      "matches_original_probes": true,
+      "matches_reference": true,
+      "graph_sha256": "2ce3f027ce003a506587a6afdedba0307fa887ee95780b40f1007df98116b85c",
+      "baseline": {
+        "status": "STORED",
+        "reason": "COMPLEX_CLAUSE",
+        "probes": 3,
+        "matches_reference": true
+      }
+    },
+    {
+      "id": "test-s18",
+      "variant": "no_punctuation",
+      "text": "Его описание дьявола белый мужчина с пустыми глазами и низким голосом ходит со своей охотничьей собакой подходит к облику шерифа который преследует бывших каторжников",
+      "status": "UNRESOLVED",
+      "reason": "NO_PREFIX @13",
+      "probes": 0,
+      "baseline": {
+        "status": "UNRESOLVED",
+        "reason": "NO_PREFIX @13",
+        "probes": 0
+      }
+    },
+    {
+      "id": "test-s18",
+      "variant": "typo",
+      "text": "Его описание дьявола (белый мужчина с пустыми глазми и низким голосом, ходит со своей охотничьей собакой) подходит к облику шерифа, который преследует бывших каторжников.",
+      "status": "STORED",
+      "reason": "COMPLEX_CLAUSE",
+      "probes": 4,
+      "matches_reference": true,
+      "graph_sha256": "2ce3f027ce003a506587a6afdedba0307fa887ee95780b40f1007df98116b85c",
+      "baseline": {
+        "status": "UNRESOLVED",
+        "reason": "NO_COMPLETE_CLAUSE",
+        "probes": 0
+      }
+    },
+    {
+      "id": "test-s18",
+      "variant": "no_punctuation_and_typo",
+      "text": "Его описание дьявола белый мужчина с пустыми глазми и низким голосом ходит со своей охотничьей собакой подходит к облику шерифа который преследует бывших каторжников",
+      "status": "UNRESOLVED",
+      "reason": "NO_PREFIX @13",
+      "probes": 1,
+      "baseline": {
+        "status": "UNRESOLVED",
+        "reason": "NO_PREFIX @13",
+        "probes": 0
+      }
+    },
+    {
+      "id": "test-s19",
+      "variant": "original",
+      "text": "И в то же время малыш должен как будто идти к папе, к кораблю.",
+      "status": "STORED",
+      "reason": "SIMPLE_CLAUSE",
+      "matches_original_acceptance": true,
+      "probes": 2,
+      "matches_original_probes": true,
+      "matches_reference": true,
+      "graph_sha256": "e7e0e9a55e0ecee4def219772b69cdda022af6e14eb690ced63998288495d006",
+      "baseline": {
+        "status": "STORED",
+        "reason": "SIMPLE_CLAUSE",
+        "probes": 2,
+        "matches_reference": true
+      }
+    },
+    {
+      "id": "test-s19",
+      "variant": "no_punctuation",
+      "text": "И в то же время малыш должен как будто идти к папе к кораблю",
+      "status": "STORED",
+      "reason": "SIMPLE_CLAUSE",
+      "probes": 3,
+      "matches_reference": true,
+      "graph_sha256": "e7e0e9a55e0ecee4def219772b69cdda022af6e14eb690ced63998288495d006",
+      "baseline": {
+        "status": "STORED",
+        "reason": "SIMPLE_CLAUSE",
+        "probes": 3,
+        "matches_reference": false
+      }
+    },
+    {
+      "id": "test-s19",
+      "variant": "typo",
+      "text": "И в то же время малшы должен как будто идти к папе, к кораблю.",
+      "status": "STORED",
+      "reason": "SIMPLE_CLAUSE",
+      "probes": 3,
+      "matches_reference": true,
+      "graph_sha256": "e7e0e9a55e0ecee4def219772b69cdda022af6e14eb690ced63998288495d006",
+      "baseline": {
+        "status": "UNRESOLVED",
+        "reason": "NO_PREFIX @0",
+        "probes": 0
+      }
+    },
+    {
+      "id": "test-s19",
+      "variant": "no_punctuation_and_typo",
+      "text": "И в то же время малшы должен как будто идти к папе к кораблю",
+      "status": "STORED",
+      "reason": "SIMPLE_CLAUSE",
+      "probes": 4,
+      "matches_reference": true,
+      "graph_sha256": "e7e0e9a55e0ecee4def219772b69cdda022af6e14eb690ced63998288495d006",
+      "baseline": {
+        "status": "UNRESOLVED",
+        "reason": "NO_PREFIX @0",
+        "probes": 0
+      }
+    },
+    {
+      "id": "test-s20",
+      "variant": "original",
+      "text": "На выборах в Европейский парламент 2009 года партия получила 769125 голосов (17%) и 4 места из 25 (в настоящее время -- 5).",
+      "status": "STORED",
+      "reason": "SIMPLE_CLAUSE",
+      "matches_original_acceptance": true,
+      "probes": 4,
+      "matches_original_probes": true,
+      "matches_reference": true,
+      "graph_sha256": "3a60d7e3106cccb903a3ad81fe00fd059534d64b5e754d1e6120458c9331836d",
+      "baseline": {
+        "status": "STORED",
+        "reason": "SIMPLE_CLAUSE",
+        "probes": 4,
+        "matches_reference": true
+      }
+    },
+    {
+      "id": "test-s20",
+      "variant": "no_punctuation",
+      "text": "На выборах в Европейский парламент 2009 года партия получила 769125 голосов 17% и 4 места из 25 в настоящее время 5",
+      "status": "UNRESOLVED",
+      "reason": "QUANTITY_BUDGET",
+      "probes": 0,
+      "baseline": {
+        "status": "UNRESOLVED",
+        "reason": "QUANTITY_BUDGET",
+        "probes": 0
+      }
+    },
+    {
+      "id": "test-s20",
+      "variant": "typo",
+      "text": "На выборах в Европейский парламент 2009 года партия получла 769125 голосов (17%) и 4 места из 25 (в настоящее время -- 5).",
+      "status": "STORED",
+      "reason": "SIMPLE_CLAUSE",
+      "probes": 5,
+      "matches_reference": true,
+      "graph_sha256": "3a60d7e3106cccb903a3ad81fe00fd059534d64b5e754d1e6120458c9331836d",
+      "baseline": {
+        "status": "UNRESOLVED",
+        "reason": "NO_COMPLETE_CLAUSE",
+        "probes": 0
+      }
+    },
+    {
+      "id": "test-s20",
+      "variant": "no_punctuation_and_typo",
+      "text": "На выборах в Европейский парламент 2009 года партия получла 769125 голосов 17% и 4 места из 25 в настоящее время 5",
+      "status": "UNRESOLVED",
+      "reason": "QUANTITY_BUDGET",
+      "probes": 1,
+      "baseline": {
+        "status": "UNRESOLVED",
+        "reason": "QUANTITY_BUDGET",
+        "probes": 0
+      }
+    },
+    {
+      "id": "test-s21",
+      "variant": "original",
+      "text": "Массауа была укреплена, кроме того, во многих пунктах от Арафали до Кассалы были возведены форты, что вызвало рассредоточение итальянских сил.",
+      "status": "STORED",
+      "reason": "COMPLEX_CLAUSE",
+      "matches_original_acceptance": true,
+      "probes": 6,
+      "matches_original_probes": true,
+      "matches_reference": true,
+      "graph_sha256": "8d3bff1a876c32f890dd0baac0590c565d4531ba4fef646dbf5d7afccbe1e9c1",
+      "baseline": {
+        "status": "STORED",
+        "reason": "COMPLEX_CLAUSE",
+        "probes": 6,
+        "matches_reference": true
+      }
+    },
+    {
+      "id": "test-s21",
+      "variant": "no_punctuation",
+      "text": "Массауа была укреплена кроме того во многих пунктах от Арафали до Кассалы были возведены форты что вызвало рассредоточение итальянских сил",
+      "status": "UNRESOLVED",
+      "reason": "NO_RULE @0",
+      "probes": 2,
+      "baseline": {
+        "status": "UNRESOLVED",
+        "reason": "NO_RULE @0",
+        "probes": 0
+      }
+    },
+    {
+      "id": "test-s21",
+      "variant": "typo",
+      "text": "Массауа была укреплена, кроме того, во многих пунктах от Арафали до Кассалы были возведены фроты, что вызвало рассредоточение итальянских сил.",
+      "status": "STORED",
+      "reason": "COMPLEX_CLAUSE",
+      "probes": 7,
+      "matches_reference": true,
+      "graph_sha256": "8d3bff1a876c32f890dd0baac0590c565d4531ba4fef646dbf5d7afccbe1e9c1",
+      "baseline": {
+        "status": "UNRESOLVED",
+        "reason": "NO_RULE @0",
+        "probes": 0
+      }
+    },
+    {
+      "id": "test-s21",
+      "variant": "no_punctuation_and_typo",
+      "text": "Массауа была укреплена кроме того во многих пунктах от Арафали до Кассалы были возведены фроты что вызвало рассредоточение итальянских сил",
+      "status": "UNRESOLVED",
+      "reason": "NO_RULE @0",
+      "probes": 3,
+      "baseline": {
+        "status": "UNRESOLVED",
+        "reason": "NO_RULE @0",
+        "probes": 0
+      }
+    }
+  ]
+}
