@@ -149,3 +149,15 @@ def test_prefix_opens_and_extends_in_reading_order():
         assert (first.kind, second.kind) == kinds
         assert first.earlier_candidates == () and second.earlier_candidates == (first.start,)
         assert first.start < second.start
+
+
+def test_comma_inside_case_government_keeps_personal_reference():
+    core = AHCore()
+    request = submit(core, 'Помоги, тому, кто упал.', choose('Помоги, тому'))
+    assert request.status == 'DIRECTIVE' and request.observation_ref is None
+    record = submit(core, 'Иван помог, тому, кто упал.', choose('помог, тому'))
+    _, rows = stored(core, record)
+    marker = next(w for w in rows if w['surface'] == 'кто')
+    anchor = rows[marker['antecedent']]
+    assert anchor['surface'] == 'тому' and anchor['case'] == 'datv'
+    assert rows[marker['head']]['assertion_status'] == 'restrictive'
