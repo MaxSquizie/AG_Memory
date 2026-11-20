@@ -92,3 +92,10 @@ def test_partial_count_questions_keep_the_condition_and_original_occurrences(tmp
     assert ask('Сколько Иван передаст книг сёстрам если Мария придёт?').status == 'UNKNOWN'
     assert ask('Сколько Иван передаст книг трём сёстрам если Мария придёт завтра?').status == 'UNKNOWN'
     assert journal.read_global_head() == 4
+
+
+def test_quantity_answer_preserves_bound_on_symbolic_unit():
+    core = AHCore()
+    assert submit(core, 'Потеряно до 30 % урожая.').status == 'STORED'
+    assert submit(core, 'Сколько процентов урожая потеряно?').text == 'до 30'
+    assert submit(core, 'Потеряно 30 процентов урожая?').status == 'UNKNOWN'

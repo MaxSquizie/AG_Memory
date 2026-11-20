@@ -272,6 +272,13 @@ def partitions(trees, tokens, text):
 
     for i in range(len(tokens)):
         roles = {tree[i].role for tree in trees}
+        if roles == {'clause_adverbial'}:
+            heads = [tree[i].head for tree in trees]
+            if len(set(heads)) > 1 and all(tree[i].scope == 'cause' for tree in trees):
+                options = {j: _span_label(tokens, j) for j in sorted(set(heads))}
+                focus = _span_label(tokens, i)
+                question = f'Какое действие объясняется причиной, названной в части со словом «{focus}»?'
+                yield Probe(question, tuple(options.values()), text), [options[j] for j in heads]
         if roles == {'possessive', 'genitive_modifier'}:
             heads = [tree[i].head for tree in trees]
             if set(heads) == {i - 1, i + 1}:

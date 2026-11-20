@@ -85,14 +85,16 @@ def _markers(boundary, root, words):
     for index in range(boundary.start, stop):
         if index < boundary.marker:
             link = Link('punctuation', words[index], root, 'CL.PUNCT')
+        elif index > boundary.marker:
+            link = Link('fixed', words[index], boundary.marker, 'CL.FIXED')
         else:
-            scope = _scope(boundary) if index == boundary.marker else None
+            scope = _scope(boundary)
             link = Link('clause_marker', words[index], root, 'CL.MARK', scope=scope)
         markers.append(link)
     return tuple(markers)
 
 
-def _attachments(prefix, levels, boundary, leaf, root, words):
+def _level_attachments(prefix, levels, boundary, leaf, root, words):
     relative = boundary.relation == 'relative'
     marker_links = _markers(boundary, root, words)
     for level in range(len(levels) - 1, -1, -1):
@@ -130,6 +132,29 @@ def _attachments(prefix, levels, boundary, leaf, root, words):
                 yield tuple(joined), next_levels
         else:
             yield tuple(joined), next_levels
+
+
+def _attachments(prefix, levels, boundary, leaf, root, words):
+    for joined, domains in _level_attachments(prefix, levels, boundary, leaf, root, words):
+        yield joined, domains
+        if boundary.relation != 'advcl':
+            continue
+        host = joined[root].head
+        edge = len(prefix) - 1
+        infinitives = []
+        while edge is not None and edge != host and prefix[edge] is not None:
+            if prefix[edge].role == 'infinitive':
+                infinitives.append(edge)
+            edge = prefix[edge].head
+        if edge != host:
+            continue
+        for target in infinitives:
+            links = list(joined)
+            links[root] = replace(links[root], head=target)
+            if links[host].scope != prefix[host].scope:
+                links[target] = replace(links[target], scope=links[target].scope or links[host].scope)
+                links[host] = prefix[host]
+            yield tuple(links), domains
 
 
 def trees(tokens, local, *, budget=256):

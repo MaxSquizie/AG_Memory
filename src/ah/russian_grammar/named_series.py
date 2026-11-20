@@ -148,9 +148,11 @@ def _attachment_heads(links, start, root):
 
 
 def _designations(tokens, parse, budget):
+    from .dated_clauses import calendar_day
+
     for i in range(1, len(tokens)):
         number = tokens[i].surface
-        if not number.isdecimal():
+        if not number.isdecimal() or calendar_day(tokens, i) is not None:
             continue
         dash = tokens[i - 1].surface in DASHES
         head = i - 1 - int(dash)

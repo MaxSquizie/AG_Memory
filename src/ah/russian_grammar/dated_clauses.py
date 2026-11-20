@@ -13,20 +13,27 @@ def _months():
     return {form: int(number) for number, form in (row.split('\t') for row in rows.splitlines())}
 
 
-def full_date(tokens):
-    if len(tokens) < 5:
+def calendar_day(tokens, i):
+    if i + 3 > len(tokens):
         return None
-    day, month, year, unit = (token.surface.casefold() for token in tokens[:4])
+    day, month, year = (t.surface.casefold() for t in tokens[i:i + 3])
     number = _months().get(month)
     if not number or not day.isdecimal() or len(day) > 2 or not year.isdecimal() or len(year) != 4:
         return None
-    if not any(lemma == 'год' and tag.case == 'gent' for lemma, tag in known_forms(unit)):
-        return None
     try:
-        value = date(int(year), number, int(day))
+        return date(int(year), number, int(day))
     except ValueError:
         return None
-    return value
+
+
+def year_unit(surface):
+    return any(lemma == 'год' and tag.POS == 'NOUN' and tag.case == 'gent' for lemma, tag in known_forms(surface))
+
+
+def full_date(tokens):
+    if len(tokens) >= 5 and year_unit(tokens[3].surface):
+        return calendar_day(tokens, 0)
+    return None
 
 
 def attach(tokens, value, parse):

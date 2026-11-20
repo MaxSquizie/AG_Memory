@@ -393,6 +393,8 @@ def _nominal_parts(stored, children, head):
             elif (stored[child].get('rule') == 'NP.DET' or role in NUMBER_PARTS or role in ('name_part', 'nominal_conjunct', 'coordinator', 'numeral') or
                   (expanded or stored[j].get('counted')) and role in ('attribute', 'possessive')):
                 parts.append(child)
+    if parent is not None and stored[head]['role'] == 'numeral' and stored[head].get('quantity_modifier'):
+        parts.extend(i for i in children[parent] if stored[i]['rule'] == 'NUM.BOUND')
     return parts
 
 
@@ -432,7 +434,7 @@ def _may_deny_participation(row):
     if kind == 'indefinite':
         return row['lemma'] not in ('несколько', 'много')
     qualifier = row.get('quantity_modifier')
-    if qualifier in ('at_most', 'less_than', 'approximate', 'negative_concord'):
+    if qualifier in ('at_most', 'upper_bound', 'less_than', 'approximate', 'negative_concord'):
         return True
     try:
         lower = Fraction((row.get('quantity') or '').partition('..')[0])

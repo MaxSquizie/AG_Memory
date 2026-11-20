@@ -77,6 +77,9 @@ def _insertions(part, parse):
                 if after:
                     links[i + 1] = Link('punctuation', ',', i, 'UTT.PUNCT')
                 yield tuple(links[j] for j in range(len(part)))
+                if i == 0 and role == 'parenthetical' and 'conj' in _connectives()[0].get((lemma,), {}):
+                    links[i] = Link('coordinator', lemma, host, 'UTT.COORD')
+                    yield tuple(links[j] for j in range(len(part)))
 
 
 def _detached_pronominal_group(part, parse):
@@ -246,3 +249,15 @@ def trees(tokens, base, *, budget):
         return tuple(built)
 
     yield from parse(tokens)
+
+
+def partitions(trees, tokens, text):
+    from .parser import _span_label
+    from .probe import Probe
+
+    markers = [tree[0] for tree in trees]
+    if {link.role for link in markers} == {'coordinator', 'parenthetical'}:
+        label = _span_label(tokens, 0)
+        other = 'оговорка рассказчика'
+        question = f'Как употреблено «{label}»? Если слово связывает сообщение с предыдущим, выберите «{label}».'
+        yield Probe(question, (label, other), text), [label if link.role == 'coordinator' else other for link in markers]

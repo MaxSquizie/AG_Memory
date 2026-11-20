@@ -16,6 +16,9 @@ def entries(path):
                 continue
             if word[3] == 'PART' and head[3] in {'ADJ', 'DET'} and index == int(head[0]) + 1:
                 rows.add(('postpositive', word[1].casefold()))
+            if (word[3] == 'PART' and head[3] in {'NOUN', 'PROPN', 'PRON'}
+                    and 'Polarity=Neg' not in word[5] and index == int(head[0]) - 1):
+                rows.add(('prenominal', word[2]))
             if head[3] not in {'VERB', 'AUX'} or word[3] not in {'ADV', 'PART', 'SCONJ'}:
                 continue
             parts = [j for j, other in words.items() if other[6] == word[0] and other[7] == 'fixed']

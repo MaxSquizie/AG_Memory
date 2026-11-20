@@ -81,3 +81,41 @@ def category(rows, children, index):
         if geographic or ('nominal', wh, prep, lemma) in entries:
             return wh
     return None
+
+
+def place_partitions(trees, tokens, text):
+    from .parser import _attachment_context, _span_label
+    from .probe import Probe
+
+    for i, token in enumerate(tokens):
+        links = [tree[i] for tree in trees]
+        if any(link.role != 'governed' or link.head is None for link in links):
+            continue
+        if len({(link.lemma, link.head) for link in links}) != 1:
+            continue
+        nominal = links[0]
+        cases = {link.case for link in links}
+        if 'accs' not in cases or not cases.intersection({'loct', 'loc2'}) or not cases <= {'loct', 'loc2', 'accs'}:
+            continue
+        if not any(lemma == nominal.lemma and {'Geox', 'Fixd'} <= tag.grammemes
+                   for lemma, tag in known_forms(token.surface)):
+            continue
+        prep = nominal.head
+        prepositions = {(tree[prep].lemma, tree[prep].head) for tree in trees if tree[prep].role == 'preposition'}
+        if len(prepositions) != 1 or any(tree[prep].role != 'preposition' for tree in trees):
+            continue
+        form, host = prepositions.pop()
+        meanings = {case: SPATIAL.get((form, case)) for case in cases}
+        if host is None or set(meanings.values()) != {'где', 'куда'}:
+            continue
+        entries, _ = _lexicon()
+        if not all(any(('governor', wh, form, tree[host].lemma) in entries for wh in meanings.values())
+                   for tree in trees):
+            continue
+        phrase = _span_label(tokens, prep, i + 1)
+        verb = _span_label(tokens, host)
+        context = _attachment_context(text, tokens, trees, [host], prep, i + 1)
+        question = (f'На какой вопрос отвечает сочетание «{phrase}» при слове «{verb}»? '
+                    '«Где» указывает место действия, «куда» — его направление.')
+        labels = {wh: f'{wh} — {phrase}' for wh in ('где', 'куда')}
+        yield Probe(question, tuple(labels.values()), context), [labels[meanings[link.case]] for link in links]

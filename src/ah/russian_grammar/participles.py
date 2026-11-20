@@ -22,7 +22,7 @@ def _hosts(outer, tree, start, end):
     for after, index in ((True, left - 1), (False, left)):
         while 0 <= index < len(tree):
             link = tree[index]
-            if link.role in _NOMINAL:
+            if link.role in _NOMINAL or (link.rule == 'V2' and link.morphology and link.morphology.pos == 'NOUN'):
                 yield index, after
                 if not after:
                     break

@@ -24,3 +24,15 @@ def test_calendar_ordinal_and_population_have_distinct_numeric_roles():
     reply = submit(core, 'Иван ушёл в 1 году', lambda probe: '?')
     assert reply.status == 'AMBIGUOUS'
     assert {tree[3].quantity_kind for tree in reply.analysis.analyses} == {'ordinal', 'cardinal'}
+
+
+def test_date_after_transitive_verb_can_be_the_object_or_the_time():
+    text = 'Иван выбрал 12 июня 2020 года.'
+    for answer, expected in [('12 июня 2020 года', 'object'), ('выбрал', 'temporal')]:
+        core = AHCore()
+        result = submit(core, text, lambda probe: answer)
+        assert result.status == 'STORED'
+        observation = core.store.get_element(Domain.H, result.observation_ref)
+        rows = [core.store.get_element(Domain.H, member.uid).meta for member in observation.members]
+        assert rows[2]['role'] == expected
+        assert rows[2]['head'] == 1

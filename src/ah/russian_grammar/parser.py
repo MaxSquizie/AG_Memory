@@ -305,7 +305,10 @@ def _clause_context(text, tokens, trees, focus, anchors):
 
 def _qualification_probe(tokens, start, end, host, context):
     phrase = _span_label(tokens, start, end).replace(' ,', ',')
-    question = f'Какое сочетание передаёт оговорку к самому сообщению о действии «{_span_label(tokens, host)}»?'
+    question = (f'Какое сочетание передаёт оговорку к самому сообщению о действии «{_span_label(tokens, host)}»? '
+                'Выберите сочетание, если рассказчик указывает, откуда взяты сведения, насколько он в них '
+                'уверен или с чьей точки зрения говорит. Если указано, когда, где или при каких обстоятельствах '
+                'произошло само событие, выберите «нет такого сочетания».')
     return Probe(question, (phrase, 'нет такого сочетания'), context)
 
 
@@ -320,6 +323,16 @@ def _partitions(analyses, tokens, text):
 
     from . import clause_series, finite_insertions, nominal_definitions, nominal_dimensions, nominal_mentions, nominal_predicates, temporal_groups
     from .morphology import NOMINAL_ROLES
+    from . import adjuncts, attributive_series, calendar_regions, measured_series, mixed_predications, predicate_lists, utterances
+    from .short_participles import voice_partitions
+    yield from voice_partitions(analyses, tokens, text)
+    yield from adjuncts.place_partitions(analyses, tokens, text)
+    yield from attributive_series.partitions(analyses, tokens, text)
+    yield from utterances.partitions(analyses, tokens, text)
+    yield from calendar_regions.partitions(analyses, tokens, text)
+    yield from measured_series.partitions(analyses, tokens, text)
+    yield from predicate_lists.partitions(analyses, tokens, text)
+    yield from mixed_predications.partitions(analyses, tokens, text)
     yield from nominal_dimensions.partitions(analyses, tokens, text)
     yield from finite_insertions.partitions(analyses, tokens, text)
     yield from clause_series.partitions(analyses, tokens, text)
@@ -511,7 +524,8 @@ def _partitions(analyses, tokens, text):
                     limits = [group_extent(a, i, external_modifier=True) for a in analyses]
                     if None not in limits:
                         end = min(limits)
-                phrase = _span_label(tokens, i, end).replace(' ,', ',')
+                phrase = (_span_label(tokens, i, end).replace(' ,', ',') if _label_extent(tokens, i, end) != (i, end)
+                          else ' '.join(text[tokens[i].start:tokens[end - 1].end].split()))
                 context = _attachment_context(text, tokens, analyses, hosts, i, end)
                 question = (f'Какое действие уточняет обстоятельство «{phrase}»?' if has_focus else
                             f'От какого из предложенных слов в этом месте текста задаётся вопрос к сочетанию «{phrase}»? '
@@ -1242,6 +1256,7 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
     analyses = tuple(structures.values())
     from .converb_control import needs_confirmation
     confirmed_names = set()
+    confirmed_options = set()
     confirmed_focus = []
     if not analyses:
         return Result(text, 'UNRESOLVED', next(iter(failures), 'NO_COMPLETE_CLAUSE'), tokens, (), tuple(probes), tuple(steps))
@@ -1263,6 +1278,10 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
             candidate = analyses[0][unconfirmed]
             regional_probe = sentence_regions.confirmation(words, analyses[0], unconfirmed, text)
             if regional_probe is not None:
+                confirmed = (regional_probe.question, regional_probe.context, regional_probe.options[0])
+                if confirmed in confirmed_options and text.count(regional_probe.context) == 1:
+                    confirmed_names.add(unconfirmed)
+                    continue
                 probe = regional_probe
                 keys = [probe.options[0]]
             elif candidate.rule == 'ELL.NOMINAL':
@@ -1298,6 +1317,7 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
         selected, stopped = select(probe, before, analyses)
         if stopped is not None:
             return stopped
+        confirmed_options.add((probe.question, probe.context, selected))
         if probe.focus_choices:
             confirmed_focus.append(probe.focus_choices[probe.options.index(selected)])
         analyses = tuple(a for a, key in zip(analyses, keys) if key == selected)

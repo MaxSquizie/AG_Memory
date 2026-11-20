@@ -144,3 +144,37 @@ def trees(tokens, base, *, budget=256):
                             if len(seen) > budget:
                                 raise AnalysisBudgetExceeded('PASSIVE_BUDGET')
                             yield expanded
+
+
+def voice_partitions(analyses, tokens, text):
+    from .parser import _clause_context, _span_label
+    from .probe import Probe
+    from .rules import dictionary
+
+    for i in range(len(tokens)):
+        links = [tree[i] for tree in analyses]
+        rules = {link.rule for link in links}
+        if rules != {'V2', 'V2.PASS'}:
+            continue
+        if any(link.morphology is None or link.morphology.pos not in ('ADJS', 'PRTS') for link in links):
+            continue
+        passive = [link for link in links if link.rule == 'V2.PASS']
+        lemmas = {link.lemma for link in passive}
+        if len(lemmas) != 1:
+            continue
+        lemma, = lemmas
+        tenses = {link.morphology.tense for link in passive}
+        tense = tenses.pop() if len(tenses) == 1 else None
+        paraphrase = f'речь идёт о действии «{lemma}»'
+        if tense in ('past', 'pres', 'futr'):
+            features = {tense, 'plur'} if tense == 'past' else {tense, 'plur', '3per'}
+            active = {form.word for reading in dictionary().parse(lemma) if reading.tag.POS == 'INFN'
+                      and (form := reading.inflect(features)) is not None and form.tag.POS == 'VERB'}
+            if len(active) == 1:
+                paraphrase = f'сообщается, что кого-то или что-то {active.pop()}'
+        focus = _span_label(tokens, i)
+        state = 'только свойство или состояние'
+        question = (f'Как понимать «{focus}» в этом предложении? Если {paraphrase}, выберите «{focus}». '
+                    f'Если описано только свойство или состояние, выберите «{state}».')
+        probe = Probe(question, (focus, state), _clause_context(text, tokens, analyses, i, ()))
+        yield probe, [focus if link.rule == 'V2.PASS' else state for link in links]

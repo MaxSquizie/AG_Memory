@@ -1,0 +1,669 @@
+{
+ "corpus_sha256": "fa3642959614db06fdab2d7464af8a0873c70d0a2b5758758231d0ef725821ea",
+ "seconds_per_stage": 30,
+ "cases": [
+  {
+   "id": "test-s52",
+   "variant": "original",
+   "text": "Однако в конце 2008 года ``Динамо&#39;&#39; прекратило существование.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "AMBIGUOUS",
+   "reason": "OPEN_CHOICE",
+   "empty": true,
+   "exact": false,
+   "calls": [
+    {
+     "question": "Какое слово служит подлежащим при «прекратило»?",
+     "options": [
+      "существование",
+      "подлежащее не названо"
+     ],
+     "answer": "подлежащее не названо",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какие слова вместе образуют название?",
+     "options": [
+      "Динамо"
+     ],
+     "answer": "?",
+     "source": "unanswered"
+    }
+   ]
+  },
+  {
+   "id": "test-s52",
+   "variant": "no_punctuation",
+   "text": "Однако в конце 2008 года Динамо прекратило существование",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": false,
+   "incorrect_heads": [],
+   "role_scope_errors": [
+    "прекратило: expected assertion_status in ['asserted']"
+   ],
+   "graph_sha256": "a91334921827fd1f838faa57136c0c15acacdcab00562d519acee65da860b712",
+   "calls": [
+    {
+     "question": "Какое слово служит подлежащим при «прекратило»?",
+     "options": [
+      "2008",
+      "Динамо",
+      "существование",
+      "подлежащее не названо"
+     ],
+     "answer": "Динамо",
+     "source": "reference tree"
+    },
+    {
+     "question": "Как употреблено «Динамо»? Если это собственное имя или название, выберите «Динамо».",
+     "options": [
+      "Динамо",
+      "нарицательное существительное"
+     ],
+     "answer": "Динамо",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое сочетание передаёт оговорку к самому сообщению о действии «прекратило»?",
+     "options": [
+      "в конце 2008 года",
+      "нет такого сочетания"
+     ],
+     "answer": "нет такого сочетания",
+     "source": "control reading"
+    }
+   ],
+   "same_as_original": null
+  },
+  {
+   "id": "test-s52",
+   "variant": "extra_comma",
+   "text": "Однако в конце 2008, года ``Динамо&#39;&#39; прекратило существование.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "AMBIGUOUS",
+   "reason": "OPEN_CHOICE",
+   "empty": true,
+   "exact": false,
+   "calls": [
+    {
+     "question": "В каком сочетании слова связаны напрямую, несмотря на запятую между ними?",
+     "options": [
+      "2008, года",
+      "сохранить все запятые"
+     ],
+     "answer": "2008, года",
+     "source": "UD"
+    },
+    {
+     "question": "Какое слово служит подлежащим при «прекратило»?",
+     "options": [
+      "существование",
+      "подлежащее не названо"
+     ],
+     "answer": "подлежащее не названо",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какие слова вместе образуют название?",
+     "options": [
+      "Динамо"
+     ],
+     "answer": "?",
+     "source": "unanswered"
+    }
+   ]
+  },
+  {
+   "id": "test-s53",
+   "variant": "original",
+   "text": "Габриэль Ханукашвили родился 17 марта 1924 года в Тбилиси в традиционной еврейской семье.",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s53",
+   "variant": "no_punctuation",
+   "text": "Габриэль Ханукашвили родился 17 марта 1924 года в Тбилиси в традиционной еврейской семье",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s53",
+   "variant": "extra_comma",
+   "text": "Габриэль Ханукашвили родился 17 марта 1924, года в Тбилиси в традиционной еврейской семье.",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_RULE @29",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s54",
+   "variant": "original",
+   "text": "Здесь производится до 50 % всех индийских легковых автомобилей и мотоциклов, 30 % всех индийских холодильников, 25 % тракторов, велосипедов, сантехники и бумаги, 20 % научных приборов.",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "QUANTITY_BUDGET",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s54",
+   "variant": "no_punctuation",
+   "text": "Здесь производится до 50 % всех индийских легковых автомобилей и мотоциклов 30 % всех индийских холодильников 25 % тракторов велосипедов сантехники и бумаги 20 % научных приборов",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "QUANTITY_BUDGET",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s54",
+   "variant": "extra_comma",
+   "text": "Здесь производится до 50 % всех индийских легковых, автомобилей и мотоциклов, 30 % всех индийских холодильников, 25 % тракторов, велосипедов, сантехники и бумаги, 20 % научных приборов.",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "QUANTITY_BUDGET",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s55",
+   "variant": "original",
+   "text": "Подходит человек и просит его пропустить, потому что он опаздывает на встречу.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": false,
+   "incorrect_heads": [
+    [
+     "что",
+     8,
+     11
+    ],
+    [
+     "опаздывает",
+     6,
+     4
+    ]
+   ],
+   "role_scope_errors": [],
+   "graph_sha256": "b84e96f01b8937b717d69ec27778c2df2814f8c66f7f6af374ab15cf876eecd3",
+   "calls": [
+    {
+     "question": "Какое слово называет исполнителя действия «пропустить»?",
+     "options": [
+      "его",
+      "исполнитель не назван"
+     ],
+     "answer": "исполнитель не назван",
+     "source": "reference tree"
+    },
+    {
+     "question": "Copy «его» if its dictionary form is «он». Otherwise choose “no such word”.",
+     "options": [
+      "его",
+      "no such word"
+     ],
+     "answer": "его",
+     "source": "reference tree"
+    }
+   ],
+   "same_as_original": null
+  },
+  {
+   "id": "test-s55",
+   "variant": "no_punctuation",
+   "text": "Подходит человек и просит его пропустить потому что он опаздывает на встречу",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": false,
+   "incorrect_heads": [
+    [
+     "что",
+     7,
+     10
+    ],
+    [
+     "опаздывает",
+     6,
+     4
+    ]
+   ],
+   "role_scope_errors": [],
+   "graph_sha256": "b84e96f01b8937b717d69ec27778c2df2814f8c66f7f6af374ab15cf876eecd3",
+   "calls": [
+    {
+     "question": "Какое слово называет исполнителя действия «пропустить»?",
+     "options": [
+      "его",
+      "исполнитель не назван"
+     ],
+     "answer": "исполнитель не назван",
+     "source": "reference tree"
+    },
+    {
+     "question": "Copy «его» if its dictionary form is «он». Otherwise choose “no such word”.",
+     "options": [
+      "его",
+      "no such word"
+     ],
+     "answer": "его",
+     "source": "reference tree"
+    }
+   ],
+   "same_as_original": null
+  },
+  {
+   "id": "test-s55",
+   "variant": "extra_comma",
+   "text": "Подходит, человек и просит его пропустить, потому что он опаздывает на встречу.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": false,
+   "incorrect_heads": [
+    [
+     "что",
+     9,
+     12
+    ],
+    [
+     "опаздывает",
+     7,
+     5
+    ]
+   ],
+   "role_scope_errors": [],
+   "graph_sha256": "b84e96f01b8937b717d69ec27778c2df2814f8c66f7f6af374ab15cf876eecd3",
+   "calls": [
+    {
+     "question": "В каком сочетании слова связаны напрямую, несмотря на запятую между ними?",
+     "options": [
+      "Подходит, человек",
+      "сохранить все запятые"
+     ],
+     "answer": "Подходит, человек",
+     "source": "UD"
+    },
+    {
+     "question": "Какое слово называет исполнителя действия «пропустить»?",
+     "options": [
+      "его",
+      "исполнитель не назван"
+     ],
+     "answer": "исполнитель не назван",
+     "source": "reference tree"
+    },
+    {
+     "question": "Copy «его» if its dictionary form is «он». Otherwise choose “no such word”.",
+     "options": [
+      "его",
+      "no such word"
+     ],
+     "answer": "его",
+     "source": "reference tree"
+    }
+   ],
+   "same_as_original": null
+  },
+  {
+   "id": "test-s56",
+   "variant": "original",
+   "text": "Теперь штрафоваться должны даже попытки задержки игрока соперника руками и даже попытки зацепа клюшкой.",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s56",
+   "variant": "no_punctuation",
+   "text": "Теперь штрафоваться должны даже попытки задержки игрока соперника руками и даже попытки зацепа клюшкой",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s56",
+   "variant": "extra_comma",
+   "text": "Теперь штрафоваться должны даже попытки, задержки игрока соперника руками и даже попытки зацепа клюшкой.",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s57",
+   "variant": "original",
+   "text": "На конференции были приняты совместная резолюция и тактическое решение: всем партиям действовать самостоятельно, но одновременно, что выражалось формулой ``врозь наступать и вместе бить&#39;&#39;.",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s57",
+   "variant": "no_punctuation",
+   "text": "На конференции были приняты совместная резолюция и тактическое решение всем партиям действовать самостоятельно но одновременно что выражалось формулой врозь наступать и вместе бить",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s57",
+   "variant": "extra_comma",
+   "text": "На конференции были приняты совместная, резолюция и тактическое решение: всем партиям действовать самостоятельно, но одновременно, что выражалось формулой ``врозь наступать и вместе бить&#39;&#39;.",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s58",
+   "variant": "original",
+   "text": "Чувашское книжное издательство -- республиканское государственное унитарное предприятие, выпускающее художественную, детскую, учебно-педагогическую, общественно-политическую и др. литературу на чуваш., рус., англ. языках.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": [
+    {
+     "question": "Какое написание передаёт слово «англ» в этом предложении?",
+     "options": [
+      "англ",
+      "анал",
+      "анг",
+      "анга",
+      "анге",
+      "ангел",
+      "анги",
+      "ангил",
+      "ангу",
+      "анел",
+      "анил",
+      "анул",
+      "нагл"
+     ],
+     "answer": "англ",
+     "source": "verbatim"
+    }
+   ]
+  },
+  {
+   "id": "test-s58",
+   "variant": "no_punctuation",
+   "text": "Чувашское книжное издательство республиканское государственное унитарное предприятие выпускающее художественную детскую учебно-педагогическую общественно-политическую и др литературу на чуваш рус англ языках",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": [
+    {
+     "question": "Какое написание передаёт слово «англ» в этом предложении?",
+     "options": [
+      "англ",
+      "анал",
+      "анг",
+      "анга",
+      "анге",
+      "ангел",
+      "анги",
+      "ангил",
+      "ангу",
+      "анел",
+      "анил",
+      "анул",
+      "нагл"
+     ],
+     "answer": "англ",
+     "source": "verbatim"
+    }
+   ]
+  },
+  {
+   "id": "test-s58",
+   "variant": "extra_comma",
+   "text": "Чувашское книжное, издательство -- республиканское государственное унитарное предприятие, выпускающее художественную, детскую, учебно-педагогическую, общественно-политическую и др. литературу на чуваш., рус., англ. языках.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": [
+    {
+     "question": "Какое написание передаёт слово «англ» в этом предложении?",
+     "options": [
+      "англ",
+      "анал",
+      "анг",
+      "анга",
+      "анге",
+      "ангел",
+      "анги",
+      "ангил",
+      "ангу",
+      "анел",
+      "анил",
+      "анул",
+      "нагл"
+     ],
+     "answer": "англ",
+     "source": "verbatim"
+    }
+   ]
+  },
+  {
+   "id": "test-s59",
+   "variant": "original",
+   "text": "Цветки сиреневые с жёлтым горлом.",
+   "abstention": "STORED",
+   "abstention_empty": false,
+   "abstention_exact": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "1248debd53b33d8a7da9b4d78cb2c0b5b0c8a0f467d2e1d6ef5dd3ae1ed20d3c",
+   "calls": [],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s59",
+   "variant": "no_punctuation",
+   "text": "Цветки сиреневые с жёлтым горлом",
+   "abstention": "STORED",
+   "abstention_empty": false,
+   "abstention_exact": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "1248debd53b33d8a7da9b4d78cb2c0b5b0c8a0f467d2e1d6ef5dd3ae1ed20d3c",
+   "calls": [],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s59",
+   "variant": "extra_comma",
+   "text": "Цветки сиреневые с жёлтым, горлом.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "1248debd53b33d8a7da9b4d78cb2c0b5b0c8a0f467d2e1d6ef5dd3ae1ed20d3c",
+   "calls": [
+    {
+     "question": "В каком сочетании слова связаны напрямую, несмотря на запятую между ними?",
+     "options": [
+      "жёлтым, горлом",
+      "сохранить все запятые"
+     ],
+     "answer": "жёлтым, горлом",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s60",
+   "variant": "original",
+   "text": "По данным государственного водного реестра России относится к Камскому бассейновому округу, водохозяйственный участок реки -- Вятка от города Котельнич до водомерного поста посёлка городского типа Аркуль, речной подбассейн реки -- Вятка.",
+   "abstention": "TIME_LIMIT",
+   "status": "TIME_LIMIT",
+   "exact": false,
+   "empty": true,
+   "calls": []
+  },
+  {
+   "id": "test-s60",
+   "variant": "no_punctuation",
+   "text": "По данным государственного водного реестра России относится к Камскому бассейновому округу водохозяйственный участок реки Вятка от города Котельнич до водомерного поста посёлка городского типа Аркуль речной подбассейн реки Вятка",
+   "abstention": "TIME_LIMIT",
+   "status": "TIME_LIMIT",
+   "exact": false,
+   "empty": true,
+   "calls": []
+  },
+  {
+   "id": "test-s60",
+   "variant": "extra_comma",
+   "text": "По данным государственного водного, реестра России относится к Камскому бассейновому округу, водохозяйственный участок реки -- Вятка от города Котельнич до водомерного поста посёлка городского типа Аркуль, речной подбассейн реки -- Вятка.",
+   "abstention": "TIME_LIMIT",
+   "status": "TIME_LIMIT",
+   "exact": false,
+   "empty": true,
+   "calls": []
+  },
+  {
+   "id": "test-s61",
+   "variant": "original",
+   "text": "Вильге́льм Ште́кель (Wilhelm Stekel; 18 марта 1868, Бояны -- 25 июня 1940, Лондон) -- австрийский психиатр и композитор, любитель, один из пионеров психоанализа, изобретатель термина ``парафилия&#39;&#39;.",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s61",
+   "variant": "no_punctuation",
+   "text": "Вильге́льм Ште́кель Wilhelm Stekel 18 марта 1868 Бояны 25 июня 1940 Лондон австрийский психиатр и композитор любитель один из пионеров психоанализа изобретатель термина парафилия",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "QUANTITY_BUDGET",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  },
+  {
+   "id": "test-s61",
+   "variant": "extra_comma",
+   "text": "Вильге́льм Ште́кель (Wilhelm Stekel; 18 марта 1868, Бояны -- 25 июня 1940, Лондон) -- австрийский, психиатр и композитор, любитель, один из пионеров психоанализа, изобретатель термина ``парафилия&#39;&#39;.",
+   "abstention": "UNRESOLVED",
+   "abstention_empty": true,
+   "status": "UNRESOLVED",
+   "reason": "NO_COMPLETE_CLAUSE",
+   "empty": true,
+   "exact": false,
+   "calls": []
+  }
+ ]
+}

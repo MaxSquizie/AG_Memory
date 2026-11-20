@@ -1,0 +1,1606 @@
+{
+ "corpus_sha256": "fa3642959614db06fdab2d7464af8a0873c70d0a2b5758758231d0ef725821ea",
+ "seconds_per_stage": 30,
+ "cases": [
+  {
+   "id": "test-s52",
+   "variant": "original",
+   "text": "Однако в конце 2008 года ``Динамо&#39;&#39; прекратило существование.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "5a7856fbe11c23339470d9142b0cb5edc46374b3f631693704b2a30fdba705a3",
+   "calls": [
+    {
+     "question": "Как употреблено «Однако»? Если слово связывает сообщение с предыдущим, выберите «Однако».",
+     "options": [
+      "Однако",
+      "оговорка рассказчика"
+     ],
+     "answer": "Однако",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое слово служит подлежащим при «прекратило»?",
+     "options": [
+      "Динамо",
+      "существование",
+      "подлежащее не названо"
+     ],
+     "answer": "Динамо",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое сочетание передаёт оговорку к самому сообщению о действии «прекратило»? Выберите сочетание, если рассказчик указывает, откуда взяты сведения, насколько он в них уверен или с чьей точки зрения говорит. Если указано, когда, где или при каких обстоятельствах произошло само событие, выберите «нет такого сочетания».",
+     "options": [
+      "в конце 2008 года",
+      "нет такого сочетания"
+     ],
+     "answer": "нет такого сочетания",
+     "source": "control reading"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s52",
+   "variant": "no_punctuation",
+   "text": "Однако в конце 2008 года Динамо прекратило существование",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "5a7856fbe11c23339470d9142b0cb5edc46374b3f631693704b2a30fdba705a3",
+   "calls": [
+    {
+     "question": "Какое слово служит подлежащим при «прекратило»?",
+     "options": [
+      "Динамо",
+      "существование",
+      "подлежащее не названо"
+     ],
+     "answer": "Динамо",
+     "source": "reference tree"
+    },
+    {
+     "question": "Как употреблено «Однако»? Если слово связывает сообщение с предыдущим, выберите «Однако».",
+     "options": [
+      "Однако",
+      "оговорка рассказчика"
+     ],
+     "answer": "Однако",
+     "source": "reference tree"
+    },
+    {
+     "question": "Как употреблено «Динамо»? Если это собственное имя или название, выберите «Динамо».",
+     "options": [
+      "Динамо",
+      "нарицательное существительное"
+     ],
+     "answer": "Динамо",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое сочетание передаёт оговорку к самому сообщению о действии «прекратило»? Выберите сочетание, если рассказчик указывает, откуда взяты сведения, насколько он в них уверен или с чьей точки зрения говорит. Если указано, когда, где или при каких обстоятельствах произошло само событие, выберите «нет такого сочетания».",
+     "options": [
+      "в конце 2008 года",
+      "нет такого сочетания"
+     ],
+     "answer": "нет такого сочетания",
+     "source": "control reading"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s52",
+   "variant": "extra_comma",
+   "text": "Однако в конце 2008, года ``Динамо&#39;&#39; прекратило существование.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "5a7856fbe11c23339470d9142b0cb5edc46374b3f631693704b2a30fdba705a3",
+   "calls": [
+    {
+     "question": "В каком сочетании слова связаны напрямую, несмотря на запятую между ними?",
+     "options": [
+      "2008, года",
+      "сохранить все запятые"
+     ],
+     "answer": "2008, года",
+     "source": "UD"
+    },
+    {
+     "question": "Как употреблено «Однако»? Если слово связывает сообщение с предыдущим, выберите «Однако».",
+     "options": [
+      "Однако",
+      "оговорка рассказчика"
+     ],
+     "answer": "Однако",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое слово служит подлежащим при «прекратило»?",
+     "options": [
+      "Динамо",
+      "существование",
+      "подлежащее не названо"
+     ],
+     "answer": "Динамо",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое сочетание передаёт оговорку к самому сообщению о действии «прекратило»? Выберите сочетание, если рассказчик указывает, откуда взяты сведения, насколько он в них уверен или с чьей точки зрения говорит. Если указано, когда, где или при каких обстоятельствах произошло само событие, выберите «нет такого сочетания».",
+     "options": [
+      "в конце 2008, года",
+      "нет такого сочетания"
+     ],
+     "answer": "нет такого сочетания",
+     "source": "control reading"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s53",
+   "variant": "original",
+   "text": "Габриэль Ханукашвили родился 17 марта 1924 года в Тбилиси в традиционной еврейской семье.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "df06dc675f448d3db7c046d19a98bd822a38c0b7c636a5dd00a01f3cd7a7901a",
+   "calls": [
+    {
+     "question": "На какой вопрос отвечает сочетание «в Тбилиси» при слове «родился»? «Где» указывает место действия, «куда» — его направление.",
+     "options": [
+      "где — в Тбилиси",
+      "куда — в Тбилиси"
+     ],
+     "answer": "где — в Тбилиси",
+     "source": "reference tree"
+    },
+    {
+     "question": "От какого из предложенных слов в этом месте текста задаётся вопрос к сочетанию «в традиционной еврейской семье»? Выберите слово, с которым оно связано непосредственно.",
+     "options": [
+      "родился",
+      "Тбилиси"
+     ],
+     "answer": "родился",
+     "source": "reference tree"
+    },
+    {
+     "question": "В каком значении употреблён глагол «родился»? Если действие представлено как единое целое, выберите «родился». Для несовершенного вида выберите «несовершенный вид».",
+     "options": [
+      "родился",
+      "несовершенный вид"
+     ],
+     "answer": "родился",
+     "source": "UD"
+    },
+    {
+     "question": "Какое слово продолжает личное имя «Габриэль»?",
+     "options": [
+      "Ханукашвили"
+     ],
+     "answer": "Ханукашвили",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s53",
+   "variant": "no_punctuation",
+   "text": "Габриэль Ханукашвили родился 17 марта 1924 года в Тбилиси в традиционной еврейской семье",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "df06dc675f448d3db7c046d19a98bd822a38c0b7c636a5dd00a01f3cd7a7901a",
+   "calls": [
+    {
+     "question": "На какой вопрос отвечает сочетание «в Тбилиси» при слове «родился»? «Где» указывает место действия, «куда» — его направление.",
+     "options": [
+      "где — в Тбилиси",
+      "куда — в Тбилиси"
+     ],
+     "answer": "где — в Тбилиси",
+     "source": "reference tree"
+    },
+    {
+     "question": "От какого из предложенных слов в этом месте текста задаётся вопрос к сочетанию «в традиционной еврейской семье»? Выберите слово, с которым оно связано непосредственно.",
+     "options": [
+      "родился",
+      "Тбилиси"
+     ],
+     "answer": "родился",
+     "source": "reference tree"
+    },
+    {
+     "question": "В каком значении употреблён глагол «родился»? Если действие представлено как единое целое, выберите «родился». Для несовершенного вида выберите «несовершенный вид».",
+     "options": [
+      "родился",
+      "несовершенный вид"
+     ],
+     "answer": "родился",
+     "source": "UD"
+    },
+    {
+     "question": "Какое слово продолжает личное имя «Габриэль»?",
+     "options": [
+      "Ханукашвили"
+     ],
+     "answer": "Ханукашвили",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s53",
+   "variant": "extra_comma",
+   "text": "Габриэль Ханукашвили родился 17 марта 1924, года в Тбилиси в традиционной еврейской семье.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "df06dc675f448d3db7c046d19a98bd822a38c0b7c636a5dd00a01f3cd7a7901a",
+   "calls": [
+    {
+     "question": "В каком сочетании слова связаны напрямую, несмотря на запятую между ними?",
+     "options": [
+      "1924, года",
+      "сохранить все запятые"
+     ],
+     "answer": "1924, года",
+     "source": "UD"
+    },
+    {
+     "question": "На какой вопрос отвечает сочетание «в Тбилиси» при слове «родился»? «Где» указывает место действия, «куда» — его направление.",
+     "options": [
+      "где — в Тбилиси",
+      "куда — в Тбилиси"
+     ],
+     "answer": "где — в Тбилиси",
+     "source": "reference tree"
+    },
+    {
+     "question": "От какого из предложенных слов в этом месте текста задаётся вопрос к сочетанию «в традиционной еврейской семье»? Выберите слово, с которым оно связано непосредственно.",
+     "options": [
+      "родился",
+      "Тбилиси"
+     ],
+     "answer": "родился",
+     "source": "reference tree"
+    },
+    {
+     "question": "В каком значении употреблён глагол «родился»? Если действие представлено как единое целое, выберите «родился». Для несовершенного вида выберите «несовершенный вид».",
+     "options": [
+      "родился",
+      "несовершенный вид"
+     ],
+     "answer": "родился",
+     "source": "UD"
+    },
+    {
+     "question": "Какое слово продолжает личное имя «Габриэль»?",
+     "options": [
+      "Ханукашвили"
+     ],
+     "answer": "Ханукашвили",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s54",
+   "variant": "original",
+   "text": "Здесь производится до 50 % всех индийских легковых автомобилей и мотоциклов, 30 % всех индийских холодильников, 25 % тракторов, велосипедов, сантехники и бумаги, 20 % научных приборов.",
+   "abstention": "STORED",
+   "abstention_empty": false,
+   "abstention_exact": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "f4c23a0762972018313738498afd67242b504065af9ccf8ea3a18ce54f33e933",
+   "calls": [],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s54",
+   "variant": "no_punctuation",
+   "text": "Здесь производится до 50 % всех индийских легковых автомобилей и мотоциклов 30 % всех индийских холодильников 25 % тракторов велосипедов сантехники и бумаги 20 % научных приборов",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "f4c23a0762972018313738498afd67242b504065af9ccf8ea3a18ce54f33e933",
+   "calls": [
+    {
+     "question": "К какому слову относится «сантехники»?",
+     "options": [
+      "[%] тракторов",
+      "тракторов",
+      "велосипедов"
+     ],
+     "answer": "тракторов",
+     "source": "reference tree"
+    },
+    {
+     "question": "Как здесь связано «велосипедов» со словом «тракторов»? Если оно отвечает от него на вопрос «кого?» или «чего?», выберите всё сочетание. Если перечислены два предмета, выберите только «велосипедов».",
+     "options": [
+      "тракторов велосипедов",
+      "велосипедов"
+     ],
+     "answer": "велосипедов",
+     "source": "reference tree"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s54",
+   "variant": "extra_comma",
+   "text": "Здесь производится до 50 % всех индийских легковых, автомобилей и мотоциклов, 30 % всех индийских холодильников, 25 % тракторов, велосипедов, сантехники и бумаги, 20 % научных приборов.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "f4c23a0762972018313738498afd67242b504065af9ccf8ea3a18ce54f33e933",
+   "calls": [
+    {
+     "question": "В каком сочетании слова связаны напрямую, несмотря на запятую между ними?",
+     "options": [
+      "легковых, автомобилей",
+      "сохранить все запятые"
+     ],
+     "answer": "легковых, автомобилей",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s55",
+   "variant": "original",
+   "text": "Подходит человек и просит его пропустить, потому что он опаздывает на встречу.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "14907cc3a7fca6f91bb2d354cb80ded22ba7b27fdc230a59c6f48ee3d8a7e7a6",
+   "calls": [
+    {
+     "question": "Какое действие объясняется причиной, названной в части со словом «опаздывает»?",
+     "options": [
+      "просит",
+      "пропустить"
+     ],
+     "answer": "пропустить",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое слово называет исполнителя действия «пропустить»?",
+     "options": [
+      "его",
+      "исполнитель не назван"
+     ],
+     "answer": "исполнитель не назван",
+     "source": "reference tree"
+    },
+    {
+     "question": "Copy «его» if its dictionary form is «он». Otherwise choose “no such word”.",
+     "options": [
+      "его",
+      "no such word"
+     ],
+     "answer": "его",
+     "source": "reference tree"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s55",
+   "variant": "no_punctuation",
+   "text": "Подходит человек и просит его пропустить потому что он опаздывает на встречу",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "14907cc3a7fca6f91bb2d354cb80ded22ba7b27fdc230a59c6f48ee3d8a7e7a6",
+   "calls": [
+    {
+     "question": "Какое действие объясняется причиной, названной в части со словом «опаздывает»?",
+     "options": [
+      "просит",
+      "пропустить"
+     ],
+     "answer": "пропустить",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое слово называет исполнителя действия «пропустить»?",
+     "options": [
+      "его",
+      "исполнитель не назван"
+     ],
+     "answer": "исполнитель не назван",
+     "source": "reference tree"
+    },
+    {
+     "question": "Copy «его» if its dictionary form is «он». Otherwise choose “no such word”.",
+     "options": [
+      "его",
+      "no such word"
+     ],
+     "answer": "его",
+     "source": "reference tree"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s55",
+   "variant": "extra_comma",
+   "text": "Подходит, человек и просит его пропустить, потому что он опаздывает на встречу.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "14907cc3a7fca6f91bb2d354cb80ded22ba7b27fdc230a59c6f48ee3d8a7e7a6",
+   "calls": [
+    {
+     "question": "В каком сочетании слова связаны напрямую, несмотря на запятую между ними?",
+     "options": [
+      "Подходит, человек",
+      "сохранить все запятые"
+     ],
+     "answer": "Подходит, человек",
+     "source": "UD"
+    },
+    {
+     "question": "Какое действие объясняется причиной, названной в части со словом «опаздывает»?",
+     "options": [
+      "просит",
+      "пропустить"
+     ],
+     "answer": "пропустить",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое слово называет исполнителя действия «пропустить»?",
+     "options": [
+      "его",
+      "исполнитель не назван"
+     ],
+     "answer": "исполнитель не назван",
+     "source": "reference tree"
+    },
+    {
+     "question": "Copy «его» if its dictionary form is «он». Otherwise choose “no such word”.",
+     "options": [
+      "его",
+      "no such word"
+     ],
+     "answer": "его",
+     "source": "reference tree"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s56",
+   "variant": "original",
+   "text": "Теперь штрафоваться должны даже попытки задержки игрока соперника руками и даже попытки зацепа клюшкой.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "ab45522c3dfe5c14221b3f4bba45d9f2adcee298fb4340338c097b5dfd53a45a",
+   "calls": [
+    {
+     "question": "Какое слово в этом фрагменте поясняет дополнение «руками» в творительном падеже?",
+     "options": [
+      "[попытки] задержки",
+      "задержки",
+      "игрока",
+      "соперника"
+     ],
+     "answer": "задержки",
+     "source": "reference tree"
+    },
+    {
+     "question": "Что уточняет «Теперь» — саму модальность («должны») или действие в её области («штрафоваться»)?",
+     "options": [
+      "штрафоваться",
+      "должны"
+     ],
+     "answer": "должны",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое слово в этом фрагменте поясняет дополнение «клюшкой» в творительном падеже?",
+     "options": [
+      "[попытки] зацепа",
+      "зацепа"
+     ],
+     "answer": "зацепа",
+     "source": "reference tree"
+    },
+    {
+     "question": "К какому слову относится «соперника»?",
+     "options": [
+      "задержки",
+      "игрока"
+     ],
+     "answer": "игрока",
+     "source": "reference tree"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s56",
+   "variant": "no_punctuation",
+   "text": "Теперь штрафоваться должны даже попытки задержки игрока соперника руками и даже попытки зацепа клюшкой",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "ab45522c3dfe5c14221b3f4bba45d9f2adcee298fb4340338c097b5dfd53a45a",
+   "calls": [
+    {
+     "question": "Какое слово в этом фрагменте поясняет дополнение «руками» в творительном падеже?",
+     "options": [
+      "[попытки] задержки",
+      "задержки",
+      "игрока",
+      "соперника"
+     ],
+     "answer": "задержки",
+     "source": "reference tree"
+    },
+    {
+     "question": "Что уточняет «Теперь» — саму модальность («должны») или действие в её области («штрафоваться»)?",
+     "options": [
+      "штрафоваться",
+      "должны"
+     ],
+     "answer": "должны",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое слово в этом фрагменте поясняет дополнение «клюшкой» в творительном падеже?",
+     "options": [
+      "[попытки] зацепа",
+      "зацепа"
+     ],
+     "answer": "зацепа",
+     "source": "reference tree"
+    },
+    {
+     "question": "К какому слову относится «соперника»?",
+     "options": [
+      "задержки",
+      "игрока"
+     ],
+     "answer": "игрока",
+     "source": "reference tree"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s56",
+   "variant": "extra_comma",
+   "text": "Теперь штрафоваться должны даже попытки, задержки игрока соперника руками и даже попытки зацепа клюшкой.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "ab45522c3dfe5c14221b3f4bba45d9f2adcee298fb4340338c097b5dfd53a45a",
+   "calls": [
+    {
+     "question": "В каком сочетании слова связаны напрямую, несмотря на запятую между ними?",
+     "options": [
+      "попытки, задержки",
+      "сохранить все запятые"
+     ],
+     "answer": "попытки, задержки",
+     "source": "UD"
+    },
+    {
+     "question": "Какое слово в этом фрагменте поясняет дополнение «руками» в творительном падеже?",
+     "options": [
+      "[попытки] ,",
+      "задержки",
+      "игрока",
+      "соперника"
+     ],
+     "answer": "задержки",
+     "source": "reference tree"
+    },
+    {
+     "question": "Что уточняет «Теперь» — саму модальность («должны») или действие в её области («штрафоваться»)?",
+     "options": [
+      "штрафоваться",
+      "должны"
+     ],
+     "answer": "должны",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое слово в этом фрагменте поясняет дополнение «клюшкой» в творительном падеже?",
+     "options": [
+      "[попытки] зацепа",
+      "зацепа"
+     ],
+     "answer": "зацепа",
+     "source": "reference tree"
+    },
+    {
+     "question": "К какому слову относится «соперника»?",
+     "options": [
+      "задержки",
+      "игрока"
+     ],
+     "answer": "игрока",
+     "source": "reference tree"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s57",
+   "variant": "original",
+   "text": "На конференции были приняты совместная резолюция и тактическое решение: всем партиям действовать самостоятельно, но одновременно, что выражалось формулой ``врозь наступать и вместе бить&#39;&#39;.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "27d86dbc7268ab7236fb3e7732f36597f285267b999a12ea94d27dd929fe962b",
+   "calls": [
+    {
+     "question": "Как понимать «приняты» в этом предложении? Если сообщается, что кого-то или что-то приняли, выберите «приняты». Если описано только свойство или состояние, выберите «только свойство или состояние».",
+     "options": [
+      "приняты",
+      "только свойство или состояние"
+     ],
+     "answer": "приняты",
+     "source": "reference tree"
+    },
+    {
+     "question": "Copy «конференции» if it is in the accusative case. Otherwise choose “no such word”.",
+     "options": [
+      "конференции",
+      "no such word"
+     ],
+     "answer": "no such word",
+     "source": "UD"
+    },
+    {
+     "question": "Какое слово в неопределённой форме раскрывает содержание слова «решение»?",
+     "options": [
+      "действовать"
+     ],
+     "answer": "действовать",
+     "source": "UD"
+    },
+    {
+     "question": "Какое слово в неопределённой форме раскрывает содержание слова «формулой»?",
+     "options": [
+      "наступать"
+     ],
+     "answer": "наступать",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s57",
+   "variant": "no_punctuation",
+   "text": "На конференции были приняты совместная резолюция и тактическое решение всем партиям действовать самостоятельно но одновременно что выражалось формулой врозь наступать и вместе бить",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "27d86dbc7268ab7236fb3e7732f36597f285267b999a12ea94d27dd929fe962b",
+   "calls": [
+    {
+     "question": "Как понимать «приняты» в этом предложении? Если сообщается, что кого-то или что-то приняли, выберите «приняты». Если описано только свойство или состояние, выберите «только свойство или состояние».",
+     "options": [
+      "приняты",
+      "только свойство или состояние"
+     ],
+     "answer": "приняты",
+     "source": "reference tree"
+    },
+    {
+     "question": "Copy «конференции» if it is in the accusative case. Otherwise choose “no such word”.",
+     "options": [
+      "конференции",
+      "no such word"
+     ],
+     "answer": "no such word",
+     "source": "UD"
+    },
+    {
+     "question": "Какое слово в неопределённой форме раскрывает содержание слова «решение»?",
+     "options": [
+      "действовать"
+     ],
+     "answer": "действовать",
+     "source": "UD"
+    },
+    {
+     "question": "Какое слово в неопределённой форме раскрывает содержание слова «формулой»?",
+     "options": [
+      "наступать"
+     ],
+     "answer": "наступать",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s57",
+   "variant": "extra_comma",
+   "text": "На конференции были приняты совместная, резолюция и тактическое решение: всем партиям действовать самостоятельно, но одновременно, что выражалось формулой ``врозь наступать и вместе бить&#39;&#39;.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "27d86dbc7268ab7236fb3e7732f36597f285267b999a12ea94d27dd929fe962b",
+   "calls": [
+    {
+     "question": "В каком сочетании слова связаны напрямую, несмотря на запятую между ними?",
+     "options": [
+      "совместная, резолюция",
+      "сохранить все запятые"
+     ],
+     "answer": "совместная, резолюция",
+     "source": "UD"
+    },
+    {
+     "question": "Как понимать «приняты» в этом предложении? Если сообщается, что кого-то или что-то приняли, выберите «приняты». Если описано только свойство или состояние, выберите «только свойство или состояние».",
+     "options": [
+      "приняты",
+      "только свойство или состояние"
+     ],
+     "answer": "приняты",
+     "source": "reference tree"
+    },
+    {
+     "question": "Copy «конференции» if it is in the accusative case. Otherwise choose “no such word”.",
+     "options": [
+      "конференции",
+      "no such word"
+     ],
+     "answer": "no such word",
+     "source": "UD"
+    },
+    {
+     "question": "Какое слово в неопределённой форме раскрывает содержание слова «решение»?",
+     "options": [
+      "действовать"
+     ],
+     "answer": "действовать",
+     "source": "UD"
+    },
+    {
+     "question": "Какое слово в неопределённой форме раскрывает содержание слова «формулой»?",
+     "options": [
+      "наступать"
+     ],
+     "answer": "наступать",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s58",
+   "variant": "original",
+   "text": "Чувашское книжное издательство -- республиканское государственное унитарное предприятие, выпускающее художественную, детскую, учебно-педагогическую, общественно-политическую и др. литературу на чуваш., рус., англ. языках.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "b3ec32d1f97bb6695820f38e235b891060573be53defbcf161de3c84236e38a6",
+   "calls": [
+    {
+     "question": "Какие слова перечисляют однородные определения к слову «литературу»?",
+     "options": [
+      "художественную, детскую, учебно-педагогическую, общественно-политическую и др.",
+      "учебно-педагогическую, общественно-политическую и др."
+     ],
+     "answer": "художественную, детскую, учебно-педагогическую, общественно-политическую и др.",
+     "source": "reference tree"
+    },
+    {
+     "question": "Каким словом или сочетанием характеризуют подлежащее в этом предложении?",
+     "options": [
+      "Чувашское книжное издательство",
+      "республиканское государственное унитарное предприятие"
+     ],
+     "answer": "республиканское государственное унитарное предприятие",
+     "source": "reference tree"
+    },
+    {
+     "question": "От какого из предложенных слов в этом месте текста задаётся вопрос к сочетанию «на чуваш., рус., англ. языках»? Выберите слово, с которым оно связано непосредственно.",
+     "options": [
+      "выпускающее",
+      "литературу"
+     ],
+     "answer": "литературу",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какие слова перечисляют однородные определения к слову «языках»?",
+     "options": [
+      "чуваш., рус., англ."
+     ],
+     "answer": "чуваш., рус., англ.",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s58",
+   "variant": "no_punctuation",
+   "text": "Чувашское книжное издательство республиканское государственное унитарное предприятие выпускающее художественную детскую учебно-педагогическую общественно-политическую и др литературу на чуваш рус англ языках",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "b3ec32d1f97bb6695820f38e235b891060573be53defbcf161de3c84236e38a6",
+   "calls": [
+    {
+     "question": "Какие слова перечисляют однородные определения к слову «литературу»?",
+     "options": [
+      "художественную детскую учебно-педагогическую общественно-политическую и др",
+      "детскую учебно-педагогическую общественно-политическую и др",
+      "учебно-педагогическую общественно-политическую и др"
+     ],
+     "answer": "художественную детскую учебно-педагогическую общественно-политическую и др",
+     "source": "reference tree"
+    },
+    {
+     "question": "От какого из предложенных слов в этом месте текста задаётся вопрос к сочетанию «на чуваш рус англ языках»? Выберите слово, с которым оно связано непосредственно.",
+     "options": [
+      "предприятие",
+      "выпускающее",
+      "литературу"
+     ],
+     "answer": "литературу",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какие слова перечисляют однородные определения к слову «языках»?",
+     "options": [
+      "чуваш рус англ"
+     ],
+     "answer": "чуваш рус англ",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s58",
+   "variant": "extra_comma",
+   "text": "Чувашское книжное, издательство -- республиканское государственное унитарное предприятие, выпускающее художественную, детскую, учебно-педагогическую, общественно-политическую и др. литературу на чуваш., рус., англ. языках.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "b3ec32d1f97bb6695820f38e235b891060573be53defbcf161de3c84236e38a6",
+   "calls": [
+    {
+     "question": "В каком сочетании слова связаны напрямую, несмотря на запятую между ними?",
+     "options": [
+      "книжное, издательство",
+      "сохранить все запятые"
+     ],
+     "answer": "книжное, издательство",
+     "source": "UD"
+    },
+    {
+     "question": "Какие слова перечисляют однородные определения к слову «литературу»?",
+     "options": [
+      "художественную, детскую, учебно-педагогическую, общественно-политическую и др.",
+      "учебно-педагогическую, общественно-политическую и др."
+     ],
+     "answer": "художественную, детскую, учебно-педагогическую, общественно-политическую и др.",
+     "source": "UD"
+    },
+    {
+     "question": "Каким словом или сочетанием характеризуют подлежащее в этом предложении?",
+     "options": [
+      "Чувашское книжное, издательство",
+      "республиканское государственное унитарное предприятие"
+     ],
+     "answer": "республиканское государственное унитарное предприятие",
+     "source": "reference tree"
+    },
+    {
+     "question": "От какого из предложенных слов в этом месте текста задаётся вопрос к сочетанию «на чуваш., рус., англ. языках»? Выберите слово, с которым оно связано непосредственно.",
+     "options": [
+      "выпускающее",
+      "литературу"
+     ],
+     "answer": "литературу",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какие слова перечисляют однородные определения к слову «языках»?",
+     "options": [
+      "чуваш., рус., англ."
+     ],
+     "answer": "чуваш., рус., англ.",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s59",
+   "variant": "original",
+   "text": "Цветки сиреневые с жёлтым горлом.",
+   "abstention": "STORED",
+   "abstention_empty": false,
+   "abstention_exact": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "1248debd53b33d8a7da9b4d78cb2c0b5b0c8a0f467d2e1d6ef5dd3ae1ed20d3c",
+   "calls": [],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s59",
+   "variant": "no_punctuation",
+   "text": "Цветки сиреневые с жёлтым горлом",
+   "abstention": "STORED",
+   "abstention_empty": false,
+   "abstention_exact": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "1248debd53b33d8a7da9b4d78cb2c0b5b0c8a0f467d2e1d6ef5dd3ae1ed20d3c",
+   "calls": [],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s59",
+   "variant": "extra_comma",
+   "text": "Цветки сиреневые с жёлтым, горлом.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "1248debd53b33d8a7da9b4d78cb2c0b5b0c8a0f467d2e1d6ef5dd3ae1ed20d3c",
+   "calls": [
+    {
+     "question": "В каком сочетании слова связаны напрямую, несмотря на запятую между ними?",
+     "options": [
+      "жёлтым, горлом",
+      "сохранить все запятые"
+     ],
+     "answer": "жёлтым, горлом",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s60",
+   "variant": "original",
+   "text": "По данным государственного водного реестра России относится к Камскому бассейновому округу, водохозяйственный участок реки -- Вятка от города Котельнич до водомерного поста посёлка городского типа Аркуль, речной подбассейн реки -- Вятка.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "bb2c22b4479d9573c99d20fd32b2da970801270b491ca9e03081bb0014e004c9",
+   "calls": [
+    {
+     "question": "Что в этом описании уточняют слова «до водомерного поста»?",
+     "options": [
+      "Вятка от города Котельнич",
+      "города",
+      "Котельнич"
+     ],
+     "answer": "Вятка от города Котельнич",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какой предмет или место здесь носит название «Аркуль»?",
+     "options": [
+      "поста",
+      "посёлка",
+      "типа"
+     ],
+     "answer": "посёлка",
+     "source": "reference tree"
+    },
+    {
+     "question": "Как употреблено «России»? Если это название самого предмета, выберите «России». Если это ответ на вопрос «кого или чего?», выберите слово, от которого задаётся вопрос.",
+     "options": [
+      "России",
+      "реестра",
+      "данным"
+     ],
+     "answer": "реестра",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое сочетание передаёт оговорку к самому сообщению о действии «относится»? Выберите сочетание, если рассказчик указывает, откуда взяты сведения, насколько он в них уверен или с чьей точки зрения говорит. Если указано, когда, где или при каких обстоятельствах произошло само событие, выберите «нет такого сочетания».",
+     "options": [
+      "По данным государственного водного реестра России",
+      "нет такого сочетания"
+     ],
+     "answer": "По данным государственного водного реестра России",
+     "source": "reference tree"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s60",
+   "variant": "no_punctuation",
+   "text": "По данным государственного водного реестра России относится к Камскому бассейновому округу водохозяйственный участок реки Вятка от города Котельнич до водомерного поста посёлка городского типа Аркуль речной подбассейн реки Вятка",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "bb2c22b4479d9573c99d20fd32b2da970801270b491ca9e03081bb0014e004c9",
+   "calls": [
+    {
+     "question": "Что в этом описании уточняют слова «до водомерного поста»?",
+     "options": [
+      "Вятка от города Котельнич",
+      "города",
+      "Котельнич"
+     ],
+     "answer": "Вятка от города Котельнич",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какой предмет или место здесь носит название «Аркуль»?",
+     "options": [
+      "поста",
+      "посёлка",
+      "типа"
+     ],
+     "answer": "посёлка",
+     "source": "reference tree"
+    },
+    {
+     "question": "Как употреблено «России»? Если это название самого предмета, выберите «России». Если это ответ на вопрос «кого или чего?», выберите слово, от которого задаётся вопрос.",
+     "options": [
+      "России",
+      "реестра",
+      "данным"
+     ],
+     "answer": "реестра",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое сочетание передаёт оговорку к самому сообщению о действии «относится»? Выберите сочетание, если рассказчик указывает, откуда взяты сведения, насколько он в них уверен или с чьей точки зрения говорит. Если указано, когда, где или при каких обстоятельствах произошло само событие, выберите «нет такого сочетания».",
+     "options": [
+      "По данным государственного водного реестра России",
+      "нет такого сочетания"
+     ],
+     "answer": "По данным государственного водного реестра России",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое слово служит здесь сказуемым при подлежащем «участок»?",
+     "options": [
+      "[Вятка] от"
+     ],
+     "answer": "[Вятка] от",
+     "source": "UD"
+    },
+    {
+     "question": "Какое слово служит здесь сказуемым при подлежащем «подбассейн»?",
+     "options": [
+      "подбассейн реки [Вятка]"
+     ],
+     "answer": "подбассейн реки [Вятка]",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s60",
+   "variant": "extra_comma",
+   "text": "По данным государственного водного, реестра России относится к Камскому бассейновому округу, водохозяйственный участок реки -- Вятка от города Котельнич до водомерного поста посёлка городского типа Аркуль, речной подбассейн реки -- Вятка.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "bb2c22b4479d9573c99d20fd32b2da970801270b491ca9e03081bb0014e004c9",
+   "calls": [
+    {
+     "question": "В каком сочетании слова связаны напрямую, несмотря на запятую между ними?",
+     "options": [
+      "водного, реестра",
+      "сохранить все запятые"
+     ],
+     "answer": "водного, реестра",
+     "source": "UD"
+    },
+    {
+     "question": "Что в этом описании уточняют слова «до водомерного поста»?",
+     "options": [
+      "Вятка от города Котельнич",
+      "города",
+      "Котельнич"
+     ],
+     "answer": "Вятка от города Котельнич",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какой предмет или место здесь носит название «Аркуль»?",
+     "options": [
+      "поста",
+      "посёлка",
+      "типа"
+     ],
+     "answer": "посёлка",
+     "source": "reference tree"
+    },
+    {
+     "question": "Как употреблено «России»? Если это название самого предмета, выберите «России». Если это ответ на вопрос «кого или чего?», выберите слово, от которого задаётся вопрос.",
+     "options": [
+      "России",
+      "реестра",
+      "данным"
+     ],
+     "answer": "реестра",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое сочетание передаёт оговорку к самому сообщению о действии «относится»? Выберите сочетание, если рассказчик указывает, откуда взяты сведения, насколько он в них уверен или с чьей точки зрения говорит. Если указано, когда, где или при каких обстоятельствах произошло само событие, выберите «нет такого сочетания».",
+     "options": [
+      "По данным государственного водного, реестра России",
+      "нет такого сочетания"
+     ],
+     "answer": "По данным государственного водного, реестра России",
+     "source": "reference tree"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s61",
+   "variant": "original",
+   "text": "Вильге́льм Ште́кель (Wilhelm Stekel; 18 марта 1868, Бояны -- 25 июня 1940, Лондон) -- австрийский психиатр и композитор, любитель, один из пионеров психоанализа, изобретатель термина ``парафилия&#39;&#39;.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "f2cb2eaf4aa446bfb8928ea6133ee656de80acc7b13474c71dfb2af28c562e31",
+   "calls": [
+    {
+     "question": "Кого именно характеризует слово «любитель» в этом перечислении?",
+     "options": [
+      "композитор",
+      "Вильге́льм"
+     ],
+     "answer": "композитор",
+     "source": "reference tree"
+    },
+    {
+     "question": "К какому слову относится «психоанализа»?",
+     "options": [
+      "один",
+      "пионеров"
+     ],
+     "answer": "пионеров",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое слово продолжает личное имя «Вильге́льм»?",
+     "options": [
+      "Ште́кель"
+     ],
+     "answer": "Ште́кель",
+     "source": "UD"
+    },
+    {
+     "question": "Какие слова дают другое написание имени «Вильге́льм Ште́кель»?",
+     "options": [
+      "Wilhelm Stekel"
+     ],
+     "answer": "Wilhelm Stekel",
+     "source": "control reading"
+    },
+    {
+     "question": "Какое название в перечне относится к дате «18 марта 1868»?",
+     "options": [
+      "Бояны"
+     ],
+     "answer": "Бояны",
+     "source": "UD"
+    },
+    {
+     "question": "Какое название в перечне относится к дате «25 июня 1940»?",
+     "options": [
+      "Лондон"
+     ],
+     "answer": "Лондон",
+     "source": "UD"
+    },
+    {
+     "question": "Каким словом дано само обозначение после «термина»?",
+     "options": [
+      "парафилия"
+     ],
+     "answer": "парафилия",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s61",
+   "variant": "no_punctuation",
+   "text": "Вильге́льм Ште́кель Wilhelm Stekel 18 марта 1868 Бояны 25 июня 1940 Лондон австрийский психиатр и композитор любитель один из пионеров психоанализа изобретатель термина парафилия",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "f2cb2eaf4aa446bfb8928ea6133ee656de80acc7b13474c71dfb2af28c562e31",
+   "calls": [
+    {
+     "question": "Кого именно характеризует слово «любитель» в этом перечислении?",
+     "options": [
+      "композитор",
+      "Вильге́льм"
+     ],
+     "answer": "композитор",
+     "source": "reference tree"
+    },
+    {
+     "question": "К какому слову относится «психоанализа»?",
+     "options": [
+      "один",
+      "пионеров"
+     ],
+     "answer": "пионеров",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое слово продолжает личное имя «Вильге́льм»?",
+     "options": [
+      "Ште́кель"
+     ],
+     "answer": "Ште́кель",
+     "source": "UD"
+    },
+    {
+     "question": "Какие слова дают другое написание имени «Вильге́льм Ште́кель»?",
+     "options": [
+      "Wilhelm Stekel"
+     ],
+     "answer": "Wilhelm Stekel",
+     "source": "control reading"
+    },
+    {
+     "question": "Какое название в перечне относится к дате «18 марта 1868»?",
+     "options": [
+      "Бояны"
+     ],
+     "answer": "Бояны",
+     "source": "UD"
+    },
+    {
+     "question": "Какое название в перечне относится к дате «25 июня 1940»?",
+     "options": [
+      "Лондон"
+     ],
+     "answer": "Лондон",
+     "source": "UD"
+    },
+    {
+     "question": "Каким словом дано само обозначение после «термина»?",
+     "options": [
+      "парафилия"
+     ],
+     "answer": "парафилия",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  },
+  {
+   "id": "test-s61",
+   "variant": "extra_comma",
+   "text": "Вильге́льм Ште́кель (Wilhelm Stekel; 18 марта 1868, Бояны -- 25 июня 1940, Лондон) -- австрийский, психиатр и композитор, любитель, один из пионеров психоанализа, изобретатель термина ``парафилия&#39;&#39;.",
+   "abstention": "AMBIGUOUS",
+   "abstention_empty": true,
+   "rejection": "UNRESOLVED",
+   "rejection_reason": "OPTIONS_REJECTED",
+   "rejection_empty": true,
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "empty": false,
+   "exact": true,
+   "incorrect_heads": [],
+   "role_scope_errors": [],
+   "graph_sha256": "f2cb2eaf4aa446bfb8928ea6133ee656de80acc7b13474c71dfb2af28c562e31",
+   "calls": [
+    {
+     "question": "В каком сочетании слова связаны напрямую, несмотря на запятую между ними?",
+     "options": [
+      "австрийский, психиатр",
+      "сохранить все запятые"
+     ],
+     "answer": "австрийский, психиатр",
+     "source": "UD"
+    },
+    {
+     "question": "Кого именно характеризует слово «любитель» в этом перечислении?",
+     "options": [
+      "композитор",
+      "Вильге́льм"
+     ],
+     "answer": "композитор",
+     "source": "UD"
+    },
+    {
+     "question": "К какому слову относится «психоанализа»?",
+     "options": [
+      "один",
+      "пионеров"
+     ],
+     "answer": "пионеров",
+     "source": "reference tree"
+    },
+    {
+     "question": "Какое слово продолжает личное имя «Вильге́льм»?",
+     "options": [
+      "Ште́кель"
+     ],
+     "answer": "Ште́кель",
+     "source": "UD"
+    },
+    {
+     "question": "Какие слова дают другое написание имени «Вильге́льм Ште́кель»?",
+     "options": [
+      "Wilhelm Stekel"
+     ],
+     "answer": "Wilhelm Stekel",
+     "source": "control reading"
+    },
+    {
+     "question": "Какое название в перечне относится к дате «18 марта 1868»?",
+     "options": [
+      "Бояны"
+     ],
+     "answer": "Бояны",
+     "source": "UD"
+    },
+    {
+     "question": "Какое название в перечне относится к дате «25 июня 1940»?",
+     "options": [
+      "Лондон"
+     ],
+     "answer": "Лондон",
+     "source": "UD"
+    },
+    {
+     "question": "Каким словом дано само обозначение после «термина»?",
+     "options": [
+      "парафилия"
+     ],
+     "answer": "парафилия",
+     "source": "UD"
+    }
+   ],
+   "same_as_original": true
+  }
+ ]
+}

@@ -21,7 +21,7 @@ def _lexicon():
         kind, surface = line.split('\t')
         if kind == 'adverbial':
             phrases.append(tuple(surface.split()))
-        else:
+        elif kind == 'postpositive':
             particles.add(surface)
     return tuple(phrases), particles
 

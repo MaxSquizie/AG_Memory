@@ -177,7 +177,8 @@ policy is ours. The table is not an exhaustive Russian valency dictionary.
 
 adverbial-modifiers.tsv includes every contiguous fixed expression headed by
 an adverb, particle or subordinator annotated as advmod of a verb or auxiliary,
-and every postposed particle annotated as advmod of a determiner or adjective.
+every postposed particle annotated as advmod of a determiner or adjective, and
+non-negative particles directly preceding their nominal advmod head.
 Source: UD Russian-GSD training split r2.15 (CC BY-SA 4.0).
 https://github.com/UniversalDependencies/UD_Russian-GSD/tree/r2.15
 Regeneration: python scripts/import_russian_adverbial_modifiers.py ru_gsd-ud-train.conllu src/ah/russian_grammar/lexicon/adverbial-modifiers.tsv
@@ -222,3 +223,8 @@ infinitive-connectives.tsv: pairs of an adverb and a subordinating conjunction
 attested with an adverbial infinitive clause in UD Russian-GSD r2.15 training
 data (CC BY-SA 4.0). The dependency label is preserved as an adverbial relation.
 python scripts/import_russian_infinitive_connectives.py ru_gsd-ud-train.conllu src/ah/russian_grammar/lexicon/infinitive-connectives.tsv
+
+unit-symbols.tsv contains unambiguous single-token short and narrow measurement symbols
+from the Russian locale in ICU, Unicode CLDR 48.0, via ECMA-402 Intl.NumberFormat.
+node scripts/import_russian_unit_symbols.mjs src/ah/russian_grammar/lexicon/unit-symbols.tsv
+https://cldr.unicode.org/translation/units/unit-names-and-patterns

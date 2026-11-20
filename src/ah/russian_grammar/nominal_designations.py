@@ -81,12 +81,31 @@ def _candidates(tokens, parse, budget):
                 yield tuple(links[j] for j in range(len(tokens)))
 
 
-def trees(tokens, parse, budget):
+def _reuse_appositions(tree):
+    return tuple(replace(l, rule='N.APP.NAME', scope='proper_name')
+                 if l.rule in ('APP.NAME', 'OPAQUE.APPOSITION') and l.role == 'apposition' else l for l in tree)
+
+
+def trees(tokens, parse, budget, *, complete=()):
     empty = {j: i - 1 for i in range(1, len(tokens) - 1)
              if tokens[i].surface == '(' and tokens[i + 1].surface == ')' and tokens[i - 1].surface.isalnum()
              for j in (i, i + 1)}
     kept = tuple(i for i in range(len(tokens)) if i not in empty)
     part = tuple(tokens[i] for i in kept) if empty else tokens
+    if complete and not empty:
+        from . import mixed_predications
+
+        def clauses(reduced):
+            return mixed_predications.trees(reduced, parse, budget)
+        seen = set(complete)
+        for candidate in _candidates(part, clauses, budget):
+            tree = _reuse_appositions(candidate)
+            if tree not in seen:
+                seen.add(tree)
+                if len(seen) > budget:
+                    raise AnalysisBudgetExceeded('NOMINAL_DESIGNATION_BUDGET')
+                yield candidate
+        return
     variants = _candidates(part, parse, budget)
     first = next(variants, None)
     if first is None:
