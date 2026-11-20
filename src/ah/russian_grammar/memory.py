@@ -1,5 +1,6 @@
+from collections.abc import Mapping
 from contextlib import contextmanager
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from fractions import Fraction
 from uuid import uuid4
 
@@ -190,21 +191,22 @@ def _remember(core, result, rows, source):
     return observation.uid
 
 
-def _lookup(core, lemma):
-    def rows_of(group):
-        rows = tuple(core.store.get_element(Domain.H, member.uid).meta for member in group.members)
-        for member, row in zip(group.members, rows):
-            anchor = row.get('antecedent')
-            if not _correlative_reference(row) and not (row['role'] == 'possessive' and anchor is not None):
-                continue
-            if (anchor is None or not 0 <= anchor < len(rows) or
-                    core.store.find_link('grammar.antecedent', member.uid, group.members[anchor].uid) is None):
-                return None
-        return rows
+def _stored_rows(core, group):
+    rows = tuple(core.store.get_element(Domain.H, member.uid).meta for member in group.members)
+    for member, row in zip(group.members, rows):
+        anchor = row.get('antecedent')
+        if not _correlative_reference(row) and not (row['role'] == 'possessive' and anchor is not None):
+            continue
+        if (anchor is None or not 0 <= anchor < len(rows) or
+                core.store.find_link('grammar.antecedent', member.uid, group.members[anchor].uid) is None):
+            return None
+    return rows
 
+
+def _lookup(core, lemma):
     for ref in core.store.find_elements_with_property(ROOT_KEY, lemma):
         group = core.store.get_element(Domain.H, ref.uid)
-        rows = rows_of(group)
+        rows = _stored_rows(core, group)
         if rows is None:
             continue
         root = _root(rows)
@@ -216,7 +218,7 @@ def _lookup(core, lemma):
         for group in core.store.groups_containing(ref.uid):
             if group.meta.get('kind') != 'russian_grammar.observation':
                 continue
-            rows = rows_of(group)
+            rows = _stored_rows(core, group)
             if rows is None:
                 continue
             members = homogeneous.projection_members(rows, _root(rows))
@@ -227,9 +229,42 @@ def _lookup(core, lemma):
         for ref in core.store.find_elements_with_property(key, lemma):
             for group in core.store.groups_containing(ref.uid):
                 if group.meta.get('kind') == 'russian_grammar.observation':
-                    rows = rows_of(group)
+                    rows = _stored_rows(core, group)
                     if rows is not None:
                         yield group, rows, group.members.index(ref)
+
+
+def _subject_lookup(core, name, lemma):
+    seen = set()
+    for uid in core.store.subject_occurrences(name):
+        anchor = uid
+        visited = {uid}
+        while links := core.store.outgoing_links(anchor, 'grammar.nominal_conjunct'):
+            if len(links) != 1 or links[0].target.uid in visited:
+                break
+            anchor = links[0].target.uid
+            visited.add(anchor)
+        for edge in core.store.outgoing_links(anchor, 'grammar.subject'):
+            for group in core.store.groups_containing(edge.target.uid):
+                if group.meta.get('kind') != 'russian_grammar.observation':
+                    continue
+                indices = {member.uid: j for j, member in enumerate(group.members)}
+                if not visited.issubset(indices) or (group.uid, uid) in seen:
+                    continue
+                seen.add((group.uid, uid))
+                rows = _stored_rows(core, group)
+                if rows is None:
+                    continue
+                root = _root(rows)
+                predicate = indices[edge.target.uid]
+                if rows[predicate]['lemma'] == lemma:
+                    props = core.store.get_element(Domain.H, edge.target.uid).properties
+                    if predicate == root or any(key in props for key in (RELATIVE_KEY, GAP_KEY, CONCESSION_KEY)):
+                        yield group, rows, predicate, (indices[uid], indices[anchor])
+                members = homogeneous.projection_members(rows, root)
+                for target in members:
+                    if rows[target]['lemma'] == lemma and (projection := homogeneous.project(rows, members, target)):
+                        yield group, *projection, None
 
 
 def _question_word(word, selected_lemma=None):
@@ -613,7 +648,7 @@ def _restricted_answer(stored, parts, source):
     return tuple(stored[i]['surface'].casefold() for i in original), ', '.join(groups)
 
 
-def _extraction(rows, stored, observed, source, focus, budget):
+def _extraction(rows, stored, observed, source, focus, budget, subject_member=None):
     root = _root(rows)
     if any(row.get('implicit_subject') == 'unresolved' and (focus is None or i != root) for i, row in enumerate(rows)):
         return {}
@@ -633,6 +668,10 @@ def _extraction(rows, stored, observed, source, focus, budget):
             surface_children[row['head']].append(j)
     children_found = [[j for j in group if stored[j]['role'] not in NUMBER_PARTS and stored[j].get('scope') != 'ordering']
                       for group in surface_children]
+    if subject_member is not None:
+        member, anchor = subject_member
+        children_found[observed] = [member if j == anchor else j for j in children_found[observed]]
+        children_found[member] = []
     if not scoped_question and not any(row['role'] == 'clause_relative' for row in rows):
         children_found = [[j for j in group if stored[j]['role'] != 'clause_relative'] for group in children_found]
     if not any(row.get('clause_relation') == 'concession' for row in rows):
@@ -668,6 +707,11 @@ def _extraction(rows, stored, observed, source, focus, budget):
                 variable_subject = i == agreement_target or (row['role'] in ('auxiliary', 'copula') and
                                                               row['head'] == agreement_target)
                 candidate = stored[j]
+                if subject_member is not None:
+                    if j == member:
+                        candidate = {**candidate, 'role': 'subject'}
+                    if i == root:
+                        variable_subject = True
                 if i == root and candidate.get('clause_relation') == 'concession':
                     candidate = {**candidate, 'role': 'predicate',
                                  'scope': None if candidate.get('scope') == 'concession' else candidate.get('scope')}
@@ -892,19 +936,69 @@ def _compatible(rows, i, stored, focus, root, variable_subject):
                for lemma, tag in known_forms(surface))
 
 
-def _answer(view, rows, focus, budget, result, participants):
+def _group_reading(store, group, rows, root, stored, observed, target, question, budget):
+    from .probe import Probe
+
+    member, anchor = target
+    source = group.meta['verbatim']
+    if (stored[observed]['assertion_status'] != 'asserted' or stored[observed].get('scope')
+            or not _compatible(rows, root, stored[observed], False, True, True)):
+        return None
+    children = [[] for _ in stored]
+    for j, row in enumerate(stored):
+        if row.get('head') is not None:
+            children[row['head']].append(j)
+    parts = _descendants(children, [anchor])
+    if not any(stored[i]['role'] == 'nominal_conjunct' for i in parts):
+        return None
+    for i in parts:
+        row = stored[i]
+        if i >= len(group.members) or row['head'] is None or row['head'] >= len(group.members):
+            return None
+        if store.find_link('grammar.' + row['role'], group.members[i].uid, group.members[row['head']].uid) is None:
+            return None
+        if row['role'] == 'coordinator':
+            if row.get('scope') != 'addition' and (row['lemma'] != 'и' or row.get('scope')):
+                return None
+        elif row.get('scope') or row['role'] not in ('subject', 'nominal_conjunct', 'coordinator_part', 'punctuation'):
+            return None
+    if not _extraction(rows, stored, observed, source, None, budget, subject_member=target):
+        return None
+    phrase = _nominal_answer(stored, _nominal_parts(stored, children, anchor), source)
+    if not phrase:
+        return None
+    individual = stored[member]['surface']
+    wording = (f'Следует ли из текста ответ «да» на вопрос «{" ".join(question.split())}»? '
+               f'Если следует, выберите «{individual}». Если сказанное верно только для группы, выберите группу.')
+    return Probe(wording, (individual, phrase[1]), source)
+
+
+def _answer(view, rows, focus, budget, result, participants, group_readings):
     rows = _query_rows(rows, participants, budget)
     if rows is None:
         return GrammarReply('UNKNOWN', UNKNOWN, analysis=result)
     answers = {}
-    lemma = rows[_root(rows)]['lemma']
-    for group, stored, observed in _lookup(view, lemma):
+    root = _root(rows)
+    lemma = rows[root]['lemma']
+    subjects = [row for row in rows if row['role'] == 'subject' and row['head'] == root]
+    anchored = (focus is None and len(subjects) == 1 and subjects[0]['lemma'] not in PERSONAL
+                and not subjects[0].get('implicit') and (rows[root].get('morphology') or {}).get('pos') == 'VERB'
+                and all(row['role'] in ('predicate', 'subject', 'punctuation', 'object', 'numeral') for row in rows))
+    candidates = (_subject_lookup(view, subjects[0]['lemma'], lemma) if anchored else
+                  ((group, stored, observed, None) for group, stored, observed in _lookup(view, lemma)))
+    for group, stored, observed, target in candidates:
         stored = _query_rows(stored, _participants(group.meta.get('source')), budget)
         if stored is None:
+            group_readings.clear()
             return GrammarReply('UNKNOWN', UNKNOWN, analysis=result)
         surfaces = _extraction(rows, stored, observed, group.meta['verbatim'], focus, budget)
         if surfaces is None:
+            group_readings.clear()
             return GrammarReply('UNKNOWN', UNKNOWN, analysis=result)
+        if target is not None and not surfaces:
+            probe = _group_reading(view.store, group, rows, root, stored, observed, target, result.source, budget)
+            if probe:
+                group_readings.setdefault(probe, group.uid)
         for identity, surface in surfaces.items():
             answers.setdefault(identity, (surface, group.uid))
     if len(answers) == 1:
@@ -948,8 +1042,29 @@ def submit(core, text, choose=None, *, source='user', speaker_ref=None, addresse
                                           rows[i].get('quantity_kind') == 'query' and rows[i]['role'] in ARGUMENTS | {'numeral'})
                                      for i in variables):
             return GrammarReply('UNKNOWN', UNKNOWN, analysis=result)
+        group_readings = {}
         with _access(core, _adapter(core, journal)) as view:
-            return _answer(view, rows, next(iter(variables), None), budget, result, participants)
+            reply = _answer(view, rows, next(iter(variables), None), budget, result, participants, group_readings)
+        if reply.status == 'UNKNOWN' and group_readings:
+            asked = []
+            if choose is not None:
+                for probe, ref in group_readings.items():
+                    if len(asked) >= budget:
+                        break
+                    asked.append(probe)
+                    try:
+                        choice = choose(probe)
+                    except OSError:
+                        break
+                    if isinstance(choice, Mapping):
+                        choice = probe.response_choice(choice)
+                    if isinstance(choice, str) and choice.strip().casefold() == probe.options[0].casefold():
+                        result = replace(result, probes=(*result.probes, *asked))
+                        return GrammarReply('ANSWER', 'Да.', ref, result)
+            result = replace(result, probes=(*result.probes, *asked))
+            probe, ref = next(iter(group_readings.items()))
+            return GrammarReply('EVIDENCE', f'В памяти записано: «{probe.context}»', ref, result)
+        return reply
     root = rows[_root(rows)]
     if (root['rule'] == 'V.IMP' or (root.get('morphology') or {}).get('mood') == 'impr'
             or 'directive' in (root.get('scope') or '').split('_')):

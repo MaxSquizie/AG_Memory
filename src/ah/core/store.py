@@ -66,6 +66,7 @@ class _StoreState:
     template_by_predicate: dict[str, list[str]] = field(default_factory=dict)
     hypernodes_by_template: dict[str, list[str]] = field(default_factory=dict)
     entity_name_index: dict[str, list[str]] = field(default_factory=dict)
+    subject_occurrences: dict[str, list[str]] = field(default_factory=dict)
     property_name_index: dict[str, list[str]] = field(default_factory=dict)
     property_value_index: dict[tuple[str, str], list[str]] = field(default_factory=dict)
     outgoing_links: dict[str, list[str]] = field(default_factory=dict)
@@ -238,6 +239,9 @@ class AHStore:
             if isinstance(element, SemanticEntity):
                 result.append(element)
         return tuple(result)
+
+    def subject_occurrences(self, lemma: str) -> tuple[str, ...]:
+        return tuple(self._state.subject_occurrences.get(lemma, ()))
 
     def find_elements_with_property(self, name: str, value: object | None = None) -> tuple[Ref, ...]:
         if value is None:
@@ -634,6 +638,10 @@ class AHStore:
         if isinstance(element, Template):
             self._state.template_by_predicate.setdefault(element.predicate.uid, []).append(element.uid)
         if isinstance(element, SemanticEntity):
+            if domain is Domain.H and element.meta.get('role') in ('subject', 'nominal_conjunct'):
+                lemma = element.meta.get('lemma')
+                if isinstance(lemma, str):
+                    self._state.subject_occurrences.setdefault(lemma, []).append(element.uid)
             self._index_entity_names(element)
             self._index_properties(element.uid, element.properties)
         elif isinstance(element, FunctionSymbol):
@@ -693,6 +701,7 @@ class AHStore:
         self._state.template_by_predicate = {}
         self._state.hypernodes_by_template = {}
         self._state.entity_name_index = {}
+        self._state.subject_occurrences = {}
         self._state.property_name_index = {}
         self._state.property_value_index = {}
         self._state.outgoing_links = {}
