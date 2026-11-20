@@ -8,7 +8,7 @@ from .prepositions import FORMS, PREFIXES
 from .rules import Reading, known_forms, name_continuations, name_type, readings
 
 
-POSSESSIVES = frozenset(('мой', 'наш', 'твой', 'ваш', 'свой', 'его', 'её', 'их', 'ихний'))
+POSSESSIVES = frozenset(('мой', 'наш', 'твой', 'ваш', 'свой', 'его', 'её', 'их', 'ихний', 'чей'))
 
 
 @cache
@@ -87,6 +87,23 @@ def _members(tokens, start, prep, case=None):
         if not options:
             break
         qualifiers.append(options)
+
+
+def _possessive_groups(tokens, start):
+    from .parser import Link
+
+    for noun, lemma, case, modifiers in _members(tokens, start, None):
+        if any(link.role == 'possessive' for _, link in modifiers):
+            yield Group(start, noun + 1, None, noun, lemma, case, modifiers)
+        if noun + 1 == len(tokens):
+            continue
+        noun_forms = [tag for word, tag in known_forms(tokens[noun].surface)
+                      if word == lemma and tag.case == case and tag.POS == 'NOUN']
+        for modifier, tag in known_forms(tokens[noun + 1].surface):
+            if modifier not in POSSESSIVES or tag.POS != 'ADJF' or not any(_agree(tag, n) for n in noun_forms):
+                continue
+            attached = Link('possessive', modifier, noun, 'P.POSS')
+            yield Group(start, noun + 2, None, noun, lemma, case, (*modifiers, (noun + 1, attached)))
 
 
 def _names(tokens, group):
@@ -234,6 +251,7 @@ def _extensions(links, groups, chart, budget):
 
 
 def with_genitives(tokens, local, *, budget, chart=None):
+    from . import collective_agreement
     from .parser import NominalBudgetExceeded
 
     lexical_members = set()
@@ -251,6 +269,7 @@ def with_genitives(tokens, local, *, budget, chart=None):
             chart.feed(token.surface)
     if chart.overflow:
         raise NominalBudgetExceeded('NOMINAL_FRONTIER_BUDGET')
+    yield from collective_agreement.trees(tokens, local, budget=budget, chart=chart)
     spans = [group for start in range(1, len(tokens))
              if start - 1 not in lexical_members and chart.steps[start - 1].right_edge
              for group in _groups(tokens, start, budget, bare_cases=('gent', 'gen2'), chart=chart)
@@ -280,8 +299,15 @@ def _restore(tree, kept, groups):
     choices = []
     for group in groups:
         head = links[group.noun]
-        if (head.role != 'governed' or head.head != group.start or head.case != group.case
-                or head.lemma != group.lemma or links[group.start].lemma != group.preposition):
+        if head.lemma != group.lemma:
+            return
+        if group.preposition is None:
+            from .morphology import NOMINAL_ROLES, ROLE_CASE
+            case = head.case or ROLE_CASE.get(head.role) or getattr(head.morphology, 'case', None)
+            if head.role not in NOMINAL_ROLES or case != group.case:
+                return
+        elif (head.role != 'governed' or head.head != group.start or head.case != group.case
+              or links[group.start].lemma != group.preposition):
             return
         links.update(group.extra)
         conjuncts = [i for i, link in group.extra if link.role == 'nominal_conjunct']
@@ -297,12 +323,19 @@ def trees(tokens, local, *, budget=256):
     from .parser import NominalBudgetExceeded
 
     yield from local(tokens)
-    if not any(token.surface.casefold() in _coordinators() or token.surface == ','
-               or any(lemma in POSSESSIVES and tag.POS == 'ADJF' for lemma, tag in known_forms(token.surface))
-               for token in tokens):
+    possessives = any(lemma in POSSESSIVES and tag.POS == 'ADJF' for token in tokens
+                      for lemma, tag in known_forms(token.surface))
+    if not possessives and not any(token.surface.casefold() in _coordinators() or token.surface == ',' for token in tokens):
         return
-    starts = [(i, tuple(_groups(tokens, i, budget))) for i in range(len(tokens))]
-    starts = [(i, groups) for i, groups in starts if groups]
+    starts = []
+    for i in range(len(tokens)):
+        options = dict.fromkeys(_groups(tokens, i, budget))
+        if possessives:
+            options.update(dict.fromkeys(_possessive_groups(tokens, i)))
+        if len(options) > budget:
+            raise NominalBudgetExceeded('NOMINAL_GROUP_BUDGET')
+        if options:
+            starts.append((i, tuple(options)))
 
     @cache
     def reduced(kept):

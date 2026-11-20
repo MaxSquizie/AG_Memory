@@ -15,10 +15,10 @@ def _comparisons(tokens, forms, budget):
             next_word += 1
         marked = next_word < len(tokens) and tokens[next_word].surface.lower() == 'чем'
         target = next_word + 1 if marked else index + 1
-        if target == len(tokens) and not marked and next_word == index + 1:
+        if not marked:
             for lemma in comparatives:
                 yield index, lemma, None
-        elif target < len(tokens):
+        if target < len(tokens):
             for group in _groups(tokens, target, budget, bare_cases={'nomn' if marked else 'gent'}):
                 for lemma in comparatives:
                     yield index, lemma, group

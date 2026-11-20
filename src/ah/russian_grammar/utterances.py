@@ -191,7 +191,30 @@ def _purposes(part, parse):
 def _parataxis(part, parse):
     from .parser import Link
 
+    from . import explanations
+
     finite = [i for i, token in enumerate(part) if any(tag.POS == 'VERB' for _, tag in known_forms(token.surface))]
+    if len(finite) >= 2:
+        governors = explanations.content_governors()
+        for start in range(finite[0] + 1, finite[-1] + 1):
+            previous = part[start - 1].surface
+            if not (explanations.anchor_forms(previous) or any(
+                    lemma in governors and tag.POS == 'VERB' for lemma, tag in known_forms(previous))):
+                continue
+            initial = part[start].surface
+            if not initial.isalpha() or any(tag.POS in {'CONJ', 'PRCL'} or 'Ques' in tag
+                    or lemma in {'кто', 'что', 'который'} for lemma, tag in known_forms(initial)):
+                continue
+            for left in parse(part[:start]):
+                host = _root(left)
+                if left[host].lemma not in governors or (host != start - 1 and left[-1].role != 'object'):
+                    continue
+                for right in parse(part[start:]):
+                    child = _root(right)
+                    if not any(tag.POS == 'VERB' and tag.mood == 'indc' and lemma == right[child].lemma
+                               for lemma, tag in known_forms(part[start + child].surface)):
+                        continue
+                    yield from explanations.attachments(part, left, right, start, start)
     for i in range(1, len(part) - 1):
         sign = part[i].surface
         if sign not in (':', ';', ',', '—') or not finite or not finite[0] < i < finite[-1]:
@@ -207,6 +230,9 @@ def _parataxis(part, parse):
             continue
         for left in parse(part[:i]):
             for right in parse(part[i + 1:]):
+                if sign in (':', '—', ',') and left[_root(left)].lemma in explanations.content_governors():
+                    yield from explanations.attachments(part, left, right, i, i + 1)
+                    continue
                 links, host, child = _linked(left, right, range(i), range(i + 1, len(part)),
                                               'clause_conjunct', 'UTT.PARATAXIS', None)
                 links[i] = Link('punctuation', sign, child, 'UTT.SEP')
@@ -216,7 +242,7 @@ def _parataxis(part, parse):
 def trees(tokens, base, *, budget):
     from .parser import AnalysisBudgetExceeded
 
-    from . import parentheses
+    from . import paired_coordination, parentheses, speech_particles
     from .quote_titles import spans
 
     if any(_QUOTES.get(tokens[start].surface) != tokens[end].surface for start, end in spans(tokens)):
@@ -237,11 +263,21 @@ def trees(tokens, base, *, budget):
                 if len(built) > budget:
                     raise AnalysisBudgetExceeded('PARENTHETICAL_BUDGET')
         elif part:
+            for tree in speech_particles.trees(part, parse):
+                built.setdefault(tree, None)
+                if len(built) > budget:
+                    raise AnalysisBudgetExceeded('ANALYSIS_BUDGET')
+            if built:
+                return tuple(built)
             for rule in (base, _insertions, _detached_pronominal_group, _quotations, _purposes, _parataxis):
                 for tree in (rule(part) if rule is base else rule(part, parse)):
                     built.setdefault(tree, None)
                     if len(built) > budget:
                         raise AnalysisBudgetExceeded('ANALYSIS_BUDGET')
+            for tree in paired_coordination.trees(part, parse, budget):
+                built.setdefault(tree, None)
+                if len(built) > budget:
+                    raise AnalysisBudgetExceeded('COORDINATION_BUDGET')
             for tree in parentheses.nominal_modifiers(part, parse, budget):
                 built.setdefault(tree, None)
                 if len(built) > budget:
@@ -255,6 +291,12 @@ def partitions(trees, tokens, text):
     from .parser import _span_label
     from .probe import Probe
 
+    from . import explanations
+
+    yield from explanations.partitions(trees, tokens, text)
+    from . import speech_particles
+
+    yield from speech_particles.partitions(trees, tokens, text)
     markers = [tree[0] for tree in trees]
     if {link.role for link in markers} == {'coordinator', 'parenthetical'}:
         label = _span_label(tokens, 0)

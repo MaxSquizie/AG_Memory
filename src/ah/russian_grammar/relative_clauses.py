@@ -169,14 +169,15 @@ def trees(tokens, local, *, budget, spatial_prefix=None, nominal_fragment=False)
                 continue
             lemmas = {lemma for lemma, _ in known_forms(words[marker])}
             spatial = clauses.relative_role(words[marker])
-            if spatial and marker != begin:
+            temporal = words[marker] == 'когда' and 'тогда' in words[:start]
+            if (spatial or temporal) and marker != begin:
                 continue
             relative = 'который' in lemmas
             if not relative and not lemmas.intersection({'кто', 'что', 'где', 'куда', 'когда', 'откуда', 'почему', 'как'}):
                 continue
             personal = 'кто' in lemmas and any(personal_correlatives.readings(w) for w in words[:start])
             indirect = not relative and any(lemma in INDIRECT for w in words[:start] for lemma, _ in known_forms(w))
-            if not (relative or personal or indirect or spatial):
+            if not (relative or personal or indirect or spatial or temporal):
                 continue
             stops = [i for i in commas if i > marker]
             if inferred and not stops:
@@ -198,7 +199,7 @@ def trees(tokens, local, *, budget, spatial_prefix=None, nominal_fragment=False)
                     matrices = (((head,), 0, None) for head in personal_correlatives.nominal_heads(matrix[0]))
                 else:
                     captions = _nominal_caption(matrix, budget) if relative and end == len(part) else ()
-                    ordinary = ((tree, None, None) for tree in chain(component(matrix), captions)) if relative or indirect or spatial else ()
+                    ordinary = ((tree, None, None) for tree in chain(component(matrix), captions)) if relative or indirect or spatial or temporal else ()
                     personal_matrices = personal_correlatives.matrices(matrix, start, component) if personal else ()
                     matrices = chain(ordinary, personal_matrices)
                 for outer, person, addressee_governor in matrices:
@@ -206,13 +207,15 @@ def trees(tokens, local, *, budget, spatial_prefix=None, nominal_fragment=False)
                     for host in ((fixed_host,) if fixed_host is not None else _anchors(outer, start)):
                         if host >= start:
                             continue
-                        if spatial:
+                        if spatial or temporal and end < len(part):
                             from .spatial_clauses import centered
 
-                            for joined in centered(part, outside, outer, host, inside, component, spatial_prefix, budget):
+                            for joined in centered(part, outside, outer, host, inside, component, spatial_prefix,
+                                                   budget, temporal=temporal):
                                 spend()
                                 yield joined
-                            continue
+                            if spatial or not indirect:
+                                continue
                         if person is not None:
                             variants = personal_correlatives.relative_forms(words[marker], outer, person)
                         elif relative:

@@ -3,7 +3,7 @@ from functools import cache, lru_cache
 from itertools import product
 
 from . import participle_forms
-from .participle_connectives import markers, relations
+from .participle_connectives import PAIRS, markers, openers, relations
 from .rules import known_forms
 
 
@@ -84,34 +84,11 @@ def linked_members(tokens):
     return {i: tuple(series) for i, series in links.items()}
 
 
-_PAIRS = {
-    'не только': {'но и': 'addition', 'но также': 'addition'},
-    'как': {'так и': 'addition'},
-    'не столько': {'сколько': 'comparison'},
-    'и': {'и': 'addition'},
-    'ни': {'ни': 'negative_coordination'},
-    'или': {'или': 'alternative'},
-    'либо': {'либо': 'alternative'},
-    'то': {'то': 'alternative'},
-    'то ли': {'то ли': 'alternative'},
-    'не то': {'не то': 'alternative'},
-}
-
-
-def _openers(tokens):
-    yield '', 0
-    words = tuple(t.surface.casefold() for t in tokens[:2])
-    for phrase in _PAIRS:
-        start = tuple(phrase.split())
-        if words[:len(start)] == start:
-            yield phrase, len(start)
-
-
 def _relations(joins, terms, opener, budget):
     from .parser import AnalysisBudgetExceeded
 
     names = [join.words for join in joins]
-    paired = _PAIRS.get(opener, {})
+    paired = PAIRS.get(opener, {})
     if opener and not paired.keys() & set(names):
         return
     options = []
@@ -208,7 +185,7 @@ def branches(tokens, pivot, forms, inside, remap, budget):
         return out
 
     count = 0
-    for opener, first in _openers(tokens):
+    for opener, first in openers(tokens):
         states = [(first, (), ())]
         while states:
             start, terms, separators = states.pop()

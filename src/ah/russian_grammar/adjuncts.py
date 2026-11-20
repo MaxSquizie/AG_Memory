@@ -4,7 +4,7 @@ from importlib.resources import files
 from .rules import known_forms
 
 
-QUESTIONS = {'где', 'куда', 'откуда', 'когда', 'как', 'почему', 'зачем'}
+QUESTIONS = {'где', 'куда', 'откуда', 'когда', 'как', 'почему', 'зачем', 'сколько', 'насколько'}
 SPATIAL = {
     ('в', 'loct'): 'где', ('на', 'loct'): 'где', ('в', 'loc2'): 'где', ('на', 'loc2'): 'где',
     ('в', 'accs'): 'куда', ('на', 'accs'): 'куда', ('к', 'datv'): 'куда',
@@ -39,6 +39,8 @@ def clause_category(rows, children, index):
     markers = [rows[i] for i in children[index] if rows[i]['role'] == 'clause_marker']
     if row['rule'] == 'UTT.PURPOSE' and any(marker.get('scope') == 'purpose' for marker in markers):
         return 'зачем'
+    if row['rule'] == 'CL.ADV' and any(marker.get('scope') == 'temporal' for marker in markers):
+        return 'когда'
     if row['rule'] == 'CL.ADV':
         for i in children[index]:
             marker = rows[i]
@@ -67,6 +69,15 @@ def category(rows, children, index):
     row = rows[index]
     entries, adverbs = _lexicon()
     if row['role'] == 'adverb':
+        for i in children[index]:
+            child = rows[i]
+            if child['role'] == 'clause_relative':
+                for j in children[i]:
+                    if rows[j].get('rule') == 'CL.CORRELATE' and rows[j].get('antecedent') == index:
+                        if rows[j]['lemma'] == 'что':
+                            return 'насколько'
+                        if rows[j]['lemma'] in ('когда', 'сколько'):
+                            return rows[j]['lemma']
         return adverbs.get(row['lemma'])
     if row['role'] != 'preposition' or row['head'] is None:
         return None

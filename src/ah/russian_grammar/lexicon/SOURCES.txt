@@ -233,3 +233,13 @@ clausal-addressees.tsv uses the Russian FrameBank revision and GPL-3.0 license a
 Each construction explicitly licenses both a bare Sacc/Sdat адресат and a distinct
 argument expressed by Rel + CL. Case belongs to the addressee in the matrix.
 python scripts/import_russian_clausal_addressees.py framebank_dict_cx_items.txt src/ah/russian_grammar/lexicon/clausal-addressees.tsv
+
+collective-agreement.tsv contains singular nominative common nouns attested as the
+uncoordinated subject of a plural finite verb with a bare plural genitive nmod.
+Russian-GSD r2.15 training set, CC BY-SA 4.0, hash and attribution above.
+python scripts/import_russian_collective_agreement.py ru_gsd-ud-train.conllu src/ah/russian_grammar/lexicon/collective-agreement.tsv
+
+content-governors.txt uses the Russian FrameBank revision and GPL-3.0 license above.
+Each lemma has a construction with a nominative subject, a verb and a content slot
+that admits что + CL. The full pattern excludes obligatory idiomatic material.
+python scripts/import_russian_content_governors.py framebank_dict_cx.txt framebank_dict_cx_items.txt src/ah/russian_grammar/lexicon/content-governors.txt

@@ -17,6 +17,7 @@ class Standalone:
     parts: tuple
     surface: str
     case_marked: bool
+    modifier: str | None
 
 
 _ARGUMENT_CASE = {'subject': 'nomn', 'object': 'accs', 'experiencer': 'datv'}
@@ -88,7 +89,7 @@ def _slots(tokens, budget):
                     continue
                 for surface in _surfaces(expression, case, parts[-1][1]):
                     marked = not tokens[start].surface[0].isdigit() or 'nomn' not in expression.cases
-                    option = Standalone(start, cursor, case, expression.kind, expression.value, parts, surface, marked)
+                    option = Standalone(start, cursor, case, expression.kind, expression.value, parts, surface, marked, expression.modifier)
                     if option not in options:
                         options.append(option)
         if options:
@@ -126,7 +127,7 @@ def _restore(tree, kept, groups):
                 return
         lemma, morphology = group.parts[0]
         links[group.start] = replace(head, lemma=lemma, morphology=morphology, case=group.case,
-                                     quantity=group.value, quantity_kind=group.kind, rule='NUM.ARG')
+                                     quantity=group.value, quantity_kind=group.kind, quantity_modifier=group.modifier, rule='NUM.ARG')
         for i, (lemma, morphology) in enumerate(group.parts[1:], group.start + 1):
             links[i] = Link('numeral_part', lemma, group.start, 'NUM.PART', morphology=morphology)
     return tuple(links[i] for i in range(len(links)))
@@ -208,7 +209,7 @@ def _nominatives(tokens, start, budget):
         if parts:
             lemma, form = parts[0]
             head = Link('subject', lemma, None, 'NUM.ARG', case='nomn', morphology=form,
-                        quantity=expression.value, quantity_kind=expression.kind)
+                        quantity=expression.value, quantity_kind=expression.kind, quantity_modifier=expression.modifier)
             children = ((i, Link('numeral_part', word, start, 'NUM.PART', morphology=morph))
                         for i, (word, morph) in enumerate(parts[1:], start + 1))
             standalone.append(Nominative(start, end, start, ((start, head), *children), False))

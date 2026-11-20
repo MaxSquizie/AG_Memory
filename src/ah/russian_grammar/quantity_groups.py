@@ -93,7 +93,7 @@ def _groups(tokens, start, expression, budget, *, nominal_start=None):
                 rule = 'NUM.GROUP' if first == expression.end else 'NUM.SPLIT'
                 links = [(start, Link('numeral', parts[0][0], noun, rule,
                                       morphology=parts[0][1], quantity=expression.value,
-                                      quantity_kind=expression.kind))]
+                                      quantity_kind=expression.kind, quantity_modifier=expression.modifier))]
                 links.extend((i, Link('numeral_part', part, start, 'NUM.PART', morphology=morph))
                              for i, (part, morph) in enumerate(parts[1:], start + 1))
                 sizes = 1

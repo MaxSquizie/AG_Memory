@@ -10,6 +10,8 @@ from .rules import dictionary, known_forms
 
 CASES = ('nomn', 'gent', 'datv', 'accs', 'ablt', 'loct')
 DIRECT = {'nomn', 'accs'}
+HYPHENS = frozenset('-‐‑')
+RANGE_MARKS = HYPHENS | {'–', '—'}
 DIGITS = re.compile(r'(\d+)(?:([.,/])(\d+)|[-‐‑]([а-яё]+))?')
 GROUPED = re.compile(r'\d{1,3}(?:[ \u00a0\u202f]\d{3})+(?:[.,/]\d+|[-‐‑][а-яё]+)?')
 
@@ -325,6 +327,7 @@ class Numeric:
     kind: str
     atoms: tuple[_Atom, ...]
     fractional_groups: tuple[tuple[int, int], ...] = ()
+    modifier: str | None = None
 
     def _rows(self, case, noun):
         if case not in CASES:
@@ -399,6 +402,62 @@ class Numeric:
         return frozenset({('sing', 'neut'), ('plur', None)})
 
 
+@dataclass(frozen=True)
+class NumberInterval(Numeric):
+    separator: str = '-'
+
+    def _rows(self, case, noun):
+        lower, upper = self.atoms
+        kind = 'cardinal' if upper.kind == 'digit' else upper.kind
+        right = Numeric(self.end, str(upper.value), kind, (upper,))._rows(case, noun)
+        if not right:
+            return ()
+        left = _forms(lower, case)
+        if noun is not None:
+            left = tuple(form for form in left if (not form.gender or not noun.gender or form.gender == noun.gender)
+                         and (not form.animacy or not noun.animacy or form.animacy == noun.animacy))
+        return (left, right[0]) if left else ()
+
+    def parts_for(self, external_case, noun_tag=None):
+        rows = self._rows(external_case, noun_tag)
+        if not rows:
+            return ()
+        lower, upper = self.atoms
+        if self.modifier == 'approximate':
+            return ((lower.lemma + '-' + upper.lemma, _common((*rows[0], *rows[1]))),)
+        return ((lower.lemma, _common(rows[0])), (self.separator, Morphology(pos='PNCT')),
+                (upper.lemma, _common(rows[1])))
+
+
+def intervals(tokens, start):
+    word = _surface(tokens[start])
+    pieces = re.split('[-‐‑]', word)
+    if len(pieces) == 2 and all(p.isalpha() for p in pieces):
+        left, right = pieces
+        modifier, separator, end = 'approximate', '-', start + 1
+    elif start + 2 < len(tokens) and _surface(tokens[start + 1]) in RANGE_MARKS:
+        first, middle, last = tokens[start:start + 3]
+        left, separator, right = word, _surface(middle), _surface(last)
+        if separator in HYPHENS:
+            if not (left.isdecimal() and right.isdecimal()):
+                return
+            if not isinstance(first, str) and (first.end != middle.start or middle.end != last.start):
+                return
+        modifier = 'unmarked' if word.isdecimal() else None
+        end = start + 3
+    else:
+        return
+    for lower in _atoms(left):
+        for upper in _atoms(right):
+            if lower.kind != upper.kind or lower.kind not in ('cardinal', 'collective', 'digit'):
+                continue
+            if lower.value < upper.value:
+                pair = NumberInterval(end, f'{lower.value}..{upper.value}', 'range', (lower, upper),
+                                      modifier=modifier, separator=separator)
+                if pair.cases:
+                    yield pair
+
+
 def _value(parts):
     total = block = 0
     scale_limit = unit_limit = None
@@ -464,6 +523,7 @@ def _fractions(tokens, numerator, *, whole=False):
 def expressions(tokens, start=0):
     if not 0 <= start < len(tokens):
         return
+    yield from intervals(tokens, start)
     for atom in _atoms(_surface(tokens[start])):
         kind = atom.kind
         if kind in {'digit_fraction', 'sesqui', 'denominator', 'collective', 'both', 'query', 'indefinite'}:

@@ -102,7 +102,7 @@ def attachments(prefix, levels, boundary, leaf, root, words, tokens, chart):
         yield bind(tree, boundary.marker, root, host, role), levels[:level + 1] + ((root, root),)
 
 
-def centered(tokens, outside, outer, host, inside, parse, chart, budget):
+def centered(tokens, outside, outer, host, inside, parse, chart, budget, *, temporal=False):
     from .parser import Link
     from .spatial_leaves import trees as leaves
     from .utterances import _map
@@ -110,7 +110,11 @@ def centered(tokens, outside, outer, host, inside, parse, chart, budget):
     marker = inside[0]
     anchor = outside[host]
     link = outer[host]
-    if link.role == 'adverb' and deictic_role(link.lemma):
+    if temporal:
+        if link.role != 'adverb' or link.lemma != 'тогда':
+            return
+        sites = [(anchor, 'clause_relative')]
+    elif link.role == 'adverb' and deictic_role(link.lemma):
         if chart is not None and not chart.permits(tokens[marker].start, tokens[anchor].start):
             return
         sites = [(anchor, 'clause_relative')]
@@ -136,4 +140,9 @@ def centered(tokens, outside, outer, host, inside, parse, chart, budget):
                 result[i] = Link('punctuation', ',', root, 'CL.PUNCT')
         assembled = tuple(result[i] for i in range(len(tokens)))
         for target, role in sites:
-            yield bind(assembled, marker, root, target, role)
+            if temporal:
+                from . import degree_clauses
+
+                yield degree_clauses.bind(assembled, marker, root, target, 'когда')
+            else:
+                yield bind(assembled, marker, root, target, role)

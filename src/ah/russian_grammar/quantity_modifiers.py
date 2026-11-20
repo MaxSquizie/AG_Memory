@@ -2,7 +2,7 @@ from dataclasses import replace
 from fractions import Fraction
 
 from .morphology import from_tag
-from .numerals import expressions
+from .numerals import RANGE_MARKS, expressions, intervals
 from .quantity_groups import _groups, _inflect
 from .rules import known_forms
 
@@ -62,10 +62,13 @@ class UnsupportedRange(Exception):
     pass
 
 
-def unsupported_scope(tokens):
+def unsupported_scope(tokens, budget):
     words = tuple(token.surface.casefold() for token in tokens)
     for i, word in enumerate(words):
-        if word in {'до', 'и', 'или', '-', '–', '—'} and i and i + 1 < len(tokens):
+        if (word in RANGE_MARKS or word in {'до', 'и', 'или'}) and i and i + 1 < len(tokens):
+            if word in RANGE_MARKS and any(next(_groups(tokens, i - 1, pair, budget), None)
+                                           for pair in intervals(tokens, i - 1)):
+                continue
             if next(expressions(tokens, i + 1), None) is None:
                 continue
             start = i - 1
@@ -73,13 +76,13 @@ def unsupported_scope(tokens):
                 continue
             while start and any(expr.end == i for expr in expressions(tokens, start - 1)):
                 start -= 1
-            if (word in {'-', '–', '—', 'или'} or
+            if (word in RANGE_MARKS or word == 'или' or
                     start and (words[start - 1], word) in {('с', 'до'), ('между', 'и')}):
                 return 'UNSUPPORTED_QUANTITY_RANGE'
         if any(mark in word for mark in '-‐‑'):
             parts = word.replace('‐', '-').replace('‑', '-').split('-')
-            if len(parts) == 2 and all(next(expressions((replace(tokens[i], surface=part),)), None)
-                                       for part in parts):
+            if len(parts) == 2 and not any(intervals(tokens, i)) and all(
+                    next(expressions((part,)), None) for part in parts):
                 return 'UNSUPPORTED_QUANTITY_RANGE'
 
 
@@ -87,6 +90,12 @@ def _map(tree, kept):
     return {i: replace(link, **{key: kept[j] for key in ('head', 'controller', 'antecedent')
                                  if (j := getattr(link, key)) is not None})
             for i, link in zip(kept, tree)}
+
+
+def _accepts_modifier(amount, modifier):
+    if amount.quantity_kind != 'range':
+        return amount.quantity_modifier in (None, modifier)
+    return modifier == 'approximate' and amount.quantity_modifier in ('unmarked', modifier)
 
 
 def _mark(links, tokens, start, anchor, modifier, lower=None):
@@ -159,7 +168,7 @@ def trees(tokens, local, *, budget=256):
             kept = (*range(start), *range(anchor, len(part)))
             for tree in parse(tuple(part[i] for i in kept), depth + 1, start):
                 links = _map(tree, kept)
-                if links[anchor].quantity_kind and not links[anchor].quantity_modifier:
+                if links[anchor].quantity_kind and _accepts_modifier(links[anchor], modifier):
                     yield _mark(links, part, start, anchor, modifier, lower)
             if modifier != 'negative_concord':
                 return
@@ -202,9 +211,10 @@ def trees(tokens, local, *, budget=256):
                                                 quantity_kind=expr.kind, quantity=expr.value)
                         for i, (word, morph) in enumerate(parts[1:], anchor + 1):
                             links[i] = Link('numeral_part', word, anchor, 'NUM.PART', morphology=morph)
-                    yield _mark(links, part, start, anchor, modifier, lower)
+                    if lower is not None or _accepts_modifier(links[anchor], modifier):
+                        yield _mark(links, part, start, anchor, modifier, lower)
 
-    failure = unsupported_scope(tokens)
+    failure = unsupported_scope(tokens, budget)
     if failure:
         raise UnsupportedRange(failure)
     if not _first(tokens, 0):

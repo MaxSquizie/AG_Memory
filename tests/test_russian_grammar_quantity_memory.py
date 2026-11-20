@@ -99,3 +99,22 @@ def test_quantity_answer_preserves_bound_on_symbolic_unit():
     assert submit(core, 'Потеряно до 30 % урожая.').status == 'STORED'
     assert submit(core, 'Сколько процентов урожая потеряно?').text == 'до 30'
     assert submit(core, 'Потеряно 30 процентов урожая?').status == 'UNKNOWN'
+
+
+def test_hyphenated_quantity_keeps_estimate_and_case():
+    core = AHCore()
+    assert submit(core, 'Иван купил две-три книги.').status == 'STORED'
+    assert submit(core, 'Сколько книг купил Иван?').text == 'две-три'
+    assert submit(core, 'Иван купил две книги?').status == 'UNKNOWN'
+    assert submit(core, 'Иван купил от двух до трёх книг?').status == 'UNKNOWN'
+    assert submit(core, 'Иван помог двум-трём сёстрам.').status == 'STORED'
+    assert submit(core, 'Скольким сёстрам помог Иван?').text == 'двум-трём'
+    assert submit(core, 'Иван купил два-три книги.').status == 'UNRESOLVED'
+
+
+def test_number_interval_preserves_spelling_and_both_bounds():
+    core = AHCore()
+    assert submit(core, 'Иван купил 3–5 книг.').status == 'STORED'
+    assert submit(core, 'Сколько книг купил Иван?').text == '3–5'
+    assert submit(core, 'Иван купил от трёх до пяти книг?').status == 'UNKNOWN'
+    assert submit(core, 'Ровно сколько книг купил Иван?').status == 'UNKNOWN'

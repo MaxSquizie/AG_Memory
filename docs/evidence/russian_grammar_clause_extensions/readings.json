@@ -1,0 +1,2578 @@
+{
+ "reader": "gpt-5.6-luna",
+ "reasoning_effort": "low",
+ "isolation": "One reader per distinct rendered card. The reader received only its card. Identical cards were replayed exactly.",
+ "cards": {
+  "24c1c7b86214": {
+   "card": "Большинство студентов пришли.\n\nКак здесь употреблено «пришли»? Если слово сообщает о действии группы, выберите «Большинство». Если это просьба или приказ собеседнику, выберите «пришли».\nВарианты ответа:\n- Большинство\n- пришли\n- 0 — Ни один вариант не подходит.\n- ? — По тексту нельзя выбрать однозначно.",
+   "answer": "Большинство"
+  },
+  "5705ba424268": {
+   "card": "Пришли мне список студентов.\n\nКому адресовано действие «Пришли»? Выберите участника, если он получатель.\nВарианты ответа:\n- мне\n- no such word\n- 0 — Ни один вариант не подходит.\n- ? — По тексту нельзя выбрать однозначно.",
+   "answer": "мне"
+  },
+  "b768c11814f6": {
+   "card": "Иван так устал, что уснул.\n\nКаким словом названо действие «устать»? Выберите «устал», если это глагол. Если «устал» здесь означает признак «усталый», выберите «только признак».\nВарианты ответа:\n- устал\n- только признак\n- 0 — Ни один вариант не подходит.\n- ? — По тексту нельзя выбрать однозначно.",
+   "answer": "устал"
+  },
+  "57a28517d4c9": {
+   "card": "Иван попросил Петра принести свою книгу.\n\nКакое слово называет исполнителя действия «принести»?\nВарианты ответа:\n- Петра\n- исполнитель не назван\n- 0 — Ни один вариант не подходит.\n- ? — По тексту нельзя выбрать однозначно.",
+   "answer": "Петра"
+  },
+  "7298ffa0250f": {
+   "card": "Иван попросил Петра принести свою книгу.\n\nНа кого указывает «свою»? Выберите слово, которым назван владелец.\nВарианты ответа:\n- Иван\n- Петра\n- 0 — Ни один вариант не подходит.\n- ? — По тексту нельзя выбрать однозначно.",
+   "answer": "?"
+  },
+  "3b87620c9b1c": {
+   "card": "Я понял одно: поезд ушёл.\n\nКакое слово в первой части поясняет сообщение со сказуемым «ушёл»? Если это самостоятельное сообщение, выберите «нет такого слова».\nВарианты ответа:\n- нет такого слова\n- одно\n- 0 — Ни один вариант не подходит.\n- ? — По тексту нельзя выбрать однозначно.",
+   "answer": "одно"
+  },
+  "307ac8ac7bba": {
+   "card": "Я понял одно поезд ушёл.\n\nКакое слово в первой части поясняет сообщение со сказуемым «ушёл»? Если это самостоятельное сообщение, выберите «нет такого слова».\nВарианты ответа:\n- нет такого слова\n- одно\n- 0 — Ни один вариант не подходит.\n- ? — По тексту нельзя выбрать однозначно.",
+   "answer": "одно"
+  },
+  "39ad61c4a5f3": {
+   "card": "Мария сказала: поезд ушёл.\n\nКакое слово в первой части поясняет сообщение со сказуемым «ушёл»? Если это самостоятельное сообщение, выберите «нет такого слова».\nВарианты ответа:\n- нет такого слова\n- сказала\n- 0 — Ни один вариант не подходит.\n- ? — По тексту нельзя выбрать однозначно.",
+   "answer": "сказала"
+  },
+  "acf801b11af5": {
+   "card": "Большинство студентов, вернулись.\n\nВ каком месте запятая разделяет связанные между собой члены предложения?\nВарианты ответа:\n- студентов, вернулись\n- сохранить все запятые\n- 0 — Ни один вариант не подходит.\n- ? — По тексту нельзя выбрать однозначно.",
+   "answer": "студентов, вернулись"
+  },
+  "174903dffddb": {
+   "card": "Едва, ли Иван придёт.\n\nВ каком сочетании слова связаны напрямую, несмотря на запятую между ними?\nВарианты ответа:\n- Едва, ли\n- сохранить все запятые\n- 0 — Ни один вариант не подходит.\n- ? — По тексту нельзя выбрать однозначно.",
+   "answer": "Едва, ли"
+  },
+  "5c509867482d": {
+   "card": "Пусть Иван придёт, но мы уйдём.\n\nКакое действие составляет главное сообщение? Выберите «придёт», если к нему побуждают. Если его допускают ради последующего возражения, выберите действие из второй части.\nВарианты ответа:\n- придёт\n- уйдём\n- 0 — Ни один вариант не подходит.\n- ? — По тексту нельзя выбрать однозначно.",
+   "answer": "уйдём"
+  },
+  "dee2a1f1c45b": {
+   "card": "Иван взял свою, книгу.\n\nВ каком сочетании слова связаны напрямую, несмотря на запятую между ними?\nВарианты ответа:\n- свою, книгу\n- сохранить все запятые\n- 0 — Ни один вариант не подходит.\n- ? — По тексту нельзя выбрать однозначно.",
+   "answer": "свою, книгу"
+  },
+  "af31992fcd29": {
+   "card": "Не только Иван но и, Мария ушла.\n\nВ каком сочетании слова связаны напрямую, несмотря на запятую между ними?\nВарианты ответа:\n- и, Мария\n- сохранить все запятые\n- 0 — Ни один вариант не подходит.\n- ? — По тексту нельзя выбрать однозначно.",
+   "answer": "и, Мария"
+  },
+  "d1bda5375abd": {
+   "card": "Я понял одно, поезд ушёл.\n\nКакое слово в первой части поясняет сообщение со сказуемым «ушёл»? Если это самостоятельное сообщение, выберите «нет такого слова».\nВарианты ответа:\n- нет такого слова\n- одно\n- 0 — Ни один вариант не подходит.\n- ? — По тексту нельзя выбрать однозначно.",
+   "answer": "одно"
+  },
+  "b0fc56375b5a": {
+   "card": "Я понял только одно: поезд ушёл.\n\nКакое слово в первой части поясняет сообщение со сказуемым «ушёл»? Если это самостоятельное сообщение, выберите «нет такого слова».\nВарианты ответа:\n- нет такого слова\n- одно\n- 0 — Ни один вариант не подходит.\n- ? — По тексту нельзя выбрать однозначно.",
+   "answer": "одно"
+  },
+  "e2b9c686df0d": {
+   "card": "Иван шёл туда, где горел свет.\n\nCopy «горел» if its dictionary form is «горелый». Otherwise choose “no such word”.\nAnswer options:\n- горел\n- no such word\n- 0 — None of the proposed answers fits.\n- ? — The sentence leaves the choice unclear.",
+   "answer": "no such word"
+  }
+ },
+ "cases": [
+  {
+   "text": "Большинство студентов пришли.",
+   "steps": [
+    {
+     "text": "Большинство студентов пришли.",
+     "probes": [
+      "24c1c7b86214"
+     ],
+     "status": "STORED",
+     "result": "Наблюдение записано.",
+     "reason": "SIMPLE_CLAUSE",
+     "links": [
+      {
+       "surface": "Большинство",
+       "role": "subject",
+       "head": 2,
+       "rule": "S.COLLECTIVE",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "студентов",
+       "role": "genitive_modifier",
+       "head": 0,
+       "rule": "N.GEN",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "пришли",
+       "role": "predicate",
+       "rule": "V1",
+       "assertion_status": "asserted"
+      }
+     ]
+    },
+    {
+     "text": "Кто пришёл?",
+     "probes": [],
+     "status": "ANSWER",
+     "result": "Большинство студентов",
+     "reason": "SIMPLE_CLAUSE"
+    }
+   ]
+  },
+  {
+   "text": "Большинство студентов вернулись.",
+   "steps": [
+    {
+     "text": "Большинство студентов вернулись.",
+     "probes": [],
+     "status": "STORED",
+     "result": "Наблюдение записано.",
+     "reason": "SIMPLE_CLAUSE",
+     "links": [
+      {
+       "surface": "Большинство",
+       "role": "subject",
+       "head": 2,
+       "rule": "S.COLLECTIVE",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "студентов",
+       "role": "genitive_modifier",
+       "head": 0,
+       "rule": "N.GEN",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "вернулись",
+       "role": "predicate",
+       "rule": "V1",
+       "assertion_status": "asserted"
+      }
+     ]
+    },
+    {
+     "text": "Кто вернулся?",
+     "probes": [],
+     "status": "ANSWER",
+     "result": "Большинство студентов",
+     "reason": "SIMPLE_CLAUSE"
+    }
+   ]
+  },
+  {
+   "text": "Большинство студентов пришло.",
+   "steps": [
+    {
+     "text": "Большинство студентов пришло.",
+     "probes": [],
+     "status": "STORED",
+     "result": "Наблюдение записано.",
+     "reason": "SIMPLE_CLAUSE",
+     "links": [
+      {
+       "surface": "Большинство",
+       "role": "subject",
+       "head": 2,
+       "rule": "S1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "студентов",
+       "role": "genitive_modifier",
+       "head": 0,
+       "rule": "N.GEN",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "пришло",
+       "role": "predicate",
+       "rule": "V1",
+       "assertion_status": "asserted"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "text": "Пришли мне список студентов.",
+   "steps": [
+    {
+     "text": "Пришли мне список студентов.",
+     "probes": [
+      "5705ba424268"
+     ],
+     "status": "DIRECTIVE",
+     "result": "Распознано побуждение к действию «прислать».",
+     "reason": "SIMPLE_CLAUSE"
+    }
+   ]
+  },
+  {
+   "text": "Я спросил, пришёл ли Иван.",
+   "steps": [
+    {
+     "text": "Я спросил, пришёл ли Иван.",
+     "probes": [],
+     "status": "STORED",
+     "result": "Наблюдение записано.",
+     "reason": "COMPLEX_CLAUSE",
+     "links": [
+      {
+       "surface": "Я",
+       "role": "subject",
+       "head": 1,
+       "rule": "S1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "спросил",
+       "role": "predicate",
+       "rule": "V1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": ",",
+       "role": "punctuation",
+       "head": 3,
+       "rule": "CL.PUNCT",
+       "assertion_status": "embedded"
+      },
+      {
+       "surface": "пришёл",
+       "role": "clause_complement",
+       "head": 1,
+       "rule": "CL.POLAR",
+       "scope": "embedded",
+       "assertion_status": "embedded"
+      },
+      {
+       "surface": "ли",
+       "role": "particle",
+       "head": 3,
+       "rule": "CL.POLAR.MARK",
+       "assertion_status": "embedded"
+      },
+      {
+       "surface": "Иван",
+       "role": "subject",
+       "head": 3,
+       "rule": "S1",
+       "assertion_status": "embedded"
+      }
+     ]
+    },
+    {
+     "text": "Иван пришёл?",
+     "probes": [],
+     "status": "UNKNOWN",
+     "result": "Неизвестно.",
+     "reason": "SIMPLE_CLAUSE"
+    }
+   ]
+  },
+  {
+   "text": "Иван едва ли пришёл.",
+   "steps": [
+    {
+     "text": "Иван едва ли пришёл.",
+     "probes": [],
+     "status": "STORED",
+     "result": "Наблюдение записано.",
+     "reason": "SIMPLE_CLAUSE",
+     "links": [
+      {
+       "surface": "Иван",
+       "role": "subject",
+       "head": 3,
+       "rule": "S1",
+       "assertion_status": "doubt"
+      },
+      {
+       "surface": "едва",
+       "role": "particle",
+       "head": 3,
+       "rule": "UTT.PARTICLE",
+       "assertion_status": "doubt"
+      },
+      {
+       "surface": "ли",
+       "role": "fixed",
+       "head": 1,
+       "rule": "UTT.FIXED",
+       "assertion_status": "doubt"
+      },
+      {
+       "surface": "пришёл",
+       "role": "predicate",
+       "rule": "V1",
+       "scope": "doubt",
+       "assertion_status": "doubt"
+      }
+     ]
+    },
+    {
+     "text": "Иван пришёл?",
+     "probes": [],
+     "status": "UNKNOWN",
+     "result": "Неизвестно.",
+     "reason": "SIMPLE_CLAUSE"
+    }
+   ]
+  },
+  {
+   "text": "Едва ли поезд ушёл.",
+   "steps": [
+    {
+     "text": "Едва ли поезд ушёл.",
+     "probes": [],
+     "status": "STORED",
+     "result": "Наблюдение записано.",
+     "reason": "SIMPLE_CLAUSE",
+     "links": [
+      {
+       "surface": "Едва",
+       "role": "particle",
+       "head": 3,
+       "rule": "UTT.PARTICLE",
+       "assertion_status": "doubt"
+      },
+      {
+       "surface": "ли",
+       "role": "fixed",
+       "head": 0,
+       "rule": "UTT.FIXED",
+       "assertion_status": "doubt"
+      },
+      {
+       "surface": "поезд",
+       "role": "subject",
+       "head": 3,
+       "rule": "S1",
+       "assertion_status": "doubt"
+      },
+      {
+       "surface": "ушёл",
+       "role": "predicate",
+       "rule": "V1",
+       "scope": "doubt",
+       "assertion_status": "doubt"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "text": "Пусть Иван войдёт.",
+   "steps": [
+    {
+     "text": "Пусть Иван войдёт.",
+     "probes": [],
+     "status": "DIRECTIVE",
+     "result": "Распознано побуждение к действию «войти».",
+     "reason": "SIMPLE_CLAUSE"
+    }
+   ]
+  },
+  {
+   "text": "Хотя шёл дождь, Иван вышел.",
+   "steps": [
+    {
+     "text": "Хотя шёл дождь, Иван вышел.",
+     "probes": [],
+     "status": "STORED",
+     "result": "Наблюдение записано.",
+     "reason": "COMPLEX_CLAUSE",
+     "links": [
+      {
+       "surface": "Хотя",
+       "role": "clause_marker",
+       "head": 1,
+       "rule": "CL.MARK",
+       "scope": "concession",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "шёл",
+       "role": "clause_adverbial",
+       "head": 5,
+       "rule": "CL.ADV",
+       "scope": "concession",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "дождь",
+       "role": "subject",
+       "head": 1,
+       "rule": "S1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": ",",
+       "role": "punctuation",
+       "head": 5,
+       "rule": "CL.COND",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "Иван",
+       "role": "subject",
+       "head": 5,
+       "rule": "S1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "вышел",
+       "role": "predicate",
+       "rule": "V1",
+       "assertion_status": "asserted"
+      }
+     ]
+    },
+    {
+     "text": "Иван вышел?",
+     "probes": [],
+     "status": "ANSWER",
+     "result": "Да.",
+     "reason": "SIMPLE_CLAUSE"
+    },
+    {
+     "text": "Шёл дождь?",
+     "probes": [],
+     "status": "ANSWER",
+     "result": "Да.",
+     "reason": "SIMPLE_CLAUSE"
+    }
+   ]
+  },
+  {
+   "text": "Даже если пойдёт дождь, Иван выйдет.",
+   "steps": [
+    {
+     "text": "Даже если пойдёт дождь, Иван выйдет.",
+     "probes": [],
+     "status": "STORED",
+     "result": "Наблюдение записано.",
+     "reason": "COMPLEX_CLAUSE",
+     "links": [
+      {
+       "surface": "Даже",
+       "role": "particle",
+       "head": 1,
+       "rule": "CL.FOCUS",
+       "scope": "concessive",
+       "assertion_status": "conditional"
+      },
+      {
+       "surface": "если",
+       "role": "clause_marker",
+       "head": 2,
+       "rule": "CL.MARK",
+       "scope": "concessive_condition",
+       "assertion_status": "conditional"
+      },
+      {
+       "surface": "пойдёт",
+       "role": "clause_adverbial",
+       "head": 6,
+       "rule": "CL.ADV",
+       "scope": "concessive_condition",
+       "assertion_status": "conditional"
+      },
+      {
+       "surface": "дождь",
+       "role": "subject",
+       "head": 2,
+       "rule": "S1",
+       "assertion_status": "conditional"
+      },
+      {
+       "surface": ",",
+       "role": "punctuation",
+       "head": 6,
+       "rule": "CL.COND",
+       "assertion_status": "conditional"
+      },
+      {
+       "surface": "Иван",
+       "role": "subject",
+       "head": 6,
+       "rule": "S1",
+       "assertion_status": "conditional"
+      },
+      {
+       "surface": "выйдет",
+       "role": "predicate",
+       "rule": "V1",
+       "scope": "conditional",
+       "assertion_status": "conditional"
+      }
+     ]
+    },
+    {
+     "text": "Иван выйдет?",
+     "probes": [],
+     "status": "UNKNOWN",
+     "result": "Неизвестно.",
+     "reason": "SIMPLE_CLAUSE"
+    }
+   ]
+  },
+  {
+   "text": "Иван вышел, потому что шёл дождь.",
+   "steps": [
+    {
+     "text": "Иван вышел, потому что шёл дождь.",
+     "probes": [],
+     "status": "STORED",
+     "result": "Наблюдение записано.",
+     "reason": "COMPLEX_CLAUSE",
+     "links": [
+      {
+       "surface": "Иван",
+       "role": "subject",
+       "head": 1,
+       "rule": "S1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "вышел",
+       "role": "predicate",
+       "rule": "V1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": ",",
+       "role": "punctuation",
+       "head": 5,
+       "rule": "CL.PUNCT",
+       "assertion_status": "cause"
+      },
+      {
+       "surface": "потому",
+       "role": "clause_marker",
+       "head": 5,
+       "rule": "CL.MARK",
+       "scope": "cause",
+       "assertion_status": "cause"
+      },
+      {
+       "surface": "что",
+       "role": "fixed",
+       "head": 3,
+       "rule": "CL.FIXED",
+       "assertion_status": "cause"
+      },
+      {
+       "surface": "шёл",
+       "role": "clause_adverbial",
+       "head": 1,
+       "rule": "CL.ADV",
+       "scope": "cause",
+       "assertion_status": "cause"
+      },
+      {
+       "surface": "дождь",
+       "role": "subject",
+       "head": 5,
+       "rule": "S1",
+       "assertion_status": "cause"
+      }
+     ]
+    },
+    {
+     "text": "Почему Иван вышел?",
+     "probes": [],
+     "status": "ANSWER",
+     "result": "потому что шёл дождь",
+     "reason": "SIMPLE_CLAUSE"
+    }
+   ]
+  },
+  {
+   "text": "Иван пришёл тогда, когда Мария ушла.",
+   "steps": [
+    {
+     "text": "Иван пришёл тогда, когда Мария ушла.",
+     "probes": [],
+     "status": "STORED",
+     "result": "Наблюдение записано.",
+     "reason": "COMPLEX_CLAUSE",
+     "links": [
+      {
+       "surface": "Иван",
+       "role": "subject",
+       "head": 1,
+       "rule": "S1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "пришёл",
+       "role": "predicate",
+       "rule": "V1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "тогда",
+       "role": "adverb",
+       "head": 1,
+       "rule": "B1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": ",",
+       "role": "punctuation",
+       "head": 6,
+       "rule": "CL.PUNCT",
+       "assertion_status": "time"
+      },
+      {
+       "surface": "когда",
+       "role": "adverb",
+       "head": 6,
+       "rule": "CL.CORRELATE",
+       "antecedent": 2,
+       "assertion_status": "time"
+      },
+      {
+       "surface": "Мария",
+       "role": "subject",
+       "head": 6,
+       "rule": "S1",
+       "assertion_status": "time"
+      },
+      {
+       "surface": "ушла",
+       "role": "clause_relative",
+       "head": 2,
+       "rule": "CL.REL",
+       "scope": "time",
+       "assertion_status": "time"
+      }
+     ]
+    },
+    {
+     "text": "Когда пришёл Иван?",
+     "probes": [],
+     "status": "ANSWER",
+     "result": "тогда, когда Мария ушла",
+     "reason": "SIMPLE_CLAUSE"
+    }
+   ]
+  },
+  {
+   "text": "Иван работал столько, сколько мог.",
+   "steps": [
+    {
+     "text": "Иван работал столько, сколько мог.",
+     "probes": [],
+     "status": "STORED",
+     "result": "Наблюдение записано.",
+     "reason": "COMPLEX_CLAUSE",
+     "links": [
+      {
+       "surface": "Иван",
+       "role": "subject",
+       "head": 1,
+       "rule": "S1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "работал",
+       "role": "predicate",
+       "rule": "V1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "столько",
+       "role": "adverb",
+       "head": 1,
+       "rule": "B1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": ",",
+       "role": "punctuation",
+       "head": 5,
+       "rule": "CL.PUNCT",
+       "assertion_status": "amount"
+      },
+      {
+       "surface": "сколько",
+       "role": "adverb",
+       "head": 5,
+       "rule": "CL.CORRELATE",
+       "antecedent": 2,
+       "assertion_status": "amount"
+      },
+      {
+       "surface": "мог",
+       "role": "clause_relative",
+       "head": 2,
+       "rule": "CL.REL",
+       "scope": "amount",
+       "assertion_status": "amount"
+      }
+     ]
+    },
+    {
+     "text": "Сколько работал Иван?",
+     "probes": [],
+     "status": "ANSWER",
+     "result": "столько, сколько мог",
+     "reason": "SIMPLE_CLAUSE"
+    }
+   ]
+  },
+  {
+   "text": "Иван так устал, что уснул.",
+   "steps": [
+    {
+     "text": "Иван так устал, что уснул.",
+     "probes": [
+      "b768c11814f6"
+     ],
+     "status": "STORED",
+     "result": "Наблюдение записано.",
+     "reason": "COMPLEX_CLAUSE",
+     "links": [
+      {
+       "surface": "Иван",
+       "role": "subject",
+       "head": 2,
+       "rule": "S1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "так",
+       "role": "adverb",
+       "head": 2,
+       "rule": "B1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "устал",
+       "role": "predicate",
+       "rule": "V1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": ",",
+       "role": "punctuation",
+       "head": 5,
+       "rule": "CL.PUNCT",
+       "assertion_status": "degree"
+      },
+      {
+       "surface": "что",
+       "role": "clause_marker",
+       "head": 5,
+       "rule": "CL.CORRELATE",
+       "antecedent": 1,
+       "assertion_status": "degree"
+      },
+      {
+       "surface": "уснул",
+       "role": "clause_relative",
+       "head": 1,
+       "rule": "CL.REL",
+       "scope": "degree_result",
+       "assertion_status": "degree"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "text": "Чем дольше Иван ждал, тем сильнее он волновался.",
+   "steps": [
+    {
+     "text": "Чем дольше Иван ждал, тем сильнее он волновался.",
+     "probes": [],
+     "status": "STORED",
+     "result": "Наблюдение записано.",
+     "reason": "COMPLEX_CLAUSE",
+     "links": [
+      {
+       "surface": "Чем",
+       "role": "clause_marker",
+       "head": 1,
+       "rule": "CL.SCALE",
+       "antecedent": 5,
+       "assertion_status": "proportional"
+      },
+      {
+       "surface": "дольше",
+       "role": "comparative_adverb",
+       "head": 3,
+       "rule": "CMP.ADV",
+       "assertion_status": "proportional"
+      },
+      {
+       "surface": "Иван",
+       "role": "subject",
+       "head": 3,
+       "rule": "S1",
+       "assertion_status": "proportional"
+      },
+      {
+       "surface": "ждал",
+       "role": "clause_adverbial",
+       "head": 8,
+       "rule": "CL.PROPORTIONAL",
+       "scope": "proportional",
+       "assertion_status": "proportional"
+      },
+      {
+       "surface": ",",
+       "role": "punctuation",
+       "head": 3,
+       "rule": "CL.PUNCT",
+       "assertion_status": "proportional"
+      },
+      {
+       "surface": "тем",
+       "role": "clause_marker",
+       "head": 6,
+       "rule": "CL.SCALE",
+       "assertion_status": "proportional"
+      },
+      {
+       "surface": "сильнее",
+       "role": "comparative_adverb",
+       "head": 8,
+       "rule": "CMP.ADV",
+       "assertion_status": "proportional"
+      },
+      {
+       "surface": "он",
+       "role": "subject",
+       "head": 8,
+       "rule": "S1",
+       "assertion_status": "proportional"
+      },
+      {
+       "surface": "волновался",
+       "role": "predicate",
+       "rule": "V1",
+       "scope": "proportional",
+       "assertion_status": "proportional"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "text": "Иван взял свою книгу.",
+   "steps": [
+    {
+     "text": "Иван взял свою книгу.",
+     "probes": [],
+     "status": "STORED",
+     "result": "Наблюдение записано.",
+     "reason": "SIMPLE_CLAUSE",
+     "links": [
+      {
+       "surface": "Иван",
+       "role": "subject",
+       "head": 1,
+       "rule": "S1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "взял",
+       "role": "predicate",
+       "rule": "V1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "свою",
+       "role": "possessive",
+       "head": 3,
+       "rule": "P.POSS",
+       "antecedent": 0,
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "книгу",
+       "role": "object",
+       "head": 1,
+       "rule": "O1",
+       "assertion_status": "asserted"
+      }
+     ]
+    },
+    {
+     "text": "Чью книгу взял Иван?",
+     "probes": [],
+     "status": "ANSWER",
+     "result": "Иван",
+     "reason": "SIMPLE_CLAUSE"
+    }
+   ]
+  },
+  {
+   "text": "Иван попросил Петра принести свою книгу.",
+   "steps": [
+    {
+     "text": "Иван попросил Петра принести свою книгу.",
+     "probes": [
+      "57a28517d4c9",
+      "7298ffa0250f"
+     ],
+     "status": "AMBIGUOUS",
+     "result": "Разбор не завершён. OPEN_CHOICE",
+     "reason": "OPEN_CHOICE"
+    }
+   ]
+  },
+  {
+   "text": "Ни Иван, ни Мария не пришли.",
+   "steps": [
+    {
+     "text": "Ни Иван, ни Мария не пришли.",
+     "probes": [],
+     "status": "STORED",
+     "result": "Наблюдение записано.",
+     "reason": "SIMPLE_CLAUSE",
+     "links": [
+      {
+       "surface": "Ни",
+       "role": "coordinator",
+       "head": 1,
+       "rule": "PAIR.MARK",
+       "scope": "negative_coordination",
+       "assertion_status": "negated"
+      },
+      {
+       "surface": "Иван",
+       "role": "subject",
+       "head": 6,
+       "rule": "S1",
+       "assertion_status": "negated"
+      },
+      {
+       "surface": ",",
+       "role": "punctuation",
+       "head": 4,
+       "rule": "PAIR.COMMA",
+       "assertion_status": "negated"
+      },
+      {
+       "surface": "ни",
+       "role": "coordinator",
+       "head": 4,
+       "rule": "PAIR.MARK",
+       "scope": "negative_coordination",
+       "assertion_status": "negated"
+      },
+      {
+       "surface": "Мария",
+       "role": "nominal_conjunct",
+       "head": 1,
+       "rule": "P.COORD",
+       "assertion_status": "negated"
+      },
+      {
+       "surface": "не",
+       "role": "particle",
+       "head": 6,
+       "rule": "N1",
+       "assertion_status": "negated"
+      },
+      {
+       "surface": "пришли",
+       "role": "predicate",
+       "rule": "V1",
+       "scope": "negated",
+       "assertion_status": "negated"
+      }
+     ]
+    },
+    {
+     "text": "Иван пришёл?",
+     "probes": [],
+     "status": "UNKNOWN",
+     "result": "Неизвестно.",
+     "reason": "SIMPLE_CLAUSE"
+    },
+    {
+     "text": "Иван не пришёл?",
+     "probes": [],
+     "status": "UNKNOWN",
+     "result": "Неизвестно.",
+     "reason": "SIMPLE_CLAUSE"
+    }
+   ]
+  },
+  {
+   "text": "Не только Иван, но и Мария ушла.",
+   "steps": [
+    {
+     "text": "Не только Иван, но и Мария ушла.",
+     "probes": [],
+     "status": "STORED",
+     "result": "Наблюдение записано.",
+     "reason": "SIMPLE_CLAUSE",
+     "links": [
+      {
+       "surface": "Не",
+       "role": "coordinator",
+       "head": 2,
+       "rule": "PAIR.MARK",
+       "scope": "addition",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "только",
+       "role": "coordinator_part",
+       "head": 0,
+       "rule": "PAIR.PART",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "Иван",
+       "role": "subject",
+       "head": 7,
+       "rule": "S1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": ",",
+       "role": "punctuation",
+       "head": 6,
+       "rule": "PAIR.COMMA",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "но",
+       "role": "coordinator",
+       "head": 6,
+       "rule": "PAIR.MARK",
+       "scope": "addition",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "и",
+       "role": "coordinator_part",
+       "head": 4,
+       "rule": "PAIR.PART",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "Мария",
+       "role": "nominal_conjunct",
+       "head": 2,
+       "rule": "P.COORD",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "ушла",
+       "role": "predicate",
+       "rule": "V1",
+       "assertion_status": "asserted"
+      }
+     ]
+    },
+    {
+     "text": "Иван ушёл?",
+     "probes": [],
+     "status": "UNKNOWN",
+     "result": "Неизвестно.",
+     "reason": "SIMPLE_CLAUSE"
+    },
+    {
+     "text": "Мария ушла?",
+     "probes": [],
+     "status": "UNKNOWN",
+     "result": "Неизвестно.",
+     "reason": "SIMPLE_CLAUSE"
+    }
+   ]
+  },
+  {
+   "text": "Я понял одно: поезд ушёл.",
+   "steps": [
+    {
+     "text": "Я понял одно: поезд ушёл.",
+     "probes": [
+      "3b87620c9b1c"
+     ],
+     "status": "STORED",
+     "result": "Наблюдение записано.",
+     "reason": "COMPLEX_CLAUSE",
+     "links": [
+      {
+       "surface": "Я",
+       "role": "subject",
+       "head": 1,
+       "rule": "S1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "понял",
+       "role": "predicate",
+       "rule": "V1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "одно",
+       "role": "object",
+       "head": 1,
+       "rule": "CONTENT.ANCHOR",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": ":",
+       "role": "punctuation",
+       "head": 5,
+       "rule": "UTT.SEP",
+       "assertion_status": "embedded"
+      },
+      {
+       "surface": "поезд",
+       "role": "subject",
+       "head": 5,
+       "rule": "S1",
+       "assertion_status": "embedded"
+      },
+      {
+       "surface": "ушёл",
+       "role": "clause_complement",
+       "head": 2,
+       "rule": "CONTENT.EXPL",
+       "scope": "embedded",
+       "assertion_status": "embedded"
+      }
+     ]
+    },
+    {
+     "text": "Что я понял?",
+     "probes": [],
+     "status": "ANSWER",
+     "result": "поезд ушёл",
+     "reason": "SIMPLE_CLAUSE"
+    },
+    {
+     "text": "Поезд ушёл?",
+     "probes": [],
+     "status": "UNKNOWN",
+     "result": "Неизвестно.",
+     "reason": "SIMPLE_CLAUSE"
+    }
+   ]
+  },
+  {
+   "text": "Я понял одно поезд ушёл.",
+   "steps": [
+    {
+     "text": "Я понял одно поезд ушёл.",
+     "probes": [
+      "307ac8ac7bba"
+     ],
+     "status": "STORED",
+     "result": "Наблюдение записано.",
+     "reason": "COMPLEX_CLAUSE",
+     "links": [
+      {
+       "surface": "Я",
+       "role": "subject",
+       "head": 1,
+       "rule": "S1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "понял",
+       "role": "predicate",
+       "rule": "V1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "одно",
+       "role": "object",
+       "head": 1,
+       "rule": "CONTENT.ANCHOR",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "поезд",
+       "role": "subject",
+       "head": 4,
+       "rule": "S1",
+       "assertion_status": "embedded"
+      },
+      {
+       "surface": "ушёл",
+       "role": "clause_complement",
+       "head": 2,
+       "rule": "CONTENT.EXPL",
+       "scope": "embedded",
+       "assertion_status": "embedded"
+      }
+     ]
+    },
+    {
+     "text": "Что я понял?",
+     "probes": [],
+     "status": "ANSWER",
+     "result": "поезд ушёл",
+     "reason": "SIMPLE_CLAUSE"
+    }
+   ]
+  },
+  {
+   "text": "Мария сказала: поезд ушёл.",
+   "steps": [
+    {
+     "text": "Мария сказала: поезд ушёл.",
+     "probes": [
+      "39ad61c4a5f3"
+     ],
+     "status": "STORED",
+     "result": "Наблюдение записано.",
+     "reason": "COMPLEX_CLAUSE",
+     "links": [
+      {
+       "surface": "Мария",
+       "role": "subject",
+       "head": 1,
+       "rule": "S1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "сказала",
+       "role": "predicate",
+       "rule": "V1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": ":",
+       "role": "punctuation",
+       "head": 4,
+       "rule": "UTT.SEP",
+       "assertion_status": "embedded"
+      },
+      {
+       "surface": "поезд",
+       "role": "subject",
+       "head": 4,
+       "rule": "S1",
+       "assertion_status": "embedded"
+      },
+      {
+       "surface": "ушёл",
+       "role": "clause_complement",
+       "head": 1,
+       "rule": "CONTENT.EXPL",
+       "scope": "embedded",
+       "assertion_status": "embedded"
+      }
+     ]
+    },
+    {
+     "text": "Что сказала Мария?",
+     "probes": [],
+     "status": "ANSWER",
+     "result": "поезд ушёл",
+     "reason": "SIMPLE_CLAUSE"
+    }
+   ]
+  },
+  {
+   "text": "Иван купил две-три книги.",
+   "steps": [
+    {
+     "text": "Иван купил две-три книги.",
+     "probes": [],
+     "status": "STORED",
+     "result": "Наблюдение записано.",
+     "reason": "SIMPLE_CLAUSE",
+     "links": [
+      {
+       "surface": "Иван",
+       "role": "subject",
+       "head": 1,
+       "rule": "S1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "купил",
+       "role": "predicate",
+       "rule": "V1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "две-три",
+       "role": "numeral",
+       "head": 3,
+       "rule": "NUM.GROUP",
+       "quantity": "2..3",
+       "quantity_kind": "range",
+       "quantity_modifier": "approximate",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "книги",
+       "role": "object",
+       "head": 1,
+       "rule": "O1",
+       "assertion_status": "asserted"
+      }
+     ]
+    },
+    {
+     "text": "Сколько книг купил Иван?",
+     "probes": [],
+     "status": "ANSWER",
+     "result": "две-три",
+     "reason": "SIMPLE_CLAUSE"
+    },
+    {
+     "text": "Иван купил две книги?",
+     "probes": [],
+     "status": "UNKNOWN",
+     "result": "Неизвестно.",
+     "reason": "SIMPLE_CLAUSE"
+    }
+   ]
+  },
+  {
+   "text": "Иван прочитал 3–5 книг.",
+   "steps": [
+    {
+     "text": "Иван прочитал 3–5 книг.",
+     "probes": [],
+     "status": "STORED",
+     "result": "Наблюдение записано.",
+     "reason": "SIMPLE_CLAUSE",
+     "links": [
+      {
+       "surface": "Иван",
+       "role": "subject",
+       "head": 1,
+       "rule": "S1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "прочитал",
+       "role": "predicate",
+       "rule": "V1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "3",
+       "role": "numeral",
+       "head": 5,
+       "rule": "NUM.GROUP",
+       "quantity": "3..5",
+       "quantity_kind": "range",
+       "quantity_modifier": "unmarked",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "–",
+       "role": "numeral_part",
+       "head": 2,
+       "rule": "NUM.PART",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "5",
+       "role": "numeral_part",
+       "head": 2,
+       "rule": "NUM.PART",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "книг",
+       "role": "object",
+       "head": 1,
+       "rule": "O1",
+       "assertion_status": "asserted"
+      }
+     ]
+    },
+    {
+     "text": "Сколько книг прочитал Иван?",
+     "probes": [],
+     "status": "ANSWER",
+     "result": "3–5",
+     "reason": "SIMPLE_CLAUSE"
+    }
+   ]
+  },
+  {
+   "text": "Большинство студентов, вернулись.",
+   "steps": [
+    {
+     "text": "Большинство студентов, вернулись.",
+     "probes": [
+      "acf801b11af5"
+     ],
+     "status": "STORED",
+     "result": "Наблюдение записано.",
+     "reason": "SIMPLE_CLAUSE",
+     "links": [
+      {
+       "surface": "Большинство",
+       "role": "subject",
+       "head": 3,
+       "rule": "S.COLLECTIVE",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "студентов",
+       "role": "genitive_modifier",
+       "head": 0,
+       "rule": "N.GEN",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": ",",
+       "role": "punctuation",
+       "head": 3,
+       "rule": "PUNCT.INTRAGROUP",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "вернулись",
+       "role": "predicate",
+       "rule": "V1",
+       "assertion_status": "asserted"
+      }
+     ]
+    },
+    {
+     "text": "Кто вернулся?",
+     "probes": [],
+     "status": "ANSWER",
+     "result": "Большинство студентов",
+     "reason": "SIMPLE_CLAUSE"
+    }
+   ]
+  },
+  {
+   "text": "Едва, ли Иван придёт.",
+   "steps": [
+    {
+     "text": "Едва, ли Иван придёт.",
+     "probes": [
+      "174903dffddb"
+     ],
+     "status": "STORED",
+     "result": "Наблюдение записано.",
+     "reason": "SIMPLE_CLAUSE",
+     "links": [
+      {
+       "surface": "Едва",
+       "role": "particle",
+       "head": 4,
+       "rule": "UTT.PARTICLE",
+       "assertion_status": "doubt"
+      },
+      {
+       "surface": ",",
+       "role": "punctuation",
+       "head": 0,
+       "rule": "PUNCT.INTRAGROUP",
+       "assertion_status": "doubt"
+      },
+      {
+       "surface": "ли",
+       "role": "fixed",
+       "head": 0,
+       "rule": "UTT.FIXED",
+       "assertion_status": "doubt"
+      },
+      {
+       "surface": "Иван",
+       "role": "subject",
+       "head": 4,
+       "rule": "S1",
+       "assertion_status": "doubt"
+      },
+      {
+       "surface": "придёт",
+       "role": "predicate",
+       "rule": "V1",
+       "scope": "doubt",
+       "assertion_status": "doubt"
+      }
+     ]
+    },
+    {
+     "text": "Иван придёт?",
+     "probes": [],
+     "status": "UNKNOWN",
+     "result": "Неизвестно.",
+     "reason": "SIMPLE_CLAUSE"
+    }
+   ]
+  },
+  {
+   "text": "Пусть Иван придёт, но мы уйдём.",
+   "steps": [
+    {
+     "text": "Пусть Иван придёт, но мы уйдём.",
+     "probes": [
+      "5c509867482d"
+     ],
+     "status": "STORED",
+     "result": "Наблюдение записано.",
+     "reason": "COMPLEX_CLAUSE",
+     "links": [
+      {
+       "surface": "Пусть",
+       "role": "clause_marker",
+       "head": 2,
+       "rule": "CL.MARK",
+       "scope": "hypothetical",
+       "assertion_status": "hypothetical"
+      },
+      {
+       "surface": "Иван",
+       "role": "subject",
+       "head": 2,
+       "rule": "S1",
+       "assertion_status": "hypothetical"
+      },
+      {
+       "surface": "придёт",
+       "role": "clause_adverbial",
+       "head": 6,
+       "rule": "CL.ADV",
+       "scope": "hypothetical",
+       "assertion_status": "hypothetical"
+      },
+      {
+       "surface": ",",
+       "role": "punctuation",
+       "head": 2,
+       "rule": "CL.PUNCT",
+       "assertion_status": "hypothetical"
+      },
+      {
+       "surface": "но",
+       "role": "clause_marker",
+       "head": 6,
+       "rule": "CL.CONTRAST",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "мы",
+       "role": "subject",
+       "head": 6,
+       "rule": "S1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "уйдём",
+       "role": "predicate",
+       "rule": "V1",
+       "assertion_status": "asserted"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "text": "Анна узнала спросил ли Иван придёт ли Ольга.",
+   "steps": [
+    {
+     "text": "Анна узнала спросил ли Иван придёт ли Ольга.",
+     "probes": [],
+     "status": "STORED",
+     "result": "Наблюдение записано.",
+     "reason": "COMPLEX_CLAUSE",
+     "links": [
+      {
+       "surface": "Анна",
+       "role": "subject",
+       "head": 1,
+       "rule": "S1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "узнала",
+       "role": "predicate",
+       "rule": "V1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "спросил",
+       "role": "clause_complement",
+       "head": 1,
+       "rule": "CL.POLAR",
+       "scope": "embedded",
+       "assertion_status": "embedded"
+      },
+      {
+       "surface": "ли",
+       "role": "particle",
+       "head": 2,
+       "rule": "CL.POLAR.MARK",
+       "assertion_status": "embedded"
+      },
+      {
+       "surface": "Иван",
+       "role": "subject",
+       "head": 2,
+       "rule": "S1",
+       "assertion_status": "embedded"
+      },
+      {
+       "surface": "придёт",
+       "role": "clause_complement",
+       "head": 2,
+       "rule": "CL.POLAR",
+       "scope": "embedded",
+       "assertion_status": "embedded"
+      },
+      {
+       "surface": "ли",
+       "role": "particle",
+       "head": 5,
+       "rule": "CL.POLAR.MARK",
+       "assertion_status": "embedded"
+      },
+      {
+       "surface": "Ольга",
+       "role": "subject",
+       "head": 5,
+       "rule": "S1",
+       "assertion_status": "embedded"
+      }
+     ]
+    },
+    {
+     "text": "Ольга придёт?",
+     "probes": [],
+     "status": "UNKNOWN",
+     "result": "Неизвестно.",
+     "reason": "SIMPLE_CLAUSE"
+    }
+   ]
+  },
+  {
+   "text": "Я спросил пришёл ли Иван.",
+   "steps": [
+    {
+     "text": "Я спросил пришёл ли Иван.",
+     "probes": [],
+     "status": "STORED",
+     "result": "Наблюдение записано.",
+     "reason": "COMPLEX_CLAUSE",
+     "links": [
+      {
+       "surface": "Я",
+       "role": "subject",
+       "head": 1,
+       "rule": "S1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "спросил",
+       "role": "predicate",
+       "rule": "V1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "пришёл",
+       "role": "clause_complement",
+       "head": 1,
+       "rule": "CL.POLAR",
+       "scope": "embedded",
+       "assertion_status": "embedded"
+      },
+      {
+       "surface": "ли",
+       "role": "particle",
+       "head": 2,
+       "rule": "CL.POLAR.MARK",
+       "assertion_status": "embedded"
+      },
+      {
+       "surface": "Иван",
+       "role": "subject",
+       "head": 2,
+       "rule": "S1",
+       "assertion_status": "embedded"
+      }
+     ]
+    },
+    {
+     "text": "Что я спросил?",
+     "probes": [],
+     "status": "ANSWER",
+     "result": "пришёл ли Иван",
+     "reason": "SIMPLE_CLAUSE"
+    }
+   ]
+  },
+  {
+   "text": "Хотя шёл дождь Иван вышел.",
+   "steps": [
+    {
+     "text": "Хотя шёл дождь Иван вышел.",
+     "probes": [],
+     "status": "STORED",
+     "result": "Наблюдение записано.",
+     "reason": "COMPLEX_CLAUSE",
+     "links": [
+      {
+       "surface": "Хотя",
+       "role": "clause_marker",
+       "head": 1,
+       "rule": "CL.MARK",
+       "scope": "concession",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "шёл",
+       "role": "clause_adverbial",
+       "head": 4,
+       "rule": "CL.ADV",
+       "scope": "concession",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "дождь",
+       "role": "subject",
+       "head": 1,
+       "rule": "S1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "Иван",
+       "role": "subject",
+       "head": 4,
+       "rule": "S1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "вышел",
+       "role": "predicate",
+       "rule": "V1",
+       "assertion_status": "asserted"
+      }
+     ]
+    },
+    {
+     "text": "Иван вышел?",
+     "probes": [],
+     "status": "ANSWER",
+     "result": "Да.",
+     "reason": "SIMPLE_CLAUSE"
+    }
+   ]
+  },
+  {
+   "text": "Иван пришёл тогда когда Мария ушла.",
+   "steps": [
+    {
+     "text": "Иван пришёл тогда когда Мария ушла.",
+     "probes": [],
+     "status": "STORED",
+     "result": "Наблюдение записано.",
+     "reason": "COMPLEX_CLAUSE",
+     "links": [
+      {
+       "surface": "Иван",
+       "role": "subject",
+       "head": 1,
+       "rule": "S1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "пришёл",
+       "role": "predicate",
+       "rule": "V1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "тогда",
+       "role": "adverb",
+       "head": 1,
+       "rule": "B1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "когда",
+       "role": "adverb",
+       "head": 5,
+       "rule": "CL.CORRELATE",
+       "antecedent": 2,
+       "assertion_status": "time"
+      },
+      {
+       "surface": "Мария",
+       "role": "subject",
+       "head": 5,
+       "rule": "S1",
+       "assertion_status": "time"
+      },
+      {
+       "surface": "ушла",
+       "role": "clause_relative",
+       "head": 2,
+       "rule": "CL.REL",
+       "scope": "time",
+       "assertion_status": "time"
+      }
+     ]
+    },
+    {
+     "text": "Когда пришёл Иван?",
+     "probes": [],
+     "status": "ANSWER",
+     "result": "тогда когда Мария ушла",
+     "reason": "SIMPLE_CLAUSE"
+    }
+   ]
+  },
+  {
+   "text": "Иван получил столько книг, сколько купил Пётр.",
+   "steps": [
+    {
+     "text": "Иван получил столько книг, сколько купил Пётр.",
+     "probes": [],
+     "status": "STORED",
+     "result": "Наблюдение записано.",
+     "reason": "COMPLEX_CLAUSE",
+     "links": [
+      {
+       "surface": "Иван",
+       "role": "subject",
+       "head": 1,
+       "rule": "S1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "получил",
+       "role": "predicate",
+       "rule": "V1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "столько",
+       "role": "numeral",
+       "head": 3,
+       "rule": "NUM.GROUP",
+       "quantity_kind": "indefinite",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "книг",
+       "role": "object",
+       "head": 1,
+       "rule": "O1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": ",",
+       "role": "punctuation",
+       "head": 6,
+       "rule": "CL.PUNCT",
+       "assertion_status": "amount"
+      },
+      {
+       "surface": "сколько",
+       "role": "object",
+       "head": 6,
+       "rule": "CL.CORRELATE",
+       "antecedent": 2,
+       "quantity_kind": "relative",
+       "assertion_status": "amount"
+      },
+      {
+       "surface": "купил",
+       "role": "clause_relative",
+       "head": 2,
+       "rule": "CL.REL",
+       "scope": "amount",
+       "assertion_status": "amount"
+      },
+      {
+       "surface": "Пётр",
+       "role": "subject",
+       "head": 6,
+       "rule": "S1",
+       "assertion_status": "amount"
+      }
+     ]
+    },
+    {
+     "text": "Сколько книг получил Иван?",
+     "probes": [],
+     "status": "ANSWER",
+     "result": "столько книг, сколько купил Пётр",
+     "reason": "SIMPLE_CLAUSE"
+    }
+   ]
+  },
+  {
+   "text": "Иван взял свою, книгу.",
+   "steps": [
+    {
+     "text": "Иван взял свою, книгу.",
+     "probes": [
+      "dee2a1f1c45b"
+     ],
+     "status": "STORED",
+     "result": "Наблюдение записано.",
+     "reason": "SIMPLE_CLAUSE",
+     "links": [
+      {
+       "surface": "Иван",
+       "role": "subject",
+       "head": 1,
+       "rule": "S1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "взял",
+       "role": "predicate",
+       "rule": "V1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "свою",
+       "role": "possessive",
+       "head": 4,
+       "rule": "P.POSS",
+       "antecedent": 0,
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": ",",
+       "role": "punctuation",
+       "head": 4,
+       "rule": "PUNCT.INTRAGROUP",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "книгу",
+       "role": "object",
+       "head": 1,
+       "rule": "O1",
+       "assertion_status": "asserted"
+      }
+     ]
+    },
+    {
+     "text": "Чью книгу взял Иван?",
+     "probes": [],
+     "status": "ANSWER",
+     "result": "Иван",
+     "reason": "SIMPLE_CLAUSE"
+    }
+   ]
+  },
+  {
+   "text": "Ни Иван ни Мария не пришли.",
+   "steps": [
+    {
+     "text": "Ни Иван ни Мария не пришли.",
+     "probes": [],
+     "status": "STORED",
+     "result": "Наблюдение записано.",
+     "reason": "SIMPLE_CLAUSE",
+     "links": [
+      {
+       "surface": "Ни",
+       "role": "coordinator",
+       "head": 1,
+       "rule": "PAIR.MARK",
+       "scope": "negative_coordination",
+       "assertion_status": "negated"
+      },
+      {
+       "surface": "Иван",
+       "role": "subject",
+       "head": 5,
+       "rule": "S1",
+       "assertion_status": "negated"
+      },
+      {
+       "surface": "ни",
+       "role": "coordinator",
+       "head": 3,
+       "rule": "PAIR.MARK",
+       "scope": "negative_coordination",
+       "assertion_status": "negated"
+      },
+      {
+       "surface": "Мария",
+       "role": "nominal_conjunct",
+       "head": 1,
+       "rule": "P.COORD",
+       "assertion_status": "negated"
+      },
+      {
+       "surface": "не",
+       "role": "particle",
+       "head": 5,
+       "rule": "N1",
+       "assertion_status": "negated"
+      },
+      {
+       "surface": "пришли",
+       "role": "predicate",
+       "rule": "V1",
+       "scope": "negated",
+       "assertion_status": "negated"
+      }
+     ]
+    },
+    {
+     "text": "Кто не пришёл?",
+     "probes": [],
+     "status": "ANSWER",
+     "result": "Ни Иван ни Мария",
+     "reason": "SIMPLE_CLAUSE"
+    }
+   ]
+  },
+  {
+   "text": "Не только Иван но и Мария ушла.",
+   "steps": [
+    {
+     "text": "Не только Иван но и Мария ушла.",
+     "probes": [],
+     "status": "STORED",
+     "result": "Наблюдение записано.",
+     "reason": "SIMPLE_CLAUSE",
+     "links": [
+      {
+       "surface": "Не",
+       "role": "coordinator",
+       "head": 2,
+       "rule": "PAIR.MARK",
+       "scope": "addition",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "только",
+       "role": "coordinator_part",
+       "head": 0,
+       "rule": "PAIR.PART",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "Иван",
+       "role": "subject",
+       "head": 6,
+       "rule": "S1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "но",
+       "role": "coordinator",
+       "head": 5,
+       "rule": "PAIR.MARK",
+       "scope": "addition",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "и",
+       "role": "coordinator_part",
+       "head": 3,
+       "rule": "PAIR.PART",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "Мария",
+       "role": "nominal_conjunct",
+       "head": 2,
+       "rule": "P.COORD",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "ушла",
+       "role": "predicate",
+       "rule": "V1",
+       "assertion_status": "asserted"
+      }
+     ]
+    },
+    {
+     "text": "Кто ушёл?",
+     "probes": [],
+     "status": "ANSWER",
+     "result": "Не только Иван но и Мария",
+     "reason": "SIMPLE_CLAUSE"
+    }
+   ]
+  },
+  {
+   "text": "Не только Иван но и, Мария ушла.",
+   "steps": [
+    {
+     "text": "Не только Иван но и, Мария ушла.",
+     "probes": [
+      "af31992fcd29"
+     ],
+     "status": "STORED",
+     "result": "Наблюдение записано.",
+     "reason": "SIMPLE_CLAUSE",
+     "links": [
+      {
+       "surface": "Не",
+       "role": "coordinator",
+       "head": 2,
+       "rule": "PAIR.MARK",
+       "scope": "addition",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "только",
+       "role": "coordinator_part",
+       "head": 0,
+       "rule": "PAIR.PART",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "Иван",
+       "role": "subject",
+       "head": 7,
+       "rule": "S1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "но",
+       "role": "coordinator",
+       "head": 6,
+       "rule": "PAIR.MARK",
+       "scope": "addition",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "и",
+       "role": "coordinator_part",
+       "head": 3,
+       "rule": "PAIR.PART",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": ",",
+       "role": "punctuation",
+       "head": 6,
+       "rule": "PUNCT.INTRAGROUP",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "Мария",
+       "role": "nominal_conjunct",
+       "head": 2,
+       "rule": "P.COORD",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "ушла",
+       "role": "predicate",
+       "rule": "V1",
+       "assertion_status": "asserted"
+      }
+     ]
+    },
+    {
+     "text": "Кто ушёл?",
+     "probes": [],
+     "status": "ANSWER",
+     "result": "Не только Иван но и, Мария",
+     "reason": "SIMPLE_CLAUSE"
+    }
+   ]
+  },
+  {
+   "text": "То ли шёл дождь, то ли падал снег.",
+   "steps": [
+    {
+     "text": "То ли шёл дождь, то ли падал снег.",
+     "probes": [],
+     "status": "STORED",
+     "result": "Наблюдение записано.",
+     "reason": "COMPLEX_CLAUSE",
+     "links": [
+      {
+       "surface": "То",
+       "role": "coordinator",
+       "head": 2,
+       "rule": "PAIR.MARK",
+       "scope": "alternative",
+       "assertion_status": "alternative"
+      },
+      {
+       "surface": "ли",
+       "role": "coordinator_part",
+       "head": 0,
+       "rule": "PAIR.PART",
+       "assertion_status": "alternative"
+      },
+      {
+       "surface": "шёл",
+       "role": "predicate",
+       "rule": "V1",
+       "scope": "alternative",
+       "assertion_status": "alternative"
+      },
+      {
+       "surface": "дождь",
+       "role": "subject",
+       "head": 2,
+       "rule": "S1",
+       "assertion_status": "alternative"
+      },
+      {
+       "surface": ",",
+       "role": "punctuation",
+       "head": 7,
+       "rule": "PAIR.COMMA",
+       "assertion_status": "alternative"
+      },
+      {
+       "surface": "то",
+       "role": "clause_marker",
+       "head": 7,
+       "rule": "PAIR.MARK",
+       "scope": "alternative",
+       "assertion_status": "alternative"
+      },
+      {
+       "surface": "ли",
+       "role": "coordinator_part",
+       "head": 5,
+       "rule": "PAIR.PART",
+       "assertion_status": "alternative"
+      },
+      {
+       "surface": "падал",
+       "role": "clause_conjunct",
+       "head": 2,
+       "rule": "CL.CONJ",
+       "scope": "alternative",
+       "assertion_status": "alternative"
+      },
+      {
+       "surface": "снег",
+       "role": "subject",
+       "head": 7,
+       "rule": "S1",
+       "assertion_status": "alternative"
+      }
+     ]
+    },
+    {
+     "text": "Шёл дождь?",
+     "probes": [],
+     "status": "UNKNOWN",
+     "result": "Неизвестно.",
+     "reason": "SIMPLE_CLAUSE"
+    },
+    {
+     "text": "Падал снег?",
+     "probes": [],
+     "status": "UNKNOWN",
+     "result": "Неизвестно.",
+     "reason": "SIMPLE_CLAUSE"
+    }
+   ]
+  },
+  {
+   "text": "Я понял одно, поезд ушёл.",
+   "steps": [
+    {
+     "text": "Я понял одно, поезд ушёл.",
+     "probes": [
+      "d1bda5375abd"
+     ],
+     "status": "STORED",
+     "result": "Наблюдение записано.",
+     "reason": "COMPLEX_CLAUSE",
+     "links": [
+      {
+       "surface": "Я",
+       "role": "subject",
+       "head": 1,
+       "rule": "S1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "понял",
+       "role": "predicate",
+       "rule": "V1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "одно",
+       "role": "object",
+       "head": 1,
+       "rule": "CONTENT.ANCHOR",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": ",",
+       "role": "punctuation",
+       "head": 5,
+       "rule": "UTT.SEP",
+       "assertion_status": "embedded"
+      },
+      {
+       "surface": "поезд",
+       "role": "subject",
+       "head": 5,
+       "rule": "S1",
+       "assertion_status": "embedded"
+      },
+      {
+       "surface": "ушёл",
+       "role": "clause_complement",
+       "head": 2,
+       "rule": "CONTENT.EXPL",
+       "scope": "embedded",
+       "assertion_status": "embedded"
+      }
+     ]
+    },
+    {
+     "text": "Что я понял?",
+     "probes": [],
+     "status": "ANSWER",
+     "result": "поезд ушёл",
+     "reason": "SIMPLE_CLAUSE"
+    }
+   ]
+  },
+  {
+   "text": "Иван помог двум-трём сёстрам.",
+   "steps": [
+    {
+     "text": "Иван помог двум-трём сёстрам.",
+     "probes": [],
+     "status": "STORED",
+     "result": "Наблюдение записано.",
+     "reason": "SIMPLE_CLAUSE",
+     "links": [
+      {
+       "surface": "Иван",
+       "role": "subject",
+       "head": 1,
+       "rule": "S1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "помог",
+       "role": "predicate",
+       "rule": "V1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "двум-трём",
+       "role": "numeral",
+       "head": 3,
+       "rule": "NUM.GROUP",
+       "quantity": "2..3",
+       "quantity_kind": "range",
+       "quantity_modifier": "approximate",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "сёстрам",
+       "role": "beneficiary",
+       "head": 1,
+       "rule": "V.GOV",
+       "assertion_status": "asserted"
+      }
+     ]
+    },
+    {
+     "text": "Скольким сёстрам помог Иван?",
+     "probes": [],
+     "status": "ANSWER",
+     "result": "двум-трём",
+     "reason": "SIMPLE_CLAUSE"
+    }
+   ]
+  },
+  {
+   "text": "Стемнело — мы вернулись.",
+   "steps": [
+    {
+     "text": "Стемнело — мы вернулись.",
+     "probes": [],
+     "status": "STORED",
+     "result": "Наблюдение записано.",
+     "reason": "COMPLEX_CLAUSE",
+     "links": [
+      {
+       "surface": "Стемнело",
+       "role": "predicate",
+       "rule": "V1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "—",
+       "role": "punctuation",
+       "head": 3,
+       "rule": "UTT.SEP",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "мы",
+       "role": "subject",
+       "head": 3,
+       "rule": "S1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "вернулись",
+       "role": "clause_conjunct",
+       "head": 0,
+       "rule": "UTT.PARATAXIS",
+       "assertion_status": "asserted"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "text": "Я понял только одно: поезд ушёл.",
+   "steps": [
+    {
+     "text": "Я понял только одно: поезд ушёл.",
+     "probes": [
+      "b0fc56375b5a"
+     ],
+     "status": "STORED",
+     "result": "Наблюдение записано.",
+     "reason": "COMPLEX_CLAUSE",
+     "links": [
+      {
+       "surface": "Я",
+       "role": "subject",
+       "head": 1,
+       "rule": "S1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "понял",
+       "role": "predicate",
+       "rule": "V1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "только",
+       "role": "particle",
+       "head": 3,
+       "rule": "F.NP",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "одно",
+       "role": "object",
+       "head": 1,
+       "rule": "CONTENT.ANCHOR",
+       "scope": "focus_exclusive",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": ":",
+       "role": "punctuation",
+       "head": 6,
+       "rule": "UTT.SEP",
+       "assertion_status": "embedded"
+      },
+      {
+       "surface": "поезд",
+       "role": "subject",
+       "head": 6,
+       "rule": "S1",
+       "assertion_status": "embedded"
+      },
+      {
+       "surface": "ушёл",
+       "role": "clause_complement",
+       "head": 3,
+       "rule": "CONTENT.EXPL",
+       "scope": "embedded",
+       "assertion_status": "embedded"
+      }
+     ]
+    },
+    {
+     "text": "Что я понял?",
+     "probes": [],
+     "status": "ANSWER",
+     "result": "поезд ушёл",
+     "reason": "SIMPLE_CLAUSE"
+    }
+   ]
+  },
+  {
+   "text": "Иван шёл туда, где горел свет.",
+   "steps": [
+    {
+     "text": "Иван шёл туда, где горел свет.",
+     "probes": [
+      "e2b9c686df0d"
+     ],
+     "status": "STORED",
+     "result": "Наблюдение записано.",
+     "reason": "COMPLEX_CLAUSE",
+     "links": [
+      {
+       "surface": "Иван",
+       "role": "subject",
+       "head": 1,
+       "rule": "S1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "шёл",
+       "role": "predicate",
+       "rule": "V1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": "туда",
+       "role": "adverb",
+       "head": 1,
+       "rule": "B1",
+       "assertion_status": "asserted"
+      },
+      {
+       "surface": ",",
+       "role": "punctuation",
+       "head": 5,
+       "rule": "CL.PUNCT",
+       "assertion_status": "relative"
+      },
+      {
+       "surface": "где",
+       "role": "adverb",
+       "head": 5,
+       "rule": "CL.SPATIAL.REF",
+       "antecedent": 2,
+       "assertion_status": "relative"
+      },
+      {
+       "surface": "горел",
+       "role": "clause_relative",
+       "head": 2,
+       "rule": "CL.REL",
+       "scope": "relative",
+       "assertion_status": "relative"
+      },
+      {
+       "surface": "свет",
+       "role": "subject",
+       "head": 5,
+       "rule": "S1",
+       "assertion_status": "relative"
+      }
+     ]
+    },
+    {
+     "text": "Куда шёл Иван?",
+     "probes": [],
+     "status": "ANSWER",
+     "result": "туда, где горел свет",
+     "reason": "SIMPLE_CLAUSE"
+    }
+   ]
+  }
+ ]
+}

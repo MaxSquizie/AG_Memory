@@ -3,6 +3,7 @@ from dataclasses import dataclass, replace
 from functools import cache
 from importlib.resources import files
 
+from . import degree_clauses
 from .ellipsis import gapped_leaves
 from .rules import known_forms
 from .spatial_prefix import relative_role
@@ -20,6 +21,7 @@ def _connectives():
         form, relation, governor = row.split('\t')
         forms[tuple(form.split())][relation].add(governor)
     forms[('что',)]['ccomp'].add('знать')
+    forms[('даже', 'если')]['advcl'].add('*')
     return forms, max(map(len, forms))
 
 
@@ -45,6 +47,9 @@ def _boundaries(words):
         start = index - 1 if index and words[index - 1] == ',' else index
         if relative_role(words[index]) and 'advcl' not in forms.get((words[index],), {}):
             yield Boundary(start, index, index + 1, words[index], 'advcl', frozenset())
+        if words[index] in degree_clauses.PAIRS and words[index] != 'когда':
+            if any(word in degree_clauses.PAIRS[words[index]][1] for word in words[:index]):
+                yield Boundary(start, index, index + 1, words[index], 'correlative', frozenset())
         if words[index] == 'что' and start > 0:
             yield Boundary(start, index, index + 1, 'что', 'relative', frozenset())
         for end in range(index + 1, min(len(words), index + width) + 1):
@@ -77,12 +82,20 @@ def _scope(boundary):
     if boundary.relation == 'advcl':
         if boundary.form in ('потому что', 'так как'):
             return 'cause'
-        return 'condition' if boundary.form == 'если' else 'adverbial'
+        if boundary.form == 'даже если':
+            return 'concessive_condition'
+        if boundary.form == 'если':
+            return 'condition'
+        if boundary.form in ('хотя', 'несмотря на то что'):
+            return 'concession'
+        if boundary.form in ('когда', 'как только', 'пока'):
+            return 'temporal'
+        return 'adverbial'
     return 'alternative' if boundary.form in ('или', 'либо') else None
 
 
 def _allows_mood(boundary, predicate):
-    if boundary.relation != 'advcl' or boundary.form not in {'если', 'когда', 'как только', 'пока'}:
+    if boundary.relation != 'advcl' or boundary.form not in {'если', 'даже если', 'хотя', 'когда', 'как только', 'пока'}:
         return True
     return predicate.morphology is None or predicate.morphology.mood != 'impr'
 
@@ -91,6 +104,12 @@ def _markers(boundary, root, words):
     from .parser import Link
 
     markers = []
+    if boundary.form == 'даже если':
+        markers.extend(Link('punctuation', words[i], root, 'CL.PUNCT')
+                       for i in range(boundary.start, boundary.marker))
+        markers.append(Link('particle', words[boundary.marker], boundary.marker + 1, 'CL.FOCUS', scope='concessive'))
+        markers.append(Link('clause_marker', words[boundary.marker + 1], root, 'CL.MARK', scope=_scope(boundary)))
+        return tuple(markers)
     stop = boundary.marker if boundary.relation == 'relative' else boundary.stop
     for index in range(boundary.start, stop):
         if index < boundary.marker:
@@ -131,7 +150,7 @@ def _level_attachments(prefix, levels, boundary, leaf, root, words):
         scope = _scope(boundary)
         joined = list(prefix + marker_links + leaf)
         joined[root] = replace(own, role=role, rule=rule, head=host, scope=own.scope or scope)
-        host_scope = {'condition': 'conditional', 'alternative': 'alternative', 'adverbial': 'adverbial'}.get(scope)
+        host_scope = {'condition': 'conditional', 'concessive_condition': 'conditional', 'alternative': 'alternative', 'adverbial': 'adverbial'}.get(scope)
         if host_scope and not joined[host].scope:
             joined[host] = replace(joined[host], scope=host_scope)
         if relative:
@@ -150,6 +169,22 @@ def _attachments(prefix, levels, boundary, leaf, root, words, *, tokens=None, sp
 
         yield from attachments(prefix, levels, boundary, leaf, root, words, tokens, spatial_prefix)
         return
+    paired = boundary.relation == 'correlative'
+    if paired or (boundary.form == 'когда' and boundary.relation == 'advcl'):
+        amount = paired and boundary.form == 'сколько'
+        markers = _markers(boundary, root, words)
+        links = prefix + (markers[:-1] if amount else markers) + leaf
+        found = False
+        for level, (_, governor) in enumerate(levels):
+            for anchor in degree_clauses.anchors(prefix, boundary.form, governor):
+                if amount and (leaf[0].lemma != boundary.form or
+                               (prefix[anchor].role == 'numeral' and leaf[0].quantity_kind != 'query')):
+                    continue
+                found = True
+                yield degree_clauses.bind(links, boundary.marker, root, anchor, boundary.form), (
+                    levels[:level + 1] + ((root, root),))
+        if paired or found:
+            return
     for joined, domains in _level_attachments(prefix, levels, boundary, leaf, root, words):
         yield joined, domains
         if boundary.relation != 'advcl':
@@ -259,8 +294,12 @@ def trees(tokens, local, *, budget=256, spatial_prefix=None):
                 for stop in finishes:
                     if stop <= marker.stop:
                         continue
-                    candidates = relative_leaves(marker, stop) if marker.relation == 'relative' else leaves(
-                        marker.stop, stop, spatial=bool(relative_role(marker.form)))
+                    if marker.relation == 'relative':
+                        candidates = relative_leaves(marker, stop)
+                    elif marker.relation == 'correlative' and marker.form == 'сколько':
+                        candidates = leaves(marker.marker, stop)
+                    else:
+                        candidates = leaves(marker.stop, stop, spatial=bool(relative_role(marker.form)))
                     if marker.relation == 'conj' and len(levels) == 1:
                         gaps = tuple(gapped_leaves(tokens, marker.stop, stop, prefix, levels[0][0], budget))
                         if gaps:
@@ -275,6 +314,7 @@ def trees(tokens, local, *, budget=256, spatial_prefix=None):
                                 if len(pending) > budget:
                                     raise AnalysisBudgetExceeded('ANALYSIS_BUDGET')
 
+    yield from degree_clauses.proportional(tokens, local, spend)
     for tree, _ in parse_region(0, size):
         yield tree
     for marker in starts[0]:
@@ -285,10 +325,10 @@ def trees(tokens, local, *, budget=256, spatial_prefix=None):
                 return trees(part, local, budget=budget, spatial_prefix=spatial_prefix)
             yield from reverse_trees(tokens, components, budget, spatial_prefix, _preposed_splits(words, marker.stop))
             continue
-        if marker.relation != 'advcl' or marker.form not in _preposed():
+        if marker.relation != 'advcl' or (marker.form not in _preposed() and marker.form != 'даже если'):
             continue
         for stop, split in _preposed_splits(words, marker.stop):
-            conditional = _scope(marker) == 'condition'
+            conditional = _scope(marker) in ('condition', 'concessive_condition')
             main = split + (conditional and split < size and words[split] == 'то')
             if main >= size:
                 continue
@@ -301,8 +341,15 @@ def trees(tokens, local, *, budget=256, spatial_prefix=None):
                                        scope='conditional' if i >= split else None)
                                   for i in range(stop, main))
                     joined.extend(matrix)
+                    if marker.form == 'когда':
+                        anchors = tuple(i for i, link in enumerate(matrix) if link.lemma == 'тогда'
+                                        and link.role == 'adverb' and link.head == root)
+                        if anchors:
+                            for anchor in anchors:
+                                yield degree_clauses.bind(joined, marker.marker, child, main + anchor, marker.form)
+                            continue
                     joined[child] = replace(joined[child], role='clause_adverbial', head=root, rule='CL.ADV',
                                             scope=joined[child].scope or _scope(marker))
-                    qualification = {'condition': 'conditional', 'adverbial': 'adverbial'}.get(_scope(marker))
+                    qualification = {'condition': 'conditional', 'concessive_condition': 'conditional', 'adverbial': 'adverbial'}.get(_scope(marker))
                     joined[root] = replace(joined[root], scope=joined[root].scope or qualification)
                     yield tuple(joined)

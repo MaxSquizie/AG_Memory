@@ -15,11 +15,16 @@ class BoundaryChoice(Exception):
         question = 'В каком сочетании слова связаны напрямую, несмотря на запятую между ними?'
         if any(tree[i].head not in (i - 1, i + 1) for i, variants in sites.items() for tree in variants):
             question = 'В каком сочетании запятая разрывает единую группу слов?'
+        if any(tree[i - 1].role == 'genitive_modifier' and tree[i - 1].head is not None
+               and tree[tree[i - 1].head].rule == 'S.COLLECTIVE' and tree[tree[i - 1].head].head == i + 1
+               for i, variants in sites.items() for tree in variants):
+            question = 'В каком месте запятая разделяет связанные между собой члены предложения?'
         self.probe = Probe(question, tuple(self.options), text)
 
 
 def _compatible(left, right):
     from .clause_series import ordinal_abbreviation
+    from .speech_particles import DOUBT, JUSSIVE
     from .spatial_prefix import deictic_role, relative_role
     from .unlisted_attributes import predicted_attributes
 
@@ -28,8 +33,13 @@ def _compatible(left, right):
     def adjective(surface):
         known = known_forms(surface)
         return tuple(tag for _, tag in known or predicted_attributes(surface) if tag.POS in {'ADJF', 'PRTF'})
+    if (left.casefold(), right.casefold()) in DOUBT or left.casefold() in JUSSIVE and nominal(right):
+        return True
     left_forms = known_forms(left)
     right_forms = known_forms(right)
+    if (any(tag.POS == 'NOUN' and tag.number == 'plur' and tag.case == 'gent' for _, tag in left_forms)
+            and any(tag.POS == 'VERB' and tag.number == 'plur' for _, tag in right_forms)):
+        return True
     spatial = relative_role(left) or deictic_role(left)
     if (spatial or any(tag.POS == 'PRCL' for _, tag in left_forms)) and any(
             tag.POS in {'VERB', 'ADJS', 'PRED'} for _, tag in right_forms):
@@ -99,6 +109,8 @@ def ignored_inside_group(tree, i):
 def repairs(tokens, parse, budget, *, sites=None):
     from .parser import AnalysisBudgetExceeded, Link
 
+    from . import collective_agreement, paired_coordination
+
     alternatives = {}
     count = 0
     for i in range(1, len(tokens) - 1):
@@ -106,22 +118,36 @@ def repairs(tokens, parse, budget, *, sites=None):
             continue
         if tokens[i].surface != ',':
             continue
+        kept = (*range(i), *range(i + 1, len(tokens)))
+        joined = tuple(tokens[j] for j in kept)
         adjacent = (tokens[i - 1].surface, tokens[i + 1].surface)
         government = None
+        paired_only = False
         if not _compatible(*adjacent):
             government = _government(*adjacent)
             if not government:
-                continue
-        kept = (*range(i), *range(i + 1, len(tokens)))
-        joined = tuple(tokens[j] for j in kept)
+                if not paired_coordination.has_opening(joined):
+                    continue
+                paired_only = True
         for tree in parse(joined):
             left, right = i - 1, i
-            if government and not _governed_dependency(tree, left, government):
+            collective = collective_agreement.comma_governor(tree, left, right)
+            pair = paired_coordination.comma_head(tree, left, right)
+            if paired_only and pair is None:
                 continue
-            if tree[left].head == right:
+            if government and collective is None and pair is None and not _governed_dependency(tree, left, government):
+                continue
+            if pair is not None:
+                head = pair
+            elif collective is not None:
+                head = collective
+            elif tree[left].head == right:
                 head = right
             elif tree[right].head == left:
                 head = left
+            elif (tree[left].rule == 'UTT.PARTICLE' and tree[right].role == 'subject'
+                  and tree[left].head == tree[right].head):
+                head = tree[left].head
             elif (tree[left].role == 'adverb' and tree[right].rule == 'PART.FOCUS'
                   and tree[left].head is not None and tree[left].head == tree[right].head):
                 head = tree[left].head

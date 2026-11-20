@@ -327,7 +327,11 @@ def _partitions(analyses, tokens, text):
     from . import adjuncts, attributive_series, calendar_regions, measured_series, mixed_predications, predicate_lists, utterances
     from . import personal_correlatives, spatial_prefix
     from .short_participles import voice_partitions
+    from . import collective_agreement
+    yield from collective_agreement.partitions(analyses, tokens, text)
     yield from personal_correlatives.partitions(analyses, tokens, text)
+    from . import degree_clauses
+    yield from degree_clauses.partitions(analyses, tokens, text)
     yield from spatial_prefix.partitions(analyses, tokens, text)
     yield from voice_partitions(analyses, tokens, text)
     yield from adjuncts.place_partitions(analyses, tokens, text)
@@ -627,7 +631,12 @@ def _partitions(analyses, tokens, text):
             yield word_choice(f'Which word does «{focus}» refer to?', antecedents)
         if roles == {'possessive'} and len(set(antecedents)) > 1:
             context = _clause_context(text, tokens, analyses, i, antecedents)
-            yield word_choice(f'Which word does the possessive «{focus}» refer to?', antecedents, context)
+            if all(link.lemma == 'свой' for link in links):
+                yield word_choice(f'На кого указывает «{focus}»? Выберите слово, которым назван владелец.',
+                                  antecedents, context,
+                                  absent='владелец не назван')
+            else:
+                yield word_choice(f'Which word does the possessive «{focus}» refer to?', antecedents, context)
         if {link.rule for link in links} == {'CL.MARK', 'CL.REF'}:
             yield word_choice(f'Copy «{focus}» if it refers to a preceding event here. Otherwise choose “no such word”.',
                               [i if link.rule == 'CL.REF' else None for link in links])
@@ -813,6 +822,14 @@ def _possessor_readings(tokens, tree, budget):
     slots = {}
     size = 1
     for i, link in enumerate(tree):
+        if link.role == 'possessive' and link.lemma == 'свой':
+            from .reflexive_possession import owners
+
+            slots[i] = owners(tree, i)
+            size *= len(slots[i])
+            if size > budget:
+                raise AnalysisBudgetExceeded('ANALYSIS_BUDGET')
+            continue
         form = tokens[i].surface.casefold().replace('ё', 'е')
         if link.role != 'possessive' or form not in ('его', 'ее', 'их'):
             continue
@@ -1079,9 +1096,10 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
         if part in comma_choices and comma_choices[part] is None:
             return
         def restored(joined):
+            from . import paired_coordination
             from .personal_correlatives import has_opening
 
-            if parse is remaining and joined and (has_opening(joined) or any(
+            if parse is remaining and joined and (has_opening(joined) or paired_coordination.has_opening(joined) or any(
                     spatial_index.permits(joined[0].start, token.start) for token in joined[1:])):
                 found = False
                 for tree in supplemented(joined):

@@ -15,7 +15,7 @@ def test_number_pair_in_a_note_does_not_license_an_arbitrary_range():
     assert words[parts['23']['head']]['surface'] == 'врача'
     assert words[parts['10']['head']]['surface'] == '23'
     assert parts['23']['quantity'] == '23' and parts['10']['quantity'] == '10'
-    assert analyze('Иван прочитал 3-5 книг.').reason == 'UNSUPPORTED_QUANTITY_RANGE'
+    assert analyze('Иван прочитал 5-3 книг.').reason == 'UNSUPPORTED_QUANTITY_RANGE'
 
 
 def test_numeric_designation_can_follow_a_governed_name_elsewhere_in_the_clause():

@@ -34,3 +34,26 @@ def markers(tokens, start):
 def relations(word):
     meanings, _ = _lexicon()
     return meanings.get(_key(word), ())
+
+
+PAIRS = {
+    'не только': {'но и': 'addition', 'но также': 'addition'},
+    'как': {'так и': 'addition'},
+    'не столько': {'сколько': 'comparison'},
+    'и': {'и': 'addition'},
+    'ни': {'ни': 'negative_coordination'},
+    'или': {'или': 'alternative'},
+    'либо': {'либо': 'alternative'},
+    'то': {'то': 'alternative'},
+    'то ли': {'то ли': 'alternative'},
+    'не то': {'не то': 'alternative'},
+}
+
+
+def openers(tokens):
+    yield '', 0
+    words = tuple(t.surface.casefold() for t in tokens[:2])
+    for phrase in PAIRS:
+        start = tuple(phrase.split())
+        if words[:len(start)] == start:
+            yield phrase, len(start)
