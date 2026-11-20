@@ -3,6 +3,7 @@ from dataclasses import replace
 from .morphology import from_tag
 from .nominal_groups import _groups
 from .parser import Link
+from .prepositions import DASHES
 from .rules import known_forms
 
 
@@ -54,7 +55,7 @@ def one_member(tokens, standalone, budget):
 
 
 def gapped_leaves(tokens, start, stop, prefix, host, budget):
-    dashes = [i for i in range(start, stop) if tokens[i].surface in ('—', '–', '-')]
+    dashes = [i for i in range(start, stop) if tokens[i].surface in DASHES]
     if len(dashes) != 1:
         return
     verb = prefix[host]

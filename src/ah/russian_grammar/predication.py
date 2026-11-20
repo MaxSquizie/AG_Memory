@@ -1,7 +1,7 @@
 from dataclasses import replace
 from itertools import product
 
-from .prepositions import group_heads
+from .prepositions import DASHES, group_heads
 from .rules import known_forms, readings
 
 
@@ -52,7 +52,7 @@ def _decorated(tokens, forms, bindings, nominal_heads, root, subject, personal):
                 for noun, head_tag in nominal_heads:
                     if tag.case == head_tag.case and _agree(tag, head_tag) and _modifies(forms, i, noun, head_tag):
                         options.append(Link('attribute', lemma, noun, 'A1'))
-        if personal and tokens[i].surface in ('—', '–', '-'):
+        if personal and tokens[i].surface in DASHES:
             subject_index = next(j for j, link in bindings.items() if link.role == 'subject')
             if min(root, subject_index) < i < max(root, subject_index):
                 options.append(Link('punctuation', tokens[i].surface, root, 'V2.DASH'))

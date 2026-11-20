@@ -74,15 +74,27 @@ def _subjects(tokens, local, budget):
             if any(link.role == 'coordinator' and link.lemma != 'и' for _, link in group.extra):
                 continue
             kept = (*range(i), group.noun, *range(group.end, len(tokens)))
-            proxy = replace(tokens[group.noun], surface='они')
-            for tree in local(tuple(proxy if j == group.noun else tokens[j] for j in kept)):
-                if tree[i].role != 'subject':
-                    continue
-                restored = _restore(tree, kept, len(tokens))
-                restored[group.noun] = Link('subject', group.lemma, restored[group.noun].head, 'S1', case='nomn')
-                for j, link in group.extra:
-                    restored[j] = link
-                yield tuple(restored)
+            head = tokens[group.noun]
+            proxies = [replace(head, surface='они')]
+            if any(tag.number == 'sing' and tag.POS in ('VERB', 'ADJS', 'PRTS')
+                   for token in tokens[:i] for _, tag in known_forms(token.surface)):
+                proxies.append(head)
+            for proxy in proxies:
+                for tree in local(tuple(proxy if j == group.noun else tokens[j] for j in kept)):
+                    subject = tree[i]
+                    if subject.role != 'subject':
+                        continue
+                    if proxy is head:
+                        if subject.lemma != group.lemma or subject.head is None or subject.head >= i:
+                            continue
+                        form = tree[subject.head].morphology
+                        if form is None or form.number != 'sing' or form.pos not in ('VERB', 'ADJS', 'PRTS'):
+                            continue
+                    restored = _restore(tree, kept, len(tokens))
+                    restored[group.noun] = Link('subject', group.lemma, restored[group.noun].head, 'S1', case='nomn')
+                    for j, link in group.extra:
+                        restored[j] = link
+                    yield tuple(restored)
 
 
 def _members(tokens, start, pos):

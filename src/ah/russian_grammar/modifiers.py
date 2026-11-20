@@ -302,9 +302,14 @@ def _converb_series(tokens, budget):
     from .case_arguments import trees
     from .parser import AnalysisBudgetExceeded, Link
 
+    from .converb_control import object_properties
+
     def single(part):
-        return _decorate(part, lambda ts: trees(ts, lambda bare: _converb_trees(bare, budget),
-                                                budget=budget, verb_pos=('GRND',)), budget)
+        def parse(region):
+            return _decorate(region, lambda ts: trees(ts, lambda bare: _converb_trees(bare, budget),
+                                                      budget=budget, verb_pos=('GRND',)), budget)
+        yield from parse(part)
+        yield from object_properties(part, parse)
 
     yield from single(tokens)
     markers = [i for i, token in enumerate(tokens) if token.surface.casefold() == 'и']

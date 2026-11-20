@@ -4,6 +4,7 @@ from importlib.resources import files
 
 from .clauses import _connectives
 from .morphology import from_tag
+from .prepositions import DASHES
 from .rules import known_forms
 
 
@@ -78,6 +79,33 @@ def _insertions(part, parse):
                 yield tuple(links[j] for j in range(len(part)))
 
 
+def _detached_pronominal_group(part, parse):
+    from .nominal_groups import _prepositions
+    from .parser import Link
+    from .prepositions import GOVERNMENT
+    from .morphology import _common
+
+    for noun, prep in _prepositions(part, 0):
+        comma = noun + 1
+        if comma + 1 >= len(part) or part[comma].surface != ',':
+            continue
+        readings = {}
+        for lemma, tag in known_forms(part[noun].surface):
+            if 'Anph' in tag and 'Subx' in tag and tag.case in GOVERNMENT.get(prep, ()):
+                readings.setdefault((lemma, tag.case), []).append(from_tag(tag))
+        for (lemma, case), forms in readings.items():
+            positions = range(comma + 1, len(part))
+            for tree in parse(part[comma + 1:]):
+                host = positions[_root(tree)]
+                links = _map(tree, positions)
+                links[0] = Link('preposition', prep, host, 'P2')
+                for j in range(1, noun):
+                    links[j] = Link('prep_part', part[j].surface.casefold(), 0, 'P1')
+                links[noun] = Link('governed', lemma, 0, 'P1', case, morphology=_common(forms))
+                links[comma] = Link('punctuation', ',', noun, 'UTT.PUNCT')
+                yield tuple(links[j] for j in range(len(part)))
+
+
 def _quotations(part, parse):
     from .parser import Link
 
@@ -90,7 +118,7 @@ def _quotations(part, parse):
             if part[i].surface != _QUOTES[part[0].surface]:
                 continue
             dash = i + 1 + (part[i + 1].surface == ',')
-            if dash + 1 < len(part) and part[dash].surface in ('—', '–', '-'):
+            if dash + 1 < len(part) and part[dash].surface in DASHES:
                 layouts.append((range(dash + 1, len(part)), 0, i))
     for matrix, opening, closing in layouts:
         mark = part[closing - 1].surface
@@ -185,6 +213,8 @@ def _parataxis(part, parse):
 def trees(tokens, base, *, budget):
     from .parser import AnalysisBudgetExceeded
 
+    from . import parentheses
+
     visited = 0
 
     @cache
@@ -194,12 +224,21 @@ def trees(tokens, base, *, budget):
         if visited > budget:
             raise AnalysisBudgetExceeded('ANALYSIS_BUDGET')
         built = {}
-        if part:
-            for rule in (base, _insertions, _quotations, _purposes, _parataxis):
+        if any(token.surface in ('(', ')') for token in part):
+            for tree in parentheses.trees(part, parse, budget):
+                built.setdefault(tree, None)
+                if len(built) > budget:
+                    raise AnalysisBudgetExceeded('PARENTHETICAL_BUDGET')
+        elif part:
+            for rule in (base, _insertions, _detached_pronominal_group, _quotations, _purposes, _parataxis):
                 for tree in (rule(part) if rule is base else rule(part, parse)):
                     built.setdefault(tree, None)
                     if len(built) > budget:
                         raise AnalysisBudgetExceeded('ANALYSIS_BUDGET')
+            for tree in parentheses.nominal_modifiers(part, parse, budget):
+                built.setdefault(tree, None)
+                if len(built) > budget:
+                    raise AnalysisBudgetExceeded('ANALYSIS_BUDGET')
         return tuple(built)
 
     yield from parse(tokens)

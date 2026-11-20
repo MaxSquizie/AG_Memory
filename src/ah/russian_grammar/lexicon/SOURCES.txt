@@ -174,3 +174,20 @@ row are alternatives. The lexical entries restrict assertion of the isolated
 placement reading to an overt or shared patient. FrameBank constructions
 4193 and 4194 attest the accusative patient; the conservative admission
 policy is ours. The table is not an exhaustive Russian valency dictionary.
+
+adverbial-modifiers.tsv includes every contiguous fixed expression headed by
+an adverb, particle or subordinator annotated as advmod of a verb or auxiliary,
+and every postposed particle annotated as advmod of a determiner or adjective.
+Source: UD Russian-GSD training split r2.15 (CC BY-SA 4.0).
+https://github.com/UniversalDependencies/UD_Russian-GSD/tree/r2.15
+Regeneration: python scripts/import_russian_adverbial_modifiers.py ru_gsd-ud-train.conllu src/ah/russian_grammar/lexicon/adverbial-modifiers.tsv
+
+month-genitives.tsv contains every month key and its Russian format/wide name from
+Unicode CLDR JSON 46.1.0, cldr-dates-full/main/ru/ca-gregorian.json, path
+main.ru.dates.calendars.gregorian.months.format.wide. See Unicode-LICENSE.txt.
+
+object-predicative-adjectives.tsv contains each verb with both an instrumental adjective xcomp and a direct object in UD Russian-GSD v2.15 train, CC BY-SA 4.0, SHA256 as above.
+python scripts/import_russian_predicative_instrumentals.py --object-adjectives ru_gsd-ud-train.conllu src/ah/russian_grammar/lexicon/object-predicative-adjectives.tsv
+
+dative-recipients.tsv uses the Russian FrameBank version and GPL-3.0 license given above. Each retained construction explicitly has Sacc and a bare Sdat with Role адресат or конечный посессор. This licenses an optional recipient reading when both participants are present.
+python scripts/import_russian_dative_recipients.py framebank_dict_cx_items.txt src/ah/russian_grammar/lexicon/dative-recipients.tsv

@@ -52,8 +52,9 @@ def _predicates(tokens, tree, root, tags):
             if lemma != predicate.lemma or aux and (tag.number != aux.number or
                     (tag.gender and aux.gender and tag.gender != aux.gender)):
                 continue
-            form = replace(from_tag(tag), tense=aux.tense if aux else 'pres',
-                           person=aux.person if aux else None, mood='indc')
+            aux_form = from_tag(aux) if aux else None
+            form = replace(from_tag(tag), tense=aux_form.tense if aux_form else 'pres',
+                           person=aux_form.person if aux_form else None, mood='indc')
             result = list(tree)
             result[root] = replace(predicate, morphology=form)
             if copula is not None:
@@ -90,6 +91,9 @@ def trees(tokens, base, *, budget=256):
     if not tags:
         yield from base(tokens)
         return
+
+    from .passive_arguments import trees as argument_trees
+    yield from argument_trees(tokens, budget=budget)
 
     starts = [(i, tuple(_groups(tokens, i, budget, bare_cases=('ablt',)))) for i in range(len(tokens))]
     starts = [(i, groups) for i, groups in starts if groups]

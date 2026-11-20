@@ -76,7 +76,8 @@ def _rows(result, participants):
     contexts = {}
     qualifications = {}
     for i, row in enumerate(rows):
-        if row['role'] == 'parenthetical' and row.get('scope') != 'ordering':
+        if (row['role'] == 'parenthetical' and row.get('scope') != 'ordering'
+                or row['rule'] == 'PP.DETACHED' and row.get('scope') == 'qualification'):
             qualifications[row['head']] = 'qualified'
         if row['role'] != 'clause_marker' or not row.get('scope'):
             continue
@@ -93,12 +94,19 @@ def _rows(result, participants):
             row['quotation'] = i
         elif row['head'] is not None and 'quotation' in rows[row['head']]:
             row['quotation'] = rows[row['head']]['quotation']
+        if row['rule'] == 'PAREN.EXPL':
+            enclosing = enclosing or 'parenthetical'
+            governing_status = enclosing
         scope = row.get('scope') or ''
         category, _, polarity = scope.partition('_')
         if category in ('negated', 'averted'):
             category, polarity = '', category
         role = row['role']
         boundary = contexts.get(i)
+        if role == 'converb':
+            from .converb_control import needs_confirmation
+            if needs_confirmation(result.analyses[0], i):
+                boundary = 'qualified'
         if role == 'clause_relative' and row['rule'] == 'CL.REL' and not category:
             nominal = row['head']
             if governing_status != 'asserted':
@@ -142,7 +150,7 @@ def _remember(core, result, rows, source):
             props[CONJUNCT_KEY] = Property(CONJUNCT_KEY, row['lemma'], 'str')
         members.append(core.ref(core.add_entity(Domain.H, properties=props, meta=row).uid))
     for i, row in enumerate(rows):
-        for key in ('head', 'controller', 'antecedent', 'coord_head', 'shared_agent', 'shared_object'):
+        for key in ('head', 'controller', 'antecedent', 'ellipsis_source', 'coord_head', 'shared_agent', 'shared_object'):
             if row.get(key) is not None:
                 relation = 'grammar.' + (row['role'] if key == 'head' else key)
                 core.add_link(relation, members[i], members[row[key]], 1.0)
@@ -247,7 +255,7 @@ def _expand_shared_arguments(rows, result, budget):
             branch.extend((child, occurrence) for child in children[original])
         for occurrence in copies.values():
             row = result[occurrence]
-            for key in ('controller', 'antecedent', 'coord_head', 'shared_agent', 'shared_object'):
+            for key in ('controller', 'antecedent', 'ellipsis_source', 'coord_head', 'shared_agent', 'shared_object'):
                 if row.get(key) in copies:
                     row[key] = copies[row[key]]
     return True
@@ -755,7 +763,9 @@ def submit(core, text, choose=None, *, source='user', speaker_ref=None, addresse
         return GrammarReply(result.status, 'Разбор не завершён. ' + result.reason, analysis=result)
     participants = _participants(source, speaker_ref, addressee_ref)
     rows = _rows(result, participants)
-    variables = [i for i, row in enumerate(rows) if 'quotation' not in row and row.get('antecedent') is None and row['rule'] != 'CL.WH' and
+    fixed_expressions = {row['head'] for row in rows if row['role'] == 'fixed'}
+    variables = [i for i, row in enumerate(rows) if i not in fixed_expressions and row['role'] != 'fixed' and
+                 'quotation' not in row and row.get('antecedent') is None and row['rule'] != 'CL.WH' and
                  row['role'] not in ('clause_marker', 'coordinator') and _question_word(row['surface'], row['lemma'])]
     if marked_question or variables or any(row['lemma'] == 'ли' and row['role'] == 'particle' and 'quotation' not in row for row in rows):
         if len(variables) > 1 or any(not (adjuncts.question(rows[i]) or rows[i]['rule'] == 'NEG.EXIST.OWNER' and rows[i]['lemma'] == 'кто' or rows[i]['role'] in ARGUMENTS and rows[i]['lemma'] in ('кто', 'что') or

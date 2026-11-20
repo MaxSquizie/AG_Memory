@@ -22,6 +22,12 @@ def _lexicon():
 
 
 @cache
+def dative_recipients():
+    table = files(__package__).joinpath('lexicon/dative-recipients.tsv')
+    return frozenset(table.read_text(encoding='utf8').splitlines())
+
+
+@cache
 def _writing_instruments():
     table = files(__package__).joinpath('lexicon/writing_instruments.tsv')
     return frozenset(table.read_text(encoding='utf-8').splitlines())
@@ -117,6 +123,9 @@ def _attach(tokens, tree, kept, groups, government, roles, budget):
             if role == 'object' and group.case in ('gent', 'gen2') and not _partitive(tokens, members, group.case):
                 continue
             choices.append(Link(role, group.lemma, host, 'V.GOV', case=group.case))
+            if (group.case == 'datv' and role == 'oblique' and verb in dative_recipients()
+                    and any(part.role == 'object' and part.head == host for part in links.values())):
+                choices.append(Link('recipient', group.lemma, host, 'V.GOV', case='datv'))
         following = []
         for bound, used in states:
             for link in choices:

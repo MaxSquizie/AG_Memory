@@ -115,7 +115,7 @@ def _restore(tree, kept, groups):
         head = links[group.start]
         if head.role not in _ARGUMENT_ROLES or (head.case or _ARGUMENT_CASE.get(head.role)) != group.case:
             return
-        if head.role == 'oblique' and not group.case_marked:
+        if (head.role == 'oblique' or group.case == 'datv' and head.role == 'recipient') and not group.case_marked:
             return
         dependents = [(i, link.role) for i, link in links.items() if link.head == group.start]
         if head.quantity_kind or any(role in {'name_part', 'numeral'} for _, role in dependents):

@@ -64,9 +64,7 @@ def _relative_child(part, subordinate):
     extras = {}
     for i in range(1, len(part)):
         token, previous = part[i], part[i - 1]
-        if token.surface == previous.surface == '-' and previous.end == token.start:
-            extras[i] = 'dash'
-        elif (token.surface.isalpha() and token.surface[0].isupper() and attested_name_parts(token.surface)
+        if (token.surface.isalpha() and token.surface[0].isupper() and attested_name_parts(token.surface)
               and previous.surface[0].isupper() and any('Name' in tag for _, tag in known_forms(previous.surface))):
             extras[i] = 'name_part'
     if not extras:
@@ -78,9 +76,7 @@ def _relative_child(part, subordinate):
             host = result.get(i - 1)
             if not host:
                 break
-            if kind == 'dash' and host.role == 'punctuation':
-                result[i] = replace(host, lemma='-')
-            elif kind == 'name_part' and host.role in ('subject', 'predicate', 'object', 'recipient', 'governed'):
+            if kind == 'name_part' and host.role in ('subject', 'predicate', 'object', 'recipient', 'governed'):
                 form = host.morphology
                 case = host.case or (form.case if form else None) or ROLE_CASE.get(host.role)
                 if case is None and host.rule == 'V2' and not any(link.role == 'copula' for link in tree):

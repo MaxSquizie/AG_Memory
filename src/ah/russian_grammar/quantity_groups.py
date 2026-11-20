@@ -258,3 +258,35 @@ def trees(tokens, local, *, budget=256):
                 if len(results) > budget:
                     raise AnalysisBudgetExceeded('QUANTITY_BUDGET')
                 yield restored
+
+
+def age_variants(tree, budget):
+    from .adjuncts import _lexicon
+    from .numerals import known_unit
+    from .parser import AnalysisBudgetExceeded
+
+    yield tree
+    datives = [i for i, link in enumerate(tree)
+               if link.role == 'oblique' and link.case == 'datv' and link.head is not None]
+    if not datives:
+        return
+    temporal, _ = _lexicon()
+    heads = {link.head for link in tree if link.role == 'numeral' and link.quantity is not None}
+    subjects = {tree[i].head for i in heads if i is not None and tree[i].role == 'subject'
+                and known_unit(tree[i].lemma) and ('nominal', 'когда', '-', tree[i].lemma) in temporal}
+    candidates = []
+    for i in datives:
+        link = tree[i]
+        host = tree[link.head]
+        if host.lemma == 'быть' and (link.head in subjects or host.role == 'infinitive' and host.head in subjects):
+            candidates.append(i)
+    if 2 ** len(candidates) > budget:
+        raise AnalysisBudgetExceeded('QUANTITY_ARGUMENT_BUDGET')
+    for mask in range(1, 2 ** len(candidates)):
+        result = list(tree)
+        for bit, i in enumerate(candidates):
+            if mask & (1 << bit):
+                link = tree[i]
+                rule = link.rule if link.antecedent is not None else 'NUM.AGE'
+                result[i] = replace(link, role='experiencer', rule=rule, scope='age_holder')
+        yield tuple(result)

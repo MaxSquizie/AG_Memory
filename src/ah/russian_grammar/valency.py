@@ -1,7 +1,7 @@
 from functools import cache
 from importlib.resources import files
 
-from .case_arguments import _lexicon as bare_government
+from .case_arguments import _lexicon as bare_government, dative_recipients
 from .infinitives import FRAMES
 from .morphology import CASE_EQUIVALENTS, PREDICATE_ROLES
 from .prepositions import GOVERNMENT
@@ -36,6 +36,9 @@ def violation(tokens, tree):
             controlled = (link.role == 'recipient' and 'infinitive' in children[link.head]
                           and frame and link.case in frame.recipient_cases)
             attested = roles.get((governor, link.case), 'oblique')
+            if (link.role == 'recipient' and link.case == 'datv' and governor in dative_recipients()
+                    and 'datv' in cases.get(governor, ()) and 'object' in children[link.head]):
+                controlled = True
             if not controlled and (link.case not in cases.get(governor, ()) or
                                    link.role not in (attested, 'oblique')):
                 return 'INVALID_GOVERNED_ROLE'

@@ -62,7 +62,7 @@ def test_possessive_relative_in_a_caption_and_in_a_finite_sentence():
     tree, = caption.analyses
     assert (tree[0].rule, tree[1].head, tree[4].role, tree[4].head, tree[4].antecedent) == (
         'NOM.EXIST', 0, 'genitive_modifier', 3, 1)
-    assert (tree[7].role, tree[7].head, tree[8].role, tree[8].head) == ('clause_relative', 1, 'name_part', 7)
+    assert (tree[6].role, tree[6].head, tree[7].role, tree[7].head) == ('clause_relative', 1, 'name_part', 6)
     unknown = analyze('Экранизация произведения, автор которого -- Джей Квазинезнайк.')
     assert unknown.status == 'UNRESOLVED'
     finite = analyze('Книга, автор которой пришёл, исчезла.')

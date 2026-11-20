@@ -1,0 +1,4403 @@
+{
+ "corpus_sha256": "fa3642959614db06fdab2d7464af8a0873c70d0a2b5758758231d0ef725821ea",
+ "required_mode": "teacher",
+ "passed": 10,
+ "total": 10,
+ "safe_abstention": true,
+ "cases": [
+  {
+   "id": "test-s12",
+   "mode": "abstain",
+   "status": "AMBIGUOUS",
+   "reason": "OPEN_CHOICE",
+   "calls": [
+    {
+     "context": "За последние 150 лет здесь не было срублено ни одно дерево, а в нескольких километрах от парка находится знаменитый Румскулльский дуб, 14 метров в охвате, которому, по оценкам учёных, может быть 1000 лет.",
+     "question": "Какое слово поясняет придаточная часть от «которому» до конца предложения?",
+     "options": [
+      "дуб",
+      "охвате"
+     ],
+     "answer": "?"
+    }
+   ],
+   "empty": true,
+   "exact": false
+  },
+  {
+   "id": "test-s12",
+   "mode": "teacher",
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "calls": [
+    {
+     "context": "За последние 150 лет здесь не было срублено ни одно дерево, а в нескольких километрах от парка находится знаменитый Румскулльский дуб, 14 метров в охвате, которому, по оценкам учёных, может быть 1000 лет.",
+     "question": "Какое слово поясняет придаточная часть от «которому» до конца предложения?",
+     "options": [
+      "дуб",
+      "охвате"
+     ],
+     "answer": "дуб"
+    },
+    {
+     "context": "За последние 150 лет здесь не было срублено ни одно дерево, а в нескольких километрах от парка находится знаменитый Румскулльский дуб, 14 метров в охвате, которому, по оценкам учёных, может быть 1000 лет.",
+     "question": "Какое слово обозначает того или то, чей возраст указан в этой части предложения? Выберите «которому», если речь идёт о его возрасте.",
+     "options": [
+      "которому",
+      "нет такого слова"
+     ],
+     "answer": "которому"
+    },
+    {
+     "context": ", а в нескольких километрах от парка находится знаменитый Румскулльский дуб, 14 метров в охвате, которому, по оценкам учёных, может быть 1000 лет",
+     "question": "Which word does the phrase «от парка» depend on?",
+     "options": [
+      "километрах",
+      "находится"
+     ],
+     "answer": "километрах"
+    },
+    {
+     "context": "знаменитый Румскулльский дуб, 14 метров в охвате, которому, по оценкам учёных, может быть 1000 лет",
+     "question": "Which word does the phrase «в охвате» depend on?",
+     "options": [
+      "дуб",
+      "метров"
+     ],
+     "answer": "метров"
+    },
+    {
+     "context": "в нескольких километрах от парка находится знаменитый Румскулльский дуб, 14 метров в охвате",
+     "question": "Copy «находится» if it describes a future action. Otherwise choose “no such word”.",
+     "options": [
+      "находится",
+      "no such word"
+     ],
+     "answer": "no such word"
+    },
+    {
+     "context": ", которому, по оценкам учёных, может быть 1000 лет",
+     "question": "Which word does the phrase «по оценкам учёных» depend on?",
+     "options": [
+      "которому",
+      "может"
+     ],
+     "answer": "может"
+    },
+    {
+     "context": "За последние 150 лет здесь не было срублено ни одно дерево, а в нескольких километрах от парка находится знаменитый Румскулльский дуб, 14 метров в охвате, которому, по оценкам учёных, может быть 1000 лет.",
+     "question": "Какое сочетание передаёт оговорку к самому сообщению о действии «может»?",
+     "options": [
+      "по оценкам учёных",
+      "нет такого сочетания"
+     ],
+     "answer": "по оценкам учёных"
+    },
+    {
+     "context": "За последние 150 лет здесь не было срублено ни одно дерево, а в нескольких километрах от парка находится знаменитый Румскулльский дуб, 14 метров в охвате, которому, по оценкам учёных, может быть 1000 лет.",
+     "question": "Copy «последние» if it is in the accusative case. Otherwise choose “no such word”.",
+     "options": [
+      "последние",
+      "no such word"
+     ],
+     "answer": "последние"
+    },
+    {
+     "context": "За последние 150 лет здесь не было срублено ни одно дерево, а в нескольких километрах от парка находится знаменитый Румскулльский дуб, 14 метров в охвате, которому, по оценкам учёных, может быть 1000 лет.",
+     "question": "Copy «парка» if its dictionary form is «парк». Otherwise choose “no such word”.",
+     "options": [
+      "парка",
+      "no such word"
+     ],
+     "answer": "парка"
+    },
+    {
+     "context": "За последние 150 лет здесь не было срублено ни одно дерево, а в нескольких километрах от парка находится знаменитый Румскулльский дуб, 14 метров в охвате, которому, по оценкам учёных, может быть 1000 лет.",
+     "question": "Какое слово характеризует согласованное определение «Румскулльский»?",
+     "options": [
+      "дуб"
+     ],
+     "answer": "дуб"
+    }
+   ],
+   "errors": [],
+   "differences": [],
+   "merged_units": 0,
+   "rows": [
+    [
+     "За",
+     "preposition",
+     7,
+     null,
+     "negated"
+    ],
+    [
+     "последние",
+     "attribute",
+     3,
+     null,
+     "negated"
+    ],
+    [
+     "150",
+     "numeral",
+     3,
+     null,
+     "negated"
+    ],
+    [
+     "лет",
+     "governed",
+     0,
+     null,
+     "negated"
+    ],
+    [
+     "здесь",
+     "adverb",
+     7,
+     null,
+     "negated"
+    ],
+    [
+     "не",
+     "particle",
+     7,
+     null,
+     "negated"
+    ],
+    [
+     "было",
+     "copula",
+     7,
+     null,
+     "negated"
+    ],
+    [
+     "срублено",
+     "predicate",
+     null,
+     null,
+     "negated"
+    ],
+    [
+     "ни",
+     "quantity_modifier",
+     9,
+     null,
+     "negated"
+    ],
+    [
+     "одно",
+     "numeral",
+     10,
+     null,
+     "negated"
+    ],
+    [
+     "дерево",
+     "subject",
+     7,
+     null,
+     "negated"
+    ],
+    [
+     ",",
+     "punctuation",
+     18,
+     null,
+     "asserted"
+    ],
+    [
+     "а",
+     "clause_marker",
+     18,
+     null,
+     "asserted"
+    ],
+    [
+     "в",
+     "preposition",
+     18,
+     null,
+     "asserted"
+    ],
+    [
+     "нескольких",
+     "numeral",
+     15,
+     null,
+     "asserted"
+    ],
+    [
+     "километрах",
+     "governed",
+     13,
+     null,
+     "asserted"
+    ],
+    [
+     "от",
+     "preposition",
+     15,
+     null,
+     "asserted"
+    ],
+    [
+     "парка",
+     "governed",
+     16,
+     null,
+     "asserted"
+    ],
+    [
+     "находится",
+     "clause_conjunct",
+     7,
+     null,
+     "asserted"
+    ],
+    [
+     "знаменитый",
+     "attribute",
+     21,
+     null,
+     "asserted"
+    ],
+    [
+     "Румскулльский",
+     "attribute",
+     21,
+     null,
+     "asserted"
+    ],
+    [
+     "дуб",
+     "subject",
+     18,
+     null,
+     "asserted"
+    ],
+    [
+     ",",
+     "punctuation",
+     24,
+     null,
+     "asserted"
+    ],
+    [
+     "14",
+     "numeral",
+     24,
+     null,
+     "asserted"
+    ],
+    [
+     "метров",
+     "measure",
+     21,
+     null,
+     "asserted"
+    ],
+    [
+     "в",
+     "preposition",
+     24,
+     null,
+     "asserted"
+    ],
+    [
+     "охвате",
+     "governed",
+     25,
+     null,
+     "asserted"
+    ],
+    [
+     ",",
+     "punctuation",
+     34,
+     null,
+     "qualified"
+    ],
+    [
+     "которому",
+     "experiencer",
+     35,
+     null,
+     "qualified"
+    ],
+    [
+     ",",
+     "punctuation",
+     31,
+     null,
+     "qualified"
+    ],
+    [
+     "по",
+     "preposition",
+     34,
+     null,
+     "qualified"
+    ],
+    [
+     "оценкам",
+     "governed",
+     30,
+     null,
+     "qualified"
+    ],
+    [
+     "учёных",
+     "genitive_modifier",
+     31,
+     null,
+     "qualified"
+    ],
+    [
+     ",",
+     "punctuation",
+     31,
+     null,
+     "qualified"
+    ],
+    [
+     "может",
+     "clause_relative",
+     21,
+     null,
+     "qualified"
+    ],
+    [
+     "быть",
+     "infinitive",
+     34,
+     37,
+     "qualified"
+    ],
+    [
+     "1000",
+     "numeral",
+     37,
+     null,
+     "qualified"
+    ],
+    [
+     "лет",
+     "subject",
+     34,
+     null,
+     "qualified"
+    ]
+   ],
+   "exact": true
+  },
+  {
+   "id": "test-s12",
+   "mode": "blind",
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "calls": [
+    {
+     "context": "За последние 150 лет здесь не было срублено ни одно дерево, а в нескольких километрах от парка находится знаменитый Румскулльский дуб, 14 метров в охвате, которому, по оценкам учёных, может быть 1000 лет.",
+     "question": "Какое слово поясняет придаточная часть от «которому» до конца предложения?",
+     "options": [
+      "дуб",
+      "охвате"
+     ],
+     "answer": "дуб"
+    },
+    {
+     "context": "За последние 150 лет здесь не было срублено ни одно дерево, а в нескольких километрах от парка находится знаменитый Румскулльский дуб, 14 метров в охвате, которому, по оценкам учёных, может быть 1000 лет.",
+     "question": "Какое слово обозначает того или то, чей возраст указан в этой части предложения? Выберите «которому», если речь идёт о его возрасте.",
+     "options": [
+      "которому",
+      "нет такого слова"
+     ],
+     "answer": "которому"
+    },
+    {
+     "context": ", а в нескольких километрах от парка находится знаменитый Румскулльский дуб, 14 метров в охвате, которому, по оценкам учёных, может быть 1000 лет",
+     "question": "Which word does the phrase «от парка» depend on?",
+     "options": [
+      "километрах",
+      "находится"
+     ],
+     "answer": "километрах"
+    },
+    {
+     "context": "знаменитый Румскулльский дуб, 14 метров в охвате, которому, по оценкам учёных, может быть 1000 лет",
+     "question": "Which word does the phrase «в охвате» depend on?",
+     "options": [
+      "дуб",
+      "метров"
+     ],
+     "answer": "метров"
+    },
+    {
+     "context": "в нескольких километрах от парка находится знаменитый Румскулльский дуб, 14 метров в охвате",
+     "question": "Copy «находится» if it describes a future action. Otherwise choose “no such word”.",
+     "options": [
+      "находится",
+      "no such word"
+     ],
+     "answer": "no such word"
+    },
+    {
+     "context": ", которому, по оценкам учёных, может быть 1000 лет",
+     "question": "Which word does the phrase «по оценкам учёных» depend on?",
+     "options": [
+      "которому",
+      "может"
+     ],
+     "answer": "может"
+    },
+    {
+     "context": "За последние 150 лет здесь не было срублено ни одно дерево, а в нескольких километрах от парка находится знаменитый Румскулльский дуб, 14 метров в охвате, которому, по оценкам учёных, может быть 1000 лет.",
+     "question": "Какое сочетание передаёт оговорку к самому сообщению о действии «может»?",
+     "options": [
+      "по оценкам учёных",
+      "нет такого сочетания"
+     ],
+     "answer": "по оценкам учёных"
+    },
+    {
+     "context": "За последние 150 лет здесь не было срублено ни одно дерево, а в нескольких километрах от парка находится знаменитый Румскулльский дуб, 14 метров в охвате, которому, по оценкам учёных, может быть 1000 лет.",
+     "question": "Copy «последние» if it is in the accusative case. Otherwise choose “no such word”.",
+     "options": [
+      "последние",
+      "no such word"
+     ],
+     "answer": "последние"
+    },
+    {
+     "context": "За последние 150 лет здесь не было срублено ни одно дерево, а в нескольких километрах от парка находится знаменитый Румскулльский дуб, 14 метров в охвате, которому, по оценкам учёных, может быть 1000 лет.",
+     "question": "Copy «парка» if its dictionary form is «парк». Otherwise choose “no such word”.",
+     "options": [
+      "парка",
+      "no such word"
+     ],
+     "answer": "парка"
+    },
+    {
+     "context": "За последние 150 лет здесь не было срублено ни одно дерево, а в нескольких километрах от парка находится знаменитый Румскулльский дуб, 14 метров в охвате, которому, по оценкам учёных, может быть 1000 лет.",
+     "question": "Какое слово характеризует согласованное определение «Румскулльский»?",
+     "options": [
+      "дуб"
+     ],
+     "answer": "дуб"
+    }
+   ],
+   "errors": [],
+   "differences": [],
+   "merged_units": 0,
+   "rows": [
+    [
+     "За",
+     "preposition",
+     7,
+     null,
+     "negated"
+    ],
+    [
+     "последние",
+     "attribute",
+     3,
+     null,
+     "negated"
+    ],
+    [
+     "150",
+     "numeral",
+     3,
+     null,
+     "negated"
+    ],
+    [
+     "лет",
+     "governed",
+     0,
+     null,
+     "negated"
+    ],
+    [
+     "здесь",
+     "adverb",
+     7,
+     null,
+     "negated"
+    ],
+    [
+     "не",
+     "particle",
+     7,
+     null,
+     "negated"
+    ],
+    [
+     "было",
+     "copula",
+     7,
+     null,
+     "negated"
+    ],
+    [
+     "срублено",
+     "predicate",
+     null,
+     null,
+     "negated"
+    ],
+    [
+     "ни",
+     "quantity_modifier",
+     9,
+     null,
+     "negated"
+    ],
+    [
+     "одно",
+     "numeral",
+     10,
+     null,
+     "negated"
+    ],
+    [
+     "дерево",
+     "subject",
+     7,
+     null,
+     "negated"
+    ],
+    [
+     ",",
+     "punctuation",
+     18,
+     null,
+     "asserted"
+    ],
+    [
+     "а",
+     "clause_marker",
+     18,
+     null,
+     "asserted"
+    ],
+    [
+     "в",
+     "preposition",
+     18,
+     null,
+     "asserted"
+    ],
+    [
+     "нескольких",
+     "numeral",
+     15,
+     null,
+     "asserted"
+    ],
+    [
+     "километрах",
+     "governed",
+     13,
+     null,
+     "asserted"
+    ],
+    [
+     "от",
+     "preposition",
+     15,
+     null,
+     "asserted"
+    ],
+    [
+     "парка",
+     "governed",
+     16,
+     null,
+     "asserted"
+    ],
+    [
+     "находится",
+     "clause_conjunct",
+     7,
+     null,
+     "asserted"
+    ],
+    [
+     "знаменитый",
+     "attribute",
+     21,
+     null,
+     "asserted"
+    ],
+    [
+     "Румскулльский",
+     "attribute",
+     21,
+     null,
+     "asserted"
+    ],
+    [
+     "дуб",
+     "subject",
+     18,
+     null,
+     "asserted"
+    ],
+    [
+     ",",
+     "punctuation",
+     24,
+     null,
+     "asserted"
+    ],
+    [
+     "14",
+     "numeral",
+     24,
+     null,
+     "asserted"
+    ],
+    [
+     "метров",
+     "measure",
+     21,
+     null,
+     "asserted"
+    ],
+    [
+     "в",
+     "preposition",
+     24,
+     null,
+     "asserted"
+    ],
+    [
+     "охвате",
+     "governed",
+     25,
+     null,
+     "asserted"
+    ],
+    [
+     ",",
+     "punctuation",
+     34,
+     null,
+     "qualified"
+    ],
+    [
+     "которому",
+     "experiencer",
+     35,
+     null,
+     "qualified"
+    ],
+    [
+     ",",
+     "punctuation",
+     31,
+     null,
+     "qualified"
+    ],
+    [
+     "по",
+     "preposition",
+     34,
+     null,
+     "qualified"
+    ],
+    [
+     "оценкам",
+     "governed",
+     30,
+     null,
+     "qualified"
+    ],
+    [
+     "учёных",
+     "genitive_modifier",
+     31,
+     null,
+     "qualified"
+    ],
+    [
+     ",",
+     "punctuation",
+     31,
+     null,
+     "qualified"
+    ],
+    [
+     "может",
+     "clause_relative",
+     21,
+     null,
+     "qualified"
+    ],
+    [
+     "быть",
+     "infinitive",
+     34,
+     37,
+     "qualified"
+    ],
+    [
+     "1000",
+     "numeral",
+     37,
+     null,
+     "qualified"
+    ],
+    [
+     "лет",
+     "subject",
+     34,
+     null,
+     "qualified"
+    ]
+   ],
+   "exact": true
+  },
+  {
+   "id": "test-s13",
+   "mode": "abstain",
+   "status": "AMBIGUOUS",
+   "reason": "OPEN_CHOICE",
+   "calls": [
+    {
+     "context": "97 -- Деятельность частных домашних хозяйств по предоставлению услуг для собственного пользования QA.",
+     "question": "Какое слово служит вершиной первой именной группы в сочетании «частных домашних хозяйств»?",
+     "options": [
+      "частных",
+      "домашних",
+      "хозяйств"
+     ],
+     "answer": "?"
+    }
+   ],
+   "empty": true,
+   "exact": false
+  },
+  {
+   "id": "test-s13",
+   "mode": "teacher",
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "calls": [
+    {
+     "context": "97 -- Деятельность частных домашних хозяйств по предоставлению услуг для собственного пользования QA.",
+     "question": "Какое слово служит вершиной первой именной группы в сочетании «частных домашних хозяйств»?",
+     "options": [
+      "частных",
+      "домашних",
+      "хозяйств"
+     ],
+     "answer": "хозяйств"
+    },
+    {
+     "context": "97 -- Деятельность частных домашних хозяйств по предоставлению услуг для собственного пользования QA",
+     "question": "Which word does the phrase «по предоставлению» depend on?",
+     "options": [
+      "Деятельность",
+      "хозяйств"
+     ],
+     "answer": "Деятельность"
+    },
+    {
+     "context": "97 -- Деятельность частных домашних хозяйств по предоставлению услуг для собственного пользования QA",
+     "question": "Which word does the phrase «для собственного пользования» depend on?",
+     "options": [
+      "Деятельность",
+      "предоставлению",
+      "услуг"
+     ],
+     "answer": "услуг"
+    },
+    {
+     "context": "97 -- Деятельность частных домашних хозяйств по предоставлению услуг для собственного пользования QA.",
+     "question": "Which word does «QA» depend on?",
+     "options": [
+      "пользования",
+      "услуг",
+      "предоставлению",
+      "Деятельность"
+     ],
+     "answer": "пользования"
+    },
+    {
+     "context": "97 -- Деятельность частных домашних хозяйств по предоставлению услуг для собственного пользования QA.",
+     "question": "Which word does «услуг» depend on?",
+     "options": [
+      "предоставлению",
+      "Деятельность"
+     ],
+     "answer": "предоставлению"
+    }
+   ],
+   "errors": [],
+   "differences": [],
+   "merged_units": 0,
+   "rows": [
+    [
+     "97",
+     "label",
+     2,
+     null,
+     "heading"
+    ],
+    [
+     "--",
+     "punctuation",
+     0,
+     null,
+     "heading"
+    ],
+    [
+     "Деятельность",
+     "predicate",
+     null,
+     null,
+     "heading"
+    ],
+    [
+     "частных",
+     "attribute",
+     5,
+     null,
+     "heading"
+    ],
+    [
+     "домашних",
+     "attribute",
+     5,
+     null,
+     "heading"
+    ],
+    [
+     "хозяйств",
+     "genitive_modifier",
+     2,
+     null,
+     "heading"
+    ],
+    [
+     "по",
+     "preposition",
+     2,
+     null,
+     "heading"
+    ],
+    [
+     "предоставлению",
+     "governed",
+     6,
+     null,
+     "heading"
+    ],
+    [
+     "услуг",
+     "genitive_modifier",
+     7,
+     null,
+     "heading"
+    ],
+    [
+     "для",
+     "preposition",
+     8,
+     null,
+     "heading"
+    ],
+    [
+     "собственного",
+     "attribute",
+     11,
+     null,
+     "heading"
+    ],
+    [
+     "пользования",
+     "governed",
+     9,
+     null,
+     "heading"
+    ],
+    [
+     "QA",
+     "designation",
+     11,
+     null,
+     "heading"
+    ]
+   ],
+   "exact": true
+  },
+  {
+   "id": "test-s13",
+   "mode": "blind",
+   "status": "AMBIGUOUS",
+   "reason": "OPEN_CHOICE",
+   "calls": [
+    {
+     "context": "97 -- Деятельность частных домашних хозяйств по предоставлению услуг для собственного пользования QA.",
+     "question": "Какое слово служит вершиной первой именной группы в сочетании «частных домашних хозяйств»?",
+     "options": [
+      "частных",
+      "домашних",
+      "хозяйств"
+     ],
+     "answer": "хозяйств"
+    },
+    {
+     "context": "97 -- Деятельность частных домашних хозяйств по предоставлению услуг для собственного пользования QA",
+     "question": "Which word does the phrase «по предоставлению» depend on?",
+     "options": [
+      "Деятельность",
+      "хозяйств"
+     ],
+     "answer": "Деятельность"
+    },
+    {
+     "context": "97 -- Деятельность частных домашних хозяйств по предоставлению услуг для собственного пользования QA",
+     "question": "Which word does the phrase «для собственного пользования» depend on?",
+     "options": [
+      "Деятельность",
+      "предоставлению",
+      "услуг"
+     ],
+     "answer": "услуг"
+    },
+    {
+     "context": "97 -- Деятельность частных домашних хозяйств по предоставлению услуг для собственного пользования QA.",
+     "question": "Which word does «QA» depend on?",
+     "options": [
+      "пользования",
+      "услуг",
+      "предоставлению",
+      "Деятельность"
+     ],
+     "answer": "?"
+    }
+   ],
+   "empty": true,
+   "exact": false
+  },
+  {
+   "id": "test-s14",
+   "mode": "abstain",
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "calls": [],
+   "errors": [],
+   "differences": [],
+   "merged_units": 0,
+   "rows": [
+    [
+     "Код",
+     "subject",
+     3,
+     null,
+     "asserted"
+    ],
+    [
+     "КОАТУУ",
+     "designation",
+     0,
+     null,
+     "asserted"
+    ],
+    [
+     "--",
+     "punctuation",
+     3,
+     null,
+     "asserted"
+    ],
+    [
+     "6322682502",
+     "predicate",
+     null,
+     null,
+     "asserted"
+    ]
+   ],
+   "exact": true
+  },
+  {
+   "id": "test-s14",
+   "mode": "teacher",
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "calls": [],
+   "errors": [],
+   "differences": [],
+   "merged_units": 0,
+   "rows": [
+    [
+     "Код",
+     "subject",
+     3,
+     null,
+     "asserted"
+    ],
+    [
+     "КОАТУУ",
+     "designation",
+     0,
+     null,
+     "asserted"
+    ],
+    [
+     "--",
+     "punctuation",
+     3,
+     null,
+     "asserted"
+    ],
+    [
+     "6322682502",
+     "predicate",
+     null,
+     null,
+     "asserted"
+    ]
+   ],
+   "exact": true
+  },
+  {
+   "id": "test-s14",
+   "mode": "blind",
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "calls": [],
+   "errors": [],
+   "differences": [],
+   "merged_units": 0,
+   "rows": [
+    [
+     "Код",
+     "subject",
+     3,
+     null,
+     "asserted"
+    ],
+    [
+     "КОАТУУ",
+     "designation",
+     0,
+     null,
+     "asserted"
+    ],
+    [
+     "--",
+     "punctuation",
+     3,
+     null,
+     "asserted"
+    ],
+    [
+     "6322682502",
+     "predicate",
+     null,
+     null,
+     "asserted"
+    ]
+   ],
+   "exact": true
+  },
+  {
+   "id": "test-s15",
+   "mode": "abstain",
+   "status": "AMBIGUOUS",
+   "reason": "OPEN_CHOICE",
+   "calls": [
+    {
+     "context": "30 апреля 1984 года Муамар Каддафи предложил одновременно вывести французские и ливийские войска из Чада.",
+     "question": "Какими словами назван тот, кто совершил действие «предложил»?",
+     "options": [
+      "Муамар Каддафи",
+      "Муамар"
+     ],
+     "answer": "?"
+    }
+   ],
+   "empty": true,
+   "exact": false
+  },
+  {
+   "id": "test-s15",
+   "mode": "teacher",
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "calls": [
+    {
+     "context": "30 апреля 1984 года Муамар Каддафи предложил одновременно вывести французские и ливийские войска из Чада.",
+     "question": "Какими словами назван тот, кто совершил действие «предложил»?",
+     "options": [
+      "Муамар Каддафи",
+      "Муамар"
+     ],
+     "answer": "Муамар Каддафи"
+    },
+    {
+     "context": "30 апреля 1984 года Муамар Каддафи предложил одновременно вывести французские и ливийские войска из Чада",
+     "question": "Which word does the phrase «из Чада» depend on?",
+     "options": [
+      "предложил",
+      "вывести",
+      "войска"
+     ],
+     "answer": "вывести"
+    },
+    {
+     "context": "30 апреля 1984 года Муамар Каддафи предложил одновременно вывести французские и ливийские войска из Чада.",
+     "question": "Who is to perform the action «вывести»?",
+     "options": [
+      "Муамар",
+      "no such word"
+     ],
+     "answer": "Муамар"
+    },
+    {
+     "context": "30 апреля 1984 года Муамар Каддафи предложил одновременно вывести французские и ливийские войска из Чада.",
+     "question": "Which word does «одновременно» depend on?",
+     "options": [
+      "предложил",
+      "вывести"
+     ],
+     "answer": "вывести"
+    },
+    {
+     "context": "30 апреля 1984 года Муамар Каддафи предложил одновременно вывести французские и ливийские войска из Чада.",
+     "question": "Copy «Чада» if its dictionary form is «чад». Otherwise choose “no such word”.",
+     "options": [
+      "Чада",
+      "no such word"
+     ],
+     "answer": "Чада"
+    }
+   ],
+   "errors": [],
+   "differences": [],
+   "merged_units": 0,
+   "rows": [
+    [
+     "30",
+     "temporal",
+     6,
+     null,
+     "asserted"
+    ],
+    [
+     "апреля",
+     "date_month",
+     0,
+     null,
+     "asserted"
+    ],
+    [
+     "1984",
+     "date_year",
+     3,
+     null,
+     "asserted"
+    ],
+    [
+     "года",
+     "genitive_modifier",
+     1,
+     null,
+     "asserted"
+    ],
+    [
+     "Муамар",
+     "subject",
+     6,
+     null,
+     "asserted"
+    ],
+    [
+     "Каддафи",
+     "name_part",
+     4,
+     null,
+     "asserted"
+    ],
+    [
+     "предложил",
+     "predicate",
+     null,
+     null,
+     "asserted"
+    ],
+    [
+     "одновременно",
+     "adverb",
+     8,
+     null,
+     "embedded"
+    ],
+    [
+     "вывести",
+     "infinitive",
+     6,
+     4,
+     "embedded"
+    ],
+    [
+     "французские",
+     "attribute",
+     12,
+     null,
+     "embedded"
+    ],
+    [
+     "и",
+     "coordinator",
+     11,
+     null,
+     "embedded"
+    ],
+    [
+     "ливийские",
+     "attribute",
+     12,
+     null,
+     "embedded"
+    ],
+    [
+     "войска",
+     "object",
+     8,
+     null,
+     "embedded"
+    ],
+    [
+     "из",
+     "preposition",
+     8,
+     null,
+     "embedded"
+    ],
+    [
+     "Чада",
+     "governed",
+     13,
+     null,
+     "embedded"
+    ]
+   ],
+   "exact": true
+  },
+  {
+   "id": "test-s15",
+   "mode": "blind",
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "calls": [
+    {
+     "context": "30 апреля 1984 года Муамар Каддафи предложил одновременно вывести французские и ливийские войска из Чада.",
+     "question": "Какими словами назван тот, кто совершил действие «предложил»?",
+     "options": [
+      "Муамар Каддафи",
+      "Муамар"
+     ],
+     "answer": "Муамар Каддафи"
+    },
+    {
+     "context": "30 апреля 1984 года Муамар Каддафи предложил одновременно вывести французские и ливийские войска из Чада",
+     "question": "Which word does the phrase «из Чада» depend on?",
+     "options": [
+      "предложил",
+      "вывести",
+      "войска"
+     ],
+     "answer": "вывести"
+    },
+    {
+     "context": "30 апреля 1984 года Муамар Каддафи предложил одновременно вывести французские и ливийские войска из Чада.",
+     "question": "Who is to perform the action «вывести»?",
+     "options": [
+      "Муамар",
+      "no such word"
+     ],
+     "answer": "Муамар"
+    },
+    {
+     "context": "30 апреля 1984 года Муамар Каддафи предложил одновременно вывести французские и ливийские войска из Чада.",
+     "question": "Which word does «одновременно» depend on?",
+     "options": [
+      "предложил",
+      "вывести"
+     ],
+     "answer": "вывести"
+    },
+    {
+     "context": "30 апреля 1984 года Муамар Каддафи предложил одновременно вывести французские и ливийские войска из Чада.",
+     "question": "Copy «Чада» if its dictionary form is «чад». Otherwise choose “no such word”.",
+     "options": [
+      "Чада",
+      "no such word"
+     ],
+     "answer": "Чада"
+    }
+   ],
+   "errors": [],
+   "differences": [],
+   "merged_units": 0,
+   "rows": [
+    [
+     "30",
+     "temporal",
+     6,
+     null,
+     "asserted"
+    ],
+    [
+     "апреля",
+     "date_month",
+     0,
+     null,
+     "asserted"
+    ],
+    [
+     "1984",
+     "date_year",
+     3,
+     null,
+     "asserted"
+    ],
+    [
+     "года",
+     "genitive_modifier",
+     1,
+     null,
+     "asserted"
+    ],
+    [
+     "Муамар",
+     "subject",
+     6,
+     null,
+     "asserted"
+    ],
+    [
+     "Каддафи",
+     "name_part",
+     4,
+     null,
+     "asserted"
+    ],
+    [
+     "предложил",
+     "predicate",
+     null,
+     null,
+     "asserted"
+    ],
+    [
+     "одновременно",
+     "adverb",
+     8,
+     null,
+     "embedded"
+    ],
+    [
+     "вывести",
+     "infinitive",
+     6,
+     4,
+     "embedded"
+    ],
+    [
+     "французские",
+     "attribute",
+     12,
+     null,
+     "embedded"
+    ],
+    [
+     "и",
+     "coordinator",
+     11,
+     null,
+     "embedded"
+    ],
+    [
+     "ливийские",
+     "attribute",
+     12,
+     null,
+     "embedded"
+    ],
+    [
+     "войска",
+     "object",
+     8,
+     null,
+     "embedded"
+    ],
+    [
+     "из",
+     "preposition",
+     8,
+     null,
+     "embedded"
+    ],
+    [
+     "Чада",
+     "governed",
+     13,
+     null,
+     "embedded"
+    ]
+   ],
+   "exact": true
+  },
+  {
+   "id": "test-s16",
+   "mode": "abstain",
+   "status": "AMBIGUOUS",
+   "reason": "OPEN_CHOICE",
+   "calls": [
+    {
+     "context": ", сделав его привлекательным для базирования операторов авиаперевозок",
+     "question": "Which word does the phrase «для базирования» depend on?",
+     "options": [
+      "сделав",
+      "его",
+      "привлекательным"
+     ],
+     "answer": "?"
+    }
+   ],
+   "empty": true,
+   "exact": false
+  },
+  {
+   "id": "test-s16",
+   "mode": "teacher",
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "calls": [
+    {
+     "context": ", сделав его привлекательным для базирования операторов авиаперевозок",
+     "question": "Which word does the phrase «для базирования» depend on?",
+     "options": [
+      "сделав",
+      "его",
+      "привлекательным"
+     ],
+     "answer": "привлекательным"
+    },
+    {
+     "context": "Для возобновления деятельности аэропорта необходим капитальный ремонт существующей и строительство современной инфраструктуры аэропорта Орёл -- Южный, сделав его привлекательным для базирования операторов авиаперевозок.",
+     "question": "Copy «[Для] возобновления» if its role here is converb. Otherwise choose “no such word”.",
+     "options": [
+      "[Для] возобновления",
+      "no such word"
+     ],
+     "answer": "no such word"
+    },
+    {
+     "context": "Для возобновления деятельности аэропорта необходим капитальный ремонт существующей и строительство современной инфраструктуры аэропорта Орёл -- Южный, сделав его привлекательным для базирования операторов авиаперевозок.",
+     "question": "Copy «существующей» if its dictionary form is «существовать». Otherwise choose “no such word”.",
+     "options": [
+      "существующей",
+      "no such word"
+     ],
+     "answer": "существующей"
+    },
+    {
+     "context": "Для возобновления деятельности аэропорта необходим капитальный ремонт существующей и строительство современной инфраструктуры аэропорта Орёл -- Южный, сделав его привлекательным для базирования операторов авиаперевозок.",
+     "question": "Copy «его» if its dictionary form is «он». Otherwise choose “no such word”.",
+     "options": [
+      "его",
+      "no such word"
+     ],
+     "answer": "его"
+    },
+    {
+     "context": "Для возобновления деятельности аэропорта необходим капитальный ремонт существующей и строительство современной инфраструктуры аэропорта Орёл -- Южный, сделав его привлекательным для базирования операторов авиаперевозок.",
+     "question": "Какое существительное подразумевается после «существующей»?",
+     "options": [
+      "инфраструктуры"
+     ],
+     "answer": "инфраструктуры"
+    },
+    {
+     "context": "Для возобновления деятельности аэропорта необходим капитальный ремонт существующей и строительство современной инфраструктуры аэропорта Орёл -- Южный, сделав его привлекательным для базирования операторов авиаперевозок.",
+     "question": "Какие слова вместе образуют название?",
+     "options": [
+      "Орёл -- Южный"
+     ],
+     "answer": "Орёл -- Южный"
+    },
+    {
+     "context": "Для возобновления деятельности аэропорта необходим капитальный ремонт существующей и строительство современной инфраструктуры аэропорта Орёл -- Южный, сделав его привлекательным для базирования операторов авиаперевозок.",
+     "question": "К какому участнику в тексте относится действие «сделав»?",
+     "options": [
+      "ремонт и строительство"
+     ],
+     "answer": "ремонт и строительство"
+    }
+   ],
+   "errors": [],
+   "differences": [],
+   "merged_units": 0,
+   "rows": [
+    [
+     "Для",
+     "preposition",
+     4,
+     null,
+     "asserted"
+    ],
+    [
+     "возобновления",
+     "governed",
+     0,
+     null,
+     "asserted"
+    ],
+    [
+     "деятельности",
+     "genitive_modifier",
+     1,
+     null,
+     "asserted"
+    ],
+    [
+     "аэропорта",
+     "genitive_modifier",
+     2,
+     null,
+     "asserted"
+    ],
+    [
+     "необходим",
+     "predicate",
+     null,
+     null,
+     "asserted"
+    ],
+    [
+     "капитальный",
+     "attribute",
+     6,
+     null,
+     "asserted"
+    ],
+    [
+     "ремонт",
+     "subject",
+     4,
+     null,
+     "asserted"
+    ],
+    [
+     "существующей",
+     "genitive_modifier",
+     6,
+     null,
+     "asserted"
+    ],
+    [
+     "и",
+     "coordinator",
+     9,
+     null,
+     "asserted"
+    ],
+    [
+     "строительство",
+     "nominal_conjunct",
+     6,
+     null,
+     "asserted"
+    ],
+    [
+     "современной",
+     "attribute",
+     11,
+     null,
+     "asserted"
+    ],
+    [
+     "инфраструктуры",
+     "genitive_modifier",
+     9,
+     null,
+     "asserted"
+    ],
+    [
+     "аэропорта",
+     "genitive_modifier",
+     11,
+     null,
+     "asserted"
+    ],
+    [
+     "Орёл",
+     "apposition",
+     12,
+     null,
+     "asserted"
+    ],
+    [
+     "--",
+     "punctuation",
+     13,
+     null,
+     "asserted"
+    ],
+    [
+     "Южный",
+     "apposition",
+     13,
+     null,
+     "asserted"
+    ],
+    [
+     ",",
+     "punctuation",
+     17,
+     null,
+     "qualified"
+    ],
+    [
+     "сделав",
+     "converb",
+     4,
+     6,
+     "qualified"
+    ],
+    [
+     "его",
+     "object",
+     17,
+     null,
+     "qualified"
+    ],
+    [
+     "привлекательным",
+     "predicative_complement",
+     17,
+     18,
+     "qualified"
+    ],
+    [
+     "для",
+     "preposition",
+     19,
+     null,
+     "qualified"
+    ],
+    [
+     "базирования",
+     "governed",
+     20,
+     null,
+     "qualified"
+    ],
+    [
+     "операторов",
+     "genitive_modifier",
+     21,
+     null,
+     "qualified"
+    ],
+    [
+     "авиаперевозок",
+     "genitive_modifier",
+     22,
+     null,
+     "qualified"
+    ]
+   ],
+   "exact": true
+  },
+  {
+   "id": "test-s16",
+   "mode": "corpus-only",
+   "status": "AMBIGUOUS",
+   "reason": "OPEN_CHOICE",
+   "calls": [
+    {
+     "context": ", сделав его привлекательным для базирования операторов авиаперевозок",
+     "question": "Which word does the phrase «для базирования» depend on?",
+     "options": [
+      "сделав",
+      "его",
+      "привлекательным"
+     ],
+     "answer": "привлекательным"
+    },
+    {
+     "context": "Для возобновления деятельности аэропорта необходим капитальный ремонт существующей и строительство современной инфраструктуры аэропорта Орёл -- Южный, сделав его привлекательным для базирования операторов авиаперевозок.",
+     "question": "Copy «[Для] возобновления» if its role here is converb. Otherwise choose “no such word”.",
+     "options": [
+      "[Для] возобновления",
+      "no such word"
+     ],
+     "answer": "no such word"
+    },
+    {
+     "context": "Для возобновления деятельности аэропорта необходим капитальный ремонт существующей и строительство современной инфраструктуры аэропорта Орёл -- Южный, сделав его привлекательным для базирования операторов авиаперевозок.",
+     "question": "Copy «существующей» if its dictionary form is «существовать». Otherwise choose “no such word”.",
+     "options": [
+      "существующей",
+      "no such word"
+     ],
+     "answer": "существующей"
+    },
+    {
+     "context": "Для возобновления деятельности аэропорта необходим капитальный ремонт существующей и строительство современной инфраструктуры аэропорта Орёл -- Южный, сделав его привлекательным для базирования операторов авиаперевозок.",
+     "question": "Copy «его» if its dictionary form is «он». Otherwise choose “no such word”.",
+     "options": [
+      "его",
+      "no such word"
+     ],
+     "answer": "его"
+    },
+    {
+     "context": "Для возобновления деятельности аэропорта необходим капитальный ремонт существующей и строительство современной инфраструктуры аэропорта Орёл -- Южный, сделав его привлекательным для базирования операторов авиаперевозок.",
+     "question": "Какое существительное подразумевается после «существующей»?",
+     "options": [
+      "инфраструктуры"
+     ],
+     "answer": "?"
+    }
+   ],
+   "empty": true,
+   "exact": false
+  },
+  {
+   "id": "test-s16",
+   "mode": "blind",
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "calls": [
+    {
+     "context": ", сделав его привлекательным для базирования операторов авиаперевозок",
+     "question": "Which word does the phrase «для базирования» depend on?",
+     "options": [
+      "сделав",
+      "его",
+      "привлекательным"
+     ],
+     "answer": "привлекательным"
+    },
+    {
+     "context": "Для возобновления деятельности аэропорта необходим капитальный ремонт существующей и строительство современной инфраструктуры аэропорта Орёл -- Южный, сделав его привлекательным для базирования операторов авиаперевозок.",
+     "question": "Copy «[Для] возобновления» if its role here is converb. Otherwise choose “no such word”.",
+     "options": [
+      "[Для] возобновления",
+      "no such word"
+     ],
+     "answer": "no such word"
+    },
+    {
+     "context": "Для возобновления деятельности аэропорта необходим капитальный ремонт существующей и строительство современной инфраструктуры аэропорта Орёл -- Южный, сделав его привлекательным для базирования операторов авиаперевозок.",
+     "question": "Copy «существующей» if its dictionary form is «существовать». Otherwise choose “no such word”.",
+     "options": [
+      "существующей",
+      "no such word"
+     ],
+     "answer": "no such word"
+    },
+    {
+     "context": "Для возобновления деятельности аэропорта необходим капитальный ремонт существующей и строительство современной инфраструктуры аэропорта Орёл -- Южный, сделав его привлекательным для базирования операторов авиаперевозок.",
+     "question": "Copy «его» if its dictionary form is «он». Otherwise choose “no such word”.",
+     "options": [
+      "его",
+      "no such word"
+     ],
+     "answer": "его"
+    },
+    {
+     "context": "Для возобновления деятельности аэропорта необходим капитальный ремонт существующей и строительство современной инфраструктуры аэропорта Орёл -- Южный, сделав его привлекательным для базирования операторов авиаперевозок.",
+     "question": "Какое существительное подразумевается после «существующей»?",
+     "options": [
+      "инфраструктуры"
+     ],
+     "answer": "инфраструктуры"
+    },
+    {
+     "context": "Для возобновления деятельности аэропорта необходим капитальный ремонт существующей и строительство современной инфраструктуры аэропорта Орёл -- Южный, сделав его привлекательным для базирования операторов авиаперевозок.",
+     "question": "Какие слова вместе образуют название?",
+     "options": [
+      "Орёл -- Южный"
+     ],
+     "answer": "Орёл -- Южный"
+    },
+    {
+     "context": "Для возобновления деятельности аэропорта необходим капитальный ремонт существующей и строительство современной инфраструктуры аэропорта Орёл -- Южный, сделав его привлекательным для базирования операторов авиаперевозок.",
+     "question": "К какому участнику в тексте относится действие «сделав»?",
+     "options": [
+      "ремонт и строительство"
+     ],
+     "answer": "ремонт и строительство"
+    }
+   ],
+   "errors": [],
+   "differences": [],
+   "merged_units": 0,
+   "rows": [
+    [
+     "Для",
+     "preposition",
+     4,
+     null,
+     "asserted"
+    ],
+    [
+     "возобновления",
+     "governed",
+     0,
+     null,
+     "asserted"
+    ],
+    [
+     "деятельности",
+     "genitive_modifier",
+     1,
+     null,
+     "asserted"
+    ],
+    [
+     "аэропорта",
+     "genitive_modifier",
+     2,
+     null,
+     "asserted"
+    ],
+    [
+     "необходим",
+     "predicate",
+     null,
+     null,
+     "asserted"
+    ],
+    [
+     "капитальный",
+     "attribute",
+     6,
+     null,
+     "asserted"
+    ],
+    [
+     "ремонт",
+     "subject",
+     4,
+     null,
+     "asserted"
+    ],
+    [
+     "существующей",
+     "genitive_modifier",
+     6,
+     null,
+     "asserted"
+    ],
+    [
+     "и",
+     "coordinator",
+     9,
+     null,
+     "asserted"
+    ],
+    [
+     "строительство",
+     "nominal_conjunct",
+     6,
+     null,
+     "asserted"
+    ],
+    [
+     "современной",
+     "attribute",
+     11,
+     null,
+     "asserted"
+    ],
+    [
+     "инфраструктуры",
+     "genitive_modifier",
+     9,
+     null,
+     "asserted"
+    ],
+    [
+     "аэропорта",
+     "genitive_modifier",
+     11,
+     null,
+     "asserted"
+    ],
+    [
+     "Орёл",
+     "apposition",
+     12,
+     null,
+     "asserted"
+    ],
+    [
+     "--",
+     "punctuation",
+     13,
+     null,
+     "asserted"
+    ],
+    [
+     "Южный",
+     "apposition",
+     13,
+     null,
+     "asserted"
+    ],
+    [
+     ",",
+     "punctuation",
+     17,
+     null,
+     "qualified"
+    ],
+    [
+     "сделав",
+     "converb",
+     4,
+     6,
+     "qualified"
+    ],
+    [
+     "его",
+     "object",
+     17,
+     null,
+     "qualified"
+    ],
+    [
+     "привлекательным",
+     "predicative_complement",
+     17,
+     18,
+     "qualified"
+    ],
+    [
+     "для",
+     "preposition",
+     19,
+     null,
+     "qualified"
+    ],
+    [
+     "базирования",
+     "governed",
+     20,
+     null,
+     "qualified"
+    ],
+    [
+     "операторов",
+     "genitive_modifier",
+     21,
+     null,
+     "qualified"
+    ],
+    [
+     "авиаперевозок",
+     "genitive_modifier",
+     22,
+     null,
+     "qualified"
+    ]
+   ],
+   "exact": true
+  },
+  {
+   "id": "test-s17",
+   "mode": "abstain",
+   "status": "AMBIGUOUS",
+   "reason": "OPEN_CHOICE",
+   "calls": [
+    {
+     "context": "неоднократно посылал ему на помощь татарские войска",
+     "question": "Кому адресовано действие «посылал»? Выберите участника, если он получатель.",
+     "options": [
+      "ему",
+      "no such word"
+     ],
+     "answer": "?"
+    }
+   ],
+   "empty": true,
+   "exact": false
+  },
+  {
+   "id": "test-s17",
+   "mode": "teacher",
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "calls": [
+    {
+     "context": "неоднократно посылал ему на помощь татарские войска",
+     "question": "Кому адресовано действие «посылал»? Выберите участника, если он получатель.",
+     "options": [
+      "ему",
+      "no such word"
+     ],
+     "answer": "ему"
+    },
+    {
+     "context": "последний заключил союз с Сайид Ахмадом, внуком Тохтамыша и соперником Улу-Мухаммеда",
+     "question": "Какое слово служит подлежащим при «заключил»?",
+     "options": [
+      "последний",
+      "союз"
+     ],
+     "answer": "последний"
+    },
+    {
+     "context": "и неоднократно посылал ему на помощь татарские войска",
+     "question": "Which word does the phrase «на помощь» depend on?",
+     "options": [
+      "посылал",
+      "ему"
+     ],
+     "answer": "посылал"
+    },
+    {
+     "context": ", но последний заключил союз с Сайид Ахмадом, внуком Тохтамыша и соперником Улу-Мухаммеда",
+     "question": "Which word does the phrase «с Сайид Ахмадом» depend on?",
+     "options": [
+      "заключил",
+      "союз"
+     ],
+     "answer": "заключил"
+    },
+    {
+     "context": "Хан Золотой Орды Улу-Мухаммед поддерживал Свидригайло и неоднократно посылал ему на помощь татарские войска, но последний заключил союз с Сайид Ахмадом, внуком Тохтамыша и соперником Улу-Мухаммеда.",
+     "question": "Copy «ему» if its dictionary form is «он». Otherwise choose “no such word”.",
+     "options": [
+      "ему",
+      "no such word"
+     ],
+     "answer": "ему"
+    },
+    {
+     "context": "Хан Золотой Орды Улу-Мухаммед поддерживал Свидригайло и неоднократно посылал ему на помощь татарские войска, но последний заключил союз с Сайид Ахмадом, внуком Тохтамыша и соперником Улу-Мухаммеда.",
+     "question": "Слово «Улу-Мухаммед» здесь служит именем или названием? Выберите его, если да.",
+     "options": [
+      "Улу-Мухаммед"
+     ],
+     "answer": "Улу-Мухаммед"
+    },
+    {
+     "context": "Хан Золотой Орды Улу-Мухаммед поддерживал Свидригайло и неоднократно посылал ему на помощь татарские войска, но последний заключил союз с Сайид Ахмадом, внуком Тохтамыша и соперником Улу-Мухаммеда.",
+     "question": "Слово «Свидригайло» здесь служит именем или названием? Выберите его, если да.",
+     "options": [
+      "Свидригайло"
+     ],
+     "answer": "Свидригайло"
+    },
+    {
+     "context": "Хан Золотой Орды Улу-Мухаммед поддерживал Свидригайло и неоднократно посылал ему на помощь татарские войска, но последний заключил союз с Сайид Ахмадом, внуком Тохтамыша и соперником Улу-Мухаммеда.",
+     "question": "Слово «Сайид» здесь служит именем или названием? Выберите его, если да.",
+     "options": [
+      "Сайид"
+     ],
+     "answer": "Сайид"
+    },
+    {
+     "context": "Хан Золотой Орды Улу-Мухаммед поддерживал Свидригайло и неоднократно посылал ему на помощь татарские войска, но последний заключил союз с Сайид Ахмадом, внуком Тохтамыша и соперником Улу-Мухаммеда.",
+     "question": "Слово «Тохтамыша» здесь служит именем или названием? Выберите его, если да.",
+     "options": [
+      "Тохтамыша"
+     ],
+     "answer": "Тохтамыша"
+    },
+    {
+     "context": "Хан Золотой Орды Улу-Мухаммед поддерживал Свидригайло и неоднократно посылал ему на помощь татарские войска, но последний заключил союз с Сайид Ахмадом, внуком Тохтамыша и соперником Улу-Мухаммеда.",
+     "question": "Слово «Улу-Мухаммеда» здесь служит именем или названием? Выберите его, если да.",
+     "options": [
+      "Улу-Мухаммеда"
+     ],
+     "answer": "Улу-Мухаммеда"
+    }
+   ],
+   "errors": [],
+   "differences": [],
+   "merged_units": 4,
+   "rows": [
+    [
+     "Хан",
+     "subject",
+     4,
+     null,
+     "asserted"
+    ],
+    [
+     "Золотой",
+     "attribute",
+     2,
+     null,
+     "asserted"
+    ],
+    [
+     "Орды",
+     "genitive_modifier",
+     0,
+     null,
+     "asserted"
+    ],
+    [
+     "Улу-Мухаммед",
+     "apposition",
+     0,
+     null,
+     "asserted"
+    ],
+    [
+     "поддерживал",
+     "predicate",
+     null,
+     null,
+     "asserted"
+    ],
+    [
+     "Свидригайло",
+     "object",
+     4,
+     null,
+     "asserted"
+    ],
+    [
+     "и",
+     "clause_marker",
+     8,
+     null,
+     "asserted"
+    ],
+    [
+     "неоднократно",
+     "adverb",
+     8,
+     null,
+     "asserted"
+    ],
+    [
+     "посылал",
+     "clause_conjunct",
+     4,
+     0,
+     "asserted"
+    ],
+    [
+     "ему",
+     "recipient",
+     8,
+     null,
+     "asserted"
+    ],
+    [
+     "на",
+     "preposition",
+     8,
+     null,
+     "asserted"
+    ],
+    [
+     "помощь",
+     "governed",
+     10,
+     null,
+     "asserted"
+    ],
+    [
+     "татарские",
+     "attribute",
+     13,
+     null,
+     "asserted"
+    ],
+    [
+     "войска",
+     "object",
+     8,
+     null,
+     "asserted"
+    ],
+    [
+     ",",
+     "punctuation",
+     17,
+     null,
+     "asserted"
+    ],
+    [
+     "но",
+     "clause_marker",
+     17,
+     null,
+     "asserted"
+    ],
+    [
+     "последний",
+     "subject",
+     17,
+     null,
+     "asserted"
+    ],
+    [
+     "заключил",
+     "clause_conjunct",
+     4,
+     null,
+     "asserted"
+    ],
+    [
+     "союз",
+     "object",
+     17,
+     null,
+     "asserted"
+    ],
+    [
+     "с",
+     "preposition",
+     17,
+     null,
+     "asserted"
+    ],
+    [
+     "Сайид",
+     "governed",
+     19,
+     null,
+     "asserted"
+    ],
+    [
+     "Ахмадом",
+     "name_part",
+     20,
+     null,
+     "asserted"
+    ],
+    [
+     ",",
+     "punctuation",
+     23,
+     null,
+     "asserted"
+    ],
+    [
+     "внуком",
+     "apposition",
+     20,
+     null,
+     "asserted"
+    ],
+    [
+     "Тохтамыша",
+     "genitive_modifier",
+     23,
+     null,
+     "asserted"
+    ],
+    [
+     "и",
+     "coordinator",
+     26,
+     null,
+     "asserted"
+    ],
+    [
+     "соперником",
+     "nominal_conjunct",
+     23,
+     null,
+     "asserted"
+    ],
+    [
+     "Улу-Мухаммеда",
+     "genitive_modifier",
+     26,
+     null,
+     "asserted"
+    ]
+   ],
+   "exact": true
+  },
+  {
+   "id": "test-s17",
+   "mode": "blind",
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "calls": [
+    {
+     "context": "неоднократно посылал ему на помощь татарские войска",
+     "question": "Кому адресовано действие «посылал»? Выберите участника, если он получатель.",
+     "options": [
+      "ему",
+      "no such word"
+     ],
+     "answer": "ему"
+    },
+    {
+     "context": "последний заключил союз с Сайид Ахмадом, внуком Тохтамыша и соперником Улу-Мухаммеда",
+     "question": "Какое слово служит подлежащим при «заключил»?",
+     "options": [
+      "последний",
+      "союз"
+     ],
+     "answer": "последний"
+    },
+    {
+     "context": "и неоднократно посылал ему на помощь татарские войска",
+     "question": "Which word does the phrase «на помощь» depend on?",
+     "options": [
+      "посылал",
+      "ему"
+     ],
+     "answer": "посылал"
+    },
+    {
+     "context": ", но последний заключил союз с Сайид Ахмадом, внуком Тохтамыша и соперником Улу-Мухаммеда",
+     "question": "Which word does the phrase «с Сайид Ахмадом» depend on?",
+     "options": [
+      "заключил",
+      "союз"
+     ],
+     "answer": "заключил"
+    },
+    {
+     "context": "Хан Золотой Орды Улу-Мухаммед поддерживал Свидригайло и неоднократно посылал ему на помощь татарские войска, но последний заключил союз с Сайид Ахмадом, внуком Тохтамыша и соперником Улу-Мухаммеда.",
+     "question": "Copy «ему» if its dictionary form is «он». Otherwise choose “no such word”.",
+     "options": [
+      "ему",
+      "no such word"
+     ],
+     "answer": "ему"
+    },
+    {
+     "context": "Хан Золотой Орды Улу-Мухаммед поддерживал Свидригайло и неоднократно посылал ему на помощь татарские войска, но последний заключил союз с Сайид Ахмадом, внуком Тохтамыша и соперником Улу-Мухаммеда.",
+     "question": "Слово «Улу-Мухаммед» здесь служит именем или названием? Выберите его, если да.",
+     "options": [
+      "Улу-Мухаммед"
+     ],
+     "answer": "Улу-Мухаммед"
+    },
+    {
+     "context": "Хан Золотой Орды Улу-Мухаммед поддерживал Свидригайло и неоднократно посылал ему на помощь татарские войска, но последний заключил союз с Сайид Ахмадом, внуком Тохтамыша и соперником Улу-Мухаммеда.",
+     "question": "Слово «Свидригайло» здесь служит именем или названием? Выберите его, если да.",
+     "options": [
+      "Свидригайло"
+     ],
+     "answer": "Свидригайло"
+    },
+    {
+     "context": "Хан Золотой Орды Улу-Мухаммед поддерживал Свидригайло и неоднократно посылал ему на помощь татарские войска, но последний заключил союз с Сайид Ахмадом, внуком Тохтамыша и соперником Улу-Мухаммеда.",
+     "question": "Слово «Сайид» здесь служит именем или названием? Выберите его, если да.",
+     "options": [
+      "Сайид"
+     ],
+     "answer": "Сайид"
+    },
+    {
+     "context": "Хан Золотой Орды Улу-Мухаммед поддерживал Свидригайло и неоднократно посылал ему на помощь татарские войска, но последний заключил союз с Сайид Ахмадом, внуком Тохтамыша и соперником Улу-Мухаммеда.",
+     "question": "Слово «Тохтамыша» здесь служит именем или названием? Выберите его, если да.",
+     "options": [
+      "Тохтамыша"
+     ],
+     "answer": "Тохтамыша"
+    },
+    {
+     "context": "Хан Золотой Орды Улу-Мухаммед поддерживал Свидригайло и неоднократно посылал ему на помощь татарские войска, но последний заключил союз с Сайид Ахмадом, внуком Тохтамыша и соперником Улу-Мухаммеда.",
+     "question": "Слово «Улу-Мухаммеда» здесь служит именем или названием? Выберите его, если да.",
+     "options": [
+      "Улу-Мухаммеда"
+     ],
+     "answer": "Улу-Мухаммеда"
+    }
+   ],
+   "errors": [],
+   "differences": [],
+   "merged_units": 4,
+   "rows": [
+    [
+     "Хан",
+     "subject",
+     4,
+     null,
+     "asserted"
+    ],
+    [
+     "Золотой",
+     "attribute",
+     2,
+     null,
+     "asserted"
+    ],
+    [
+     "Орды",
+     "genitive_modifier",
+     0,
+     null,
+     "asserted"
+    ],
+    [
+     "Улу-Мухаммед",
+     "apposition",
+     0,
+     null,
+     "asserted"
+    ],
+    [
+     "поддерживал",
+     "predicate",
+     null,
+     null,
+     "asserted"
+    ],
+    [
+     "Свидригайло",
+     "object",
+     4,
+     null,
+     "asserted"
+    ],
+    [
+     "и",
+     "clause_marker",
+     8,
+     null,
+     "asserted"
+    ],
+    [
+     "неоднократно",
+     "adverb",
+     8,
+     null,
+     "asserted"
+    ],
+    [
+     "посылал",
+     "clause_conjunct",
+     4,
+     0,
+     "asserted"
+    ],
+    [
+     "ему",
+     "recipient",
+     8,
+     null,
+     "asserted"
+    ],
+    [
+     "на",
+     "preposition",
+     8,
+     null,
+     "asserted"
+    ],
+    [
+     "помощь",
+     "governed",
+     10,
+     null,
+     "asserted"
+    ],
+    [
+     "татарские",
+     "attribute",
+     13,
+     null,
+     "asserted"
+    ],
+    [
+     "войска",
+     "object",
+     8,
+     null,
+     "asserted"
+    ],
+    [
+     ",",
+     "punctuation",
+     17,
+     null,
+     "asserted"
+    ],
+    [
+     "но",
+     "clause_marker",
+     17,
+     null,
+     "asserted"
+    ],
+    [
+     "последний",
+     "subject",
+     17,
+     null,
+     "asserted"
+    ],
+    [
+     "заключил",
+     "clause_conjunct",
+     4,
+     null,
+     "asserted"
+    ],
+    [
+     "союз",
+     "object",
+     17,
+     null,
+     "asserted"
+    ],
+    [
+     "с",
+     "preposition",
+     17,
+     null,
+     "asserted"
+    ],
+    [
+     "Сайид",
+     "governed",
+     19,
+     null,
+     "asserted"
+    ],
+    [
+     "Ахмадом",
+     "name_part",
+     20,
+     null,
+     "asserted"
+    ],
+    [
+     ",",
+     "punctuation",
+     23,
+     null,
+     "asserted"
+    ],
+    [
+     "внуком",
+     "apposition",
+     20,
+     null,
+     "asserted"
+    ],
+    [
+     "Тохтамыша",
+     "genitive_modifier",
+     23,
+     null,
+     "asserted"
+    ],
+    [
+     "и",
+     "coordinator",
+     26,
+     null,
+     "asserted"
+    ],
+    [
+     "соперником",
+     "nominal_conjunct",
+     23,
+     null,
+     "asserted"
+    ],
+    [
+     "Улу-Мухаммеда",
+     "genitive_modifier",
+     26,
+     null,
+     "asserted"
+    ]
+   ],
+   "exact": true
+  },
+  {
+   "id": "test-s18",
+   "mode": "abstain",
+   "status": "AMBIGUOUS",
+   "reason": "OPEN_CHOICE",
+   "calls": [
+    {
+     "context": "Его описание дьявола (белый мужчина с пустыми глазами и низким голосом, ходит со своей охотничьей собакой) подходит к облику шерифа, который преследует бывших каторжников.",
+     "question": "К какому слову относится пояснение «белый мужчина с пустыми глазами и низким голосом, ходит со своей охотничьей собакой»?",
+     "options": [
+      "описание",
+      "дьявола"
+     ],
+     "answer": "?"
+    }
+   ],
+   "empty": true,
+   "exact": false
+  },
+  {
+   "id": "test-s18",
+   "mode": "teacher",
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "calls": [
+    {
+     "context": "Его описание дьявола (белый мужчина с пустыми глазами и низким голосом, ходит со своей охотничьей собакой) подходит к облику шерифа, который преследует бывших каторжников.",
+     "question": "К какому слову относится пояснение «белый мужчина с пустыми глазами и низким голосом, ходит со своей охотничьей собакой»?",
+     "options": [
+      "описание",
+      "дьявола"
+     ],
+     "answer": "описание"
+    },
+    {
+     "context": "Его описание дьявола (белый мужчина с пустыми глазами и низким голосом, ходит со своей охотничьей собакой) подходит к облику шерифа, который преследует бывших каторжников.",
+     "question": "Which word does «который» refer to?",
+     "options": [
+      "облику",
+      "шерифа"
+     ],
+     "answer": "шерифа"
+    },
+    {
+     "context": "бывших каторжников",
+     "question": "Copy «бывших» if it describes an action here. Otherwise choose “no such word”.",
+     "options": [
+      "бывших",
+      "no such word"
+     ],
+     "answer": "no such word"
+    }
+   ],
+   "errors": [],
+   "differences": [],
+   "merged_units": 0,
+   "rows": [
+    [
+     "Его",
+     "possessive",
+     1,
+     null,
+     "asserted"
+    ],
+    [
+     "описание",
+     "subject",
+     19,
+     null,
+     "asserted"
+    ],
+    [
+     "дьявола",
+     "genitive_modifier",
+     1,
+     null,
+     "asserted"
+    ],
+    [
+     "(",
+     "punctuation",
+     5,
+     null,
+     "parenthetical"
+    ],
+    [
+     "белый",
+     "attribute",
+     5,
+     null,
+     "parenthetical"
+    ],
+    [
+     "мужчина",
+     "apposition",
+     1,
+     null,
+     "parenthetical"
+    ],
+    [
+     "с",
+     "preposition",
+     5,
+     null,
+     "parenthetical"
+    ],
+    [
+     "пустыми",
+     "attribute",
+     8,
+     null,
+     "parenthetical"
+    ],
+    [
+     "глазами",
+     "governed",
+     6,
+     null,
+     "parenthetical"
+    ],
+    [
+     "и",
+     "coordinator",
+     11,
+     null,
+     "parenthetical"
+    ],
+    [
+     "низким",
+     "attribute",
+     11,
+     null,
+     "parenthetical"
+    ],
+    [
+     "голосом",
+     "nominal_conjunct",
+     8,
+     null,
+     "parenthetical"
+    ],
+    [
+     ",",
+     "punctuation",
+     13,
+     null,
+     "parenthetical"
+    ],
+    [
+     "ходит",
+     "clause_conjunct",
+     5,
+     5,
+     "parenthetical"
+    ],
+    [
+     "со",
+     "preposition",
+     13,
+     null,
+     "parenthetical"
+    ],
+    [
+     "своей",
+     "possessive",
+     17,
+     null,
+     "parenthetical"
+    ],
+    [
+     "охотничьей",
+     "attribute",
+     17,
+     null,
+     "parenthetical"
+    ],
+    [
+     "собакой",
+     "governed",
+     14,
+     null,
+     "parenthetical"
+    ],
+    [
+     ")",
+     "punctuation",
+     5,
+     null,
+     "parenthetical"
+    ],
+    [
+     "подходит",
+     "predicate",
+     null,
+     null,
+     "asserted"
+    ],
+    [
+     "к",
+     "preposition",
+     19,
+     null,
+     "asserted"
+    ],
+    [
+     "облику",
+     "governed",
+     20,
+     null,
+     "asserted"
+    ],
+    [
+     "шерифа",
+     "genitive_modifier",
+     21,
+     null,
+     "asserted"
+    ],
+    [
+     ",",
+     "punctuation",
+     25,
+     null,
+     "asserted"
+    ],
+    [
+     "который",
+     "subject",
+     25,
+     null,
+     "asserted"
+    ],
+    [
+     "преследует",
+     "clause_relative",
+     22,
+     null,
+     "asserted"
+    ],
+    [
+     "бывших",
+     "attribute",
+     27,
+     null,
+     "asserted"
+    ],
+    [
+     "каторжников",
+     "object",
+     25,
+     null,
+     "asserted"
+    ]
+   ],
+   "exact": true
+  },
+  {
+   "id": "test-s18",
+   "mode": "blind",
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "calls": [
+    {
+     "context": "Его описание дьявола (белый мужчина с пустыми глазами и низким голосом, ходит со своей охотничьей собакой) подходит к облику шерифа, который преследует бывших каторжников.",
+     "question": "К какому слову относится пояснение «белый мужчина с пустыми глазами и низким голосом, ходит со своей охотничьей собакой»?",
+     "options": [
+      "описание",
+      "дьявола"
+     ],
+     "answer": "дьявола"
+    },
+    {
+     "context": "Его описание дьявола (белый мужчина с пустыми глазами и низким голосом, ходит со своей охотничьей собакой) подходит к облику шерифа, который преследует бывших каторжников.",
+     "question": "Which word does «который» refer to?",
+     "options": [
+      "облику",
+      "шерифа"
+     ],
+     "answer": "шерифа"
+    },
+    {
+     "context": "бывших каторжников",
+     "question": "Copy «бывших» if it describes an action here. Otherwise choose “no such word”.",
+     "options": [
+      "бывших",
+      "no such word"
+     ],
+     "answer": "no such word"
+    }
+   ],
+   "errors": [],
+   "differences": [
+    [
+     "мужчина",
+     2,
+     3
+    ]
+   ],
+   "merged_units": 0,
+   "rows": [
+    [
+     "Его",
+     "possessive",
+     1,
+     null,
+     "asserted"
+    ],
+    [
+     "описание",
+     "subject",
+     19,
+     null,
+     "asserted"
+    ],
+    [
+     "дьявола",
+     "genitive_modifier",
+     1,
+     null,
+     "asserted"
+    ],
+    [
+     "(",
+     "punctuation",
+     5,
+     null,
+     "parenthetical"
+    ],
+    [
+     "белый",
+     "attribute",
+     5,
+     null,
+     "parenthetical"
+    ],
+    [
+     "мужчина",
+     "apposition",
+     2,
+     null,
+     "parenthetical"
+    ],
+    [
+     "с",
+     "preposition",
+     5,
+     null,
+     "parenthetical"
+    ],
+    [
+     "пустыми",
+     "attribute",
+     8,
+     null,
+     "parenthetical"
+    ],
+    [
+     "глазами",
+     "governed",
+     6,
+     null,
+     "parenthetical"
+    ],
+    [
+     "и",
+     "coordinator",
+     11,
+     null,
+     "parenthetical"
+    ],
+    [
+     "низким",
+     "attribute",
+     11,
+     null,
+     "parenthetical"
+    ],
+    [
+     "голосом",
+     "nominal_conjunct",
+     8,
+     null,
+     "parenthetical"
+    ],
+    [
+     ",",
+     "punctuation",
+     13,
+     null,
+     "parenthetical"
+    ],
+    [
+     "ходит",
+     "clause_conjunct",
+     5,
+     5,
+     "parenthetical"
+    ],
+    [
+     "со",
+     "preposition",
+     13,
+     null,
+     "parenthetical"
+    ],
+    [
+     "своей",
+     "possessive",
+     17,
+     null,
+     "parenthetical"
+    ],
+    [
+     "охотничьей",
+     "attribute",
+     17,
+     null,
+     "parenthetical"
+    ],
+    [
+     "собакой",
+     "governed",
+     14,
+     null,
+     "parenthetical"
+    ],
+    [
+     ")",
+     "punctuation",
+     5,
+     null,
+     "parenthetical"
+    ],
+    [
+     "подходит",
+     "predicate",
+     null,
+     null,
+     "asserted"
+    ],
+    [
+     "к",
+     "preposition",
+     19,
+     null,
+     "asserted"
+    ],
+    [
+     "облику",
+     "governed",
+     20,
+     null,
+     "asserted"
+    ],
+    [
+     "шерифа",
+     "genitive_modifier",
+     21,
+     null,
+     "asserted"
+    ],
+    [
+     ",",
+     "punctuation",
+     25,
+     null,
+     "asserted"
+    ],
+    [
+     "который",
+     "subject",
+     25,
+     null,
+     "asserted"
+    ],
+    [
+     "преследует",
+     "clause_relative",
+     22,
+     null,
+     "asserted"
+    ],
+    [
+     "бывших",
+     "attribute",
+     27,
+     null,
+     "asserted"
+    ],
+    [
+     "каторжников",
+     "object",
+     25,
+     null,
+     "asserted"
+    ]
+   ],
+   "exact": false
+  },
+  {
+   "id": "test-s19",
+   "mode": "abstain",
+   "status": "AMBIGUOUS",
+   "reason": "OPEN_CHOICE",
+   "calls": [
+    {
+     "context": "И в то же время малыш должен как будто идти к папе, к кораблю",
+     "question": "Which word does the phrase «в то же время» depend on?",
+     "options": [
+      "должен",
+      "идти"
+     ],
+     "answer": "?"
+    }
+   ],
+   "empty": true,
+   "exact": false
+  },
+  {
+   "id": "test-s19",
+   "mode": "teacher",
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "calls": [
+    {
+     "context": "И в то же время малыш должен как будто идти к папе, к кораблю",
+     "question": "Which word does the phrase «в то же время» depend on?",
+     "options": [
+      "должен",
+      "идти"
+     ],
+     "answer": "должен"
+    },
+    {
+     "context": "И в то же время малыш должен как будто идти к папе, к кораблю",
+     "question": "Which word does the phrase «к папе, к кораблю» depend on?",
+     "options": [
+      "должен",
+      "идти"
+     ],
+     "answer": "идти"
+    }
+   ],
+   "errors": [],
+   "differences": [],
+   "merged_units": 0,
+   "rows": [
+    [
+     "И",
+     "coordinator",
+     6,
+     null,
+     "asserted"
+    ],
+    [
+     "в",
+     "preposition",
+     6,
+     null,
+     "asserted"
+    ],
+    [
+     "то",
+     "attribute",
+     4,
+     null,
+     "asserted"
+    ],
+    [
+     "же",
+     "particle",
+     2,
+     null,
+     "asserted"
+    ],
+    [
+     "время",
+     "governed",
+     1,
+     null,
+     "asserted"
+    ],
+    [
+     "малыш",
+     "subject",
+     6,
+     null,
+     "asserted"
+    ],
+    [
+     "должен",
+     "predicate",
+     null,
+     null,
+     "asserted"
+    ],
+    [
+     "как",
+     "adverb",
+     9,
+     null,
+     "modal"
+    ],
+    [
+     "будто",
+     "fixed",
+     7,
+     null,
+     "modal"
+    ],
+    [
+     "идти",
+     "infinitive",
+     6,
+     5,
+     "modal"
+    ],
+    [
+     "к",
+     "preposition",
+     9,
+     null,
+     "modal"
+    ],
+    [
+     "папе",
+     "governed",
+     10,
+     null,
+     "modal"
+    ],
+    [
+     ",",
+     "punctuation",
+     14,
+     null,
+     "modal"
+    ],
+    [
+     "к",
+     "case",
+     14,
+     null,
+     "modal"
+    ],
+    [
+     "кораблю",
+     "nominal_conjunct",
+     11,
+     null,
+     "modal"
+    ]
+   ],
+   "exact": true
+  },
+  {
+   "id": "test-s19",
+   "mode": "blind",
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "calls": [
+    {
+     "context": "И в то же время малыш должен как будто идти к папе, к кораблю",
+     "question": "Which word does the phrase «в то же время» depend on?",
+     "options": [
+      "должен",
+      "идти"
+     ],
+     "answer": "идти"
+    },
+    {
+     "context": "И в то же время малыш должен как будто идти к папе, к кораблю",
+     "question": "Which word does the phrase «к папе, к кораблю» depend on?",
+     "options": [
+      "должен",
+      "идти"
+     ],
+     "answer": "идти"
+    }
+   ],
+   "errors": [],
+   "differences": [
+    [
+     "время",
+     7,
+     10
+    ]
+   ],
+   "merged_units": 0,
+   "rows": [
+    [
+     "И",
+     "coordinator",
+     6,
+     null,
+     "asserted"
+    ],
+    [
+     "в",
+     "preposition",
+     9,
+     null,
+     "modal"
+    ],
+    [
+     "то",
+     "attribute",
+     4,
+     null,
+     "modal"
+    ],
+    [
+     "же",
+     "particle",
+     2,
+     null,
+     "modal"
+    ],
+    [
+     "время",
+     "governed",
+     1,
+     null,
+     "modal"
+    ],
+    [
+     "малыш",
+     "subject",
+     6,
+     null,
+     "asserted"
+    ],
+    [
+     "должен",
+     "predicate",
+     null,
+     null,
+     "asserted"
+    ],
+    [
+     "как",
+     "adverb",
+     9,
+     null,
+     "modal"
+    ],
+    [
+     "будто",
+     "fixed",
+     7,
+     null,
+     "modal"
+    ],
+    [
+     "идти",
+     "infinitive",
+     6,
+     5,
+     "modal"
+    ],
+    [
+     "к",
+     "preposition",
+     9,
+     null,
+     "modal"
+    ],
+    [
+     "папе",
+     "governed",
+     10,
+     null,
+     "modal"
+    ],
+    [
+     ",",
+     "punctuation",
+     14,
+     null,
+     "modal"
+    ],
+    [
+     "к",
+     "case",
+     14,
+     null,
+     "modal"
+    ],
+    [
+     "кораблю",
+     "nominal_conjunct",
+     11,
+     null,
+     "modal"
+    ]
+   ],
+   "exact": false
+  },
+  {
+   "id": "test-s20",
+   "mode": "abstain",
+   "status": "AMBIGUOUS",
+   "reason": "OPEN_CHOICE",
+   "calls": [
+    {
+     "context": "На выборах в Европейский парламент 2009 года партия получила 769125 голосов (17%) и 4 места из 25 (в настоящее время -- 5).",
+     "question": "К какому слову относится пояснение «в настоящее время -- 5»?",
+     "options": [
+      "голосов",
+      "места",
+      "25"
+     ],
+     "answer": "?"
+    }
+   ],
+   "empty": true,
+   "exact": false
+  },
+  {
+   "id": "test-s20",
+   "mode": "teacher",
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "calls": [
+    {
+     "context": "На выборах в Европейский парламент 2009 года партия получила 769125 голосов (17%) и 4 места из 25 (в настоящее время -- 5).",
+     "question": "К какому слову относится пояснение «в настоящее время -- 5»?",
+     "options": [
+      "голосов",
+      "места",
+      "25"
+     ],
+     "answer": "места"
+    },
+    {
+     "context": "На выборах в Европейский парламент 2009 года партия получила 769125 голосов (17%) и 4 места из 25 (в настоящее время -- 5)",
+     "question": "Which word does the phrase «в Европейский парламент» depend on?",
+     "options": [
+      "выборах",
+      "получила"
+     ],
+     "answer": "выборах"
+    },
+    {
+     "context": "На выборах в Европейский парламент 2009 года партия получила 769125 голосов (17%) и 4 места из 25 (в настоящее время -- 5).",
+     "question": "Copy «выборах» if its dictionary form is «выбор». Otherwise choose “no such word”.",
+     "options": [
+      "выборах",
+      "no such word"
+     ],
+     "answer": "no such word"
+    },
+    {
+     "context": "На выборах в Европейский парламент 2009 года партия получила 769125 голосов (17%) и 4 места из 25 (в настоящее время -- 5).",
+     "question": "Which word does «года» depend on?",
+     "options": [
+      "парламент",
+      "выборах"
+     ],
+     "answer": "выборах"
+    }
+   ],
+   "errors": [],
+   "differences": [],
+   "merged_units": 0,
+   "rows": [
+    [
+     "На",
+     "preposition",
+     8,
+     null,
+     "asserted"
+    ],
+    [
+     "выборах",
+     "governed",
+     0,
+     null,
+     "asserted"
+    ],
+    [
+     "в",
+     "preposition",
+     1,
+     null,
+     "asserted"
+    ],
+    [
+     "Европейский",
+     "attribute",
+     4,
+     null,
+     "asserted"
+    ],
+    [
+     "парламент",
+     "governed",
+     2,
+     null,
+     "asserted"
+    ],
+    [
+     "2009",
+     "numeral",
+     6,
+     null,
+     "asserted"
+    ],
+    [
+     "года",
+     "genitive_modifier",
+     1,
+     null,
+     "asserted"
+    ],
+    [
+     "партия",
+     "subject",
+     8,
+     null,
+     "asserted"
+    ],
+    [
+     "получила",
+     "predicate",
+     null,
+     null,
+     "asserted"
+    ],
+    [
+     "769125",
+     "numeral",
+     10,
+     null,
+     "asserted"
+    ],
+    [
+     "голосов",
+     "object",
+     8,
+     null,
+     "asserted"
+    ],
+    [
+     "(",
+     "punctuation",
+     13,
+     null,
+     "parenthetical"
+    ],
+    [
+     "17",
+     "numeral",
+     13,
+     null,
+     "parenthetical"
+    ],
+    [
+     "%",
+     "apposition",
+     10,
+     null,
+     "parenthetical"
+    ],
+    [
+     ")",
+     "punctuation",
+     13,
+     null,
+     "parenthetical"
+    ],
+    [
+     "и",
+     "coordinator",
+     17,
+     null,
+     "asserted"
+    ],
+    [
+     "4",
+     "numeral",
+     17,
+     null,
+     "asserted"
+    ],
+    [
+     "места",
+     "nominal_conjunct",
+     10,
+     null,
+     "asserted"
+    ],
+    [
+     "из",
+     "preposition",
+     17,
+     null,
+     "asserted"
+    ],
+    [
+     "25",
+     "governed",
+     18,
+     null,
+     "asserted"
+    ],
+    [
+     "(",
+     "punctuation",
+     25,
+     null,
+     "parenthetical"
+    ],
+    [
+     "в",
+     "preposition",
+     25,
+     null,
+     "parenthetical"
+    ],
+    [
+     "настоящее",
+     "attribute",
+     23,
+     null,
+     "parenthetical"
+    ],
+    [
+     "время",
+     "governed",
+     21,
+     null,
+     "parenthetical"
+    ],
+    [
+     "--",
+     "punctuation",
+     25,
+     null,
+     "parenthetical"
+    ],
+    [
+     "5",
+     "apposition",
+     17,
+     null,
+     "parenthetical"
+    ],
+    [
+     ")",
+     "punctuation",
+     25,
+     null,
+     "parenthetical"
+    ]
+   ],
+   "exact": true
+  },
+  {
+   "id": "test-s20",
+   "mode": "blind",
+   "status": "STORED",
+   "reason": "SIMPLE_CLAUSE",
+   "calls": [
+    {
+     "context": "На выборах в Европейский парламент 2009 года партия получила 769125 голосов (17%) и 4 места из 25 (в настоящее время -- 5).",
+     "question": "К какому слову относится пояснение «в настоящее время -- 5»?",
+     "options": [
+      "голосов",
+      "места",
+      "25"
+     ],
+     "answer": "места"
+    },
+    {
+     "context": "На выборах в Европейский парламент 2009 года партия получила 769125 голосов (17%) и 4 места из 25 (в настоящее время -- 5)",
+     "question": "Which word does the phrase «в Европейский парламент» depend on?",
+     "options": [
+      "выборах",
+      "получила"
+     ],
+     "answer": "выборах"
+    },
+    {
+     "context": "На выборах в Европейский парламент 2009 года партия получила 769125 голосов (17%) и 4 места из 25 (в настоящее время -- 5).",
+     "question": "Copy «выборах» if its dictionary form is «выбор». Otherwise choose “no such word”.",
+     "options": [
+      "выборах",
+      "no such word"
+     ],
+     "answer": "выборах"
+    },
+    {
+     "context": "На выборах в Европейский парламент 2009 года партия получила 769125 голосов (17%) и 4 места из 25 (в настоящее время -- 5).",
+     "question": "Which word does «года» depend on?",
+     "options": [
+      "парламент",
+      "выборах"
+     ],
+     "answer": "выборах"
+    }
+   ],
+   "errors": [],
+   "differences": [],
+   "merged_units": 0,
+   "rows": [
+    [
+     "На",
+     "preposition",
+     8,
+     null,
+     "asserted"
+    ],
+    [
+     "выборах",
+     "governed",
+     0,
+     null,
+     "asserted"
+    ],
+    [
+     "в",
+     "preposition",
+     1,
+     null,
+     "asserted"
+    ],
+    [
+     "Европейский",
+     "attribute",
+     4,
+     null,
+     "asserted"
+    ],
+    [
+     "парламент",
+     "governed",
+     2,
+     null,
+     "asserted"
+    ],
+    [
+     "2009",
+     "numeral",
+     6,
+     null,
+     "asserted"
+    ],
+    [
+     "года",
+     "genitive_modifier",
+     1,
+     null,
+     "asserted"
+    ],
+    [
+     "партия",
+     "subject",
+     8,
+     null,
+     "asserted"
+    ],
+    [
+     "получила",
+     "predicate",
+     null,
+     null,
+     "asserted"
+    ],
+    [
+     "769125",
+     "numeral",
+     10,
+     null,
+     "asserted"
+    ],
+    [
+     "голосов",
+     "object",
+     8,
+     null,
+     "asserted"
+    ],
+    [
+     "(",
+     "punctuation",
+     13,
+     null,
+     "parenthetical"
+    ],
+    [
+     "17",
+     "numeral",
+     13,
+     null,
+     "parenthetical"
+    ],
+    [
+     "%",
+     "apposition",
+     10,
+     null,
+     "parenthetical"
+    ],
+    [
+     ")",
+     "punctuation",
+     13,
+     null,
+     "parenthetical"
+    ],
+    [
+     "и",
+     "coordinator",
+     17,
+     null,
+     "asserted"
+    ],
+    [
+     "4",
+     "numeral",
+     17,
+     null,
+     "asserted"
+    ],
+    [
+     "места",
+     "nominal_conjunct",
+     10,
+     null,
+     "asserted"
+    ],
+    [
+     "из",
+     "preposition",
+     17,
+     null,
+     "asserted"
+    ],
+    [
+     "25",
+     "governed",
+     18,
+     null,
+     "asserted"
+    ],
+    [
+     "(",
+     "punctuation",
+     25,
+     null,
+     "parenthetical"
+    ],
+    [
+     "в",
+     "preposition",
+     25,
+     null,
+     "parenthetical"
+    ],
+    [
+     "настоящее",
+     "attribute",
+     23,
+     null,
+     "parenthetical"
+    ],
+    [
+     "время",
+     "governed",
+     21,
+     null,
+     "parenthetical"
+    ],
+    [
+     "--",
+     "punctuation",
+     25,
+     null,
+     "parenthetical"
+    ],
+    [
+     "5",
+     "apposition",
+     17,
+     null,
+     "parenthetical"
+    ],
+    [
+     ")",
+     "punctuation",
+     25,
+     null,
+     "parenthetical"
+    ]
+   ],
+   "exact": true
+  },
+  {
+   "id": "test-s21",
+   "mode": "abstain",
+   "status": "AMBIGUOUS",
+   "reason": "OPEN_CHOICE",
+   "calls": [
+    {
+     "context": "что вызвало рассредоточение итальянских сил",
+     "question": "Какое слово служит подлежащим при «вызвало»?",
+     "options": [
+      "что",
+      "рассредоточение"
+     ],
+     "answer": "?"
+    }
+   ],
+   "empty": true,
+   "exact": false
+  },
+  {
+   "id": "test-s21",
+   "mode": "teacher",
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "calls": [
+    {
+     "context": "что вызвало рассредоточение итальянских сил",
+     "question": "Какое слово служит подлежащим при «вызвало»?",
+     "options": [
+      "что",
+      "рассредоточение"
+     ],
+     "answer": "что"
+    },
+    {
+     "context": ", кроме того, во многих пунктах от Арафали до Кассалы были возведены форты, что вызвало рассредоточение итальянских сил",
+     "question": "Which word does the phrase «от Арафали» depend on?",
+     "options": [
+      "пунктах",
+      "возведены"
+     ],
+     "answer": "пунктах"
+    },
+    {
+     "context": ", кроме того, во многих пунктах от Арафали до Кассалы были возведены форты, что вызвало рассредоточение итальянских сил",
+     "question": "Which word does the phrase «до Кассалы» depend on?",
+     "options": [
+      "пунктах",
+      "Арафали",
+      "возведены"
+     ],
+     "answer": "пунктах"
+    },
+    {
+     "context": "Массауа была укреплена, кроме того, во многих пунктах от Арафали до Кассалы были возведены форты, что вызвало рассредоточение итальянских сил.",
+     "question": "Слово «Массауа» здесь служит именем или названием? Выберите его, если да.",
+     "options": [
+      "Массауа"
+     ],
+     "answer": "Массауа"
+    },
+    {
+     "context": "Массауа была укреплена, кроме того, во многих пунктах от Арафали до Кассалы были возведены форты, что вызвало рассредоточение итальянских сил.",
+     "question": "Слово «Арафали» здесь служит именем или названием? Выберите его, если да.",
+     "options": [
+      "Арафали"
+     ],
+     "answer": "Арафали"
+    },
+    {
+     "context": "Массауа была укреплена, кроме того, во многих пунктах от Арафали до Кассалы были возведены форты, что вызвало рассредоточение итальянских сил.",
+     "question": "Слово «Кассалы» здесь служит именем или названием? Выберите его, если да.",
+     "options": [
+      "Кассалы"
+     ],
+     "answer": "Кассалы"
+    }
+   ],
+   "errors": [],
+   "differences": [],
+   "merged_units": 0,
+   "rows": [
+    [
+     "Массауа",
+     "subject",
+     2,
+     null,
+     "asserted"
+    ],
+    [
+     "была",
+     "copula",
+     2,
+     null,
+     "asserted"
+    ],
+    [
+     "укреплена",
+     "predicate",
+     null,
+     null,
+     "asserted"
+    ],
+    [
+     ",",
+     "punctuation",
+     15,
+     null,
+     "asserted"
+    ],
+    [
+     "кроме",
+     "preposition",
+     15,
+     null,
+     "asserted"
+    ],
+    [
+     "того",
+     "governed",
+     4,
+     null,
+     "asserted"
+    ],
+    [
+     ",",
+     "punctuation",
+     5,
+     null,
+     "asserted"
+    ],
+    [
+     "во",
+     "preposition",
+     15,
+     null,
+     "asserted"
+    ],
+    [
+     "многих",
+     "attribute",
+     9,
+     null,
+     "asserted"
+    ],
+    [
+     "пунктах",
+     "governed",
+     7,
+     null,
+     "asserted"
+    ],
+    [
+     "от",
+     "preposition",
+     9,
+     null,
+     "asserted"
+    ],
+    [
+     "Арафали",
+     "governed",
+     10,
+     null,
+     "asserted"
+    ],
+    [
+     "до",
+     "preposition",
+     9,
+     null,
+     "asserted"
+    ],
+    [
+     "Кассалы",
+     "governed",
+     12,
+     null,
+     "asserted"
+    ],
+    [
+     "были",
+     "copula",
+     15,
+     null,
+     "asserted"
+    ],
+    [
+     "возведены",
+     "clause_conjunct",
+     2,
+     null,
+     "asserted"
+    ],
+    [
+     "форты",
+     "subject",
+     15,
+     null,
+     "asserted"
+    ],
+    [
+     ",",
+     "punctuation",
+     19,
+     null,
+     "asserted"
+    ],
+    [
+     "что",
+     "subject",
+     19,
+     null,
+     "asserted"
+    ],
+    [
+     "вызвало",
+     "clause_relative",
+     15,
+     null,
+     "asserted"
+    ],
+    [
+     "рассредоточение",
+     "object",
+     19,
+     null,
+     "asserted"
+    ],
+    [
+     "итальянских",
+     "attribute",
+     22,
+     null,
+     "asserted"
+    ],
+    [
+     "сил",
+     "genitive_modifier",
+     20,
+     null,
+     "asserted"
+    ]
+   ],
+   "exact": true
+  },
+  {
+   "id": "test-s21",
+   "mode": "blind",
+   "status": "STORED",
+   "reason": "COMPLEX_CLAUSE",
+   "calls": [
+    {
+     "context": "что вызвало рассредоточение итальянских сил",
+     "question": "Какое слово служит подлежащим при «вызвало»?",
+     "options": [
+      "что",
+      "рассредоточение"
+     ],
+     "answer": "что"
+    },
+    {
+     "context": ", кроме того, во многих пунктах от Арафали до Кассалы были возведены форты, что вызвало рассредоточение итальянских сил",
+     "question": "Which word does the phrase «от Арафали» depend on?",
+     "options": [
+      "пунктах",
+      "возведены"
+     ],
+     "answer": "пунктах"
+    },
+    {
+     "context": ", кроме того, во многих пунктах от Арафали до Кассалы были возведены форты, что вызвало рассредоточение итальянских сил",
+     "question": "Which word does the phrase «до Кассалы» depend on?",
+     "options": [
+      "пунктах",
+      "Арафали",
+      "возведены"
+     ],
+     "answer": "пунктах"
+    },
+    {
+     "context": "Массауа была укреплена, кроме того, во многих пунктах от Арафали до Кассалы были возведены форты, что вызвало рассредоточение итальянских сил.",
+     "question": "Слово «Массауа» здесь служит именем или названием? Выберите его, если да.",
+     "options": [
+      "Массауа"
+     ],
+     "answer": "Массауа"
+    },
+    {
+     "context": "Массауа была укреплена, кроме того, во многих пунктах от Арафали до Кассалы были возведены форты, что вызвало рассредоточение итальянских сил.",
+     "question": "Слово «Арафали» здесь служит именем или названием? Выберите его, если да.",
+     "options": [
+      "Арафали"
+     ],
+     "answer": "Арафали"
+    },
+    {
+     "context": "Массауа была укреплена, кроме того, во многих пунктах от Арафали до Кассалы были возведены форты, что вызвало рассредоточение итальянских сил.",
+     "question": "Слово «Кассалы» здесь служит именем или названием? Выберите его, если да.",
+     "options": [
+      "Кассалы"
+     ],
+     "answer": "Кассалы"
+    }
+   ],
+   "errors": [],
+   "differences": [],
+   "merged_units": 0,
+   "rows": [
+    [
+     "Массауа",
+     "subject",
+     2,
+     null,
+     "asserted"
+    ],
+    [
+     "была",
+     "copula",
+     2,
+     null,
+     "asserted"
+    ],
+    [
+     "укреплена",
+     "predicate",
+     null,
+     null,
+     "asserted"
+    ],
+    [
+     ",",
+     "punctuation",
+     15,
+     null,
+     "asserted"
+    ],
+    [
+     "кроме",
+     "preposition",
+     15,
+     null,
+     "asserted"
+    ],
+    [
+     "того",
+     "governed",
+     4,
+     null,
+     "asserted"
+    ],
+    [
+     ",",
+     "punctuation",
+     5,
+     null,
+     "asserted"
+    ],
+    [
+     "во",
+     "preposition",
+     15,
+     null,
+     "asserted"
+    ],
+    [
+     "многих",
+     "attribute",
+     9,
+     null,
+     "asserted"
+    ],
+    [
+     "пунктах",
+     "governed",
+     7,
+     null,
+     "asserted"
+    ],
+    [
+     "от",
+     "preposition",
+     9,
+     null,
+     "asserted"
+    ],
+    [
+     "Арафали",
+     "governed",
+     10,
+     null,
+     "asserted"
+    ],
+    [
+     "до",
+     "preposition",
+     9,
+     null,
+     "asserted"
+    ],
+    [
+     "Кассалы",
+     "governed",
+     12,
+     null,
+     "asserted"
+    ],
+    [
+     "были",
+     "copula",
+     15,
+     null,
+     "asserted"
+    ],
+    [
+     "возведены",
+     "clause_conjunct",
+     2,
+     null,
+     "asserted"
+    ],
+    [
+     "форты",
+     "subject",
+     15,
+     null,
+     "asserted"
+    ],
+    [
+     ",",
+     "punctuation",
+     19,
+     null,
+     "asserted"
+    ],
+    [
+     "что",
+     "subject",
+     19,
+     null,
+     "asserted"
+    ],
+    [
+     "вызвало",
+     "clause_relative",
+     15,
+     null,
+     "asserted"
+    ],
+    [
+     "рассредоточение",
+     "object",
+     19,
+     null,
+     "asserted"
+    ],
+    [
+     "итальянских",
+     "attribute",
+     22,
+     null,
+     "asserted"
+    ],
+    [
+     "сил",
+     "genitive_modifier",
+     20,
+     null,
+     "asserted"
+    ]
+   ],
+   "exact": true
+  }
+ ]
+}
