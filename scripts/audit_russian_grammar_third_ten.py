@@ -53,6 +53,13 @@ def variants(text, rows):
         head = int(row[6]) - 1
         if row[7] in priority and head >= 0 and abs(i - head) == 1:
             sites.append((priority.index(row[7]), max(i, head)))
+    if not sites:
+        for i, (left, right) in enumerate(zip(rows, rows[1:]), 1):
+            if left[3] != 'PUNCT' and right[3] != 'PUNCT':
+                adjacent = left[6] == right[0] or right[6] == left[0]
+                sites.append((int(not adjacent), i))
+    if not sites:
+        raise ValueError('No adjacent lexical tokens for an internal comma')
     index = min(sites)[1]
     cut = spans[index - 1][1]
     dirty = [r.copy() for r in rows]

@@ -211,7 +211,7 @@ def trees(tokens, local, *, budget):
 def bindings(tree):
     resolved = list(tree)
     for i, link in enumerate(tree):
-        if link.role != 'clause_conjunct' or link.rule == 'GAP' or link.head is None:
+        if link.role != 'clause_conjunct' or link.rule in ('GAP', 'UTT.INDEPENDENT') or link.head is None:
             continue
         own = [j for j, part in enumerate(tree) if part.role == 'subject' and part.head == i]
         if own or link.implicit_subject not in (None, 'unresolved'):

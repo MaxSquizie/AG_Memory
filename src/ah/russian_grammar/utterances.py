@@ -206,12 +206,60 @@ def _purposes(part, parse):
                 yield from _purpose_readings(part, parse, i, range(i + 1, len(part)), matrix, comma)
 
 
+def nominal_then_finite(part, parse, *, marked=False):
+    from .morphology import _agree
+    from .parser import Link
+
+    start = next((i for i, token in enumerate(part) if any(
+        tag.POS == 'VERB' and tag.mood == 'indc' for _, tag in known_forms(token.surface))), None)
+    if start is None or start < 2:
+        return
+    stop = start - int(part[start - 1].surface == ',')
+    separator = stop < start
+    nominal_dash = any(t.surface in DASHES for t in part[:stop])
+    if stop < 2 or not (separator or nominal_dash) or (separator and nominal_dash) != marked:
+        return
+    forms = [known_forms(token.surface) for token in part[:stop]]
+    if sum(any(tag.POS == 'NOUN' and tag.case == 'nomn' for _, tag in row) for row in forms) < 2:
+        return
+    for left in parse(part[:stop]):
+        host = _root(left)
+        if left[host].rule != 'V2':
+            continue
+        actors = [i for i, link in enumerate(left) if link.head == host and link.role == 'subject']
+        if len(actors) != 1:
+            continue
+        actor, = actors
+        nominals = [from_tag(tag) for lemma, tag in forms[actor] if lemma == left[actor].lemma
+                    and tag.POS == 'NOUN' and tag.case == 'nomn']
+        if not nominals:
+            continue
+        for right in parse(part[start:]):
+            verb = right[0]
+            if verb.head is not None or verb.implicit_subject != 'unresolved':
+                continue
+            verbs = [from_tag(tag) for lemma, tag in known_forms(part[start].surface)
+                     if lemma == verb.lemma and tag.POS == 'VERB' and tag.mood == 'indc']
+            if not any(_agree('subject', n, v) for n in nominals for v in verbs):
+                continue
+            links, _, child = _linked(left, right, range(stop), range(start, len(part)),
+                                      'clause_conjunct', 'UTT.PARATAXIS', verb.scope)
+            if stop < start:
+                links[stop] = Link('punctuation', ',', child, 'UTT.SEP')
+            links[child] = replace(links[child], rule='UTT.INDEPENDENT')
+            yield tuple(links[j] for j in range(len(part)))
+            links[child] = replace(links[child], rule='UTT.PARATAXIS', controller=actor, implicit_subject=None)
+            yield tuple(links[j] for j in range(len(part)))
+
+
 def _parataxis(part, parse):
     from .parser import Link
 
     from . import explanations
 
     finite = [i for i, token in enumerate(part) if any(tag.POS == 'VERB' for _, tag in known_forms(token.surface))]
+    if finite and finite[0] > 1 and part[finite[0] - 1].surface == ',':
+        yield from nominal_then_finite(part, parse, marked=True)
     if len(finite) >= 2:
         governors = explanations.content_governors()
         for start in range(finite[0] + 1, finite[-1] + 1):

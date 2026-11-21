@@ -24,3 +24,16 @@ def test_comma_preserves_the_choice_between_enumeration_and_genitive():
         reply = submit(AHCore(), text, lambda _: next(options))
         assert reply.status == 'STORED'
         assert reply.analysis.analyses[0][4].role == role
+
+
+def test_comma_between_nominal_homonym_and_agreeing_noun_requires_a_choice():
+    for text, phrase in [('Иван участвовал в боевых, вылетах.', 'боевых, вылетах'),
+                         ('Они пришли в белых, куртках.', 'белых, куртках')]:
+        core = AHCore()
+        reply = submit(core, text)
+        assert reply.status == 'AMBIGUOUS' and not core.store.elements(Domain.H)
+        assert reply.analysis.probes[-1].options == (phrase, 'сохранить все запятые')
+    for ordinary in ('Иван участвовал в конкурсах, выставках.',
+                     'Он наблюдал движение спутников, комет и метеоров.'):
+        reply = submit(AHCore(), ordinary)
+        assert reply.status == 'STORED' and not reply.analysis.probes

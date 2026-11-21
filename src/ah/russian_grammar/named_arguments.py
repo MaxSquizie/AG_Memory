@@ -35,10 +35,15 @@ def personal_accusatives(surface):
 
 
 def trees(tokens, *, budget):
+    from .determiners import with_agreeing_determiners
+
+    if any(opaque_cases(t.surface) or personal_accusatives(t.surface) for t in tokens):
+        yield from with_agreeing_determiners(tokens, lambda part: _named_trees(part, budget), include_bare=True)
+
+
+def _named_trees(tokens, budget):
     from .parser import AnalysisBudgetExceeded, Link
 
-    if not any(opaque_cases(t.surface) or personal_accusatives(t.surface) for t in tokens):
-        return
     forms = [known_forms(t.surface) for t in tokens]
     finite = [i for i, variants in enumerate(forms) if any(t.POS == 'VERB' and t.mood == 'indc' for _, t in variants)]
     if len(finite) != 1:
@@ -159,14 +164,56 @@ def trees(tokens, *, budget):
                                 pending.append((noun.end, actor, obj, noun.head, links | pp | interior))
 
 
+def missing_subjects(tokens, parse):
+    from .morphology import PREDICATE_ROLES
+    from .parser import Link
+    from .utterances import _map, _root
+
+    for i, token in enumerate(tokens):
+        word = token.surface
+        if not word.istitle() or not all(part.isalpha() for part in word.split('-')) or known_forms(word):
+            continue
+        cases = opaque_cases(word)
+        if cases and 'nomn' not in cases:
+            continue
+        if not cases and any(p.tag.POS for p in dictionary().parse(word)):
+            continue
+        kept = (*range(i), *range(i + 1, len(tokens)))
+        if not kept:
+            continue
+        for tree in parse(tuple(tokens[j] for j in kept)):
+            root = _root(tree)
+            predicate = tree[root]
+            if (predicate.rule != 'V1' or predicate.implicit_subject != 'unresolved'
+                    or any(link.role == 'subject' or j != root and
+                           link.role in PREDICATE_ROLES | {'infinitive', 'converb', 'participle'}
+                           for j, link in enumerate(tree))):
+                continue
+            form = predicate.morphology
+            if not form or form.pos != 'VERB' or form.mood != 'indc' or form.person not in (None, '3per'):
+                continue
+            if form.transitivity == 'tran' and not any(link.head == root and link.role == 'object' for link in tree):
+                continue
+            if not any(lemma == predicate.lemma and tag.POS == 'VERB' and 'Impe' not in tag
+                       for lemma, tag in known_forms(tokens[kept[root]].surface)):
+                continue
+            links = _map(tree, kept)
+            links[kept[root]] = replace(links[kept[root]], implicit_subject=None)
+            links[i] = Link('subject', word, kept[root], 'OPAQUE.SUBJECT', case='nomn')
+            yield tuple(links[j] for j in range(len(tokens)))
+
+
 def confirmation(tokens, tree, i, text):
-    if tree[i].rule != 'OPAQUE.PERSON.ACC':
+    if tree[i].rule not in ('OPAQUE.PERSON.ACC', 'OPAQUE.SUBJECT'):
         return None
     from .parser import _span_label
     from .probe import Probe
 
     person = _span_label(tokens, i)
     head = tree[i].head
+    if tree[i].rule == 'OPAQUE.SUBJECT':
+        action = _span_label(tokens, head)
+        return Probe(f'Каким именем или названием в тексте выражено подлежащее при «{action}»?', (person,), text)
     question = 'Какое слово здесь обозначает человека и стоит в винительном падеже?'
     if head is not None and tree[head].role == 'predicate':
         action = _span_label(tokens, head)

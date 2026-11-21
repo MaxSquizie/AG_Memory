@@ -31,6 +31,10 @@ def trees(tokens, parse, budget):
 
 
 def remaining(tokens, parse, budget):
+    from .utterances import nominal_then_finite
+
+    yield from nominal_then_finite(tokens, parse)
+    yield from named_arguments.missing_subjects(tokens, parse)
     yield from clause_series.trees(tokens, parse, budget)
     yield from nominal_mentions.trees(tokens, parse, budget)
     yield from participial_regions.trees(tokens, budget=budget, extended=True)

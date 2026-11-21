@@ -43,3 +43,14 @@ def test_elliptical_noun_uses_a_word_as_its_source_without_equating_referents():
     edges = {link.relation_id for link in core.store.links()
              if link.source == group.members[2] and link.target == group.members[6]}
     assert edges == {'grammar.ellipsis_source'}
+
+
+def test_simple_converb_regions_stop_at_finite_predicates_and_clause_boundaries():
+    from ah.russian_grammar import analyze
+    from ah.russian_grammar.modifiers import _regions
+
+    result = analyze('Мария пришла; Иван вышел, закрыв дверь.')
+    tree, = result.analyses
+    assert (tree[6].head, tree[6].controller) == (4, 3)
+    unmarked = analyze('Иван закрыв дверь ушёл; Мария спала.')
+    assert all(end <= 3 for _, end in _regions(unmarked.tokens, 1))

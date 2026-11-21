@@ -1,7 +1,7 @@
 from .homogeneous import _restore
 from .nominal_groups import _agree, genitive_ordinals
 from .prepositions import FORMS
-from .rules import known_forms, readings, subject_agrees
+from .rules import known_forms, name_type, readings, subject_agrees
 
 
 class BoundaryChoice(Exception):
@@ -124,13 +124,20 @@ def _governed_dependency(tree, left, candidates):
     return False
 
 
-def coordinate_genitive(tokens, tree, i):
+def coordinate_or_modifier(tokens, tree, i, *, check_genitive):
     if not (0 < i < len(tree) - 1 and tree[i].rule == 'P.COORD'):
         return False
     right = tree[i + 1]
-    return (right.role == 'nominal_conjunct' and right.head == i - 1
-            and any(tag.POS == 'NOUN' and tag.case in ('gent', 'gen2')
-                    for _, tag in known_forms(tokens[i + 1].surface)))
+    if right.role != 'nominal_conjunct' or right.head != i - 1:
+        return False
+    nouns = [tag for _, tag in known_forms(tokens[i + 1].surface) if tag.POS == 'NOUN']
+    if check_genitive and any(tag.case in ('gent', 'gen2') for tag in nouns):
+        return True
+    left = tree[i - 1]
+    forms = known_forms(tokens[i - 1].surface)
+    if not any(lemma == left.lemma and tag.case == left.case and name_type(tag) for lemma, tag in forms):
+        return False
+    return any(_agree(adj, noun) for _, adj in forms if adj.POS in ('ADJF', 'PRTF') for noun in nouns)
 
 
 def ignored_inside_group(tree, i):

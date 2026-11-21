@@ -328,7 +328,8 @@ def _partitions(analyses, tokens, text):
     from . import adjuncts, attributive_series, calendar_regions, measured_series, mixed_predications, predicate_lists, utterances
     from . import personal_correlatives, spatial_prefix
     from .short_participles import voice_partitions
-    from . import case_arguments, collective_agreement, partitive_domains
+    from . import case_arguments, collective_agreement, partitive_domains, quote_titles
+    yield from quote_titles.partitions(analyses, tokens, text)
     yield from case_arguments.nominal_partitions(analyses, tokens, text)
     yield from partitive_domains.partitions(analyses, tokens, text)
     yield from collective_agreement.partitions(analyses, tokens, text)
@@ -370,6 +371,13 @@ def _partitions(analyses, tokens, text):
             actions = [tree[i].ellipsis_source for tree in analyses]
             if len(set(actions)) > 1:
                 yield word_choice('Какое действие повторяется в неполной части предложения?', actions)
+        if any(tree[i].rule == 'ELL.PARALLEL.ORDINAL' for tree in analyses):
+            sources = [tree[i].ellipsis_source if tree[i].rule == 'ELL.PARALLEL.ORDINAL' else None
+                       for tree in analyses]
+            if len(set(sources)) > 1:
+                focus = _span_label(tokens, i)
+                yield word_choice(temporal_groups.ordinal_ellipsis_question(focus),
+                                  sources, absent='существительное не повторяется')
         if all(tree[i].rule == 'GAP.COUNT' for tree in analyses):
             sources = [tree[i].ellipsis_source for tree in analyses]
             if len(set(sources)) > 1:
@@ -420,7 +428,11 @@ def _partitions(analyses, tokens, text):
         if roles == {'clause_conjunct'} or roles == {'clause_relative'}:
             subjects = [next((j for j, dep in enumerate(tree) if dep.head == i and dep.role == 'subject'),
                              tree[i].controller) for tree in analyses]
-            if len(set(subjects)) > 1:
+            if None in subjects and any(link.rule == 'UTT.INDEPENDENT' for link in links) and len(set(subjects)) > 1:
+                yield word_choice(f'О ком или о чём сказано «{_span_label(tokens, i)}» во второй части предложения?',
+                                  subjects, _clause_context(text, tokens, analyses, i, subjects),
+                                  absent='речь о другом, неназванном участнике')
+            elif len(set(subjects)) > 1:
                 yield word_choice(f'Какое слово служит подлежащим при «{_span_label(tokens, i)}»?', subjects,
                                   _clause_context(text, tokens, analyses, i, subjects), absent='подлежащее не названо')
         if roles == {'governed', 'nominal_conjunct'} and all(
@@ -664,7 +676,8 @@ def _partitions(analyses, tokens, text):
                                   antecedents, context,
                                   absent='владелец не назван')
             else:
-                yield word_choice(f'Which word does the possessive «{focus}» refer to?', antecedents, context)
+                yield word_choice(f'На кого или на что указывает «{focus}»? Выберите слово из текста.',
+                                  antecedents, context, absent='в тексте не названо')
         if {link.rule for link in links} == {'CL.MARK', 'CL.REF'}:
             yield word_choice(f'Copy «{focus}» if it refers to a preceding event here. Otherwise choose “no such word”.',
                               [i if link.rule == 'CL.REF' else None for link in links])
@@ -878,7 +891,8 @@ def _possessor_readings(tokens, tree, budget):
         candidates = []
         for j in range(i):
             noun = tree[j]
-            if noun.role not in ('subject', 'object', 'recipient', 'experiencer', 'beneficiary', 'stimulus', 'instrument', 'oblique', 'governed', 'nominal_conjunct'):
+            if noun.role not in ('subject', 'object', 'recipient', 'experiencer', 'beneficiary', 'stimulus',
+                                 'instrument', 'oblique', 'governed', 'nominal_conjunct', 'genitive_modifier'):
                 continue
             count = counts.get(j) if noun.quantity_kind not in ('cardinal', 'both', 'collective') else noun.quantity
             if count is not None and count.isdecimal() and count != '1':
@@ -1174,28 +1188,34 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
 
         generated = grammar(part)
         first = next(generated, None)
-        if first is None:
+        regional_reading = first is not None
+        if not regional_reading:
             repaired = checked_comma_readings(part, grammar)
             option = next(repaired, None)
             if option is not None:
                 yield from chain((option,), repaired)
-            elif fallback is not None:
-                yield from fallback(part)
-            return
+                return
+            if fallback is None:
+                return
+            grammar, fallback = fallback, None
+            generated = grammar(part)
+            first = next(generated, None)
+            if first is None:
+                return
 
         commas = {i for i, token in enumerate(part) if token.surface == ','}
         if commas:
             ordinary = []
             suspect = set()
             for tree in chain((first,), generated):
-                ignored = {i for i in commas if internal_comma.ignored_inside_group(tree, i)}
+                ignored = {i for i in commas if regional_reading and internal_comma.ignored_inside_group(tree, i)}
                 suspect.update(ignored)
                 if not ignored:
                     ordinary.append(tree)
                 if len(ordinary) > budget:
                     raise AnalysisBudgetExceeded('REGION_BUDGET')
-                suspect.update(i for i in commas if tree[i].rule == 'PP.DETACHED.COMMA'
-                               or internal_comma.coordinate_genitive(part, tree, i))
+                suspect.update(i for i in commas if regional_reading and tree[i].rule == 'PP.DETACHED.COMMA'
+                               or internal_comma.coordinate_or_modifier(part, tree, i, check_genitive=regional_reading))
             if suspect:
                 repaired = checked_comma_readings(part, grammar, suspect)
                 option = next(repaired, None)
@@ -1232,7 +1252,7 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
     structures = {}
 
     def collect(candidates):
-        for tree in candidates:
+        for tree in ellipsis.parallel_ordinals(working_words, candidates, budget):
             if any(link.role == 'governed' and not GOVERNMENT.get(tree[link.head].lemma) for link in tree):
                 if not failures or failures[0] != 'UNKNOWN_GOVERNMENT':
                     failures.insert(0, 'UNKNOWN_GOVERNMENT')

@@ -171,6 +171,49 @@ def competing_leaves(candidates, start, gaps):
             yield leaf, root
 
 
+def parallel_ordinals(tokens, candidates, budget):
+    from itertools import product
+    from math import prod
+    from .morphology import CASE_EQUIVALENTS
+    from .parser import AnalysisBudgetExceeded
+
+    for tree in candidates:
+        yield tree
+        if not any(link.rule == 'NUM.ARG' and link.role == 'governed' for link in tree):
+            continue
+        sources = {}
+        alternatives = {}
+        for i, link in enumerate(tree):
+            if link.quantity_kind == 'ordinal' and link.role == 'attribute' and link.head is not None:
+                noun = tree[link.head]
+                if noun.role != 'governed' or noun.head is None or not link.morphology:
+                    continue
+                prep = tree[noun.head]
+                key = prep.head, prep.lemma, CASE_EQUIVALENTS.get(noun.case, noun.case)
+                sources.setdefault(key, []).append((link.head, link.morphology))
+            elif (link.rule == 'NUM.ARG' and link.role == 'governed' and link.quantity_kind == 'cardinal'
+                  and tokens[i].surface.isdecimal() and link.head is not None):
+                prep = tree[link.head]
+                if prep.head is None or tree[prep.head].role != 'clause_conjunct':
+                    continue
+                key = tree[prep.head].head, prep.lemma, CASE_EQUIVALENTS.get(link.case, link.case)
+                for source, form in sources.get(key, ()):
+                    if source < i:
+                        alternatives.setdefault(i, [link]).append(replace(link, rule='ELL.PARALLEL.ORDINAL',
+                            quantity_kind='ordinal', morphology=form, ellipsis_source=source))
+        if not alternatives:
+            continue
+        if prod(map(len, alternatives.values())) > budget:
+            raise AnalysisBudgetExceeded('ORDINAL_ELLIPSIS_BUDGET')
+        choices = product(*alternatives.values())
+        next(choices)
+        for choice in choices:
+            restored = list(tree)
+            for i, reading in zip(alternatives, choice):
+                restored[i] = reading
+            yield tuple(restored)
+
+
 def expand(tokens, tree):
     from .parser import Occurrence
 

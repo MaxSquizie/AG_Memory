@@ -57,3 +57,13 @@ def test_unpunctuated_preposed_purpose_keeps_the_controller_in_the_matrix():
     assert any(tree[1].role == 'clause_adverbial' and tree[1].scope == 'purpose'
                and (tree[1].head, tree[1].controller) == (3, 2) for tree in reply.analysis.analyses)
     assert submit(AHCore(), 'Чтобы согреться Анна.').observation_ref is None
+
+
+def test_nominal_predicate_can_share_a_subject_with_a_following_finite_clause():
+    from ah.russian_grammar.parser import analyze
+
+    result = analyze('Исток — река в России, протекает в горах.')
+    actor, verb = (next(i for i, token in enumerate(result.tokens) if token.surface == form)
+                   for form in ('Исток', 'протекает'))
+    assert any(tree[verb].controller == actor and tree[actor].role == 'subject' for tree in result.analyses)
+    assert any(tree[verb].implicit_subject == 'unresolved' for tree in result.analyses)

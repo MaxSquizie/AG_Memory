@@ -3,6 +3,7 @@ from unicodedata import name
 from .calendar_regions import calendar_day, day_links, year_unit
 from .morphology import Morphology, from_tag
 from .parser import Link, _span_label
+from .passive_arguments import _opaque
 from .prepositions import DASHES
 from .probe import Probe
 from .rules import Reading, known_forms, name_continuations, name_type, unaccented
@@ -21,6 +22,14 @@ def _first_name(tokens):
     if not tokens or not _name(tokens[0].surface):
         return
     first = tokens[0].surface
+    if _opaque(first):
+        group = {0: Link('subject', first, None, 'OPAQUE.NOTE.SUBJECT', 'nomn', scope='proper_name')}
+        for end in range(1, len(tokens)):
+            yield end, group
+            surface = tokens[end].surface
+            if not _opaque(surface) or _script(surface) != _script(first):
+                break
+            group = group | {end: Link('name_part', surface, 0, 'NAME', scope='proper_name')}
     for lemma, tag in known_forms(first):
         if tag.POS != 'NOUN' or tag.case != 'nomn' or not name_type(tag) or tag.number != 'sing':
             continue
@@ -43,6 +52,26 @@ def _first_name(tokens):
             for part in name_continuations(surface, parts):
                 extra = Link('name_part', part.lemma, 0, part.name_rule, part.case, scope='proper_name')
                 pending.append((end + 1, (*parts, part), links | {end: extra}))
+
+
+def _year_interval(tokens, start, host):
+    comma = start < len(tokens) and tokens[start].surface == ','
+    first = start + int(comma)
+    marked = first + 1 < len(tokens) and tokens[first + 1].surface in DASHES
+    last = first + 1 + int(marked)
+    if last >= len(tokens):
+        return None
+    years = [tokens[j].surface for j in (first, last)]
+    if not all(len(year) == 4 and year.isdecimal() for year in years) or not 0 < int(years[0]) <= int(years[1]):
+        return None
+    links = {first: Link('list_item', years[0], host, 'DATE.NOTE.INTERVAL',
+                         quantity='..'.join(years), quantity_kind='ordinal_range'),
+             last: Link('numeral_part', years[1], first, 'NUM.PART', quantity=years[1], quantity_kind='ordinal')}
+    if marked:
+        links[first + 1] = Link('punctuation', tokens[first + 1].surface, last, 'NUM.RANGE.MARK')
+    if comma:
+        links[start] = Link('punctuation', ',', first, 'DATE.SEP')
+    return last + 1, first, links
 
 
 def _note(tokens, start):
@@ -83,13 +112,18 @@ def _note(tokens, start):
             links[label] = Link('list_item', tokens[label].surface, day, 'DATE.NOTE.LABEL',
                                 scope='proper_name', morphology=Morphology(pos='NOUN'))
             i = label + 1
+    if first_day is None:
+        interval = _year_interval(tokens, i, alias if alias is not None else 0)
+        if interval:
+            i, first_day, group = interval
+            links.update(group)
     if alias is None and first_day is None:
         return
     if enclosed:
         if i >= size or tokens[i].surface != ')':
             return
         for j in (start, i):
-            links[j] = Link('punctuation', tokens[j].surface, first, 'NAME.NOTE.BOUND')
+            links[j] = Link('punctuation', tokens[j].surface, alias if alias is not None else first_day, 'NAME.NOTE.BOUND')
         i += 1
     if i < size and tokens[i].surface in DASHES:
         links[i] = Link('punctuation', tokens[i].surface, 0, 'V2.DASH')
@@ -106,6 +140,17 @@ def prefixes(tokens):
 
 def confirmation(tokens, tree, i, text):
     link = tree[i]
+    if link.rule == 'DATE.NOTE.INTERVAL':
+        end = next(j for j, child in enumerate(tree) if child.role == 'numeral_part' and child.head == i)
+        years = text[tokens[i].start:tokens[end].end]
+        if text.count(years) != 1:
+            years = _span_label(tokens, i, end + 1)
+        return Probe('Какие числа указывают границы периода, приведённого при имени?', (years,), text)
+    if link.rule == 'OPAQUE.NOTE.SUBJECT':
+        end = i + 1
+        while end < len(tree) and tree[end].head == i and tree[end].role == 'name_part':
+            end += 1
+        return Probe('Какими словами назван тот, кому дана характеристика?', (_span_label(tokens, i, end),), text)
     if link.rule == 'NAME.ALIAS':
         stop = i + 1
         while stop < len(tree) and tree[stop].head == i and tree[stop].rule == 'NAME.ALIAS.PART':

@@ -2,8 +2,9 @@ from dataclasses import replace
 from html import unescape
 from unicodedata import category, name
 
-from .parser import Link
-from .rules import known_forms
+from .parser import Link, _span_label
+from .probe import Probe
+from .rules import known_forms, unaccented
 from .utterances import _map, _root
 
 
@@ -192,10 +193,83 @@ def _aliases(tokens, quoted, parse):
                 yield tuple(links[j] for j in range(len(tokens)))
 
 
+def _listed_mentions(tokens, budget):
+    from .nominal_groups import _markers
+    from .participle_connectives import relations
+
+    if not any(token.surface == ',' for token in tokens):
+        return
+    groups = []
+    separators = {}
+    start = i = 0
+    final_marker = False
+    while i < len(tokens):
+        word = unaccented(tokens[i].surface)
+        if word.isalpha() and word.istitle():
+            i += 1
+            continue
+        if i == start or final_marker:
+            return
+        groups.append((start, i))
+        if word == ',':
+            separators[i] = Link('punctuation', ',', i + 1, 'TITLE.SEP')
+            i += 1
+        else:
+            markers = [marker for marker in _markers(tokens, i) if
+                       set(relations(' '.join(tokens[j].surface for j in marker))) == {'addition'}]
+            if len(markers) != 1:
+                return
+            marker, = markers
+            i = marker[-1] + 1
+            for j in marker:
+                separators[j] = Link('coordinator' if j == marker[0] else 'coordinator_part',
+                                     tokens[j].surface.casefold(), i if j == marker[0] else marker[0], 'P.COORD')
+            final_marker = True
+        start = i
+    if not final_marker or start == len(tokens):
+        return
+    groups.append((start, len(tokens)))
+    links = dict(separators)
+    for start, end in groups:
+        lemma = tokens[start].surface
+        links[start] = (Link('predicate', lemma, None, 'TITLE.MENTION.LIST', scope='heading') if start == 0 else
+                        Link('nominal_conjunct', lemma, 0, 'TITLE.LIST.ITEM'))
+        for j in range(start + 1, end):
+            links[j] = Link('name_part', tokens[j].surface, start, 'TITLE.PART')
+    from .parser import AnalysisBudgetExceeded
+
+    variants = [(tuple(links[j] for j in range(len(tokens))), -1)]
+    for n, ((left, comma), (right, end)) in enumerate(zip(groups, groups[1:])):
+        if right != comma + 1 or tokens[comma].surface != ',':
+            continue
+        size = comma - left + end - right
+        neighbors = (j for j in (n - 1, n + 2) if 0 <= j < len(groups))
+        if not any(groups[j][1] - groups[j][0] == size for j in neighbors):
+            continue
+        joined = []
+        for tree, last in variants:
+            if last >= n:
+                continue
+            updated = list(tree)
+            updated[comma] = Link('punctuation', ',', right, 'TITLE.INNER.COMMA')
+            for j in range(right, end):
+                updated[j] = Link('name_part', tokens[j].surface, left, 'TITLE.PART')
+            joined.append((tuple(updated), n + 1))
+            if len(variants) + len(joined) > budget:
+                raise AnalysisBudgetExceeded('TITLE_BUDGET')
+        variants.extend(joined)
+    for tree, _ in variants:
+        yield tree
+
+
 def trees(part, parse, budget):
     from .parser import AnalysisBudgetExceeded
 
+    yield from _listed_mentions(part, budget)
+    from . import dated_headings
+
     quoted = spans(part)
+    yield from dated_headings.trees(part, quoted, budget)
     output = set()
     for family in (_series, _aliases):
         for tree in family(part, quoted, parse):
@@ -206,20 +280,79 @@ def trees(part, parse, budget):
                 yield tree
 
 
-def confirmation(tokens, tree, index, text):
-    from .parser import _span_label
-    from .probe import Probe
+def title_bounds(tree, root):
+    children = {}
+    for i, link in enumerate(tree):
+        if link.role != 'punctuation':
+            children.setdefault(link.head, []).append(i)
+    pending = [root]
+    first = last = root
+    while pending:
+        i = pending.pop()
+        first, last = min(first, i), max(last, i)
+        pending.extend(children.get(i, ()))
+    return first, last
 
+
+def partitions(trees, tokens, text):
+    for mark, token in enumerate(tokens):
+        if token.surface != ',':
+            continue
+        rules = {tree[mark].rule for tree in trees}
+        if rules != {'TITLE.INNER.COMMA', 'TITLE.SEP'}:
+            continue
+        merged = next(tree for tree in trees if tree[mark].rule == 'TITLE.INNER.COMMA')
+        right = mark + 1
+        left = merged[right].head
+        end = right + 1
+        while end < len(merged) and merged[end].rule == 'TITLE.PART' and merged[end].head == left:
+            end += 1
+        a = text[tokens[left].start:tokens[mark - 1].end]
+        b = text[tokens[right].start:tokens[end - 1].end]
+        extra = any(tree[j].rule == 'TITLE.INNER.COMMA' for tree in trees
+                    for j in (left - 1, end) if 0 <= j < len(tree))
+        one = f'одно название «{a} {b}»'
+        two = f'слова «{a}» и «{b}» входят в разные названия' if extra else f'два названия «{a}» и «{b}»'
+        phrase = text[tokens[left].start:tokens[end - 1].end]
+        question = f'Как в этом перечне следует прочитать сочетание «{phrase}»?'
+        yield Probe(question, (one, two), text), [one if tree[mark].rule == 'TITLE.INNER.COMMA' else two for tree in trees]
+    regions = []
+    for tree in trees:
+        titles = {title_bounds(tree, i): i for i, link in enumerate(tree)
+                  if link.role == 'apposition' and (link.scope or '').split('_', 1)[0] == 'title'}
+        if not titles:
+            return
+        regions.append(titles)
+    for bounds in sorted(set.intersection(*(set(titles) for titles in regions))):
+        heads = [titles[bounds] for titles in regions]
+        if len(set(heads)) < 2:
+            continue
+        first, last = bounds
+        phrase = text[tokens[first].start:tokens[last].end]
+        labels = {i: _span_label(tokens, i) for i in sorted(set(heads))}
+        question = f'Какое слово в названии «{phrase}» обозначает то, о чём говорится, и уточняется остальными словами?'
+        yield Probe(question, tuple(labels.values()), text), [labels[head] for head in heads]
+
+
+def confirmation(tokens, tree, index, text):
+    from . import dated_headings
+
+    note = dated_headings.confirmation(tokens, tree, index, text)
+    if note is not None:
+        return note
     link = tree[index]
     if link.rule == 'INF.NOUN':
         target = _span_label(tokens, link.head)
         return Probe(f'Какое существительное поясняет действие «{tokens[index].surface}»?', (target,), text)
-    if link.rule == 'TITLE.SERIES':
+    if link.rule in ('TITLE.SERIES', 'TITLE.MENTION.LIST'):
         names = [index, *(j for j, other in enumerate(tree) if other.head == index and other.role == 'nominal_conjunct')]
         labels = []
         for name in names:
             rest = [j for j, other in enumerate(tree) if other.head == name and other.rule == 'TITLE.PART']
-            labels.append(_span_label(tokens, name, max([name, *rest]) + 1))
+            if link.rule == 'TITLE.MENTION.LIST':
+                labels.append(' '.join(tokens[j].surface for j in (name, *rest)))
+            else:
+                labels.append(_span_label(tokens, name, max([name, *rest]) + 1))
         items = ', '.join(f'«{label}»' for label in labels)
         if index > 0 and tree[index - 1].rule == 'TITLE.QUOTE':
             return Probe(f'Для какого слова {items} перечислены как названия?',
@@ -228,13 +361,7 @@ def confirmation(tokens, tree, index, text):
         return Probe(f'Образуют ли {items} перечень отдельных названий? Если да, выберите весь перечень.',
                      (phrase,), text)
     if link.rule == 'TITLE.ALIAS':
-        members = [index]
-        for j in range(len(tree)):
-            k = j
-            while k is not None and k != index and tree[k].role != 'punctuation':
-                k = tree[k].head
-            if k == index:
-                members.append(j)
-        phrase = _span_label(tokens, min(members), max(members) + 1)
+        first, last = title_bounds(tree, index)
+        phrase = _span_label(tokens, first, last + 1)
         return Probe('Какие слова дают второй вариант названия?', (phrase,), text)
     return None

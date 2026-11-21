@@ -73,17 +73,25 @@ def _subjects(tokens):
 
 
 def trees(tokens, parse, budget):
-    if not any(next(_markers(tokens, i), None) for i in range(len(tokens))):
+    has_markers = any(next(_markers(tokens, i), None) for i in range(len(tokens)))
+    if not has_markers and not any(t.surface.isdecimal() for t in tokens):
         return
     quotes = dict(spans(tokens))
     for start, intro, subject in _subjects(tokens):
+        note = any(link.rule.startswith('DATE.') for link in intro.values())
+        if not note and not has_markers:
+            continue
         stack = []
         for end, root, group in _items(tokens, start, quotes, budget):
             initial = dict(intro)
             initial[subject] = replace(initial[subject], head=root)
             if initial.get(start - 1) and initial[start - 1].rule == 'V2.DASH':
                 initial[start - 1] = replace(initial[start - 1], head=root)
-            stack.append((end, root, root, False, initial | group))
+            if end == len(tokens) and note:
+                complete = initial | group
+                yield tuple(complete[j] for j in range(end))
+            else:
+                stack.append((end, root, root, False, initial | group))
         while stack:
             i, root, last, coordinated, links = stack.pop()
             if i == len(tokens):

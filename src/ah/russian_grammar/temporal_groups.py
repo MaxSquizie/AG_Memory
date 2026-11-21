@@ -173,8 +173,16 @@ def trees(tokens, parse, budget):
                     yield tuple(links[k] for k in range(len(tokens)))
 
 
+def ordinal_ellipsis_question(focus):
+    return f'Какое ранее названное существительное подразумевается при числе «{focus}»?'
+
+
 def confirmation(tokens, tree, i, text):
     link = tree[i]
+    if link.rule == 'ELL.PARALLEL.ORDINAL':
+        focus = _span_label(tokens, i)
+        source = _span_label(tokens, link.ellipsis_source)
+        return Probe(ordinal_ellipsis_question(focus), (source,), text)
     if link.rule == 'DATE.APPOS':
         focus = _span_label(tokens, i)
         return Probe('Какое число указывает календарный год, уточняющий названное время?', (focus,), text)

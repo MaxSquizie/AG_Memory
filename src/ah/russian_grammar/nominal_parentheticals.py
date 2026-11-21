@@ -9,7 +9,7 @@ from .utterances import _map, _root
 @cache
 def _phrases():
     resource = files(__package__).joinpath('lexicon/nominal-parentheticals.tsv')
-    return {tuple(phrase.split()): (prep, noun) for phrase, prep, noun in
+    return {tuple(phrase.split()): (prep, noun, pos) for phrase, prep, noun, pos in
             (line.split('\t') for line in resource.read_text(encoding='utf8').splitlines())}
 
 
@@ -27,11 +27,14 @@ def trees(tokens, parse):
             continue
         for tree in parse(tuple(tokens[j] for j in kept)):
             root = _root(tree)
-            if tree[root].role != 'predicate' or any(link.role in PREDICATE_ROLES for j, link in enumerate(tree) if j != root):
+            connector = entry[2] == 'PRON'
+            if tree[root].role != 'predicate' or ((i > 0 or not connector) and any(
+                    link.role in PREDICATE_ROLES for j, link in enumerate(tree) if j != root)):
                 continue
             links = _map(tree, kept)
             links[i] = Link('case', entry[0], i + 1, 'UTT.PARENT.CASE')
-            links[i + 1] = Link('parenthetical', entry[1], kept[root], 'UTT.PARENT.GROUP')
+            links[i + 1] = Link('parenthetical', entry[1], kept[root], 'UTT.PARENT.GROUP',
+                                scope='addition' if connector else None)
             for j in range(i - before, i + 2 + after):
                 if j not in links:
                     links[j] = Link('punctuation', ',', i + 1, 'UTT.PUNCT')
@@ -43,6 +46,8 @@ def confirmation(tokens, tree, i, text):
         return None
     from .parser import _span_label
     phrase = _span_label(tokens, i - 1, i + 1)
+    if tree[i].scope == 'addition':
+        return Probe(f'Выберите «{phrase}», если эти слова вводят дополнительное сообщение и не указывают на предмет.', (phrase,), text)
     return Probe(f'Выберите «{phrase}», если это вводное замечание рассказчика ко всему сообщению.', (phrase,), text)
 
 

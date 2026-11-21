@@ -99,10 +99,10 @@ def _substantive_subjects(tokens, base, budget):
                             yield tuple(links[j] for j in range(len(tokens)))
 
 
-def _determined(tokens, base, budget):
+def with_agreeing_determiners(tokens, base, *, include_bare=False):
     from .parser import Link
+    from .utterances import _map
 
-    yield from _substantive_subjects(tokens, base, budget)
     groups = {}
     for i, token in enumerate(tokens[:-1]):
         forms = [(lemma, tag) for lemma, tag in known_forms(token.surface)
@@ -117,14 +117,13 @@ def _determined(tokens, base, budget):
                 break
             if not any(tag.POS == 'ADJF' for _, tag in readings):
                 break
-    if not groups:
+    if include_bare or not groups:
         yield from base(tokens)
+    if not groups:
         return
     kept = tuple(i for i in range(len(tokens)) if i not in groups)
     for tree in base(tuple(tokens[i] for i in kept)):
-        links = {i: replace(link, **{key: kept[j] for key in ('head', 'controller', 'antecedent', 'coord_head', 'shared_agent', 'shared_object')
-                                     if (j := getattr(link, key)) is not None})
-                 for i, link in zip(kept, tree)}
+        links = _map(tree, kept)
         for i, (j, forms) in groups.items():
             host = links.get(j)
             if host is None or host.role not in NOMINAL_ROLES | {'genitive_modifier'}:
@@ -145,6 +144,11 @@ def _determined(tokens, base, budget):
             links[i] = Link('attribute', lemma, j, 'NP.DET', scope=scope)
         else:
             yield tuple(links[i] for i in range(len(tokens)))
+
+
+def _determined(tokens, base, budget):
+    yield from _substantive_subjects(tokens, base, budget)
+    yield from with_agreeing_determiners(tokens, base)
 
 
 def trees(tokens, base, *, budget=256):

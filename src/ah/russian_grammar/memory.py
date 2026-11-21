@@ -69,6 +69,10 @@ def _root(rows):
     return next(i for i, row in enumerate(rows) if row['role'] == 'predicate' and row['head'] is None)
 
 
+def _discourse_marker(row):
+    return row.get('scope') == 'ordering' or (row['role'] == 'parenthetical' and row.get('scope') == 'addition')
+
+
 def _rows(result, participants):
     rows = tuple({**asdict(token), **asdict(link)} for token, link in zip(result.tokens, result.analyses[0]))
     for focus in result.confirmed_focus:
@@ -81,7 +85,7 @@ def _rows(result, participants):
     contexts = {}
     qualifications = {}
     for i, row in enumerate(rows):
-        if (row['role'] == 'parenthetical' and row.get('scope') != 'ordering'
+        if (row['role'] == 'parenthetical' and not _discourse_marker(row)
                 or row['role'] == 'preposition' and row.get('scope') == 'qualification'):
             qualifications[row['head']] = 'qualified'
         if (row['role'] != 'clause_marker' or not row.get('scope')
@@ -676,13 +680,13 @@ def _extraction(rows, stored, observed, source, focus, budget, subject_member=No
         return {}
     children = [[] for _ in rows]
     for i, row in enumerate(rows):
-        if row['head'] is not None and row.get('rule') != 'UTT.POLAR' and row['role'] != 'punctuation' and row['role'] not in NUMBER_PARTS and row.get('scope') != 'ordering':
+        if row['head'] is not None and row.get('rule') != 'UTT.POLAR' and row['role'] != 'punctuation' and row['role'] not in NUMBER_PARTS and not _discourse_marker(row):
             children[row['head']].append(i)
     surface_children = [[] for _ in stored]
     for j, row in enumerate(stored):
         if row['head'] is not None and row['role'] != 'punctuation':
             surface_children[row['head']].append(j)
-    children_found = [[j for j in group if stored[j]['role'] not in NUMBER_PARTS and stored[j].get('scope') != 'ordering']
+    children_found = [[j for j in group if stored[j]['role'] not in NUMBER_PARTS and not _discourse_marker(stored[j])]
                       for group in surface_children]
     if subject_member is not None:
         member, anchor = subject_member

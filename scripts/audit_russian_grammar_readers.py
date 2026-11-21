@@ -28,6 +28,20 @@ def eligible(rows):
     return True
 
 
+def name_coordination_errors(words, gold):
+    errors = []
+    for word, row in zip(words, gold):
+        if ((word['role'] == 'nominal_conjunct' and row[7] == 'flat:name')
+                or (word['role'] == 'name_part' and row[7] == 'conj')):
+            errors.append(f"{word['surface']}: {word['role']}, UD {row[7]}")
+    return errors
+
+
+def evaluate(words, gold, identity):
+    heads, errors = compare(words, gold, identity, lambda *_: [])
+    return heads, errors + name_coordination_errors(words, gold)
+
+
 def audit(identity, kind, text, rows, readings, seconds):
     calls = []
     core = AHCore()
@@ -50,7 +64,7 @@ def audit(identity, kind, text, rows, readings, seconds):
             reply = submit(core, text, choose)
             record.update(status=reply.status, reason=reply.analysis.reason)
             result, _ = inspect(core, reply, text, rows, identity, project=project,
-                                evaluate=lambda w, g, i: compare(w, g, i, lambda *_: []))
+                                evaluate=evaluate)
             record.update(result)
     except MissingReading:
         record['status'] = 'AWAITING_READER'

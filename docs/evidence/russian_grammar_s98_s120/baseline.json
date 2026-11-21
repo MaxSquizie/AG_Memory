@@ -1,0 +1,843 @@
+{
+  "corpus_sha256": "fa3642959614db06fdab2d7464af8a0873c70d0a2b5758758231d0ef725821ea",
+  "skipped": [
+    "test-s99",
+    "test-s103",
+    "test-s117"
+  ],
+  "results": [
+    {
+      "id": "test-s98",
+      "variant": "original",
+      "text": "Беньямино работает параллельно в компании плотников.",
+      "calls": [
+        "d6791a0cd23e9de62129a005af61d3148b8118b428b44cb69d46d4a0ce824bc9"
+      ],
+      "status": "UNRESOLVED",
+      "reason": "NO_RULE @0",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s98",
+      "variant": "no_punctuation",
+      "text": "Беньямино работает параллельно в компании плотников",
+      "calls": [
+        "5682e27958a2843d7e86b1c0191a5483afefe55054d0be2fe31fcb59f4f014e0"
+      ],
+      "status": "UNRESOLVED",
+      "reason": "NO_RULE @0",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s98",
+      "variant": "extra_comma",
+      "text": "Беньямино работает параллельно в компании, плотников.",
+      "calls": [
+        "e74862e2380f04ee8a479e9237b8b65f10b01fce41319c4c2e6808838405f33a"
+      ],
+      "status": "UNRESOLVED",
+      "reason": "NO_RULE @0",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s100",
+      "variant": "original",
+      "text": "Домье записался в члены Парижской коммуны.",
+      "calls": [
+        "c9ac02950514d1e6d71bd8ef083c2dd843feb87dc57720dc3f9f8bbad11d87f3"
+      ],
+      "status": "UNRESOLVED",
+      "reason": "NO_RULE @0",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s100",
+      "variant": "no_punctuation",
+      "text": "Домье записался в члены Парижской коммуны",
+      "calls": [
+        "85fda5b047b61304a9225aa5ebcdbfa80df5cedc8760272d7d18a59c9bac27c6"
+      ],
+      "status": "UNRESOLVED",
+      "reason": "NO_RULE @0",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s100",
+      "variant": "extra_comma",
+      "text": "Домье записался в члены Парижской, коммуны.",
+      "calls": [
+        "9eb04fef590bec1144978c64075d69e9c2f094affd194a9443a0fbe56ce4a1d6"
+      ],
+      "status": "UNRESOLVED",
+      "reason": "NO_RULE @0",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s101",
+      "variant": "original",
+      "text": "Древовидная форма драцены обусловлена вторичным утолщением за счёт деятельности стеблевых меристем.",
+      "calls": [
+        "7c9d078c620489e70840df02dbd7f711a4e40616671d9c9f35b3d7c25b4e5474",
+        "32722d90c139a25771b766604331d2a6a63334ad5d74d5f34fb928caf5a462a1",
+        "c79dc31f1115a8d3ba68192e75804ebc5707faa689319a64b98870f2149dcdf1"
+      ],
+      "status": "STORED",
+      "reason": "SIMPLE_CLAUSE",
+      "empty": false,
+      "exact": true,
+      "incorrect_heads": [],
+      "role_scope_errors": [],
+      "graph_sha256": "a4bc3f0ff29d9e72a2ea42e86ecadbbc0b87369d34f27cdcdc4cdb3654342778"
+    },
+    {
+      "id": "test-s101",
+      "variant": "no_punctuation",
+      "text": "Древовидная форма драцены обусловлена вторичным утолщением за счёт деятельности стеблевых меристем",
+      "calls": [
+        "7c9d078c620489e70840df02dbd7f711a4e40616671d9c9f35b3d7c25b4e5474",
+        "32722d90c139a25771b766604331d2a6a63334ad5d74d5f34fb928caf5a462a1",
+        "f4dd57c2e02b4c12acc56a870ef2a3a3efc76e177507a583d56d013a8f7132a7"
+      ],
+      "status": "STORED",
+      "reason": "SIMPLE_CLAUSE",
+      "empty": false,
+      "exact": true,
+      "incorrect_heads": [],
+      "role_scope_errors": [],
+      "graph_sha256": "a4bc3f0ff29d9e72a2ea42e86ecadbbc0b87369d34f27cdcdc4cdb3654342778"
+    },
+    {
+      "id": "test-s101",
+      "variant": "extra_comma",
+      "text": "Древовидная, форма драцены обусловлена вторичным утолщением за счёт деятельности стеблевых меристем.",
+      "calls": [
+        "f30559f691eccf000387b4a67b9ef9823226111c977fe2c95d41c852627be57f",
+        "7c9d078c620489e70840df02dbd7f711a4e40616671d9c9f35b3d7c25b4e5474",
+        "dc673f2b831f4a9ce04d10cb9245d9384cffa03c9940508f9f149a9e54143499",
+        "76fd2058ccfcef74dcdc82d2bfdb88cdf5044e66c291c9459d7da2da9f2aeff4"
+      ],
+      "status": "STORED",
+      "reason": "SIMPLE_CLAUSE",
+      "empty": false,
+      "exact": false,
+      "incorrect_heads": [
+        [
+          "счёт",
+          7,
+          5
+        ]
+      ],
+      "role_scope_errors": [],
+      "graph_sha256": "cd5e1bf2065a1fbfecfc5dbde80b8c4919e2bcc9208752ab8b67f6e16479ae82"
+    },
+    {
+      "id": "test-s102",
+      "variant": "original",
+      "text": "Елизаветовка () -- село в Братском районе Николаевской области Украины.",
+      "calls": [
+        "e0dab47dbbcf205d9abde41eb400b134491241b48b3ca280419538f1263c8016",
+        "c53eb3b283304cdaad071dd9b0c110d4cc32df229d6e92dcdf8621dd86945f6a",
+        "06a3ab44f1829d48142fd3cfe7d345de2e56d4dfb5ac02d77c1adcf59b2a4529"
+      ],
+      "status": "STORED",
+      "reason": "SIMPLE_CLAUSE",
+      "empty": false,
+      "exact": true,
+      "incorrect_heads": [],
+      "role_scope_errors": [],
+      "graph_sha256": "21eada9e4c18b4993615cc0cf83007f35d75c619ae538b5b7428803b94c88528"
+    },
+    {
+      "id": "test-s102",
+      "variant": "no_punctuation",
+      "text": "Елизаветовка село в Братском районе Николаевской области Украины",
+      "calls": [
+        "77e291d1c9c39452cbe4496265743440cada326bf96751e37452a846b2c67801",
+        "161bfbf8d763635a843427b6815af6758cbb41fb6a48ff8c74338299489cf79a",
+        "bcfd7c86753763c7e3c648eb12d97457157738d61920194a155a1a0854b55a1e"
+      ],
+      "status": "STORED",
+      "reason": "SIMPLE_CLAUSE",
+      "empty": false,
+      "exact": true,
+      "incorrect_heads": [],
+      "role_scope_errors": [],
+      "graph_sha256": "21eada9e4c18b4993615cc0cf83007f35d75c619ae538b5b7428803b94c88528"
+    },
+    {
+      "id": "test-s102",
+      "variant": "extra_comma",
+      "text": "Елизаветовка () -- село в Братском, районе Николаевской области Украины.",
+      "calls": [
+        "44c494cd1086a2490b6d4e012d55cbcbd2203ac5fa20e34db3a19e8431b01cfb",
+        "fe60fec94226e515b20f397ec0ead9e150ca3ede7159d16139b92611b8f4ddae",
+        "d9218ba5c0835f1104f5d728c1dcd80a94b58cb69a96c61d2da6f21f21ccf3bb",
+        "bf23a64f1023b20ebb119536e3561a14d2cfb3703722fbb9a528133e9c75c88f"
+      ],
+      "status": "STORED",
+      "reason": "SIMPLE_CLAUSE",
+      "empty": false,
+      "exact": true,
+      "incorrect_heads": [],
+      "role_scope_errors": [],
+      "graph_sha256": "21eada9e4c18b4993615cc0cf83007f35d75c619ae538b5b7428803b94c88528"
+    },
+    {
+      "id": "test-s104",
+      "variant": "original",
+      "text": "С 1870 по 1876 работы Зинина направлены на изучение лепидена и его производных.",
+      "calls": [
+        "0847f038dd8b0937c026bbef06c6630f22dd9e4c255e20e854bab6e527376469"
+      ],
+      "status": "UNRESOLVED",
+      "reason": "NO_COMPLETE_CLAUSE",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s104",
+      "variant": "no_punctuation",
+      "text": "С 1870 по 1876 работы Зинина направлены на изучение лепидена и его производных",
+      "calls": [
+        "22190d8c85666b6734afefd86e8be834d0eff18c14a39919192a23be1a7329b4"
+      ],
+      "status": "UNRESOLVED",
+      "reason": "NO_COMPLETE_CLAUSE",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s104",
+      "variant": "extra_comma",
+      "text": "С 1870 по 1876 работы Зинина направлены на изучение лепидена и его, производных.",
+      "calls": [
+        "17865a40b9e5fe7b9d7c18fe26f85f8fb5641de7d2d4b2d49f413f6af35afe9b"
+      ],
+      "status": "UNRESOLVED",
+      "reason": "NO_COMPLETE_CLAUSE",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s105",
+      "variant": "original",
+      "text": "Кроме того, угловой размер Луны слегка меняется в зависимости от её положения на орбите.",
+      "calls": [
+        "b56c226f04ec8dc3ed91d859eaf9b52a81985f4453151cc2d947a993fa827781",
+        "b243864a4c4f3c31432f4b33072c04c73ca219830ac95e03b6fc1b693f2bd3c8",
+        "c95dbaaa9432fe2e83122e80680b8b1f220adb0f6c8e6dff3c49127305071d76"
+      ],
+      "status": "UNRESOLVED",
+      "reason": "OPTIONS_REJECTED",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s105",
+      "variant": "no_punctuation",
+      "text": "Кроме того угловой размер Луны слегка меняется в зависимости от её положения на орбите",
+      "calls": [],
+      "status": "UNRESOLVED",
+      "reason": "NO_COMPLETE_CLAUSE",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s105",
+      "variant": "extra_comma",
+      "text": "Кроме того, угловой, размер Луны слегка меняется в зависимости от её положения на орбите.",
+      "calls": [
+        "be6c3dbbf6d73cafcb8bc197a9895d09c132536e912310340af4519b7c9cc906",
+        "c26769d1216dd8fca95a2417a9bc57356d955346a65bc8a73fac3d49a8eec656",
+        "f30330c35365de9d0f88a01a86256dde4e0a7ef1b178f7dd944e30f620a297c4",
+        "6688fb0a9af31fa22d06e85c4b550f51b955ae63c9a6be962d7c4ca126ce17a3"
+      ],
+      "status": "UNRESOLVED",
+      "reason": "OPTIONS_REJECTED",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s106",
+      "variant": "original",
+      "text": "Райс написала этот роман в 1973 году, а впервые он был напечатан в 1976.",
+      "calls": [
+        "c2787592d6c2256244fc8925c51cf1d77b21734cb596a55875e2bfd3c76b3213",
+        "48b9cf331496fcc4f5dd5c6bf02f268dca2fbd72465d79379e75db773510ac7e",
+        "b8a919b026660d3646d446ba4aeca4d8d14092eb8f42ce66d455a842e20b0c90",
+        "af9bc46f0b6a07650be68ab88d8dddab8fe801af16418112760b8f23667a6383",
+        "e16c9400614e517c58572ce7b7ed7d32aebb563f56d92d6ce8addfddab801be4"
+      ],
+      "status": "STORED",
+      "reason": "COMPLEX_CLAUSE",
+      "empty": false,
+      "exact": false,
+      "incorrect_heads": [
+        [
+          "этот",
+          4,
+          2
+        ],
+        [
+          "роман",
+          2,
+          3
+        ]
+      ],
+      "role_scope_errors": [
+        "роман: genitive_modifier, UD obj"
+      ],
+      "graph_sha256": "c213f86546cbe526c1609ded039912258d23cf172ba69b4de0eec7e1b22a0a41"
+    },
+    {
+      "id": "test-s106",
+      "variant": "no_punctuation",
+      "text": "Райс написала этот роман в 1973 году а впервые он был напечатан в 1976",
+      "calls": [
+        "2fd15caff5c948e76c6bdecc1a86140e2de616a5af9ec118a5fe0f5444ab392f",
+        "d39511bbb3661e13b629aca3ee3a0ff4b4b97d4867c8e6445293c998f6d38fbc",
+        "ab332c88eb4157e9cac90f863063ec0188ea40b6adfedd65f4e7312350a869b3",
+        "5481392b946d63794616a3c11ad3d7bf85e824c0b3ada415b1607109722c58b9",
+        "56431160cb7e09444ddcaa4a8af3ab67fb88b63808debdd65d82771fccda81c5"
+      ],
+      "status": "STORED",
+      "reason": "COMPLEX_CLAUSE",
+      "empty": false,
+      "exact": false,
+      "incorrect_heads": [
+        [
+          "этот",
+          4,
+          2
+        ],
+        [
+          "роман",
+          2,
+          3
+        ]
+      ],
+      "role_scope_errors": [
+        "роман: genitive_modifier, UD obj"
+      ],
+      "graph_sha256": "c213f86546cbe526c1609ded039912258d23cf172ba69b4de0eec7e1b22a0a41"
+    },
+    {
+      "id": "test-s106",
+      "variant": "extra_comma",
+      "text": "Райс написала этот роман в 1973, году, а впервые он был напечатан в 1976.",
+      "calls": [
+        "21cf5ba48a71765bfc93a4110e5fc3afcb1d1b6512248b19d296a0f826727c38",
+        "f9a127019459bd01e8e25866711b16ffa5555fe5fdc31f6ded2c7c013961ff29",
+        "df0a943caafd693aede517e929d70e826e77e607d48ce40a2164d9d1b59836dc",
+        "d07b24fac407544e0df02db3895849b947045af5abb2a3207d9426e1abfbb0ab",
+        "e6ba9dbe67397a28fb05a091757b81fe20758cfbe0315693efe529d2e3ca7855",
+        "7e9f655781c5520be720a5b36503ebaa589b98b05bd4f080c26f1c0d1097dad3"
+      ],
+      "status": "STORED",
+      "reason": "COMPLEX_CLAUSE",
+      "empty": false,
+      "exact": false,
+      "incorrect_heads": [
+        [
+          "этот",
+          4,
+          2
+        ],
+        [
+          "роман",
+          2,
+          3
+        ]
+      ],
+      "role_scope_errors": [
+        "роман: genitive_modifier, UD obj"
+      ],
+      "graph_sha256": "c213f86546cbe526c1609ded039912258d23cf172ba69b4de0eec7e1b22a0a41"
+    },
+    {
+      "id": "test-s107",
+      "variant": "original",
+      "text": "Исток -- река в России, протекает в Алтайском крае, Республике Алтай.",
+      "calls": [],
+      "status": "UNRESOLVED",
+      "reason": "NO_RULE @6",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s107",
+      "variant": "no_punctuation",
+      "text": "Исток река в России протекает в Алтайском крае Республике Алтай",
+      "calls": [],
+      "status": "UNRESOLVED",
+      "reason": "NO_PREFIX @20",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s107",
+      "variant": "extra_comma",
+      "text": "Исток -- река в России, протекает в Алтайском, крае, Республике Алтай.",
+      "calls": [],
+      "status": "UNRESOLVED",
+      "reason": "NO_RULE @6",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s108",
+      "variant": "original",
+      "text": "Подвешенный к корзине парашют удерживался на тонкой верёвке, которая от рывка разорвалась.",
+      "calls": [
+        "06931d455ec357ba482ccab27a7941ddc01ac25e3b772b0fd03e484f20d319cf"
+      ],
+      "status": "STORED",
+      "reason": "COMPLEX_CLAUSE",
+      "empty": false,
+      "exact": true,
+      "incorrect_heads": [],
+      "role_scope_errors": [],
+      "graph_sha256": "658e8f41756c8d93f2234d22534361e7d32fd157c3927f6c715adcec2564dc44"
+    },
+    {
+      "id": "test-s108",
+      "variant": "no_punctuation",
+      "text": "Подвешенный к корзине парашют удерживался на тонкой верёвке которая от рывка разорвалась",
+      "calls": [
+        "285ec7781aef54923913f6fab48e877dc8ba3463d3ab38ad463af095b6d6e380"
+      ],
+      "status": "STORED",
+      "reason": "COMPLEX_CLAUSE",
+      "empty": false,
+      "exact": true,
+      "incorrect_heads": [],
+      "role_scope_errors": [],
+      "graph_sha256": "658e8f41756c8d93f2234d22534361e7d32fd157c3927f6c715adcec2564dc44"
+    },
+    {
+      "id": "test-s108",
+      "variant": "extra_comma",
+      "text": "Подвешенный к корзине парашют удерживался на тонкой, верёвке, которая от рывка разорвалась.",
+      "calls": [
+        "9334b500cb08c0cf3fa018f3bb15a0ec7aa08f80acef2f31d7ec3f21dacb019a",
+        "06931d455ec357ba482ccab27a7941ddc01ac25e3b772b0fd03e484f20d319cf"
+      ],
+      "status": "STORED",
+      "reason": "COMPLEX_CLAUSE",
+      "empty": false,
+      "exact": true,
+      "incorrect_heads": [],
+      "role_scope_errors": [],
+      "graph_sha256": "658e8f41756c8d93f2234d22534361e7d32fd157c3927f6c715adcec2564dc44"
+    },
+    {
+      "id": "test-s109",
+      "variant": "original",
+      "text": "Кочик Башуй, Шеих Эли, Аджи Эли, Коп Бешуй, Сарт и Акшек.",
+      "calls": [
+        "d67e906b85f70da00051e873b66004f3f75f91d7a7809bec96149ec8aff5ce03",
+        "eff81d26557b5da548a2db48d275f5809eebf60354e2200d4a41a9cd807b4065",
+        "5f348dde327b7e131c3acd915831b3a4eea5e300a426632102625a04a1a717fe",
+        "e150aa861c32fcfd2b5cbbcb861b9c8cfa998bce68810d490cb880bfadc9f3c6",
+        "25611ead948d624fd83cd2a316c374b026d1f1a88451f1638d0758a1eb7cba27",
+        "2169557f1ad33eb89ce833a160fdc880f94e2a46adba9817146a7d8a22c5a09a"
+      ],
+      "status": "UNRESOLVED",
+      "reason": "NO_RULE @0",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s109",
+      "variant": "no_punctuation",
+      "text": "Кочик Башуй Шеих Эли Аджи Эли Коп Бешуй Сарт и Акшек",
+      "calls": [
+        "53279ff3d544ab96785c17191367e22aa8331ffa52002c0751673f38dc07ed0e",
+        "d7f7139fddae69eb1b75610c0b0079317f5c8d24de39e2bb4f94ac6fbc71f55e",
+        "799cd3c7102c1c076a2812fc3eb9a3b4fdf3c1562febc2cf5113b652f1f1f656",
+        "602d3c171714fb759c874fecb774940b3dfa38862e5fc97d81ccddad6bcd5149",
+        "9fb67a8c20ed3a684379600920f9b014a2ebd3c79e745885a8da436b84dba6f6",
+        "e1850e2b70799dbfcdf71671b384cb0148b38adfefcfd47c512649c679cf0e2d"
+      ],
+      "status": "UNRESOLVED",
+      "reason": "NO_RULE @0",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s109",
+      "variant": "extra_comma",
+      "text": "Кочик, Башуй, Шеих Эли, Аджи Эли, Коп Бешуй, Сарт и Акшек.",
+      "calls": [
+        "1e3623ffe01b5685c486f3c370e2bfe4842565f1d6668c1afc02423a7149cdfd",
+        "a6798d1d4de3aef1a86f5156f7560266ab2adb273a060f13e39386409c962518",
+        "825378198f8456cf08c70b7a7615b798f2240dabbfd32dfe4b2b311eb797aa0b",
+        "d2681c50145c26587f8eed8e6a94c7d1989d01cdfc8541e14c7166ee98f26d19",
+        "1f7e76c888a498fdef73c36756f4619862c39ad7a671f9548942043381e049ad",
+        "3f5b9f9b04547ce83a3d508330984bf97dd76bc4dc2b0fbe4b9a48904f67ac4c"
+      ],
+      "status": "UNRESOLVED",
+      "reason": "NO_RULE @0",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s110",
+      "variant": "original",
+      "text": "В августе 1937 года Баатр Басангов подготовил подстрочный перевод двенадцати песен калмыцкого эпоса ``Джангар&#39;&#39;, который в 1940 году использовал Семён Липкин при литературном переводе.",
+      "calls": [
+        "a80fa5b22984d44455a9bbc5290265cad433da91c998fb84923202bb58ba317c",
+        "c7c095bb55d6040ccb345e5a538e47591008675d41c05ac9325d20b9753c84cd",
+        "8875f6399fbc78c99c61867b0cea997a3a06c4f4ae196507836e8e8c7dd950f1"
+      ],
+      "status": "UNRESOLVED",
+      "reason": "NO_COMPLETE_CLAUSE",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s110",
+      "variant": "no_punctuation",
+      "text": "В августе 1937 года Баатр Басангов подготовил подстрочный перевод двенадцати песен калмыцкого эпоса Джангар который в 1940 году использовал Семён Липкин при литературном переводе",
+      "calls": [
+        "f5e80321a4467b34537a658b1da4a115b3fea62c06d32083509a3fc0393b1655",
+        "3d9809c0e7947ba0b6f87127e8c324c6d774d87e857d9306c187be22ceab8f8d",
+        "df5259bef78c52d8bf2a771672c107cd85071556eb4641966f3d666aa01d7595"
+      ],
+      "status": "UNRESOLVED",
+      "reason": "NO_COMPLETE_CLAUSE",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s110",
+      "variant": "extra_comma",
+      "text": "В августе 1937, года Баатр Басангов подготовил подстрочный перевод двенадцати песен калмыцкого эпоса ``Джангар&#39;&#39;, который в 1940 году использовал Семён Липкин при литературном переводе.",
+      "calls": [
+        "8e900746d5982c6087bedb65bd999cb9e91ee7e2fd0a002844e63455c76f52fd",
+        "f48aefec5dd72009a5037ceca5b6ea030966923db66c7ff459623f9a1448b2ab",
+        "9b9e747f5860ea15df4a668814325959893384d6edb8835e3db5ce65c1b79537"
+      ],
+      "status": "UNRESOLVED",
+      "reason": "NO_COMPLETE_CLAUSE",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s111",
+      "variant": "original",
+      "text": "В 2008 Камская ГЭС вошла в состав ОАО ``РусГидро&#39;&#39; в качестве филиала.",
+      "calls": [],
+      "status": "UNRESOLVED",
+      "reason": "NO_COMPLETE_CLAUSE",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s111",
+      "variant": "no_punctuation",
+      "text": "В 2008 Камская ГЭС вошла в состав ОАО РусГидро в качестве филиала",
+      "calls": [],
+      "status": "UNRESOLVED",
+      "reason": "NO_GOVERNED_READING @2",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s111",
+      "variant": "extra_comma",
+      "text": "В 2008 Камская, ГЭС вошла в состав ОАО ``РусГидро&#39;&#39; в качестве филиала.",
+      "calls": [],
+      "status": "UNRESOLVED",
+      "reason": "NO_COMPLETE_CLAUSE",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s112",
+      "variant": "original",
+      "text": "Взгляды Карлейля в чём-то предвосхитили воззрения Ницше с его культом сверхчеловека, а через него -- Гитлера и других фашистских идеологов.",
+      "calls": [],
+      "status": "UNRESOLVED",
+      "reason": "NO_COMPLETE_CLAUSE",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s112",
+      "variant": "no_punctuation",
+      "text": "Взгляды Карлейля в чём-то предвосхитили воззрения Ницше с его культом сверхчеловека а через него Гитлера и других фашистских идеологов",
+      "calls": [],
+      "status": "UNRESOLVED",
+      "reason": "NO_COMPLETE_CLAUSE",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s112",
+      "variant": "extra_comma",
+      "text": "Взгляды Карлейля в чём-то предвосхитили воззрения Ницше с его культом сверхчеловека, а через него -- Гитлера и других фашистских, идеологов.",
+      "calls": [],
+      "status": "UNRESOLVED",
+      "reason": "NO_RULE @8",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s113",
+      "variant": "original",
+      "text": "Становился чемпионом Азербайджана по ЧГК 2002, 2004, 2008 и 2012 годов, чемпионом Азербайджана по Брейн-рингу в 2002 году, чемпионом Южного Кавказа в 1998, 2003 (в составе команды Анара Азимова) и 2010 годах.",
+      "calls": [],
+      "status": "UNRESOLVED",
+      "reason": "QUANTITY_BUDGET",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s113",
+      "variant": "no_punctuation",
+      "text": "Становился чемпионом Азербайджана по ЧГК 2002 2004 2008 и 2012 годов чемпионом Азербайджана по Брейн-рингу в 2002 году чемпионом Южного Кавказа в 1998 2003 в составе команды Анара Азимова и 2010 годах",
+      "calls": [],
+      "status": "UNRESOLVED",
+      "reason": "QUANTITY_BUDGET",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s113",
+      "variant": "extra_comma",
+      "text": "Становился чемпионом Азербайджана по ЧГК 2002, 2004, 2008 и 2012 годов, чемпионом Азербайджана по Брейн-рингу в 2002 году, чемпионом Южного, Кавказа в 1998, 2003 (в составе команды Анара Азимова) и 2010 годах.",
+      "calls": [],
+      "status": "UNRESOLVED",
+      "reason": "QUANTITY_BUDGET",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s114",
+      "variant": "original",
+      "text": "Кроме того, здесь Моррис мог рассчитывать на частые визиты и помощь Уокера, который также жил и работал неподалеку.",
+      "calls": [
+        "be3019e642a4137db0fdd6ac7e64e37dd369bb8f440dd0dcd05c938caf02de94",
+        "e78146a346d6927ca976c08c975329c93d2474b34fe001100c960ad892617698"
+      ],
+      "status": "UNRESOLVED",
+      "reason": "NO_COMPLETE_CLAUSE",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s114",
+      "variant": "no_punctuation",
+      "text": "Кроме того здесь Моррис мог рассчитывать на частые визиты и помощь Уокера который также жил и работал неподалеку",
+      "calls": [
+        "32f52bdf9cf278fc6dad00f13fcdf9e0e628ee1bfef416f9fa8fb33a52aeba3f",
+        "6e09b93b54028e7325733dbf839c04410b13c0e7194742229230b3a616cd959a"
+      ],
+      "status": "UNRESOLVED",
+      "reason": "NO_COMPLETE_CLAUSE",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s114",
+      "variant": "extra_comma",
+      "text": "Кроме того, здесь Моррис мог рассчитывать на частые, визиты и помощь Уокера, который также жил и работал неподалеку.",
+      "calls": [
+        "18b924bfd98994402edbecb54dbf2598309c48484da7ea67c2fa4acb30089b1a",
+        "ce1f2f7b2bad1b75ba4e9eb97a09993c351cef907aa4b1b90a8712c80e621143"
+      ],
+      "status": "UNRESOLVED",
+      "reason": "NO_COMPLETE_CLAUSE",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s115",
+      "variant": "original",
+      "text": "Филькино Верхотурского уезда Екатеринбургской губернии в семье служащего.",
+      "calls": [],
+      "status": "UNRESOLVED",
+      "reason": "NO_RULE @23",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s115",
+      "variant": "no_punctuation",
+      "text": "Филькино Верхотурского уезда Екатеринбургской губернии в семье служащего",
+      "calls": [],
+      "status": "UNRESOLVED",
+      "reason": "NO_RULE @23",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s115",
+      "variant": "extra_comma",
+      "text": "Филькино Верхотурского, уезда Екатеринбургской губернии в семье служащего.",
+      "calls": [],
+      "status": "UNRESOLVED",
+      "reason": "NO_RULE @22",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s116",
+      "variant": "original",
+      "text": "Алекса́ндр Илларио́нович Козло́в (1816 -- 1893) -- русский врач.",
+      "calls": [],
+      "status": "UNRESOLVED",
+      "reason": "NO_COMPLETE_CLAUSE",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s116",
+      "variant": "no_punctuation",
+      "text": "Алекса́ндр Илларио́нович Козло́в 1816 1893 русский врач",
+      "calls": [],
+      "status": "UNRESOLVED",
+      "reason": "NO_RULE @33",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s116",
+      "variant": "extra_comma",
+      "text": "Алекса́ндр Илларио́нович Козло́в (1816 -- 1893) -- русский, врач.",
+      "calls": [],
+      "status": "UNRESOLVED",
+      "reason": "NO_COMPLETE_CLAUSE",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s118",
+      "variant": "original",
+      "text": "Дмитрий сначала не дал внятного ответа.",
+      "calls": [],
+      "status": "STORED",
+      "reason": "SIMPLE_CLAUSE",
+      "empty": false,
+      "exact": true,
+      "incorrect_heads": [],
+      "role_scope_errors": [],
+      "graph_sha256": "2a6f3efb3849829f1e747065a2d3a44d2ea16b4dfdc28a6c6c1cfe2190ab5381"
+    },
+    {
+      "id": "test-s118",
+      "variant": "no_punctuation",
+      "text": "Дмитрий сначала не дал внятного ответа",
+      "calls": [],
+      "status": "STORED",
+      "reason": "SIMPLE_CLAUSE",
+      "empty": false,
+      "exact": true,
+      "incorrect_heads": [],
+      "role_scope_errors": [],
+      "graph_sha256": "2a6f3efb3849829f1e747065a2d3a44d2ea16b4dfdc28a6c6c1cfe2190ab5381"
+    },
+    {
+      "id": "test-s118",
+      "variant": "extra_comma",
+      "text": "Дмитрий сначала не дал внятного, ответа.",
+      "calls": [
+        "8f75b5b02f2bd946ad8f5be3790ea14644b9a49c395c5165795ca6f1601a1e05"
+      ],
+      "status": "STORED",
+      "reason": "SIMPLE_CLAUSE",
+      "empty": false,
+      "exact": true,
+      "incorrect_heads": [],
+      "role_scope_errors": [],
+      "graph_sha256": "2a6f3efb3849829f1e747065a2d3a44d2ea16b4dfdc28a6c6c1cfe2190ab5381"
+    },
+    {
+      "id": "test-s119",
+      "variant": "original",
+      "text": "Пьер Корне́ль (; (произносится, собственно говоря, Корней) 6 июня 1606, Руан -- 1 октября 1684, Париж) -- французский поэт и драматург, отец французской трагедии; член Французской академии (1647).",
+      "calls": [],
+      "status": "UNRESOLVED",
+      "reason": "NO_COMPLETE_CLAUSE",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s119",
+      "variant": "no_punctuation",
+      "text": "Пьер Корне́ль произносится собственно говоря Корней 6 июня 1606 Руан 1 октября 1684 Париж французский поэт и драматург отец французской трагедии член Французской академии 1647",
+      "calls": [],
+      "status": "TIME_LIMIT",
+      "empty": true
+    },
+    {
+      "id": "test-s119",
+      "variant": "extra_comma",
+      "text": "Пьер Корне́ль (; (произносится, собственно говоря, Корней) 6 июня 1606, Руан -- 1 октября 1684, Париж) -- французский, поэт и драматург, отец французской трагедии; член Французской академии (1647).",
+      "calls": [],
+      "status": "UNRESOLVED",
+      "reason": "NO_COMPLETE_CLAUSE",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s120",
+      "variant": "original",
+      "text": "Родился в 1923 году в Вичуге в крестьянской семье.",
+      "calls": [
+        "614e47693bd77596d6ed3c014764a51a146bcec5128e17354c4fff6e81c0908d",
+        "8e717744ce1d76f4b58ab1a63e77ce603c092aaf89bffd527ed39044da1bf625",
+        "f72ea7edc9cf3dc74d77d1afebc0114034e72b4ff3e338ba645acb59417ae364"
+      ],
+      "status": "STORED",
+      "reason": "SIMPLE_CLAUSE",
+      "empty": false,
+      "exact": true,
+      "incorrect_heads": [],
+      "role_scope_errors": [],
+      "graph_sha256": "a1a7e03a72277f54d5e6351ce312a5e0287b29bb9436930d7390cd7547280c1f"
+    },
+    {
+      "id": "test-s120",
+      "variant": "no_punctuation",
+      "text": "Родился в 1923 году в Вичуге в крестьянской семье",
+      "calls": [
+        "614e47693bd77596d6ed3c014764a51a146bcec5128e17354c4fff6e81c0908d",
+        "8e717744ce1d76f4b58ab1a63e77ce603c092aaf89bffd527ed39044da1bf625",
+        "4a32468d9327c4c0e34d99cdfff2bb76f2fe14da9eb268e8b262c3620056099a"
+      ],
+      "status": "STORED",
+      "reason": "SIMPLE_CLAUSE",
+      "empty": false,
+      "exact": true,
+      "incorrect_heads": [],
+      "role_scope_errors": [],
+      "graph_sha256": "a1a7e03a72277f54d5e6351ce312a5e0287b29bb9436930d7390cd7547280c1f"
+    },
+    {
+      "id": "test-s120",
+      "variant": "extra_comma",
+      "text": "Родился в 1923, году в Вичуге в крестьянской семье.",
+      "calls": [
+        "3b0fe259d86781f430ab125207d2f9892a571529ce9d3736359e15ea560d1235",
+        "506c8bdf4c38b8c34824985fc3019e537b144264e48485da359dbd2d1ab828f9",
+        "07fb628bfc66d3707eb76cf8c644a22224a708bae1a5305b2d10b25cccd7478b",
+        "72eb8ea35c21221a8cbc94426ff63dfabec20fa7430a88beb50c361d0395445c"
+      ],
+      "status": "STORED",
+      "reason": "SIMPLE_CLAUSE",
+      "empty": false,
+      "exact": true,
+      "incorrect_heads": [],
+      "role_scope_errors": [],
+      "graph_sha256": "a1a7e03a72277f54d5e6351ce312a5e0287b29bb9436930d7390cd7547280c1f"
+    }
+  ]
+}

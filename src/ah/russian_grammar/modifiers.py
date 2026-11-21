@@ -170,14 +170,19 @@ def _converb_trees(tokens, budget):
                             for link in tree[1:])
 
 
+def _simple_converb_boundary(surface):
+    forms = known_forms(surface)
+    return surface == ';' or bool(forms) and all(tag.POS == 'VERB' for _, tag in forms)
+
+
 def _regions(tokens, pivot):
     left = pivot
-    while left and tokens[left - 1].surface != ',':
+    while left and tokens[left - 1].surface != ',' and not _simple_converb_boundary(tokens[left - 1].surface):
         left -= 1
     right = pivot + 1
-    while right < len(tokens) and tokens[right].surface != ',':
+    while right < len(tokens) and tokens[right].surface != ',' and not _simple_converb_boundary(tokens[right].surface):
         right += 1
-    if left or right < len(tokens):
+    if left and tokens[left - 1].surface == ',' or right < len(tokens) and tokens[right].surface == ',':
         yield left, right
     else:
         for start in range(left, pivot + 1):
@@ -242,7 +247,18 @@ def _with_attributes(tokens, base, budget, region_budget):
 
 
 def structures(tokens, base_function, *, budget=256):
-    return _structures(tokens, base_function, budget, iter(range(budget)))
+    from .parser import AnalysisBudgetExceeded
+
+    @cache
+    def readings(part):
+        variants = {}
+        for reading in _converb_series(part, budget):
+            variants.setdefault(reading, None)
+            if len(variants) > budget:
+                raise AnalysisBudgetExceeded('MODIFIER_BUDGET')
+        return tuple(variants)
+
+    return _structures(tokens, base_function, budget, iter(range(budget)), readings)
 
 
 def _converb_hosts(matrix, outer, start):
@@ -278,7 +294,7 @@ def _neighboring_converbs(matrix, outer, start):
     return sorted(neighbors)
 
 
-def _structures(tokens, base_function, budget, region_budget):
+def _structures(tokens, base_function, budget, region_budget, readings):
     from .parser import AnalysisBudgetExceeded, Link
 
     pivots = [i for i, token in enumerate(tokens) if any(tag.POS == 'GRND' for _, tag in known_forms(token.surface))]
@@ -301,10 +317,10 @@ def _structures(tokens, base_function, budget, region_budget):
             outer = tuple(i for i in range(len(tokens)) if not start <= i < end and i not in commas)
             if not outer:
                 continue
-            for part in _converb_series(tuple(tokens[i] for i in inner), budget):
+            for part in readings(tuple(tokens[i] for i in inner)):
                 converbs = [i for i, link in zip(inner, part) if link.role == 'predicate']
                 converb = converbs[0]
-                for matrix in _structures(tuple(tokens[i] for i in outer), base_function, budget, region_budget):
+                for matrix in _structures(tuple(tokens[i] for i in outer), base_function, budget, region_budget, readings):
                     for controller, head in _converb_hosts(matrix, outer, start):
                         links = {i: _remap(link, outer) for i, link in zip(outer, matrix)}
                         links.update((i, _remap(link, inner)) for i, link in zip(inner, part))

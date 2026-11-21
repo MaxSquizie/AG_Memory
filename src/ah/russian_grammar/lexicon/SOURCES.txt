@@ -267,8 +267,10 @@ and MIT license as bare_government.tsv.
 python scripts/import_russian_impersonal_infinitives.py rus_infinitives_sov.sol ru_gsd-ud-train.conllu src/ah/russian_grammar/lexicon/impersonal-infinitives.tsv
 
 nominal-parentheticals.tsv содержит двухсловные сочетания из словаря вводных
-конструкций GrammarEngine. Внутренняя связь предлога с существительным и
-обособленное чтение засвидетельствованы в обучающей части Russian-GSD r2.15.
+конструкций GrammarEngine. Разметка обучающей части Russian-GSD r2.15 задаёт
+внутреннюю связь предлога с существительным или местоимением. При существительном
+требуется parataxis, при местоимении допустима также внешняя связь obl.
+Добавление сообщения проверяется отдельной пробой.
 При разборе нового текста это чтение требует выбора читателя.
 GrammarEngine (MIT): https://github.com/Koziev/GrammarEngine/blob/c70bdbdd8b41af25fa754e727ca645de90d28c23/src/dictionary.src/rus_sa_modal_collocations.sol
 Russian-GSD (CC BY-SA 4.0): https://github.com/UniversalDependencies/UD_Russian-GSD/tree/r2.15

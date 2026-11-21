@@ -42,3 +42,18 @@ def test_unknown_attribute_and_place_leave_both_passive_preposition_hosts_open()
     assert all(tree[2].rule == 'OPAQUE.ATTRIBUTE' and tree[2].head == 3 for tree in trees)
     assert all(tree[9].rule == 'OPAQUE.GOVERNED' and tree[9].lemma == 'Файюма' for tree in trees)
     assert not core.store.elements(Domain.H)
+
+
+def test_unlisted_name_requires_an_open_subject_in_a_personal_clause():
+    for name in ('Домье', 'Беньямино'):
+        core = AHCore()
+        result = submit(core, f'{name} работает.')
+        assert result.status == 'AMBIGUOUS' and not core.store.elements(Domain.H)
+        assert result.analysis.probes[-1].options == (name,)
+        tree, = result.analysis.analyses
+        assert tree[0].role == 'subject' and tree[0].lemma == name and tree[0].morphology is None
+        assert tree[0].head == 1 and tree[1].implicit_subject is None
+    for text in ('Домье работает Иван.', 'Домье работаю.', 'Домье смеркается.', 'Домье увидел.'):
+        result = submit(AHCore(), text)
+        assert result.status != 'STORED'
+        assert not any(link.rule == 'OPAQUE.SUBJECT' for tree in result.analysis.analyses for link in tree)

@@ -86,3 +86,30 @@ def test_four_digits_after_a_month_can_belong_to_a_following_counted_noun():
     assert dated and all(tree[2].rule == 'DATE.APPOS' and tree[2].head == 1 for tree in dated)
     counted, = analyze('В январе 1999 студентов сдали экзамен.').analyses
     assert counted[2].quantity_kind == 'cardinal' and counted[2].head == 3
+
+
+def test_interval_at_a_personal_name_is_a_note_requiring_confirmation():
+    for text, years in (('Иван Петров (1900–1950) — врач.', '1900–1950'),
+                        ('Иван Петров 1900 1950 врач.', '1900 1950')):
+        core = AHCore()
+        result = submit(core, text)
+        assert result.status == 'AMBIGUOUS' and not core.store.elements(Domain.H)
+        assert result.analysis.probes[-1].options == (years,)
+        tree, = result.analysis.analyses
+        note = next(link for link in tree if link.rule == 'DATE.NOTE.INTERVAL')
+        assert (note.role, note.head, note.quantity) == ('list_item', 0, '1900..1950')
+        assert [link.lemma for link in tree if link.role == 'predicate'] == ['врач']
+
+
+def test_parallel_number_can_share_the_previous_governed_ordinal_unit():
+    from ah.russian_grammar import analyze
+
+    text = 'Райс написала этот роман в 1973 году, а впервые он был напечатан в 1976.'
+    reading = analyze(text)
+    assert any(tree[2].scope == 'demonstrative' and tree[2].head == 3 and tree[3].role == 'object'
+               and tree[-1].quantity_kind == 'ordinal' and tree[-1].ellipsis_source == 6
+               for tree in reading.analyses)
+    assert any(tree[-1].quantity_kind == 'cardinal' and tree[-1].ellipsis_source is None
+               for tree in reading.analyses)
+    separate = analyze('Книга издана в 1976.')
+    assert separate.analyses and all(tree[-1].ellipsis_source is None for tree in separate.analyses)
