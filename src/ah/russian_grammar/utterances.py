@@ -198,7 +198,8 @@ def _parataxis(part, parse):
         governors = explanations.content_governors()
         for start in range(finite[0] + 1, finite[-1] + 1):
             previous = part[start - 1].surface
-            if not (explanations.anchor_forms(previous) or any(
+            nominal = explanations.nominal_boundary(part, start)
+            if not (nominal or explanations.anchor_forms(previous) or any(
                     lemma in governors and tag.POS == 'VERB' for lemma, tag in known_forms(previous))):
                 continue
             initial = part[start].surface
@@ -207,7 +208,8 @@ def _parataxis(part, parse):
                 continue
             for left in parse(part[:start]):
                 host = _root(left)
-                if left[host].lemma not in governors or (host != start - 1 and left[-1].role != 'object'):
+                verbal = left[host].lemma in governors and (host == start - 1 or left[-1].role == 'object')
+                if not verbal and not (nominal and explanations.nominal_anchor(left)):
                     continue
                 for right in parse(part[start:]):
                     child = _root(right)
@@ -230,7 +232,8 @@ def _parataxis(part, parse):
             continue
         for left in parse(part[:i]):
             for right in parse(part[i + 1:]):
-                if sign in (':', '—', ',') and left[_root(left)].lemma in explanations.content_governors():
+                if sign in (':', '—', ',') and (left[_root(left)].lemma in explanations.content_governors()
+                        or explanations.nominal_anchor(left)):
                     yield from explanations.attachments(part, left, right, i, i + 1)
                     continue
                 links, host, child = _linked(left, right, range(i), range(i + 1, len(part)),

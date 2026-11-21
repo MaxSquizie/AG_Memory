@@ -21,3 +21,25 @@ def test_colon_between_events_does_not_license_an_object():
     assert record.status == 'STORED'
     tree, = record.analysis.analyses
     assert tree[-1].rule == 'UTT.PARATAXIS'
+
+
+def test_nominal_explanation_returns_both_clauses_from_memory():
+    import json
+    from pathlib import Path
+    from ah.model import Domain
+
+    path = Path(__file__).resolve().parents[1] / 'docs/evidence/russian_grammar_s64/readings.json'
+    for case in json.loads(path.read_text(encoding='utf-8'))['cases']:
+        cards = {p['prompt']: p['answer'] for p in case['probes']}
+        core = AHCore()
+        reply = submit(core, case['text'], lambda probe: cards.pop(probe.prompt()))
+        assert not cards and reply.status == 'STORED'
+        stored = core.store.get_element(Domain.H, reply.observation_ref)
+        rows = [core.store.get_element(Domain.H, ref.uid).meta for ref in stored.members]
+        child, = [row for row in rows if row['rule'] == 'CONTENT.NOMINAL']
+        assert rows[child['head']]['role'] == 'subject'
+        conjunct, = [r for r in rows if r['role'] == 'clause_conjunct']
+        assert rows[conjunct['head']] == child
+        assert child['assertion_status'] == conjunct['assertion_status'] == 'embedded'
+        answer = submit(core, case['question'])
+        assert (answer.text, answer.observation_ref) == (case['answer'], reply.observation_ref)

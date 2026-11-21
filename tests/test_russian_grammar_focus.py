@@ -119,3 +119,22 @@ def test_focus_abstention_and_replayed_question(tmp_path):
     assert submit(reader, text + '?', lambda p: 'в школе', journal=journal).text == 'Да.'
     assert submit(reader, text + '?', lambda p: 'пел', journal=journal).status == 'UNKNOWN'
     assert not analyze('Вчера в школе Иван пел').probes
+
+
+def test_postpositive_particle_stays_with_its_host_in_nominal_answer():
+    core = AHCore()
+    reply = submit(core, 'Анна прочитала ту же книгу.')
+    tree, = reply.analysis.analyses
+    assert reply.status == 'STORED'
+    assert tree[3].head == 2 and tree[2].head == 4
+    assert submit(core, 'Что прочитала Анна?').text == 'ту же книгу'
+    assert submit(core, 'Анна прочитала эту же книгу?').status == 'UNKNOWN'
+    assert analyze('Анна прочитала того же книгу.').status == 'UNRESOLVED'
+
+
+def test_comma_inside_postpositive_group_requires_a_choice():
+    for fragment, boundary in (('том, же направлении', 'том, же'), ('том же, направлении', 'же, направлении')):
+        reply = submit(AHCore(), f'Отряд шёл в {fragment}.')
+        assert reply.status == 'AMBIGUOUS' and reply.observation_ref is None
+        probe, = reply.analysis.probes
+        assert probe.options == (boundary, 'сохранить все запятые')

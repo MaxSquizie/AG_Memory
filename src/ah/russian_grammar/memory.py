@@ -485,7 +485,8 @@ def _nominal_parts(stored, children, head):
             if j in modifiers or role in ('participle', 'genitive_modifier'):
                 modifiers.add(child)
                 parts.append(child)
-            elif (stored[child].get('rule') == 'NP.DET' or role == 'possessive' and stored[child]['lemma'] == 'свой'
+            elif (stored[child].get('rule') == 'F.NP' and stored[j]['role'] in ('attribute', 'possessive')
+                  or stored[child].get('rule') == 'NP.DET' or role == 'possessive' and stored[child]['lemma'] == 'свой'
                   or role in NUMBER_PARTS or role in ('name_part', 'nominal_conjunct', 'coordinator', 'numeral') or
                   paired and (role == 'coordinator_part' or role in ('attribute', 'possessive')) or
                   (expanded or stored[j].get('counted')) and role in ('attribute', 'possessive')):
@@ -836,6 +837,9 @@ def _extraction(rows, stored, observed, source, focus, budget, subject_member=No
             parts = (_descendants(surface_children, [head]) if adjuncts.question(rows[focus])
                      else _nominal_parts(stored, surface_children, head))
             parts = set(parts)
+            elaborations = [j for j in surface_children[head] if stored[j].get('rule') == 'CONTENT.NOMINAL']
+            if elaborations:
+                parts.update(_descendants(surface_children, [head]))
             if stored[head].get('correlative_quantity') and stored[head]['role'] == 'numeral':
                 parts.add(stored[head]['head'])
             included_clauses = {clause for anchor in parts for clause in restrictions.get(anchor, ())}
@@ -844,7 +848,7 @@ def _extraction(rows, stored, observed, source, focus, budget, subject_member=No
                 missing.difference_update(j for j in surface_children[head] if stored[j]['rule'] == 'F.NP')
             if missing and not missing.issubset(parts):
                 continue
-            answer = (_restricted_answer(stored, parts, source) if included_clauses else
+            answer = (_restricted_answer(stored, parts, source) if included_clauses or elaborations else
                       _nominal_answer(stored, parts, source))
             if answer:
                 identity, phrase = answer

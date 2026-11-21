@@ -1,6 +1,7 @@
 from dataclasses import replace
 from importlib.resources import files
 from itertools import product
+from functools import lru_cache
 
 from .morphology import _common, from_tag
 from .prepositions import DASHES, group_heads
@@ -35,6 +36,9 @@ def _modifies(forms, index, noun, head_tag):
                    for _, tag in variants) for variants in forms[index+1:noun])
 
 
+INSTRUMENTAL_COPULAS = frozenset(('оказаться', 'оказываться'))
+
+
 def _decorated(tokens, forms, bindings, nominal_heads, root, subject, personal):
     from .parser import Link
 
@@ -46,7 +50,7 @@ def _decorated(tokens, forms, bindings, nominal_heads, root, subject, personal):
             continue
         options = []
         for lemma, tag in variants:
-            if (lemma == 'быть' or (lemma in {'оказаться', 'оказываться'} and personal and instrumental)) and tag.POS == 'VERB' and tag.mood == 'indc' and _copula_agrees(tag, subject):
+            if (lemma == 'быть' or (lemma in INSTRUMENTAL_COPULAS and personal and instrumental)) and tag.POS == 'VERB' and tag.mood == 'indc' and _copula_agrees(tag, subject):
                 options.append(Link('copula', lemma, root, 'V2.COP'))
             if tag.POS == 'ADVB':
                 options.append(Link('adverb', lemma, root, 'V2.MOD'))
@@ -154,7 +158,17 @@ def _impersonal(tokens, forms, root, lemma, pred, *, requires_infinitive=False, 
                     yield tree
 
 
+@lru_cache(maxsize=4096)
+def _admits_bare_predication(surface):
+    return surface in DASHES or any(
+        tag.POS != 'VERB' or lemma == 'быть' or lemma in INSTRUMENTAL_COPULAS
+        or lemma in IMPERSONAL_INFINITIVES or 'Impe' in tag or 'Prdx' in tag
+        for lemma, tag in known_forms(surface))
+
+
 def _bare_trees(tokens, substantive=None):
+    if not all(_admits_bare_predication(token.surface) for token in tokens):
+        return
     forms = [known_forms(token.surface) for token in tokens]
     seen = set()
     for root, variants in enumerate(forms):

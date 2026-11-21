@@ -586,6 +586,9 @@ def _partitions(analyses, tokens, text):
         if roles == {'attribute', 'participle'}:
             heads = [link.head for link in links]
             context = _attachment_context(text, tokens, analyses, heads, i, i + 1)
+            if any(link.rule == 'CONTENT.NOMINAL' and link.head == host
+                   for tree, host in zip(analyses, heads) for link in tree):
+                context = text
             quality = 'только признак'
             question = (f'Указывает ли «{focus}» здесь на действие? Если да, выберите «{focus}». '
                         f'Если это только характеристика предмета, выберите «{quality}».')
@@ -751,6 +754,11 @@ def _partition(analyses, tokens, text):
             values = [getattr(link, attr) for link in links]
             distinct = sorted(set(values) - {None})
             if len(set(values)) < 2:
+                continue
+            if attr == 'lemma' and len(distinct) > 2 and all(
+                    link.morphology and link.morphology.pos == 'NOUN' for link in links):
+                choices.append((Probe(f'Какова начальная форма слова «{focus}» в этом предложении?',
+                                      tuple(distinct), text), values))
                 continue
             for value in (distinct if None in values else distinct[:-1]):
                 condition = template.format(CASE_NAMES.get(value, value) if attr == 'case' else value)

@@ -13,7 +13,7 @@ from .rules import known_forms, readings
 
 
 @cache
-def _lexicon():
+def adverbial_modifiers():
     phrases = []
     particles = set()
     data = files(__package__).joinpath('lexicon/adverbial-modifiers.tsv')
@@ -37,7 +37,7 @@ class Phrase:
     links: tuple
 
 
-def _phrases(tokens, words, start, particles):
+def _phrases(tokens, words, start):
     for first, prep in _prepositions(tokens, start):
         if not GOVERNMENT.get(prep):
             continue
@@ -45,9 +45,6 @@ def _phrases(tokens, words, start, particles):
         fixed = [(j, Link('prep_part', words[j], start, 'P1')) for j in range(start + 1, first)]
         for j in range(first, len(tokens)):
             forms = known_forms(words[j])
-            if j > first and qualifiers and j - 1 == qualifiers[-1][0] and words[j] in particles:
-                fixed.append((j, Link('particle', words[j], j - 1, 'F.NP')))
-                continue
             governed = {(r.lemma, r.case) for r in readings(words[j], prep) if r.role == 'governed'}
             for lemma, noun in forms:
                 if noun.POS not in {'NOUN', 'NPRO'} or (lemma, noun.case) not in governed:
@@ -114,7 +111,7 @@ def trees(tokens, kernel, budget):
                                   for t in tokens):
         return
     words = tuple(t.surface.casefold() for t in tokens)
-    adverbials, particles = _lexicon()
+    adverbials, _ = adverbial_modifiers()
     opening = next((span for span in markers(tokens, 0)
                     if set(relations(' '.join(words[j] for j in span))) <= {'addition', 'contrast'}
                     and relations(' '.join(words[j] for j in span))), ())
@@ -134,7 +131,7 @@ def trees(tokens, kernel, budget):
             if i in fixed:
                 pending.append((i + 1, kept, groups))
                 continue
-            found = tuple(dict.fromkeys(_phrases(tokens, words, i, particles)))
+            found = tuple(dict.fromkeys(_phrases(tokens, words, i)))
             if found:
                 pending.extend((g.end, kept, (*groups, g)) for g in found)
             else:

@@ -28,6 +28,7 @@ class BoundaryChoice(Exception):
 def _compatible(left, right):
     from .adjuncts import QUESTIONS
     from .clause_series import ordinal_abbreviation
+    from .modal_regions import adverbial_modifiers
     from .predication import IMPERSONAL_INFINITIVES, _copula_agrees
     from .speech_particles import DOUBT, JUSSIVE
     from .spatial_prefix import deictic_role, relative_role
@@ -42,6 +43,10 @@ def _compatible(left, right):
         return True
     left_forms = known_forms(left)
     right_forms = known_forms(right)
+    _, postpositive = adverbial_modifiers()
+    if (right.casefold() in postpositive and any(tag.POS == 'ADJF' for _, tag in left_forms)
+            or left.casefold() in postpositive and nominal(right)):
+        return True
     if left.casefold() == 'не' and right.casefold() in FORMS:
         return True
     if any(any(lemma in IMPERSONAL_INFINITIVES or 'Impe' in tag or tag.POS == 'PRED'
@@ -176,6 +181,9 @@ def repairs(tokens, parse, budget, *, sites=None):
                 head = left
             elif (tree[left].rule == 'NEG.PRON' and tree[left].head is not None and
                   tree[tree[left].head].head == right):
+                head = tree[left].head
+            elif (tree[left].rule == 'F.NP' and tree[left].head is not None and
+                  tree[tree[left].head].role in ('attribute', 'possessive') and tree[tree[left].head].head == right):
                 head = tree[left].head
             elif _predicative_neighbors(tree[left], tree[right], tree):
                 head = tree[left].head

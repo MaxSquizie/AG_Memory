@@ -1,4 +1,5 @@
 from dataclasses import replace
+from itertools import combinations
 
 from .morphology import NOMINAL_ROLES, ROLE_CASE, from_tag
 from .nominal_groups import _agree
@@ -98,7 +99,7 @@ def _substantive_subjects(tokens, base, budget):
                             yield tuple(links[j] for j in range(len(tokens)))
 
 
-def trees(tokens, base, *, budget=256):
+def _determined(tokens, base, budget):
     from .parser import Link
 
     yield from _substantive_subjects(tokens, base, budget)
@@ -142,3 +143,30 @@ def trees(tokens, base, *, budget=256):
             links[i] = Link('attribute', lemma, j, 'NP.DET', scope=SCOPES[lemma])
         else:
             yield tuple(links[i] for i in range(len(tokens)))
+
+
+def trees(tokens, base, *, budget=256):
+    from .modal_regions import adverbial_modifiers
+    from .parser import AnalysisBudgetExceeded, Link
+    from .utterances import _map
+
+    yield from _determined(tokens, base, budget)
+    _, particles = adverbial_modifiers()
+    sites = [i for i in range(1, len(tokens) - 1)
+             if tokens[i].surface.casefold() in particles
+             and any(tag.POS == 'ADJF' for _, tag in known_forms(tokens[i - 1].surface))
+             and any(tag.POS in {'ADJF', 'NOUN', 'NPRO'} for _, tag in known_forms(tokens[i + 1].surface))]
+    if (1 << len(sites)) > budget:
+        raise AnalysisBudgetExceeded('MODIFIER_BUDGET')
+    for count in range(1, len(sites) + 1):
+        for marked in combinations(sites, count):
+            kept = tuple(i for i in range(len(tokens)) if i not in marked)
+            for tree in _determined(tuple(tokens[i] for i in kept), base, budget):
+                links = _map(tree, kept)
+                for i in marked:
+                    host = links[i - 1]
+                    if host.role not in ('attribute', 'possessive') or host.head is None or host.head <= i:
+                        break
+                    links[i] = Link('particle', tokens[i].surface.casefold(), i - 1, 'F.NP')
+                else:
+                    yield tuple(links[i] for i in range(len(tokens)))
