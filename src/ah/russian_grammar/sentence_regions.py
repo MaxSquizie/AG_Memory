@@ -6,7 +6,7 @@ from . import (
 )
 
 
-def trees(tokens, parse, budget):
+def _primary_regions(tokens, parse, budget):
     yield from infinitive_elaborations.trees(tokens, parse, budget)
     yield from predicate_lists.trees(tokens, parse, budget)
     mixed = tuple(mixed_predications.trees(tokens, parse, budget))
@@ -22,6 +22,20 @@ def trees(tokens, parse, budget):
     yield from framed_clauses.trees(tokens, parse, budget)
     yield from nominal_definitions.trees(tokens, parse, budget)
     yield from named_regions.trees(tokens, parse, budget)
+    yield from named_regions.matrix_readings(tokens, parse, budget)
+
+
+def trees(tokens, parse, budget, *, dated_members=None):
+    found = False
+    for tree in _primary_regions(tokens, parse, budget):
+        found = True
+        yield tree
+    if not found and dated_members is not None:
+        for tree in dated_members(tokens):
+            found = True
+            yield tree
+        if found:
+            return
     yield from temporal_groups.trees(tokens, parse, budget)
     yield from reference_directives.trees(tokens, parse, budget)
     yield from quote_titles.trees(tokens, parse, budget)
@@ -30,10 +44,38 @@ def trees(tokens, parse, budget):
     yield from predicative_groups.trees(tokens, parse, budget)
 
 
-def remaining(tokens, parse, budget):
-    from .utterances import nominal_then_finite
+def _relative_child_readings(part, parse, budget):
+    yield from parse(part)
+    yield from trees(part, parse, budget)
 
+
+def remaining(tokens, parse, budget, *, text, selected):
+    from . import marked_regions
+    from .utterances import nominal_then_finite
+    from .contrastive_regions import nominal_remnants
+    from .relative_clauses import final_subject_relative
+
+    yield from marked_regions.nominal_relative(tokens, text, selected,
+        lambda part: named_regions.matrix_readings(part, parse, budget),
+        lambda part: _relative_child_readings(part, parse, budget), budget)
+    yield from quote_titles.quoted_arguments(tokens, parse, budget)
+    from . import homogeneous
+    from .utterances import _parataxis
+
+    def expanded(part):
+        yield from homogeneous.expanded_infinitives(part, parse, budget)
+        yield from named_series.initial_name_groups(part, parse, budget)
+
+    yield from expanded(tokens)
+    if any(t.surface in (':', ';') for t in tokens):
+        def leaf(part):
+            yield from parse(part)
+            yield from expanded(part)
+        yield from _parataxis(tokens, leaf, explicit=True)
     yield from nominal_then_finite(tokens, parse)
+    yield from nominal_remnants(tokens, parse, budget)
+    yield from final_subject_relative(tokens, parse, budget)
+    yield from named_arguments.clauses_with_named_series(tokens, parse, budget)
     yield from named_arguments.missing_subjects(tokens, parse)
     yield from clause_series.trees(tokens, parse, budget)
     yield from nominal_mentions.trees(tokens, parse, budget)
@@ -51,3 +93,12 @@ def confirmation(tokens, tree, i, text):
         if probe is not None:
             return probe
     return None
+
+def additional_nominal_readings(tokens, parse, budget):
+    from itertools import chain
+
+    def expanded(part):
+        return chain(parse(part), named_regions.unlisted_genitives(part, parse, budget))
+
+    yield from named_regions.unlisted_genitives(tokens, parse, budget)
+    yield from calendar_regions.leading_year_range(tokens, expanded)

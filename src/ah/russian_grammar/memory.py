@@ -85,7 +85,7 @@ def _rows(result, participants):
     contexts = {}
     qualifications = {}
     for i, row in enumerate(rows):
-        if (row['role'] == 'parenthetical' and not _discourse_marker(row)
+        if (row['role'] == 'parenthetical' and row.get('scope') != 'parenthetical' and not _discourse_marker(row)
                 or row['role'] == 'preposition' and row.get('scope') == 'qualification'):
             qualifications[row['head']] = 'qualified'
         if (row['role'] != 'clause_marker' or not row.get('scope')
@@ -115,7 +115,7 @@ def _rows(result, participants):
             if governing_status == 'asserted':
                 enclosing = enclosing or 'attributive'
                 governing_status = enclosing
-        if row['rule'] == 'PAREN.EXPL':
+        if row['rule'] == 'PAREN.EXPL' or (row['role'] == 'parenthetical' and row['scope'] == 'parenthetical'):
             enclosing = enclosing or 'parenthetical'
             governing_status = enclosing
         scope = row.get('scope') or ''
@@ -123,6 +123,8 @@ def _rows(result, participants):
         if category in ('negated', 'averted'):
             category, polarity = '', category
         role = row['role']
+        if role == 'clause_relative' and scope == 'supplementary':
+            enclosing, governing_status, category = None, 'asserted', ''
         boundary = contexts.get(i)
         factual_concession = role == 'clause_adverbial' and boundary == 'concession'
         if factual_concession:

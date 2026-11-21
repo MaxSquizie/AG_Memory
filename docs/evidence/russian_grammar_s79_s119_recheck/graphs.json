@@ -1,0 +1,1921 @@
+{
+  "test-s79": [
+    {
+      "surface": "В",
+      "role": "preposition",
+      "head": 5,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "том",
+      "role": "attribute",
+      "head": 3,
+      "scope": "demonstrative",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "же",
+      "role": "particle",
+      "head": 1,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "году",
+      "role": "governed",
+      "head": 0,
+      "case": "loc2",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "Агияр",
+      "role": "subject",
+      "head": 5,
+      "case": "nomn",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "перешёл",
+      "role": "predicate",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "в",
+      "role": "preposition",
+      "head": 5,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "португальский",
+      "role": "attribute",
+      "head": 9,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "``",
+      "role": "punctuation",
+      "head": 9,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "Порту",
+      "role": "governed",
+      "head": 6,
+      "case": "accs",
+      "scope": "proper_name",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "&#39;&#39;",
+      "role": "punctuation",
+      "head": 9,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": ";",
+      "role": "punctuation",
+      "head": 28,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "спустя",
+      "role": "preposition",
+      "head": 28,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "два",
+      "role": "numeral",
+      "head": 14,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "месяца",
+      "role": "governed",
+      "head": 12,
+      "case": "accs",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": ",",
+      "role": "punctuation",
+      "head": 17,
+      "assertion_status": "negated"
+    },
+    {
+      "surface": "не",
+      "role": "particle",
+      "head": 17,
+      "assertion_status": "negated"
+    },
+    {
+      "surface": "сыграв",
+      "role": "converb",
+      "head": 28,
+      "scope": "negated",
+      "controller": 26,
+      "assertion_status": "negated"
+    },
+    {
+      "surface": "ни",
+      "role": "quantity_modifier",
+      "head": 19,
+      "assertion_status": "negated"
+    },
+    {
+      "surface": "одного",
+      "role": "numeral",
+      "head": 20,
+      "assertion_status": "negated"
+    },
+    {
+      "surface": "матча",
+      "role": "object",
+      "head": 17,
+      "case": "accs",
+      "assertion_status": "negated"
+    },
+    {
+      "surface": "за",
+      "role": "preposition",
+      "head": 20,
+      "assertion_status": "negated"
+    },
+    {
+      "surface": "``",
+      "role": "punctuation",
+      "head": 23,
+      "assertion_status": "negated"
+    },
+    {
+      "surface": "Порту",
+      "role": "governed",
+      "head": 21,
+      "case": "accs",
+      "scope": "proper_name",
+      "assertion_status": "negated"
+    },
+    {
+      "surface": "&#39;&#39;",
+      "role": "punctuation",
+      "head": 23,
+      "assertion_status": "negated"
+    },
+    {
+      "surface": ",",
+      "role": "punctuation",
+      "head": 17,
+      "assertion_status": "negated"
+    },
+    {
+      "surface": "Агияр",
+      "role": "subject",
+      "head": 28,
+      "case": "nomn",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "был",
+      "role": "copula",
+      "head": 28,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "отдан",
+      "role": "clause_conjunct",
+      "head": 5,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "в",
+      "role": "preposition",
+      "head": 28,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "аренду",
+      "role": "governed",
+      "head": 29,
+      "case": "accs",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "амадорской",
+      "role": "attribute",
+      "head": 33,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "``",
+      "role": "punctuation",
+      "head": 33,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "Эштреле",
+      "role": "recipient",
+      "head": 28,
+      "case": "datv",
+      "scope": "proper_name",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "&#39;&#39;",
+      "role": "punctuation",
+      "head": 33,
+      "assertion_status": "asserted"
+    }
+  ],
+  "test-s85": [
+    {
+      "surface": "Аслан-паша",
+      "role": "subject",
+      "head": 1,
+      "case": "nomn",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "занял",
+      "role": "predicate",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "Кутаиси",
+      "role": "object",
+      "head": 1,
+      "case": "accs",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": ",",
+      "role": "punctuation",
+      "head": 5,
+      "assertion_context": "relative",
+      "assertion_status": "relative"
+    },
+    {
+      "surface": "где",
+      "role": "adverb",
+      "head": 5,
+      "antecedent": 2,
+      "assertion_context": "relative",
+      "assertion_status": "relative"
+    },
+    {
+      "surface": "схватил",
+      "role": "clause_relative",
+      "head": 2,
+      "scope": "relative",
+      "controller": 0,
+      "assertion_context": "relative",
+      "assertion_status": "relative"
+    },
+    {
+      "surface": "Вахтанга",
+      "role": "object",
+      "head": 5,
+      "assertion_context": "relative",
+      "assertion_status": "relative"
+    },
+    {
+      "surface": ",",
+      "role": "punctuation",
+      "head": 8,
+      "assertion_context": "relative",
+      "assertion_status": "relative"
+    },
+    {
+      "surface": "царицу",
+      "role": "nominal_conjunct",
+      "head": 6,
+      "case": "accs",
+      "assertion_context": "relative",
+      "assertion_status": "relative"
+    },
+    {
+      "surface": "Дареджан",
+      "role": "apposition",
+      "head": 8,
+      "case": "accs",
+      "assertion_context": "relative",
+      "assertion_status": "relative"
+    },
+    {
+      "surface": "и",
+      "role": "coordinator",
+      "head": 11,
+      "assertion_context": "relative",
+      "assertion_status": "relative"
+    },
+    {
+      "surface": "Кетеван",
+      "role": "nominal_conjunct",
+      "head": 6,
+      "case": "accs",
+      "assertion_context": "relative",
+      "assertion_status": "relative"
+    },
+    {
+      "surface": ",",
+      "role": "punctuation",
+      "head": 17,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "а",
+      "role": "clause_marker",
+      "head": 17,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "Баграта",
+      "role": "object",
+      "head": 17,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "Слепого",
+      "role": "name_part",
+      "head": 14,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "вторично",
+      "role": "adverb",
+      "head": 17,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "посадил",
+      "role": "clause_conjunct",
+      "head": 1,
+      "controller": 0,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "на",
+      "role": "preposition",
+      "head": 17,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "царский",
+      "role": "attribute",
+      "head": 20,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "престол",
+      "role": "governed",
+      "head": 18,
+      "case": "accs",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "Имеретии",
+      "role": "genitive_modifier",
+      "head": 20,
+      "case": "gent",
+      "assertion_status": "asserted"
+    }
+  ],
+  "test-s86": [
+    {
+      "surface": "В",
+      "role": "preposition",
+      "head": 6,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "этом",
+      "role": "attribute",
+      "head": 3,
+      "scope": "demonstrative",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "же",
+      "role": "particle",
+      "head": 1,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "году",
+      "role": "governed",
+      "head": 0,
+      "case": "loc2",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "он",
+      "role": "subject",
+      "head": 6,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "вновь",
+      "role": "adverb",
+      "head": 6,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "озвучил",
+      "role": "predicate",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "Кота",
+      "role": "object",
+      "head": 6,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "в",
+      "role": "preposition",
+      "head": 7,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "сапогах",
+      "role": "governed",
+      "head": 8,
+      "case": "loct",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "в",
+      "role": "preposition",
+      "head": 6,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "спин-оффе",
+      "role": "governed",
+      "head": 10,
+      "case": "loct",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "мультфильма",
+      "role": "genitive_modifier",
+      "head": 11,
+      "case": "gent",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "``",
+      "role": "punctuation",
+      "head": 14,
+      "assertion_context": "title",
+      "assertion_status": "title"
+    },
+    {
+      "surface": "Шрек",
+      "role": "apposition",
+      "head": 12,
+      "scope": "title",
+      "assertion_context": "title",
+      "assertion_status": "title"
+    },
+    {
+      "surface": "&#39;&#39;",
+      "role": "punctuation",
+      "head": 14,
+      "assertion_context": "title",
+      "assertion_status": "title"
+    },
+    {
+      "surface": "``",
+      "role": "punctuation",
+      "head": 17,
+      "assertion_context": "title",
+      "assertion_status": "title"
+    },
+    {
+      "surface": "Кот",
+      "role": "apposition",
+      "head": 11,
+      "case": "nomn",
+      "scope": "title",
+      "assertion_context": "title",
+      "assertion_status": "title"
+    },
+    {
+      "surface": "в",
+      "role": "preposition",
+      "head": 17,
+      "assertion_context": "title",
+      "assertion_status": "title"
+    },
+    {
+      "surface": "сапогах",
+      "role": "governed",
+      "head": 18,
+      "case": "loct",
+      "assertion_context": "title",
+      "assertion_status": "title"
+    },
+    {
+      "surface": "&#39;&#39;",
+      "role": "punctuation",
+      "head": 17,
+      "assertion_context": "title",
+      "assertion_status": "title"
+    }
+  ],
+  "test-s93": [
+    {
+      "surface": "К",
+      "role": "preposition",
+      "head": 8,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "Бынаты",
+      "role": "governed",
+      "head": 0,
+      "case": "datv",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "Хицау",
+      "role": "name_part",
+      "head": 1,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": ",",
+      "role": "punctuation",
+      "head": 1,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "наряду",
+      "role": "preposition",
+      "head": 8,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "с",
+      "role": "prep_part",
+      "head": 4,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "Хилы",
+      "role": "governed",
+      "head": 4,
+      "case": "ablt",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "дзуаром",
+      "role": "name_part",
+      "head": 6,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "обращалась",
+      "role": "predicate",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "за",
+      "role": "preposition",
+      "head": 8,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "помощью",
+      "role": "governed",
+      "head": 9,
+      "case": "ablt",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "молодая",
+      "role": "attribute",
+      "head": 12,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "невестка",
+      "role": "subject",
+      "head": 8,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": ":",
+      "role": "punctuation",
+      "head": 15,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "он",
+      "role": "subject",
+      "head": 15,
+      "case": "nomn",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "помогал",
+      "role": "clause_conjunct",
+      "head": 8,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "ей",
+      "role": "recipient",
+      "head": 15,
+      "case": "datv",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "расстаться",
+      "role": "infinitive",
+      "head": 15,
+      "scope": "embedded",
+      "controller": 16,
+      "assertion_context": "embedded",
+      "assertion_status": "embedded"
+    },
+    {
+      "surface": "с",
+      "role": "preposition",
+      "head": 17,
+      "assertion_context": "embedded",
+      "assertion_status": "embedded"
+    },
+    {
+      "surface": "родителями",
+      "role": "governed",
+      "head": 18,
+      "case": "ablt",
+      "assertion_context": "embedded",
+      "assertion_status": "embedded"
+    },
+    {
+      "surface": "и",
+      "role": "coordinator",
+      "head": 22,
+      "assertion_context": "embedded",
+      "assertion_status": "embedded"
+    },
+    {
+      "surface": "благополучно",
+      "role": "adverb",
+      "head": 22,
+      "assertion_context": "embedded",
+      "assertion_status": "embedded"
+    },
+    {
+      "surface": "войти",
+      "role": "infinitive",
+      "head": 17,
+      "scope": "embedded",
+      "controller": 16,
+      "assertion_context": "embedded",
+      "assertion_status": "embedded"
+    },
+    {
+      "surface": "в",
+      "role": "preposition",
+      "head": 22,
+      "assertion_context": "embedded",
+      "assertion_status": "embedded"
+    },
+    {
+      "surface": "новую",
+      "role": "attribute",
+      "head": 25,
+      "assertion_context": "embedded",
+      "assertion_status": "embedded"
+    },
+    {
+      "surface": "семью",
+      "role": "governed",
+      "head": 23,
+      "case": "accs",
+      "assertion_context": "embedded",
+      "assertion_status": "embedded"
+    },
+    {
+      "surface": "мужа",
+      "role": "genitive_modifier",
+      "head": 25,
+      "case": "gent",
+      "assertion_context": "embedded",
+      "assertion_status": "embedded"
+    }
+  ],
+  "test-s104": [
+    {
+      "surface": "С",
+      "role": "preposition",
+      "head": 6,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "1870",
+      "role": "governed",
+      "head": 0,
+      "case": "gent",
+      "scope": "year_interval",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "по",
+      "role": "preposition",
+      "head": 6,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "1876",
+      "role": "governed",
+      "head": 2,
+      "case": "accs",
+      "scope": "year_interval",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "работы",
+      "role": "subject",
+      "head": 6,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "Зинина",
+      "role": "genitive_modifier",
+      "head": 4,
+      "case": "gent",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "направлены",
+      "role": "predicate",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "на",
+      "role": "preposition",
+      "head": 6,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "изучение",
+      "role": "governed",
+      "head": 7,
+      "case": "accs",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "лепидена",
+      "role": "genitive_modifier",
+      "head": 8,
+      "case": "gent",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "и",
+      "role": "coordinator",
+      "head": 12,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "его",
+      "role": "possessive",
+      "head": 12,
+      "antecedent": 9,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "производных",
+      "role": "nominal_conjunct",
+      "head": 9,
+      "case": "gent",
+      "assertion_status": "asserted"
+    }
+  ],
+  "test-s110": [
+    {
+      "surface": "В",
+      "role": "preposition",
+      "head": 6,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "августе",
+      "role": "governed",
+      "head": 0,
+      "case": "loct",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "1937",
+      "role": "numeral",
+      "head": 3,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "года",
+      "role": "genitive_modifier",
+      "head": 1,
+      "case": "gent",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "Баатр",
+      "role": "subject",
+      "head": 6,
+      "case": "nomn",
+      "scope": "proper_name",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "Басангов",
+      "role": "name_part",
+      "head": 4,
+      "case": "nomn",
+      "scope": "proper_name",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "подготовил",
+      "role": "predicate",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "подстрочный",
+      "role": "attribute",
+      "head": 8,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "перевод",
+      "role": "object",
+      "head": 6,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "двенадцати",
+      "role": "numeral",
+      "head": 10,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "песен",
+      "role": "genitive_modifier",
+      "head": 8,
+      "case": "gent",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "калмыцкого",
+      "role": "attribute",
+      "head": 12,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "эпоса",
+      "role": "genitive_modifier",
+      "head": 10,
+      "case": "gent",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "``",
+      "role": "punctuation",
+      "head": 14,
+      "assertion_context": "title",
+      "assertion_status": "title"
+    },
+    {
+      "surface": "Джангар",
+      "role": "apposition",
+      "head": 12,
+      "scope": "title",
+      "assertion_context": "title",
+      "assertion_status": "title"
+    },
+    {
+      "surface": "&#39;&#39;",
+      "role": "punctuation",
+      "head": 14,
+      "assertion_context": "title",
+      "assertion_status": "title"
+    },
+    {
+      "surface": ",",
+      "role": "punctuation",
+      "head": 21,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "который",
+      "role": "object",
+      "head": 21,
+      "case": "accs",
+      "antecedent": 8,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "в",
+      "role": "preposition",
+      "head": 21,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "1940",
+      "role": "attribute",
+      "head": 20,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "году",
+      "role": "governed",
+      "head": 18,
+      "case": "loc2",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "использовал",
+      "role": "clause_relative",
+      "head": 8,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "Семён",
+      "role": "subject",
+      "head": 21,
+      "case": "nomn",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "Липкин",
+      "role": "name_part",
+      "head": 22,
+      "case": "nomn",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "при",
+      "role": "preposition",
+      "head": 21,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "литературном",
+      "role": "attribute",
+      "head": 26,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "переводе",
+      "role": "governed",
+      "head": 24,
+      "case": "loct",
+      "assertion_status": "asserted"
+    }
+  ],
+  "test-s111": [
+    {
+      "surface": "В",
+      "role": "preposition",
+      "head": 4,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "2008",
+      "role": "governed",
+      "head": 0,
+      "case": "loct",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "Камская",
+      "role": "attribute",
+      "head": 3,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "ГЭС",
+      "role": "subject",
+      "head": 4,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "вошла",
+      "role": "predicate",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "в",
+      "role": "preposition",
+      "head": 4,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "состав",
+      "role": "governed",
+      "head": 5,
+      "case": "accs",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "ОАО",
+      "role": "genitive_modifier",
+      "head": 6,
+      "case": "gent",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "``",
+      "role": "punctuation",
+      "head": 9,
+      "assertion_context": "title",
+      "assertion_status": "title"
+    },
+    {
+      "surface": "РусГидро",
+      "role": "apposition",
+      "head": 7,
+      "scope": "title",
+      "assertion_context": "title",
+      "assertion_status": "title"
+    },
+    {
+      "surface": "&#39;&#39;",
+      "role": "punctuation",
+      "head": 9,
+      "assertion_context": "title",
+      "assertion_status": "title"
+    },
+    {
+      "surface": "в",
+      "role": "preposition",
+      "head": 4,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "качестве",
+      "role": "prep_part",
+      "head": 11,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "филиала",
+      "role": "governed",
+      "head": 11,
+      "case": "gent",
+      "assertion_status": "asserted"
+    }
+  ],
+  "test-s112": [
+    {
+      "surface": "Взгляды",
+      "role": "subject",
+      "head": 4,
+      "case": "nomn",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "Карлейля",
+      "role": "genitive_modifier",
+      "head": 0,
+      "case": "gent",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "в",
+      "role": "preposition",
+      "head": 4,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "чём-то",
+      "role": "governed",
+      "head": 2,
+      "case": "loct",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "предвосхитили",
+      "role": "predicate",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "воззрения",
+      "role": "object",
+      "head": 4,
+      "case": "accs",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "Ницше",
+      "role": "genitive_modifier",
+      "head": 5,
+      "case": "gent",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "с",
+      "role": "preposition",
+      "head": 5,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "его",
+      "role": "possessive",
+      "head": 9,
+      "antecedent": 6,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "культом",
+      "role": "governed",
+      "head": 7,
+      "case": "ablt",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "сверхчеловека",
+      "role": "genitive_modifier",
+      "head": 9,
+      "case": "gent",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": ",",
+      "role": "punctuation",
+      "head": 16,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "а",
+      "role": "coordinator",
+      "head": 16,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "через",
+      "role": "preposition",
+      "head": 16,
+      "scope": "elliptical",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "него",
+      "role": "governed",
+      "head": 13,
+      "case": "accs",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "--",
+      "role": "punctuation",
+      "head": 16,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "Гитлера",
+      "role": "nominal_conjunct",
+      "head": 6,
+      "case": "gent",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "и",
+      "role": "coordinator",
+      "head": 20,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "других",
+      "role": "attribute",
+      "head": 20,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "фашистских",
+      "role": "attribute",
+      "head": 20,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "идеологов",
+      "role": "nominal_conjunct",
+      "head": 16,
+      "case": "gent",
+      "assertion_status": "asserted"
+    }
+  ],
+  "test-s113": [
+    {
+      "surface": "Становился",
+      "role": "predicate",
+      "implicit_subject": "unresolved",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "чемпионом",
+      "role": "predicative_complement",
+      "head": 0,
+      "case": "ablt",
+      "implicit_subject": "unresolved",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "Азербайджана",
+      "role": "genitive_modifier",
+      "head": 1,
+      "case": "gent",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "по",
+      "role": "preposition",
+      "head": 1,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "ЧГК",
+      "role": "governed",
+      "head": 3,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "2002",
+      "role": "attribute",
+      "head": 12,
+      "case": "gent",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": ",",
+      "role": "punctuation",
+      "head": 7,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "2004",
+      "role": "nominal_conjunct",
+      "head": 5,
+      "case": "gent",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": ",",
+      "role": "punctuation",
+      "head": 9,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "2008",
+      "role": "nominal_conjunct",
+      "head": 5,
+      "case": "gent",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "и",
+      "role": "coordinator",
+      "head": 11,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "2012",
+      "role": "nominal_conjunct",
+      "head": 5,
+      "case": "gent",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "годов",
+      "role": "genitive_modifier",
+      "head": 1,
+      "case": "gent",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": ",",
+      "role": "punctuation",
+      "head": 14,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "чемпионом",
+      "role": "nominal_conjunct",
+      "head": 1,
+      "case": "ablt",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "Азербайджана",
+      "role": "genitive_modifier",
+      "head": 14,
+      "case": "gent",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "по",
+      "role": "preposition",
+      "head": 14,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "Брейн-рингу",
+      "role": "governed",
+      "head": 16,
+      "case": "datv",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "в",
+      "role": "preposition",
+      "head": 14,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "2002",
+      "role": "attribute",
+      "head": 20,
+      "case": "loc2",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "году",
+      "role": "governed",
+      "head": 18,
+      "case": "loc2",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": ",",
+      "role": "punctuation",
+      "head": 22,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "чемпионом",
+      "role": "nominal_conjunct",
+      "head": 1,
+      "case": "ablt",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "Южного",
+      "role": "attribute",
+      "head": 24,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "Кавказа",
+      "role": "genitive_modifier",
+      "head": 22,
+      "case": "gent",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "в",
+      "role": "preposition",
+      "head": 22,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "1998",
+      "role": "attribute",
+      "head": 38,
+      "case": "loct",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": ",",
+      "role": "punctuation",
+      "head": 28,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "2003",
+      "role": "nominal_conjunct",
+      "head": 26,
+      "case": "loct",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "(",
+      "role": "punctuation",
+      "head": 30,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "в",
+      "role": "preposition",
+      "head": 28,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "составе",
+      "role": "governed",
+      "head": 30,
+      "case": "loct",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "команды",
+      "role": "genitive_modifier",
+      "head": 31,
+      "case": "gent",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "Анара",
+      "role": "genitive_modifier",
+      "head": 32,
+      "case": "gent",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "Азимова",
+      "role": "name_part",
+      "head": 33,
+      "case": "gent",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": ")",
+      "role": "punctuation",
+      "head": 30,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "и",
+      "role": "coordinator",
+      "head": 37,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "2010",
+      "role": "nominal_conjunct",
+      "head": 26,
+      "case": "loct",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "годах",
+      "role": "governed",
+      "head": 25,
+      "case": "loct",
+      "assertion_status": "asserted"
+    }
+  ],
+  "test-s114": [
+    {
+      "surface": "Кроме",
+      "role": "case",
+      "head": 1,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "того",
+      "role": "parenthetical",
+      "head": 5,
+      "scope": "addition",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": ",",
+      "role": "punctuation",
+      "head": 1,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "здесь",
+      "role": "adverb",
+      "head": 5,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "Моррис",
+      "role": "subject",
+      "head": 5,
+      "case": "nomn",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "мог",
+      "role": "predicate",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "рассчитывать",
+      "role": "infinitive",
+      "head": 5,
+      "scope": "modal",
+      "controller": 4,
+      "assertion_context": "modal",
+      "assertion_status": "modal"
+    },
+    {
+      "surface": "на",
+      "role": "preposition",
+      "head": 6,
+      "assertion_context": "modal",
+      "assertion_status": "modal"
+    },
+    {
+      "surface": "частые",
+      "role": "attribute",
+      "head": 9,
+      "assertion_context": "modal",
+      "assertion_status": "modal"
+    },
+    {
+      "surface": "визиты",
+      "role": "governed",
+      "head": 7,
+      "case": "accs",
+      "assertion_context": "modal",
+      "assertion_status": "modal"
+    },
+    {
+      "surface": "и",
+      "role": "coordinator",
+      "head": 11,
+      "assertion_context": "modal",
+      "assertion_status": "modal"
+    },
+    {
+      "surface": "помощь",
+      "role": "nominal_conjunct",
+      "head": 9,
+      "case": "accs",
+      "assertion_context": "modal",
+      "assertion_status": "modal"
+    },
+    {
+      "surface": "Уокера",
+      "role": "genitive_modifier",
+      "head": 11,
+      "case": "gent",
+      "assertion_context": "modal",
+      "assertion_status": "modal"
+    },
+    {
+      "surface": ",",
+      "role": "punctuation",
+      "head": 16,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "который",
+      "role": "subject",
+      "head": 16,
+      "case": "nomn",
+      "antecedent": 12,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "также",
+      "role": "particle",
+      "head": 16,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "жил",
+      "role": "clause_relative",
+      "head": 12,
+      "scope": "supplementary",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "и",
+      "role": "clause_marker",
+      "head": 18,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "работал",
+      "role": "clause_conjunct",
+      "head": 16,
+      "controller": 14,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "неподалеку",
+      "role": "adverb",
+      "head": 16,
+      "scope": "coordination",
+      "assertion_status": "asserted"
+    }
+  ],
+  "test-s115": [
+    {
+      "surface": "Филькино",
+      "role": "nominal_head"
+    },
+    {
+      "surface": "Верхотурского",
+      "role": "attribute",
+      "head": 2
+    },
+    {
+      "surface": "уезда",
+      "role": "genitive_modifier",
+      "head": 0
+    },
+    {
+      "surface": "Екатеринбургской",
+      "role": "attribute",
+      "head": 4
+    },
+    {
+      "surface": "губернии",
+      "role": "genitive_modifier",
+      "head": 2
+    },
+    {
+      "surface": "в",
+      "role": "preposition",
+      "head": 0
+    },
+    {
+      "surface": "семье",
+      "role": "governed",
+      "head": 5
+    },
+    {
+      "surface": "служащего",
+      "role": "genitive_modifier",
+      "head": 6
+    }
+  ],
+  "test-s119": [
+    {
+      "surface": "Пьер",
+      "role": "subject",
+      "head": 26,
+      "case": "nomn",
+      "scope": "proper_name",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "Корне́ль",
+      "role": "name_part",
+      "head": 0,
+      "case": "nomn",
+      "scope": "proper_name",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "(",
+      "role": "punctuation",
+      "head": 12,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": ";",
+      "role": "punctuation",
+      "head": 5,
+      "assertion_context": "parenthetical",
+      "assertion_status": "parenthetical"
+    },
+    {
+      "surface": "(",
+      "role": "punctuation",
+      "head": 5,
+      "assertion_context": "parenthetical",
+      "assertion_status": "parenthetical"
+    },
+    {
+      "surface": "произносится",
+      "role": "parenthetical",
+      "head": 12,
+      "scope": "parenthetical",
+      "assertion_context": "parenthetical",
+      "assertion_status": "parenthetical"
+    },
+    {
+      "surface": ",",
+      "role": "punctuation",
+      "head": 8,
+      "assertion_context": "parenthetical",
+      "assertion_status": "parenthetical"
+    },
+    {
+      "surface": "собственно",
+      "role": "adverb",
+      "head": 8,
+      "assertion_context": "parenthetical",
+      "assertion_status": "parenthetical"
+    },
+    {
+      "surface": "говоря",
+      "role": "parenthetical",
+      "head": 5,
+      "scope": "parenthetical",
+      "assertion_context": "parenthetical",
+      "assertion_status": "parenthetical"
+    },
+    {
+      "surface": ",",
+      "role": "punctuation",
+      "head": 8,
+      "assertion_context": "parenthetical",
+      "assertion_status": "parenthetical"
+    },
+    {
+      "surface": "Корней",
+      "role": "designation",
+      "head": 5,
+      "antecedent": 0,
+      "assertion_context": "parenthetical",
+      "assertion_status": "parenthetical"
+    },
+    {
+      "surface": ")",
+      "role": "punctuation",
+      "head": 5,
+      "assertion_context": "parenthetical",
+      "assertion_status": "parenthetical"
+    },
+    {
+      "surface": "6",
+      "role": "list_item",
+      "head": 0,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "июня",
+      "role": "date_month",
+      "head": 12,
+      "case": "gent",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "1606",
+      "role": "date_year",
+      "head": 13,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": ",",
+      "role": "punctuation",
+      "head": 16,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "Руан",
+      "role": "list_item",
+      "head": 12,
+      "scope": "proper_name",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "--",
+      "role": "punctuation",
+      "head": 18,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "1",
+      "role": "list_item",
+      "head": 12,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "октября",
+      "role": "date_month",
+      "head": 18,
+      "case": "gent",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "1684",
+      "role": "date_year",
+      "head": 19,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": ",",
+      "role": "punctuation",
+      "head": 22,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "Париж",
+      "role": "list_item",
+      "head": 18,
+      "scope": "proper_name",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": ")",
+      "role": "punctuation",
+      "head": 12,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "--",
+      "role": "punctuation",
+      "head": 26,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "французский",
+      "role": "attribute",
+      "head": 26,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "поэт",
+      "role": "predicate",
+      "case": "nomn",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "и",
+      "role": "coordinator",
+      "head": 28,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "драматург",
+      "role": "clause_conjunct",
+      "head": 26,
+      "case": "nomn",
+      "controller": 0,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": ",",
+      "role": "punctuation",
+      "head": 30,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "отец",
+      "role": "clause_conjunct",
+      "head": 26,
+      "case": "nomn",
+      "controller": 0,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "французской",
+      "role": "attribute",
+      "head": 32,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "трагедии",
+      "role": "genitive_modifier",
+      "head": 30,
+      "case": "gent",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": ";",
+      "role": "punctuation",
+      "head": 34,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "член",
+      "role": "clause_conjunct",
+      "head": 26,
+      "case": "nomn",
+      "controller": 0,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "Французской",
+      "role": "attribute",
+      "head": 36,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "академии",
+      "role": "genitive_modifier",
+      "head": 34,
+      "case": "gent",
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "(",
+      "role": "punctuation",
+      "head": 38,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": "1647",
+      "role": "nominal_date",
+      "head": 34,
+      "assertion_status": "asserted"
+    },
+    {
+      "surface": ")",
+      "role": "punctuation",
+      "head": 38,
+      "assertion_status": "asserted"
+    }
+  ]
+}

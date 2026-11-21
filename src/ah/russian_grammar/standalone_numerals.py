@@ -63,9 +63,11 @@ def _expects_unit(tokens, expressions):
 
 
 def _slots(tokens, budget):
+    from .calendar_regions import year_lists
 
     slots = {}
     counted = set()
+    calendar_years = {year for years, _, _ in year_lists(tokens) for year in years}
     cursor = 0
     while cursor < len(tokens):
         start = cursor
@@ -74,6 +76,8 @@ def _slots(tokens, budget):
             cursor += 1
             continue
         cursor = longest[0].end
+        if start in calendar_years:
+            continue
         if any(next(_groups(tokens, start, expr, budget), None) for expr in longest):
             counted.add(start)
             continue
@@ -150,10 +154,14 @@ def _single_trees(tokens, local, budget):
                 raise AnalysisBudgetExceeded('QUANTITY_BUDGET')
         return output
 
+    layouts = 1
+    for options in slots.values():
+        layouts *= 1 + len(options)
+        if layouts - 1 > budget:
+            raise AnalysisBudgetExceeded('QUANTITY_BUDGET')
     seen = set()
     starts = tuple(slots)
     pending = [(0, ())]
-    count = 0
     while pending:
         at, groups = pending.pop()
         if at < len(starts):
@@ -163,9 +171,6 @@ def _single_trees(tokens, local, budget):
             continue
         if not groups:
             continue
-        count += 1
-        if count > budget:
-            raise AnalysisBudgetExceeded('QUANTITY_BUDGET')
         hidden = {i for group in groups for i in range(group.start + 1, group.end)}
         kept = tuple(i for i in range(len(tokens)) if i not in hidden)
         heads = {group.start: group.surface for group in groups}

@@ -297,3 +297,98 @@ def trees(tokens, local, *, budget, spatial_prefix=None, nominal_fragment=False)
         yield from attachments(tokens, inferred=True, fragment=True)
     else:
         yield from parse(tokens, True)
+
+
+def attach_final(matrix, child, marker, host, tag):
+    from .parser import Link
+    from .utterances import _root
+
+    root = marker + _root(child)
+    result = list(matrix)
+    if len(matrix) < marker:
+        result.append(Link('punctuation', ',', root, 'CL.PUNCT'))
+    result.extend(clauses._shift(link, marker) for link in child)
+    result[marker] = replace(result[marker], lemma='который', rule='CL.NOMREF',
+                             antecedent=host, case=tag.case, morphology=from_tag(tag))
+    result[root] = replace(result[root], head=host, role='clause_relative', rule='CL.REL')
+    return tuple(result), root
+
+
+def final_subject_relative(tokens, parse, budget):
+    from . import clause_series, named_arguments, named_regions
+
+    def matrix_core(part):
+        yield from parse(part)
+        yield from named_arguments.missing_subjects(part, parse)
+
+    def matrices(part):
+        yield from matrix_core(part)
+        yield from named_regions.unlisted_genitives(part, matrix_core, budget)
+
+    for marker in range(1, len(tokens) - 1):
+        tags = [tag for lemma, tag in known_forms(tokens[marker].surface)
+                if lemma == 'который' and tag.case == 'nomn']
+        if not tags:
+            continue
+        comma = tokens[marker - 1].surface == ','
+        start = marker - int(comma)
+        for tag in tags:
+            for surface, _ in personal_correlatives._pronoun_forms(tag.number, tag.gender, 'nomn', False):
+                if tag.gender == 'neut':
+                    surface = 'оно'
+                inner = (replace(tokens[marker], surface=surface), *tokens[marker + 1:])
+                children = tuple(tree for tree in clause_series.trees(inner, parse, budget)
+                                 if tree[0].role == 'subject' and any(l.role == 'clause_conjunct' for l in tree))
+                if not children:
+                    continue
+                for matrix in matrices(tokens[:start]):
+                    for host in _anchors(matrix, start):
+                        link = matrix[host]
+                        opaque = link.rule == 'N.UNLISTED.GEN'
+                        if not opaque and not any(t == tag for _, t in _projections(tokens[host], link, tokens[marker])):
+                            continue
+                        if opaque and not any(p.tag.POS == 'NOUN' and p.tag.case == 'gent' and
+                                (not tag.gender or not p.tag.gender or p.tag.gender == tag.gender) and
+                                p.tag.number == tag.number for p in dictionary().parse(tokens[host].surface)):
+                            continue
+                        for child in children:
+                            links, pivot = attach_final(matrix, child, marker, host, tag)
+                            yield links
+                            for j in range(pivot + 1, len(links)):
+                                adverb = links[j]
+                                if adverb.role != 'adverb' or adverb.head is None or adverb.head >= j:
+                                    continue
+                                sibling = links[adverb.head]
+                                if sibling.role != 'clause_conjunct' or sibling.head != pivot:
+                                    continue
+                                yield (*links[:j], replace(adverb, head=pivot, rule='CL.SHARED.ADV',
+                                                          scope='coordination'), *links[j + 1:])
+
+
+def modal_scope_choices(tokens, tree, text):
+    from .parser import _span_label
+    from .probe import Probe
+
+    for i, rel in enumerate(tree):
+        if rel.rule != 'CL.REL' or rel.scope is not None or rel.head is None:
+            continue
+        noun = rel.head
+        if not tokens[noun].surface[:1].isupper() or not any(
+                child.antecedent == noun and child.head == i for child in tree):
+            continue
+        host = tree[noun].head
+        while host is not None and tree[host].role not in ('infinitive', 'predicate', 'clause_relative'):
+            host = tree[host].head
+        if host is None or tree[host].role != 'infinitive' or tree[host].scope != 'modal':
+            continue
+        governor = tree[host].head
+        if governor is None or tree[governor].head is not None or tree[governor].scope:
+            continue
+        if any(l.role == 'clause_marker' and l.scope and l.scope not in ('addition', 'contrast') for l in tree):
+            continue
+        named = _span_label(tokens, noun)
+        action = _span_label(tokens, i)
+        alternative = 'только в рамках описанной возможности'
+        probe = Probe(f'Сообщает ли рассказчик отдельно о «{named}», что тот «{action}»? '
+                      f'Если это утверждается, выберите «{action}».', (action, alternative), text)
+        yield i, probe

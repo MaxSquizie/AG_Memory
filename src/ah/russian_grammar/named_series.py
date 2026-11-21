@@ -225,6 +225,54 @@ def _governed_names(tokens, parse, budget):
                 yield from _attach_governed(tokens, parse, start, prep, head, tail + 1, cases, parts)
 
 
+def initial_name_groups(tokens, parse, budget):
+    from .rules import dictionary
+
+    pending = [(0, {})]
+    examined = 0
+    while pending:
+        start, prefix = pending.pop()
+        if prefix and start < len(tokens):
+            for tree in parse(tokens[start:]):
+                root = start + _root(tree)
+                links = _map(tree, range(start, len(tokens)))
+                for i, link in prefix.items():
+                    links[i] = replace(link, head=root) if link.role == 'preposition' else link
+                yield tuple(links[i] for i in range(len(tokens)))
+        for first, prep in _prepositions(tokens, start):
+            if first + 1 >= len(tokens):
+                continue
+            head = tokens[first].surface
+            if not head.istitle() or any(tag.POS == 'NOUN' for _, tag in known_forms(head)):
+                continue
+            cases = frozenset(GOVERNMENT.get(prep, ()))
+            for i in range(first + 1, len(tokens)):
+                word = tokens[i].surface
+                if not word.isalpha() or known_forms(word):
+                    break
+                forms = dictionary().parse(word)
+                if not word.istitle() and not any(p.tag.POS == 'NOUN' and p.tag.case in cases for p in forms):
+                    break
+                if not word.istitle() and i != first + 1:
+                    break
+                for case in sorted(cases.intersection(p.tag.case for p in forms if p.tag.POS == 'NOUN')):
+                    links = dict(prefix)
+                    links[start] = Link('preposition', prep, None, 'P2')
+                    for j in range(start + 1, first):
+                        links[j] = Link('prep_part', tokens[j].surface.casefold(), start, 'P1')
+                    links[first] = Link('governed', head, start, 'OPAQUE.GOVERNED.NAME', case)
+                    for j in range(first + 1, i + 1):
+                        links[j] = Link('name_part', tokens[j].surface, first, 'NAME')
+                    end = i + 1
+                    if end < len(tokens) and tokens[end].surface == ',':
+                        links[end] = Link('punctuation', ',', first, 'PP.SEP')
+                        end += 1
+                    pending.append((end, links))
+                    examined += 1
+                    if examined > budget:
+                        raise AnalysisBudgetExceeded('NAMED_SERIES_BUDGET')
+
+
 def trees(tokens, parse, budget):
     yield from _governed_names(tokens, parse, budget)
     if any(t.surface.isdecimal() for t in tokens):

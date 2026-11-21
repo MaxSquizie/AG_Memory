@@ -4,12 +4,12 @@ from importlib.resources import files
 
 from . import adjuncts, quantity_groups
 from .morphology import from_tag
-from .nominal_groups import _members, _prepositions
+from .nominal_groups import POSSESSIVES, _groups, _markers, _members, _open_heads, _prepositions
 from .parser import AnalysisBudgetExceeded, Link, _span_label
 from .prepositions import GOVERNMENT
 from .probe import Probe
 from .quote_titles import spans
-from .rules import known_forms
+from .rules import dictionary, known_forms, unaccented
 from .utterances import _map, _root
 
 
@@ -43,7 +43,12 @@ def _apposition(tokens, parse, quoted):
     for start, (left, fence) in candidates.items():
         if left == 0 or not any(tag.POS == 'NOUN' for _, tag in known_forms(tokens[left - 1].surface)):
             continue
-        for noun, lemma, case, attrs in _members(tokens, start, None, 'nomn'):
+        members = _members(tokens, start, None, 'nomn')
+        surface = tokens[start].surface
+        if (fence == start + 1 and unaccented(surface).isalpha() and surface[:1].isupper()
+                and not known_forms(surface)):
+            members = ((start, surface, None, ()),)
+        for noun, lemma, case, attrs in members:
             if fence is None and not attrs or fence is not None and noun + 1 != fence:
                 continue
             stop = noun + 1 if fence is None else fence + 1
@@ -205,6 +210,110 @@ def _correlatives(tokens, parse, budget, quoted):
                 yield tuple(result[i] for i in range(len(tokens)))
 
 
+def _unlisted_groups(tokens, i, budget):
+    surface = tokens[i].surface
+    if (not unaccented(surface).isalpha() or known_forms(surface)
+            or not any(tag.POS == 'NOUN' for _, tag in known_forms(tokens[i - 1].surface))):
+        return
+    guessed = dictionary().parse(surface)
+    if (any(p.tag.POS == 'VERB' for p in guessed)
+            or not any(p.tag.POS == 'NOUN' and p.tag.case == 'gent' for p in guessed)):
+        return
+    yield i + 1, {}
+    for marker in _markers(tokens, i + 1):
+        start = marker[-1] + 1
+        groups = tuple(_groups(tokens, start, budget, bare_cases=('gent',)))
+        possessive = any(any(j == start and link.role == 'possessive' for j, link in group.extra)
+                         for group in groups)
+        for group in groups:
+            if possessive and group.noun == start and tokens[start].surface.casefold() in POSSESSIVES:
+                continue
+            extra = dict(group.extra)
+            extra[group.noun] = Link('nominal_conjunct', group.lemma, i, 'P.COORD', 'gent')
+            for j in marker:
+                extra[j] = Link('coordinator' if j == marker[0] else 'coordinator_part',
+                                tokens[j].surface.casefold(), group.noun if j == marker[0] else marker[0], 'P.COORD')
+            yield group.end, extra
+
+
+def unlisted_genitives(tokens, parse, budget):
+    from .morphology import NOMINAL_ROLES
+    from itertools import product
+
+    sites = {i: groups for i in range(1, len(tokens))
+             if (groups := tuple(_unlisted_groups(tokens, i, budget)))}
+    if not sites:
+        return
+    examined = 0
+    for selected in product(*((None, *groups) for groups in sites.values())):
+        examined += 1
+        if examined > budget:
+            raise AnalysisBudgetExceeded('NOMINAL_GROUP_BUDGET')
+        chosen = [(i, group) for i, group in zip(sites, selected) if group]
+        if not chosen or any(i < previous[1][0] for previous, (i, _) in zip(chosen, chosen[1:])):
+            continue
+        hidden = {j for i, (end, _) in chosen for j in range(i, end)}
+        kept = tuple(j for j in range(len(tokens)) if j not in hidden)
+        for tree in parse(tuple(tokens[j] for j in kept)):
+            if not any(link.head is None and any(lemma == link.lemma and tag.POS in ('VERB', 'PRTS')
+                                                  for lemma, tag in known_forms(tokens[kept[j]].surface))
+                       for j, link in enumerate(tree)):
+                continue
+            links = _map(tree, kept)
+            allowed = {j for j, l in links.items() if l.role in NOMINAL_ROLES | {'genitive_modifier'}}
+            hosts = [tuple(_open_heads(links, i, allowed)) for i, _ in chosen]
+            for heads in product(*hosts):
+                examined += 1
+                if examined > budget:
+                    raise AnalysisBudgetExceeded('NOMINAL_GROUP_BUDGET')
+                output = links.copy()
+                for (i, (_, extra)), head in zip(chosen, heads):
+                    output[i] = Link('genitive_modifier', tokens[i].surface, head, 'N.UNLISTED.GEN', 'gent')
+                    output.update(extra)
+                yield tuple(output[i] for i in range(len(tokens)))
+
+
+def matrix_readings(tokens, parse, budget):
+    from .dated_name_notes import _first_name
+    from .named_arguments import missing_subjects, single_finite_region
+
+    if not single_finite_region(tokens):
+        return
+
+    def subjects(part):
+        attempts = 0
+        for start in range(len(part) - 1):
+            if not all(unaccented(t.surface).istitle() for t in part[start:start + 2]):
+                continue
+            for stop, name in _first_name(part[start:]):
+                if stop < 2 or not any(not known_forms(t.surface) for t in part[start:start + stop]):
+                    continue
+                attempts += 1
+                if attempts > budget:
+                    raise AnalysisBudgetExceeded('NOMINAL_GROUP_BUDGET')
+                pivot = next((i for i in range(stop) if known_forms(part[start + i].surface)), 0)
+                kept = (*range(start), start + pivot, *range(start + stop, len(part)))
+                reduced = tuple(part[j] for j in kept)
+                alternatives = (parse(reduced) if known_forms(part[start + pivot].surface)
+                                else missing_subjects(reduced, parse))
+                for tree in alternatives:
+                    anchor = tree[start]
+                    if anchor.role != 'subject' or anchor.head is None or any(
+                            l.role == 'name_part' and l.head == start for l in tree):
+                        continue
+                    positions = (*range(start + 1), *range(start + stop, len(part)))
+                    links = _map(tree, positions)
+                    host = links[start].head
+                    links.update(_map(tuple(name[i] for i in range(stop)), range(start, start + stop)))
+                    links[start] = replace(links[start], head=host, rule='NAME.COMPOUND.SUBJECT')
+                    yield tuple(links[j] for j in range(len(part)))
+
+    yield from subjects(tokens)
+    quoted = spans(tokens)
+    if quoted:
+        yield from _apposition(tokens, subjects, quoted)
+
+
 def trees(tokens, parse, budget):
     quoted = spans(tokens)
     seen = set()
@@ -219,6 +328,16 @@ def trees(tokens, parse, budget):
 
 def confirmation(tokens, tree, index, text):
     link = tree[index]
+    if link.rule == 'NAME.COMPOUND.SUBJECT':
+        stop = index + 1
+        while stop < len(tree) and tree[stop].role == 'name_part' and tree[stop].head == index:
+            stop += 1
+        return Probe(f'Каким именем назван исполнитель действия «{tokens[link.head].surface}»?',
+                     (_span_label(tokens, index, stop),), text)
+    if link.rule == 'N.UNLISTED.GEN':
+        host = _span_label(tokens, link.head)
+        target = _span_label(tokens, index)
+        return Probe(f'Какое слово здесь отвечает на вопрос «кого или чего?» от слова «{host}»?', (target,), text)
     if link.rule not in {'TITLE.APPOSITION', 'TITLE.GOVERNED'}:
         return None
     members = [j for j, part in enumerate(tree) if j == index or part.head == index and

@@ -83,3 +83,65 @@ def predicates(tokens, parse):
                         links[head] = Link('nominal_conjunct', lemma, first, 'N.COORD', case, scope='correction')
                         _join(tokens, links, end, marker, head)
                         yield tuple(links[j] for j in range(len(tokens)))
+
+
+def nominal_remnants(tokens, parse, budget):
+    from .determiners import with_agreeing_determiners
+    from .nominal_groups import _groups, _prepositions
+    from .parser import AnalysisBudgetExceeded
+    from .prepositions import DASHES
+
+    def endings(part, case):
+        for group in _groups(part, 0, budget, bare_cases=(case,)):
+            if group.end != len(part):
+                continue
+            links = dict(group.extra)
+            links[group.noun] = Link('nominal_conjunct', group.lemma, None, 'ELL.COORD', case)
+            yield tuple(links[i] for i in range(len(part)))
+
+    for start, marker in joins(tokens):
+        if not start:
+            continue
+        prep_start = marker + 1
+        for first, prep in _prepositions(tokens, prep_start):
+            for noun, lemma, case, attrs in _members(tokens, first, prep):
+                dash = noun + 1
+                if dash >= len(tokens) - 1 or tokens[dash].surface not in DASHES:
+                    continue
+                suffix = tokens[dash + 1:]
+                tails = {}
+                seen = set()
+                for tree in parse(tokens[:start]):
+                    roots = [i for i, link in enumerate(tree) if link.head is None and link.role == 'predicate']
+                    if len(roots) != 1 or any(link.role.startswith('clause_') for link in tree):
+                        continue
+                    for host in range(roots[0] + 1, start):
+                        l = tree[host]
+                        if l.role not in NOMINAL_ROLES | {'genitive_modifier'}:
+                            continue
+                        hcase = l.case or ROLE_CASE.get(l.role)
+                        if not hcase:
+                            continue
+                        if hcase not in tails:
+                            tails[hcase] = tuple(with_agreeing_determiners(suffix, lambda p: endings(p, hcase),
+                                                                         include_bare=True))
+                        for tail in tails[hcase]:
+                            kept = range(dash + 1, len(tokens))
+                            links = dict(enumerate(tree)) | _map(tail, kept)
+                            head = next(j for j in kept if links[j].head is None)
+                            links[head] = replace(links[head], head=host)
+                            _join(tokens, links, start, marker, head)
+                            links[dash] = Link('punctuation', tokens[dash].surface, head, 'ELL.PUNCT')
+                            links[prep_start] = Link('preposition', prep, head, 'ELL.REMNANT.PP',
+                                                     scope='elliptical')
+                            links.update((j, Link('prep_part', tokens[j].surface.casefold(), prep_start, 'P1'))
+                                         for j in range(prep_start + 1, first))
+                            links.update(attrs)
+                            links[noun] = Link('governed', lemma, prep_start, 'P1', case)
+                            result = tuple(links[j] for j in range(len(tokens)))
+                            if result in seen:
+                                continue
+                            if len(seen) >= budget:
+                                raise AnalysisBudgetExceeded('ELLIPSIS_BUDGET')
+                            seen.add(result)
+                            yield result

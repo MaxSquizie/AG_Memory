@@ -29,3 +29,14 @@ def test_group_case_and_word_inflection(sentence, head, role, outer, inner, numb
 def test_quantity_rejects_incompatible_inflections():
     for sentence in ('Я читаю две книгу.', 'Два ученика упала.', 'Я помог двум ученика.'):
         assert analyze(sentence).status == 'UNRESOLVED'
+
+
+def test_declined_count_inside_an_object_and_calendars_with_a_shared_unit():
+    genitive = tree('Иван подготовил перевод трёх стихотворений.')
+    assert (genitive['стихотворений'].role, genitive['стихотворений'].head) == ('genitive_modifier', 2)
+    assert (genitive['трёх'].quantity, genitive['трёх'].head) == ('3', 4)
+
+    dated = tree('Иван работал в 1998, 2003 или 2010 годах.')
+    assert (dated['1998'].head, dated['2003'].head, dated['2010'].head) == (8, 3, 3)
+    assert dated['или'].scope == 'alternative'
+    assert all(dated[year].quantity_kind == 'ordinal' for year in ('1998', '2003', '2010'))

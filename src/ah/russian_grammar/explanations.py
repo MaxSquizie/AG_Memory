@@ -90,4 +90,10 @@ def partitions(trees, tokens, text):
             actions = ', '.join(f'«{_span_label(tokens, j)}»' for j in (i, *members))
             question = (f'Какое слово первой части поясняют вместе сообщения со сказуемыми {actions}? '
                         'Если они самостоятельны, выберите «нет такого слова».')
+        if any(link.rule == 'CONTENT.NOMINAL' and tree[link.head].morphology
+               and tree[link.head].morphology.animacy == 'anim' for link, tree in zip(links, trees)):
+            action = _span_label(tokens, i)
+            question = (f'Каким словом в первой части прямо названо сообщение или содержание, '
+                        f'которое раскрывается в следующей части? Если «{action}» сообщает отдельное '
+                        'действие участника, выберите «нет такого слова».')
         yield Probe(question, options, text), labels

@@ -417,8 +417,27 @@ def _partitions(analyses, tokens, text):
             if None not in heads and len(set(heads)) > 1:
                 context = _attachment_context(text, tokens, analyses, heads, i, i + 1)
                 yield word_choice(f'К какому слову относится «{_span_label(tokens, i)}»?', heads, context)
+        if roles == {'converb', 'preposition'}:
+            verbs = sorted({link.lemma for link in links if link.role == 'converb'})
+            if len(verbs) == 1:
+                focus = _span_label(tokens, i)
+                labels = (f'«{focus}» — предлог', f'«{focus}» — добавочное действие от «{verbs[0]}»')
+                question = f'Как употреблено слово «{focus}» в этом месте предложения?'
+                yield Probe(question, labels, text), [labels[int(link.role == 'converb')] for link in links]
+        if roles == {'oblique', 'recipient'} and {link.case for link in links} == {'ablt', 'datv'}:
+            if all(link.head is not None and (link.role == 'recipient') == (link.case == 'datv') for link in links):
+                focus = _span_label(tokens, i)
+                labels = [f'«{_span_label(tokens, link.head)}» — ' +
+                          (f'кому? «{focus}»' if link.case == 'datv' else f'кем или чем? «{focus}»')
+                          for link in links]
+                question = f'С каким действием и с каким вопросом связано слово «{focus}»?'
+                yield Probe(question, tuple(dict.fromkeys(labels)), text), labels
         if roles == {'oblique', 'recipient'} and all(a[i].case == 'datv' for a in analyses):
             hosts = {a[i].head for a in analyses}
+            if len(hosts) > 1 and None not in hosts:
+                focus = _span_label(tokens, i)
+                yield word_choice(f'От какого действия здесь задаётся вопрос «кому?» к слову «{focus}»?',
+                                  [link.head for link in links], _clause_context(text, tokens, analyses, i, hosts))
             if len(hosts) == 1 and None not in hosts:
                 host, = hosts
                 yield word_choice(f'Кому адресовано действие «{_span_label(tokens, host)}»? '
@@ -581,7 +600,7 @@ def _partitions(analyses, tokens, text):
     for head in duration_heads:
         durations = [next((i for i, link in enumerate(tree) if link.role == 'duration' and link.head == head), None)
                      for tree in analyses]
-        if len(set(durations)) > 1:
+        if len(set(durations)) > 1 and all(tree[head].role != 'preposition' for tree in analyses):
             yield word_choice(f'Which word tells how long the action «{_span_label(tokens, head)}» lasts?', durations)
 
     for i in range(len(tokens)):
@@ -900,6 +919,9 @@ def _possessor_readings(tokens, tree, budget):
                     candidates.append(j)
                 continue
             surface = noun.recovery.corrected if noun.recovery else tokens[j].surface
+            if noun.rule == 'N.UNLISTED.GEN':
+                candidates.append(j)
+                continue
             for lemma, tag in known_forms(surface):
                 if lemma != noun.lemma or tag.POS not in ('NOUN', 'NPRO') or tag.person in ('1per', '2per'):
                     continue
@@ -1047,7 +1069,12 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
         from . import modal_regions
         yield from modal_regions.trees(part, lambda core: homogeneous.modals(core, base), budget)
 
+    @reuse_completed
     def governed(part):
+        if not case_arguments.admits_single_clause(part):
+            if part is working_words:
+                yield from _simple_trees(part, budget, failures.append)
+            return
         yield from case_arguments.trees(part, modal, budget=budget)
 
     def passive(part):
@@ -1124,7 +1151,7 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
         yield from partitive_domains.trees(part, coordination_base, budget, distribution_index)
         yield from partitive_domains.enumerations(part, coordination_base, budget)
 
-    from . import marked_regions, nominal_entries
+    from . import dated_nominal_series, marked_regions, nominal_entries
     group_heads_by_start = {}
     relative_hosts = {}
 
@@ -1151,13 +1178,17 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
 
     comma_choices = {}
 
+    def dated_members(part):
+        return dated_nominal_series.trees(part, candidates, relative_hosts, text, budget)
+
     @reuse_completed
     def regional(part):
-        yield from sentence_regions.trees(part, candidates, budget)
+        yield from sentence_regions.trees(part, candidates, budget,
+                                         dated_members=dated_members if part is working_words else None)
 
     @reuse_completed
     def remaining(part):
-        yield from sentence_regions.remaining(part, candidates, budget)
+        yield from sentence_regions.remaining(part, candidates, budget, text=text, selected=relative_hosts)
 
     def checked_comma_readings(part, parse, sites=None):
         if part in comma_choices and comma_choices[part] is None:
@@ -1300,16 +1331,21 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
             try:
                 collect(exact(working_words))
             except AnalysisBudgetExceeded as error:
-                if structures or isinstance(error, NominalBudgetExceeded):
+                if structures or (isinstance(error, NominalBudgetExceeded)
+                                  and not any(dated_nominal_series.year_lists(working_words))):
                     raise
                 budget_error = error
             try:
+                if not structures and any(dated_nominal_series.year_lists(working_words)):
+                    collect(exact(working_words, dated_members))
                 if not structures:
                     collect(exact(working_words, lambda part: readings_for_region(part, remaining, None)))
                 if not structures and budget_error is None and any(t.surface == ',' for t in working_words):
                     collect(exact(working_words, lambda part: checked_comma_readings(part, supplemented)))
                 if not structures and budget_error is None:
                     collect(recovery.trees(working_words, exact, budget=budget))
+                if not structures and budget_error is None:
+                    collect(exact(working_words, lambda part: sentence_regions.additional_nominal_readings(part, candidates, budget)))
                 if not structures and budget_error is None and personal_correlatives.readings(working_words[0].surface):
                     from .relative_clauses import trees as relative_trees
 
@@ -1321,6 +1357,10 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
                     if not structures and any(t.surface == ',' for t in working_words):
                         collect(exact(working_words, lambda part: checked_comma_readings(part, fragment_trees),
                                       root_role='nominal_head'))
+                if not structures and budget_error is None:
+                    from .nominal_mentions import name_fragments
+
+                    collect(exact(working_words, lambda part: name_fragments(part, budget), root_role='nominal_head'))
             except AnalysisBudgetExceeded as error:
                 if structures or isinstance(error, NominalBudgetExceeded):
                     raise
@@ -1473,6 +1513,17 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
                 tree = (*tree[:start], replace(tree[start], scope='qualification'), *tree[start + 1:])
             steps.append(ProbeStep(2, 1, 'selected', 'qualification'))
         analyses = (tree,)
+    from .relative_clauses import modal_scope_choices
+
+    tree = analyses[0]
+    for i, probe in modal_scope_choices(words, tree, text):
+        selected, stopped = select(probe, 2, (tree,), 'relative_scope')
+        if stopped is not None:
+            return stopped
+        if selected == probe.options[0]:
+            tree = (*tree[:i], replace(tree[i], scope='supplementary'), *tree[i + 1:])
+        steps.append(ProbeStep(2, 1, 'selected', 'relative_scope'))
+    analyses = (tree,)
     if analyses[0][0].role == 'nominal_head':
         reason = 'NOMINAL_FRAGMENT'
     else:

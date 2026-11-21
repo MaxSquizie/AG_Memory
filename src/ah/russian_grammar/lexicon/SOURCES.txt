@@ -31,6 +31,12 @@ SHA256 (sov): 5895dc0f12b955713286d8d9d1665841744ccc0b0f21897f417f488d5526719f
 SHA256 (nesov): 65a2b6c2c6d6c2ef2fd7b22528d980abd6710f531e8442bddedc05de80b574aa
 python scripts/import_russian_infinitives.py rus_infinitives_sov.sol rus_infinitives_nesov.sol src/ah/russian_grammar/lexicon/infinitives.tsv
 
+Для рамки содействия с дательным участником и зависимым инфинитивом см.
+FrameBank 7217 («помочь 1.6», обе видовые формы) и описание объектного
+инфинитива, «Значение как феномен актуального языкового сознания», вып. 3.
+https://github.com/olesar/framebank/blob/e60da2a38f645db21c55aa0e7ff9730e92e7e2ca/framebank_dict_cx.txt
+https://www.vsu.ru/ru/university/structure/communicate/pdf/znachenie-phenomen/zn-phen3.pdf
+
 infinitive_control.tsv describes selected lexical frames applicable in a
 construction with a dependent infinitive. Fields: embedded scope, source of
 the infinitive's subject, possible case of the matrix recipient, verb lemmas.
@@ -68,8 +74,11 @@ https://gramota.ru/biblioteka/spravochniki/pravila-russkoy-orfografii-i-punktuat
 predicative-instrumentals.tsv lists verb lemmas governing a nominal xcomp
 in the instrumental case in the same GSD and PUD sources. These attestations
 license an alternative to the agent reading of a passive instrumental.
+For a subject with a bare instrumental labelled «статус», a paired FrameBank
+lexeme inherits the attested option from its partner in the same construction.
+FrameBank revision and licence are listed below.
 Source revisions, attribution and CC BY-SA terms are given above.
-python scripts/import_russian_predicative_instrumentals.py ru_gsd-ud-train.conllu ru_pud-ud-test.conllu src/ah/russian_grammar/lexicon/predicative-instrumentals.tsv
+python scripts/import_russian_predicative_instrumentals.py --status-frames framebank_dict_cx_items.txt ru_gsd-ud-train.conllu ru_pud-ud-test.conllu src/ah/russian_grammar/lexicon/predicative-instrumentals.tsv
 
 bare_government.tsv lists licensed bare oblique cases by infinitive. The
 importer reads the two GrammarEngine infinitive files at the revision and

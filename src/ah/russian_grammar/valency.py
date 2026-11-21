@@ -5,7 +5,7 @@ from .case_arguments import _lexicon as bare_government, dative_recipients
 from .infinitives import FRAMES
 from .morphology import CASE_EQUIVALENTS, PREDICATE_ROLES
 from .prepositions import GOVERNMENT
-from .rules import known_forms
+from .rules import fixed_noun_cases, known_forms
 
 
 @cache
@@ -65,7 +65,8 @@ def violation(tokens, tree):
             if not allowed:
                 return 'UNKNOWN_GOVERNMENT'
             if link.case not in allowed and CASE_EQUIVALENTS.get(link.case) not in allowed:
-                return 'INVALID_GOVERNED_CASE'
+                if link.case is not None or len(fixed_noun_cases(token.surface, link.lemma, allowed)) < 2:
+                    return 'INVALID_GOVERNED_CASE'
         if link.rule == 'V.CMP' and (not form or form.pos != 'COMP'):
             return 'INVALID_COMPARATIVE_PREDICATE'
         if link.rule == 'CMP.ATTR':

@@ -162,3 +162,66 @@ def complete(tokens, text, parse, selected, budget):
             if len(result) > budget:
                 raise AnalysisBudgetExceeded('RELATIVE_REGION_BUDGET')
     return tuple(result)
+
+
+def nominal_relative(tokens, text, selected, matrix_parse, local, budget):
+    from .parser import AnalysisBudgetExceeded
+    from .rules import dictionary
+
+    for marker in range(1, len(tokens)):
+        if not any(lemma == 'который' for lemma, _ in known_forms(tokens[marker].surface)):
+            continue
+        comma = tokens[marker - 1].surface == ','
+        start = marker - int(comma)
+        if start == 0 or marker + 1 == len(tokens):
+            continue
+        key = ('nominal_relative', tokens[marker].start)
+        if key in selected and selected[key] is None:
+            continue
+
+        @cache
+        def child(surface, lemma, case):
+            projected = (replace(tokens[marker], surface=surface), *tokens[marker + 1:])
+            results = {}
+            for tree in local(projected):
+                ref = tree[0]
+                if ref.lemma != lemma or (ref.case or ROLE_CASE.get(ref.role)) != case:
+                    continue
+                results[tree] = None
+                for i, link in enumerate(tree):
+                    if not (link.role == 'apposition' and link.head == i - 1 and i > 0 and
+                            tree[i - 1].role == 'subject' and projected[i].surface.istitle()):
+                        continue
+                    if not any('Name' in tag for _, tag in known_forms(projected[i - 1].surface)):
+                        continue
+                    if not any('Surn' in p.tag and p.tag.case == 'nomn' for p in dictionary().parse(projected[i].surface)):
+                        continue
+                    results[(*tree[:i], replace(link, role='name_part', rule='OPAQUE.NAME.CONTINUATION'), *tree[i + 1:])] = None
+                if len(results) > budget:
+                    raise AnalysisBudgetExceeded('RELATIVE_REGION_BUDGET')
+            return tuple(results)
+
+        by_host = {}
+        for matrix in matrix_parse(tokens[:start]):
+            for host in relative_clauses._anchors(matrix, start):
+                source = host
+                if matrix[host].role == 'apposition' and matrix[host].rule == 'TITLE.APPOSITION':
+                    source = matrix[host].head
+                if source is None:
+                    continue
+                word = matrix[source]
+                for surface, tag in relative_clauses._projections(tokens[source], word, tokens[marker]):
+                    inside = child(surface, word.lemma, tag.case)
+                    if inside:
+                        by_host.setdefault(host, {}).setdefault((matrix, tag, surface, word.lemma), inside)
+        if not by_host:
+            continue
+        if key not in selected and (len(by_host) > 1 or not comma):
+            choice = RelativeChoice(marker, by_host, tokens, text, inferred=not comma)
+            choice.start = key
+            raise choice
+        host = selected.get(key, next(iter(by_host)))
+        for (matrix, tag, _, _), children in by_host.get(host, {}).items():
+            for inside in children:
+                result, _ = relative_clauses.attach_final(matrix, inside, marker, host, tag)
+                yield result

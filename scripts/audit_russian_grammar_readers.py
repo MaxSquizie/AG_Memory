@@ -1,4 +1,5 @@
 import argparse
+from dataclasses import asdict
 import hashlib
 import json
 from pathlib import Path
@@ -66,6 +67,17 @@ def audit(identity, kind, text, rows, readings, seconds):
             result, _ = inspect(core, reply, text, rows, identity, project=project,
                                 evaluate=evaluate)
             record.update(result)
+            if reply.status == 'STORED':
+                observation = core.store.get_element(Domain.H, reply.observation_ref)
+                words = [core.store.get_element(Domain.H, ref.uid).meta for ref in observation.members]
+                wire = json.dumps([observation.meta, words], sort_keys=True, ensure_ascii=False,
+                                  separators=(',', ':')).encode()
+                record['stored_metadata_sha256'] = hashlib.sha256(wire).hexdigest()
+            elif reply.analysis.status == 'PARSED_FRAGMENT' and len(reply.analysis.analyses) == 1:
+                record['fragment'] = [
+                    {**asdict(token), 'role': link.role, 'head': link.head, 'scope': link.scope}
+                    for token, link in zip(reply.analysis.tokens, reply.analysis.analyses[0])
+                ]
     except MissingReading:
         record['status'] = 'AWAITING_READER'
     except TimeoutError:
@@ -81,7 +93,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('corpus', type=Path)
     parser.add_argument('output', type=Path)
-    parser.add_argument('--readings', type=Path)
+    parser.add_argument('--readings', type=Path, action='append', default=[])
     parser.add_argument('--start', type=int, default=72)
     parser.add_argument('--count', type=int, default=20)
     parser.add_argument('--seconds', type=int, default=30)
@@ -90,7 +102,12 @@ def main():
         parser.error('Unexpected corpus revision')
     if min(args.start, args.count, args.seconds) < 1:
         parser.error('Expected positive bounds')
-    readings = json.loads(args.readings.read_text()) if args.readings else {}
+    readings = {}
+    for path in args.readings:
+        for key, entry in json.loads(path.read_text(encoding='utf8')).items():
+            if key in readings and readings[key] != entry:
+                parser.error(f'Conflicting reader records for {key}')
+            readings[key] = entry
     signal.signal(signal.SIGPROF, expire)
     selected = []
     skipped = []

@@ -22,6 +22,45 @@ def _lexicon():
 
 
 @cache
+def _fixed_clause_words():
+    from .modal_regions import adverbial_modifiers
+    from .participle_connectives import _lexicon as connectives
+    from .prepositions import DASHES, FORMS
+
+    words = {',', *DASHES}
+    words.update(word for phrase in FORMS for word in phrase.split())
+    words.update(word for variants in connectives()[1].values() for phrase in variants for word in phrase)
+    words.update(word for phrase in adverbial_modifiers()[0] for word in phrase)
+    return words
+
+
+@lru_cache(maxsize=4096)
+def _clause_token(surface):
+    from .predication import INSTRUMENTAL_COPULAS
+    from .rules import name_type
+
+    forms = known_forms(surface)
+    fixed = surface.casefold() in _fixed_clause_words()
+    finite = bool(forms) and not fixed and all(
+        tag.POS == 'VERB' and lemma != 'быть' and lemma not in INSTRUMENTAL_COPULAS for lemma, tag in forms)
+    return bool(forms) or fixed, any(name_type(tag) for _, tag in forms), finite
+
+
+def admits_single_clause(tokens):
+    named = False
+    seen_finite = False
+    for token in tokens:
+        lexical, name, finite = _clause_token(token.surface)
+        if not lexical and not (named and token.surface.istitle()):
+            return False
+        if finite and seen_finite:
+            return False
+        named |= name
+        seen_finite |= finite
+    return True
+
+
+@cache
 def dative_recipients():
     table = files(__package__).joinpath('lexicon/dative-recipients.tsv')
     return frozenset(table.read_text(encoding='utf8').splitlines())

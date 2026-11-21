@@ -164,11 +164,37 @@ def _named_trees(tokens, budget):
                                 pending.append((noun.end, actor, obj, noun.head, links | pp | interior))
 
 
+def _spatial_argument(tree, root):
+    from .adjuncts import SPATIAL, _lexicon
+
+    entries, _ = _lexicon()
+    for noun in tree:
+        if noun.role != 'governed' or noun.head is None:
+            continue
+        prep = tree[noun.head]
+        wh = SPATIAL.get((prep.lemma, noun.case))
+        if prep.head == root and wh and ('governor', wh, prep.lemma, tree[root].lemma) in entries:
+            return True
+    return False
+
+
+def single_finite_region(tokens):
+    from .case_arguments import _clause_token
+    from .quote_titles import spans
+
+    quoted = {i for start, end in spans(tokens) for i in range(start + 1, end)}
+    return sum(i not in quoted and t.surface.islower() and _clause_token(t.surface)[2]
+               for i, t in enumerate(tokens)) <= 1
+
+
 def missing_subjects(tokens, parse):
+    from .infinitives import FRAMES
     from .morphology import PREDICATE_ROLES
     from .parser import Link
     from .utterances import _map, _root
 
+    if not single_finite_region(tokens):
+        return
     for i, token in enumerate(tokens):
         word = token.surface
         if not word.istitle() or not all(part.isalpha() for part in word.split('-')) or known_forms(word):
@@ -184,21 +210,31 @@ def missing_subjects(tokens, parse):
         for tree in parse(tuple(tokens[j] for j in kept)):
             root = _root(tree)
             predicate = tree[root]
+            infinitives = [j for j, link in enumerate(tree) if link.role == 'infinitive']
+            if infinitives:
+                frame = FRAMES.get(predicate.lemma)
+                if not frame or frame.control != 'subject' or any(tree[j].head != root or
+                        tree[j].implicit_subject != 'unresolved' or tree[j].controller is not None
+                        for j in infinitives):
+                    continue
             if (predicate.rule != 'V1' or predicate.implicit_subject != 'unresolved'
                     or any(link.role == 'subject' or j != root and
-                           link.role in PREDICATE_ROLES | {'infinitive', 'converb', 'participle'}
+                           link.role in PREDICATE_ROLES | {'converb', 'participle'}
                            for j, link in enumerate(tree))):
                 continue
             form = predicate.morphology
             if not form or form.pos != 'VERB' or form.mood != 'indc' or form.person not in (None, '3per'):
                 continue
-            if form.transitivity == 'tran' and not any(link.head == root and link.role == 'object' for link in tree):
+            if (form.transitivity == 'tran' and not any(link.head == root and link.role == 'object' for link in tree)
+                    and not _spatial_argument(tree, root)):
                 continue
             if not any(lemma == predicate.lemma and tag.POS == 'VERB' and 'Impe' not in tag
                        for lemma, tag in known_forms(tokens[kept[root]].surface)):
                 continue
             links = _map(tree, kept)
             links[kept[root]] = replace(links[kept[root]], implicit_subject=None)
+            for j in infinitives:
+                links[kept[j]] = replace(links[kept[j]], controller=i, implicit_subject=None)
             links[i] = Link('subject', word, kept[root], 'OPAQUE.SUBJECT', case='nomn')
             yield tuple(links[j] for j in range(len(tokens)))
 
@@ -219,3 +255,103 @@ def confirmation(tokens, tree, i, text):
         action = _span_label(tokens, head)
         question = f'Какое слово здесь называет того, на кого направлено действие «{action}»?'
     return Probe(question, (person,), text)
+
+
+def coordinated_names(tokens, parse, budget):
+    from .morphology import NOMINAL_ROLES, ROLE_CASE
+    from .parser import AnalysisBudgetExceeded, Link
+
+    def items(i, case):
+        for noun, lemma, _, attrs in _members(tokens, i, None, case):
+            head = Link('nominal_conjunct', lemma, None, 'N.COORD', case)
+            links = dict(attrs) | {noun: head}
+            yield noun + 1, noun, links
+            after = noun + 1
+            if after < len(tokens) and opaque_cases(tokens[after].surface):
+                app = Link('apposition', tokens[after].surface, noun, 'OPAQUE.APPOSITION', case)
+                yield after + 1, noun, links | {after: app}
+        if i < len(tokens) and case in opaque_cases(tokens[i].surface):
+            yield i + 1, i, {i: Link('nominal_conjunct', tokens[i].surface, None, 'OPAQUE.NAME', case)}
+
+    commas = [i for i, token in enumerate(tokens) if i and token.surface == ',']
+    if not commas or not any(opaque_cases(t.surface) for t in tokens):
+        return
+    for left in commas:
+        for tree in parse(tokens[:left]):
+            host = left - 1
+            if tree[host].role not in NOMINAL_ROLES:
+                continue
+            case = tree[host].case or ROLE_CASE.get(tree[host].role)
+            if not case:
+                continue
+            pending = [(left, dict(enumerate(tree)), False)]
+            examined = 0
+            while pending:
+                stop, links, lexical_marker = pending.pop()
+                examined += 1
+                if examined > budget:
+                    raise AnalysisBudgetExceeded('COORDINATED_NAME_BUDGET')
+                if stop == len(tokens):
+                    if lexical_marker and any(l.rule in ('OPAQUE.APPOSITION', 'OPAQUE.NAME') for l in links.values()):
+                        yield tuple(links[i] for i in range(stop))
+                    continue
+                comma = tokens[stop].surface == ','
+                begin = stop + int(comma)
+                marks = list(_markers(tokens, begin))
+                if comma:
+                    marks.append(())
+                for mark in marks:
+                    nxt = begin + len(mark)
+                    for finish, member, tail in items(nxt, case):
+                        fresh = links | tail
+                        fresh[member] = replace(tail[member], head=host)
+                        if comma:
+                            fresh[stop] = Link('punctuation', ',', member, 'P.COORD')
+                        for j in mark:
+                            fresh[j] = Link('coordinator' if j == mark[0] else 'coordinator_part',
+                                            tokens[j].surface.casefold(), member if j == mark[0] else mark[0], 'P.COORD')
+                        pending.append((finish, fresh, lexical_marker or bool(mark)))
+
+
+def clauses_with_named_series(tokens, parse, budget):
+    from . import clauses
+    from .morphology import NOMINAL_ROLES
+    from .parser import Link
+
+    if not any(t.surface == ',' for t in tokens) or not any(opaque_cases(t.surface) for t in tokens):
+        return
+    if not any(next(_markers(tokens, i), ()) for i in range(len(tokens))):
+        return
+
+    def local(part):
+        yield from parse(part)
+        yield from coordinated_names(part, parse, budget)
+        if len(part) < 2 or not opaque_cases(part[-1].surface):
+            return
+        for tree in parse(part[:-1]):
+            if tree[-1].role in NOMINAL_ROLES and tree[-1].role != 'subject':
+                yield (*tree, Link('genitive_modifier', part[-1].surface, len(tree) - 1, 'N.UNLISTED.GEN', 'gent'))
+
+    for tree in clauses.trees(tokens, local, budget=budget):
+        if not any(l.role == 'nominal_conjunct' and (l.rule == 'OPAQUE.NAME' or
+                   any(a.head == i and a.rule == 'OPAQUE.APPOSITION' for a in tree)) for i, l in enumerate(tree)):
+            continue
+        yield tree
+        for i, clause in enumerate(tree):
+            if clause.role != 'clause_relative' or clause.implicit_subject != 'unresolved' or clause.head is None:
+                continue
+            parent = tree[clause.head].head
+            if parent is None or tree[parent].role != 'predicate':
+                continue
+            for actor, subject in enumerate(tree):
+                if subject.role != 'subject' or subject.head != parent:
+                    continue
+                forms = [tag for lemma, tag in known_forms(tokens[actor].surface)
+                         if lemma == subject.lemma and tag.case == 'nomn']
+                if not forms:
+                    forms = [p.tag for p in dictionary().parse(tokens[actor].surface)
+                             if p.tag.POS == 'NOUN' and p.tag.case == 'nomn']
+                if any(tag.POS == 'VERB' and tag.mood == 'indc' and tag.person in (None, '3per')
+                       and any(f.number == tag.number and (not tag.gender or tag.gender == f.gender) for f in forms)
+                       for lemma, tag in known_forms(tokens[i].surface) if lemma == clause.lemma):
+                    yield (*tree[:i], replace(clause, controller=actor, implicit_subject=None), *tree[i + 1:])

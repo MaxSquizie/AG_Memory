@@ -51,6 +51,26 @@ def _dates(tokens, parse):
                 head = links[head].head
 
 
+def leading_year_range(tokens, parse):
+    if len(tokens) <= 4:
+        return
+    first, lower, last, upper = (t.surface.casefold() for t in tokens[:4])
+    cases = {('с', 'по'): ('gent', 'accs'), ('от', 'до'): ('gent', 'gent')}.get((first, last))
+    if not cases or not all(len(n) == 4 and n.isdecimal() for n in (lower, upper)) or not 0 < int(lower) <= int(upper):
+        return
+    for tree in parse(tokens[4:]):
+        root = next(i for i, link in enumerate(tree) if link.head is None)
+        if not any(l.role == 'subject' and l.head == root for l in tree):
+            continue
+        links = _map(tree, range(4, len(tokens)))
+        for j, (prep, year, case) in enumerate(zip((first, last), (lower, upper), cases)):
+            i = 2 * j
+            links[i] = Link('preposition', prep, root + 4, 'P2')
+            links[i + 1] = Link('governed', year, i, 'DATE.YEAR.BOUND', case,
+                                scope='year_interval', quantity=year, quantity_kind='ordinal')
+        yield tuple(links[j] for j in range(len(tokens)))
+
+
 def _ordinal_years(tokens, parse):
     from .numerals import expressions
     from .prepositions import GOVERNMENT
@@ -146,6 +166,8 @@ def _ordinal_intervals(tokens, parse):
 
 
 def confirmation(tokens, tree, i, text):
+    if i == 1 and tree[i].rule == 'DATE.YEAR.BOUND':
+        return Probe('Какие слова обозначают начало и конец периода в годах?', (_span_label(tokens, 0, 4),), text)
     if tree[i].rule == 'NUM.ORDINAL.UNMARKED.INTERVAL':
         host = tree[i].head
         first, last = (_span_label(tokens, j) for j in (i, i + 1))
@@ -159,7 +181,78 @@ def _simple_titles(tokens):
             if right == left + 2 and tokens[left + 1].surface.istitle()}
 
 
+def year_lists(tokens):
+    from .nominal_groups import _markers
+    from .parentheses import _pairs
+
+    notes = dict(_pairs(tokens))
+    start = 0
+    while start < len(tokens):
+        years, separators = [], []
+        index = start
+        while index < len(tokens):
+            word = tokens[index].surface
+            if len(word) != 4 or not word.isdecimal() or not int(word):
+                break
+            years.append(index)
+            following = index + 1
+            index = notes[following] + 1 if following in notes else following
+            if index == len(tokens):
+                break
+            unit = tokens[index].surface.casefold()
+            if len(years) > 1 and unit.startswith('год') and any(
+                    lemma == 'год' and tag.number == 'plur' for lemma, tag in known_forms(unit)):
+                yield tuple(years), tuple(separators), index
+                break
+            comma = tokens[index].surface == ','
+            conjunction = next(_markers(tokens, index + int(comma)), ())
+            if not comma and not conjunction:
+                break
+            end = index + int(comma) + len(conjunction)
+            separators.append((index, end))
+            index = end
+        start = max(start + 1, index)
+
+
+def year_links(tokens, years, separators, unit, case):
+    from .measured_series import _separator_links
+
+    first = years[0]
+    links = {}
+    for year in years:
+        links[year] = Link('attribute' if year == first else 'nominal_conjunct', tokens[year].surface,
+                           unit if year == first else first, 'DATE.YEAR.SERIES', case,
+                           quantity=tokens[year].surface, quantity_kind='ordinal')
+    for (begin, end), year in zip(separators, years[1:]):
+        comma = tokens[begin].surface == ','
+        links.update(_separator_links(tokens, begin, comma, tuple(range(begin + int(comma), end)), year))
+    return links
+
+
+def _year_lists(tokens, parse):
+    lists = tuple(year_lists(tokens))
+    if not lists:
+        return
+    hidden = {i for years, _, unit in lists for i in range(years[0], unit)}
+    if any(tokens[i].surface == '(' for i in hidden):
+        return
+    kept = tuple(i for i in range(len(tokens)) if i not in hidden)
+    for tree in parse(tuple(tokens[i] for i in kept)):
+        links = _map(tree, kept)
+        for years, separators, unit in lists:
+            noun = links[unit]
+            if noun.lemma != 'год' or noun.role not in NOMINAL_ROLES | {'genitive_modifier'}:
+                break
+            case = noun.case or ROLE_CASE.get(noun.role) or (noun.morphology and noun.morphology.case)
+            if not any(tag.number == 'plur' and tag.case == case for _, tag in known_forms(tokens[unit].surface)):
+                break
+            links.update(year_links(tokens, years, separators, unit, case))
+        else:
+            yield tuple(links[i] for i in range(len(tokens)))
+
+
 def _calendar(tokens, parse):
+    yield from _year_lists(tokens, parse)
     yield from _dates(tokens, parse)
     yield from _ordinal_years(tokens, parse)
     yield from _ordinal_intervals(tokens, parse)

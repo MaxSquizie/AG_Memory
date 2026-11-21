@@ -47,6 +47,13 @@ def known_forms(surface):
     return forms(surface) or _attested_nouns().get(unaccented(surface).casefold(), ())
 
 
+def fixed_noun_cases(surface, lemma, allowed):
+    tags = [tag for form, tag in known_forms(surface) if form == lemma and tag.POS == 'NOUN']
+    if not tags or any('Fixd' not in tag for tag in tags):
+        return frozenset()
+    return frozenset(tag.case for tag in tags if tag.case in allowed)
+
+
 @lru_cache(maxsize=1024)
 def plain_person_reference(surface: str) -> bool:
     nominatives = [tag for _, tag in known_forms(surface) if tag.case == 'nomn']

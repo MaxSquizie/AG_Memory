@@ -240,7 +240,7 @@ def _extensions(links, groups, chart, budget):
                     pending.append((position + 1, updated))
             continue
         group = groups[position]
-        hosts = (chart.steps[group.start - 1].right_edge if group.ordinal is not None
+        hosts = (chart.steps[group.start - 1].right_edge if group.ordinal is not None or any(link.role == 'numeral' for _, link in group.extra)
                  else chart.steps[group.noun].genitive_hosts)
         for host in _open_heads(current, group.start, hosts):
             examined += 1
@@ -270,6 +270,14 @@ def _genitives(tokens, start, chart, budget):
     for group in _groups(tokens, start, budget, bare_cases=('gent', 'gen2'), chart=chart):
         if chart.steps[group.noun].genitive_hosts:
             yield group
+    preceding = known_forms(tokens[start - 1].surface)
+    if not any(tag.POS == 'PREP' for _, tag in preceding):
+        for expr in expressions(tokens, start):
+            if expr.kind != 'cardinal' or 'gent' not in expr.cases or 'nomn' in expr.cases:
+                continue
+            for counted in counted_groups(tokens, start, expr, budget):
+                if counted.case == 'gent':
+                    yield Group(start, counted.noun + 1, None, counted.noun, counted.lemma, 'gent', counted.links)
     for expr in genitive_ordinals(tokens, start):
         if next(counted_groups(tokens, start, expr, budget), None) is not None:
             continue

@@ -28,6 +28,9 @@ def _names(tokens, start):
 def trees(tokens, *, budget):
     if not any(any(tag.POS == 'INFN' for _, tag in known_forms(t.surface)) for t in tokens):
         return
+    if not any(r.role == 'predicate' and r.lemma in infinitives.FRAMES
+               for token in tokens for r in readings(token.surface)):
+        return
     from .prepositions import GOVERNMENT
     layouts = [(0, (), {}, {}, ())]
     count = 0

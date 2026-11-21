@@ -262,6 +262,148 @@ def _listed_mentions(tokens, budget):
         yield tree
 
 
+def _adjacent_titles(tokens, quoted, parse, budget):
+    from .dated_headings import _nominals
+    from .parser import AnalysisBudgetExceeded
+    from .passive_arguments import _opaque
+
+    if len(quoted) < 2 or any(end + 1 != left for (_, end), (left, _) in zip(quoted, quoted[1:])):
+        return
+    first, last = quoted[0][0], quoted[-1][1]
+    if not first or any(right <= left + 1 for left, right in quoted):
+        return
+    parts = []
+    for left, right in quoted:
+        body = tokens[left + 1:right]
+        options = tuple(_nominals(body, budget))
+        if not options and len(body) == 1 and _opaque(body[0].surface):
+            options = ((0, (Link('nominal', body[0].surface, None, 'TITLE.NAME'),)),)
+        if not options:
+            return
+        parts.append((left, right, options))
+    kept = (*range(first), *range(last + 1, len(tokens)))
+    generated = 0
+    for base in parse(tuple(tokens[j] for j in kept)):
+        links = _map(base, kept)
+        host = first - 1
+        spine = []
+        while host is not None and links[host].role in {'governed', 'genitive_modifier', 'subject', 'object', 'apposition'}:
+            spine.append(host)
+            host = links[host].head
+        if not spine:
+            continue
+        pending = [(0, 0, links)]
+        while pending:
+            n, first_host, entries = pending.pop()
+            if n == len(parts):
+                yield tuple(entries[j] for j in range(len(tokens)))
+                continue
+            left, right, options = parts[n]
+            for offset, tree in options:
+                name = left + 1 + offset
+                phrase = _map(tree, range(left + 1, right))
+                for j in (left, right):
+                    phrase[j] = Link('punctuation', tokens[j].surface, name, 'TITLE.QUOTE')
+                for h in range(first_host, len(spine)):
+                    generated += 1
+                    if generated > budget * len(parts):
+                        raise AnalysisBudgetExceeded('TITLE_BUDGET')
+                    item = replace(phrase[name], role='apposition', rule='TITLE.ATTACHED', head=spine[h], scope='title')
+                    pending.append((n + 1, h, entries | phrase | {name: item}))
+
+
+def _oblique_titles(tokens, parse, quoted_heads):
+    from .case_arguments import _lexicon
+    from .morphology import _common, from_tag
+    from .named_arguments import opaque_cases
+    from .unlisted_attributes import predicted_attributes
+
+    government, roles = _lexicon()
+    for head in quoted_heads:
+        cases = opaque_cases(tokens[head].surface)
+        if not cases:
+            continue
+        start = head
+        modifiers = []
+        while start:
+            surface = tokens[start - 1].surface
+            hypotheses = [(lemma, tag) for lemma, tag in known_forms(surface) if tag.POS == 'ADJF']
+            if not hypotheses:
+                hypotheses = predicted_attributes(surface)
+            if not hypotheses:
+                break
+            modifiers.append((start - 1, hypotheses))
+            start -= 1
+        if not modifiers:
+            continue
+        kept = (*range(start), *range(head + 1, len(tokens)))
+        for tree in parse(tuple(tokens[i] for i in kept)):
+            pivot = _root(tree)
+            verb = tree[pivot]
+            if verb.rule != 'V2.PASS':
+                continue
+            for case in cases.intersection(government.get(verb.lemma, ())):
+                role = roles.get((verb.lemma, case))
+                if not role or any(l.head == pivot and l.role == role for l in tree):
+                    continue
+                features = [{(tag.gender, tag.number) for _, tag in hypotheses if tag.case == case}
+                            for _, hypotheses in modifiers]
+                compatible = set.intersection(*features)
+                if not compatible:
+                    continue
+                links = _map(tree, kept)
+                for i, hypotheses in modifiers:
+                    forms = [from_tag(tag) for _, tag in hypotheses if tag.case == case and
+                             (tag.gender, tag.number) in compatible]
+                    rule = 'A1' if known_forms(tokens[i].surface) else 'OPAQUE.ATTRIBUTE'
+                    links[i] = Link('attribute', tokens[i].surface, head, rule, morphology=_common(forms))
+                links[head] = Link(role, tokens[head].surface, kept[pivot], 'OPAQUE.QUOTED.ARG', case, scope='proper_name')
+                yield tuple(links[i] for i in range(len(tokens)))
+
+
+def quoted_arguments(tokens, parse, budget):
+    from itertools import chain
+    from .named_arguments import missing_subjects
+    from .morphology import NOMINAL_ROLES
+    from .parser import AnalysisBudgetExceeded
+    from .utterances import _parataxis
+
+    def quoted_part(part):
+        quotes = spans(part)
+        if not quotes:
+            yield from parse(part)
+            return
+        if not all(right == left + 2 and part[left + 1].surface[:1].isupper() for left, right in quotes):
+            return
+        excluded = {j for pair in quotes for j in pair}
+        kept = tuple(i for i in range(len(part)) if i not in excluded)
+        bare = tuple(part[j] for j in kept)
+        heads = {kept.index(left + 1) for left, _ in quotes}
+        for tree in chain(parse(bare), missing_subjects(bare, parse), _oblique_titles(bare, parse, heads)):
+            if any(tree[head].role not in NOMINAL_ROLES for head in heads):
+                continue
+            links = _map(tree, kept)
+            for left, right in quotes:
+                head = left + 1
+                links[head] = replace(links[head], scope='proper_name')
+                for j in (left, right):
+                    links[j] = Link('punctuation', part[j].surface, head, 'TITLE.QUOTE')
+            yield tuple(links[i] for i in range(len(part)))
+
+    if not spans(tokens):
+        return
+    result = set()
+    sources = [quoted_part(tokens)]
+    if any(t.surface in (':', ';') for t in tokens):
+        sources.append(_parataxis(tokens, quoted_part, explicit=True))
+    for tree in chain.from_iterable(sources):
+        if tree not in result:
+            result.add(tree)
+            if len(result) > budget:
+                raise AnalysisBudgetExceeded('TITLE_BUDGET')
+            yield tree
+
+
 def trees(part, parse, budget):
     from .parser import AnalysisBudgetExceeded
 
@@ -270,6 +412,7 @@ def trees(part, parse, budget):
 
     quoted = spans(part)
     yield from dated_headings.trees(part, quoted, budget)
+    yield from _adjacent_titles(part, quoted, parse, budget)
     output = set()
     for family in (_series, _aliases):
         for tree in family(part, quoted, parse):
@@ -316,6 +459,17 @@ def partitions(trees, tokens, text):
         phrase = text[tokens[left].start:tokens[end - 1].end]
         question = f'Как в этом перечне следует прочитать сочетание «{phrase}»?'
         yield Probe(question, (one, two), text), [one if tree[mark].rule == 'TITLE.INNER.COMMA' else two for tree in trees]
+    for i in range(len(tokens)):
+        if not all(tree[i].rule == 'TITLE.ATTACHED' for tree in trees):
+            continue
+        heads = sorted({tree[i].head for tree in trees})
+        if len(heads) < 2:
+            continue
+        first, last = title_bounds(trees[0], i)
+        phrase = text[tokens[first].start:tokens[last].end]
+        labels = {head: _span_label(tokens, head) for head in heads}
+        question = f'Что в этом предложении носит название «{phrase}»? Выберите соответствующее слово.'
+        yield Probe(question, tuple(labels.values()), text), [labels[tree[i].head] for tree in trees]
     regions = []
     for tree in trees:
         titles = {title_bounds(tree, i): i for i, link in enumerate(tree)
@@ -341,6 +495,10 @@ def confirmation(tokens, tree, index, text):
     if note is not None:
         return note
     link = tree[index]
+    if link.rule == 'OPAQUE.QUOTED.ARG':
+        governor = tokens[link.head].surface
+        return Probe(f'Какое название указывает получателя при «{governor}»?' if link.role == 'recipient' else
+                     f'Какое название заполняет дополнение при «{governor}»?', (_span_label(tokens, index),), text)
     if link.rule == 'INF.NOUN':
         target = _span_label(tokens, link.head)
         return Probe(f'Какое существительное поясняет действие «{tokens[index].surface}»?', (target,), text)

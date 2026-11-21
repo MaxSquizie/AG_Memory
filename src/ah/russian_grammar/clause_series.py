@@ -126,7 +126,10 @@ def _omittable(tokens, root):
             word = tokens[j].surface
             options = {Link('adverb', lemma, root, 'B1') for lemma, tag in known_forms(word) if tag.POS == 'ADVB'}
             if any(marker == (j,) for marker in _markers(tokens, j)):
-                options.add(Link('coordinator', word.casefold(), root, 'N.COORD'))
+                if j > 0 and all(tag.POS == 'PRCL' for _, tag in known_forms(word)):
+                    options.add(Link('particle', word.casefold(), root, 'PART.FOCUS'))
+                else:
+                    options.add(Link('coordinator', word.casefold(), root, 'N.COORD'))
             if not options:
                 break
             variants.append(sorted(options, key=lambda link: (link.role, link.lemma)))
@@ -248,6 +251,26 @@ def confirmation(tokens, tree, i, text):
 def partitions(trees, tokens, text):
     from .parser import _span_label
     from .probe import Probe
+
+    for i in range(len(tokens)):
+        links = [tree[i] for tree in trees]
+        if all(link.rule == 'ELL.COORD' for link in links) and len({l.head for l in links}) > 1:
+            labels = {l.head: _span_label(tokens, l.head) for l in links}
+            focus = _span_label(tokens, i)
+            question = f'С каким словом из первой части сопоставлено «{focus}» в продолжении перечисления?'
+            yield Probe(question, tuple(dict.fromkeys(labels.values())), text), [labels[l.head] for l in links]
+        if all(l.role == 'adverb' for l in links) and {l.rule == 'CL.SHARED.ADV' for l in links} == {True, False}:
+            answers = []
+            for tree, link in zip(trees, links):
+                if link.rule == 'CL.SHARED.ADV':
+                    last = max(j for j, part in enumerate(tree[:i]) if part.role == 'clause_conjunct'
+                               and part.head == link.head)
+                    answers.append(_span_label(tokens, link.head, last + 1))
+                else:
+                    answers.append(_span_label(tokens, link.head))
+            focus = _span_label(tokens, i)
+            question = f'Какое действие или сочетание действий уточняет слово «{focus}»?'
+            yield Probe(question, tuple(dict.fromkeys(answers)), text), answers
 
     fixed = {(link.head, i) for tree in trees for i, link in enumerate(tree) if link.rule == 'CL.FIXED'}
     for start in sorted({host for host, _ in fixed}):

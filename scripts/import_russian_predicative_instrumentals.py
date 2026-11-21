@@ -1,3 +1,5 @@
+import csv
+from collections import defaultdict
 from argparse import ArgumentParser
 from pathlib import Path
 
@@ -23,10 +25,32 @@ def governors(corpora, *, object_adjectives=False):
     return sorted(lemmas)
 
 
+def status_partners(lemmas, path):
+    frames = defaultdict(list)
+    with path.open(encoding='utf-8') as stream:
+        for row in csv.DictReader(stream, delimiter='\t', quoting=csv.QUOTE_NONE):
+            frames[row['ConstrIndex']].append(row)
+    known = set(lemmas)
+    expanded = set(known)
+    for frame in frames.values():
+        if not any(row['Form'] == 'Snom' for row in frame) or any(row['Form'] == 'Sacc' for row in frame):
+            continue
+        for row in frame:
+            if row['Form'] == 'Sins' and row['Role'] == 'статус':
+                related = {word.rstrip('0123456789') for word in row['KeyLexemes'].split(',')}
+                if len(related) == 2 and related & known:
+                    expanded.update(related)
+    return sorted(expanded)
+
+
 if __name__ == '__main__':
     parser = ArgumentParser()
+    parser.add_argument('--status-frames', type=Path)
     parser.add_argument('--object-adjectives', action='store_true')
     parser.add_argument('corpora', nargs='+', type=Path)
     parser.add_argument('output', type=Path)
     args = parser.parse_args()
-    args.output.write_text(''.join(verb + '\n' for verb in governors(args.corpora, object_adjectives=args.object_adjectives)), encoding='utf-8')
+    verbs = governors(args.corpora, object_adjectives=args.object_adjectives)
+    if args.status_frames:
+        verbs = status_partners(verbs, args.status_frames)
+    args.output.write_text(''.join(verb + '\n' for verb in verbs), encoding='utf-8')

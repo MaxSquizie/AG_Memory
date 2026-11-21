@@ -52,10 +52,10 @@ def _modifiers(tokens, index, budget):
                        (*parts, *attrs), (index, prep))
 
 
-def _layouts(span, seed, constraints, budget):
+def _layouts(span, seed, constraints, budget, *, modifiers=_modifiers):
     @lru_cache(maxsize=None)
     def at(index):
-        return tuple(unit for unit in _modifiers(span, index, budget)
+        return tuple(unit for unit in modifiers(span, index, budget)
                      if index not in constraints or constraints[index] == unit.head)
 
     pending = [(seed.end, ())]

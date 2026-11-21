@@ -1,3 +1,4 @@
+from dataclasses import replace
 from functools import lru_cache
 from itertools import product
 from math import prod
@@ -126,12 +127,56 @@ def _appositions(tokens, parse, budget):
                     yield tuple(links[i] for i in range(len(tokens)))
 
 
+def _fragment_modifiers(tokens, index, budget):
+    from .nominal_entries import Unit, _modifiers
+
+    yield from _modifiers(tokens, index, budget)
+    if index == len(tokens):
+        return
+    lemmas = {lemma for lemma, tag in known_forms(tokens[index].surface)
+              if tag.POS == 'ADJF' and 'Subx' in tag and tag.case == 'gent'}
+    for lemma in sorted(lemmas):
+        yield Unit(index, index + 1, index, Link('genitive_modifier', lemma, None, 'N.GEN.SUBSTANTIVE', 'gent'), ())
+
+
+def name_fragments(tokens, budget):
+    from .nominal_entries import Unit, _attach, _layouts
+
+    if len(tokens) < 2 or not tokens[0].surface.istitle():
+        return
+    surface = tokens[0].surface
+    forms = known_forms(surface)
+    proper = [lemma for lemma, tag in forms if tag.POS == 'NOUN' and tag.case == 'nomn'
+              and {'Geox', 'Name', 'Surn', 'Orgn', 'Trad'} & tag.grammemes]
+    convertible = any(tag.POS == 'ADJF' and tag.case == 'nomn' for _, tag in forms)
+    if not proper and not convertible:
+        return
+    for lemma in dict.fromkeys(proper or (surface,)):
+        root = Link('nominal_head', lemma, None, 'N.FRAGMENT.NAME', scope='proper_name')
+        seed = Unit(0, 1, 0, root, ())
+        generated = 0
+        for layout in _layouts(tokens, seed, {}, budget, modifiers=_fragment_modifiers):
+            if not layout or layout[0].link.role != 'genitive_modifier':
+                continue
+            for tree in _attach(layout, (0,), {0: root}):
+                generated += 1
+                if generated > budget:
+                    raise AnalysisBudgetExceeded('NOMINAL_FRAGMENT_BUDGET')
+                yield tree
+                for j, link in enumerate(tree):
+                    if (link.role == 'preposition' and link.head == 0
+                            and all(next_link.head >= j for next_link in tree[j + 1:])):
+                        yield (*tree[:j], replace(link, scope='orphan'), *tree[j + 1:])
+
+
 def trees(tokens, parse, budget):
     yield from _mentions(tokens, budget)
     yield from _appositions(tokens, parse, budget)
 
 
 def confirmation(tokens, tree, i, text):
+    if tree[i].rule == 'N.FRAGMENT.NAME':
+        return Probe('Какое слово служит собственным именем в этом именном фрагменте?', (_span_label(tokens, i),), text)
     if tree[i].rule != 'APP.PRON':
         return None
     answer = _span_label(tokens, i)
@@ -141,7 +186,22 @@ def confirmation(tokens, tree, i, text):
 
 
 def partitions(trees, tokens, text):
-    if not all(any(link.rule == 'N.MENTION' for link in tree) for tree in trees):
+    if all(tree[0].rule == 'N.FRAGMENT.NAME' for tree in trees):
+        for i in range(len(tokens)):
+            if not all(tree[i].role == 'preposition' for tree in trees) or not any(tree[i].scope == 'orphan' for tree in trees):
+                continue
+            missing = 'связь с пропущенной частью'
+            keys = [missing if tree[i].scope == 'orphan' else _span_label(tokens, tree[i].head) for tree in trees]
+            options = tuple(dict.fromkeys(keys))
+            if len(options) < 2:
+                continue
+            options = tuple(k for k in options if k != missing) + (missing,)
+            target = next(j for j, l in enumerate(trees[0]) if l.role == 'governed' and l.head == i)
+            group = _span_label(tokens, i, target + 1)
+            yield Probe(f'Какое слово в этом фрагменте поясняет сочетание «{group}»? '
+                        'Если то, к чему оно относится, пропущено, выберите «связь с пропущенной частью».',
+                        options, text), keys
+    if not all(any(link.rule in ('N.MENTION', 'N.FRAGMENT.NAME') for link in tree) for tree in trees):
         return
     for i in range(len(tokens)):
         if not all(tree[i].role == 'genitive_modifier' for tree in trees):

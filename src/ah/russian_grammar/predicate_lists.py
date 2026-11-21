@@ -55,6 +55,16 @@ def _items(tokens, start, quotes, budget):
                 for k in (stop, stop + 2):
                     group[k] = Link('punctuation', tokens[k].surface, title, 'TITLE.QUOTE')
             yield title + 1 + int(quoted), root, links | group
+        if (stop + 2 < len(tokens) and tokens[stop].surface == '(' and tokens[stop + 2].surface == ')'
+                and len(tokens[stop + 1].surface) == 4 and tokens[stop + 1].surface.isdecimal()
+                and int(tokens[stop + 1].surface) > 0):
+            year = tokens[stop + 1].surface
+            for host in hosts:
+                note = {stop + 1: Link('nominal_date', year, host, 'DATE.NOTE.YEAR',
+                                       quantity=year, quantity_kind='ordinal')}
+                for j in (stop, stop + 2):
+                    note[j] = Link('punctuation', tokens[j].surface, stop + 1, 'NAME.NOTE.BOUND')
+                yield stop + 3, root, links | note
         if len(pending) > budget:
             raise AnalysisBudgetExceeded('PREDICATE_LIST_BUDGET')
 
@@ -63,6 +73,10 @@ def _subjects(tokens):
     from . import dated_name_notes
 
     yield from dated_name_notes.prefixes(tokens)
+    for stop, links in dated_name_notes._first_name(tokens):
+        if stop > 1 and stop < len(tokens) and tokens[stop].surface in DASHES:
+            dash = Link('punctuation', tokens[stop].surface, 0, 'V2.DASH')
+            yield stop + 1, links | {stop: dash}, 0
     for head, lemma, case, attrs in _members(tokens, 0, None, 'nomn'):
         dash = head + 1
         if dash < len(tokens) and tokens[dash].surface in DASHES:
@@ -74,11 +88,11 @@ def _subjects(tokens):
 
 def trees(tokens, parse, budget):
     has_markers = any(next(_markers(tokens, i), None) for i in range(len(tokens)))
-    if not has_markers and not any(t.surface.isdecimal() for t in tokens):
+    if not has_markers and not any(t.surface.isdecimal() or t.surface == '(' for t in tokens):
         return
     quotes = dict(spans(tokens))
     for start, intro, subject in _subjects(tokens):
-        note = any(link.rule.startswith('DATE.') for link in intro.values())
+        note = any(link.rule.startswith(('DATE.', 'NAME.FORM.')) for link in intro.values())
         if not note and not has_markers:
             continue
         stack = []
@@ -98,7 +112,7 @@ def trees(tokens, parse, budget):
                 if coordinated:
                     yield tuple(links[j] for j in range(i))
                 continue
-            comma = tokens[i].surface == ','
+            comma = tokens[i].surface in (',', ';')
             boundary = i + int(comma)
             for marker in (tuple(_markers(tokens, boundary)) or ((),)):
                 if marker:
@@ -110,7 +124,7 @@ def trees(tokens, parse, budget):
                     anchor = group[item]
                     additions = dict(group)
                     if comma:
-                        additions[i] = Link('punctuation', ',', item, 'V2.SEP')
+                        additions[i] = Link('punctuation', tokens[i].surface, item, 'V2.SEP')
                     for j in marker:
                         additions[j] = Link('coordinator' if j == marker[0] else 'coordinator_part',
                                             tokens[j].surface.casefold(), item if j == marker[0] else marker[0], 'P.COORD')
@@ -127,6 +141,11 @@ def trees(tokens, parse, budget):
 def partitions(analyses, tokens, text):
     for i in range(len(tokens)):
         links = [tree[i] for tree in analyses]
+        if all(link.rule == 'DATE.NOTE.YEAR' for link in links):
+            labels = [_span_label(tokens, link.head) for link in links]
+            if len(set(labels)) > 1:
+                question = confirmation(tokens, analyses[0], i, text).question
+                yield Probe(question, tuple(dict.fromkeys(labels)), text), labels
         if {link.rule for link in links} != {'APP.NOMINAL', 'V2.CONJ'}:
             continue
         hosts = [link.head if link.role == 'apposition' else link.controller for link in links]
@@ -137,6 +156,9 @@ def partitions(analyses, tokens, text):
 
 
 def confirmation(tokens, tree, i, text):
+    if tree[i].rule == 'DATE.NOTE.YEAR':
+        host = _span_label(tokens, tree[i].head)
+        return Probe(f'К какому слову относится год «{tokens[i].surface}» в скобках?', (host,), text)
     if tree[i].rule == 'APP.LABEL':
         host = _span_label(tokens, tree[i].head)
         return Probe(f'Каким словом дано само обозначение после «{host}»?', (_span_label(tokens, i),), text)

@@ -176,6 +176,56 @@ def _infinitives(tokens, local, members):
             yield tuple(restored)
 
 
+def expanded_infinitives(tokens, parse, budget):
+    from .infinitive_elaborations import _adverbs
+    from .parser import AnalysisBudgetExceeded, Link
+    from .predicative_groups import _groups as prepositional_groups
+
+    infinitives = [i for i, t in enumerate(tokens) if any(tag.POS == 'INFN' for _, tag in known_forms(t.surface))]
+    if len(infinitives) < 2:
+        return
+    right = infinitives[-1]
+    seen = set()
+    for marker in range(infinitives[-2] + 1, right):
+        word = tokens[marker].surface.casefold()
+        if word not in ADDITIVE | ALTERNATIVE:
+            continue
+        tail = tuple(group for end, _, group in prepositional_groups(tokens, right + 1) if end == len(tokens))
+        if right + 1 == len(tokens):
+            tail = ({},)
+        if not tail or right == marker + 1 == infinitives[-2] + 2:
+            continue
+        adverbs = tuple(_adverbs(tokens, marker + 1, right, right))
+        if not adverbs:
+            continue
+        stop = marker - int(tokens[marker - 1].surface == ',')
+        left = infinitives[-2]
+        for tree in parse(tokens[:stop]):
+            anchor = tree[left]
+            if anchor.role != 'infinitive' or anchor.head is None:
+                continue
+            for lemma, tag in known_forms(tokens[right].surface):
+                if tag.POS != 'INFN':
+                    continue
+                for group, mods in product(tail, adverbs):
+                    links = dict(enumerate(tree)) | group | mods
+                    if group:
+                        links[right + 1] = replace(group[right + 1], head=right)
+                    links[right] = Link('infinitive', lemma, left, 'INF.COORD', controller=anchor.controller,
+                                        scope=anchor.scope, morphology=from_tag(tag))
+                    links[marker] = Link('coordinator', word, right, 'I.MARK',
+                                         scope='alternative' if word in ALTERNATIVE else None)
+                    if stop != marker:
+                        links[stop] = Link('punctuation', ',', right, 'I.MARK')
+                    candidate = tuple(links[j] for j in range(len(tokens)))
+                    if candidate in seen:
+                        continue
+                    seen.add(candidate)
+                    if len(seen) > budget:
+                        raise AnalysisBudgetExceeded('COORDINATION_BUDGET')
+                    yield candidate
+
+
 def trees(tokens, local, *, budget):
     from .parser import AnalysisBudgetExceeded
 

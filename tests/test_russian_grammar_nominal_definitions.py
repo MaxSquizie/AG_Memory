@@ -56,3 +56,17 @@ def test_fractional_measure_attaches_to_noun_with_confirmed_qualification():
     assert tree[2].head == 1 and tree[3].head == 4
     assert tree[4].case == 'accs' and tree[4].morphology.case == 'gent'
     assert Fraction(tree[3].quantity) == Fraction(1, 8)
+
+
+def test_cited_name_requires_a_speech_verb_and_reader_confirmation():
+    from ah.russian_grammar import analyze
+
+    text = 'Мария (произносится Марья) — поэт и переводчик.'
+    core = AHCore()
+    result = submit(core, text)
+    assert result.status == 'AMBIGUOUS' and not list(core.store.elements(Domain.H))
+    assert result.analysis.probes[-1].options == ('Марья',)
+    tree, = result.analysis.analyses
+    assert tree[3].role == 'designation' and tree[3].antecedent == 0
+    other = analyze(text.replace('произносится', 'появляется'))
+    assert all(link.rule != 'NAME.FORM.CITATION' for tree in other.analyses for link in tree)

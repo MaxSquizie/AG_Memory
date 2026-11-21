@@ -81,6 +81,46 @@ def variants(text, rows):
     yield 'extra_comma', text[:cut] + ',' + text[cut:], dirty
 
 
+def align_name_components(tokens, text, gold):
+    spans = bounds(text, gold)
+    by_start = {start: i for i, (start, _) in enumerate(spans)}
+    groups = {}
+    for token in tokens:
+        first = by_start.get(token.start)
+        if first is None or spans[first][1] >= token.end:
+            continue
+        last = first
+        while last + 1 < len(gold) and spans[last][1] < token.end:
+            last += 1
+        parts = gold[first:last + 1]
+        ids = {r[0] for r in parts}
+        roots = [r for r in parts if r[6] not in ids]
+        if (spans[last][1] != token.end or len(roots) != 1 or roots[0][3] != 'PROPN'
+                or not any(r[7] == 'flat:name' for r in parts)
+                or any(r is not roots[0] and r[7] not in {'punct', 'flat:name'} for r in parts)
+                or not all(parts[j][1] in {'-', '‐', '‑'} for j in range(1, len(parts), 2))
+                or len(parts) % 2 == 0
+                or ''.join(r[1] for r in parts) != token.surface):
+            continue
+        groups[first] = (last, roots[0], token.surface)
+    if not groups:
+        return gold, []
+    result = []
+    mapping = {}
+    i = 0
+    while i < len(gold):
+        last, root, surface = groups.get(i, (i, gold[i], gold[i][1]))
+        row = root.copy()
+        row[0], row[1] = str(len(result) + 1), surface
+        result.append(row)
+        for j in range(i, last + 1):
+            mapping[gold[j][0]] = row[0]
+        i = last + 1
+    for row in result:
+        row[6] = mapping.get(row[6], row[6])
+    return result, [surface for _, _, surface in groups.values()]
+
+
 def align(tokens, text, gold):
     aligned = [None] * len(tokens)
     targets = {}
@@ -290,6 +330,7 @@ def inspect(core, reply, text, gold, identity, *, evaluate=compare, project=proj
         result['exact'] = False
         return result, None
     analyzed = reply.analysis
+    gold, compound_names = align_name_components(analyzed.tokens, text, gold)
     aligned = align(analyzed.tokens, text, gold)
     if reply.status == 'STORED':
         group = core.store.get_element(Domain.H, reply.observation_ref)
@@ -319,8 +360,10 @@ def inspect(core, reply, text, gold, identity, *, evaluate=compare, project=proj
            for w, t in zip(words, analyzed.tokens)):
         raise ValueError('Bad source span')
     heads, issues = evaluate(words, aligned, identity)
+    if compound_names:
+        result['unchecked_name_internals'] = compound_names
     graph = project(words, aligned)
-    result.update(exact=not heads and not issues and reply.status == good, incorrect_heads=heads,
+    result.update(exact=not heads and not issues and not compound_names and reply.status == good, incorrect_heads=heads,
                   role_scope_errors=issues, graph_sha256=digest(graph))
     return result, graph
 

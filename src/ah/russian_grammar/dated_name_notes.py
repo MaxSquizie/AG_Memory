@@ -1,3 +1,4 @@
+from dataclasses import replace
 from unicodedata import name
 
 from .calendar_regions import calendar_day, day_links, year_unit
@@ -27,7 +28,14 @@ def _first_name(tokens):
         for end in range(1, len(tokens)):
             yield end, group
             surface = tokens[end].surface
-            if not _opaque(surface) or _script(surface) != _script(first):
+            if _script(surface) != _script(first):
+                break
+            if not _opaque(surface):
+                if _name(surface):
+                    for lemma, tag in known_forms(surface):
+                        if tag.case == 'nomn' and tag.number == 'sing' and name_type(tag) in ('Surn', 'Patr'):
+                            named = Link('name_part', lemma, 0, 'NAME', 'nomn', morphology=from_tag(tag), scope='proper_name')
+                            yield end + 1, group | {end: named}
                 break
             group = group | {end: Link('name_part', surface, 0, 'NAME', scope='proper_name')}
     for lemma, tag in known_forms(first):
@@ -74,6 +82,55 @@ def _year_interval(tokens, start, host):
     return last + 1, first, links
 
 
+def _cited_form(tokens, start):
+    from .utterances import _quotation_governors
+
+    if start >= len(tokens) or tokens[start].surface != '(':
+        return
+    verb = start + 1
+    if verb + 2 >= len(tokens):
+        return
+    forms = [(lemma, tag) for lemma, tag in known_forms(tokens[verb].surface)
+             if tag.POS == 'VERB' and tag.person == '3per' and tag.number == 'sing'
+             and lemma.endswith('ся') and lemma[:-2] in _quotation_governors()]
+    if len(forms) != 1:
+        return
+    lemma, tag = forms[0]
+    quoted = verb + 1
+    links = {verb: Link('parenthetical', lemma, None, 'NAME.FORM.NOTE',
+                        scope='parenthetical', morphology=from_tag(tag))}
+    if tokens[quoted].surface == ',':
+        closing = next((i for i in range(quoted + 1, len(tokens)) if tokens[i].surface in {',', ')'}), None)
+        if closing is None or closing < quoted + 2 or tokens[closing].surface != ',':
+            return
+        gerund = closing - 1
+        verbs = [(l, t) for l, t in known_forms(tokens[gerund].surface)
+                 if t.POS == 'GRND' and l in _quotation_governors()]
+        if len(verbs) != 1:
+            return
+        for j in range(quoted + 1, gerund):
+            modifiers = {l for l, t in known_forms(tokens[j].surface) if t.POS == 'ADVB' or 'Prnt' in t}
+            if len(modifiers) != 1:
+                return
+            links[j] = Link('adverb', next(iter(modifiers)), gerund, 'MOD.ADV')
+        links[gerund] = Link('parenthetical', verbs[0][0], verb, 'NAME.FORM.ASIDE',
+                             scope='parenthetical', morphology=from_tag(verbs[0][1]))
+        for j in (quoted, closing):
+            links[j] = Link('punctuation', ',', gerund, 'PAREN.BOUND')
+        quoted = closing + 1
+    close = quoted
+    while close < len(tokens) and _name(tokens[close].surface):
+        close += 1
+    if close == quoted or close >= len(tokens) or tokens[close].surface != ')':
+        return
+    links[quoted] = Link('designation', tokens[quoted].surface, verb, 'NAME.FORM.CITATION', antecedent=0)
+    for j in range(quoted + 1, close):
+        links[j] = Link('name_part', tokens[j].surface, quoted, 'NAME', scope='proper_name')
+    for j in (start, close):
+        links[j] = Link('punctuation', tokens[j].surface, verb, 'PAREN.BOUND')
+    return close + 1, verb, links
+
+
 def _note(tokens, start):
     size = len(tokens)
     enclosed = start < size and tokens[start].surface == '('
@@ -90,6 +147,14 @@ def _note(tokens, start):
             links[i] = Link(role, tokens[i].surface, 0 if i == first else first, rule, scope='proper_name')
             i += 1
     alias = first if i != first else None
+    separator = i < size and tokens[i].surface in {';', ','}
+    citation = _cited_form(tokens, i + int(separator)) if enclosed else None
+    if citation:
+        after, verb, remark = citation
+        if separator:
+            links[i] = Link('punctuation', tokens[i].surface, verb, 'PAREN.BOUND')
+        links.update(remark)
+        i = after
     first_day = None
     while i < size:
         separator = tokens[i].surface in {';', ','} | DASHES
@@ -119,6 +184,8 @@ def _note(tokens, start):
             links.update(group)
     if alias is None and first_day is None:
         return
+    if citation:
+        links[verb] = replace(links[verb], head=first_day if first_day is not None else alias)
     if enclosed:
         if i >= size or tokens[i].surface != ')':
             return
@@ -134,12 +201,24 @@ def _note(tokens, start):
 
 def prefixes(tokens):
     for stop, initial in _first_name(tokens):
+        citation = _cited_form(tokens, stop)
+        if citation:
+            end, verb, links = citation
+            if end < len(tokens) and tokens[end].surface in DASHES:
+                links[verb] = replace(links[verb], head=0)
+                links[end] = Link('punctuation', tokens[end].surface, 0, 'V2.DASH')
+                yield end + 1, initial | links, 0
         for end, note in _note(tokens, stop):
             yield end, initial | note, 0
 
 
 def confirmation(tokens, tree, i, text):
     link = tree[i]
+    if link.rule == 'NAME.FORM.CITATION':
+        end = i + 1
+        while end < len(tree) and tree[end].head == i and tree[end].role == 'name_part':
+            end += 1
+        return Probe('Какую форму имени приводят в скобках?', (_span_label(tokens, i, end),), text)
     if link.rule == 'DATE.NOTE.INTERVAL':
         end = next(j for j, child in enumerate(tree) if child.role == 'numeral_part' and child.head == i)
         years = text[tokens[i].start:tokens[end].end]

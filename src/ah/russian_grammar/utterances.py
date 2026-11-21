@@ -252,15 +252,15 @@ def nominal_then_finite(part, parse, *, marked=False):
             yield tuple(links[j] for j in range(len(part)))
 
 
-def _parataxis(part, parse):
+def _parataxis(part, parse, *, explicit=False):
     from .parser import Link
 
     from . import explanations
 
     finite = [i for i, token in enumerate(part) if any(tag.POS == 'VERB' for _, tag in known_forms(token.surface))]
-    if finite and finite[0] > 1 and part[finite[0] - 1].surface == ',':
+    if not explicit and finite and finite[0] > 1 and part[finite[0] - 1].surface == ',':
         yield from nominal_then_finite(part, parse, marked=True)
-    if len(finite) >= 2:
+    if not explicit and len(finite) >= 2:
         governors = explanations.content_governors()
         for start in range(finite[0] + 1, finite[-1] + 1):
             previous = part[start - 1].surface
@@ -285,6 +285,8 @@ def _parataxis(part, parse):
                     yield from explanations.attachments(part, left, right, start, start)
     for i in range(1, len(part) - 1):
         sign = part[i].surface
+        if explicit and sign not in (':', ';'):
+            continue
         if sign not in (':', ';', ',', '—') or not finite or not finite[0] < i < finite[-1]:
             continue
         if part[i + 1].surface in _QUOTES or any(tag.POS == 'CONJ' for _, tag in known_forms(part[i + 1].surface)):
