@@ -104,3 +104,33 @@ def test_missing_comma_preserves_antecedent_choice():
     result = analyze('Иван увидел брата друга который ушёл')
     assert result.status == 'AMBIGUOUS'
     assert result.probes[0].options == ('брата', 'друга')
+
+
+@pytest.mark.parametrize(('sentence', 'answer', 'question'), [
+    ('Я знаю, кто пришёл и зачем.', 'кто пришёл и зачем', 'Что я знаю?'),
+    ('Я знаю зачем Иван пришёл и когда.', 'зачем Иван пришёл и когда', 'Что я знаю?'),
+    ('Я помню, кто говорил и с кем.', 'кто говорил и с кем', 'Что я помню?'),
+])
+def test_indirect_question_shares_predicate_across_interrogative_remnant(sentence, answer, question):
+    core = AHCore()
+    observed = submit(core, sentence, speaker_ref='person')
+    assert observed.status == 'STORED'
+    tree, = observed.analysis.analyses
+    remnant, = [link for link in tree if link.ellipsis_source is not None]
+    assert tree[remnant.ellipsis_source].role == 'clause_complement'
+    assert tree[remnant.coord_head].head == remnant.ellipsis_source
+    content = submit(core, question, speaker_ref='person')
+    assert (content.text, content.observation_ref) == (answer, observed.observation_ref)
+    assert submit(core, 'Кто пришёл?').status == 'UNKNOWN'
+    assert submit(core, 'Зачем Иван пришёл?').status == 'UNKNOWN'
+
+
+def test_explicit_second_indirect_question_preserves_its_own_predicate():
+    core = AHCore()
+    observed = submit(core, 'Я знаю, кто пришёл и почему Мария осталась.')
+    assert observed.status == 'STORED'
+    tree, = observed.analysis.analyses
+    why, = [link for link in tree if link.lemma == 'почему']
+    assert tree[why.head].lemma == 'остаться'
+    assert why.rule == 'CL.WH' and why.ellipsis_source is None
+    assert submit(core, 'Почему Мария осталась?').status == 'UNKNOWN'

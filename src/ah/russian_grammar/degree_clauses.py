@@ -116,8 +116,25 @@ def concessive_adverbs(tokens, parse):
                         yield tuple(joined[i] for i in range(len(tokens)))
 
 
+def compared_clause(prefix, levels, boundary, leaf, root, markers):
+    child = leaf[root - boundary.stop]
+    form = child.morphology
+    if not form or form.mood == 'impr':
+        return
+    if form.pos in {'NOUN', 'ADJF'} and not any(link.role == 'copula' and link.head == root for link in leaf):
+        return
+    for level, (_, governor) in enumerate(levels):
+        for i, link in enumerate(prefix):
+            if not link or not ((link.rule == 'V.CMP' and i == governor) or
+                                (link.rule == 'CMP.ADV' and link.head == governor)):
+                continue
+            joined = list(prefix + markers + leaf)
+            joined[root] = replace(child, role='clause_adverbial', head=i, rule='CL.COMPARISON',
+                                   scope=child.scope or 'comparison')
+            yield tuple(joined), levels[:level + 1] + ((root, root),)
+
+
 def _scales(tokens, positions, local):
-    from .parser import Link
     from .utterances import _map, _root
 
     local_tokens = tuple(tokens[i] for i in positions)
@@ -126,6 +143,19 @@ def _scales(tokens, positions, local):
         for i in positions:
             if mapped[i].rule in ('V.CMP', 'CMP.ADV'):
                 yield mapped, positions[_root(tree)], i
+    yield from _adverb_scales(tokens, positions, local)
+
+
+def comparison_leaves(tokens, local):
+    positions = tuple(range(len(tokens)))
+    for mapped, _, _ in _adverb_scales(tokens, positions, local):
+        yield tuple(mapped[i] for i in positions)
+
+
+def _adverb_scales(tokens, positions, local):
+    from .parser import Link
+    from .utterances import _map, _root
+
     for i in positions:
         variants = [(lemma, tag) for lemma, tag in known_forms(tokens[i].surface) if tag.POS == 'COMP']
         if not variants:

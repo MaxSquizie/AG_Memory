@@ -116,3 +116,55 @@ def test_unmarked_object_can_compete_with_a_nominal_predicate():
     explicit = submit(AHCore(), 'Иван купил книгу, а Мария довольна.')
     assert explicit.status == 'STORED'
     assert all(link.rule != 'GAP' for link in explicit.analysis.analyses[0])
+
+
+@pytest.mark.parametrize('sentence', [
+    'Иван купил красную ручку, а Мария — синюю.',
+    'Иван купил красную ручку а Мария синюю',
+])
+def test_parallel_adjective_restores_only_the_noun(sentence):
+    from ah.model import Domain
+
+    core = AHCore()
+    result = submit(core, sentence)
+    assert result.status == 'STORED'
+    group = core.store.get_element(Domain.H, result.observation_ref)
+    tree, = result.analysis.analyses
+    omitted = next(j for j, link in enumerate(tree) if link.rule == 'GAP.NOUN')
+    source = tree[omitted].ellipsis_source
+    assert omitted != source and result.analysis.tokens[omitted].surface == ''
+    assert tree[source].lemma == tree[omitted].lemma == 'ручка'
+    assert core.store.find_link('grammar.ellipsis_source', group.members[omitted].uid, group.members[source].uid)
+    assert submit(core, 'Что купила Мария?').text == 'синюю ручку'
+    assert submit(core, 'Кто купил синюю ручку?').text == 'Мария'
+    assert submit(core, 'Мария купила синюю ручку?').text == 'Да.'
+    assert submit(core, 'Иван купил красную ручку?').text == 'Да.'
+    assert submit(core, 'Мария купила красную ручку?').status == 'UNKNOWN'
+
+
+def test_adjectival_ellipsis_checks_agreement_and_alternative_antecedents():
+    core = AHCore()
+    assert submit(core, 'Иван купил красную ручку, а Мария выбрала синие.').status == 'STORED'
+    assert submit(core, 'Что выбрала Мария?').text == 'синие ручки'
+    assert submit(core, 'Мария выбрала синюю ручку?').status == 'UNKNOWN'
+    assert submit(core, 'Иван купил красную ручку, а Мария — зелёный.').status == 'UNRESOLVED'
+    undecided = submit(core, 'Иван купил ручку и тетрадь, а Мария — синюю.')
+    assert undecided.status == 'AMBIGUOUS' and undecided.observation_ref is None
+    assert undecided.analysis.probes[-1].options == ('ручку', 'тетрадь')
+
+
+def test_alternative_does_not_assert_either_acquisition():
+    core = AHCore()
+    assert submit(core, 'Иван купил красную ручку или Мария синюю').status == 'STORED'
+    assert submit(core, 'Иван купил красную ручку?').status == 'UNKNOWN'
+    assert submit(core, 'Мария купила синюю ручку?').status == 'UNKNOWN'
+
+
+def test_parallel_adjective_reuses_dictionary_government():
+    core = AHCore()
+    assert submit(core, 'Иван помог тихому соседу а Мария шумному').status == 'STORED'
+    assert submit(core, 'Кому помогла Мария?').text == 'шумному соседу'
+    assert submit(core, 'Мария помогла шумному соседу?').text == 'Да.'
+    assert submit(core, 'Мария помогла тихому соседу?').status == 'UNKNOWN'
+    assert submit(core, 'Иван помог тихому соседу, а Мария ушла шумному.').status == 'UNRESOLVED'
+    assert submit(core, 'Иван передал младшему брату книгу, а Мария — старшему.').status == 'UNRESOLVED'

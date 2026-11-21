@@ -173,6 +173,8 @@ def repairs(tokens, parse, budget, *, sites=None):
                 paired_only = True
         for tree in parse(joined):
             left, right = i - 1, i
+            if tree[right].rule == 'NP.ENUM.JUXT' and tree[right].head == left:
+                continue
             collective = collective_agreement.comma_governor(tree, left, right)
             pair = paired_coordination.comma_head(tree, left, right)
             if paired_only and pair is None:

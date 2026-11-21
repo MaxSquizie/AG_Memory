@@ -58,6 +58,8 @@ def remaining(tokens, parse, budget, *, text, selected):
     yield from marked_regions.nominal_relative(tokens, text, selected,
         lambda part: named_regions.matrix_readings(part, parse, budget),
         lambda part: _relative_child_readings(part, parse, budget), budget)
+    from . import generalizing_series
+    yield from generalizing_series.trees(tokens, parse, budget)
     yield from quote_titles.quoted_arguments(tokens, parse, budget)
     from . import homogeneous
     from .utterances import _parataxis
@@ -83,7 +85,9 @@ def remaining(tokens, parse, budget, *, text, selected):
 
 
 def confirmation(tokens, tree, i, text):
+    from . import generalizing_series
     grammars = (
+        generalizing_series,
         calendar_regions, mixed_predications, measured_series, dated_name_notes, infinitive_elaborations, predicate_lists,
         attributive_series, quote_titles, reference_directives, nominal_mentions, temporal_groups,
         clause_series, nominal_parentheticals, named_regions, lexical_parts, framed_clauses, named_series, named_arguments, nominal_dimensions,

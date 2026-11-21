@@ -2,7 +2,8 @@ from dataclasses import replace
 from functools import lru_cache
 from itertools import chain
 
-from . import clauses, degree_clauses, personal_correlatives
+from . import clauses, degree_clauses, indirect_questions, personal_correlatives
+from .homogeneous import REFERENCES as INDICES
 from .morphology import ROLE_CASE, from_tag
 from .nominal_groups import _groups
 from .prepositions import FORMS, PREFIXES
@@ -10,7 +11,6 @@ from .rules import attested_name_parts, dictionary, known_forms
 
 
 INDIRECT = frozenset('знать узнать помнить вспомнить понимать понять спросить спрашивать выяснить выяснять видеть увидеть сообщить сказать рассказать объяснить интересоваться'.split())
-INDICES = ('head', 'controller', 'antecedent', 'coord_head', 'shared_agent', 'shared_object')
 
 
 def _move(link, indices):
@@ -128,15 +128,17 @@ def trees(tokens, local, *, budget, spatial_prefix=None, nominal_fragment=False)
         if allow_inference and (not explicit or not found):
             yield from attachments(part, inferred=True)
 
+        yield from indirect_questions.coordinated_remnants(part, lambda reduced: subordinate(reduced, allow_inference))
+
     def attachments(part, inferred, *, fragment=False):
         def component(tokens):
             return subordinate(tokens, inferred)
 
         words = [t.surface.casefold() for t in part]
         commas = [i for i, w in enumerate(words) if w == ',']
-        candidates = {i for i, word in enumerate(words) if i and any(lemma in {
-            'который', 'кто', 'что', 'где', 'куда', 'когда', 'откуда', 'почему', 'как'
-        } for lemma, _ in known_forms(word))}
+        candidates = {i for i, word in enumerate(words) if i and any(
+            lemma in ('который', 'кто', 'что') or (tag.POS == 'ADVB' and 'Ques' in tag)
+            for lemma, tag in known_forms(word))}
         amounts = set()
         has_counter = False
         for i, word in enumerate(words):
@@ -182,8 +184,6 @@ def trees(tokens, local, *, budget, spatial_prefix=None, nominal_fragment=False)
                 continue
             relative = 'который' in lemmas
             amount = marker == begin and marker in amounts
-            if not relative and not amount and not lemmas.intersection({'кто', 'что', 'где', 'куда', 'когда', 'откуда', 'почему', 'как'}):
-                continue
             personal = 'кто' in lemmas and any(personal_correlatives.readings(w) for w in words[:start])
             indirect = not relative and any(lemma in INDIRECT for w in words[:start] for lemma, _ in known_forms(w))
             if not (relative or personal or indirect or spatial or temporal or amount):
@@ -296,7 +296,8 @@ def trees(tokens, local, *, budget, spatial_prefix=None, nominal_fragment=False)
     if nominal_fragment:
         yield from attachments(tokens, inferred=True, fragment=True)
     else:
-        yield from parse(tokens, True)
+        for tree in parse(tokens, True):
+            yield indirect_questions.bind_overt_conjuncts(tokens, tree)
 
 
 def attach_final(matrix, child, marker, host, tag):

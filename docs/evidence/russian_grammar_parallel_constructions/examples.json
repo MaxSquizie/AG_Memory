@@ -1,0 +1,1092 @@
+[
+  {
+    "rule": "summary",
+    "variant": "original",
+    "text": "На столе лежало всё: книги, письма и газеты",
+    "status": "STORED",
+    "response": "Наблюдение записано.",
+    "probes": [],
+    "reason": "SIMPLE_CLAUSE",
+    "graph": [
+      {
+        "surface": "На",
+        "role": "preposition",
+        "lemma": "на",
+        "rule": "P2",
+        "head": 2,
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": "столе",
+        "role": "governed",
+        "lemma": "стол",
+        "rule": "P1",
+        "case": "loct",
+        "head": 0,
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": "лежало",
+        "role": "predicate",
+        "lemma": "лежать",
+        "rule": "V1",
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": "всё",
+        "role": "subject",
+        "lemma": "весь",
+        "rule": "NP.GENERALIZER",
+        "case": "nomn",
+        "head": 2,
+        "scope": "universal",
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": ":",
+        "role": "punctuation",
+        "lemma": ":",
+        "rule": "NP.ENUM.BOUND",
+        "head": 5,
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": "книги",
+        "role": "apposition",
+        "lemma": "книга",
+        "rule": "NP.ENUM",
+        "case": "nomn",
+        "head": 3,
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": ",",
+        "role": "punctuation",
+        "lemma": ",",
+        "rule": "P.COORD",
+        "head": 7,
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": "письма",
+        "role": "nominal_conjunct",
+        "lemma": "письмо",
+        "rule": "P.COORD",
+        "case": "nomn",
+        "head": 5,
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": "и",
+        "role": "coordinator",
+        "lemma": "и",
+        "rule": "P.COORD",
+        "head": 9,
+        "scope": "addition",
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": "газеты",
+        "role": "nominal_conjunct",
+        "lemma": "газета",
+        "rule": "P.COORD",
+        "case": "nomn",
+        "head": 5,
+        "assertion_status": "asserted"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Что лежало на столе?",
+        "status": "ANSWER",
+        "response": "книги, письма и газеты",
+        "probes": [],
+        "reason": "SIMPLE_CLAUSE"
+      },
+      {
+        "text": "На столе лежали книги?",
+        "status": "ANSWER",
+        "response": "Да.",
+        "probes": [
+          "f1f236dfaed77c25f797b489eb27b217a34176ba742566a87f1dd1af144912f6"
+        ],
+        "reason": "SIMPLE_CLAUSE"
+      },
+      {
+        "text": "На столе лежали письма?",
+        "status": "ANSWER",
+        "response": "Да.",
+        "probes": [
+          "f1a2292b845d1c580ea9999b9555d87936c11f48f78e86611a52b25d0cc57ce4"
+        ],
+        "reason": "SIMPLE_CLAUSE"
+      },
+      {
+        "text": "На столе лежали газеты?",
+        "status": "ANSWER",
+        "response": "Да.",
+        "probes": [
+          "a11206e582f801ba90473e4f321b686ed1b985b9bdd63563f2a10524461bdcf5"
+        ],
+        "reason": "SIMPLE_CLAUSE"
+      },
+      {
+        "text": "На столе лежала чашка?",
+        "status": "UNKNOWN",
+        "response": "Неизвестно.",
+        "probes": [],
+        "reason": "SIMPLE_CLAUSE"
+      }
+    ],
+    "baseline_status": "UNRESOLVED"
+  },
+  {
+    "rule": "summary",
+    "variant": "without_commas",
+    "text": "На столе лежало всё: книги письма и газеты",
+    "status": "STORED",
+    "response": "Наблюдение записано.",
+    "probes": [
+      "236a402ad5725631f267781615038c3c4033744fd000b8946ab2624ba392f564"
+    ],
+    "reason": "SIMPLE_CLAUSE",
+    "graph": [
+      {
+        "surface": "На",
+        "role": "preposition",
+        "lemma": "на",
+        "rule": "P2",
+        "head": 2,
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": "столе",
+        "role": "governed",
+        "lemma": "стол",
+        "rule": "P1",
+        "case": "loct",
+        "head": 0,
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": "лежало",
+        "role": "predicate",
+        "lemma": "лежать",
+        "rule": "V1",
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": "всё",
+        "role": "subject",
+        "lemma": "весь",
+        "rule": "NP.GENERALIZER",
+        "case": "nomn",
+        "head": 2,
+        "scope": "universal",
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": ":",
+        "role": "punctuation",
+        "lemma": ":",
+        "rule": "NP.ENUM.BOUND",
+        "head": 5,
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": "книги",
+        "role": "apposition",
+        "lemma": "книга",
+        "rule": "NP.ENUM",
+        "case": "nomn",
+        "head": 3,
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": "письма",
+        "role": "nominal_conjunct",
+        "lemma": "письмо",
+        "rule": "NP.ENUM.JUXT",
+        "case": "nomn",
+        "head": 5,
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": "и",
+        "role": "coordinator",
+        "lemma": "и",
+        "rule": "P.COORD",
+        "head": 8,
+        "scope": "addition",
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": "газеты",
+        "role": "nominal_conjunct",
+        "lemma": "газета",
+        "rule": "P.COORD",
+        "case": "nomn",
+        "head": 5,
+        "assertion_status": "asserted"
+      }
+    ],
+    "queries": [],
+    "baseline_status": "UNRESOLVED",
+    "same_word_graph": true
+  },
+  {
+    "rule": "passive",
+    "variant": "original",
+    "text": "Письмо написано и отправлено вчера",
+    "status": "STORED",
+    "response": "Наблюдение записано.",
+    "probes": [
+      "6a2607b981549d500e789df9683dde381f303548c20530af7f7094ff15ce18c2"
+    ],
+    "reason": "COMPLEX_CLAUSE",
+    "graph": [
+      {
+        "surface": "Письмо",
+        "role": "subject",
+        "lemma": "письмо",
+        "rule": "S1",
+        "head": 1,
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": "написано",
+        "role": "predicate",
+        "lemma": "написать",
+        "rule": "V2.PASS",
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": "и",
+        "role": "clause_marker",
+        "lemma": "и",
+        "rule": "CL.MARK",
+        "head": 3,
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": "отправлено",
+        "role": "clause_conjunct",
+        "lemma": "отправить",
+        "rule": "CL.PASS",
+        "head": 1,
+        "controller": 0,
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": "вчера",
+        "role": "adverb",
+        "lemma": "вчера",
+        "rule": "CL.SHARED.ADV",
+        "head": 1,
+        "scope": "coordination",
+        "assertion_status": "asserted"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Письмо написано?",
+        "status": "ANSWER",
+        "response": "Да.",
+        "probes": [],
+        "reason": "SIMPLE_CLAUSE"
+      },
+      {
+        "text": "Письмо отправлено?",
+        "status": "ANSWER",
+        "response": "Да.",
+        "probes": [],
+        "reason": "SIMPLE_CLAUSE"
+      },
+      {
+        "text": "Письмо отправлено вчера?",
+        "status": "ANSWER",
+        "response": "Да.",
+        "probes": [],
+        "reason": "SIMPLE_CLAUSE"
+      },
+      {
+        "text": "Письмо написано вчера?",
+        "status": "ANSWER",
+        "response": "Да.",
+        "probes": [],
+        "reason": "SIMPLE_CLAUSE"
+      }
+    ],
+    "baseline_status": "STORED"
+  },
+  {
+    "rule": "noun",
+    "variant": "original",
+    "text": "Иван купил красную ручку, а Мария — синюю",
+    "status": "STORED",
+    "response": "Наблюдение записано.",
+    "probes": [],
+    "reason": "COMPLEX_CLAUSE",
+    "graph": [
+      {
+        "surface": "Иван",
+        "role": "subject",
+        "lemma": "иван",
+        "rule": "S1",
+        "head": 1,
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": "купил",
+        "role": "predicate",
+        "lemma": "купить",
+        "rule": "V1",
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": "красную",
+        "role": "attribute",
+        "lemma": "красный",
+        "rule": "A1",
+        "head": 3,
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": "ручку",
+        "role": "object",
+        "lemma": "ручка",
+        "rule": "O1",
+        "head": 1,
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": ",",
+        "role": "punctuation",
+        "lemma": ",",
+        "rule": "CL.PUNCT",
+        "head": 7,
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": "а",
+        "role": "clause_marker",
+        "lemma": "а",
+        "rule": "CL.MARK",
+        "head": 7,
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": "Мария",
+        "role": "subject",
+        "lemma": "мария",
+        "rule": "GAP.SUBJ",
+        "case": "nomn",
+        "head": 7,
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": "—",
+        "role": "clause_conjunct",
+        "lemma": "купить",
+        "rule": "GAP",
+        "head": 1,
+        "ellipsis_source": 1,
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": "синюю",
+        "role": "attribute",
+        "lemma": "синий",
+        "rule": "A1",
+        "head": 9,
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": "",
+        "role": "object",
+        "lemma": "ручка",
+        "rule": "GAP.NOUN",
+        "case": "accs",
+        "head": 7,
+        "ellipsis_source": 3,
+        "assertion_status": "asserted"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Что купила Мария?",
+        "status": "ANSWER",
+        "response": "синюю ручку",
+        "probes": [],
+        "reason": "SIMPLE_CLAUSE"
+      },
+      {
+        "text": "Иван купил красную ручку?",
+        "status": "ANSWER",
+        "response": "Да.",
+        "probes": [],
+        "reason": "SIMPLE_CLAUSE"
+      },
+      {
+        "text": "Мария купила синюю ручку?",
+        "status": "ANSWER",
+        "response": "Да.",
+        "probes": [],
+        "reason": "SIMPLE_CLAUSE"
+      },
+      {
+        "text": "Иван купил синюю ручку?",
+        "status": "UNKNOWN",
+        "response": "Неизвестно.",
+        "probes": [],
+        "reason": "SIMPLE_CLAUSE"
+      },
+      {
+        "text": "Мария купила красную ручку?",
+        "status": "UNKNOWN",
+        "response": "Неизвестно.",
+        "probes": [],
+        "reason": "SIMPLE_CLAUSE"
+      }
+    ],
+    "baseline_status": "UNRESOLVED"
+  },
+  {
+    "rule": "noun",
+    "variant": "without_commas",
+    "text": "Иван купил красную ручку а Мария — синюю",
+    "status": "STORED",
+    "response": "Наблюдение записано.",
+    "probes": [],
+    "reason": "COMPLEX_CLAUSE",
+    "graph": [
+      {
+        "surface": "Иван",
+        "role": "subject",
+        "lemma": "иван",
+        "rule": "S1",
+        "head": 1,
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": "купил",
+        "role": "predicate",
+        "lemma": "купить",
+        "rule": "V1",
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": "красную",
+        "role": "attribute",
+        "lemma": "красный",
+        "rule": "A1",
+        "head": 3,
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": "ручку",
+        "role": "object",
+        "lemma": "ручка",
+        "rule": "O1",
+        "head": 1,
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": "а",
+        "role": "clause_marker",
+        "lemma": "а",
+        "rule": "CL.MARK",
+        "head": 6,
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": "Мария",
+        "role": "subject",
+        "lemma": "мария",
+        "rule": "GAP.SUBJ",
+        "case": "nomn",
+        "head": 6,
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": "—",
+        "role": "clause_conjunct",
+        "lemma": "купить",
+        "rule": "GAP",
+        "head": 1,
+        "ellipsis_source": 1,
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": "синюю",
+        "role": "attribute",
+        "lemma": "синий",
+        "rule": "A1",
+        "head": 8,
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": "",
+        "role": "object",
+        "lemma": "ручка",
+        "rule": "GAP.NOUN",
+        "case": "accs",
+        "head": 6,
+        "ellipsis_source": 3,
+        "assertion_status": "asserted"
+      }
+    ],
+    "queries": [],
+    "baseline_status": "UNRESOLVED",
+    "same_word_graph": true
+  },
+  {
+    "rule": "comparison",
+    "variant": "original",
+    "text": "Иван читает быстрее, чем Мария пишет",
+    "status": "STORED",
+    "response": "Наблюдение записано.",
+    "probes": [],
+    "reason": "COMPLEX_CLAUSE",
+    "graph": [
+      {
+        "surface": "Иван",
+        "role": "subject",
+        "lemma": "иван",
+        "rule": "S1",
+        "head": 1,
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": "читает",
+        "role": "predicate",
+        "lemma": "читать",
+        "rule": "V1",
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": "быстрее",
+        "role": "comparative_adverb",
+        "lemma": "быстрый",
+        "rule": "CMP.ADV",
+        "head": 1,
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": ",",
+        "role": "punctuation",
+        "lemma": ",",
+        "rule": "CL.PUNCT",
+        "head": 6,
+        "assertion_status": "comparison"
+      },
+      {
+        "surface": "чем",
+        "role": "clause_marker",
+        "lemma": "чем",
+        "rule": "CL.MARK",
+        "head": 6,
+        "scope": "comparison",
+        "assertion_status": "comparison"
+      },
+      {
+        "surface": "Мария",
+        "role": "subject",
+        "lemma": "мария",
+        "rule": "S1",
+        "head": 6,
+        "assertion_status": "comparison"
+      },
+      {
+        "surface": "пишет",
+        "role": "clause_adverbial",
+        "lemma": "писать",
+        "rule": "CL.COMPARISON",
+        "head": 2,
+        "scope": "comparison",
+        "assertion_status": "comparison"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Иван читает быстрее, чем Мария пишет?",
+        "status": "ANSWER",
+        "response": "Да.",
+        "probes": [],
+        "reason": "COMPLEX_CLAUSE"
+      },
+      {
+        "text": "Мария пишет быстрее, чем Иван читает?",
+        "status": "UNKNOWN",
+        "response": "Неизвестно.",
+        "probes": [],
+        "reason": "COMPLEX_CLAUSE"
+      }
+    ],
+    "baseline_status": "UNRESOLVED"
+  },
+  {
+    "rule": "comparison",
+    "variant": "without_commas",
+    "text": "Иван читает быстрее чем Мария пишет",
+    "status": "STORED",
+    "response": "Наблюдение записано.",
+    "probes": [],
+    "reason": "COMPLEX_CLAUSE",
+    "graph": [
+      {
+        "surface": "Иван",
+        "role": "subject",
+        "lemma": "иван",
+        "rule": "S1",
+        "head": 1,
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": "читает",
+        "role": "predicate",
+        "lemma": "читать",
+        "rule": "V1",
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": "быстрее",
+        "role": "comparative_adverb",
+        "lemma": "быстрый",
+        "rule": "CMP.ADV",
+        "head": 1,
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": "чем",
+        "role": "clause_marker",
+        "lemma": "чем",
+        "rule": "CL.MARK",
+        "head": 5,
+        "scope": "comparison",
+        "assertion_status": "comparison"
+      },
+      {
+        "surface": "Мария",
+        "role": "subject",
+        "lemma": "мария",
+        "rule": "S1",
+        "head": 5,
+        "assertion_status": "comparison"
+      },
+      {
+        "surface": "пишет",
+        "role": "clause_adverbial",
+        "lemma": "писать",
+        "rule": "CL.COMPARISON",
+        "head": 2,
+        "scope": "comparison",
+        "assertion_status": "comparison"
+      }
+    ],
+    "queries": [],
+    "baseline_status": "UNRESOLVED",
+    "same_word_graph": true
+  },
+  {
+    "rule": "wh",
+    "variant": "original",
+    "text": "Я знаю, кто пришёл и зачем",
+    "status": "STORED",
+    "response": "Наблюдение записано.",
+    "probes": [],
+    "reason": "COMPLEX_CLAUSE",
+    "graph": [
+      {
+        "surface": "Я",
+        "role": "subject",
+        "lemma": "я",
+        "rule": "S1",
+        "head": 1,
+        "assertion_status": "asserted",
+        "participant_ref": "reader"
+      },
+      {
+        "surface": "знаю",
+        "role": "predicate",
+        "lemma": "знать",
+        "rule": "V1",
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": ",",
+        "role": "punctuation",
+        "lemma": ",",
+        "rule": "CL.PUNCT",
+        "head": 4,
+        "assertion_status": "embedded"
+      },
+      {
+        "surface": "кто",
+        "role": "subject",
+        "lemma": "кто",
+        "rule": "CL.WH",
+        "head": 4,
+        "assertion_status": "embedded"
+      },
+      {
+        "surface": "пришёл",
+        "role": "clause_complement",
+        "lemma": "прийти",
+        "rule": "CL.COMP",
+        "head": 1,
+        "scope": "embedded",
+        "assertion_status": "embedded"
+      },
+      {
+        "surface": "и",
+        "role": "coordinator",
+        "lemma": "и",
+        "rule": "CL.WH.COORD",
+        "head": 6,
+        "assertion_status": "embedded"
+      },
+      {
+        "surface": "зачем",
+        "role": "adverb",
+        "lemma": "зачем",
+        "rule": "CL.WH",
+        "head": 4,
+        "coord_head": 3,
+        "ellipsis_source": 4,
+        "assertion_status": "embedded"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Что я знаю?",
+        "status": "ANSWER",
+        "response": "кто пришёл и зачем",
+        "probes": [],
+        "reason": "SIMPLE_CLAUSE"
+      },
+      {
+        "text": "Иван пришёл?",
+        "status": "UNKNOWN",
+        "response": "Неизвестно.",
+        "probes": [],
+        "reason": "SIMPLE_CLAUSE"
+      }
+    ],
+    "baseline_status": "UNRESOLVED"
+  },
+  {
+    "rule": "wh",
+    "variant": "without_commas",
+    "text": "Я знаю кто пришёл и зачем",
+    "status": "STORED",
+    "response": "Наблюдение записано.",
+    "probes": [],
+    "reason": "COMPLEX_CLAUSE",
+    "graph": [
+      {
+        "surface": "Я",
+        "role": "subject",
+        "lemma": "я",
+        "rule": "S1",
+        "head": 1,
+        "assertion_status": "asserted",
+        "participant_ref": "reader"
+      },
+      {
+        "surface": "знаю",
+        "role": "predicate",
+        "lemma": "знать",
+        "rule": "V1",
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": "кто",
+        "role": "subject",
+        "lemma": "кто",
+        "rule": "CL.WH",
+        "head": 3,
+        "assertion_status": "embedded"
+      },
+      {
+        "surface": "пришёл",
+        "role": "clause_complement",
+        "lemma": "прийти",
+        "rule": "CL.COMP",
+        "head": 1,
+        "scope": "embedded",
+        "assertion_status": "embedded"
+      },
+      {
+        "surface": "и",
+        "role": "coordinator",
+        "lemma": "и",
+        "rule": "CL.WH.COORD",
+        "head": 5,
+        "assertion_status": "embedded"
+      },
+      {
+        "surface": "зачем",
+        "role": "adverb",
+        "lemma": "зачем",
+        "rule": "CL.WH",
+        "head": 3,
+        "coord_head": 2,
+        "ellipsis_source": 3,
+        "assertion_status": "embedded"
+      }
+    ],
+    "queries": [],
+    "baseline_status": "UNRESOLVED",
+    "same_word_graph": true
+  },
+  {
+    "rule": "quote",
+    "variant": "original",
+    "text": "„Я вернусь, — сказал Иван, — когда стемнеет“",
+    "status": "STORED",
+    "response": "Наблюдение записано.",
+    "probes": [],
+    "reason": "COMPLEX_CLAUSE",
+    "graph": [
+      {
+        "surface": "„",
+        "role": "punctuation",
+        "lemma": "„",
+        "rule": "UTT.QUOTE.BOUND",
+        "head": 2,
+        "quotation": 2,
+        "assertion_status": "quoted"
+      },
+      {
+        "surface": "Я",
+        "role": "subject",
+        "lemma": "я",
+        "rule": "S1",
+        "head": 2,
+        "quotation": 2,
+        "assertion_status": "quoted"
+      },
+      {
+        "surface": "вернусь",
+        "role": "clause_complement",
+        "lemma": "вернуться",
+        "rule": "UTT.QUOTE",
+        "head": 5,
+        "scope": "quoted",
+        "quotation": 2,
+        "assertion_status": "quoted"
+      },
+      {
+        "surface": ",",
+        "role": "punctuation",
+        "lemma": ",",
+        "rule": "CL.PUNCT",
+        "head": 10,
+        "quotation": 2,
+        "assertion_status": "quoted"
+      },
+      {
+        "surface": "—",
+        "role": "punctuation",
+        "lemma": "—",
+        "rule": "UTT.QUOTE.BREAK",
+        "head": 2,
+        "quotation": 2,
+        "assertion_status": "quoted"
+      },
+      {
+        "surface": "сказал",
+        "role": "predicate",
+        "lemma": "сказать",
+        "rule": "V1",
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": "Иван",
+        "role": "subject",
+        "lemma": "иван",
+        "rule": "S1",
+        "head": 5,
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": ",",
+        "role": "punctuation",
+        "lemma": ",",
+        "rule": "UTT.QUOTE.BREAK",
+        "head": 2,
+        "quotation": 2,
+        "assertion_status": "quoted"
+      },
+      {
+        "surface": "—",
+        "role": "punctuation",
+        "lemma": "—",
+        "rule": "UTT.QUOTE.BREAK",
+        "head": 2,
+        "quotation": 2,
+        "assertion_status": "quoted"
+      },
+      {
+        "surface": "когда",
+        "role": "clause_marker",
+        "lemma": "когда",
+        "rule": "CL.MARK",
+        "head": 10,
+        "scope": "temporal",
+        "quotation": 2,
+        "assertion_status": "quoted"
+      },
+      {
+        "surface": "стемнеет",
+        "role": "clause_adverbial",
+        "lemma": "стемнеть",
+        "rule": "CL.ADV",
+        "implicit_subject": "unresolved",
+        "head": 2,
+        "scope": "temporal",
+        "quotation": 2,
+        "assertion_status": "quoted"
+      },
+      {
+        "surface": "“",
+        "role": "punctuation",
+        "lemma": "“",
+        "rule": "UTT.QUOTE.BOUND",
+        "head": 2,
+        "quotation": 2,
+        "assertion_status": "quoted"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Что сказал Иван?",
+        "status": "ANSWER",
+        "response": "„Я вернусь, когда стемнеет“",
+        "probes": [],
+        "reason": "SIMPLE_CLAUSE"
+      },
+      {
+        "text": "Я вернусь?",
+        "status": "UNKNOWN",
+        "response": "Неизвестно.",
+        "probes": [],
+        "reason": "SIMPLE_CLAUSE"
+      },
+      {
+        "text": "Иван вернётся?",
+        "status": "UNKNOWN",
+        "response": "Неизвестно.",
+        "probes": [],
+        "reason": "SIMPLE_CLAUSE"
+      }
+    ],
+    "baseline_status": "UNRESOLVED"
+  },
+  {
+    "rule": "quote",
+    "variant": "without_commas",
+    "text": "„Я вернусь — сказал Иван — когда стемнеет“",
+    "status": "STORED",
+    "response": "Наблюдение записано.",
+    "probes": [],
+    "reason": "COMPLEX_CLAUSE",
+    "graph": [
+      {
+        "surface": "„",
+        "role": "punctuation",
+        "lemma": "„",
+        "rule": "UTT.QUOTE.BOUND",
+        "head": 2,
+        "quotation": 2,
+        "assertion_status": "quoted"
+      },
+      {
+        "surface": "Я",
+        "role": "subject",
+        "lemma": "я",
+        "rule": "S1",
+        "head": 2,
+        "quotation": 2,
+        "assertion_status": "quoted"
+      },
+      {
+        "surface": "вернусь",
+        "role": "clause_complement",
+        "lemma": "вернуться",
+        "rule": "UTT.QUOTE",
+        "head": 4,
+        "scope": "quoted",
+        "quotation": 2,
+        "assertion_status": "quoted"
+      },
+      {
+        "surface": "—",
+        "role": "punctuation",
+        "lemma": "—",
+        "rule": "UTT.QUOTE.BREAK",
+        "head": 2,
+        "quotation": 2,
+        "assertion_status": "quoted"
+      },
+      {
+        "surface": "сказал",
+        "role": "predicate",
+        "lemma": "сказать",
+        "rule": "V1",
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": "Иван",
+        "role": "subject",
+        "lemma": "иван",
+        "rule": "S1",
+        "head": 4,
+        "assertion_status": "asserted"
+      },
+      {
+        "surface": "—",
+        "role": "punctuation",
+        "lemma": "—",
+        "rule": "UTT.QUOTE.BREAK",
+        "head": 2,
+        "quotation": 2,
+        "assertion_status": "quoted"
+      },
+      {
+        "surface": "когда",
+        "role": "clause_marker",
+        "lemma": "когда",
+        "rule": "CL.MARK",
+        "head": 8,
+        "scope": "temporal",
+        "quotation": 2,
+        "assertion_status": "quoted"
+      },
+      {
+        "surface": "стемнеет",
+        "role": "clause_adverbial",
+        "lemma": "стемнеть",
+        "rule": "CL.ADV",
+        "implicit_subject": "unresolved",
+        "head": 2,
+        "scope": "temporal",
+        "quotation": 2,
+        "assertion_status": "quoted"
+      },
+      {
+        "surface": "“",
+        "role": "punctuation",
+        "lemma": "“",
+        "rule": "UTT.QUOTE.BOUND",
+        "head": 2,
+        "quotation": 2,
+        "assertion_status": "quoted"
+      }
+    ],
+    "queries": [],
+    "baseline_status": "UNRESOLVED",
+    "same_word_graph": true
+  }
+]

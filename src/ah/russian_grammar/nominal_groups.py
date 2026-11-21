@@ -129,7 +129,7 @@ def _names(tokens, group):
                     states.append((expanded, (*parts, part)))
 
 
-def _groups(tokens, start, budget, *, bare_cases=(), chart=None):
+def _groups(tokens, start, budget, *, bare_cases=(), chart=None, unmarked_series=False):
     from .parser import NominalBudgetExceeded, Link
 
     found = set()
@@ -168,7 +168,7 @@ def _groups(tokens, start, budget, *, bare_cases=(), chart=None):
                 comma = tokens[end].surface == ','
                 next_word = end + int(comma)
                 markers = list(_markers(tokens, next_word))
-                if comma:
+                if comma or unmarked_series:
                     markers.append(())
                 for marker in markers:
                     stop = next_word + len(marker)
@@ -180,7 +180,8 @@ def _groups(tokens, start, budget, *, bare_cases=(), chart=None):
                             parent = head if i == marker[0] else marker[0]
                             role = 'coordinator' if i == marker[0] else 'coordinator_part'
                             links.append((i, Link(role, tokens[i].surface.casefold(), parent, 'P.COORD')))
-                        links.append((head, Link('nominal_conjunct', child, noun, 'P.COORD', case)))
+                        rule = 'P.COORD' if comma or marker else 'NP.ENUM.JUXT'
+                        links.append((head, Link('nominal_conjunct', child, noun, rule, case)))
                         pending.append(replace(group, end=head + 1, extra=(*links, *attrs)))
                         if bare_cases:
                             item = Group(stop, head + 1, prep, head, child, case, attrs)

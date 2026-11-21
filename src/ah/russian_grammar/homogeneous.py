@@ -332,7 +332,7 @@ def projection_members(rows, root):
             continue
         markers = [m for m in rows if m['role'] == 'clause_marker' and m['head'] == i]
         if (row['assertion_status'] not in ('asserted', 'negated') or row.get('scope') not in (None, 'negated') or
-                row['rule'] == 'GAP' or
+                row['rule'] in ('GAP', 'CL.NOUN.GAP') or
                 (not markers and row['rule'] not in ('V2.CONJ', 'CL.PASS') or any(m['lemma'] not in ADDITIVE for m in markers))):
             return ()
         members.append(i)

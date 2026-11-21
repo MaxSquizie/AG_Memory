@@ -109,9 +109,126 @@ def _detached_pronominal_group(part, parse):
                 yield tuple(links[j] for j in range(len(part)))
 
 
-def _quotations(part, parse):
+def _unpunctuated_join(tree, comma):
+    from .homogeneous import ADDITIVE, ALTERNATIVE, bindings
+    from .participle_connectives import relations
+
+    next_word = comma + 1
+    marker = tree[next_word]
+    if (marker.role not in ('clause_marker', 'coordinator') or marker.head != tree[comma].head
+            or marker.lemma not in ADDITIVE | ALTERNATIVE
+            or relations(marker.lemma) not in (('addition',), ('alternative',))):
+        return False
+    member = tree[marker.head]
+    anchor = member.head
+    if anchor is None or any(i != next_word and link.lemma == marker.lemma and
+                             link.role in ('coordinator', 'clause_marker') and link.head is not None and
+                             (link.head == anchor or tree[link.head].head == anchor) for i, link in enumerate(tree)):
+        return False
+    if member.role in ('nominal_conjunct', 'infinitive', 'participle', 'attribute'):
+        return True
+    if member.role != 'clause_conjunct':
+        return False
+    if bindings(tree)[marker.head].controller is not None:
+        return True
+    host = tree[anchor].morphology
+    form = member.morphology
+    return bool(member.implicit_subject and member.implicit_subject != 'unresolved' and form and host
+                and form.person and (form.person, form.number) == (host.person, host.number))
+
+
+def _interrupted_content(part, parse, first, last, before, after):
     from .parser import Link
 
+    leading = range(1, before)
+    trailing = range(last + 1, len(part) - 1 - (part[-2].surface in ('.', '!', '?', '…')))
+    if not leading or not trailing:
+        return
+    if part[after].surface == '.':
+        for left in parse(tuple(part[j] for j in leading)):
+            for right in parse(tuple(part[j] for j in trailing)):
+                links, host, child = _linked(left, right, leading, trailing, 'clause_conjunct', 'UTT.INDEPENDENT', None)
+                if part[-2].surface == '?':
+                    links[child] = replace(links[child], scope=_quote_scope(links[child], '?'))
+                if before != first and part[before].surface != ',':
+                    links[before] = Link('punctuation', part[before].surface, host, 'UTT.QUOTE.MARK')
+                else:
+                    links[after] = Link('punctuation', '.', host, 'UTT.QUOTE.STOP')
+                yield links, host
+        return
+    if before != first and part[before].surface != ',':
+        return
+    marked = {}
+    if before != first:
+        kept = (*leading, before, *trailing)
+        for tree in parse(tuple(part[j] for j in kept)):
+            links = _map(tree, kept)
+            signature = tuple((j, link) for j, link in links.items() if j != before)
+            if _unpunctuated_join(tree, len(leading)):
+                del links[before]
+            marked[signature] = links, kept[_root(tree)]
+    yield from marked.values()
+    kept = (*leading, *trailing)
+    for tree in parse(tuple(part[j] for j in kept)):
+        links = _map(tree, kept)
+        if tuple(links.items()) not in marked:
+            yield links, kept[_root(tree)]
+
+
+def _quote_scope(link, mark):
+    scope = 'quoted_question' if mark == '?' else 'quoted'
+    return scope + '_' + link.scope if link.scope else scope
+
+
+def _attach_quote(part, author, matrix, reported, child, bounds, mark, interruption=()):
+    from .parser import Link
+
+    links = {**_map(author, matrix), **reported}
+    links[child] = replace(links[child], head=matrix[_root(author)], role='clause_complement', rule='UTT.QUOTE',
+                           scope=_quote_scope(links[child], mark))
+    for j, token in enumerate(part):
+        if j in links:
+            continue
+        if j in bounds:
+            rule = 'UTT.QUOTE.BOUND'
+        elif j in interruption:
+            rule = 'UTT.QUOTE.BREAK'
+        else:
+            rule = 'UTT.QUOTE.MARK'
+        links[j] = Link('punctuation', token.surface, child, rule)
+    return tuple(links[j] for j in range(len(part)))
+
+
+def _interrupted_quotations(part, parse):
+    from .quote_titles import spans
+
+    if len(part) < 7 or _QUOTES.get(part[0].surface) != part[-1].surface:
+        return
+    bounds = 0, len(part) - 1
+    pairs = spans(part)
+    if bounds not in pairs:
+        return
+    nested = [pair for pair in pairs if pair != bounds]
+    dashes = [i for i in range(2, len(part) - 2) if part[i].surface in DASHES
+              and not any(a < i < b for a, b in nested)]
+    for n, first in enumerate(dashes):
+        before = first - (part[first - 1].surface in (',', '?', '!', '…'))
+        for last in dashes[n + 1:]:
+            after = last - (part[last - 1].surface in (',', '.'))
+            matrix = range(first + 1, after)
+            if not matrix:
+                continue
+            for author in parse(tuple(part[j] for j in matrix)):
+                root = _root(author)
+                if author[root].lemma not in _quotation_governors():
+                    continue
+                for reported, child in _interrupted_content(part, parse, first, last, before, after):
+                    mark = part[before].surface if part[after].surface == '.' else part[-2].surface
+                    yield _attach_quote(part, author, matrix, reported, child, bounds, mark, range(before, last + 1))
+
+
+def _quotations(part, parse):
+    yield from _interrupted_quotations(part, parse)
     layouts = []
     for i in range(2, len(part) - 2):
         if part[i - 1].surface == ':' and _QUOTES.get(part[i].surface) == part[-1].surface:
@@ -130,15 +247,7 @@ def _quotations(part, parse):
             if left[_root(left)].lemma not in _quotation_governors():
                 continue
             for right in parse(tuple(part[i] for i in content)):
-                scope = 'quoted_question' if mark == '?' else 'quoted'
-                if right[_root(right)].scope:
-                    scope += '_' + right[_root(right)].scope
-                links, _, child = _linked(left, right, matrix, content, 'clause_complement', 'UTT.QUOTE', scope)
-                for j in range(len(part)):
-                    if j not in links:
-                        rule = 'UTT.QUOTE.BOUND' if j in (opening, closing) else 'UTT.QUOTE.MARK'
-                        links[j] = Link('punctuation', part[j].surface, child, rule)
-                yield tuple(links[j] for j in range(len(part)))
+                yield _attach_quote(part, left, matrix, _map(right, content), content[_root(right)], (opening, closing), mark)
 
 
 def _purpose_readings(part, parse, marker, content, matrix, comma=None):
@@ -401,6 +510,9 @@ def _parataxis(part, parse, *, explicit=False):
         if part[i + 1].surface in _QUOTES or any(tag.POS == 'CONJ' for _, tag in known_forms(part[i + 1].surface)):
             continue
         forms, width = _connectives()
+        temporal_opening = sign == ',' and any(
+            'temporal' in forms.get(tuple(token.surface.casefold() for token in part[:size]), {})
+            for size in range(2, min(width, i) + 1))
         if any(tuple(token.surface.casefold() for token in part[i + 1:i + 1 + size]) in forms
                for size in range(2, min(width, len(part) - i - 1) + 1)):
             continue
@@ -408,6 +520,8 @@ def _parataxis(part, parse, *, explicit=False):
                                for token in (part[0], part[i + 1]) for lemma, tag in known_forms(token.surface)):
             continue
         for left in parse(part[:i]):
+            if temporal_opening and left[0].scope != 'temporal':
+                continue
             for right in parse(part[i + 1:]):
                 if sign in (':', '—', ',') and (left[_root(left)].lemma in explanations.content_governors()
                         or explanations.nominal_anchor(left)):

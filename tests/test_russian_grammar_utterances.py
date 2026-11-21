@@ -79,3 +79,30 @@ def test_unmarked_finite_clauses_allow_homonymous_nouns_and_multiple_subjects():
     assert any(all(tree[i].role == 'subject' and tree[i].head == verb for i, verb in hosts.items())
                and tree[words.index('стали')].role == 'genitive_modifier' for tree in result.analyses)
     assert submit(AHCore(), 'Он увидел предмет из стали в нём нашли трещину.').observation_ref is None
+
+
+def test_interrupted_speech_keeps_author_and_two_quote_segments_separate():
+    for text, expected in (
+        ('„Я вернусь, — сказал Иван, — когда стемнеет“.', '„Я вернусь, когда стемнеет“'),
+        ('«Я вернусь — сказал Иван — когда стемнеет».', '«Я вернусь когда стемнеет»'),
+        ('“Я, — сказал Иван, — вернусь”.', '“Я вернусь”'),
+        ('«Письмо написано, — сказал Иван, — и отправлено».', '«Письмо написано и отправлено»'),
+        ('«Я приду, — сказал Иван, — и помогу».', '«Я приду и помогу»'),
+        ('«Я приду, — сказал Иван, — и Мария поможет».', '«Я приду, и Мария поможет»'),
+        ('«Я приду, — сказал Иван, — но опоздаю».', '«Я приду, но опоздаю»'),
+        ('«Я вернусь, — сказал Иван. — Ждите».', '«Я вернусь. Ждите»'),
+        ('«Ты придёшь? — сказал Иван. — Я жду».', '«Ты придёшь? Я жду»'),
+    ):
+        core = AHCore()
+        saved = submit(core, text)
+        assert saved.status == 'STORED'
+        assert submit(core, 'Что сказал Иван?').text == expected
+        assert submit(core, 'Что сказала Мария?').status == 'UNKNOWN'
+        assert submit(core, 'Я вернусь?').status == 'UNKNOWN'
+    assert submit(AHCore(), '«Я вернусь, — спал Иван, — когда стемнеет».').observation_ref is None
+
+
+def test_shared_adverb_probe_uses_only_actions_inside_the_quote():
+    reply = submit(AHCore(), '«Письмо написано, — сказал Иван, — и отправлено вчера»')
+    assert reply.status == 'AMBIGUOUS' and reply.observation_ref is None
+    assert set(reply.analysis.probes[-1].options) == {'отправлено', 'написано и отправлено'}

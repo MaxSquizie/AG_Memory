@@ -182,3 +182,11 @@ def attribute_agrees(attribute: Reading, nominal: Reading) -> bool:
     if attribute.number == 'sing' and attribute.gender != nominal.gender:
         return False
     return not (attribute.animacy and nominal.animacy and attribute.animacy != nominal.animacy)
+
+
+INTERROGATIVES = frozenset('кто что какой который чей сколько где куда откуда когда почему зачем как каков насколько'.split())
+
+
+def question_word(word, selected_lemma=None):
+    return any((selected_lemma is None or selected_lemma == lemma) and (lemma in INTERROGATIVES or 'Ques' in tag)
+               for lemma, tag in known_forms(word))

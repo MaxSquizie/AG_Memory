@@ -1,0 +1,33 @@
+{
+  "matrix": {
+    "n": 119,
+    "identical": 119,
+    "previous_sha256": "d24582d6562a611e4cf2887aa817cfec5874f12885a5f8e61a203fe496bb1540",
+    "current_sha256": "d24582d6562a611e4cf2887aa817cfec5874f12885a5f8e61a203fe496bb1540",
+    "statuses": {
+      "STORED": 105,
+      "UNRESOLVED": 12,
+      "PARSED_FRAGMENT": 2
+    }
+  },
+  "legacy": {
+    "n": 40,
+    "identical": 40,
+    "previous_sha256": "3fe687f82be3fbe85aef3f132ccd58a166d634538bdb9098890e7c9b7e90611f",
+    "current_sha256": "3fe687f82be3fbe85aef3f132ccd58a166d634538bdb9098890e7c9b7e90611f",
+    "statuses": {
+      "STORED": 23,
+      "MISSING_READING": 17
+    }
+  },
+  "omissions": {
+    "n": 10,
+    "identical": 10,
+    "previous_sha256": "f97da247ff9927bc406f016b1bf9f5d72fb045e41b3355f21e13f0e451b42c11",
+    "current_sha256": "f97da247ff9927bc406f016b1bf9f5d72fb045e41b3355f21e13f0e451b42c11",
+    "statuses": {
+      "AMBIGUOUS": 2,
+      "STORED": 8
+    }
+  }
+}

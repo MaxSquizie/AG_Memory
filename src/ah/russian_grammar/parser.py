@@ -329,6 +329,8 @@ def _partitions(analyses, tokens, text):
     from . import personal_correlatives, spatial_prefix
     from .short_participles import voice_partitions
     from . import case_arguments, collective_agreement, partitive_domains, quote_titles
+    from . import generalizing_series
+    yield from generalizing_series.gap_partitions(analyses, tokens, text)
     yield from quote_titles.partitions(analyses, tokens, text)
     yield from case_arguments.nominal_partitions(analyses, tokens, text)
     yield from partitive_domains.partitions(analyses, tokens, text)
@@ -378,10 +380,12 @@ def _partitions(analyses, tokens, text):
                 focus = _span_label(tokens, i)
                 yield word_choice(temporal_groups.ordinal_ellipsis_question(focus),
                                   sources, absent='существительное не повторяется')
-        if all(tree[i].rule == 'GAP.COUNT' for tree in analyses):
-            sources = [tree[i].ellipsis_source for tree in analyses]
+        if any(tree[i].rule in ('GAP.COUNT', 'GAP.ATTR') for tree in analyses):
+            sources = [tree[i].ellipsis_source if tree[i].rule in ('GAP.COUNT', 'GAP.ATTR') else None
+                       for tree in analyses]
             if len(set(sources)) > 1:
-                yield word_choice(f'Какое существительное подразумевается после «{token.surface}»?', sources)
+                yield word_choice(f'Какое существительное подразумевается после «{token.surface}»?', sources,
+                                  absent='существительное не пропущено')
 
     predicates = [next(i for i, link in enumerate(a) if link.head is None) for a in analyses]
     if len(set(predicates)) > 1:
@@ -959,10 +963,16 @@ def _connected(tree, root_role='predicate'):
                for ref in (link.controller, link.antecedent, link.shared_object, link.ellipsis_source)):
             return False
         if link.coord_head is not None:
-            if link.role != 'participle' or not 0 <= link.coord_head < i:
+            if not 0 <= link.coord_head < i:
                 return False
             first = tree[link.coord_head]
-            if first.role != 'participle' or first.head != link.head or first.coord_head is not None:
+            if first.coord_head is not None:
+                return False
+            if link.rule == 'CL.WH':
+                if (first.rule not in ('CL.WH', 'CL.SPATIAL.WH') or link.ellipsis_source is None
+                        or tree[link.ellipsis_source].role != 'clause_complement'):
+                    return False
+            elif link.role != 'participle' or first.role != 'participle' or first.head != link.head:
                 return False
         if link.shared_agent is not None:
             if link.role != 'participle' or not 0 <= link.shared_agent < len(tree):
@@ -1001,7 +1011,7 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
             on_distribution_step: Callable[[DistributionStep], None] | None = None) -> Result:
     if budget < 1:
         raise ValueError('budget must be positive')
-    from . import internal_comma, personal_correlatives, qualification, sentence_regions
+    from . import generalizing_series, internal_comma, personal_correlatives, qualification, sentence_regions
 
     scanner = qualification.GroupOpenings()
     prefix_openings = []
@@ -1330,6 +1340,9 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
             budget_error = None
             try:
                 collect(exact(working_words))
+                if structures and (bounds := generalizing_series.gap_boundaries(working_words, structures.values())):
+                    collect(exact(working_words, lambda part: generalizing_series.trees(
+                        part, candidates, budget, gap_boundaries=bounds)))
             except AnalysisBudgetExceeded as error:
                 if structures or (isinstance(error, NominalBudgetExceeded)
                                   and not any(dated_nominal_series.year_lists(working_words))):

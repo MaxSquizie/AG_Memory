@@ -292,3 +292,9 @@ external accusative. Require at least two distinct attested cardinal values.
 This licenses event counts; an ordinary counted object has its usual role.
 framebank_anno_ex_circ.txt SHA256 320596df05ca5cb08f645e94212bd96045c6c68923c6bac9b99d8ecf2db47354
 PYTHONPATH=src python scripts/import_russian_frequency_units.py framebank_anno_ex_circ.txt src/ah/russian_grammar/lexicon/frequency-units.txt
+
+clause-connective-readings.tsv refines coarse clause-marker relations by grammatical
+function. The notation (,) allows the comma at the indicated boundary of a compound
+conjunction. Sources:
+https://rusgram.narod.ru/2090-2099.html
+https://old-punctum.ru/punctum.php?sid=628

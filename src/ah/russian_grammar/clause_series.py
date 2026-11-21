@@ -248,6 +248,19 @@ def confirmation(tokens, tree, i, text):
                      (_span_label(tokens, i),), text)
 
 
+def _action_series_label(tokens, tree, head, stop):
+    from .parser import _span_label
+
+    actions = {head} | {i for i, link in enumerate(tree[:stop]) if link.role == 'clause_conjunct' and link.head == head}
+    first, last = min(actions), max(actions)
+    markers = {i for i in range(first + 1, last) if tree[i].role in ('coordinator', 'clause_marker') and tree[i].head in actions}
+    words = sorted(actions | markers | {i for i in range(first, last)
+                                        if tree[i].role in ('coordinator_part', 'fixed') and tree[i].head in markers})
+    if len(words) == last - first + 1:
+        return _span_label(tokens, first, last + 1)
+    return ' '.join(tokens[i].surface for i in words)
+
+
 def partitions(trees, tokens, text):
     from .parser import _span_label
     from .probe import Probe
@@ -263,9 +276,7 @@ def partitions(trees, tokens, text):
             answers = []
             for tree, link in zip(trees, links):
                 if link.rule == 'CL.SHARED.ADV':
-                    last = max(j for j, part in enumerate(tree[:i]) if part.role == 'clause_conjunct'
-                               and part.head == link.head)
-                    answers.append(_span_label(tokens, link.head, last + 1))
+                    answers.append(_action_series_label(tokens, tree, link.head, i))
                 else:
                     answers.append(_span_label(tokens, link.head))
             focus = _span_label(tokens, i)

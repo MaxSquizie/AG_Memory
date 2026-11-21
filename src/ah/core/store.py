@@ -638,7 +638,8 @@ class AHStore:
         if isinstance(element, Template):
             self._state.template_by_predicate.setdefault(element.predicate.uid, []).append(element.uid)
         if isinstance(element, SemanticEntity):
-            if domain is Domain.H and element.meta.get('role') in ('subject', 'nominal_conjunct'):
+            if domain is Domain.H and (element.meta.get('role') in ('subject', 'nominal_conjunct')
+                                       or element.meta.get('rule') == 'NP.ENUM'):
                 lemma = element.meta.get('lemma')
                 if isinstance(lemma, str):
                     self._state.subject_occurrences.setdefault(lemma, []).append(element.uid)

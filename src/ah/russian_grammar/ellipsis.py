@@ -1,6 +1,10 @@
 from dataclasses import dataclass, replace
+from collections import defaultdict
+from itertools import chain, product
+from math import prod
 
 from .morphology import Morphology, from_tag
+from .nominal_chart import agrees
 from .nominal_groups import _groups
 from .parser import Link
 from .prepositions import DASHES
@@ -67,8 +71,33 @@ def _noun_paradigm(source, lemma):
 
 
 @dataclass(frozen=True, kw_only=True)
-class CountedGap(Link):
+class NounGap(Link):
     noun_form: Morphology
+
+
+def _attribute_gaps(tokens, start, stop, sources, root, role, case, budget):
+    from .parser import AnalysisBudgetExceeded
+
+    modifiers = []
+    for token in tokens[start:stop]:
+        forms = [(lemma, tag) for lemma, tag in known_forms(token.surface)
+                 if tag.POS == 'ADJF' and tag.case == case and 'Apro' not in tag and 'Anum' not in tag]
+        if not forms:
+            return
+        modifiers.append(forms)
+    for source, noun in sources:
+        for variant in _noun_paradigm(tokens[source].surface, noun):
+            if variant.tag.case != case:
+                continue
+            options = [tuple(dict.fromkeys((lemma, from_tag(tag)) for lemma, tag in forms if agrees(tag, variant.tag)))
+                       for forms in modifiers]
+            if prod(map(len, options)) > budget:
+                raise AnalysisBudgetExceeded('NOMINAL_ELLIPSIS_BUDGET')
+            for first, *rest in product(*options):
+                gap = NounGap(role, first[0], root, 'GAP.ATTR', case, morphology=first[1],
+                              noun_form=from_tag(variant.tag), ellipsis_source=source)
+                yield ((start, gap), *((i, Link('attribute', lemma, start, 'A1', morphology=form))
+                                       for i, (lemma, form) in enumerate(rest, start + 1)))
 
 
 def _objects(tokens, start, stop, sources, root, budget, explicit):
@@ -89,7 +118,7 @@ def _objects(tokens, start, stop, sources, root, budget, explicit):
                 if not expr.compatible('accs', variant.tag, lemma):
                     continue
                 parts = expr.parts_for('accs', variant.tag)
-                first = CountedGap('object', parts[0][0], root, 'GAP.COUNT', 'accs', ellipsis_source=source,
+                first = NounGap('object', parts[0][0], root, 'GAP.COUNT', 'accs', ellipsis_source=source,
                                    quantity=expr.value, quantity_kind=expr.kind, quantity_modifier=expr.modifier,
                                    morphology=parts[0][1], noun_form=from_tag(variant.tag))
                 yield ((start, first), *((i, Link('numeral_part', word, start, 'NUM.PART', morphology=morph))
@@ -97,7 +126,36 @@ def _objects(tokens, start, stop, sources, root, budget, explicit):
                 break
 
 
-def gapped_leaves(tokens, start, stop, prefix, host, budget):
+def _parallel_nouns(prefix, arguments):
+    result = defaultdict(list)
+    for index, role in arguments:
+        argument = prefix[index]
+        if role != 'object' and argument.rule not in ('V.GOV', 'GAP.ATTR'):
+            continue
+        case = argument.case or ('accs' if role == 'object' else None)
+        if case is None:
+            continue
+        members = [index]
+        for member in members:
+            members.extend(i for i, link in enumerate(prefix)
+                           if link and link.head == member and link.role == 'nominal_conjunct')
+            source = prefix[member].ellipsis_source if prefix[member].rule in ('GAP.ATTR', 'GAP.COUNT') else member
+            result[role, case].append((source, prefix[source].lemma))
+    return result
+
+
+def _explicit_role(verb, role, case):
+    from .case_arguments import _lexicon
+
+    if role == 'object':
+        return role if verb.morphology.transitivity == 'tran' and case == 'accs' else None
+    cases, roles = _lexicon()
+    if case in cases.get(verb.lemma, ()):
+        return roles.get((verb.lemma, case), 'oblique')
+    return None
+
+
+def gapped_leaves(tokens, start, stop, prefix, host, budget, leaves):
     dashes = [i for i in range(start, stop) if tokens[i].surface in DASHES]
     anchor = prefix[host]
     source_verb = anchor.ellipsis_source if anchor.rule in ('GAP', 'GAP.REMNANT') else host
@@ -107,14 +165,28 @@ def gapped_leaves(tokens, start, stop, prefix, host, budget):
         return
     arguments = [(i, link.role) for i, link in enumerate(prefix) if link and link.head == host
                  and link.role not in ('clause_conjunct', 'clause_marker', 'punctuation')]
-    sources = [i for i, role in arguments if role == 'object']
-    if not sources or anchor.rule != 'GAP.REMNANT' and not any(role == 'subject' for _, role in arguments):
+    parallel = _parallel_nouns(prefix, arguments)
+    if not parallel or anchor.rule != 'GAP.REMNANT' and not any(role == 'subject' for _, role in arguments):
         return
-    for parent in sources:
-        sources.extend(i for i, link in enumerate(prefix) if link and link.head == parent and link.role == 'nominal_conjunct')
     simple = sorted(role for _, role in arguments) == ['object', 'subject']
-    sources = [prefix[i].ellipsis_source if prefix[i].rule == 'GAP.COUNT' else i for i in sources]
-    parallel_objects = [(i, prefix[i].lemma) for i in dict.fromkeys(sources)]
+    objects = [source for (role, _), sources in parallel.items() if role == 'object' for source in sources]
+    argument_roles = {role for _, role in arguments if role != 'subject'}
+    single_slot = len(parallel) == 1 and argument_roles == {role for role, _ in parallel}
+    if not dashes and any(tag.POS == 'ADJF' for _, tag in known_forms(tokens[stop - 1].surface)):
+        for end in range(start + 2, stop):
+            if not any(tag.POS == 'VERB' for _, tag in known_forms(tokens[end - 1].surface)):
+                continue
+            for body, root in leaves(start, end):
+                predicate = body[root - start]
+                if (root != end - 1 or not predicate.morphology or predicate.morphology.pos != 'VERB'
+                        or not any(link.role == 'subject' and link.head == root for link in body)):
+                    continue
+                for (role, case), sources in parallel.items():
+                    target = _explicit_role(predicate, role, case)
+                    if not target or any(link.role == target and link.head == root for link in body):
+                        continue
+                    for obj in _attribute_gaps(tokens, end, stop, sources, root, target, case, budget):
+                        yield (*body, *(link for _, link in obj)), root
     for subject in _groups(tokens[:stop], start, budget, bare_cases=('nomn',)):
         split = subject.end
         if split >= stop or dashes and split != dashes[0]:
@@ -124,7 +196,13 @@ def gapped_leaves(tokens, start, stop, prefix, host, budget):
         if right >= stop:
             continue
         root = split if dashes else subject.noun
-        for obj in _objects(tokens, right, stop, parallel_objects, root, budget, simple):
+        attributes = (obj for (role, case), sources in parallel.items() if single_slot
+                      for obj in _attribute_gaps(tokens, right, stop, sources, root, role, case, budget))
+        gaps = _objects(tokens, right, stop, objects, root, budget, simple) if objects else ()
+        governed = (((obj.noun, Link(role, obj.lemma, root, 'V.GOV', case)), *obj.extra)
+                     for role, case in parallel if single_slot and role != 'object'
+                     for obj in _span(tokens, right, stop, case, budget))
+        for obj in chain(attributes, gaps, governed):
             for lemma, tag in _nominals(tokens[subject.noun].surface, 'nomn'):
                 if lemma != subject.lemma or form.tense != 'past' and tag.POS == 'NPRO' and not tag.person:
                     continue
@@ -158,6 +236,7 @@ def unsupported_count(tree, i):
 
 
 def competing_leaves(candidates, start, gaps):
+    adjectival = any(any(link.rule == 'GAP.ATTR' for link in variant) for variant, _ in gaps)
     unmarked = any(variant[anchor - start].rule == 'GAP.REMNANT' for variant, anchor in gaps)
     for leaf, root in candidates:
         own = leaf[root - start]
@@ -166,14 +245,13 @@ def competing_leaves(candidates, start, gaps):
             continue
         personal = own.morphology and own.morphology.animacy == 'anim'
         nominal_identity = personal and any(link.morphology and link.morphology.animacy == 'anim' for link in subjects)
-        if (unmarked or nominal_identity or own.morphology and own.morphology.pos == 'VERB'
+        adjectival_predicate = adjectival and own.morphology and own.morphology.pos == 'ADJF' and subjects
+        if (unmarked or adjectival_predicate or nominal_identity or own.morphology and own.morphology.pos == 'VERB'
                 or any(link.quantity_kind for link in subjects)):
             yield leaf, root
 
 
 def parallel_ordinals(tokens, candidates, budget):
-    from itertools import product
-    from math import prod
     from .morphology import CASE_EQUIVALENTS
     from .parser import AnalysisBudgetExceeded
 
@@ -217,7 +295,7 @@ def parallel_ordinals(tokens, candidates, budget):
 def expand(tokens, tree):
     from .parser import Occurrence
 
-    if not any(l.rule in ('GAP.COUNT', 'GAP.REMNANT') for l in tree):
+    if not any(l.rule in ('GAP.COUNT', 'GAP.ATTR', 'GAP.REMNANT') for l in tree):
         return tokens, tree
     links = list(tree)
     words = list(tokens[:len(tree)])
@@ -232,15 +310,23 @@ def expand(tokens, tree):
                 if child.head == i and child.role not in ('attribute', 'name_part', 'possessive'):
                     links[j] = replace(child, head=root)
             links[i] = Link('subject', link.lemma, root, 'GAP.SUBJ', 'nomn', morphology=link.morphology)
-        elif link.rule == 'GAP.COUNT':
+        elif link.rule in ('GAP.COUNT', 'GAP.ATTR'):
             src = link.ellipsis_source
             noun = tree[src].lemma
             end = i + 1
-            while end < len(tree) and tree[end].head == i and tree[end].role == 'numeral_part':
+            while end < len(tree) and tree[end].head == i and tree[end].role in ('numeral_part', 'attribute'):
                 end += 1
             noun_index = len(links)
             words.append(Occurrence('', tokens[end - 1].end, tokens[end - 1].end))
-            links.append(Link('object', noun, links[i].head, 'GAP.NOUN', 'accs', morphology=link.noun_form, ellipsis_source=src))
+            links.append(Link(link.role, noun, links[i].head, 'GAP.NOUN', link.case, morphology=link.noun_form, ellipsis_source=src))
+            if link.rule == 'GAP.ATTR':
+                parent = links[i].head
+                if links[parent].rule == 'CL.CONJ':
+                    links[parent] = replace(links[parent], rule='CL.NOUN.GAP')
+                links[i] = Link('attribute', link.lemma, noun_index, 'A1', morphology=link.morphology)
+                for j in range(i + 1, end):
+                    links[j] = replace(links[j], head=noun_index)
+                continue
             links[i] = Link('numeral', link.lemma, noun_index, 'NUM.GROUP', morphology=link.morphology,
                             quantity=link.quantity, quantity_kind=link.quantity_kind, quantity_modifier=link.quantity_modifier)
     return (*words, *tokens[len(tree):]), tuple(links)

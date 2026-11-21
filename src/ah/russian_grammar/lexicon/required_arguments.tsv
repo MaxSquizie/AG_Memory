@@ -6,4 +6,4 @@ V.CMP	*	subject
 NEG.EXIST	*	object
 NEG.EXIST	*	preposition
 GAP	*	subject
-GAP	*	object
+GAP	*	parallel_argument

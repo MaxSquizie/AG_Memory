@@ -23,6 +23,13 @@ def _connectives():
         forms[tuple(form.split())][relation].add(governor)
     forms[('что',)]['ccomp'].add('знать')
     forms[('даже', 'если')]['advcl'].add('*')
+    refinements = files(__package__).joinpath('lexicon', 'clause-connective-readings.tsv')
+    for row in refinements.read_text(encoding='utf-8').splitlines():
+        phrase, relation = row.split('\t')
+        for spelling in {phrase.replace('(,)', ''), phrase.replace('(,)', ' ,')}:
+            words = tuple(spelling.split())
+            forms[words].pop('advcl', None)
+            forms[words][relation].add('*')
     return forms, max(map(len, forms))
 
 
@@ -79,6 +86,8 @@ def _preposed_splits(words, body_start):
 
 
 def _scope(boundary):
+    if boundary.relation in ('comparison', 'temporal'):
+        return boundary.relation
     if boundary.relation == 'ccomp':
         return 'embedded'
     if boundary.relation == 'advcl':
@@ -117,7 +126,7 @@ def _markers(boundary, root, words):
         return tuple(markers)
     stop = boundary.marker if boundary.relation == 'relative' else boundary.stop
     for index in range(boundary.start, stop):
-        if index < boundary.marker:
+        if index < boundary.marker or words[index] == ',':
             link = Link('punctuation', words[index], root, 'CL.PUNCT')
         elif index > boundary.marker:
             link = Link('fixed', words[index], boundary.marker, 'CL.FIXED')
@@ -171,6 +180,10 @@ def _level_attachments(prefix, levels, boundary, leaf, root, words):
 
 
 def _attachments(prefix, levels, boundary, leaf, root, words, *, tokens=None, spatial_prefix=None):
+    if boundary.relation == 'comparison':
+        markers = _markers(boundary, root, words)
+        yield from degree_clauses.compared_clause(prefix, levels, boundary, leaf, root, markers)
+        return
     if boundary.relation == 'advcl' and relative_role(boundary.form):
         from .spatial_clauses import attachments
 
@@ -246,6 +259,8 @@ def trees(tokens, local, *, budget=256, spatial_prefix=None, subject_fronted=Fal
             candidates = spatial_leaves(tokens[start:stop], local, budget)
         else:
             candidates = local(tokens[start:stop])
+        if any(b.relation == 'comparison' for b in starts.get(stop, ())):
+            candidates = chain(candidates, degree_clauses.comparison_leaves(tokens[start:stop], local))
         for tree in candidates:
             roots = [i for i, link in enumerate(tree) if link.role == 'predicate' and link.head is None]
             if len(roots) == 1:
@@ -317,7 +332,7 @@ def trees(tokens, local, *, budget=256, spatial_prefix=None, subject_fronted=Fal
                         parallel = [anchor, *(i for i, link in enumerate(prefix) if link and
                                               link.role == 'clause_conjunct' and link.head == anchor)]
                         gaps = tuple(dict.fromkeys(gap for host in parallel if marker.form for gap in
-                                                   gapped_leaves(tokens, marker.stop, stop, prefix, host, budget)))
+                                                   gapped_leaves(tokens, marker.stop, stop, prefix, host, budget, leaves)))
                         if gaps:
                             candidates = (*gaps, *competing_leaves(candidates, marker.stop, gaps))
                         if prefix[anchor].morphology and prefix[anchor].morphology.pos == 'PRTS':
@@ -357,7 +372,8 @@ def trees(tokens, local, *, budget=256, spatial_prefix=None, subject_fronted=Fal
                 return trees(part, local, budget=budget, spatial_prefix=spatial_prefix)
             yield from reverse_trees(tokens, components, budget, spatial_prefix, _preposed_splits(words, marker.stop))
             continue
-        if marker.relation != 'advcl' or (marker.form not in _preposed() and marker.form != 'даже если'):
+        if marker.relation != 'temporal' and not (
+                marker.relation == 'advcl' and (marker.form in _preposed() or marker.form == 'даже если')):
             continue
         for stop, split in _preposed_splits(words, marker.stop):
             conditional = _scope(marker) in ('condition', 'concessive_condition')

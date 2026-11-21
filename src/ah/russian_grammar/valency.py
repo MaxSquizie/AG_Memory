@@ -28,6 +28,8 @@ def violation(tokens, tree):
     for link in tree:
         if link.head is not None:
             children[link.head].add(link.role)
+            if tree[link.head].rule == 'GAP' and (link.role == 'object' or link.rule in ('V.GOV', 'GAP.NOUN')):
+                children[link.head].add('parallel_argument')
     for i, link in enumerate(tree):
         if link.role != 'governed' or link.case != 'accs' or 'numeral' not in children[i]:
             continue
@@ -43,7 +45,7 @@ def violation(tokens, tree):
             return 'UNSUPPORTED_QUANTITY_ELLIPSIS'
         if link.lemma == 'себя' and link.antecedent is None:
             return 'UNBOUND_REFLEXIVE'
-        if link.rule == 'V.GOV':
+        if link.rule == 'V.GOV' or link.rule == 'GAP.NOUN' and link.role != 'object':
             if link.head is None:
                 return 'INVALID_GOVERNOR'
             governor = tree[link.head].lemma

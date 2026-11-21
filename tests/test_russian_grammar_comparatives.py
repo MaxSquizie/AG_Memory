@@ -59,3 +59,39 @@ def test_comparison_standard_has_its_own_possessor():
     tree, = result.analyses
     assert (tree[5].role, tree[5].head, tree[5].antecedent) == ('possessive', 7, 0)
     assert (tree[6].role, tree[6].head, tree[7].role) == ('attribute', 7, 'comparison_standard')
+
+
+@pytest.mark.parametrize(('sentence', 'reversed_order', 'subordinate'), [
+    ('Иван читает быстрее, чем Мария пишет.', 'Мария пишет быстрее, чем Иван читает?', 'Мария пишет?'),
+    ('Иван читает быстрее чем Мария пишет.', 'Мария пишет быстрее чем Иван читает?', 'Мария пишет?'),
+    ('Мария медленнее работает, нежели Иван читает.', 'Иван медленнее читает, нежели Мария работает?', 'Иван читает?'),
+])
+def test_comparison_clause_attaches_to_degree_with_its_own_subject(sentence, reversed_order, subordinate):
+    from ah.core import AHCore
+    from ah.russian_grammar.memory import submit
+
+    core = AHCore()
+    record = submit(core, sentence)
+    assert record.status == 'STORED' and not record.analysis.steps
+    tree, = record.analysis.analyses
+    degree, = (i for i, link in enumerate(tree) if link.rule == 'CMP.ADV')
+    child, = (i for i, link in enumerate(tree) if link.rule == 'CL.COMPARISON')
+    assert tree[child].head == degree and tree[child].scope == 'comparison'
+    subjects = [link.head for link in tree if link.role == 'subject']
+    assert subjects == [tree[degree].head, child]
+    assert submit(core, sentence[:-1] + '?').text == 'Да.'
+    assert submit(core, reversed_order).status == 'UNKNOWN'
+    assert submit(core, subordinate).status == 'UNKNOWN'
+
+
+@pytest.mark.parametrize(('sentence', 'clause_rule', 'scope'), [
+    ('Иван знает, чем Мария пишет.', 'CL.COMP', 'embedded'),
+    ('Иван ушёл прежде, чем Мария пришла.', 'CL.ADV', 'temporal'),
+    ('Прежде чем Мария пришла, Иван ушёл.', 'CL.ADV', 'temporal'),
+])
+def test_noncomparative_chem_keeps_its_clause_relation(sentence, clause_rule, scope):
+    result = analyze(sentence)
+    tree, = result.analyses
+    clause, = (link for link in tree if link.rule == clause_rule)
+    assert clause.scope == scope
+    assert all(link.rule != 'CL.COMPARISON' for link in tree)
