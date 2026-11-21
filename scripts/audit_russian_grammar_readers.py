@@ -7,7 +7,7 @@ import signal
 
 from accept_russian_grammar_second_ten import DIGEST
 from audit_russian_grammar_fourth_ten import project
-from audit_russian_grammar_third_ten import compare, expire, inspect, time_limit, variants
+from audit_russian_grammar_third_ten import bounds, compare, expire, inspect, time_limit, variants
 from measure_russian_grammar import sentences
 from ah.core import AHCore
 from ah.model import Domain
@@ -27,6 +27,32 @@ def eligible(rows):
         if any(ch.isalpha() and ch.casefold() not in 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя' for ch in surface):
             return False
     return True
+
+
+def comma_omissions(text, rows):
+    spans = bounds(text, rows)
+    commas = [i for i, row in enumerate(rows) if row[1] == ',' and row[3] == 'PUNCT']
+    masks = [(f'omit_comma_{number}', (i,)) for number, i in enumerate(commas, 1)]
+    if len(commas) > 1:
+        masks.append(('omit_all_commas', tuple(commas)))
+    for name, removed in masks:
+        source = text
+        for i in reversed(removed):
+            start, end = spans[i]
+            source = source[:start] + source[end:]
+        kept = [row for i, row in enumerate(rows) if i not in removed]
+        parents = {row[0]: row[6] for row in rows}
+        indices = {row[0]: str(i) for i, row in enumerate(kept, 1)}
+        indices['0'] = '0'
+        gold = []
+        for row in kept:
+            head = row[6]
+            while head not in indices:
+                head = parents[head]
+            item = row.copy()
+            item[0], item[6] = indices[row[0]], indices[head]
+            gold.append(item)
+        yield name, source, gold
 
 
 def name_coordination_errors(words, gold):
@@ -97,6 +123,8 @@ def main():
     parser.add_argument('--start', type=int, default=72)
     parser.add_argument('--count', type=int, default=20)
     parser.add_argument('--seconds', type=int, default=30)
+    parser.add_argument('--comma-omissions', action='store_true',
+                        help='Test each omitted comma and all of them, retaining every other character')
     args = parser.parse_args()
     if hashlib.sha256(args.corpus.read_bytes()).hexdigest() != DIGEST:
         parser.error('Unexpected corpus revision')
@@ -122,8 +150,9 @@ def main():
             skipped.append(identity)
     if len(selected) != args.count:
         parser.error('Not enough eligible sentences')
+    generate = comma_omissions if args.comma_omissions else variants
     results = [audit(identity, kind, source, gold, readings, args.seconds)
-               for identity, text, rows in selected for kind, source, gold in variants(text, rows)]
+               for identity, text, rows in selected for kind, source, gold in generate(text, rows)]
     args.output.write_text(json.dumps(dict(corpus_sha256=DIGEST, skipped=skipped, results=results),
                                       ensure_ascii=False, indent=2) + '\n', encoding='utf8')
 

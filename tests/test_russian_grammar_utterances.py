@@ -67,3 +67,15 @@ def test_nominal_predicate_can_share_a_subject_with_a_following_finite_clause():
                    for form in ('Исток', 'протекает'))
     assert any(tree[verb].controller == actor and tree[actor].role == 'subject' for tree in result.analyses)
     assert any(tree[verb].implicit_subject == 'unresolved' for tree in result.analyses)
+
+
+def test_unmarked_finite_clauses_allow_homonymous_nouns_and_multiple_subjects():
+    from ah.russian_grammar.parser import analyze
+
+    result = analyze('Он председательствовал на выставке стали в ней приняли участие 22 страны делегаты подписали соглашение.')
+    words = tuple(token.surface for token in result.tokens)
+    hosts = {words.index(subject): words.index(verb) for subject, verb in (
+        ('Он', 'председательствовал'), ('страны', 'приняли'), ('делегаты', 'подписали'))}
+    assert any(all(tree[i].role == 'subject' and tree[i].head == verb for i, verb in hosts.items())
+               and tree[words.index('стали')].role == 'genitive_modifier' for tree in result.analyses)
+    assert submit(AHCore(), 'Он увидел предмет из стали в нём нашли трещину.').observation_ref is None

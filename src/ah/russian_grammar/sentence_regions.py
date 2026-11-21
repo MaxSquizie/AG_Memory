@@ -94,6 +94,13 @@ def confirmation(tokens, tree, i, text):
             return probe
     return None
 
+def additional_readings(tokens, parse, budget):
+    from .utterances import missing_boundaries
+
+    yield from missing_boundaries(tokens, parse, lambda part: _relative_child_readings(part, parse, budget), budget)
+    yield from additional_nominal_readings(tokens, parse, budget)
+
+
 def additional_nominal_readings(tokens, parse, budget):
     from itertools import chain
 

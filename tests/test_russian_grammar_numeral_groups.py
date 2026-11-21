@@ -36,7 +36,18 @@ def test_declined_count_inside_an_object_and_calendars_with_a_shared_unit():
     assert (genitive['стихотворений'].role, genitive['стихотворений'].head) == ('genitive_modifier', 2)
     assert (genitive['трёх'].quantity, genitive['трёх'].head) == ('3', 4)
 
-    dated = tree('Иван работал в 1998, 2003 или 2010 годах.')
-    assert (dated['1998'].head, dated['2003'].head, dated['2010'].head) == (8, 3, 3)
-    assert dated['или'].scope == 'alternative'
-    assert all(dated[year].quantity_kind == 'ordinal' for year in ('1998', '2003', '2010'))
+    for separator in (', ', ' '):
+        dated = tree(f'Иван работал в 1998{separator}2003 или 2010 годах.')
+        words = list(dated)
+        assert [words[dated[y].head] for y in ('1998', '2003', '2010')] == ['годах', '1998', '1998']
+        assert dated['или'].scope == 'alternative'
+        assert all(dated[year].quantity_kind == 'ordinal' for year in ('1998', '2003', '2010'))
+
+
+def test_nested_year_lists_keep_their_separate_object_hosts():
+    result = analyze('Анна получала медаль в 2002 2004 и 2009 годах медаль в 2015 и 2017 годах.')
+    first, second = [i for i, token in enumerate(result.tokens) if token.surface == 'медаль']
+    tree, = result.analyses
+    assert tree[first].role == 'object'
+    assert (tree[second].role, tree[second].head) == ('nominal_conjunct', first)
+    assert [tree[i].head for i, token in enumerate(result.tokens) if token.surface == 'в'] == [first, second]

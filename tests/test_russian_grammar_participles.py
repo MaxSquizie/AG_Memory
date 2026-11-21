@@ -170,3 +170,14 @@ def test_verbal_noun_can_govern_an_instrumental_alongside_the_finite_verb():
     assert result.probes[-1].options == ('Шли', 'командующие')
     control = analyze('Шли люди фронтами.')
     assert all(link.rule != 'N.VERBAL.GOV' for tree in control.analyses for link in tree)
+
+
+def test_completed_passive_can_omit_time_only_in_an_affirmative_question():
+    core = AHCore()
+    assert submit(core, 'Письмо отправлено вчера.').status == 'STORED'
+    assert submit(core, 'Письмо отправлено?').text == 'Да.'
+    assert submit(core, 'Письмо отправлено сегодня?').status == 'UNKNOWN'
+
+    negative = AHCore()
+    assert submit(negative, 'Письмо не отправлено вчера.').status == 'STORED'
+    assert submit(negative, 'Письмо не отправлено?').status == 'UNKNOWN'

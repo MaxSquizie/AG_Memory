@@ -1,0 +1,32 @@
+{
+  "previous": "5391abf330254513a3597dc401804b936d5584e3",
+  "prior_inputs": 119,
+  "unchanged_inputs": 118,
+  "unchanged_stored": 104,
+  "changed": [
+    {
+      "id": "test-s82",
+      "variant": "no_punctuation",
+      "text": "Он председательствовал на Всемирной Исламской конференции в 1931 году в ней приняли участие 22 исламские страны",
+      "calls": [
+        "56e3e1dea7b8029739dded438682aeb8833189c49db3c264a47bd6f29683deb7",
+        "27c337c7129272ab9d33afd2c8dd5ea0269bfe55c8981fdf5fdee0d1a7a73433",
+        "9b1ac7b79d2b035b4da1b3fe3b9fff8583160e2e65659008751b9a11b429fe1f"
+      ],
+      "status": "STORED",
+      "reason": "COMPLEX_CLAUSE",
+      "empty": false,
+      "exact": true,
+      "incorrect_heads": [],
+      "role_scope_errors": [],
+      "graph_sha256": "c0f1978e26ee4708df55e049e4680525bac539f18fa896bb0b946e0354168cf8",
+      "stored_metadata_sha256": "9653bfc1f5822949fb592744c2bd1ee7e0a6f6802381fc225eff4a1643110958"
+    }
+  ],
+  "legacy_equal": 40,
+  "legacy_counts": {
+    "STORED": 23,
+    "MISSING_READING": 17
+  },
+  "legacy_sha256": "3fe687f82be3fbe85aef3f132ccd58a166d634538bdb9098890e7c9b7e90611f"
+}

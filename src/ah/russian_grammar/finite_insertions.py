@@ -93,7 +93,7 @@ def partitions(trees, tokens, text):
             question = 'Какое действие дано как добавочное пояснение к основному сообщению?'
             answers = [label if (l.scope or '').startswith('parenthetical') else other for l in links]
             yield Probe(question, (label, other), text), answers
-        if all(l.role == 'adverb' and l.head is not None for l in links):
+        if all(l.role == 'adverb' and l.head is not None and l.scope != 'coordination' for l in links):
             heads = tuple(dict.fromkeys(l.head for l in links))
             if len(heads) > 1 and all(tree[h].role in ('predicate', 'clause_conjunct') for tree in trees for h in heads):
                 labels = {h: _span_label(tokens, h) for h in heads}

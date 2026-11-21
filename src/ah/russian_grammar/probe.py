@@ -24,6 +24,7 @@ class Probe:
     options: tuple[str, ...]
     context: str
     focus_choices: tuple[FocusChoice, ...] = field(default=(), compare=False, repr=False)
+    verify_option_order: bool = field(default=False, compare=False, repr=False, kw_only=True)
     _russian_controls: bool | None = field(default=None, compare=False, repr=False, kw_only=True)
 
     def _format(self):

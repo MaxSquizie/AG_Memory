@@ -333,14 +333,14 @@ def projection_members(rows, root):
         markers = [m for m in rows if m['role'] == 'clause_marker' and m['head'] == i]
         if (row['assertion_status'] not in ('asserted', 'negated') or row.get('scope') not in (None, 'negated') or
                 row['rule'] == 'GAP' or
-                (row['rule'] != 'V2.CONJ' and (not markers or any(m['lemma'] not in ADDITIVE for m in markers)))):
+                (not markers and row['rule'] not in ('V2.CONJ', 'CL.PASS') or any(m['lemma'] not in ADDITIVE for m in markers))):
             return ()
         members.append(i)
     return members if len(members) > 1 else ()
 
 
 def project(rows, members, target):
-    if rows[target]['assertion_status'] != 'asserted':
+    if rows[target]['assertion_status'] not in ('asserted', 'negated'):
         return None
     children = [[] for _ in rows]
     for i, row in enumerate(rows):
@@ -353,8 +353,16 @@ def project(rows, members, target):
         attachments.add(row['controller'])
     if target != members[0] and row['rule'] == 'V.FUT':
         attachments.update(i for i in children[members[0]] if rows[i]['role'] == 'auxiliary')
+    if row['rule'] == 'CL.PASS':
+        attachments.update(i for i in children[members[0]] if rows[i].get('scope') == 'coordination')
+        if not any(rows[i]['role'] == 'copula' for i in children[target]):
+            attachments.update(i for i in children[members[0]] if rows[i]['role'] == 'copula')
     if row.get('shared_object') is not None:
         attachments.add(row['shared_object'])
+    inherited = [i for i in attachments if rows[i]['head'] != target]
+    for i in inherited:
+        inherited.extend(children[i])
+    inherited = set(inherited)
     nodes = sorted(attachments)
     for i in nodes:
         nodes.extend(children[i])
@@ -364,10 +372,16 @@ def project(rows, members, target):
     for i in indices:
         part = dict(rows[i])
         part.pop('shared_object', None)
+        if i in inherited and part['assertion_status'] == rows[members[0]]['assertion_status']:
+            part['assertion_status'] = row['assertion_status']
         if i == target:
             part.update(head=None, role='predicate', controller=None)
+            if part['rule'] == 'CL.PASS':
+                part['rule'] = 'V2.PASS'
         elif i in attachments:
             part['head'] = target
+            if part['rule'] == 'CL.SHARED.ADV':
+                part.update(scope=None, rule='B1')
         for key in REFERENCES:
             value = part.get(key)
             if value is not None:

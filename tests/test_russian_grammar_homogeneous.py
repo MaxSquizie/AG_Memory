@@ -84,3 +84,37 @@ def test_embedded_conjunction_has_no_independent_index():
     assert tree[5].role == 'clause_complement' and tree[7].head == 5
     assert not tuple(core.store.find_elements_with_property(CONJUNCT_KEY, 'закрыть'))
     assert submit(core, 'Кто закрыл окно?').status == 'UNKNOWN'
+
+
+@pytest.mark.parametrize('source', [
+    'Письмо написано, проверено и отправлено.',
+    'Письмо написано проверено и отправлено.',
+])
+def test_coordinated_passive_predicates_share_the_patient(source):
+    core = AHCore()
+    result = submit(core, source)
+    assert result.status == 'STORED'
+    tree, = result.analysis.analyses
+    members = [part for part in tree if part.role == 'clause_conjunct']
+    assert [(part.controller, part.morphology.voice) for part in members] == [(0, 'pssv'), (0, 'pssv')]
+    assert submit(core, 'Письмо отправлено?').status == 'ANSWER'
+
+
+def test_coordinated_passive_keeps_polarity_local():
+    core = AHCore()
+    assert submit(core, 'Письмо написано, но не отправлено.').status == 'STORED'
+    assert submit(core, 'Письмо не отправлено?').status == 'ANSWER'
+    assert submit(core, 'Письмо отправлено?').status == 'UNKNOWN'
+    assert submit(core, 'Письмо написано и отправлена.').status == 'UNRESOLVED'
+
+
+def test_postposed_passive_subject_uses_both_agreements():
+    core = AHCore()
+    assert submit(core, 'Исправлены и подписаны документы.').status == 'STORED'
+    assert submit(core, 'Документы исправлены?').status == 'ANSWER'
+    assert submit(core, 'Документы подписаны?').status == 'ANSWER'
+    assert submit(core, 'Исправлен и подписаны документы.').status == 'UNRESOLVED'
+    separate = AHCore()
+    assert submit(separate, 'Исправлены черновики и подписаны документы.').status == 'STORED'
+    assert submit(separate, 'Документы исправлены?').status == 'UNKNOWN'
+    assert submit(separate, 'Черновики подписаны?').status == 'UNKNOWN'

@@ -252,6 +252,115 @@ def nominal_then_finite(part, parse, *, marked=False):
             yield tuple(links[j] for j in range(len(part)))
 
 
+def _unmarked_nominals(part, parse):
+    from .nominal_designations import _name
+    from .nominal_groups import _members
+    from .parser import Link
+
+    for i in range(1, len(part)):
+        cases = {tag.case for _, tag in known_forms(part[i - 1].surface)
+                 if tag.POS == 'NOUN' and tag.case}
+        for case in sorted(cases):
+            for head, lemma, _, attrs in _members(part, i, None, case):
+                end = head + 1
+                name = _name(part[end].surface) if end < len(part) else None
+                if name is None and not attrs:
+                    continue
+                stop = end + int(name is not None)
+                kept = (*range(i), *range(stop, len(part)))
+                for tree in parse(tuple(part[j] for j in kept)):
+                    governor = tree[i - 1]
+                    if governor.role != 'governed' or governor.case != case:
+                        continue
+                    links = _map(tree, kept) | dict(attrs)
+                    if name is not None:
+                        links[end] = replace(name, head=head)
+                    for role in ('nominal_conjunct', 'apposition'):
+                        links[head] = Link(role, lemma, i - 1, 'PP.UNMARKED', case)
+                        yield tuple(links[j] for j in range(len(part)))
+
+
+def missing_boundaries(part, parse, regional, budget):
+    from . import explanations, nominal_designations
+
+    finite = [i for i, token in enumerate(part) if any(tag.POS == 'VERB' and tag.mood == 'indc'
+                                                       for _, tag in known_forms(token.surface))]
+    if len(finite) == 1 and any(t.surface in DASHES for t in part[:finite[0]]):
+        def read(segment):
+            yield from parse(segment)
+            yield from nominal_designations.trees(segment, parse, budget)
+            yield from _unmarked_nominals(segment, parse)
+
+        yield from nominal_then_finite(part, read, marked=part[finite[0] - 1].surface == ',')
+    if len(finite) < 2:
+        return
+
+    from .case_arguments import _clause_token
+    from .nominal_groups import _members
+    from .parser import AnalysisBudgetExceeded
+
+    finite = set(finite)
+    required = {j for j in finite if _clause_token(part[j].surface)[2]}
+    subjects = {j for j, token in enumerate(part) if any(
+        tag.POS in ('NOUN', 'NPRO', 'NUMR', 'ADJF') and tag.case == 'nomn'
+        for _, tag in known_forms(token.surface))}
+    if len(subjects) < 2:
+        return
+    cuts = []
+    for cut in range(1, len(part)):
+        end = cut - int(part[cut - 1].surface == ',')
+        if end == cut and any(tag.POS == 'PREP' and next(_members(part, cut, lemma), None) is not None
+                              for lemma, tag in known_forms(part[cut - 1].surface)):
+            continue
+        if (end and part[cut].surface.isalnum() and part[end - 1].surface.isalnum()
+                and not any(tag.POS == 'CONJ' or 'Ques' in tag or lemma in ('кто', 'что', 'который')
+                            for lemma, tag in known_forms(part[cut].surface))):
+            cuts.append((end, cut))
+
+    visited = 0
+
+    @cache
+    def personal(begin, end):
+        nonlocal visited
+        span = range(begin, end)
+        if (not finite.intersection(span) or not subjects.intersection(span)
+                or len(required.intersection(span)) > 1):
+            return ()
+        visited += 1
+        if visited > budget:
+            raise AnalysisBudgetExceeded('PARATAXIS_BUDGET')
+        good = {}
+        for tree in regional(part[begin:end]):
+            root = _root(tree)
+            if (tree[root].role == 'predicate' and any(
+                    lemma == tree[root].lemma and tag.POS == 'VERB' and tag.mood == 'indc'
+                    for lemma, tag in known_forms(part[begin + root].surface))
+                    and any(l.head == root and l.role == 'subject' for l in tree)
+                    and not any(l.role.startswith('clause_') and l.role != 'clause_marker' for l in tree)):
+                good[tree] = None
+                if len(good) > budget:
+                    raise AnalysisBudgetExceeded('PARATAXIS_BUDGET')
+        return tuple(good)
+
+    @cache
+    def suffix(begin):
+        found = {}
+        if begin:
+            found.update((tree, None) for tree in personal(begin, len(part)))
+        for end, cut in cuts:
+            if end <= begin or not finite.intersection(range(cut, len(part))):
+                continue
+            for left in personal(begin, end):
+                for right in suffix(cut):
+                    for tree in explanations.attachments(part[begin:], left, right, end - begin, cut - begin):
+                        found[tree] = None
+                        if len(found) > budget:
+                            raise AnalysisBudgetExceeded('PARATAXIS_BUDGET')
+        return tuple(found)
+
+    yield from suffix(0)
+
+
 def _parataxis(part, parse, *, explicit=False):
     from .parser import Link
 
@@ -364,6 +473,52 @@ def partitions(trees, tokens, text):
     from .probe import Probe
 
     from . import explanations, nominal_parentheticals
+
+    for child in range(1, len(tokens)):
+        if not all(tree[child].rule == 'UTT.PARATAXIS' and not any(
+                l.rule == 'UTT.SEP' and l.head == child for l in tree) for tree in trees):
+            continue
+        starts = []
+        for tree in trees:
+            for start in range(child + 1):
+                index = start
+                while index is not None and index != child:
+                    index = tree[index].head
+                if index == child:
+                    starts.append(start)
+                    break
+        if len(set(starts)) > 1:
+            labels = {j: _span_label(tokens, j, child + 1) for j in sorted(set(starts))}
+            verb = _span_label(tokens, child)
+            question = f'С каких слов начинается часть предложения со сказуемым «{verb}»? Выберите её начало вплоть до сказуемого.'
+            yield Probe(question, tuple(labels.values()), text), [labels[j] for j in starts]
+
+    def nominal_label(tree, head, stop):
+        members = {head}
+        for j, link in enumerate(tree[:stop]):
+            if link.head == head and link.role in ('attribute', 'possessive', 'apposition', 'name_part'):
+                members.add(j)
+        start, end = min(members), max(members) + 1
+        return _span_label(tokens, start, end) if end - start == len(members) else _span_label(tokens, head)
+
+    for i in range(len(tokens)):
+        if not all(tree[i].rule == 'PP.UNMARKED' for tree in trees):
+            continue
+        labels = []
+        for tree in trees:
+            head = tree[i].head
+            first = nominal_label(tree, head, i)
+            second = nominal_label(tree, i, len(tokens))
+            prep = tree[head].head
+            end = prep + 1
+            while end < head and tree[end].role == 'prep_part' and tree[end].head == prep:
+                end += 1
+            preposition = ' '.join(token.surface for token in tokens[prep:end])
+            join = ' и ' if tree[i].role == 'nominal_conjunct' else ', то есть '
+            labels.append(f'{preposition} {first}{join}{preposition} {second}')
+        if len(set(labels)) > 1:
+            question = 'Как лучше прочитать выделенный фрагмент, если повторить предлог? Выберите вариант с тем же смыслом.'
+            yield Probe(question, tuple(dict.fromkeys(labels)), text, verify_option_order=True), labels
 
     yield from nominal_parentheticals.partitions(trees, tokens, text)
 

@@ -187,7 +187,7 @@ def _remember(core, result, rows, source, distributions):
             props[key] = Property(key, row['lemma'], 'str')
         if row.get('clause_relation') == 'concession' and row['assertion_status'] in ('asserted', 'negated'):
             props[CONCESSION_KEY] = Property(CONCESSION_KEY, row['lemma'], 'str')
-        if i in projected and row['assertion_status'] == 'asserted':
+        if i in projected and row['assertion_status'] in ('asserted', 'negated'):
             props[CONJUNCT_KEY] = Property(CONJUNCT_KEY, row['lemma'], 'str')
         members.append(core.ref(core.add_entity(Domain.H, properties=props, meta=row).uid))
     for i, row in enumerate(rows):
@@ -702,6 +702,15 @@ def _extraction(rows, stored, observed, source, focus, budget, subject_member=No
                                     and not (stored[observed].get('clause_relation') == 'concession'
                                              and stored[j].get('scope') == 'concession'
                                              and stored[j]['role'] == 'clause_marker')]
+    event = stored[observed]
+    if (focus is None and event.get('rule') == 'V2.PASS' and event['assertion_status'] == 'asserted'
+            and (event.get('morphology') or {}).get('aspect') == 'perf' and not event.get('scope')
+            and not any(rows[j]['role'] == 'adverb' for j in children[root])):
+        children_found[observed] = [
+            j for j in children_found[observed]
+            if not (stored[j]['role'] == 'adverb' and not stored[j].get('scope') and not surface_children[j]
+                    and adjuncts.category(stored, surface_children, j) == 'когда')
+        ]
     groups, projection = _participle_groups(stored, observed)
     flexible = {j for anchor in projection for j in (stored[anchor]['head'], *groups[anchor])}
     if focus is not None:

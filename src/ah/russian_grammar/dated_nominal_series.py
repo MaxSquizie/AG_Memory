@@ -1,8 +1,9 @@
 from dataclasses import replace
 from itertools import islice, product
 
-from .calendar_regions import year_links, year_lists
+from .calendar_regions import _printed_year, year_links, year_lists
 from .marked_regions import RelativeChoice
+from .morphology import ROLE_CASE
 from .named_arguments import opaque_cases
 from .nominal_entries import Unit, _attach, _layouts, _modifiers
 from .nominal_groups import _groups, _prepositions
@@ -96,9 +97,9 @@ def _modifiers_with_dates(part, i, budget):
                     yield Unit(i, unit + 1, unit, role, tuple(extra.items()), prep)
 
 
-def _members(part, head, budget):
+def _members(part, head, case, budget):
     choices = {}
-    for seed in _groups(part, 0, budget, bare_cases=(head.case,)):
+    for seed in _groups(part, 0, budget, bare_cases=(case,)):
         if seed.noun or seed.lemma != head.lemma:
             continue
         for layout in _layouts(part, seed, {}, budget, modifiers=_modifiers_with_dates):
@@ -151,64 +152,83 @@ def _member_partition(trees, tokens, text):
     return _partition(trees, tokens, text)
 
 
+def _dated_heads(tokens, dates):
+    ends = {unit + 1 for _, _, unit in dates}
+    for i in range(1, len(tokens)):
+        if _printed_year(tokens[i - 1].surface) and any(
+                lemma == 'год' and tag.number == 'sing' for lemma, tag in known_forms(tokens[i].surface)):
+            ends.add(i + 1)
+    inside_notes = {i for left, right in _pairs(tokens) for i in range(left + 1, right)}
+    by_form = {}
+    for i, token in enumerate(tokens[1:], 1):
+        if i in inside_notes:
+            continue
+        for lemma, tag in known_forms(token.surface):
+            if tag.POS == 'NOUN' and tag.case:
+                by_form.setdefault((lemma, str(tag.case)), set()).add(i)
+    for (lemma, case), indices in sorted(by_form.items()):
+        ordered = sorted(indices)
+        starts = [i for i in ordered[1:] if i in ends or tokens[i - 1].surface == ',']
+        if starts:
+            for first in ordered:
+                if first >= starts[0]:
+                    break
+                yield lemma, case, [first, *starts]
+
+
 def trees(tokens, parse, choices, text, budget):
-    if not any(year_lists(tokens)):
+    dates = tuple(year_lists(tokens))
+    if not dates:
         return
-    pairs = dict(_pairs(tokens))
-    separators = [i for i in range(1, len(tokens) - 1) if tokens[i].surface == ','
-                  and not any(a < i < b for a, b in pairs.items())
-                  and any(tag.POS == 'NOUN' for _, tag in known_forms(tokens[i + 1].surface))]
-    if not separators:
-        return
-    forms = [{(lemma, str(tag.case)) for lemma, tag in known_forms(tokens[i + 1].surface)
-              if tag.POS == 'NOUN' and tag.case} for i in separators]
-    for lemma, case in sorted(set.intersection(*forms)):
-        for first in range(1, separators[0]):
-            if not any(l == lemma and t.case == case for l, t in known_forms(tokens[first].surface)):
+    for lemma, case, begins in _dated_heads(tokens, dates):
+        first = begins[0]
+        marked = [i for i in begins[1:] if tokens[i - 1].surface == ',']
+        stops = [i - int(i in marked) for i in begins[1:]] + [len(tokens)]
+        kept = (*range(first + 1), *(k for i in marked for k in (i - 1, i)))
+        for base in parse(tuple(tokens[j] for j in kept)):
+            outer = _map(base, kept)
+            head = outer[first]
+            assigned_case = head.case or ROLE_CASE.get(head.role) or (head.morphology and head.morphology.case)
+            if (assigned_case != case or head.lemma != lemma or head.role not in (
+                    'predicative_complement', 'object', 'oblique', 'recipient')
+                    or any(outer[j].head != first or outer[j].role != 'nominal_conjunct' for j in marked)):
                 continue
-            begins = [first, *(j + 1 for j in separators)]
-            stops = [*separators, len(tokens)]
-            kept = (*range(first + 1), *(k for j in separators for k in (j, j + 1)))
-            for base in parse(tuple(tokens[j] for j in kept)):
-                outer = _map(base, kept)
-                head = outer[first]
-                if (head.case != case or head.lemma != lemma or head.role not in (
-                        'predicative_complement', 'object', 'oblique', 'recipient')
-                        or any(outer[j].head != first or outer[j].role != 'nominal_conjunct' for j in begins[1:])):
-                    continue
-                families = [_members(tokens[a:b], outer[a], budget) for a, b in zip(begins, stops)]
-                if not all(families):
-                    continue
-                for begin, stop, trees_here in zip(begins, stops, families):
-                    part = tokens[begin:stop]
-                    plain = text[part[0].start:part[-1].end]
-                    local = tuple(replace(t, start=t.start - part[0].start, end=t.end - part[0].start) for t in part)
-                    while len(trees_here) > 1:
-                        partition = _member_partition(trees_here, local, plain)
-                        if partition is None:
-                            break
-                        selected = _choose(partition, part[0].start, choices)
-                        trees_here = [tree for tree, retained in zip(trees_here, selected) if retained]
-                    if len(trees_here) != 1:
+            for j in begins[1:]:
+                if j not in outer:
+                    outer[j] = Link('nominal_conjunct', lemma, first, 'P.COORD', case)
+            families = [_members(tokens[a:b], outer[a], case, budget) for a, b in zip(begins, stops)]
+            if not all(families):
+                continue
+            for begin, stop, trees_here in zip(begins, stops, families):
+                part = tokens[begin:stop]
+                plain = text[part[0].start:part[-1].end]
+                local = tuple(replace(t, start=t.start - part[0].start, end=t.end - part[0].start) for t in part)
+                while len(trees_here) > 1:
+                    partition = _member_partition(trees_here, local, plain)
+                    if partition is None:
                         break
-                    links = _map(trees_here[0], range(begin, stop))
-                    links[begin] = outer[begin]
-                    outer.update(links)
-                else:
-                    verb = outer[head.head]
-                    if (case == 'ablt' and head.role == 'oblique' and verb.lemma in _predicative_instrumentals()
-                            and any(w == verb.lemma and t.transitivity == 'intr'
-                                    for w, t in known_forms(tokens[head.head].surface))):
-                        focus = tokens[first].surface
-                        action = _span_label(tokens, head.head)
-                        absent = 'нет такого слова'
-                        question = f'Какое повторяющееся слово обозначает статус участника действия «{action}»?'
-                        options = (focus, absent)
-                        selected = _choose((Probe(question, options, text), options), tokens[first].start, choices)
-                        if selected[0]:
-                            subjects = [j for j, link in outer.items() if link.role == 'subject' and link.head == head.head]
-                            controller = subjects[0] if len(subjects) == 1 else None
-                            outer[first] = replace(head, role='predicative_complement', rule='V.XCOMP', controller=controller)
-                            for j in begins[1:]:
-                                outer[j] = replace(outer[j], controller=controller)
-                    yield tuple(outer[j] for j in range(len(tokens)))
+                    selected = _choose(partition, part[0].start, choices)
+                    trees_here = [tree for tree, retained in zip(trees_here, selected) if retained]
+                if len(trees_here) != 1:
+                    break
+                links = _map(trees_here[0], range(begin, stop))
+                links[begin] = outer[begin]
+                outer.update(links)
+            else:
+                verb = outer[head.head]
+                if (case == 'ablt' and head.role == 'oblique' and verb.lemma in _predicative_instrumentals()
+                        and any(w == verb.lemma and t.transitivity == 'intr'
+                                for w, t in known_forms(tokens[head.head].surface))):
+                    focus = tokens[first].surface
+                    action = _span_label(tokens, head.head)
+                    absent = 'нет такого слова'
+                    question = f'Какое повторяющееся слово обозначает статус участника действия «{action}»?'
+                    options = (focus, absent)
+                    selected = _choose((Probe(question, options, text), options), tokens[first].start, choices)
+                    if selected[0]:
+                        subjects = [j for j, link in outer.items() if link.role == 'subject' and link.head == head.head]
+                        controller = subjects[0] if len(subjects) == 1 else None
+                        outer[first] = replace(head, role='predicative_complement', rule='V.XCOMP', controller=controller)
+                        for j in begins[1:]:
+                            outer[j] = replace(outer[j], controller=controller)
+                yield tuple(outer[j] for j in range(len(tokens)))

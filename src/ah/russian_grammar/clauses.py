@@ -1,6 +1,7 @@
 from collections import defaultdict
 from dataclasses import dataclass, replace
 from functools import cache
+from itertools import chain
 from importlib.resources import files
 
 from . import degree_clauses
@@ -105,6 +106,9 @@ def _markers(boundary, root, words):
     from .parser import Link
 
     markers = []
+    if boundary.form == '':
+        return tuple(Link('punctuation', words[j], root, 'CL.PUNCT')
+                     for j in range(boundary.start, boundary.stop))
     if boundary.form == 'даже если':
         markers.extend(Link('punctuation', words[i], root, 'CL.PUNCT')
                        for i in range(boundary.start, boundary.marker))
@@ -141,6 +145,8 @@ def _level_attachments(prefix, levels, boundary, leaf, root, words):
             continue
         if relation == 'conj':
             role, rule = 'clause_conjunct', own.rule if own.rule in ('GAP', 'GAP.REMNANT') else 'CL.CONJ'
+            if own.rule == 'V2.PASS' and own.controller is not None:
+                rule = 'CL.PASS'
             next_levels = levels[:level] + ((anchor, root),)
         elif relative:
             role, rule = 'clause_relative', 'CL.REL'
@@ -208,12 +214,13 @@ def _attachments(prefix, levels, boundary, leaf, root, words, *, tokens=None, sp
             yield tuple(links), domains
 
 
-def trees(tokens, local, *, budget=256, spatial_prefix=None):
+def trees(tokens, local, *, budget=256, spatial_prefix=None, subject_fronted=False):
     from .parser import AnalysisBudgetExceeded, Link
 
     words = tuple(_key(token.surface) for token in tokens)
     yield from local(tokens)
-    boundaries = tuple(_boundaries(words))
+    from .short_participles import series_boundaries
+    boundaries = (*_boundaries(words), *series_boundaries(tokens))
     if not boundaries:
         return
     size = len(words)
@@ -295,7 +302,11 @@ def trees(tokens, local, *, budget=256, spatial_prefix=None):
                 for stop in finishes:
                     if stop <= marker.stop:
                         continue
-                    if marker.relation == 'relative':
+                    if not marker.form:
+                        if len(levels) != 1:
+                            continue
+                        candidates = ()
+                    elif marker.relation == 'relative':
                         candidates = relative_leaves(marker, stop)
                     elif marker.relation == 'correlative' and marker.form == 'сколько':
                         candidates = leaves(marker.marker, stop)
@@ -305,10 +316,13 @@ def trees(tokens, local, *, budget=256, spatial_prefix=None):
                         anchor = levels[0][0]
                         parallel = [anchor, *(i for i, link in enumerate(prefix) if link and
                                               link.role == 'clause_conjunct' and link.head == anchor)]
-                        gaps = tuple(dict.fromkeys(gap for host in parallel for gap in
+                        gaps = tuple(dict.fromkeys(gap for host in parallel if marker.form for gap in
                                                    gapped_leaves(tokens, marker.stop, stop, prefix, host, budget)))
                         if gaps:
                             candidates = (*gaps, *competing_leaves(candidates, marker.stop, gaps))
+                        if prefix[anchor].morphology and prefix[anchor].morphology.pos == 'PRTS':
+                            from .short_participles import coordinated_leaves
+                            candidates = chain(candidates, coordinated_leaves(tokens, marker.stop, stop, prefix, anchor, local))
                     for leaf, root in candidates:
                         for tree, scopes in _attachments(prefix, levels, marker, leaf, root, words,
                                                         tokens=tokens, spatial_prefix=spatial_prefix):
@@ -320,8 +334,21 @@ def trees(tokens, local, *, budget=256, spatial_prefix=None):
                                     raise AnalysisBudgetExceeded('ANALYSIS_BUDGET')
 
     yield from degree_clauses.proportional(tokens, local, spend)
+    from .short_participles import adverb_scopes, postposed_subjects
     for tree, _ in parse_region(0, size):
-        yield tree
+        yield from adverb_scopes(tree)
+    from .utterances import _map
+    layouts = () if subject_fronted else postposed_subjects(tokens, boundaries, local)
+    for order, subject, lemma in layouts:
+        moved = tuple(tokens[i] for i in order)
+        for tree in trees(moved, local, budget=budget, subject_fronted=True):
+            head = order.index(subject)
+            pivot = tree[head].head
+            if (tree[head].role != 'subject' or tree[head].lemma != lemma or pivot is None
+                    or tree[pivot].rule != 'V2.PASS' or not any(link.rule == 'CL.PASS' for link in tree)):
+                continue
+            restored = _map(tree, order)
+            yield tuple(restored[j] for j in range(size))
     for marker in starts[0]:
         if relative_role(marker.form):
             from .spatial_reverse import trees as reverse_trees

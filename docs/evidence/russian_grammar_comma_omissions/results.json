@@ -1,0 +1,285 @@
+[
+  {
+    "id": "test-s107",
+    "variant": "omit_all_commas",
+    "text": "Исток -- река в России протекает в Алтайском крае Республике Алтай.",
+    "calls": [
+      "5c8e8cc5fdc16079cd15cc85ecd4384d6552413ceb0c135c7f95dec3230640b7",
+      "478553360383d30a80abea58e029a43df0464eef23d3422379747160cbb57bc4"
+    ],
+    "status": "AMBIGUOUS",
+    "reason": "INCONSISTENT_ATTACHMENT",
+    "empty": true,
+    "exact": false,
+    "baseline_status": "UNRESOLVED",
+    "baseline_reason": "NO_RULE @6",
+    "same_word_roles_and_links_as_original": null
+  },
+  {
+    "id": "test-s107",
+    "variant": "omit_comma_1",
+    "text": "Исток -- река в России протекает в Алтайском крае, Республике Алтай.",
+    "calls": [
+      "8813b50787c4eb53af5708c5987f7b7d52bf2bf7e2caffa4c233557b17385e3a",
+      "4f68ec9ed83588ff26bdafbfb16e5214d54170d60a6662f31720600d1754e222"
+    ],
+    "status": "STORED",
+    "reason": "COMPLEX_CLAUSE",
+    "empty": false,
+    "exact": true,
+    "incorrect_heads": [],
+    "role_scope_errors": [],
+    "graph_sha256": "a0c9894f2bdfc69e636b883dcbe10fa71fed6b667ccdffdd4901da5d4d1340f7",
+    "stored_metadata_sha256": "a100315056703c274000726758219b879260fc2b5ac0d82c1379916b2cd6f8a5",
+    "baseline_status": "UNRESOLVED",
+    "baseline_reason": "NO_RULE @6",
+    "same_word_roles_and_links_as_original": true
+  },
+  {
+    "id": "test-s107",
+    "variant": "omit_comma_2",
+    "text": "Исток -- река в России, протекает в Алтайском крае Республике Алтай.",
+    "calls": [
+      "6893adcc84060b2819af70056c3720462e80b89b42ceba2c758523cc518f63fe",
+      "7e0b385104d024e793e3932c96c9d8a5576bfbb6423b072aa73824a55434194c"
+    ],
+    "status": "AMBIGUOUS",
+    "reason": "INCONSISTENT_ATTACHMENT",
+    "empty": true,
+    "exact": false,
+    "baseline_status": "UNRESOLVED",
+    "baseline_reason": "NO_RULE @6",
+    "same_word_roles_and_links_as_original": null
+  },
+  {
+    "id": "test-s113",
+    "variant": "omit_all_commas",
+    "text": "Становился чемпионом Азербайджана по ЧГК 2002 2004 2008 и 2012 годов чемпионом Азербайджана по Брейн-рингу в 2002 году чемпионом Южного Кавказа в 1998 2003 (в составе команды Анара Азимова) и 2010 годах.",
+    "calls": [
+      "4cf0af9b1ce79a1e2bb4ab8607151c625375913496a4a98a7f24ad96b736449f",
+      "517ff813f09614459876da0eaa01e94b7c29f11f9d8c6c975eff86997a13c9c3",
+      "9ee3e484c6f9d3637c1e07a95a89b57c7293882e1f797c0c9d03979c946f2f57",
+      "074295b3a67734c5664a3a2760eeb117e5828dc3fef07d7f5fb4fb81a87c5350",
+      "d23f44e5b7102d716a7b7dcbd8ff4f5af314522b8ac540734fe98cc085518e63",
+      "76ea9a768862f72289743e9aa6f33140e19f85ee70cbef021a31a51e24866efd",
+      "886de1af5f030f24acda582bf95405c7ecc179ba570a8ad5e63ca13a6eca39b9",
+      "8eec786a8742fae63ec39acb4bc4a2313921a6b8bde12c7a4e448279806ab903",
+      "dd2c28e6f3c975876d915057f82132166e5316401a5442960ef55965c80dddcd",
+      "bbf2b32f86595bf842ae084eaba79d1207bb05b42ccfd4d4961087a78b4579c8",
+      "c23f4a0a3174f94e12efee5165772de85ccae3ea659cbf4dd2a801c3d055a498"
+    ],
+    "status": "STORED",
+    "reason": "SIMPLE_CLAUSE",
+    "empty": false,
+    "exact": false,
+    "incorrect_heads": [
+      [
+        "2002",
+        19,
+        18
+      ]
+    ],
+    "role_scope_errors": [],
+    "graph_sha256": "a5debdc259c0c2c185d82abcf4bf3f26cb3ff7e36a7b322f348a5315a2d59371",
+    "stored_metadata_sha256": "33940e888dec762297b110399284428eae0731e3412f35148cb8e00a4366c3fc",
+    "baseline_status": "UNRESOLVED",
+    "baseline_reason": "QUANTITY_BUDGET",
+    "same_word_roles_and_links_as_original": true
+  },
+  {
+    "id": "test-s113",
+    "variant": "omit_comma_1",
+    "text": "Становился чемпионом Азербайджана по ЧГК 2002 2004, 2008 и 2012 годов, чемпионом Азербайджана по Брейн-рингу в 2002 году, чемпионом Южного Кавказа в 1998, 2003 (в составе команды Анара Азимова) и 2010 годах.",
+    "calls": [
+      "1e69e0eaa610241eb92d86bccbe35099b64d61768e924c663e2db3b3bb7f79f6",
+      "242e4aa35ebd0773feeff5b2f5a92750e7f51c9aebef5a4b03775dbac912d519",
+      "1a539237254be9179373bdd1f9235a118f7fb61ed173d560cb9029cc5fa88b14",
+      "074295b3a67734c5664a3a2760eeb117e5828dc3fef07d7f5fb4fb81a87c5350",
+      "d23f44e5b7102d716a7b7dcbd8ff4f5af314522b8ac540734fe98cc085518e63",
+      "59ce86d365d3fd16a61c41154c2d1f1cf7deddaab72a074392561052938b0f41",
+      "886de1af5f030f24acda582bf95405c7ecc179ba570a8ad5e63ca13a6eca39b9",
+      "3e8fb7f16c984d4caff96fcab558cdad4cf07f0573a05e2a12dc7eeebbc365d6",
+      "d12ccda92f596b39cd15faf85c1479098d4ecf4f80bf94cf3fc3dd4f9811cae0",
+      "a07be5f7ebef3bfcfdad3a5faffc5ec8d89290521ba5460289d978c836a860a4",
+      "4d18c15b4345f9e4632bf5d7fc2a34c61e4403812eb471d56683cd774bf1397e"
+    ],
+    "status": "STORED",
+    "reason": "SIMPLE_CLAUSE",
+    "empty": false,
+    "exact": false,
+    "incorrect_heads": [
+      [
+        "2002",
+        22,
+        20
+      ]
+    ],
+    "role_scope_errors": [],
+    "graph_sha256": "a5debdc259c0c2c185d82abcf4bf3f26cb3ff7e36a7b322f348a5315a2d59371",
+    "stored_metadata_sha256": "71ccc942af66d78ab6bd95e9d84966752be02bc353a9d452d88f1cab59a4ae3a",
+    "baseline_status": "UNRESOLVED",
+    "baseline_reason": "QUANTITY_BUDGET",
+    "same_word_roles_and_links_as_original": true
+  },
+  {
+    "id": "test-s113",
+    "variant": "omit_comma_2",
+    "text": "Становился чемпионом Азербайджана по ЧГК 2002, 2004 2008 и 2012 годов, чемпионом Азербайджана по Брейн-рингу в 2002 году, чемпионом Южного Кавказа в 1998, 2003 (в составе команды Анара Азимова) и 2010 годах.",
+    "calls": [
+      "97647b40dd448fb1786c45dcaa79e045d826c530e85d8927646cfb1443e3bd0a",
+      "0e63e06627e66a64ffc4addda22f67e8dee13cdce28f6059cc9bc3243d73a8a5",
+      "263c3afbb17ce585e0480147e934d9358031c03e6fc1791986b64ead8505135e",
+      "074295b3a67734c5664a3a2760eeb117e5828dc3fef07d7f5fb4fb81a87c5350",
+      "d23f44e5b7102d716a7b7dcbd8ff4f5af314522b8ac540734fe98cc085518e63",
+      "59ce86d365d3fd16a61c41154c2d1f1cf7deddaab72a074392561052938b0f41",
+      "886de1af5f030f24acda582bf95405c7ecc179ba570a8ad5e63ca13a6eca39b9",
+      "3e8fb7f16c984d4caff96fcab558cdad4cf07f0573a05e2a12dc7eeebbc365d6",
+      "f2877901335485ac9938f11c21b0f56a0eeda6173557956c9ecfc703afaa7d30",
+      "ef47f67593f35fa68062b3ca8b0ddbb498e39793184e210a2afa5e0a6a77ed0d",
+      "88751cdda2a24508442804286674c8d3434d270300fdd2a439693ed4c54eb153"
+    ],
+    "status": "STORED",
+    "reason": "SIMPLE_CLAUSE",
+    "empty": false,
+    "exact": false,
+    "incorrect_heads": [
+      [
+        "2002",
+        22,
+        20
+      ]
+    ],
+    "role_scope_errors": [],
+    "graph_sha256": "a5debdc259c0c2c185d82abcf4bf3f26cb3ff7e36a7b322f348a5315a2d59371",
+    "stored_metadata_sha256": "592eaf9251a5c7ec974b30e6baca42788b4e16e43306386ebcc1f218d94af4e5",
+    "baseline_status": "UNRESOLVED",
+    "baseline_reason": "QUANTITY_BUDGET",
+    "same_word_roles_and_links_as_original": true
+  },
+  {
+    "id": "test-s113",
+    "variant": "omit_comma_3",
+    "text": "Становился чемпионом Азербайджана по ЧГК 2002, 2004, 2008 и 2012 годов чемпионом Азербайджана по Брейн-рингу в 2002 году, чемпионом Южного Кавказа в 1998, 2003 (в составе команды Анара Азимова) и 2010 годах.",
+    "calls": [
+      "579bff2275868e6312d0721032fd836a2a702428b604fed0bd2e0752278e4b2c",
+      "5b6b721d69470a726a1c73fe21994a7f0821210ff628ad0c55d779af025697e2",
+      "ef4d718948c4f9df9733960facc173dcd6f23ebd5fcd093ca80a264ec098f906",
+      "074295b3a67734c5664a3a2760eeb117e5828dc3fef07d7f5fb4fb81a87c5350",
+      "d23f44e5b7102d716a7b7dcbd8ff4f5af314522b8ac540734fe98cc085518e63",
+      "59ce86d365d3fd16a61c41154c2d1f1cf7deddaab72a074392561052938b0f41",
+      "886de1af5f030f24acda582bf95405c7ecc179ba570a8ad5e63ca13a6eca39b9",
+      "3e8fb7f16c984d4caff96fcab558cdad4cf07f0573a05e2a12dc7eeebbc365d6",
+      "4e9b6080feffd684e901da9433b40af25be34b3bff2eaf9744983f0bcc7ea02f",
+      "ea28ee215d0bfb7b7b48820646afcd6fccacd0397ecee1858b01ee4e618ed413",
+      "30b5ecb064df0066ee24329c88c18b724c22d8aee0c6d942b92584aea2ec73b1"
+    ],
+    "status": "STORED",
+    "reason": "SIMPLE_CLAUSE",
+    "empty": false,
+    "exact": false,
+    "incorrect_heads": [
+      [
+        "2002",
+        22,
+        20
+      ]
+    ],
+    "role_scope_errors": [],
+    "graph_sha256": "a5debdc259c0c2c185d82abcf4bf3f26cb3ff7e36a7b322f348a5315a2d59371",
+    "stored_metadata_sha256": "656d56afc1ab4b503aba0bf963de0bb6d3bc206ed1934e33c119ecc4bd3f4b92",
+    "baseline_status": "UNRESOLVED",
+    "baseline_reason": "QUANTITY_BUDGET",
+    "same_word_roles_and_links_as_original": true
+  },
+  {
+    "id": "test-s113",
+    "variant": "omit_comma_4",
+    "text": "Становился чемпионом Азербайджана по ЧГК 2002, 2004, 2008 и 2012 годов, чемпионом Азербайджана по Брейн-рингу в 2002 году чемпионом Южного Кавказа в 1998, 2003 (в составе команды Анара Азимова) и 2010 годах.",
+    "calls": [
+      "579bff2275868e6312d0721032fd836a2a702428b604fed0bd2e0752278e4b2c",
+      "5b6b721d69470a726a1c73fe21994a7f0821210ff628ad0c55d779af025697e2",
+      "ef4d718948c4f9df9733960facc173dcd6f23ebd5fcd093ca80a264ec098f906",
+      "074295b3a67734c5664a3a2760eeb117e5828dc3fef07d7f5fb4fb81a87c5350",
+      "d23f44e5b7102d716a7b7dcbd8ff4f5af314522b8ac540734fe98cc085518e63",
+      "59ce86d365d3fd16a61c41154c2d1f1cf7deddaab72a074392561052938b0f41",
+      "886de1af5f030f24acda582bf95405c7ecc179ba570a8ad5e63ca13a6eca39b9",
+      "3e8fb7f16c984d4caff96fcab558cdad4cf07f0573a05e2a12dc7eeebbc365d6",
+      "f27791250668e70965fb6452397a12d59736fd8558e5faf2969d3fd548623f8d",
+      "980c3064fc79d0a1992aa0b40f38e6ec10dbee737c884355cfd512e06ef14e4f",
+      "c861969abc3ba70b3364159539b8c3d1810eed072af43d5127e41f5d050ad4a3"
+    ],
+    "status": "STORED",
+    "reason": "SIMPLE_CLAUSE",
+    "empty": false,
+    "exact": false,
+    "incorrect_heads": [
+      [
+        "2002",
+        22,
+        21
+      ]
+    ],
+    "role_scope_errors": [],
+    "graph_sha256": "a5debdc259c0c2c185d82abcf4bf3f26cb3ff7e36a7b322f348a5315a2d59371",
+    "stored_metadata_sha256": "e0503d3425f212383ed20b9136617c8c761b0ee3ef52154a01f92ea643644bff",
+    "baseline_status": "UNRESOLVED",
+    "baseline_reason": "QUANTITY_BUDGET",
+    "same_word_roles_and_links_as_original": true
+  },
+  {
+    "id": "test-s113",
+    "variant": "omit_comma_5",
+    "text": "Становился чемпионом Азербайджана по ЧГК 2002, 2004, 2008 и 2012 годов, чемпионом Азербайджана по Брейн-рингу в 2002 году, чемпионом Южного Кавказа в 1998 2003 (в составе команды Анара Азимова) и 2010 годах.",
+    "calls": [
+      "579bff2275868e6312d0721032fd836a2a702428b604fed0bd2e0752278e4b2c",
+      "5b6b721d69470a726a1c73fe21994a7f0821210ff628ad0c55d779af025697e2",
+      "ef4d718948c4f9df9733960facc173dcd6f23ebd5fcd093ca80a264ec098f906",
+      "074295b3a67734c5664a3a2760eeb117e5828dc3fef07d7f5fb4fb81a87c5350",
+      "d23f44e5b7102d716a7b7dcbd8ff4f5af314522b8ac540734fe98cc085518e63",
+      "76ea9a768862f72289743e9aa6f33140e19f85ee70cbef021a31a51e24866efd",
+      "886de1af5f030f24acda582bf95405c7ecc179ba570a8ad5e63ca13a6eca39b9",
+      "8eec786a8742fae63ec39acb4bc4a2313921a6b8bde12c7a4e448279806ab903",
+      "d3b3f314690841acfc3ebdb836065808d6d59a306bf4e3a466d93cf085b5ac52",
+      "06b60d2c76e8c3a0312407fdd2b2f624d67b6886f276a28361bfd29868411a99",
+      "7b0f1bffa0ea0e15c4f3df00ee59caee54acf0fbf5c88dd9d202d32d414fe64b"
+    ],
+    "status": "STORED",
+    "reason": "SIMPLE_CLAUSE",
+    "empty": false,
+    "exact": false,
+    "incorrect_heads": [
+      [
+        "2002",
+        23,
+        21
+      ]
+    ],
+    "role_scope_errors": [],
+    "graph_sha256": "a5debdc259c0c2c185d82abcf4bf3f26cb3ff7e36a7b322f348a5315a2d59371",
+    "stored_metadata_sha256": "792c5c0a439d412d1dfe849f527da900bb07d52b0887091cb9a3f315b5dadaa7",
+    "baseline_status": "UNRESOLVED",
+    "baseline_reason": "QUANTITY_BUDGET",
+    "same_word_roles_and_links_as_original": true
+  },
+  {
+    "id": "test-s82",
+    "variant": "omit_comma_1",
+    "text": "Он председательствовал на Всемирной Исламской конференции в 1931 году в ней приняли участие 22 исламские страны.",
+    "calls": [
+      "cb992d7bf20b65942353a7385e3a7a9e178c94cd1c2d1e2fee948ec48e0725b1",
+      "11be657a8f5457d071cff20e0af6f29de7b59986678ea8567e3eeb0270751e0c",
+      "9b1ac7b79d2b035b4da1b3fe3b9fff8583160e2e65659008751b9a11b429fe1f"
+    ],
+    "status": "STORED",
+    "reason": "COMPLEX_CLAUSE",
+    "empty": false,
+    "exact": true,
+    "incorrect_heads": [],
+    "role_scope_errors": [],
+    "graph_sha256": "c0f1978e26ee4708df55e049e4680525bac539f18fa896bb0b946e0354168cf8",
+    "stored_metadata_sha256": "aa60f127336f5f8d7e13219701e18bf6d845ecdb1dbd931737b8574bc6db5ccd",
+    "baseline_status": "UNRESOLVED",
+    "baseline_reason": "NO_COMPLETE_CLAUSE",
+    "same_word_roles_and_links_as_original": true
+  }
+]

@@ -181,6 +181,10 @@ def _simple_titles(tokens):
             if right == left + 2 and tokens[left + 1].surface.istitle()}
 
 
+def _printed_year(word):
+    return len(word) == 4 and word.isdecimal() and int(word) != 0
+
+
 def year_lists(tokens):
     from .nominal_groups import _markers
     from .parentheses import _pairs
@@ -192,7 +196,7 @@ def year_lists(tokens):
         index = start
         while index < len(tokens):
             word = tokens[index].surface
-            if len(word) != 4 or not word.isdecimal() or not int(word):
+            if not _printed_year(word):
                 break
             years.append(index)
             following = index + 1
@@ -202,11 +206,12 @@ def year_lists(tokens):
             unit = tokens[index].surface.casefold()
             if len(years) > 1 and unit.startswith('год') and any(
                     lemma == 'год' and tag.number == 'plur' for lemma, tag in known_forms(unit)):
-                yield tuple(years), tuple(separators), index
+                if any(left < right for left, right in separators):
+                    yield tuple(years), tuple(separators), index
                 break
             comma = tokens[index].surface == ','
             conjunction = next(_markers(tokens, index + int(comma)), ())
-            if not comma and not conjunction:
+            if not comma and not conjunction and not _printed_year(tokens[index].surface):
                 break
             end = index + int(comma) + len(conjunction)
             separators.append((index, end))

@@ -1345,7 +1345,7 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
                 if not structures and budget_error is None:
                     collect(recovery.trees(working_words, exact, budget=budget))
                 if not structures and budget_error is None:
-                    collect(exact(working_words, lambda part: sentence_regions.additional_nominal_readings(part, candidates, budget)))
+                    collect(exact(working_words, lambda part: sentence_regions.additional_readings(part, candidates, budget)))
                 if not structures and budget_error is None and personal_correlatives.readings(working_words[0].surface):
                     from .relative_clauses import trees as relative_trees
 
@@ -1493,6 +1493,14 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
         confirmed_options.add((probe.question, probe.context, selected))
         if probe.focus_choices:
             confirmed_focus.append(probe.focus_choices[probe.options.index(selected)])
+        if probe.verify_option_order:
+            check = replace(probe, options=tuple(reversed(probe.options)))
+            repeated, stopped = select(check, before, analyses, 'unmarked_apposition')
+            if stopped is not None:
+                return stopped
+            if repeated != selected:
+                steps.append(ProbeStep(before, before, 'open', 'unmarked_apposition'))
+                return Result(text, 'AMBIGUOUS', 'INCONSISTENT_ATTACHMENT', tokens, analyses, tuple(probes), tuple(steps))
         analyses = tuple(a for a, key in zip(analyses, keys) if key == selected)
         steps.append(ProbeStep(before, len(analyses), 'selected'))
     if accept_tree is None:

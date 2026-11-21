@@ -149,6 +149,105 @@ def trees(tokens, base, *, budget=256):
                             yield expanded
 
 
+@cache
+def _has_short_passive(word):
+    return any(tag.POS == 'PRTS' and tag.voice == 'pssv' for _, tag in known_forms(word))
+
+
+def series_boundaries(tokens):
+    from .clauses import Boundary
+
+    for i in range(1, len(tokens)):
+        if not _has_short_passive(tokens[i].surface):
+            continue
+        start = i - int(tokens[i - 1].surface == ',')
+        if start and _has_short_passive(tokens[start - 1].surface):
+            yield Boundary(start, start, i, '', 'conj', frozenset())
+
+
+def _dependents(tree, root):
+    children = [[] for _ in tree]
+    for i, link in enumerate(tree):
+        if link and link.head is not None:
+            children[link.head].append(i)
+    pending = [root]
+    for i in pending:
+        pending.extend(children[i])
+    return set(pending)
+
+
+def postposed_subjects(tokens, boundaries, local):
+    from .utterances import _root
+
+    pivots = [i for i, token in enumerate(tokens) if _has_short_passive(token.surface)]
+    if len(pivots) < 2 or pivots[-1] + 1 == len(tokens):
+        return
+    for boundary in boundaries:
+        if boundary.relation != 'conj' or boundary.start <= pivots[-2] or boundary.stop > pivots[-1]:
+            continue
+        for final in local(tokens[boundary.stop:]):
+            root = _root(final)
+            if root + boundary.stop != pivots[-1] or final[root].rule != 'V2.PASS':
+                continue
+            for subject in range(root + 1, len(final)):
+                if final[subject].role != 'subject' or final[subject].head != root:
+                    continue
+                phrase = _dependents(final, subject)
+                if min(phrase) <= root or max(phrase) - min(phrase) + 1 != len(phrase):
+                    continue
+                indices = tuple(boundary.stop + j for j in sorted(phrase))
+                outside = tuple(j for j in range(len(tokens)) if j not in range(indices[0], indices[-1] + 1))
+                yield (*indices, *outside), boundary.stop + subject, final[subject].lemma
+
+
+def coordinated_leaves(tokens, start, stop, prefix, host, local):
+    from .utterances import _map, _root
+
+    first = prefix[host]
+    if first.morphology is None or first.morphology.pos != 'PRTS' or first.morphology.voice != 'pssv':
+        return
+    if not any(_has_short_passive(token.surface) for token in tokens[start:stop]):
+        return
+    subjects = [i for i, link in enumerate(prefix) if link and link.role == 'subject' and link.head == host]
+    if len(subjects) != 1:
+        return
+    subject, = subjects
+    inherited = _dependents(prefix, subject)
+    if not any(lemma == 'быть' and tag.POS == 'VERB' for token in tokens[start:stop]
+               for lemma, tag in known_forms(token.surface)):
+        inherited.update(i for i, link in enumerate(prefix) if link and link.role == 'copula' and link.head == host)
+    indices = (*sorted(inherited), *range(start, stop))
+    for branch in local(tuple(tokens[i] for i in indices)):
+        pivot = _root(branch)
+        root = indices[pivot]
+        if root < start or branch[pivot].rule != 'V2.PASS':
+            continue
+        mapped = _map(branch, indices)
+        if any(mapped[i].role != prefix[i].role or mapped[i].lemma != prefix[i].lemma or
+               mapped[i].head != (root if prefix[i].head == host else prefix[i].head) for i in inherited):
+            continue
+        if any(mapped[i].role.startswith('clause_') for i in range(start, stop)):
+            continue
+        mapped[root] = replace(mapped[root], controller=subject)
+        yield tuple(mapped[i] for i in range(start, stop)), root
+
+
+def adverb_scopes(tree):
+    yield tree
+    if len(tree) < 2:
+        return
+    index = len(tree) - 1
+    adverb = tree[index]
+    if adverb.role != 'adverb' or adverb.head is None:
+        return
+    action = tree[adverb.head]
+    if action.rule != 'CL.PASS' or action.head is None or action.scope != tree[action.head].scope:
+        return
+    if any(link.role == 'adverb' and link.head == action.head for link in tree):
+        return
+    yield (*tree[:index], replace(adverb, head=action.head, rule='CL.SHARED.ADV', scope='coordination'))
+
+
 def voice_partitions(analyses, tokens, text):
     from .parser import _clause_context, _span_label
     from .probe import Probe

@@ -1,0 +1,518 @@
+[
+  {
+    "text": "Письмо написано и отправлено вчера.",
+    "status": "STORED",
+    "reason": "COMPLEX_CLAUSE",
+    "calls": [
+      "af107cfd219e919b91c2c9b54cc0fe2b0c19d852e734a766e8f9603960c2abec"
+    ],
+    "queries": [
+      {
+        "text": "Письмо написано?",
+        "status": "ANSWER",
+        "answer": "Да.",
+        "calls": []
+      },
+      {
+        "text": "Письмо отправлено?",
+        "status": "ANSWER",
+        "answer": "Да.",
+        "calls": []
+      },
+      {
+        "text": "Письмо отправлено вчера?",
+        "status": "ANSWER",
+        "answer": "Да.",
+        "calls": []
+      },
+      {
+        "text": "Письмо написано вчера?",
+        "status": "ANSWER",
+        "answer": "Да.",
+        "calls": []
+      }
+    ],
+    "words": [
+      {
+        "surface": "Письмо",
+        "role": "subject",
+        "head": 1,
+        "assertion_status": "asserted",
+        "morphology": {
+          "pos": "NOUN",
+          "case": "nomn",
+          "number": "sing",
+          "gender": "neut",
+          "animacy": "inan"
+        }
+      },
+      {
+        "surface": "написано",
+        "role": "predicate",
+        "assertion_status": "asserted",
+        "morphology": {
+          "pos": "PRTS",
+          "number": "sing",
+          "gender": "neut",
+          "tense": "pres",
+          "aspect": "perf",
+          "mood": "indc",
+          "voice": "pssv"
+        }
+      },
+      {
+        "surface": "и",
+        "role": "clause_marker",
+        "head": 3,
+        "assertion_status": "asserted",
+        "morphology": {}
+      },
+      {
+        "surface": "отправлено",
+        "role": "clause_conjunct",
+        "head": 1,
+        "controller": 0,
+        "assertion_status": "asserted",
+        "morphology": {
+          "pos": "PRTS",
+          "number": "sing",
+          "gender": "neut",
+          "tense": "pres",
+          "aspect": "perf",
+          "mood": "indc",
+          "voice": "pssv"
+        }
+      },
+      {
+        "surface": "вчера",
+        "role": "adverb",
+        "head": 1,
+        "assertion_status": "asserted",
+        "scope": "coordination",
+        "morphology": {
+          "pos": "ADVB"
+        }
+      }
+    ]
+  },
+  {
+    "text": "Документы подписаны и переданы.",
+    "status": "STORED",
+    "reason": "COMPLEX_CLAUSE",
+    "calls": [],
+    "queries": [
+      {
+        "text": "Документы переданы?",
+        "status": "ANSWER",
+        "answer": "Да.",
+        "calls": []
+      }
+    ],
+    "words": [
+      {
+        "surface": "Документы",
+        "role": "subject",
+        "head": 1,
+        "assertion_status": "asserted",
+        "morphology": {
+          "pos": "NOUN",
+          "case": "nomn",
+          "number": "plur",
+          "gender": "masc",
+          "animacy": "inan"
+        }
+      },
+      {
+        "surface": "подписаны",
+        "role": "predicate",
+        "assertion_status": "asserted",
+        "morphology": {
+          "pos": "PRTS",
+          "number": "plur",
+          "tense": "pres",
+          "aspect": "perf",
+          "mood": "indc",
+          "voice": "pssv"
+        }
+      },
+      {
+        "surface": "и",
+        "role": "clause_marker",
+        "head": 3,
+        "assertion_status": "asserted",
+        "morphology": {}
+      },
+      {
+        "surface": "переданы",
+        "role": "clause_conjunct",
+        "head": 1,
+        "controller": 0,
+        "assertion_status": "asserted",
+        "morphology": {
+          "pos": "PRTS",
+          "number": "plur",
+          "tense": "pres",
+          "aspect": "perf",
+          "mood": "indc",
+          "voice": "pssv"
+        }
+      }
+    ]
+  },
+  {
+    "text": "Письмо написано и отправлена.",
+    "status": "UNRESOLVED",
+    "reason": "NO_RULE @7",
+    "calls": [],
+    "queries": []
+  },
+  {
+    "text": "Письмо написано, но не отправлено.",
+    "status": "STORED",
+    "reason": "COMPLEX_CLAUSE",
+    "calls": [],
+    "queries": [
+      {
+        "text": "Письмо отправлено?",
+        "status": "UNKNOWN",
+        "answer": "Неизвестно.",
+        "calls": []
+      },
+      {
+        "text": "Письмо не отправлено?",
+        "status": "ANSWER",
+        "answer": "Да.",
+        "calls": []
+      }
+    ],
+    "words": [
+      {
+        "surface": "Письмо",
+        "role": "subject",
+        "head": 1,
+        "assertion_status": "asserted",
+        "morphology": {
+          "pos": "NOUN",
+          "case": "nomn",
+          "number": "sing",
+          "gender": "neut",
+          "animacy": "inan"
+        }
+      },
+      {
+        "surface": "написано",
+        "role": "predicate",
+        "assertion_status": "asserted",
+        "morphology": {
+          "pos": "PRTS",
+          "number": "sing",
+          "gender": "neut",
+          "tense": "pres",
+          "aspect": "perf",
+          "mood": "indc",
+          "voice": "pssv"
+        }
+      },
+      {
+        "surface": ",",
+        "role": "punctuation",
+        "head": 5,
+        "assertion_status": "negated"
+      },
+      {
+        "surface": "но",
+        "role": "clause_marker",
+        "head": 5,
+        "assertion_status": "negated",
+        "morphology": {
+          "pos": "CONJ"
+        }
+      },
+      {
+        "surface": "не",
+        "role": "particle",
+        "head": 5,
+        "assertion_status": "negated",
+        "morphology": {
+          "pos": "PRCL"
+        }
+      },
+      {
+        "surface": "отправлено",
+        "role": "clause_conjunct",
+        "head": 1,
+        "controller": 0,
+        "assertion_status": "negated",
+        "scope": "negated",
+        "morphology": {
+          "pos": "PRTS",
+          "number": "sing",
+          "gender": "neut",
+          "tense": "pres",
+          "aspect": "perf",
+          "mood": "indc",
+          "voice": "pssv"
+        }
+      }
+    ]
+  },
+  {
+    "text": "Исправлены и подписаны документы.",
+    "status": "STORED",
+    "reason": "COMPLEX_CLAUSE",
+    "calls": [],
+    "queries": [
+      {
+        "text": "Документы исправлены?",
+        "status": "ANSWER",
+        "answer": "Да.",
+        "calls": []
+      },
+      {
+        "text": "Документы подписаны?",
+        "status": "ANSWER",
+        "answer": "Да.",
+        "calls": []
+      }
+    ],
+    "words": [
+      {
+        "surface": "Исправлены",
+        "role": "predicate",
+        "assertion_status": "asserted",
+        "morphology": {
+          "pos": "PRTS",
+          "number": "plur",
+          "tense": "pres",
+          "aspect": "perf",
+          "mood": "indc",
+          "voice": "pssv"
+        }
+      },
+      {
+        "surface": "и",
+        "role": "clause_marker",
+        "head": 2,
+        "assertion_status": "asserted",
+        "morphology": {}
+      },
+      {
+        "surface": "подписаны",
+        "role": "clause_conjunct",
+        "head": 0,
+        "controller": 3,
+        "assertion_status": "asserted",
+        "morphology": {
+          "pos": "PRTS",
+          "number": "plur",
+          "tense": "pres",
+          "aspect": "perf",
+          "mood": "indc",
+          "voice": "pssv"
+        }
+      },
+      {
+        "surface": "документы",
+        "role": "subject",
+        "head": 0,
+        "assertion_status": "asserted",
+        "morphology": {
+          "pos": "NOUN",
+          "case": "nomn",
+          "number": "plur",
+          "gender": "masc",
+          "animacy": "inan"
+        }
+      }
+    ]
+  },
+  {
+    "text": "Исправлен и подписаны документы.",
+    "status": "UNRESOLVED",
+    "reason": "NO_RULE @0",
+    "calls": [],
+    "queries": []
+  },
+  {
+    "text": "Исправлены черновики и подписаны документы.",
+    "status": "STORED",
+    "reason": "COMPLEX_CLAUSE",
+    "calls": [],
+    "queries": [
+      {
+        "text": "Черновики исправлены?",
+        "status": "ANSWER",
+        "answer": "Да.",
+        "calls": []
+      },
+      {
+        "text": "Документы подписаны?",
+        "status": "ANSWER",
+        "answer": "Да.",
+        "calls": []
+      },
+      {
+        "text": "Документы исправлены?",
+        "status": "UNKNOWN",
+        "answer": "Неизвестно.",
+        "calls": []
+      },
+      {
+        "text": "Черновики подписаны?",
+        "status": "UNKNOWN",
+        "answer": "Неизвестно.",
+        "calls": []
+      }
+    ],
+    "words": [
+      {
+        "surface": "Исправлены",
+        "role": "predicate",
+        "assertion_status": "asserted",
+        "morphology": {
+          "pos": "PRTS",
+          "number": "plur",
+          "tense": "pres",
+          "aspect": "perf",
+          "mood": "indc",
+          "voice": "pssv"
+        }
+      },
+      {
+        "surface": "черновики",
+        "role": "subject",
+        "head": 0,
+        "assertion_status": "asserted",
+        "morphology": {
+          "pos": "NOUN",
+          "case": "nomn",
+          "number": "plur",
+          "gender": "masc",
+          "animacy": "inan"
+        }
+      },
+      {
+        "surface": "и",
+        "role": "clause_marker",
+        "head": 3,
+        "assertion_status": "asserted",
+        "morphology": {}
+      },
+      {
+        "surface": "подписаны",
+        "role": "clause_conjunct",
+        "head": 0,
+        "assertion_status": "asserted",
+        "morphology": {
+          "pos": "PRTS",
+          "number": "plur",
+          "tense": "pres",
+          "aspect": "perf",
+          "mood": "indc",
+          "voice": "pssv"
+        }
+      },
+      {
+        "surface": "документы",
+        "role": "subject",
+        "head": 3,
+        "assertion_status": "asserted",
+        "morphology": {
+          "pos": "NOUN",
+          "case": "nomn",
+          "number": "plur",
+          "gender": "masc",
+          "animacy": "inan"
+        }
+      }
+    ]
+  },
+  {
+    "text": "Письмо написано проверено и отправлено.",
+    "status": "STORED",
+    "reason": "COMPLEX_CLAUSE",
+    "calls": [],
+    "queries": [
+      {
+        "text": "Письмо проверено?",
+        "status": "ANSWER",
+        "answer": "Да.",
+        "calls": []
+      },
+      {
+        "text": "Письмо отправлено?",
+        "status": "ANSWER",
+        "answer": "Да.",
+        "calls": []
+      }
+    ],
+    "words": [
+      {
+        "surface": "Письмо",
+        "role": "subject",
+        "head": 1,
+        "assertion_status": "asserted",
+        "morphology": {
+          "pos": "NOUN",
+          "case": "nomn",
+          "number": "sing",
+          "gender": "neut",
+          "animacy": "inan"
+        }
+      },
+      {
+        "surface": "написано",
+        "role": "predicate",
+        "assertion_status": "asserted",
+        "morphology": {
+          "pos": "PRTS",
+          "number": "sing",
+          "gender": "neut",
+          "tense": "pres",
+          "aspect": "perf",
+          "mood": "indc",
+          "voice": "pssv"
+        }
+      },
+      {
+        "surface": "проверено",
+        "role": "clause_conjunct",
+        "head": 1,
+        "controller": 0,
+        "assertion_status": "asserted",
+        "morphology": {
+          "pos": "PRTS",
+          "number": "sing",
+          "gender": "neut",
+          "tense": "pres",
+          "aspect": "perf",
+          "mood": "indc",
+          "voice": "pssv"
+        }
+      },
+      {
+        "surface": "и",
+        "role": "clause_marker",
+        "head": 4,
+        "assertion_status": "asserted",
+        "morphology": {}
+      },
+      {
+        "surface": "отправлено",
+        "role": "clause_conjunct",
+        "head": 1,
+        "controller": 0,
+        "assertion_status": "asserted",
+        "morphology": {
+          "pos": "PRTS",
+          "number": "sing",
+          "gender": "neut",
+          "tense": "pres",
+          "aspect": "perf",
+          "mood": "indc",
+          "voice": "pssv"
+        }
+      }
+    ]
+  }
+]
