@@ -265,3 +265,19 @@ frame only if it also has an attested subjectless infinitive complement in the
 training corpus. The aspect pairs use the same GrammarEngine perfective file
 and MIT license as bare_government.tsv.
 python scripts/import_russian_impersonal_infinitives.py rus_infinitives_sov.sol ru_gsd-ud-train.conllu src/ah/russian_grammar/lexicon/impersonal-infinitives.tsv
+
+nominal-parentheticals.tsv содержит двухсловные сочетания из словаря вводных
+конструкций GrammarEngine. Внутренняя связь предлога с существительным и
+обособленное чтение засвидетельствованы в обучающей части Russian-GSD r2.15.
+При разборе нового текста это чтение требует выбора читателя.
+GrammarEngine (MIT): https://github.com/Koziev/GrammarEngine/blob/c70bdbdd8b41af25fa754e727ca645de90d28c23/src/dictionary.src/rus_sa_modal_collocations.sol
+Russian-GSD (CC BY-SA 4.0): https://github.com/UniversalDependencies/UD_Russian-GSD/tree/r2.15
+python scripts/import_russian_nominal_parentheticals.py rus_sa_modal_collocations.sol ru_gsd-ud-train.conllu src/ah/russian_grammar/lexicon/nominal-parentheticals.tsv
+
+frequency-units.txt uses frequency adjuncts in the Russian FrameBank version
+and GPL-3.0 license given above. From complete phrases annotated Circum,
+частота and Sacc, retain the head noun of a cardinal group compatible with
+external accusative. Require at least two distinct attested cardinal values.
+This licenses event counts; an ordinary counted object has its usual role.
+framebank_anno_ex_circ.txt SHA256 320596df05ca5cb08f645e94212bd96045c6c68923c6bac9b99d8ecf2db47354
+PYTHONPATH=src python scripts/import_russian_frequency_units.py framebank_anno_ex_circ.txt src/ah/russian_grammar/lexicon/frequency-units.txt

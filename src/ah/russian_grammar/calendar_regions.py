@@ -2,7 +2,8 @@ from dataclasses import replace
 from itertools import chain
 
 from .dated_clauses import calendar_day, year_unit
-from .morphology import Morphology, PREDICATE_ROLES
+from .morphology import Morphology, NOMINAL_ROLES, PREDICATE_ROLES, ROLE_CASE
+from .numerals import HYPHENS, RANGE_MARKS, roman_value
 from .parser import Link, _span_label
 from .probe import Probe
 from .quote_titles import spans
@@ -51,22 +52,106 @@ def _dates(tokens, parse):
 
 
 def _ordinal_years(tokens, parse):
+    from .numerals import expressions
+    from .prepositions import GOVERNMENT
+
     for i, token in enumerate(tokens[:-1]):
-        if not (len(token.surface) == 4 and token.surface.isdecimal() and int(token.surface)
-                and year_unit(tokens[i + 1].surface)):
+        if not (len(token.surface) == 4 and token.surface.isdecimal() and int(token.surface)):
             continue
-        if i >= 2 and calendar_day(tokens, i - 2):
+        forms = [tag for lemma, tag in known_forms(tokens[i + 1].surface) if lemma == 'год' and tag.POS == 'NOUN']
+        if not any(tag.number == 'sing' and tag.case == 'gent' for tag in forms) or i >= 2 and calendar_day(tokens, i - 2):
             continue
         kept = (*range(i), *range(i + 1, len(tokens)))
+        cardinal_possible = False
         for tree in parse(tuple(tokens[j] for j in kept)):
             links = _map(tree, kept)
             unit = links[i + 1]
-            if unit.role != 'genitive_modifier' or unit.lemma != 'год':
+            if unit.lemma != 'год':
                 continue
-            form = Morphology(pos='ADJF', case='gent', number='sing', gender='masc')
-            links[i] = Link('attribute', token.surface, i + 1, 'NUM.UNMARKED.ORDINAL', 'gent', morphology=form,
+            if (unit.role == 'governed' and i > 0 and unit.head == i - 1 and links[i - 1].role == 'preposition'):
+                cases = GOVERNMENT.get(links[i - 1].lemma, ())
+                cardinal_possible |= any(number.compatible(case, tag) for number in expressions((token.surface,))
+                                         if number.kind == 'cardinal' for case in cases for tag in forms)
+            elif unit.role != 'genitive_modifier':
+                continue
+            if unit.case != 'gent':
+                continue
+            form = Morphology(pos='ADJF', case=unit.case, number='sing', gender='masc')
+            links[i] = Link('attribute', token.surface, i + 1, 'NUM.UNMARKED.ORDINAL', unit.case, morphology=form,
                             quantity=token.surface, quantity_kind='ordinal')
             yield tuple(links[j] for j in range(len(tokens)))
+        if cardinal_possible:
+            for tree in parse(tokens):
+                if tree[i].head == i + 1 and tree[i].quantity_kind == 'cardinal':
+                    yield tree
+
+
+def _roman_interval(tokens, start):
+    surface = tokens[start].surface
+    left = roman_value(surface)
+    if left is None:
+        mark = next((letter for letter in surface if letter in HYPHENS), None)
+        if mark is None:
+            return
+        lower, _, upper = surface.partition(mark)
+        left, right = roman_value(lower), roman_value(upper)
+        noun, marked = start + 1, True
+    else:
+        marked = tokens[start + 1].surface in RANGE_MARKS or tokens[start + 1].surface == '--'
+        end = start + 1 + int(marked)
+        if end + 1 >= len(tokens):
+            return
+        right = roman_value(tokens[end].surface)
+        noun = end + 1
+    if left is not None and right is not None and left < right:
+        return noun, left, right, marked
+
+
+def _ordinal_intervals(tokens, parse):
+    sites = {}
+    hidden = set()
+    for i in range(len(tokens) - 1):
+        if i in hidden:
+            continue
+        interval = _roman_interval(tokens, i)
+        if interval is None:
+            continue
+        noun, left, right, marked = interval
+        forms = [(lemma, tag.case) for lemma, tag in known_forms(tokens[noun].surface)
+                 if tag.POS == 'NOUN' and tag.number == 'plur']
+        if forms:
+            sites[i] = noun, left, right, marked, forms
+            hidden.update(range(i, noun))
+    if not sites:
+        return
+    kept = tuple(i for i in range(len(tokens)) if i not in hidden)
+    for tree in parse(tuple(tokens[j] for j in kept)):
+        links = _map(tree, kept)
+        for i, (noun, left, right, marked, forms) in sites.items():
+            host = links[noun]
+            case = host.case or ROLE_CASE.get(host.role) or (host.morphology and host.morphology.case)
+            if (host.role not in NOMINAL_ROLES | {'genitive_modifier'} or (host.lemma, case) not in forms
+                    or host.morphology and host.morphology.number == 'sing'):
+                break
+            rule = 'NUM.ORDINAL.INTERVAL' if marked else 'NUM.ORDINAL.UNMARKED.INTERVAL'
+            links[i] = Link('attribute', tokens[i].surface, noun, rule, case,
+                            quantity=f'{left}..{right}', quantity_kind='ordinal_range')
+            if noun > i + 1:
+                end = noun - 1
+                links[end] = Link('numeral_part', tokens[end].surface, i, 'NUM.PART')
+                if marked:
+                    links[i + 1] = Link('punctuation', tokens[i + 1].surface, end, 'NUM.RANGE.MARK')
+        else:
+            yield tuple(links[j] for j in range(len(tokens)))
+
+
+def confirmation(tokens, tree, i, text):
+    if tree[i].rule == 'NUM.ORDINAL.UNMARKED.INTERVAL':
+        host = tree[i].head
+        first, last = (_span_label(tokens, j) for j in (i, i + 1))
+        region = _span_label(tokens, i, host + 1)
+        return Probe(f'Какое сочетание обозначает весь промежуток от «{first}» до «{last}» включительно?',
+                     (region,), text)
 
 
 def _simple_titles(tokens):
@@ -77,6 +162,7 @@ def _simple_titles(tokens):
 def _calendar(tokens, parse):
     yield from _dates(tokens, parse)
     yield from _ordinal_years(tokens, parse)
+    yield from _ordinal_intervals(tokens, parse)
 
 
 def trees(tokens, parse, budget):

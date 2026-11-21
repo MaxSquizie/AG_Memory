@@ -1,10 +1,10 @@
 from dataclasses import replace
-from functools import cache
+from functools import cache, lru_cache
 from importlib.resources import files
 
 from .infinitives import FRAMES, _with_control
 from .nominal_groups import _groups
-from .rules import known_forms
+from .rules import dictionary, known_forms
 
 
 @cache
@@ -31,6 +31,35 @@ def dative_recipients():
 def _writing_instruments():
     table = files(__package__).joinpath('lexicon/writing_instruments.tsv')
     return frozenset(table.read_text(encoding='utf-8').splitlines())
+
+
+@lru_cache(maxsize=4096)
+def _verbal_nouns(surface):
+    nouns = {lemma for lemma, tag in known_forms(surface) if tag.POS == 'NOUN'}
+    if not nouns or not any(tag.POS == 'PRTF' and tag.voice == 'actv' for _, tag in known_forms(surface)):
+        return ()
+    sources = set()
+    for word in dictionary().parse(surface):
+        if word.is_known and word.tag.POS == 'PRTF' and word.tag.voice == 'actv':
+            citation = word.inflect({'masc', 'sing', 'nomn'})
+            if citation and citation.word in nouns:
+                sources.add((citation.word, word.normal_form))
+    return tuple(sorted(sources))
+
+
+def nominal_partitions(trees, tokens, text):
+    from .parser import _span_label
+    from .probe import Probe
+
+    for i in range(len(tokens)):
+        links = [tree[i] for tree in trees]
+        heads = {link.head for link in links}
+        if None in heads or len(heads) < 2 or not any(link.rule == 'N.VERBAL.GOV' for link in links):
+            continue
+        labels = {head: _span_label(tokens, head) for head in sorted(heads)}
+        word = _span_label(tokens, i)
+        question = f'Какое слово требует зависимой формы «{word}» в этом предложении?'
+        yield Probe(question, tuple(labels.values()), text), [labels[link.head] for link in links]
 
 
 def _slot(link):
@@ -75,7 +104,7 @@ def _pp_attachments(expanded, groups, budget):
                 continue
             candidates = [j for j in edge if tree[j].role in {
                 'subject', 'object', 'duration', 'governed', 'experiencer', 'infinitive', 'nominal_conjunct',
-                'recipient', 'beneficiary', 'oblique', 'instrument', 'stimulus', 'predicate'}]
+                'recipient', 'beneficiary', 'oblique', 'instrument', 'agent', 'stimulus', 'predicate'}]
             candidates.extend(j for j, link in enumerate(tree) if link.role == 'predicate' and j not in candidates)
             active.add(i)
             for head in candidates:
@@ -147,6 +176,12 @@ def _attach(tokens, tree, kept, groups, government, roles, budget):
             if (group.case == 'datv' and role == 'oblique' and verb in dative_recipients()
                     and any(part.role == 'object' and part.head == host for part in links.values())):
                 choices.append(Link('recipient', group.lemma, host, 'V.GOV', case='datv'))
+        neighbor = group.start - 1
+        nearby = links.get(neighbor)
+        if nearby and nearby.role in {'subject', 'object', 'governed', 'nominal_conjunct'}:
+            for noun, verb in _verbal_nouns(tokens[neighbor].surface):
+                if nearby.lemma == noun and group.case in government.get(verb, ()):
+                    choices.append(Link('oblique', group.lemma, neighbor, 'N.VERBAL.GOV', case=group.case))
         following = []
         for bound, used in states:
             for link in choices:
@@ -189,6 +224,9 @@ def trees(tokens, base, *, budget=256, verb_pos=('VERB', 'INFN', 'PRTS')):
     government, roles = _lexicon()
     potential = {i: {case for lemma, tag in known_forms(token.surface) if tag.POS in verb_pos
                      for case in government.get(lemma, ())} for i, token in enumerate(tokens)}
+    for i, token in enumerate(tokens):
+        for _, verb in _verbal_nouns(token.surface):
+            potential[i].update(government.get(verb, ()))
     if any(any(tag.POS == 'NPRO' and 'Anph' in tag and tag.case == 'datv' for _, tag in known_forms(t.surface))
            for t in tokens):
         for i, token in enumerate(tokens):

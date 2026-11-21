@@ -16,6 +16,17 @@ DIGITS = re.compile(r'(\d+)(?:([.,/])(\d+)|[-‐‑]([а-яё]+))?')
 GROUPED = re.compile(r'\d{1,3}(?:[ \u00a0\u202f]\d{3})+(?:[.,/]\d+|[-‐‑][а-яё]+)?')
 
 
+ROMAN = re.compile(r'(?=[IVXLCDM]+$)M{0,3}(?:CM|CD|D?C{0,3})(?:XC|XL|L?X{0,3})(?:IX|IV|V?I{0,3})')
+_ROMAN_DIGITS = dict(zip('IVXLCDM', (1, 5, 10, 50, 100, 500, 1000)))
+
+
+def roman_value(word):
+    if not ROMAN.fullmatch(word):
+        return None
+    values = [_ROMAN_DIGITS[letter] for letter in word]
+    return sum(-value if value < right else value for value, right in zip(values, values[1:] + [0]))
+
+
 def _key(text):
     return text.casefold().replace('ё', 'е')
 

@@ -84,6 +84,10 @@ class NominalChart:
                 continue
             for lemma, outer in self._prep_ends[start - 1]:
                 if any(tag.case in GOVERNMENT.get(lemma, ()) for tag in self._noun_forms[-1]):
+                    if (index not in self._local_edge and not adjectives and any(
+                            tag.POS == 'VERB' for _, tag in forms)):
+                        self._local_edge = (index, *self._local_edge)[:self.budget]
+                        edge.append(index)
                     edge.extend(outer)
         edge = tuple(dict.fromkeys(edge))
         if len(edge) > self.budget:

@@ -30,3 +30,15 @@ def test_unknown_object_and_subject_of_a_coordinated_clause_keep_separate_links(
     assert (rows[2]['role'], rows[2]['head']) == ('object', 1)
     assert (rows[5]['role'], rows[5]['head']) == ('subject', 6)
     assert rows[6]['controller'] is None
+
+
+def test_unknown_attribute_and_place_leave_both_passive_preposition_hosts_open():
+    text = 'Выстроенный в греко-романском стиле город был населён греками из Файюма.'
+    core = AHCore()
+    result = submit(core, text)
+    assert result.status == 'AMBIGUOUS'
+    trees = result.analysis.analyses
+    assert {tree[8].head for tree in trees} == {6, 7}
+    assert all(tree[2].rule == 'OPAQUE.ATTRIBUTE' and tree[2].head == 3 for tree in trees)
+    assert all(tree[9].rule == 'OPAQUE.GOVERNED' and tree[9].lemma == 'Файюма' for tree in trees)
+    assert not core.store.elements(Domain.H)

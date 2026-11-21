@@ -1074,7 +1074,8 @@ def submit(core, text, choose=None, *, source='user', speaker_ref=None, addresse
     fixed_expressions = {row['head'] for row in rows if row['role'] == 'fixed'}
     variables = [i for i, row in enumerate(rows) if i not in fixed_expressions and row['role'] != 'fixed' and
                  'quotation' not in row and row.get('antecedent') is None and row['rule'] not in ('CL.WH', 'CL.SPATIAL.WH', 'CL.SPATIAL.FREE', 'NEG.PRON.ARG') and
-                 row['role'] not in ('clause_marker', 'coordinator') and _question_word(row['surface'], row['lemma'])]
+                 row['role'] not in ('clause_marker', 'coordinator', 'preposition', 'case', 'prep_part') and
+                 _question_word(row['surface'], row['lemma'])]
     if marked_question or variables or any(row['rule'] == 'UTT.POLAR' and 'quotation' not in row for row in rows):
         if len(variables) > 1 or any(not (adjuncts.question(rows[i]) or rows[i]['role'] == 'possessive' and rows[i]['lemma'] == 'чей'
                                           or rows[i]['rule'] == 'NEG.EXIST.OWNER' and rows[i]['lemma'] == 'кто' or rows[i]['role'] in ARGUMENTS and rows[i]['lemma'] in ('кто', 'что') or

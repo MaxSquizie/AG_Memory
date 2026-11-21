@@ -162,3 +162,11 @@ def test_substantive_subject_keeps_its_arguments_and_agreement():
     assert submit(core, 'Вошедший читает книгу.').status == 'STORED'
     assert submit(core, 'Что читает вошедший?').text == 'книгу'
     assert submit(core, 'Вошедшая читает книгу?').status == 'UNKNOWN'
+
+
+def test_verbal_noun_can_govern_an_instrumental_alongside_the_finite_verb():
+    result = analyze('Шли командующие фронтами.')
+    assert result.status == 'AMBIGUOUS'
+    assert result.probes[-1].options == ('Шли', 'командующие')
+    control = analyze('Шли люди фронтами.')
+    assert all(link.rule != 'N.VERBAL.GOV' for tree in control.analyses for link in tree)

@@ -106,7 +106,8 @@ def _determined(tokens, base, budget):
     groups = {}
     for i, token in enumerate(tokens[:-1]):
         forms = [(lemma, tag) for lemma, tag in known_forms(token.surface)
-                 if tag.POS == 'ADJF' and lemma in SCOPES]
+                 if tag.POS == 'ADJF' and (lemma in SCOPES or
+                    {'Apro', 'Subx'} <= tag.grammemes and not {'Anph', 'Anum'} & tag.grammemes)]
         if not forms:
             continue
         for j in range(i + 1, len(tokens)):
@@ -134,13 +135,14 @@ def _determined(tokens, base, budget):
                           and _agree(tag, reading)), None)
             if lemma is None:
                 break
-            if SCOPES[lemma] == 'negative':
+            scope = SCOPES.get(lemma)
+            if scope == 'negative':
                 governor = host
                 while governor.head is not None and governor.role not in ('predicate', 'infinitive', 'converb'):
                     governor = links[governor.head]
                 if 'negated' not in (governor.scope or '').split('_'):
                     break
-            links[i] = Link('attribute', lemma, j, 'NP.DET', scope=SCOPES[lemma])
+            links[i] = Link('attribute', lemma, j, 'NP.DET', scope=scope)
         else:
             yield tuple(links[i] for i in range(len(tokens)))
 

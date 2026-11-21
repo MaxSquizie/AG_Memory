@@ -1,6 +1,8 @@
 from dataclasses import replace
+from functools import cache
 from itertools import product
 
+from . import event_counts
 from .adjuncts import _lexicon
 from .morphology import CASE_EQUIVALENTS, Morphology, PREDICATE_ROLES, from_tag
 from .nominal_groups import _prepositions
@@ -18,29 +20,59 @@ def _unit(lemma):
     return ('nominal', 'когда', '-', lemma) in entries
 
 
-def _calendar_note(tokens, parse):
-    end = len(tokens)
-    enclosed = end >= 4 and tokens[-1].surface == ')' and tokens[-3].surface == '('
-    year = end - 2 if enclosed else end - 1
-    if year < 2:
-        return
-    digits = tokens[year].surface
-    if len(digits) != 4 or not digits.isdecimal() or not int(digits):
-        return
-    start = year - int(enclosed)
-    unit = start - 1
-    if not any(tag.POS == 'NOUN' and _unit(lemma) for lemma, tag in known_forms(tokens[unit].surface)):
-        return
-    for prefix in parse(tokens[:start]):
-        if prefix[unit].role != 'governed' or not _unit(prefix[unit].lemma):
+@cache
+def _month_lemmas():
+    from .dated_clauses import _months
+
+    return frozenset(lemma for surface in _months() for lemma, tag in known_forms(surface)
+                     if tag.POS == 'NOUN' and tag.case == 'gent' and tag.number == 'sing' and tag.animacy == 'inan')
+
+
+def _calendar_note(tokens, parse, budget):
+    from .quantity_groups import _groups
+
+    for year in range(2, len(tokens)):
+        digits = tokens[year].surface
+        if len(digits) != 4 or not digits.isdecimal() or not int(digits):
             continue
-        if not any(link.head == unit and link.role == 'numeral' for link in prefix):
+        enclosed = (tokens[year - 1].surface == '(' and year + 1 < len(tokens)
+                    and tokens[year + 1].surface == ')')
+        start, stop = year - int(enclosed), year + 1 + int(enclosed)
+        unit = start - 1
+        words = {lemma for lemma, tag in known_forms(tokens[unit].surface) if tag.POS == 'NOUN'}
+        month = bool(words & _month_lemmas())
+        if not month and (stop != len(tokens) or not any(_unit(word) for word in words)):
             continue
-        note = Link('apposition', digits, unit, 'DATE.APPOS', quantity=digits, quantity_kind='ordinal')
-        if enclosed:
-            yield (*prefix, Link('punctuation', '(', year, 'DATE.PAREN'), note, Link('punctuation', ')', year, 'DATE.PAREN'))
-        else:
-            yield (*prefix, note)
+        if stop < len(tokens) and any(lemma == 'год' for lemma, _ in known_forms(tokens[stop].surface)):
+            continue
+        positions = (*range(start), *range(stop, len(tokens)))
+        possible_counts = set()
+        if month and not enclosed and year + 1 < len(tokens):
+            for number in expressions(tokens, year):
+                if number.kind == 'cardinal' and number.end == year + 1:
+                    possible_counts.update(group.noun for group in _groups(tokens, year, number, budget))
+        witnessed_counts = set()
+        if possible_counts:
+            for tree in parse(tokens):
+                link = tree[year]
+                if link.quantity_kind == 'cardinal' and link.head in possible_counts:
+                    witnessed_counts.add(link.head)
+                    yield tree
+        for tree in parse(tuple(tokens[j] for j in positions)):
+            links = _map(tree, positions)
+            host = links[unit]
+            if host.role != 'governed':
+                continue
+            if host.lemma not in _month_lemmas() and not (
+                    _unit(host.lemma) and any(l.head == unit and l.role == 'numeral' for l in links.values())):
+                continue
+            if any(links[j].head == unit and links[j].role == 'genitive_modifier' for j in witnessed_counts):
+                continue
+            links[year] = Link('apposition', digits, unit, 'DATE.APPOS', quantity=digits, quantity_kind='ordinal')
+            if enclosed:
+                for j in (start, stop - 1):
+                    links[j] = Link('punctuation', tokens[j].surface, year, 'DATE.PAREN')
+            yield tuple(links[j] for j in range(len(tokens)))
 
 
 def _unknown_forms(surface):
@@ -91,7 +123,8 @@ def _ordinal_sites(tokens):
 
 
 def trees(tokens, parse, budget):
-    yield from _calendar_note(tokens, parse)
+    yield from event_counts.trees(tokens, parse, budget)
+    yield from _calendar_note(tokens, parse, budget)
     sites = dict(_ordinal_sites(tokens))
     if not sites:
         yield from _unlisted_complement(tokens, parse)

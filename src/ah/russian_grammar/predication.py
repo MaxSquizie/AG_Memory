@@ -312,6 +312,27 @@ def _with_prepositions(tokens, bare, budget):
             yield from _attach(tokens, kept, tree, layout)
 
 
+def _prepositional_predicates(tokens):
+    from .adjuncts import SPATIAL
+    from .nominal_groups import _members, _prepositions
+    from .parser import Link
+
+    for start, prep in _prepositions(tokens, 0):
+        for head, lemma, case, attrs in _members(tokens, start, prep):
+            if SPATIAL.get((prep, case)) != 'где':
+                continue
+            for subj, noun, _, modifiers in _members(tokens, head + 1, None, 'nomn'):
+                if subj != len(tokens) - 1:
+                    continue
+                links = {**dict(attrs), **dict(modifiers), 0: Link('preposition', prep, head, 'V2.PREP'),
+                         head: Link('predicate', lemma, None, 'V2.PP', case),
+                         subj: Link('subject', noun, head, 'S1', 'nomn')}
+                for i in range(1, start):
+                    links[i] = Link('prep_part', tokens[i].surface.casefold(), 0, 'P1')
+                yield tuple(links[i] for i in range(len(tokens)))
+
+
 def trees(tokens, *, budget=256):
     yield from _unavailable(tokens, budget)
+    yield from _prepositional_predicates(tokens)
     yield from _with_prepositions(tokens, _bare_trees, budget)

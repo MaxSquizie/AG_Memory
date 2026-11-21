@@ -4,6 +4,7 @@ from importlib.resources import files
 from itertools import product
 
 from .nominal_chart import NominalChart, agrees as _agree
+from .numerals import Numeric, expressions
 from .prepositions import FORMS, PREFIXES
 from .rules import Reading, known_forms, name_continuations, name_type, readings
 
@@ -40,6 +41,7 @@ class Group:
     lemma: str
     case: str
     extra: tuple
+    ordinal: Numeric | None = None
 
 
 def _prepositions(tokens, start):
@@ -238,16 +240,44 @@ def _extensions(links, groups, chart, budget):
                     pending.append((position + 1, updated))
             continue
         group = groups[position]
-        for host in _open_heads(current, group.start, chart.steps[group.noun].genitive_hosts):
+        hosts = (chart.steps[group.start - 1].right_edge if group.ordinal is not None
+                 else chart.steps[group.noun].genitive_hosts)
+        for host in _open_heads(current, group.start, hosts):
             examined += 1
             if examined > budget:
                 raise NominalBudgetExceeded('NOMINAL_FRONTIER_BUDGET')
-            if current[host].role not in nominal_roles:
+            if current[host].role not in nominal_roles and current[host].rule != 'V2.PP':
                 continue
             updated = dict(current)
-            updated[group.noun] = Link('genitive_modifier', group.lemma, host, 'N.GEN', case=group.case)
+            link = Link('genitive_modifier', group.lemma, host, 'N.GEN', case=group.case)
+            if group.ordinal is not None:
+                link = replace(link, morphology=group.ordinal.parts_for(group.case)[0][1],
+                               quantity=group.ordinal.value, quantity_kind=group.ordinal.kind)
+            updated[group.noun] = link
             updated.update(group.extra)
             pending.append((position + 1, updated))
+
+
+def genitive_ordinals(tokens, start):
+    return (expr for expr in expressions(tokens, start)
+            if expr.kind == 'ordinal' and 'gent' in expr.cases and 'nomn' not in expr.cases)
+
+
+def _genitives(tokens, start, chart, budget):
+    from .quantity_groups import _groups as counted_groups
+    from .parser import Link
+
+    for group in _groups(tokens, start, budget, bare_cases=('gent', 'gen2'), chart=chart):
+        if chart.steps[group.noun].genitive_hosts:
+            yield group
+    for expr in genitive_ordinals(tokens, start):
+        if next(counted_groups(tokens, start, expr, budget), None) is not None:
+            continue
+        parts = expr.parts_for('gent')
+        if parts:
+            extra = tuple((j, Link('numeral_part', lemma, start, 'NUM.PART', morphology=form))
+                          for j, (lemma, form) in enumerate(parts[1:], start + 1))
+            yield Group(start, expr.end, None, start, parts[0][0], 'gent', extra, expr)
 
 
 def with_genitives(tokens, local, *, budget, chart=None):
@@ -272,8 +302,8 @@ def with_genitives(tokens, local, *, budget, chart=None):
     yield from collective_agreement.trees(tokens, local, budget=budget, chart=chart)
     spans = [group for start in range(1, len(tokens))
              if start - 1 not in lexical_members and chart.steps[start - 1].right_edge
-             for group in _groups(tokens, start, budget, bare_cases=('gent', 'gen2'), chart=chart)
-             if chart.steps[group.noun].genitive_hosts and lexical_members.isdisjoint(range(start, group.end))]
+             for group in _genitives(tokens, start, chart, budget)
+             if lexical_members.isdisjoint(range(start, group.end))]
     pending = [(0, ())]
     examined = 0
     while pending:

@@ -1,5 +1,5 @@
 from .homogeneous import _restore
-from .nominal_groups import _agree
+from .nominal_groups import _agree, genitive_ordinals
 from .prepositions import FORMS
 from .rules import known_forms, readings, subject_agrees
 
@@ -68,7 +68,8 @@ def _compatible(left, right):
         return True
     if spatial and any(tag.POS == 'PRCL' for _, tag in right_forms):
         return True
-    if nominal(left) and any(tag.case in ('gent', 'gen2') for tag in nominal(right)):
+    if nominal(left) and (any(tag.case in ('gent', 'gen2') for tag in nominal(right))
+                          or any(genitive_ordinals((right,), 0))):
         return True
     if (any(tag.case == 'ablt' for tag in nominal(left))
             and any(tag.case == 'nomn' for tag in nominal(right))):

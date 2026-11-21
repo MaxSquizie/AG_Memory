@@ -104,7 +104,6 @@ def test_syncretic_governed_cases_remain_distinct_and_each_answer_makes_progress
     ('Иван шёл с тяжёлой биноклем', 'GROUP_AGREEMENT'),
     ('Иван подбежал к', 'INCOMPLETE_PREPOSITIONAL_GROUP'),
     ('Иван увидел человека с тяжёлым', 'INCOMPLETE_PREPOSITIONAL_GROUP'),
-    ('На столе арбуз', 'NO_COMPLETE_CLAUSE'),
 ])
 def test_incomplete_or_incompatible_group_never_yields_a_partial_tree(text, reason):
     r = analyze(text)
@@ -138,3 +137,14 @@ def test_second_preposition_extends_only_the_branch_open_after_the_first():
     attachments = {(t[3].head, t[5].head) for t in result.analyses if t[2].head == 1}
     assert (1, 1) in attachments
     assert (0, 1) not in attachments and (1, 2) not in attachments
+
+
+def test_preposed_predicative_phrase_licenses_a_nominative_subject_without_a_verb():
+    tree, = analyze('На столе арбуз').analyses
+    assert [(link.role, link.head) for link in tree] == [
+        ('preposition', 1), ('predicate', None), ('subject', 1)]
+    assert tree[1].case == 'loct'
+    result = analyze('На юго-западе села живописный пруд.')
+    assert result.status == 'AMBIGUOUS'
+    assert any(tree[1].rule == 'V2.PP' and tree[2].role == 'genitive_modifier' and tree[2].head == 1
+               and tree[4].role == 'subject' for tree in result.analyses)

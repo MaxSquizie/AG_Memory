@@ -1,0 +1,987 @@
+{
+  "corpus_sha256": "fa3642959614db06fdab2d7464af8a0873c70d0a2b5758758231d0ef725821ea",
+  "skipped": [
+    "test-s72",
+    "test-s73",
+    "test-s74",
+    "test-s75",
+    "test-s80",
+    "test-s84"
+  ],
+  "results": [
+    {
+      "id": "test-s76",
+      "variant": "original",
+      "text": "Как правило не участвует в боевых вылетах, координируя остальных ведьм из башни управления.",
+      "calls": [],
+      "status": "UNKNOWN",
+      "reason": "NO_COMPLETE_CLAUSE",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s76",
+      "variant": "no_punctuation",
+      "text": "Как правило не участвует в боевых вылетах координируя остальных ведьм из башни управления",
+      "calls": [],
+      "status": "UNKNOWN",
+      "reason": "NO_COMPLETE_CLAUSE",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s76",
+      "variant": "extra_comma",
+      "text": "Как правило не участвует в боевых, вылетах, координируя остальных ведьм из башни управления.",
+      "calls": [],
+      "status": "UNKNOWN",
+      "reason": "NO_COMPLETE_CLAUSE",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s77",
+      "variant": "original",
+      "text": "Заказ на постройку субмарины был отдан 7 августа 1939 года.",
+      "calls": [
+        "8cc4c3e04952e9a607ba9568b3736eab1cf896f004afe3f8a9f3cc8514f08fb8"
+      ],
+      "status": "STORED",
+      "reason": "SIMPLE_CLAUSE",
+      "empty": false,
+      "exact": true,
+      "incorrect_heads": [],
+      "role_scope_errors": [],
+      "graph_sha256": "00240e2cee6467effe34e5bf5c2761831d17575e708a5fc56a0992608a68cec6"
+    },
+    {
+      "id": "test-s77",
+      "variant": "no_punctuation",
+      "text": "Заказ на постройку субмарины был отдан 7 августа 1939 года",
+      "calls": [
+        "8cc4c3e04952e9a607ba9568b3736eab1cf896f004afe3f8a9f3cc8514f08fb8"
+      ],
+      "status": "STORED",
+      "reason": "SIMPLE_CLAUSE",
+      "empty": false,
+      "exact": true,
+      "incorrect_heads": [],
+      "role_scope_errors": [],
+      "graph_sha256": "00240e2cee6467effe34e5bf5c2761831d17575e708a5fc56a0992608a68cec6"
+    },
+    {
+      "id": "test-s77",
+      "variant": "extra_comma",
+      "text": "Заказ на постройку субмарины был отдан 7 августа 1939, года.",
+      "calls": [
+        "89e567b3500ad43eabc14159ce80a890f6bcac2291e8a925332adcefdecde263",
+        "cf0af25bc8b2fbbdcb4307d8589bd7bb615f89708d5bdd5f8823075d3daedce3"
+      ],
+      "status": "STORED",
+      "reason": "SIMPLE_CLAUSE",
+      "empty": false,
+      "exact": true,
+      "incorrect_heads": [],
+      "role_scope_errors": [],
+      "graph_sha256": "00240e2cee6467effe34e5bf5c2761831d17575e708a5fc56a0992608a68cec6"
+    },
+    {
+      "id": "test-s78",
+      "variant": "original",
+      "text": "Ещё в Падуе сделал большое число наблюдений астероидов, комет и покрытий звёзд.",
+      "calls": [
+        "55d3e391985c3cd1da1a665c686b3e384b3a89c52c6fa302202c33e3c007a02e",
+        "e0d477ae314d3adb877863de377698bf803328b48239ba5c300b940c1efb2ce7"
+      ],
+      "status": "STORED",
+      "reason": "SIMPLE_CLAUSE",
+      "empty": false,
+      "exact": true,
+      "incorrect_heads": [],
+      "role_scope_errors": [],
+      "graph_sha256": "ed04a8a148a3eb34be4d3ff54f7cf93655c77a3d112f09b870ae7894c3ce1b69"
+    },
+    {
+      "id": "test-s78",
+      "variant": "no_punctuation",
+      "text": "Ещё в Падуе сделал большое число наблюдений астероидов комет и покрытий звёзд",
+      "calls": [
+        "c7f2538e93d711ffe51d4d6b6fa468b8afb4cdaefbb84660771c2c4a5c11a930",
+        "fecf8d0f7d0819a8ae74d0d1d003f634d104c5bdbd7e24d59c033e30a1e31293"
+      ],
+      "status": "STORED",
+      "reason": "SIMPLE_CLAUSE",
+      "empty": false,
+      "exact": false,
+      "incorrect_heads": [
+        [
+          "комет",
+          8,
+          7
+        ],
+        [
+          "покрытий",
+          8,
+          9
+        ]
+      ],
+      "role_scope_errors": [],
+      "graph_sha256": "bdb4ffc4fb1389299767a3e6bf96bd36b03a8c691e0a76cb8b5e89fd971d2906"
+    },
+    {
+      "id": "test-s78",
+      "variant": "extra_comma",
+      "text": "Ещё в Падуе сделал большое, число наблюдений астероидов, комет и покрытий звёзд.",
+      "calls": [
+        "ebaa9f238ed4ff239e231f9a73c3ae2731ee046ee8aa09a3cceb77a95327ba75",
+        "5f974c69bded08ccaebf0e8a35c9d0799374a54ce2e369fca5d251071d871bb9",
+        "ba5855cb13a5d70f76c89530cd45f3e385d165beefd4fd901a8c5e72709d7ab5"
+      ],
+      "status": "STORED",
+      "reason": "SIMPLE_CLAUSE",
+      "empty": false,
+      "exact": true,
+      "incorrect_heads": [],
+      "role_scope_errors": [],
+      "graph_sha256": "ed04a8a148a3eb34be4d3ff54f7cf93655c77a3d112f09b870ae7894c3ce1b69"
+    },
+    {
+      "id": "test-s79",
+      "variant": "original",
+      "text": "В том же году Агияр перешёл в португальский ``Порту&#39;&#39;; спустя два месяца, не сыграв ни одного матча за ``Порту&#39;&#39;, Агияр был отдан в аренду амадорской ``Эштреле&#39;&#39;.",
+      "calls": [
+        "fafa840be2874871b392f5a866afbac741586047fd4d9958c8b2c59b27e5d6da",
+        "0d80d622e652fda2a7515c2a8d4ca355764c8de966620f5be0729785307e51c7"
+      ],
+      "status": "UNRESOLVED",
+      "reason": "MODIFIER_BUDGET",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s79",
+      "variant": "no_punctuation",
+      "text": "В том же году Агияр перешёл в португальский Порту спустя два месяца не сыграв ни одного матча за Порту Агияр был отдан в аренду амадорской Эштреле",
+      "calls": [
+        "d230125de8c53a1e74cbb2c64c3417282cef2ecd98566283ae3b4afa3a8752ca",
+        "41f80bdb890880a5d5795b7bada7de021901f1ff846a4c3170dbff81c2f02bd5"
+      ],
+      "status": "UNRESOLVED",
+      "reason": "MODIFIER_BUDGET",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s79",
+      "variant": "extra_comma",
+      "text": "В том же году Агияр перешёл в португальский ``Порту&#39;&#39;; спустя два, месяца, не сыграв ни одного матча за ``Порту&#39;&#39;, Агияр был отдан в аренду амадорской ``Эштреле&#39;&#39;.",
+      "calls": [
+        "9551c0f1b67817b0caca6f02e3d4d7dbbb47005124113d6761be910a5c28c052",
+        "1f2e8e77d672683a7827e9d4c8e842ff652d944f48e59441e44e4ff3cf9a9df1"
+      ],
+      "status": "UNRESOLVED",
+      "reason": "MODIFIER_BUDGET",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s81",
+      "variant": "original",
+      "text": "Церковь XV--XVI веков была построена в готическом стиле на месте мусульманской мечети, в честь победы над маврами.",
+      "calls": [],
+      "status": "UNRESOLVED",
+      "reason": "NO_RULE @8",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s81",
+      "variant": "no_punctuation",
+      "text": "Церковь XV XVI веков была построена в готическом стиле на месте мусульманской мечети в честь победы над маврами",
+      "calls": [],
+      "status": "UNRESOLVED",
+      "reason": "NO_RULE @8",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s81",
+      "variant": "extra_comma",
+      "text": "Церковь XV--XVI веков была построена в готическом, стиле на месте мусульманской мечети, в честь победы над маврами.",
+      "calls": [],
+      "status": "UNRESOLVED",
+      "reason": "NO_RULE @8",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s82",
+      "variant": "original",
+      "text": "Он председательствовал на Всемирной Исламской конференции в 1931 году, в ней приняли участие 22 исламские страны.",
+      "calls": [
+        "892958b1d3347930138d638b3904cca9e5a9a4708e3a641fa93879cea3031694",
+        "88575b3434e0ba30eb0808a0d4fce3e03c1430ca3d2c8ace2f420c19c707b5cb"
+      ],
+      "status": "STORED",
+      "reason": "COMPLEX_CLAUSE",
+      "empty": false,
+      "exact": true,
+      "incorrect_heads": [],
+      "role_scope_errors": [],
+      "graph_sha256": "c0f1978e26ee4708df55e049e4680525bac539f18fa896bb0b946e0354168cf8"
+    },
+    {
+      "id": "test-s82",
+      "variant": "no_punctuation",
+      "text": "Он председательствовал на Всемирной Исламской конференции в 1931 году в ней приняли участие 22 исламские страны",
+      "calls": [],
+      "status": "UNRESOLVED",
+      "reason": "NO_COMPLETE_CLAUSE",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s82",
+      "variant": "extra_comma",
+      "text": "Он председательствовал на Всемирной Исламской, конференции в 1931 году, в ней приняли участие 22 исламские страны.",
+      "calls": [
+        "4c7dfb1e69a81f260dc959b7173e44410ccb0f204e4b36e5ab9ee08b2a24eab5",
+        "eb9a1085a036baeed49533b1d565f69fcda13a36a89fcc7ec9ec686a22a3c234",
+        "f42eaf30d19581f249089bf7898773d32c81186e4898633515ff527ba80adc94"
+      ],
+      "status": "STORED",
+      "reason": "COMPLEX_CLAUSE",
+      "empty": false,
+      "exact": true,
+      "incorrect_heads": [],
+      "role_scope_errors": [],
+      "graph_sha256": "c0f1978e26ee4708df55e049e4680525bac539f18fa896bb0b946e0354168cf8"
+    },
+    {
+      "id": "test-s83",
+      "variant": "original",
+      "text": "Выстроенный в греко-романском стиле город был населён греками из Файюма.",
+      "calls": [],
+      "status": "UNRESOLVED",
+      "reason": "NO_COMPLETE_CLAUSE",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s83",
+      "variant": "no_punctuation",
+      "text": "Выстроенный в греко-романском стиле город был населён греками из Файюма",
+      "calls": [],
+      "status": "UNRESOLVED",
+      "reason": "NO_COMPLETE_CLAUSE",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s83",
+      "variant": "extra_comma",
+      "text": "Выстроенный в греко-романском, стиле город был населён греками из Файюма.",
+      "calls": [],
+      "status": "UNRESOLVED",
+      "reason": "NO_COMPLETE_CLAUSE",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s85",
+      "variant": "original",
+      "text": "Аслан-паша занял Кутаиси, где схватил Вахтанга, царицу Дареджан и Кетеван, а Баграта Слепого вторично посадил на царский престол Имеретии.",
+      "calls": [
+        "fc025cab60c9695694deb3147839ff88af3ad4087b57e31a84af424a1a821d29",
+        "47809dccb0c653f5895f9df2cc478d0cc9cc1e69485c3af7e3f967022bf4aead"
+      ],
+      "status": "UNRESOLVED",
+      "reason": "NO_COMPLETE_CLAUSE",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s85",
+      "variant": "no_punctuation",
+      "text": "Аслан паша занял Кутаиси где схватил Вахтанга царицу Дареджан и Кетеван а Баграта Слепого вторично посадил на царский престол Имеретии",
+      "calls": [
+        "522e5c796ed58afa5f011616ff41fe5059a1249b7402be8e1f91f18df4778e4f",
+        "11f492fc79f74812f920dee2e268bc41b40735c08651a71693fb790fa7278ba8"
+      ],
+      "status": "UNRESOLVED",
+      "reason": "NO_COMPLETE_CLAUSE",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s85",
+      "variant": "extra_comma",
+      "text": "Аслан-паша занял Кутаиси, где схватил Вахтанга, царицу Дареджан и Кетеван, а Баграта, Слепого вторично посадил на царский престол Имеретии.",
+      "calls": [
+        "63828acb3a45e14f3a34ed7a2480dad6cbb21a4b18a0b3e9572d5246aabeafb2",
+        "1f69274953b30ff56642247342959c4aabc251670a204db8f52f9d7c06ba97ea"
+      ],
+      "status": "UNRESOLVED",
+      "reason": "NO_COMPLETE_CLAUSE",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s86",
+      "variant": "original",
+      "text": "В этом же году он вновь озвучил Кота в сапогах в спин-оффе мультфильма ``Шрек&#39;&#39; ``Кот в сапогах&#39;&#39;.",
+      "calls": [
+        "49ec913be9cb8478f15fe6edc7479c190902deb733ce2d7471cb705d3daee3b1"
+      ],
+      "status": "UNRESOLVED",
+      "reason": "NO_COMPLETE_CLAUSE",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s86",
+      "variant": "no_punctuation",
+      "text": "В этом же году он вновь озвучил Кота в сапогах в спин-оффе мультфильма Шрек Кот в сапогах",
+      "calls": [
+        "053f691e6e20b8cc624505ce1b16ffaf6e4a6fa9f6e107d2ee2e21636bef549f"
+      ],
+      "status": "UNRESOLVED",
+      "reason": "NO_COMPLETE_CLAUSE",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s86",
+      "variant": "extra_comma",
+      "text": "В этом же году он вновь озвучил Кота в сапогах в спин-оффе, мультфильма ``Шрек&#39;&#39; ``Кот в сапогах&#39;&#39;.",
+      "calls": [
+        "c554a0bfbe8b5d30198b5b7a7d03dc1800041ce3f030b04851ad0f91b3ffec9e"
+      ],
+      "status": "UNRESOLVED",
+      "reason": "NO_COMPLETE_CLAUSE",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s87",
+      "variant": "original",
+      "text": "2005 год, премия имени Герда Буцериуса ``Молодая пресса Восточной Европы&#39;&#39;",
+      "calls": [],
+      "status": "UNRESOLVED",
+      "reason": "NO_COMPLETE_CLAUSE",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s87",
+      "variant": "no_punctuation",
+      "text": "2005 год премия имени Герда Буцериуса Молодая пресса Восточной Европы",
+      "calls": [],
+      "status": "UNRESOLVED",
+      "reason": "NO_RULE @0",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s87",
+      "variant": "extra_comma",
+      "text": "2005, год, премия имени Герда Буцериуса ``Молодая пресса Восточной Европы&#39;&#39;",
+      "calls": [],
+      "status": "UNRESOLVED",
+      "reason": "NO_COMPLETE_CLAUSE",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s88",
+      "variant": "original",
+      "text": "Газанфер Бильге (, 1924 -- 2008) -- турецкий борец, чемпион Европы и олимпийский чемпион.",
+      "calls": [
+        "dbee60278efbe05d4883e47dd9e1754a4f2a6b2d4f47ebda6506bc21ca49273c"
+      ],
+      "status": "UNRESOLVED",
+      "reason": "NO_COMPLETE_CLAUSE",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s88",
+      "variant": "no_punctuation",
+      "text": "Газанфер Бильге 1924 2008 турецкий борец чемпион Европы и олимпийский чемпион",
+      "calls": [
+        "ec85ae017f4a936b803da1f1bc1a15f2daa10b30740b401c28b266fb42f081c5"
+      ],
+      "status": "UNRESOLVED",
+      "reason": "NO_RULE @0",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s88",
+      "variant": "extra_comma",
+      "text": "Газанфер Бильге (, 1924 -- 2008) -- турецкий, борец, чемпион Европы и олимпийский чемпион.",
+      "calls": [
+        "73ac55d898d33a9951a741df19177e47b435a24e9179ff4926f19d149641457a"
+      ],
+      "status": "UNRESOLVED",
+      "reason": "NO_COMPLETE_CLAUSE",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s89",
+      "variant": "original",
+      "text": "Летом 2010 года, на правах свободного агента, вернулся в Россию, где подписал контракт, на один сезон, с московским ``Спартаком&#39;&#39;.",
+      "calls": [
+        "c89055907efbb97a82272a622cb2319858bd95fdbefe84862a03d08a903edae0",
+        "123b8fb88edfd2dccc0d37ad5c24ed42789483e77511065ff81ca4406eba761b",
+        "3e93370670c4664223b5b4a548d5a0f9c73f974ed362b5cc60895a45596f9ac1",
+        "b7e7411e6f5d58478a8cc079a018277d0528b540948721f9c47bbebf32df7bc9",
+        "f6395286299cf9c3ef1d2a00caecf04ed2dfc1b719e47b714fef6e2f0a76927b",
+        "c142034de92277aa4783a728f82c7d9c69c1b848d006910663ebf68e6cdc03cd"
+      ],
+      "status": "STORED",
+      "reason": "COMPLEX_CLAUSE",
+      "empty": false,
+      "exact": false,
+      "incorrect_heads": [
+        [
+          "сезон",
+          15,
+          16
+        ],
+        [
+          "Спартаком",
+          15,
+          16
+        ]
+      ],
+      "role_scope_errors": [
+        "контракт: subject, UD obj"
+      ],
+      "graph_sha256": "e2dc6ee9b4982efde8b8cff917f989b09180ad779a9ea683b30e19b4adca9f2c"
+    },
+    {
+      "id": "test-s89",
+      "variant": "no_punctuation",
+      "text": "Летом 2010 года на правах свободного агента вернулся в Россию где подписал контракт на один сезон с московским Спартаком",
+      "calls": [
+        "af10cd8f963285a5d0099295366e087c6d6fe0394617b7528531506f1ee3fe42",
+        "38e1b6bb75741ca520d056fbebf070926ef56489c6e054aae1d783a3e28df95e",
+        "1e1a5a617e1251f4341e26a414b6c9a93bdd50537dc5b4f7b7a11cead9e3593f",
+        "3e66d8c10f5fcc2bcd42ba2eb8c3ad8a084532f9ae4134528e9e25e4a6c1c506",
+        "69d3e693366d7075e9914b2e55de346096ae626e0d6e03306e3dbc9615522ce5",
+        "4764a8741ccf76d3aaa4531ad731f7110c37ad50738283f6d734b822e663b0b0",
+        "cd66cdee42ffc6b33ea6f2ff97b6525db013b56428ba0f3c25aeba655f06cfea",
+        "d450ade83f508e76dcd17748ff31f8a40f022912d2cb16e0bced55b6fc6ed846"
+      ],
+      "status": "STORED",
+      "reason": "COMPLEX_CLAUSE",
+      "empty": false,
+      "exact": false,
+      "incorrect_heads": [
+        [
+          "2010",
+          3,
+          1
+        ],
+        [
+          "года",
+          1,
+          8
+        ],
+        [
+          "сезон",
+          12,
+          13
+        ],
+        [
+          "Спартаком",
+          12,
+          13
+        ]
+      ],
+      "role_scope_errors": [
+        "контракт: subject, UD obj"
+      ],
+      "graph_sha256": "531f1e7abd88482945faa34b4b08be6f7c621cb7ae7c9017630760541d7344db"
+    },
+    {
+      "id": "test-s89",
+      "variant": "extra_comma",
+      "text": "Летом 2010, года, на правах свободного агента, вернулся в Россию, где подписал контракт, на один сезон, с московским ``Спартаком&#39;&#39;.",
+      "calls": [
+        "83923cd961637adde10e539b61b68dea0750aacab6497993a1d94727cfd09f97",
+        "c89055907efbb97a82272a622cb2319858bd95fdbefe84862a03d08a903edae0",
+        "123b8fb88edfd2dccc0d37ad5c24ed42789483e77511065ff81ca4406eba761b",
+        "d3c62a48e73cd95b2b770a008ff7d0e8e6e720f22441e2e68037766e40c663fb",
+        "8a306bf5019cf4363433940d42c4813bf7f6875b1e26cb6bdabd0d7ca98dfb75",
+        "243c7bdbb1d1e87ce8b0c34f370765919218e398ae1118204e114201ffec26b4",
+        "c0a5e5a58695014cbd546e76e1f8e224d31e03c611d36e20665f8789933f767e"
+      ],
+      "status": "STORED",
+      "reason": "COMPLEX_CLAUSE",
+      "empty": false,
+      "exact": false,
+      "incorrect_heads": [
+        [
+          "сезон",
+          16,
+          17
+        ],
+        [
+          "Спартаком",
+          16,
+          17
+        ]
+      ],
+      "role_scope_errors": [
+        "контракт: subject, UD obj"
+      ],
+      "graph_sha256": "e2dc6ee9b4982efde8b8cff917f989b09180ad779a9ea683b30e19b4adca9f2c"
+    },
+    {
+      "id": "test-s90",
+      "variant": "original",
+      "text": "Чтобы сгладить конфронтацию, ряд представителей оппозиции, начиная с 1996 года, включался в состав правительства.",
+      "calls": [
+        "970a6601bdb8bff4a61ff1cbf715938f34167d09a38a72fb4f5f4eb8a102e31a",
+        "f8eb500a3db1d87a444e27ed4982e17402d524893bf80a3c5b75641e96aa764c",
+        "e8ddf28011febe3f39d6b9e8674acfd60f441137b0bfe3232b848e6ff74d5214",
+        "d670e85d6065628d907d79e8c1d64668d2aa48c5ffd31b30c8fee82d56e3ae9d"
+      ],
+      "status": "STORED",
+      "reason": "COMPLEX_CLAUSE",
+      "empty": false,
+      "exact": false,
+      "incorrect_heads": [
+        [
+          "с",
+          12,
+          11
+        ],
+        [
+          "1996",
+          12,
+          9
+        ]
+      ],
+      "role_scope_errors": [],
+      "graph_sha256": "d1b9ceeb73dbfe30cf1dd932b527ee922383ee3b7f04495c4d0c2591ca6c41e8"
+    },
+    {
+      "id": "test-s90",
+      "variant": "no_punctuation",
+      "text": "Чтобы сгладить конфронтацию ряд представителей оппозиции начиная с 1996 года включался в состав правительства",
+      "calls": [],
+      "status": "UNRESOLVED",
+      "reason": "NO_COMPLETE_CLAUSE",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s90",
+      "variant": "extra_comma",
+      "text": "Чтобы сгладить конфронтацию, ряд представителей оппозиции, начиная с 1996, года, включался в состав правительства.",
+      "calls": [
+        "970a6601bdb8bff4a61ff1cbf715938f34167d09a38a72fb4f5f4eb8a102e31a",
+        "2e8fd458f10dd8e35b646a79949282a06312c92834b0b356e19ed8547cba0c5f"
+      ],
+      "status": "STORED",
+      "reason": "COMPLEX_CLAUSE",
+      "empty": false,
+      "exact": false,
+      "incorrect_heads": [
+        [
+          "с",
+          13,
+          11
+        ],
+        [
+          "1996",
+          13,
+          9
+        ],
+        [
+          "года",
+          9,
+          11
+        ]
+      ],
+      "role_scope_errors": [],
+      "graph_sha256": "5d6f10f60369cd0b828e36eaea8b7252bdd77c047f778973f14d00f7586ef7cc"
+    },
+    {
+      "id": "test-s91",
+      "variant": "original",
+      "text": "В январе 1999 бразильский Центральный банк объявил, что реал больше не будет привязан к доллару США, что привело к некоторой девальвации бразильской валюты.",
+      "calls": [
+        "e5866754ea70fafec85c03e35dba9e6c25f0e363385de1392da300194b22e1ae",
+        "150bb94f2853ce7ed05cbea6e48294987a15a56b9750dacedc31d01e202ced09",
+        "1cd22fa221570f03e5ed8ee827ba82863fa984a6109c3d0655943ef68cf6d433",
+        "8cfc823ad16e25208f41a190174e671046daf139f85ef1eb5f40f29e611aeb8f",
+        "e4a8b64903a9bc5ce55e90314973db9d8e406238054256a6f05fb62811d775b7",
+        "b3a1e437f8c3c9f48b87ac5fa8717c15e5e34f0045e6230d9d45b3938a84a92e"
+      ],
+      "status": "STORED",
+      "reason": "COMPLEX_CLAUSE",
+      "empty": false,
+      "exact": false,
+      "incorrect_heads": [
+        [
+          "1999",
+          2,
+          7
+        ],
+        [
+          "привело",
+          7,
+          14
+        ]
+      ],
+      "role_scope_errors": [],
+      "graph_sha256": "c9b188a04b6d5381d5ebf9e0dd06c5da768dcf1ca3dabcfbb60897a046edd096"
+    },
+    {
+      "id": "test-s91",
+      "variant": "no_punctuation",
+      "text": "В январе 1999 бразильский Центральный банк объявил что реал больше не будет привязан к доллару США что привело к некоторой девальвации бразильской валюты",
+      "calls": [
+        "765496cc49e0c1b69fe198df0f6bfb85f0c922d8064da513c5adb2fd8ce11fb1",
+        "94569aec412913298d804cca3add4c47eaa7f545d0ff8c88e71ebfa44cc5dea3",
+        "bb4f34e6bf4c6270805fbd2b95e8f9219ad7fc9d40425ba33a6c5f83a5c91f17",
+        "781bfde72ea03057da7ab590a69644f070b6094c8b0714758b3bc76fc1d77c4f",
+        "5ba9fa94d5aae03cd5fdff2a9e4a4b6efdedea01a84b325bd1c352c2b0a2089b",
+        "e9a4b009f46a399349d3970f5c69dc89dc63bfe07117d537549945c40ec8ee8e"
+      ],
+      "status": "STORED",
+      "reason": "COMPLEX_CLAUSE",
+      "empty": false,
+      "exact": false,
+      "incorrect_heads": [
+        [
+          "1999",
+          2,
+          7
+        ],
+        [
+          "привело",
+          7,
+          13
+        ]
+      ],
+      "role_scope_errors": [],
+      "graph_sha256": "c9b188a04b6d5381d5ebf9e0dd06c5da768dcf1ca3dabcfbb60897a046edd096"
+    },
+    {
+      "id": "test-s91",
+      "variant": "extra_comma",
+      "text": "В январе 1999 бразильский Центральный, банк объявил, что реал больше не будет привязан к доллару США, что привело к некоторой девальвации бразильской валюты.",
+      "calls": [
+        "431fb36aea59b8d76f1bee745e6f56cbc467cfca381aa9492e49ec1f607d1eaf",
+        "1cbb7e6823fa0429cd9ec99dd6d9096c7d604390b4695d1c2043d368a14fad70",
+        "fe11bd67e53a279397c205c09b6a6cda3e560baea27d343e438b83fd73010e25",
+        "1188c32606bb06b8e6eb4f608b5e9918de21395a1655f3fc8be50893ea7d587e"
+      ],
+      "status": "UNKNOWN",
+      "reason": "COMPLEX_CLAUSE",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s92",
+      "variant": "original",
+      "text": "Один раз алжирец появился в матче Кубка Лиги.",
+      "calls": [],
+      "status": "UNRESOLVED",
+      "reason": "NO_RULE @0",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s92",
+      "variant": "no_punctuation",
+      "text": "Один раз алжирец появился в матче Кубка Лиги",
+      "calls": [],
+      "status": "UNRESOLVED",
+      "reason": "NO_RULE @0",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s92",
+      "variant": "extra_comma",
+      "text": "Один раз алжирец появился в матче, Кубка Лиги.",
+      "calls": [],
+      "status": "UNRESOLVED",
+      "reason": "NO_RULE @0",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s93",
+      "variant": "original",
+      "text": "К Бынаты Хицау, наряду с Хилы дзуаром обращалась за помощью молодая невестка: он помогал ей расстаться с родителями и благополучно войти в новую семью мужа.",
+      "calls": [],
+      "status": "UNRESOLVED",
+      "reason": "NO_GOVERNED_READING @2",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s93",
+      "variant": "no_punctuation",
+      "text": "К Бынаты Хицау наряду с Хилы дзуаром обращалась за помощью молодая невестка он помогал ей расстаться с родителями и благополучно войти в новую семью мужа",
+      "calls": [],
+      "status": "UNRESOLVED",
+      "reason": "NO_GOVERNED_READING @2",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s93",
+      "variant": "extra_comma",
+      "text": "К Бынаты Хицау, наряду с Хилы дзуаром обращалась за помощью молодая, невестка: он помогал ей расстаться с родителями и благополучно войти в новую семью мужа.",
+      "calls": [],
+      "status": "UNRESOLVED",
+      "reason": "NO_GOVERNED_READING @2",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s94",
+      "variant": "original",
+      "text": "С начала 1960-х писал музыку к фильмам.",
+      "calls": [],
+      "status": "UNRESOLVED",
+      "reason": "NO_RULE @9",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s94",
+      "variant": "no_punctuation",
+      "text": "С начала 1960-х писал музыку к фильмам",
+      "calls": [],
+      "status": "UNRESOLVED",
+      "reason": "NO_RULE @9",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s94",
+      "variant": "extra_comma",
+      "text": "С начала, 1960-х писал музыку к фильмам.",
+      "calls": [],
+      "status": "UNRESOLVED",
+      "reason": "NO_RULE @8",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s95",
+      "variant": "original",
+      "text": "На юго-западе села живописный пруд.",
+      "calls": [],
+      "status": "STORED",
+      "reason": "SIMPLE_CLAUSE",
+      "empty": false,
+      "exact": false,
+      "incorrect_heads": [
+        [
+          "юго-западе",
+          0,
+          5
+        ],
+        [
+          "села",
+          2,
+          5
+        ],
+        [
+          "пруд",
+          2,
+          0
+        ]
+      ],
+      "role_scope_errors": [
+        "пруд: predicate, UD nsubj"
+      ],
+      "graph_sha256": "9ee84827856f46ee285669aec4fc226e211476962e8677aca1d083a953e44432"
+    },
+    {
+      "id": "test-s95",
+      "variant": "no_punctuation",
+      "text": "На юго-западе села живописный пруд",
+      "calls": [],
+      "status": "STORED",
+      "reason": "SIMPLE_CLAUSE",
+      "empty": false,
+      "exact": false,
+      "incorrect_heads": [
+        [
+          "юго-западе",
+          0,
+          5
+        ],
+        [
+          "села",
+          2,
+          5
+        ],
+        [
+          "пруд",
+          2,
+          0
+        ]
+      ],
+      "role_scope_errors": [
+        "пруд: predicate, UD nsubj"
+      ],
+      "graph_sha256": "9ee84827856f46ee285669aec4fc226e211476962e8677aca1d083a953e44432"
+    },
+    {
+      "id": "test-s95",
+      "variant": "extra_comma",
+      "text": "На юго-западе села живописный, пруд.",
+      "calls": [
+        "e5f2859dfadaf9ff18bb940f2a0522a6d9e684e4e46ac82c4d750b3666e2c6bb"
+      ],
+      "status": "STORED",
+      "reason": "SIMPLE_CLAUSE",
+      "empty": false,
+      "exact": false,
+      "incorrect_heads": [
+        [
+          "юго-западе",
+          0,
+          6
+        ],
+        [
+          "села",
+          2,
+          6
+        ],
+        [
+          "пруд",
+          2,
+          0
+        ]
+      ],
+      "role_scope_errors": [
+        "пруд: predicate, UD nsubj"
+      ],
+      "graph_sha256": "9ee84827856f46ee285669aec4fc226e211476962e8677aca1d083a953e44432"
+    },
+    {
+      "id": "test-s96",
+      "variant": "original",
+      "text": "Она не должна составляться в последний день установленного срока её представления.",
+      "calls": [],
+      "status": "UNRESOLVED",
+      "reason": "NO_COMPLETE_CLAUSE",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s96",
+      "variant": "no_punctuation",
+      "text": "Она не должна составляться в последний день установленного срока её представления",
+      "calls": [],
+      "status": "UNRESOLVED",
+      "reason": "NO_COMPLETE_CLAUSE",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s96",
+      "variant": "extra_comma",
+      "text": "Она не должна составляться в последний, день установленного срока её представления.",
+      "calls": [],
+      "status": "UNRESOLVED",
+      "reason": "NO_COMPLETE_CLAUSE",
+      "empty": true,
+      "exact": false
+    },
+    {
+      "id": "test-s97",
+      "variant": "original",
+      "text": "Впереди сводных полков фронтов шли командующие фронтами и армиями, Герои Советского Союза несли знамёна прославленных частей и соединений.",
+      "calls": [
+        "82f12b006ff1003787120b98c1fc219ff58e0cf7d2bc7e9193cabe503568e596",
+        "74dfeb82127c1a47105d88d5aea1c423ad41f7de94a8e2d35479074d7420aed9",
+        "d205a1d6d576451d9a678db7a966d5f000aa6323a79e5673e12c0efe3580f129"
+      ],
+      "status": "STORED",
+      "reason": "COMPLEX_CLAUSE",
+      "empty": false,
+      "exact": false,
+      "incorrect_heads": [
+        [
+          "фронтами",
+          6,
+          5
+        ]
+      ],
+      "role_scope_errors": [],
+      "graph_sha256": "c2ff4aabf36b64263d58a03b15d02cb2fe273e90ebd76b6ddd89f7d24a681c25"
+    },
+    {
+      "id": "test-s97",
+      "variant": "no_punctuation",
+      "text": "Впереди сводных полков фронтов шли командующие фронтами и армиями Герои Советского Союза несли знамёна прославленных частей и соединений",
+      "calls": [
+        "777274277c362be2800d7f0f4aefe354623c6d2ed4a63e2a584acbba465e2ba6",
+        "0abff1b3124b277e4dcee19e29cd99ddea989e4a3551182c5469c9aa603cfb4b",
+        "fbfdffab385993840eb31710fee060d6f72155ffbe9788f4e20623537e9bc740"
+      ],
+      "status": "STORED",
+      "reason": "COMPLEX_CLAUSE",
+      "empty": false,
+      "exact": false,
+      "incorrect_heads": [
+        [
+          "фронтами",
+          6,
+          5
+        ],
+        [
+          "и",
+          9,
+          13
+        ],
+        [
+          "армиями",
+          7,
+          13
+        ]
+      ],
+      "role_scope_errors": [],
+      "graph_sha256": "6bdb7876aac828451176ec49a824325f95846c87f79d9173d5953b685dae5298"
+    },
+    {
+      "id": "test-s97",
+      "variant": "extra_comma",
+      "text": "Впереди сводных, полков фронтов шли командующие фронтами и армиями, Герои Советского Союза несли знамёна прославленных частей и соединений.",
+      "calls": [
+        "658c5025bfb7978748f2dfce7865c384e337098bb5cb3eb3cc0d4bc20253edd9",
+        "2e505166b03b6cd914001a91199c726bd9ab90cacb738e27d40989a48795aaad",
+        "f8e626c4db4c05eee92d1886ddf72f969bd8746209e8e8692639ba055a0183e2",
+        "25994e4771bcc0060792f3154680a1af5324423fa1c50c15caaac29d9bcf44ea"
+      ],
+      "status": "STORED",
+      "reason": "COMPLEX_CLAUSE",
+      "empty": false,
+      "exact": false,
+      "incorrect_heads": [
+        [
+          "фронтами",
+          7,
+          6
+        ]
+      ],
+      "role_scope_errors": [],
+      "graph_sha256": "74860c9834464d5b43c01e3353b7c322c096c859bf3ee5775ffcb39e7a88934d"
+    }
+  ]
+}

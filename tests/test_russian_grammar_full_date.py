@@ -36,3 +36,53 @@ def test_date_after_transitive_verb_can_be_the_object_or_the_time():
         rows = [core.store.get_element(Domain.H, member.uid).meta for member in observation.members]
         assert rows[2]['role'] == expected
         assert rows[2]['head'] == 1
+
+
+def test_ordinal_interval_distinguishes_a_written_and_a_missing_dash():
+    core = AHCore()
+    result = submit(core, 'Храмы XII–XIV веков уничтожены.')
+    assert result.status == 'STORED'
+    group = core.store.get_element(Domain.H, result.observation_ref)
+    rows = [core.store.get_element(Domain.H, member.uid).meta for member in group.members]
+    assert (rows[1]['quantity_kind'], rows[1]['quantity'], rows[1]['head']) == ('ordinal_range', '12..14', 4)
+    assert rows[3]['head'] == 1
+    undecided = AHCore()
+    result = submit(undecided, 'Храмы XII XIV веков уничтожены.')
+    assert result.status == 'AMBIGUOUS'
+    assert result.analysis.probes[-1].options == ('XII XIV веков',)
+    assert not undecided.store.elements(Domain.H)
+
+
+def test_accusative_quantity_marks_event_frequency_only_for_a_licensed_unit():
+    for text, amount in [('Один раз алжирец появился.', '1'), ('Алжирец появился три раза.', '3')]:
+        core = AHCore()
+        reply = submit(core, text)
+        assert reply.status == 'STORED'
+        group = core.store.get_element(Domain.H, reply.observation_ref)
+        rows = [core.store.get_element(Domain.H, member.uid).meta for member in group.members]
+        number, = [row for row in rows if row['quantity'] == amount]
+        freq = rows[number['head']]
+        assert (freq['role'], rows[freq['head']]['lemma']) == ('frequency', 'появиться')
+    result = submit(AHCore(), 'Одну книгу алжирец прочитал.')
+    tree, = result.analysis.analyses
+    assert tree[1].role == 'object'
+    assert submit(AHCore(), 'Одну книгу алжирец появился.').status == 'UNRESOLVED'
+
+
+def test_preposition_governs_the_calendar_year_and_retains_counted_years():
+    from ah.russian_grammar.parser import analyze
+
+    date, = analyze('Она работала с 1996 года.').analyses
+    assert date[3].head == 4 and date[3].quantity_kind == 'ordinal'
+    assert date[4].role == 'governed' and date[4].head == 2 and date[4].case == 'gent'
+    spans = analyze('Башня простояла 1996 лет.').analyses
+    assert spans and all(tree[2].quantity_kind == 'cardinal' and tree[2].head == 3 for tree in spans)
+
+
+def test_four_digits_after_a_month_can_belong_to_a_following_counted_noun():
+    from ah.russian_grammar.parser import analyze
+
+    dated = analyze('В январе 1999 банк закрылся.').analyses
+    assert dated and all(tree[2].rule == 'DATE.APPOS' and tree[2].head == 1 for tree in dated)
+    counted, = analyze('В январе 1999 студентов сдали экзамен.').analyses
+    assert counted[2].quantity_kind == 'cardinal' and counted[2].head == 3

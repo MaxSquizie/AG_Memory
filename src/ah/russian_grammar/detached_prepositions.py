@@ -85,3 +85,40 @@ def trees(tokens, parse, *, recover, starts_after_comma, ends_before_comma):
                 if tree[prep.head].role in PREDICATE_ROLES:
                     links[start] = replace(links[start], scope='qualification')
                     yield tuple(links)
+
+
+def shared_comma_boundary(trees):
+    if len(trees) != 2 or len(trees[0]) != len(trees[1]):
+        return None
+    first, second = trees
+    different = [i for i, (a, b) in enumerate(zip(first, second)) if a != b]
+    if len(different) != 3:
+        return None
+    left, mark, right = different
+    if right != mark + 1:
+        return None
+    for tree in trees:
+        comma = tree[mark]
+        if (comma.role, comma.lemma, comma.rule) != ('punctuation', ',', 'PP.DETACHED.COMMA'):
+            return None
+        if comma.head is None or any(link.head == mark for link in tree):
+            return None
+        noun = tree[comma.head]
+        if noun.role != 'governed' or noun.head not in (left, right) or tree[noun.head].rule != 'PP.DETACHED':
+            return None
+    if extent(first, left) != mark:
+        return None
+    host = first[left].head
+    if host is None or first[right].head != host or first[host].role not in PREDICATE_ROLES:
+        return None
+    result = list(first)
+    for i in (left, right):
+        a, b = first[i], second[i]
+        if (a.role != 'preposition' or a.scope is not None or {a.rule, b.rule} != {'P2', 'PP.DETACHED'}
+                or replace(a, rule=b.rule) != b):
+            return None
+        result[i] = replace(a, rule='P2')
+    if first[mark].head == second[mark].head or replace(first[mark], head=second[mark].head) != second[mark]:
+        return None
+    result[mark] = replace(first[mark], rule='PUNCT.SHARED_BOUNDARY', head=host)
+    return tuple(result)

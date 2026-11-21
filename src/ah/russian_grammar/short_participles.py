@@ -1,7 +1,7 @@
 from dataclasses import replace
 from functools import cache
 from importlib.resources import files
-from itertools import product
+from itertools import chain, product
 
 from .case_arguments import _lexicon, _pp_attachments, _writing_instruments
 from .morphology import from_tag
@@ -114,7 +114,10 @@ def trees(tokens, base, *, budget=256):
         hidden = {i for group in selected for i in range(group.start, group.end)}
         kept = tuple(i for i in range(len(tokens)) if i not in hidden)
         words = tuple(tokens[i] for i in kept)
-        for tree in base(words):
+        candidates = base(words)
+        if selected:
+            candidates = chain(candidates, argument_trees(words, budget=budget))
+        for tree in candidates:
             root = next((i for i, link in enumerate(tree) if link.rule == 'V2.PASS'), None)
             if root is None:
                 if not selected:

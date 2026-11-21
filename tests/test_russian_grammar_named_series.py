@@ -27,3 +27,15 @@ def test_numeric_designation_can_follow_a_governed_name_elsewhere_in_the_clause(
     assert tree[5].role == 'designation' and tree[5].quantity_kind is None
     regular = analyze('Иван 5 книг прочитал.')
     assert not regular.probes and regular.analyses[0][1].role == 'numeral'
+
+
+def test_unknown_governed_name_is_confirmed_as_a_whole():
+    text = 'К Бынаты Хицау обращалась за помощью молодая невестка.'
+    core = AHCore()
+    reply = submit(core, text)
+    assert reply.status == 'AMBIGUOUS' and not core.store.elements(Domain.H)
+    probe, = reply.analysis.probes
+    assert probe.options == ('Бынаты Хицау',)
+    tree, = reply.analysis.analyses
+    assert (tree[1].role, tree[1].case, tree[1].head) == ('governed', 'datv', 0)
+    assert (tree[2].role, tree[2].head, tree[2].case) == ('name_part', 1, None)

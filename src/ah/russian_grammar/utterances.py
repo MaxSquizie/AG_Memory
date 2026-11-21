@@ -141,51 +141,69 @@ def _quotations(part, parse):
                 yield tuple(links[j] for j in range(len(part)))
 
 
-def _purposes(part, parse):
+def _purpose_readings(part, parse, marker, content, matrix, comma=None):
     from .parser import Link
 
-    if part[0].surface.casefold() in ('чтобы', 'чтоб'):
-        for split in range(2, len(part) - 1):
-            if part[split].surface != ',':
-                continue
-            order = (*range(split + 1, len(part)), split, *range(split))
-            if part[order[0]].surface.casefold() in ('чтобы', 'чтоб'):
-                continue
-            for tree in _purposes(tuple(part[j] for j in order), parse):
-                mapped = _map(tree, order)
-                yield tuple(mapped[j] for j in range(len(part)))
+    introducer = part[marker]
+    infinitives = {j: [(lemma, tag) for lemma, tag in known_forms(part[j].surface) if tag.POS == 'INFN']
+                   for j in content}
+    if not any(infinitives.values()):
         return
-    for i, token in enumerate(part):
-        if token.surface.casefold() not in ('чтобы', 'чтоб') or i == 0 or i + 1 >= len(part):
+    dummy = tuple(replace(introducer, surface=w) for w in ('я', 'могу'))
+    for inner in parse(dummy + tuple(part[j] for j in content)):
+        roots = [j for j in range(2, len(inner)) if inner[j].head in (0, 1)]
+        if len(roots) != 1:
             continue
-        split = i - int(part[i - 1].surface == ',')
-        for left in parse(part[:split]):
-            host = _root(left)
-            actors = [j for j, link in enumerate(left) if link.head == host and link.role == 'subject']
-            if not actors and not left[host].implicit_subject:
+        pivot, = roots
+        verb = inner[pivot]
+        k = content[pivot - 2]
+        if verb.role != 'infinitive' or verb.head != 1:
+            continue
+        for lemma, tag in infinitives[k]:
+            if verb.lemma != lemma:
                 continue
-            for k in range(i + 1, len(part)):
-                for lemma, tag in known_forms(part[k].surface):
-                    if tag.POS != 'INFN':
-                        continue
-                    dummy = tuple(replace(token, surface=w) for w in ('я', 'могу'))
-                    for right in parse(dummy + part[i + 1:]):
-                        pivot = k - i + 1
-                        if right[pivot].role != 'infinitive' or right[pivot].head != 1 or right[pivot].lemma != lemma:
-                            continue
-                        if any(link.head in (0, 1) for j, link in enumerate(right) if j >= 2 and j != pivot):
-                            continue
-                        refs = (actors[0] if actors else host, host, *range(i + 1, len(part)))
-                        links = dict(enumerate(left))
-                        links.update({j: link for j, link in _map(right, refs).items() if j > i})
-                        negative = (right[pivot].scope or '').endswith('_negated')
-                        scope = 'purpose_negated' if negative else 'purpose'
-                        links[k] = replace(links[k], role='clause_adverbial', rule='UTT.PURPOSE', head=host,
-                                           controller=actors[0] if actors else None, scope=scope, morphology=from_tag(tag))
-                        links[i] = Link('clause_marker', token.surface.casefold(), k, 'UTT.PURPOSE.MARK', scope='purpose')
-                        if split < i:
-                            links[split] = Link('punctuation', ',', k, 'UTT.PUNCT')
-                        yield tuple(links[j] for j in range(len(part)))
+            for outer in parse(tuple(part[j] for j in matrix)):
+                root = _root(outer)
+                host = matrix[root]
+                actor = next((j for j, link in zip(matrix, outer) if link.role == 'subject' and link.head == root), None)
+                if actor is None and not outer[root].implicit_subject:
+                    continue
+                refs = (actor if actor is not None else host, host, *content)
+                links = _map(outer, matrix)
+                mapped = _map(inner, refs)
+                links.update((j, mapped[j]) for j in content)
+                scope = 'purpose_negated' if (verb.scope or '').endswith('_negated') else 'purpose'
+                links[k] = replace(links[k], role='clause_adverbial', rule='UTT.PURPOSE', head=host,
+                                   controller=actor, scope=scope, morphology=from_tag(tag))
+                links[marker] = Link('clause_marker', introducer.surface.casefold(), k, 'UTT.PURPOSE.MARK', scope='purpose')
+                if comma is not None:
+                    links[comma] = Link('punctuation', ',', k, 'UTT.PUNCT')
+                yield tuple(links[j] for j in range(len(part)))
+
+
+def _purposes(part, parse):
+    if part[0].surface.casefold() in ('чтобы', 'чтоб'):
+        cuts = [i for i in range(2, len(part) - 1) if part[i].surface == ',']
+        marked = False
+        for cut in cuts:
+            for tree in _purpose_readings(part, parse, 0, range(1, cut), range(cut + 1, len(part)), cut):
+                marked = True
+                yield tree
+        if marked:
+            return
+        first_finite = next((i for i in range(1, len(part)) if any(
+            tag.POS == 'VERB' for _, tag in known_forms(part[i].surface))), None)
+        if first_finite is not None:
+            for cut in range(2, first_finite + 1):
+                if part[cut - 1].surface != ',' and part[cut].surface != ',':
+                    yield from _purpose_readings(part, parse, 0, range(1, cut), range(cut, len(part)))
+        return
+    for i in range(1, len(part) - 1):
+        if part[i].surface.casefold() in ('чтобы', 'чтоб'):
+            comma = i - 1 if part[i - 1].surface == ',' else None
+            matrix = range(comma if comma is not None else i)
+            if matrix:
+                yield from _purpose_readings(part, parse, i, range(i + 1, len(part)), matrix, comma)
 
 
 def _parataxis(part, parse):
@@ -245,7 +263,7 @@ def _parataxis(part, parse):
 def trees(tokens, base, *, budget):
     from .parser import AnalysisBudgetExceeded
 
-    from . import degree_clauses, paired_coordination, parentheses, speech_particles
+    from . import degree_clauses, nominal_parentheticals, paired_coordination, parentheses, speech_particles
     from .quote_titles import spans
 
     if any(_QUOTES.get(tokens[start].surface) != tokens[end].surface for start, end in spans(tokens)):
@@ -273,7 +291,7 @@ def trees(tokens, base, *, budget):
                         raise AnalysisBudgetExceeded('ANALYSIS_BUDGET')
             if built:
                 return tuple(built)
-            for rule in (base, _insertions, _detached_pronominal_group, _quotations, _purposes, _parataxis):
+            for rule in (base, nominal_parentheticals.trees, _insertions, _detached_pronominal_group, _quotations, _purposes, _parataxis):
                 for tree in (rule(part) if rule is base else rule(part, parse)):
                     built.setdefault(tree, None)
                     if len(built) > budget:
@@ -295,7 +313,9 @@ def partitions(trees, tokens, text):
     from .parser import _span_label
     from .probe import Probe
 
-    from . import explanations
+    from . import explanations, nominal_parentheticals
+
+    yield from nominal_parentheticals.partitions(trees, tokens, text)
 
     yield from explanations.partitions(trees, tokens, text)
     from . import speech_particles

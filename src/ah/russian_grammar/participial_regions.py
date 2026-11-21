@@ -1,12 +1,12 @@
 from dataclasses import dataclass, replace
 from functools import cache
-import re
 
 from . import participle_forms
 from .case_arguments import _lexicon
 from .finite_forms import _agreement_subject
 from .morphology import Morphology, _agree as compatible, _common, from_tag
 from .nominal_groups import POSSESSIVES, _agree, _markers, _members, _prepositions
+from .numerals import ROMAN
 from .prepositions import DASHES, GOVERNMENT
 from .rules import known_forms, name_type, readings
 from .utterances import _map
@@ -24,9 +24,6 @@ class Nominal:
     @property
     def noun(self):
         return self.head
-
-
-_ROMAN = re.compile(r'(?=[IVXLCDM]+$)M{0,3}(?:CM|CD|D?C{0,3})(?:XC|XL|L?X{0,3})(?:IX|IV|V?I{0,3})')
 
 
 def _merge_nominals(items):
@@ -63,7 +60,7 @@ def _nominals(words, budget):
                 n = Nominal(head, head + 1, lemma, case, from_tag(t), extra)
                 result.append(n)
                 end = n.end
-                while title(end) and title(head) and not _ROMAN.fullmatch(words[end].surface):
+                while title(end) and title(head) and not ROMAN.fullmatch(words[end].surface):
                     forms = known_forms(words[end].surface)
                     matching = [(l, f) for l, f in forms if f.case == case and name_type(f)]
                     unknown = not forms or all(f.POS in ('INTJ', 'PRCL') for _, f in forms)
@@ -75,7 +72,7 @@ def _nominals(words, budget):
                     n = replace(n, end=end + 1, extra=(*n.extra, (end, Link(role, label, head, rule, case))))
                     result.append(n)
                     end = n.end
-                if end < len(words) and _ROMAN.fullmatch(words[end].surface) and title(head) and name_type(t):
+                if end < len(words) and ROMAN.fullmatch(words[end].surface) and title(head) and name_type(t):
                     result.append(replace(n, end=end + 1, extra=(*n.extra, (end, Link('attribute', words[end].surface,
                                           head, 'NAME.ORDINAL', case)))))
                 if end < len(words):
@@ -170,7 +167,7 @@ def trees(tokens, *, budget=256, extended=False):
     parts = {i for i, values in enumerate(forms) if values and all(t.POS == 'PRTF' for _, t in values)}
     if not finite or not parts:
         return
-    signals = any((_ROMAN.fullmatch(w.surface) and i > 0 and words[i - 1].surface.istitle()) or
+    signals = any((ROMAN.fullmatch(w.surface) and i > 0 and words[i - 1].surface.istitle()) or
                   (i > 0 and w.surface[:1].isupper() and words[i - 1].surface[:1].isupper() and
                    (not forms[i] or all(tag.POS == 'INTJ' for _, tag in forms[i])))
                   for i, w in enumerate(words))

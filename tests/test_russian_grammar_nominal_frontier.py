@@ -68,3 +68,13 @@ def test_open_attachment_never_writes_the_partial_method(answer, expected):
     core = AHCore()
     assert submit(core, SENTENCE, lambda _: answer).status == expected
     assert not core.store.elements(Domain.H) and not core.store.links()
+
+
+def test_case_government_keeps_a_homonymous_noun_open_for_genitive_extensions():
+    dates = analyze('С начала 1960-х писал музыку к фильмам.')
+    assert dates.analyses
+    assert all(tree[2].head == 1 and tree[2].case == 'gent' and tree[2].quantity == '1960'
+               and tree[2].morphology.number == 'plur' for tree in dates.analyses)
+    deadlines = analyze('Она не должна составляться в последний день установленного срока её представления.')
+    assert any(tree[8].head == 6 and tree[10].head == 8 and tree[7].head == 8
+               and tree[9].head == 10 for tree in deadlines.analyses)

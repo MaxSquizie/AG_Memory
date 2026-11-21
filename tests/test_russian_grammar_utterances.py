@@ -30,3 +30,30 @@ def test_negation_stays_with_the_infinitive_of_purpose():
     assert predicate.scope == 'purpose_negated'
     assert submit(core, 'Зачем пришёл Иван?').text.casefold() == 'чтобы не опоздать'
     assert submit(core, 'Иван опоздал?').status == 'UNKNOWN'
+
+
+def test_nominal_parenthetical_keeps_literal_reading_open():
+    for text in ('Как правило действует?', 'К примеру подошёл студент.'):
+        reply = submit(AHCore(), text)
+        assert reply.observation_ref is None
+        roles = {tree[1].role for tree in reply.analysis.analyses}
+        assert 'parenthetical' in roles
+        assert roles & {'subject', 'governed'}
+
+
+def test_pronominal_adjective_agrees_with_the_object_of_a_converb():
+    reply = submit(AHCore(), 'Не участвует, координируя остальных ведьм.')
+    assert reply.status == 'STORED'
+    tree, = reply.analysis.analyses
+    modifier = next(link for link in tree if link.lemma == 'остальной')
+    assert modifier.role == 'attribute' and tree[modifier.head].role == 'object'
+    converb = tree[tree[modifier.head].head]
+    assert converb.role == 'converb' and converb.implicit_subject == 'unresolved'
+    assert submit(AHCore(), 'Не участвует, координируя другую ведьм.').observation_ref is None
+
+
+def test_unpunctuated_preposed_purpose_keeps_the_controller_in_the_matrix():
+    reply = submit(AHCore(), 'Чтобы согреться Анна вернулась.')
+    assert any(tree[1].role == 'clause_adverbial' and tree[1].scope == 'purpose'
+               and (tree[1].head, tree[1].controller) == (3, 2) for tree in reply.analysis.analyses)
+    assert submit(AHCore(), 'Чтобы согреться Анна.').observation_ref is None

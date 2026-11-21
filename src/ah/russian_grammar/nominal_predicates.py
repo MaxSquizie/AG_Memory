@@ -198,6 +198,21 @@ def partitions(trees, tokens, text):
     from .parser import _span_label
     from .probe import Probe
 
+    roots = [next(i for i, link in enumerate(tree) if link.head is None) for tree in trees]
+    if len(set(roots)) > 1 and any(tree[root].rule == 'V2.PP' for tree, root in zip(trees, roots)):
+        subjects = [next((i for i, link in enumerate(tree) if link.role == 'subject' and link.head == root), None)
+                    for tree, root in zip(trees, roots)]
+        if None not in subjects and len(set(subjects)) > 1:
+            choices = [_span_label(tokens, i) for i in subjects]
+            yield Probe('О ком или о чём здесь говорится? Выберите предмет, для которого названо место, '
+                        'действие или признак.', tuple(dict.fromkeys(choices)), text), choices
+        choices = []
+        for tree, root in zip(trees, roots):
+            prep = next((i for i, link in enumerate(tree) if link.rule == 'V2.PREP' and link.head == root), root)
+            choices.append(_span_label(tokens, prep, root + 1))
+        if len(set(choices)) > 1:
+            yield Probe('Что здесь служит сказуемым? Выберите слово или сочетание с предлогом.',
+                        tuple(dict.fromkeys(choices)), text), choices
     if any(any(link.rule == 'V2.CONJ' for link in tree) for tree in trees):
         groups = [tuple(i for i, link in enumerate(tree)
                         if (link.rule == 'V2' and link.head is None) or link.rule == 'V2.CONJ')

@@ -182,28 +182,51 @@ def _designations(tokens, parse, budget):
             for first, prep in _prepositions(tokens, start):
                 if first != head:
                     continue
-                allowed = cases & set(GOVERNMENT.get(prep, ()))
-                if not allowed:
+                yield from _attach_governed(tokens, parse, start, prep, head, i + 1, cases, extras)
+
+
+def _attach_governed(tokens, parse, start, prep, head, end, cases, extras):
+    allowed = cases.intersection(GOVERNMENT.get(prep, ()))
+    kept = (*range(start), *range(end, len(tokens)))
+    if not allowed or not kept:
+        return
+    for tree in parse(tuple(tokens[j] for j in kept)):
+        links = _map(tree, kept)
+        root = kept[_root(tree)]
+        if links[root].role not in PREDICATE_ROLES:
+            continue
+        for host in _attachment_heads(links, start, root):
+            pp = {start: Link('preposition', prep, host, 'P2')}
+            for k in range(start + 1, head):
+                pp[k] = Link('prep_part', tokens[k].surface.casefold(), start, 'P1')
+            for case in sorted(allowed):
+                pp[head] = Link('governed', tokens[head].surface, start, 'OPAQUE.GOVERNED.NAME', case)
+                completed = links | pp | extras
+                yield tuple(completed[k] for k in range(len(tokens)))
+
+
+def _governed_names(tokens, parse, budget):
+    candidates = 0
+    for start in range(len(tokens)):
+        for head, prep in _prepositions(tokens, start):
+            if head >= len(tokens) or not opaque_cases(tokens[head].surface):
+                continue
+            parts = {}
+            for tail in range(head + 1, len(tokens)):
+                cases = opaque_cases(tokens[tail].surface)
+                if not cases:
+                    break
+                parts[tail] = Link('name_part', tokens[tail].surface, head, 'NAME')
+                if not cases.intersection(GOVERNMENT.get(prep, ())):
                     continue
-                kept = (*range(start), *range(i + 1, len(tokens)))
-                if not kept:
-                    continue
-                for tree in parse(tuple(tokens[j] for j in kept)):
-                    links = _map(tree, kept)
-                    root = kept[_root(tree)]
-                    if links[root].role not in PREDICATE_ROLES:
-                        continue
-                    for host in _attachment_heads(links, start, root):
-                        pp = {start: Link('preposition', prep, host, 'P2')}
-                        for k in range(start + 1, head):
-                            pp[k] = Link('prep_part', tokens[k].surface.casefold(), start, 'P1')
-                        for case in sorted(allowed):
-                            pp[head] = Link('governed', word.surface, start, 'OPAQUE.GOVERNED.NAME', case)
-                            completed = links | pp | extras
-                            yield tuple(completed[k] for k in range(len(tokens)))
+                candidates += 1
+                if candidates > budget:
+                    raise AnalysisBudgetExceeded('NAMED_SERIES_BUDGET')
+                yield from _attach_governed(tokens, parse, start, prep, head, tail + 1, cases, parts)
 
 
 def trees(tokens, parse, budget):
+    yield from _governed_names(tokens, parse, budget)
     if any(t.surface.isdecimal() for t in tokens):
         yield from _designations(tokens, parse, budget)
     if not any(_person(token.surface) for token in tokens):
@@ -248,5 +271,11 @@ def confirmation(tokens, tree, i, text):
         return Probe(f'Какое число входит в обозначение вместе со словом «{host}»?', (_span_label(tokens, i),), text)
     if link.rule == 'OPAQUE.GOVERNED.NAME':
         prep = _span_label(tokens, link.head)
+        end = i + 1
+        while end < len(tree) and tree[end].role == 'name_part' and tree[end].head == i:
+            end += 1
+        if end > i + 1:
+            return Probe(f'Какие слова вместе образуют имя, к которому относится предлог «{prep}»?',
+                         (_span_label(tokens, i, end),), text)
         return Probe(f'Какое слово управляется предлогом «{prep}»?', (_span_label(tokens, i),), text)
     return None

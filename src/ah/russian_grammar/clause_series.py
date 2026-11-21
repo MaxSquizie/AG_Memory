@@ -9,7 +9,8 @@ from .nominal_groups import POSSESSIVES, _markers, _prepositions
 from .parser import AnalysisBudgetExceeded, Link
 from .predicative_groups import _groups, _nominals
 from .prepositions import GOVERNMENT
-from .rules import dictionary, known_forms
+from .numerals import roman_value
+from .rules import known_forms
 from .short_participles import _predicative_instrumentals
 from .utterances import _map, _root
 
@@ -24,14 +25,7 @@ def _abbreviations():
 
 
 def ordinal_abbreviation(left, right):
-    return (left.isupper() and set(left) <= set('IVXLCDM') and any('ROMN' in p.tag for p in dictionary().parse(left))
-            and right.casefold().rstrip('.') in _abbreviations())
-
-
-def _roman_value(word):
-    digits = dict(zip('IVXLCDM', (1, 5, 10, 50, 100, 500, 1000)))
-    values = [digits[letter] for letter in word]
-    return sum(-value if value < right else value for value, right in zip(values, values[1:] + [0]))
+    return roman_value(left) is not None and right.casefold().rstrip('.') in _abbreviations()
 
 
 def _dated_prefix(tokens, finite):
@@ -54,7 +48,7 @@ def _dated_prefix(tokens, finite):
                     for selected in product(*before):
                         group = {**dict(selected), i: Link('preposition', prep, finite, 'P2'),
                                  first: Link('attribute', tokens[first].surface, noun, 'NUM.ROMAN',
-                                             quantity_kind='ordinal', quantity=str(_roman_value(tokens[first].surface))),
+                                             quantity_kind='ordinal', quantity=str(roman_value(tokens[first].surface))),
                                  noun: Link('governed', lemma, i, 'UNIT.ABBR', case)}
                         for j in range(i + 1, first):
                             group[j] = Link('prep_part', tokens[j].surface.casefold(), i, 'P1')

@@ -73,3 +73,24 @@ def test_unmarked_group_grows_on_prefix_and_requires_a_scope_choice():
             assert reply.status == 'STORED'
             row = next(w for w in observation(core, reply) if w['surface'] == 'может')
             assert row['assertion_status'] == status
+
+
+def test_shared_comma_support_requires_identical_lexical_links():
+    from dataclasses import replace
+    from ah.russian_grammar.detached_prepositions import shared_comma_boundary
+    from ah.russian_grammar.parser import Link
+
+    first = (Link('predicate', 'жить', None, 'V1'),
+             Link('preposition', 'в', 0, 'PP.DETACHED'), Link('governed', 'дом', 1, 'P1', 'loct'),
+             Link('punctuation', ',', 2, 'PP.DETACHED.COMMA'),
+             Link('preposition', 'с', 0, 'P2'), Link('governed', 'семья', 4, 'P1', 'ablt'))
+    second = (first[0], replace(first[1], rule='P2'), first[2], replace(first[3], head=5),
+              replace(first[4], rule='PP.DETACHED'), first[5])
+    shared = shared_comma_boundary((first, second))
+    assert shared == shared_comma_boundary((second, first))
+    assert shared[3] == Link('punctuation', ',', 0, 'PUNCT.SHARED_BOUNDARY')
+    assert shared[1:3] == second[1:3] and shared[4:] == first[4:]
+    for index, changes in ((4, {'scope': 'qualification'}), (4, {'head': 2}), (2, {'rule': 'OPAQUE.GOVERNED'})):
+        altered = list(second)
+        altered[index] = replace(altered[index], **changes)
+        assert shared_comma_boundary((first, tuple(altered))) is None

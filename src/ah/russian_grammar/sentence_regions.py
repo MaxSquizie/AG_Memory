@@ -1,7 +1,7 @@
 from . import (
     attributive_series, calendar_regions, clause_series, dated_name_notes, finite_insertions, framed_clauses,
     infinitive_elaborations, lexical_parts, measured_series, mixed_predications, named_arguments, named_regions,
-    named_series, nominal_definitions, nominal_designations, nominal_dimensions, nominal_mentions, nominal_predicates,
+    named_series, nominal_definitions, nominal_designations, nominal_dimensions, nominal_mentions, nominal_parentheticals, nominal_predicates,
     participial_regions, predicate_lists, predicative_groups, quote_titles, reference_directives, temporal_groups,
 )
 
@@ -38,9 +38,9 @@ def remaining(tokens, parse, budget):
 
 def confirmation(tokens, tree, i, text):
     grammars = (
-        mixed_predications, measured_series, dated_name_notes, infinitive_elaborations, predicate_lists,
+        calendar_regions, mixed_predications, measured_series, dated_name_notes, infinitive_elaborations, predicate_lists,
         attributive_series, quote_titles, reference_directives, nominal_mentions, temporal_groups,
-        clause_series, named_regions, lexical_parts, framed_clauses, named_series, named_arguments, nominal_dimensions,
+        clause_series, nominal_parentheticals, named_regions, lexical_parts, framed_clauses, named_series, named_arguments, nominal_dimensions,
     )
     for grammar in grammars:
         probe = grammar.confirmation(tokens, tree, i, text)

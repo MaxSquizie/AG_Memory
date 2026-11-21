@@ -328,7 +328,8 @@ def _partitions(analyses, tokens, text):
     from . import adjuncts, attributive_series, calendar_regions, measured_series, mixed_predications, predicate_lists, utterances
     from . import personal_correlatives, spatial_prefix
     from .short_participles import voice_partitions
-    from . import collective_agreement, partitive_domains
+    from . import case_arguments, collective_agreement, partitive_domains
+    yield from case_arguments.nominal_partitions(analyses, tokens, text)
     yield from partitive_domains.partitions(analyses, tokens, text)
     yield from collective_agreement.partitions(analyses, tokens, text)
     yield from personal_correlatives.partitions(analyses, tokens, text)
@@ -419,9 +420,9 @@ def _partitions(analyses, tokens, text):
         if roles == {'clause_conjunct'} or roles == {'clause_relative'}:
             subjects = [next((j for j, dep in enumerate(tree) if dep.head == i and dep.role == 'subject'),
                              tree[i].controller) for tree in analyses]
-            if None not in subjects and len(set(subjects)) > 1:
+            if len(set(subjects)) > 1:
                 yield word_choice(f'Какое слово служит подлежащим при «{_span_label(tokens, i)}»?', subjects,
-                                  _clause_context(text, tokens, analyses, i, subjects))
+                                  _clause_context(text, tokens, analyses, i, subjects), absent='подлежащее не названо')
         if roles == {'governed', 'nominal_conjunct'} and all(
                 link.role == 'governed' or link.rule == 'P.COORD.UNMARKED' for link in links):
             sample = next(tree for tree in analyses if tree[i].role == 'nominal_conjunct')
@@ -1370,6 +1371,12 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
         if len(analyses) > 1:
             partition = _partition(analyses, words, text)
             if partition is None:
+                from .detached_prepositions import shared_comma_boundary
+
+                shared = shared_comma_boundary(analyses)
+                if shared is not None and (accept_tree is None or accept_tree(shared)):
+                    analyses = (shared,)
+                    continue
                 return Result(text, 'AMBIGUOUS', 'NO_DISTINGUISHING_PROBE', tokens, analyses, tuple(probes), tuple(steps))
             probe, keys = partition
         else:
