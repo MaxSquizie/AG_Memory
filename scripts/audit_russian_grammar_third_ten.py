@@ -12,7 +12,8 @@ from measure_russian_grammar import sentences
 from ah.core import AHCore
 from ah.model import Domain
 from ah.russian_grammar.memory import _rows, submit
-from ah.russian_grammar.parser import _partition
+from ah.russian_grammar.parser import Occurrence, _partition
+from ah.russian_grammar.quote_titles import spans as quote_spans
 
 
 def batch(path, start=22, end=31):
@@ -48,18 +49,27 @@ def variants(text, rows):
         row[6] = str(indices[int(row[6])] if int(row[6]) else 0)
     yield 'no_punctuation', ' '.join(r[1] for r in plain), plain
     priority = ('amod', 'nummod:gov', 'det', 'nmod', 'nsubj', 'case')
+    tokens = [Occurrence(row[1], *span) for row, span in zip(rows, spans)]
+    protected = set()
+    for start, end in quote_spans(tokens):
+        protected.update(range(start + 1, end + 1))
+    for row in rows:
+        if row[7] == 'flat:name':
+            first, last = sorted((int(row[0]), int(row[6])))
+            protected.update(range(first, last))
     sites = []
-    for i, row in enumerate(rows):
-        head = int(row[6]) - 1
-        if row[7] in priority and head >= 0 and abs(i - head) == 1:
-            sites.append((priority.index(row[7]), max(i, head)))
+    for i, (left, right) in enumerate(zip(rows, rows[1:]), 1):
+        if i in protected or {left[3], right[3]} & {'PUNCT', 'PROPN'}:
+            continue
+        relation = None
+        if left[6] == right[0]:
+            relation = left[7]
+        elif right[6] == left[0]:
+            relation = right[7]
+        rank = priority.index(relation) if relation in priority else len(priority) + int(relation is None)
+        sites.append((rank, i))
     if not sites:
-        for i, (left, right) in enumerate(zip(rows, rows[1:]), 1):
-            if left[3] != 'PUNCT' and right[3] != 'PUNCT':
-                adjacent = left[6] == right[0] or right[6] == left[0]
-                sites.append((int(not adjacent), i))
-    if not sites:
-        raise ValueError('No adjacent lexical tokens for an internal comma')
+        return
     index = min(sites)[1]
     cut = spans[index - 1][1]
     dirty = [r.copy() for r in rows]
