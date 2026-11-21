@@ -242,7 +242,7 @@ def _parataxis(part, parse):
 def trees(tokens, base, *, budget):
     from .parser import AnalysisBudgetExceeded
 
-    from . import paired_coordination, parentheses, speech_particles
+    from . import degree_clauses, paired_coordination, parentheses, speech_particles
     from .quote_titles import spans
 
     if any(_QUOTES.get(tokens[start].surface) != tokens[end].surface for start, end in spans(tokens)):
@@ -263,10 +263,11 @@ def trees(tokens, base, *, budget):
                 if len(built) > budget:
                     raise AnalysisBudgetExceeded('PARENTHETICAL_BUDGET')
         elif part:
-            for tree in speech_particles.trees(part, parse):
-                built.setdefault(tree, None)
-                if len(built) > budget:
-                    raise AnalysisBudgetExceeded('ANALYSIS_BUDGET')
+            for marked in (degree_clauses.concessive_adverbs, speech_particles.trees):
+                for tree in marked(part, parse):
+                    built.setdefault(tree, None)
+                    if len(built) > budget:
+                        raise AnalysisBudgetExceeded('ANALYSIS_BUDGET')
             if built:
                 return tuple(built)
             for rule in (base, _insertions, _detached_pronominal_group, _quotations, _purposes, _parataxis):

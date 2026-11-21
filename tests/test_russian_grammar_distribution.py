@@ -83,3 +83,36 @@ def test_quantity_can_grow_before_the_unit_arrives():
     assert [(s.surface, s.quantities) for s in steps if s.kind == 'quantity_candidate'] == [
         ('сто', ('100',)), ('двадцать', ('120',)), ('пять', ('125',))]
     assert (steps[-1].surface, steps[-1].quantities) == ('килограммов', ('125',))
+
+
+@pytest.mark.parametrize(('statement', 'outer', 'inner'), (
+    ('Каждый студент не пришёл.', False, True),
+    ('Не каждый студент пришёл.', True, False),
+    ('Не каждый студент не пришёл.', True, True),
+))
+def test_negative_universal_scope_survives_replay(tmp_path, statement, outer, inner):
+    journal = JournalChannel(tmp_path / 'quantified.log')
+    writer = AHCore()
+    source = submit(writer, statement, journal=journal)
+    assert source.status == 'STORED' and not source.analysis.probes
+    obs = writer.store.get_element(Domain.H, source.observation_ref)
+    frame, = read(writer, obs)
+    assert (frame.quantifier_negated, frame.predicate_negated) == (outer, inner)
+    reader = AHCore()
+    question = 'Иван не пришёл?'
+    assert submit(reader, question, journal=journal).status == 'UNKNOWN'
+    member = submit(reader, 'Иван студент.', journal=journal)
+    reply = submit(reader, question, journal=journal)
+    if outer:
+        assert reply.status == 'UNKNOWN'
+    else:
+        assert reply.text == 'Да.' and reply.support_refs == (source.observation_ref, member.observation_ref)
+    assert submit(reader, 'Иван пришёл?', journal=journal).status == 'UNKNOWN'
+    assert submit(reader, 'Пётр не пришёл?', journal=journal).status == 'UNKNOWN'
+
+
+def test_negated_subject_with_second_quantifier_cannot_drop_outer_scope():
+    core = AHCore()
+    record = submit(core, 'Не каждый студент прочитал каждую книгу.')
+    assert record.status == 'STORED'
+    assert not read(core, core.store.get_element(Domain.H, record.observation_ref))

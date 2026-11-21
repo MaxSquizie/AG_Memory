@@ -1,6 +1,6 @@
 from ah.model import ActantRole, BoundVar, Domain, FunctionSymbol, Group, Hypernode, Property, VariableSort
 
-from .distribution import Domain as BoundDomain, Frame, _asserted, _children
+from .distribution import Domain as BoundDomain, Frame, _asserted, _children, _negated_restriction, _negative_universal
 
 
 MEMBER_KEY = 'russian_grammar.distribution_member'
@@ -27,13 +27,16 @@ def _function(core, operator, *operands):
     return core.ref(core.add_function(Domain.H, operator, operands).uid)
 
 
-def _simple_class(rows, domain):
+def _simple_class(rows, domain, quantifier_negated=False):
     if domain.members or domain.marker is None or rows[domain.marker]['lemma'] not in ('каждый', 'всякий'):
         return None
     if domain.marker == domain.head or rows[domain.marker]['head'] != domain.head:
         return None
-    if any(row['head'] in (domain.head, domain.marker) and i != domain.marker and row['role'] != 'punctuation'
-           for i, row in enumerate(rows)):
+    for i, row in enumerate(rows):
+        if row['head'] not in (domain.head, domain.marker) or i == domain.marker or row['role'] == 'punctuation':
+            continue
+        if quantifier_negated and i + 1 == domain.marker and row['role'] == 'particle' and row['lemma'] == 'не':
+            continue
         return None
     return rows[domain.head]['lemma']
 
@@ -83,7 +86,7 @@ def write(core, observation, members, rows, frames):
         for n, domain in enumerate(frame.domains):
             if not _valid_size(domain.members, domain.cardinality):
                 raise ValueError('DISTRIBUTION_MEMBERS_EXCEED_CARDINALITY')
-            class_name = _simple_class(rows, domain)
+            class_name = _simple_class(rows, domain, frame.quantifier_negated)
             properties = {CLASS_KEY: Property(CLASS_KEY, class_name, 'str')} if class_name else {}
             group = core.add_group(Domain.H, tuple(members[j] for j in domain.members), properties,
                                    {'kind': DOMAIN_KIND, 'head': domain.head, 'marker': domain.marker,
@@ -108,9 +111,13 @@ def write(core, observation, members, rows, frames):
                              f'{observation.uid}/{frame.predicate}', predicate=frame.predicate,
                              share=frame.share, marker=frame.marker)
         condition = restrictions[0] if len(restrictions) == 1 else _function(core, 'AND', *restrictions)
+        if frame.predicate_negated:
+            predicate = _function(core, 'NOT', predicate)
         body = _function(core, 'IMPLIES', condition, predicate)
         for variable in reversed(variables):
             body = _function(core, 'FORALL', variable, body)
+        if frame.quantifier_negated:
+            body = _function(core, 'NOT', body)
         core.add_link(FORMULA, core.ref(observation.uid), body, 1.0)
 
 
@@ -140,9 +147,15 @@ def _share_attached(rows, frame):
 
 def _body_matches(store, obs, rows, frame, node):
     predicate = rows[frame.predicate]
-    if not _asserted(predicate) or not _has_pattern(store, node, predicate['lemma'] + '.body', f'{obs.uid}/{frame.predicate}'):
-        return False
     children = _children(rows)
+    scoped = _negative_universal(rows, children, frame.predicate)
+    if frame.predicate_negated or frame.quantifier_negated or scoped is not None:
+        if scoped != frame:
+            return False
+    elif not _asserted(predicate) or _negated_restriction(rows, children, frame.predicate):
+        return False
+    if not _has_pattern(store, node, predicate['lemma'] + '.body', f'{obs.uid}/{frame.predicate}'):
+        return False
     expected = _role_values(frame, rows, obs.members, children)
     if frame.share is not None:
         share = store.get_element(Domain.H, node.actants[ActantRole.AMOUNT].uid)
@@ -173,6 +186,10 @@ def _body_matches(store, obs, rows, frame, node):
 def _unpack(store, observation, root, indices, rows):
     variables = []
     term = store.get_element(Domain.H, root.uid)
+    outer = isinstance(term, FunctionSymbol) and term.function_id == 'NOT'
+    if outer:
+        operand, = term.operands
+        term = store.get_element(Domain.H, operand.uid)
     while isinstance(term, FunctionSymbol) and term.function_id == 'FORALL':
         var, body = term.operands
         if not isinstance(var, BoundVar) or var.local_id != len(variables):
@@ -183,6 +200,10 @@ def _unpack(store, observation, root, indices, rows):
         return None
     antecedent, consequent = term.operands
     pattern = store.get_element(Domain.H, consequent.uid)
+    negative = isinstance(pattern, FunctionSymbol) and pattern.function_id == 'NOT'
+    if negative:
+        operand, = pattern.operands
+        pattern = store.get_element(Domain.H, operand.uid)
     if not isinstance(pattern, Hypernode):
         return None
     condition = store.get_element(Domain.H, antecedent.uid)
@@ -208,7 +229,7 @@ def _unpack(store, observation, root, indices, rows):
         domains.append(BoundDomain(head=group.meta['head'], role=group.meta['role'], members=member_ids,
                                    cardinality=size, marker=group.meta['marker']))
     frame = Frame(predicate=pattern.meta['predicate'], domains=tuple(domains), share=pattern.meta['share'],
-                  marker=pattern.meta['marker'])
+                  marker=pattern.meta['marker'], predicate_negated=negative, quantifier_negated=outer)
     required = [frame.predicate, *(domain.head for domain in domains)]
     optional = [frame.marker, frame.share, *(domain.marker for domain in domains)]
     required.extend(i for i in optional if i is not None)
@@ -283,5 +304,5 @@ def lookup_class(core, name):
     for ref in core.store.find_elements_with_property(CLASS_KEY, name):
         group = core.store.get_element(Domain.H, ref.uid)
         for obs, rows, frame, i in _bound_domains(core, group):
-            if _simple_class(rows, frame.domains[i]) == name:
+            if _simple_class(rows, frame.domains[i], frame.quantifier_negated) == name:
                 yield obs, rows, frame, i

@@ -178,7 +178,9 @@ policy is ours. The table is not an exhaustive Russian valency dictionary.
 adverbial-modifiers.tsv includes every contiguous fixed expression headed by
 an adverb, particle or subordinator annotated as advmod of a verb or auxiliary,
 every postposed particle annotated as advmod of a determiner or adjective, and
-non-negative particles directly preceding their nominal advmod head.
+non-negative particles directly preceding their nominal advmod head. Prenegative
+particles immediately precede a negative particle and a verb or auxiliary,
+with both particles attached to that predicate as advmod.
 Source: UD Russian-GSD training split r2.15 (CC BY-SA 4.0).
 https://github.com/UniversalDependencies/UD_Russian-GSD/tree/r2.15
 Regeneration: python scripts/import_russian_adverbial_modifiers.py ru_gsd-ud-train.conllu src/ah/russian_grammar/lexicon/adverbial-modifiers.tsv
@@ -254,3 +256,12 @@ For example, FrameBank constructions 1527 and 1528 give the role «вес»
 for both ADV and Sacc in the predicate «весить». The unit identifies the
 dimension used when reading a recorded quantity; no conversion is implied.
 python scripts/import_russian_measure_questions.py framebank_dict_cx_items.txt units.json currencies.json src/ah/russian_grammar/lexicon/measure-questions.tsv
+
+impersonal-infinitives.tsv derives finite verb frames from Russian-GSD r2.15
+training sentences (CC BY-SA 4.0, https://github.com/UniversalDependencies/UD_Russian-GSD/tree/r2.15).
+The frame requires singular third person or neuter, a bare dative and an
+infinitive, with no overt subject. A dictionary aspect partner inherits the
+frame only if it also has an attested subjectless infinitive complement in the
+training corpus. The aspect pairs use the same GrammarEngine perfective file
+and MIT license as bare_government.tsv.
+python scripts/import_russian_impersonal_infinitives.py rus_infinitives_sov.sol ru_gsd-ud-train.conllu src/ah/russian_grammar/lexicon/impersonal-infinitives.tsv

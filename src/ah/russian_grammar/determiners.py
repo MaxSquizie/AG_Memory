@@ -13,58 +13,95 @@ SCOPES = {
 }
 
 
-def _substantive_subjects(tokens, base):
-    from .parser import Link
-    from .predication import _bare_trees, _copula_agrees
+def _nominal_predicates(tokens, head, word, tag, marker):
+    from .predication import _bare_trees
     from .utterances import _map
 
-    for i, token in enumerate(tokens[:-1]):
-        quantifiers = [(word, tag) for word, tag in known_forms(token.surface)
-                       if word in SCOPES and tag.POS == 'ADJF' and tag.case == 'nomn']
-        if not quantifiers:
-            continue
-        head = i + 1
-        candidates = [(word, tag, det, det_tag) for word, tag in known_forms(tokens[head].surface)
-                      if tag.POS == 'PRTF' and tag.case == 'nomn'
-                      for det, det_tag in quantifiers if _agree(det_tag, tag)]
-        if not candidates:
-            continue
-        visible = tuple(j for j in range(len(tokens)) if j != i)
-        nominal_clause = tuple(tokens[j] for j in visible)
-        for word, tag, det, det_tag in candidates:
-            if SCOPES[det] == 'negative':
-                continue
-            for tree in _bare_trees(nominal_clause, substantive=(i, word, tag)):
-                if tree[i].role != 'subject' or tree[i].lemma != word:
-                    continue
-                bound = _map(tree, visible)
-                bound[i] = Link('attribute', det, head, 'NP.DET', scope=SCOPES[det], morphology=from_tag(det_tag))
-                bound[head] = replace(bound[head], rule='PART.SUBSTANTIVE', case='nomn', morphology=from_tag(tag))
-                yield tuple(bound[j] for j in range(len(tokens)))
-        kept = tuple(j for j in range(len(tokens)) if j not in (i, head))
-        for tree in base(tuple(tokens[j] for j in kept)):
-            roots = [j for j, link in enumerate(tree) if link.head is None and link.role == 'predicate'
-                     and link.rule == 'V1' and link.implicit_subject == 'unresolved']
-            if len(roots) != 1 or any(link.role.startswith('clause_') for link in tree):
-                continue
-            root = kept[roots[0]]
-            links = _map(tree, kept)
-            predicate = links[root]
-            for word, tag, det, det_tag in candidates:
-                if (not _copula_agrees(predicate.morphology, tag)
-                        or SCOPES[det] == 'negative' and 'negated' not in (predicate.scope or '').split('_')):
-                    continue
-                bound = {j: replace(link, implicit_subject=None, controller=head if j != root else link.controller)
-                         if link.implicit_subject == 'unresolved' else link for j, link in links.items()}
-                bound[i] = Link('attribute', det, head, 'NP.DET', scope=SCOPES[det], morphology=from_tag(det_tag))
-                bound[head] = Link('subject', word, root, 'PART.SUBSTANTIVE', 'nomn', morphology=from_tag(tag))
-                yield tuple(bound[j] for j in range(len(tokens)))
+    det = head - 1
+    indices = tuple(j for j in range(len(tokens)) if j != det)
+    for tree in _bare_trees(tuple(tokens[j] for j in indices), substantive=(det, word, tag)):
+        if tree[det].role == 'subject' and tree[det].lemma == word:
+            links = _map(tree, indices)
+            links[det] = marker
+            links[head] = replace(links[head], rule='PART.SUBSTANTIVE', case='nomn', morphology=from_tag(tag))
+            yield tuple(links[j] for j in range(len(tokens)))
 
 
-def trees(tokens, base):
+def _subject_matrix(tokens, kept, base, tag, head, marker):
+    from .predication import _copula_agrees
+    from .utterances import _map
+
+    for tree in base(tuple(tokens[j] for j in kept)):
+        root = next((i for i, link in enumerate(tree) if link.head is None), None)
+        if root is None:
+            continue
+        pred = tree[root]
+        if (pred.rule != 'V1' or pred.implicit_subject != 'unresolved'
+                or not _copula_agrees(pred.morphology, tag)
+                or any(link.role.startswith('clause_') for link in tree)
+                or marker and marker.scope == 'negative' and 'negated' not in (pred.scope or '').split('_')):
+            continue
+        links = _map(tree, kept)
+        predicate = kept[root]
+        for i, link in tuple(links.items()):
+            if link.implicit_subject == 'unresolved':
+                links[i] = replace(link, implicit_subject=None, controller=head if i != predicate else link.controller)
+        if marker:
+            links[head - 1] = marker
+        yield links, predicate
+
+
+def _substantive_subjects(tokens, base, budget):
+    from .parser import AnalysisBudgetExceeded, Link
+    from .participle_forms import ParticipleForm
+    from .predication import _copula_agrees
+    from .participles import _inner, _remap
+
+    forms = [known_forms(token.surface) for token in tokens]
+    finite = {i for i, variants in enumerate(forms) if variants and all(tag.POS == 'VERB' for _, tag in variants)}
+    if len(finite) > 1:
+        return
+    barriers = finite | {i for i, token in enumerate(tokens) if token.surface in {',', ':', ';'}}
+    attempts = 0
+    for head, variants in enumerate(forms):
+        for word, tag in variants:
+            if tag.POS != 'PRTF' or tag.case != 'nomn':
+                continue
+            form = ParticipleForm(word, from_tag(tag))
+            previous = forms[head - 1] if head else ()
+            determiners = [(name, t) for name, t in previous if name in SCOPES and t.POS == 'ADJF']
+            markers = [Link('attribute', name, head, 'NP.DET', scope=SCOPES[name], morphology=from_tag(t))
+                       for name, t in determiners if _agree(t, tag)] if determiners else [None]
+            for marker in markers:
+                if marker and marker.scope != 'negative':
+                    yield from _nominal_predicates(tokens, head, word, tag, marker)
+                if not any(t.POS == 'VERB' and t.mood == 'indc' and _copula_agrees(t, tag)
+                           for variants in forms for _, t in variants):
+                    continue
+                end_limit = min((i for i in barriers if i > head), default=len(tokens))
+                for end in range(head + 1, end_limit + 1):
+                    kept = (*range(head - int(marker is not None)), *range(end, len(tokens)))
+                    if not kept:
+                        continue
+                    attempts += 1
+                    if attempts > budget:
+                        raise AnalysisBudgetExceeded('PARTICIPLE_BUDGET')
+                    for links, predicate in _subject_matrix(tokens, kept, base, tag, head, marker):
+                        links[head] = Link('subject', word, predicate, 'PART.SUBSTANTIVE', 'nomn',
+                                           morphology=form.morphology)
+                        if end == head + 1:
+                            yield tuple(links[j] for j in range(len(tokens)))
+                            continue
+                        anchors = {-1: head, **dict(enumerate(range(head, end)))}
+                        for branch in _inner(tokens[head:end], 0, form, base, budget):
+                            links.update((head + j, _remap(child, anchors)) for j, child in enumerate(branch) if j)
+                            yield tuple(links[j] for j in range(len(tokens)))
+
+
+def trees(tokens, base, *, budget=256):
     from .parser import Link
 
-    yield from _substantive_subjects(tokens, base)
+    yield from _substantive_subjects(tokens, base, budget)
     groups = {}
     for i, token in enumerate(tokens[:-1]):
         forms = [(lemma, tag) for lemma, tag in known_forms(token.surface)

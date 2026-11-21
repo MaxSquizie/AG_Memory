@@ -29,7 +29,7 @@ def _candidates(core, question, root):
 def _add(records, question, root, i, group, rows, frame, domain_index, support):
     domain = frame.domains[domain_index]
     row = question[i]
-    if (domain.role != row['role'] or rows[frame.predicate]['lemma'] != question[root]['lemma']
+    if (frame.quantifier_negated or domain.role != row['role'] or rows[frame.predicate]['lemma'] != question[root]['lemma']
             or any(part.get('head') == i and part['role'] != 'punctuation' for part in question)):
         return
     if domain.role == 'governed':
@@ -47,8 +47,9 @@ def _instance(question, root, stored, frame, args):
 
     pred = frame.predicate
     variable_subject = any(d.role == 'subject' for d in frame.domains)
+    status = 'negated' if frame.predicate_negated else 'asserted'
     if (stored[pred]['role'] != 'predicate' or stored[pred]['head'] is not None
-            or any(row.get('assertion_status') != 'asserted' or 'quotation' in row for row in question)
+            or any(row.get('assertion_status') != status or 'quotation' in row for row in question)
             or not _compatible(question, root, stored[pred], False, True, variable_subject)):
         return None
     instance = list(stored)

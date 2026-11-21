@@ -1,5 +1,7 @@
 from bisect import bisect_left
 from dataclasses import replace
+from functools import cache
+from importlib.resources import files
 from itertools import product
 
 from .morphology import NOMINAL_ROLES
@@ -72,6 +74,13 @@ def _apply_particles(words, links, groups, conditional):
     return True
 
 
+@cache
+def _prenegative_particles():
+    table = files(__package__).joinpath('lexicon/adverbial-modifiers.tsv')
+    return {row.split('\t')[1] for row in table.read_text(encoding='utf8').splitlines()
+            if row.startswith('prenegative\t')}
+
+
 def _decorate(tokens, base, budget):
     from .parser import AnalysisBudgetExceeded, Link
 
@@ -82,16 +91,26 @@ def _decorate(tokens, base, budget):
         return
     particles = conditional | {i for positions, _ in groups.values() for i in positions}
     adverbs = {}
+    focal_particles = set()
     optional = []
     for i, word in enumerate(words):
         if i in particles or i in groups:
             continue
         forms = known_forms(word)
         lemmas = tuple(dict.fromkeys(lemma for lemma, tag in forms if tag.POS == 'ADVB'))
-        if lemmas:
+        if (i + 2 in groups and groups[i + 2][1] == 'negated' and words[i + 1] == 'не'
+                and word in _prenegative_particles() and any(tag.POS == 'PRCL' for _, tag in forms)):
+            focal_particles.add(i)
+            adverbs[i] = lemmas
+            optional.append(i)
+        elif lemmas:
             adverbs[i] = lemmas
             if word in FORMS or word in PREFIXES or any(tag.POS not in {'ADVB', 'CONJ'} for _, tag in forms):
                 optional.append(i)
+    if any(words[i] == 'не' and i + 1 < len(words) and words[i + 1] in FORMS for i in particles):
+        for tree in base(tokens):
+            if any(link.rule == 'NEG.PRON' for link in tree):
+                yield tree
     if not particles and not adverbs:
         yield from base(tokens)
         return
@@ -112,8 +131,12 @@ def _decorate(tokens, base, budget):
                 hosts = [j for j in neighbors if links[j].role in {'predicate', 'infinitive', 'attribute', 'converb'}]
                 if not hosts:
                     hosts = predicates
-                choices.append(tuple((i, Link('adverb', lemma, j, 'B1'))
-                                     for j in hosts for lemma in adverbs[i]))
+                readings = [(i, Link('adverb', lemma, j, 'B1')) for j in hosts for lemma in adverbs[i]]
+                if i in focal_particles:
+                    negative = links[i + 1]
+                    if negative.rule == 'N1':
+                        readings.append((i, Link('particle', words[i], negative.head, 'F.V.MOD')))
+                choices.append(readings)
             for bindings in product(*choices):
                 merged = links.copy()
                 merged.update(bindings)

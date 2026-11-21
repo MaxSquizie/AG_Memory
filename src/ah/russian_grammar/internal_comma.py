@@ -19,11 +19,16 @@ class BoundaryChoice(Exception):
                and tree[tree[i - 1].head].rule == 'S.COLLECTIVE' and tree[tree[i - 1].head].head == i + 1
                for i, variants in sites.items() for tree in variants):
             question = 'В каком месте запятая разделяет связанные между собой члены предложения?'
+        if any(_predicative_neighbors(tree[i - 1], tree[i + 1], tree)
+               for i, variants in sites.items() for tree in variants):
+            question = 'В каком месте запятая разделяет слова, относящиеся к одному сказуемому?'
         self.probe = Probe(question, tuple(self.options), text)
 
 
 def _compatible(left, right):
+    from .adjuncts import QUESTIONS
     from .clause_series import ordinal_abbreviation
+    from .predication import IMPERSONAL_INFINITIVES, _copula_agrees
     from .speech_particles import DOUBT, JUSSIVE
     from .spatial_prefix import deictic_role, relative_role
     from .unlisted_attributes import predicted_attributes
@@ -37,6 +42,16 @@ def _compatible(left, right):
         return True
     left_forms = known_forms(left)
     right_forms = known_forms(right)
+    if left.casefold() == 'не' and right.casefold() in FORMS:
+        return True
+    if any(any(lemma in IMPERSONAL_INFINITIVES or 'Impe' in tag or tag.POS == 'PRED'
+               for lemma, tag in governor) and any(tag.POS == 'INFN' for _, tag in complement)
+           for governor, complement in ((left_forms, right_forms), (right_forms, left_forms))):
+        return True
+    if left.casefold() in QUESTIONS and right.casefold() == 'ни':
+        return True
+    if any(tag.POS == 'NUMR' for _, tag in left_forms) and any(tag.case == 'gent' for tag in nominal(right)):
+        return True
     if (any(tag.POS == 'NOUN' and tag.number == 'plur' and tag.case == 'gent' for _, tag in left_forms)
             and any(tag.POS == 'VERB' and tag.number == 'plur' for _, tag in right_forms)):
         return True
@@ -50,11 +65,17 @@ def _compatible(left, right):
         return True
     if nominal(left) and any(tag.case in ('gent', 'gen2') for tag in nominal(right)):
         return True
+    if (any(tag.case == 'ablt' for tag in nominal(left))
+            and any(tag.case == 'nomn' for tag in nominal(right))):
+        return True
     if ordinal_abbreviation(left, right) or left.isdecimal() and nominal(right):
         return True
     if left.casefold() in FORMS and (nominal(right) or adjective(right)):
         return True
     for subject, verb in ((left, right), (right, left)):
+        if any(part.POS == 'PRTF' and part.case == 'nomn' and v.POS == 'VERB' and _copula_agrees(v, part)
+               for _, part in known_forms(subject) for _, v in known_forms(verb)):
+            return True
         if (any(lemma == 'кто' and tag.case == 'nomn' for lemma, tag in known_forms(subject))
                 and any(tag.POS in ('VERB', 'ADJS', 'PRTS') for _, tag in known_forms(verb))):
             return True
@@ -63,6 +84,14 @@ def _compatible(left, right):
             return True
     return any(_agree(adj, noun) for a, n in ((left, right), (right, left))
                for adj in adjective(a) for noun in nominal(n))
+
+
+def _predicative_neighbors(left, right, tree):
+    from .short_participles import _predicative_instrumentals
+
+    return (left.case == 'ablt' and left.rule in {'V.XCOMP', 'V.GOV'} and right.role == 'subject'
+            and right.head is not None and left.head == right.head
+            and tree[left.head].lemma in _predicative_instrumentals())
 
 
 def _government(left, right):
@@ -145,6 +174,11 @@ def repairs(tokens, parse, budget, *, sites=None):
                 head = right
             elif tree[right].head == left:
                 head = left
+            elif (tree[left].rule == 'NEG.PRON' and tree[left].head is not None and
+                  tree[tree[left].head].head == right):
+                head = tree[left].head
+            elif _predicative_neighbors(tree[left], tree[right], tree):
+                head = tree[left].head
             elif (tree[left].rule == 'UTT.PARTICLE' and tree[right].role == 'subject'
                   and tree[left].head == tree[right].head):
                 head = tree[left].head

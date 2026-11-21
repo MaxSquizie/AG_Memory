@@ -4,7 +4,7 @@ from functools import cache
 from importlib.resources import files
 
 from . import degree_clauses
-from .ellipsis import gapped_leaves
+from .ellipsis import competing_leaves, gapped_leaves
 from .rules import known_forms
 from .spatial_prefix import relative_role
 
@@ -62,6 +62,7 @@ def _boundaries(words):
 
 def _shift(link, offset):
     return replace(link, head=None if link.head is None else link.head + offset,
+                   ellipsis_source=None if link.ellipsis_source is None else link.ellipsis_source + offset,
                    coord_head=None if link.coord_head is None else link.coord_head + offset,
                    shared_agent=None if link.shared_agent is None else link.shared_agent + offset,
                    shared_object=None if link.shared_object is None else link.shared_object + offset,
@@ -139,7 +140,7 @@ def _level_attachments(prefix, levels, boundary, leaf, root, words):
         if not _allows_mood(boundary, own):
             continue
         if relation == 'conj':
-            role, rule = 'clause_conjunct', 'GAP' if own.rule == 'GAP' else 'CL.CONJ'
+            role, rule = 'clause_conjunct', own.rule if own.rule in ('GAP', 'GAP.REMNANT') else 'CL.CONJ'
             next_levels = levels[:level] + ((anchor, root),)
         elif relative:
             role, rule = 'clause_relative', 'CL.REL'
@@ -301,9 +302,13 @@ def trees(tokens, local, *, budget=256, spatial_prefix=None):
                     else:
                         candidates = leaves(marker.stop, stop, spatial=bool(relative_role(marker.form)))
                     if marker.relation == 'conj' and len(levels) == 1:
-                        gaps = tuple(gapped_leaves(tokens, marker.stop, stop, prefix, levels[0][0], budget))
+                        anchor = levels[0][0]
+                        parallel = [anchor, *(i for i, link in enumerate(prefix) if link and
+                                              link.role == 'clause_conjunct' and link.head == anchor)]
+                        gaps = tuple(dict.fromkeys(gap for host in parallel for gap in
+                                                   gapped_leaves(tokens, marker.stop, stop, prefix, host, budget)))
                         if gaps:
-                            candidates = gaps
+                            candidates = (*gaps, *competing_leaves(candidates, marker.stop, gaps))
                     for leaf, root in candidates:
                         for tree, scopes in _attachments(prefix, levels, marker, leaf, root, words,
                                                         tokens=tokens, spatial_prefix=spatial_prefix):

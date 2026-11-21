@@ -213,8 +213,12 @@ def partitions(trees, tokens, text):
         if all(link.rule in {'V.XCOMP', 'V.GOV'} for link in links) and any(link.rule == 'V.GOV' for link in links):
             focus = _span_label(tokens, i)
             options = (focus, 'нет такого слова')
-            yield Probe('Какое слово в творительном падеже называет, кем или чем выступает подлежащее?',
-                        options, text), [options[0] if link.rule == 'V.XCOMP' else options[1] for link in links]
+            question = 'Какое слово в творительном падеже называет, кем или чем выступает подлежащее?'
+            if all('negated' in (tree[tree[i].head].scope or '').split('_') for tree in trees):
+                question = ('Какое слово называет роль или состояние подлежащего, о котором говорится '
+                            'с отрицанием? Если указан лишь предмет или способ действия, выберите '
+                            '«нет такого слова».')
+            yield Probe(question, options, text), [options[0] if link.rule == 'V.XCOMP' else options[1] for link in links]
     for i in range(len(tokens)):
         links = [tree[i] for tree in trees]
         if {link.rule for link in links} != {'N.GEN', 'N.COORD'} or not all(

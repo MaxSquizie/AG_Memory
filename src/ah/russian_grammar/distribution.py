@@ -20,6 +20,8 @@ class Frame:
     marker: int | None
     alternatives: tuple[Domain, ...] = ()
     optional: bool = False
+    predicate_negated: bool = False
+    quantifier_negated: bool = False
 
     @property
     def resolved(self):
@@ -108,13 +110,17 @@ def _coordination(rows, children, anchor):
     return tuple(members) if len(members) > 1 else ()
 
 
+def _universal_marker(rows, children, head):
+    return next((j for j in children[head] if rows[j]['role'] == 'attribute'
+                 and rows[j].get('scope') == 'universal' and rows[j]['lemma'] in ('каждый', 'всякий')), None)
+
+
 def _domain(rows, children, head):
     row = rows[head]
     if (row['role'] not in NOMINAL_ROLES or row.get('assertion_status') != 'asserted'
             or row.get('scope') not in (None, 'universal') or 'quotation' in row):
         return None
-    explicit = next((j for j in children[head] if rows[j]['role'] == 'attribute'
-                     and rows[j].get('scope') == 'universal' and rows[j]['lemma'] in ('каждый', 'всякий')), None)
+    explicit = _universal_marker(rows, children, head)
     anchor = head
     if row.get('rule') == 'NP.PARTITIVE' and row['lemma'] == 'каждый':
         explicit = head
@@ -208,11 +214,63 @@ def _per_unit(rows, children, prep):
     return Domain(head, row['role'], (), None, prep)
 
 
+def _negated_restriction(rows, children, predicate):
+    return any(rows[j].get('scope') == 'focus_negated' and _universal_marker(rows, children, j) is not None
+               for j in children[predicate])
+
+
+def _negative_universal(rows, children, predicate):
+    row = rows[predicate]
+    if row['role'] != 'predicate' or row['head'] is not None or 'quotation' in row or row.get('assertion_context'):
+        return None
+    negative = row.get('scope') == 'negated' and row.get('assertion_status') == 'negated'
+    if not negative and not _asserted(row):
+        return None
+    subjects = [j for j in children[predicate] if rows[j]['role'] == 'subject']
+    if len(subjects) != 1:
+        return None
+    subject, = subjects
+    marker = _universal_marker(rows, children, subject)
+    if marker is None or (rows[subject].get('morphology') or {}).get('pos') != 'NOUN':
+        return None
+    outer = rows[subject].get('scope') == 'focus_negated'
+    if not negative and not outer:
+        return None
+    if rows[subject].get('scope') not in (None, 'focus_negated'):
+        return None
+    nominal = {j for j in children[subject] if rows[j]['role'] != 'punctuation'}
+    if outer:
+        particle = marker - 1
+        if (particle not in nominal or rows[particle]['role'] != 'particle' or rows[particle]['lemma'] != 'не'):
+            return None
+        nominal.remove(particle)
+    if nominal != {marker} or children[marker]:
+        return None
+    negations = []
+    for j in children[predicate]:
+        part = rows[j]
+        if j == subject or part['role'] == 'punctuation':
+            continue
+        if part['role'] == 'particle' and part['lemma'] == 'не':
+            negations.append(j)
+        elif (part['role'] not in ('object', 'recipient') or part.get('scope') or part.get('quantity_kind')
+              or any(rows[k]['role'] != 'punctuation' for k in children[j])):
+            return None
+    if negative != bool(negations) or negations and (len(negations) != 1 or marker > negations[0]):
+        return None
+    domain = Domain(subject, 'subject', (), None, marker)
+    return Frame(predicate, (domain,), None, None, predicate_negated=negative, quantifier_negated=outer)
+
+
 def frames(rows):
     children = _children(rows)
     result = []
     for predicate, row in enumerate(rows):
-        if not _asserted(row):
+        negative = _negative_universal(rows, children, predicate)
+        if negative is not None:
+            result.append(negative)
+            continue
+        if not _asserted(row) or _negated_restriction(rows, children, predicate):
             continue
         candidates = []
         shares = []

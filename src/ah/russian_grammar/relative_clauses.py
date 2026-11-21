@@ -2,7 +2,7 @@ from dataclasses import replace
 from functools import lru_cache
 from itertools import chain
 
-from . import clauses, personal_correlatives
+from . import clauses, degree_clauses, personal_correlatives
 from .morphology import ROLE_CASE, from_tag
 from .nominal_groups import _groups
 from .prepositions import FORMS, PREFIXES
@@ -137,6 +137,14 @@ def trees(tokens, local, *, budget, spatial_prefix=None, nominal_fragment=False)
         candidates = {i for i, word in enumerate(words) if i and any(lemma in {
             'который', 'кто', 'что', 'где', 'куда', 'когда', 'откуда', 'почему', 'как'
         } for lemma, _ in known_forms(word))}
+        amounts = set()
+        has_counter = False
+        for i, word in enumerate(words):
+            lemmas = {lemma for lemma, tag in known_forms(word) if tag.POS == 'NUMR'}
+            if has_counter and 'сколько' in lemmas:
+                amounts.add(i)
+            has_counter |= 'столько' in lemmas
+        candidates.update(amounts)
         if not candidates:
             return
         for begin in range(1, len(words)):
@@ -173,11 +181,12 @@ def trees(tokens, local, *, budget, spatial_prefix=None, nominal_fragment=False)
             if (spatial or temporal) and marker != begin:
                 continue
             relative = 'который' in lemmas
-            if not relative and not lemmas.intersection({'кто', 'что', 'где', 'куда', 'когда', 'откуда', 'почему', 'как'}):
+            amount = marker == begin and marker in amounts
+            if not relative and not amount and not lemmas.intersection({'кто', 'что', 'где', 'куда', 'когда', 'откуда', 'почему', 'как'}):
                 continue
             personal = 'кто' in lemmas and any(personal_correlatives.readings(w) for w in words[:start])
             indirect = not relative and any(lemma in INDIRECT for w in words[:start] for lemma, _ in known_forms(w))
-            if not (relative or personal or indirect or spatial or temporal):
+            if not (relative or personal or indirect or spatial or temporal or amount):
                 continue
             stops = [i for i in commas if i > marker]
             if inferred and not stops:
@@ -186,7 +195,7 @@ def trees(tokens, local, *, budget, spatial_prefix=None, nominal_fragment=False)
                 if resumed_verbs:
                     stops = range(marker + 1, resumed_verbs[-1] + 1)
             for end in (*stops, len(part)):
-                if spatial and end == len(part):
+                if (spatial or amount) and end == len(part):
                     continue
                 resume = end + (end < len(part) and words[end] == ',')
                 outside = tuple(range(start)) + tuple(range(resume, len(part)))
@@ -199,13 +208,18 @@ def trees(tokens, local, *, budget, spatial_prefix=None, nominal_fragment=False)
                     matrices = (((head,), 0, None) for head in personal_correlatives.nominal_heads(matrix[0]))
                 else:
                     captions = _nominal_caption(matrix, budget) if relative and end == len(part) else ()
-                    ordinary = ((tree, None, None) for tree in chain(component(matrix), captions)) if relative or indirect or spatial or temporal else ()
+                    ordinary = ((tree, None, None) for tree in chain(component(matrix), captions)) if relative or indirect or spatial or temporal or amount else ()
                     personal_matrices = personal_correlatives.matrices(matrix, start, component) if personal else ()
                     matrices = chain(ordinary, personal_matrices)
                 for outer, person, addressee_governor in matrices:
                     fixed_host = person if person is not None else addressee_governor
                     for host in ((fixed_host,) if fixed_host is not None else _anchors(outer, start)):
                         if host >= start:
+                            continue
+                        if amount:
+                            for joined in degree_clauses.centered_quantity(part, outside, outer, host, inside, component):
+                                spend()
+                                yield joined
                             continue
                         if spatial or temporal and end < len(part):
                             from .spatial_clauses import centered

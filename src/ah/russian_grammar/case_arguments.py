@@ -88,6 +88,7 @@ def _pp_attachments(expanded, groups, budget):
 
 def _attach(tokens, tree, kept, groups, government, roles, budget):
     from .parser import AnalysisBudgetExceeded, Link
+    from .predication import experiencer
     from .short_participles import _predicative_instrumentals
 
     links = {}
@@ -111,6 +112,9 @@ def _attach(tokens, tree, kept, groups, government, roles, budget):
             lemma == group.lemma and tag.POS == 'NPRO' and 'Anph' in tag and tag.case == 'datv'
             for lemma, tag in known_forms(tokens[group.noun].surface))
         for host, verb in hosts:
+            if links[host].rule in ('V3', 'V3.FRAME') and group.case == 'datv':
+                choices.append(experiencer(tokens[group.noun].surface, group.lemma, host))
+                continue
             if (reflexive_dative and links[host].role == 'infinitive'
                     and links[host].controller is not None
                     and any(link.role == 'object' and link.head == host for link in links.values())
@@ -159,6 +163,11 @@ def _attach(tokens, tree, kept, groups, government, roles, budget):
         for group, link in zip(groups, bound):
             expanded[group.noun] = link
             expanded.update(group.extra)
+        for group, link in zip(groups, bound):
+            if link.role == 'experiencer':
+                for i, member in expanded.items():
+                    if member.rule == 'V3.INF' and member.head == link.head:
+                        expanded[i] = replace(member, controller=group.noun)
         result = tuple(expanded[i] for i in range(len(tokens)))
         if any(link.head in governors for link in bound):
             root = next(i for i, _ in hosts if links[i].role == 'predicate')

@@ -41,3 +41,26 @@ def test_proportional_construction_links_the_two_comparative_scales():
     assert tree[first.antecedent] == second
     assert tree[first.head].lemma == 'долгий' and tree[second.head].lemma == 'сильный'
     assert tree[tree[first.head].head].scope == tree[tree[second.head].head].scope == 'proportional'
+
+
+def test_adverbial_concession_keeps_polarity_and_mood():
+    for sentence in ('Как ни старался Иван, дверь не открылась.',
+                     'Как ни старался Иван дверь не открылась',
+                     'Дверь не открылась, как Иван ни старался.'):
+        core = AHCore()
+        assert submit(core, sentence).status == 'STORED'
+        assert submit(core, 'Иван старался?').text == 'Да.'
+        assert submit(core, 'Дверь не открылась?').text == 'Да.'
+        assert submit(core, 'Дверь открылась?').status == 'UNKNOWN'
+    core = AHCore()
+    assert submit(core, 'Как бы Иван ни старался, Мария уйдёт.').status == 'STORED'
+    assert submit(core, 'Иван старался?').status == 'UNKNOWN'
+
+
+def test_centered_quantity_resumes_its_matrix_argument():
+    for sentence in ('Столько писем, сколько просила Анна, Иван отправил.',
+                     'Столько писем сколько просила Анна Иван отправил'):
+        core = AHCore()
+        assert submit(core, sentence).status == 'STORED'
+        assert submit(core, 'Сколько писем отправил Иван?').text == sentence[:sentence.index(' Иван')].rstrip(',')
+        assert submit(core, 'Иван отправил три письма?').status == 'UNKNOWN'

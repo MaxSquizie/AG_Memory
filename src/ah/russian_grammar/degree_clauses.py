@@ -40,6 +40,82 @@ def bind(tree, marker, child, host, form):
     return tuple(links)
 
 
+def centered_quantity(tokens, outside, outer, noun, inside, parse):
+    from .parser import Link
+    from .utterances import _map, _root
+
+    counters = [outside[i] for i, item in enumerate(outer) if item.role == 'numeral' and
+                item.lemma == 'столько' and item.head == noun and outside[i] < inside[0]]
+    if not counters:
+        return
+    for child in parse(tuple(tokens[i] for i in inside)):
+        if child[0].quantity_kind != 'query' or child[0].lemma != 'сколько':
+            continue
+        root = inside[_root(child)]
+        merged = _map(outer, outside) | _map(child, inside)
+        for i in (inside[0] - 1, inside[-1] + 1):
+            if i not in merged:
+                merged[i] = Link('punctuation', ',', root, 'CL.PUNCT')
+        joined = tuple(merged[i] for i in range(len(tokens)))
+        for anchor in counters:
+            yield bind(joined, inside[0], root, anchor, 'сколько')
+
+
+def concessive_adverbs(tokens, parse):
+    from .adjuncts import QUESTIONS
+    from .clauses import _preposed_splits
+    from .modifiers import _apply_particles
+    from .parser import Link
+    from .utterances import _map, _root
+
+    words = tuple(t.surface.casefold() for t in tokens)
+    if 'ни' not in words:
+        return
+    for marker, word in enumerate(words):
+        if word not in QUESTIONS:
+            continue
+        start = marker - int(marker > 0 and words[marker - 1] == ',')
+        for ni in range(marker + 1, len(tokens)):
+            if words[ni] == ',':
+                break
+            if words[ni] != 'ни':
+                continue
+            spans = ((len(words), 0),) if marker else _preposed_splits(words, ni + 1)
+            for end, resume in spans:
+                modal = [i for i in range(marker + 1, end) if words[i] in ('бы', 'б')]
+                inner = tuple(j for j in range(marker, end) if j != ni and j not in modal)
+                outer = tuple(range(start)) if marker else tuple(range(resume, len(tokens)))
+                if not inner or not outer:
+                    continue
+                for child in parse(tuple(tokens[i] for i in inner)):
+                    predicate = _root(child)
+                    verb = child[predicate]
+                    form = verb.morphology
+                    if (child[0].role != 'adverb' or child[0].head != predicate or
+                            form is None or form.pos != 'VERB' or inner[predicate] <= ni):
+                        continue
+                    root = inner[predicate]
+                    dependent = _map(child, inner)
+                    neighbor = dependent.get(ni + 1)
+                    if not neighbor or (ni + 1 != root and not (
+                            neighbor.role == 'adverb' and neighbor.head == root)):
+                        continue
+                    if modal and not _apply_particles(words, dependent, {}, modal):
+                        continue
+                    conditional = bool(modal) or form.mood == 'impr' or form.tense == 'futr'
+                    relation = 'concessive_condition' if conditional else 'concession'
+                    for matrix in parse(tuple(tokens[i] for i in outer)):
+                        host = outer[_root(matrix)]
+                        joined = dependent | _map(matrix, outer)
+                        joined[marker] = replace(joined[marker], role='clause_marker', rule='CL.MARK', scope=relation)
+                        joined[ni] = Link('particle', 'ни', marker, 'CL.FOCUS')
+                        joined[root] = replace(joined[root], role='clause_adverbial', head=host,
+                                               rule='CL.ADV', scope=dependent[root].scope or relation)
+                        for i in (*range(start, marker), *range(end, resume)):
+                            joined[i] = Link('punctuation', words[i], root, 'CL.PUNCT')
+                        yield tuple(joined[i] for i in range(len(tokens)))
+
+
 def _scales(tokens, positions, local):
     from .parser import Link
     from .utterances import _map, _root

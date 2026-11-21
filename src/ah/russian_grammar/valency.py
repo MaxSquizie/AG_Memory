@@ -19,6 +19,7 @@ def _required():
 
 
 def violation(tokens, tree):
+    from .ellipsis import unsupported_count
     from .partitive_domains import cardinality_violation
 
     if reason := cardinality_violation(tree):
@@ -38,6 +39,8 @@ def violation(tokens, tree):
             children[prep.head].add('object')
     for i, (token, link) in enumerate(zip(tokens, tree)):
         form = link.morphology
+        if unsupported_count(tree, i):
+            return 'UNSUPPORTED_QUANTITY_ELLIPSIS'
         if link.lemma == 'себя' and link.antecedent is None:
             return 'UNBOUND_REFLEXIVE'
         if link.rule == 'V.GOV':

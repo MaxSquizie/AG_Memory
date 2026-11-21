@@ -148,3 +148,17 @@ def test_comma_between_modifier_and_noun_preserves_both_morphological_readings()
         result = analyze(text, lambda _: choice)
         tree, = result.analyses
         assert (tree[0].role, tree[0].head, tree[1].rule) == (role, 2, boundary)
+
+
+def test_substantive_subject_keeps_its_arguments_and_agreement():
+    text = 'Прочитавшие книгу ушли.'
+    tree, = analyze(text).analyses
+    assert [(link.role, link.head) for link in tree] == [('subject', 2), ('object', 0), ('predicate', None)]
+    assert tree[0].rule == 'PART.SUBSTANTIVE' and tree[0].morphology.voice == 'actv'
+    tree, = analyze('Прочитавшие книгу студенты ушли.').analyses
+    assert tree[0].role == 'participle' and tree[0].head == 2 and tree[2].role == 'subject'
+    assert analyze('Вошедшая снял куртку.').status == 'UNRESOLVED'
+    core = AHCore()
+    assert submit(core, 'Вошедший читает книгу.').status == 'STORED'
+    assert submit(core, 'Что читает вошедший?').text == 'книгу'
+    assert submit(core, 'Вошедшая читает книгу?').status == 'UNKNOWN'

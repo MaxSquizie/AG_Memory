@@ -97,6 +97,9 @@ def _rows(result, participants):
     while pending:
         i, enclosing, governing_status = pending.pop()
         row = rows[i]
+        if row['rule'] == 'V3.DAT.UNBOUND':
+            row['lemma_alternatives'] = sorted({lemma for lemma, tag in known_forms(row['surface'])
+                                                if tag.POS == 'NPRO' and tag.person == '3per' and tag.case == 'datv'})
         if (row['scope'] or '').split('_', 1)[0] == 'title' and row['role'] in ('apposition', 'nominal_conjunct', 'genitive_modifier', 'governed'):
             row['quotation'] = i
             enclosing = governing_status = 'title'
@@ -499,6 +502,9 @@ def _nominal_answer(stored, parts, source):
     for j in sorted(parts):
         row = stored[j]
         word = _participant_answer(row) if row['lemma'] in PERSONAL else row['surface']
+        if row.get('rule') == 'GAP.NOUN':
+            from .ellipsis import noun_surface
+            word = noun_surface(row, stored)
         if word is None:
             return None
         words.append(word)
@@ -541,7 +547,7 @@ def _may_deny_participation(row):
 def _projection_requirements(rows, children, root, scoped):
     required = set()
     subtree = _descendants(children, [root])
-    if rows[root].get('rule') == 'NEG.EXIST':
+    if rows[root].get('rule') in ('NEG.EXIST', 'V3.UNAVAILABLE'):
         required.update(subtree)
     if any(rows[j]['role'] == 'coordinator' and rows[j].get('scope') == 'alternative' for j in subtree):
         required.update(subtree)
@@ -661,7 +667,7 @@ def _extraction(rows, stored, observed, source, focus, budget, subject_member=No
     root = _root(rows)
     if any(row.get('implicit_subject') == 'unresolved' and (focus is None or i != root) for i, row in enumerate(rows)):
         return {}
-    scoped_question = focus is not None and bool(rows[root].get('scope')) and rows[root]['rule'] != 'NEG.EXIST'
+    scoped_question = focus is not None and bool(rows[root].get('scope')) and rows[root]['rule'] not in ('NEG.EXIST', 'V3.UNAVAILABLE')
     concord = rows[root].get('scope') == 'negated' and any(
         row.get('rule') == 'PAIR.MARK' and row.get('scope') == 'negative_coordination' for row in stored)
     if scoped_question and not concord and not any(row['role'] == 'clause_marker' and row.get('scope') in ('condition', 'concessive_condition', 'adverbial')
@@ -890,6 +896,9 @@ def _compatible(rows, i, stored, focus, root, variable_subject):
             if (row['lemma'] != stored['lemma'] or
                     any(left.get(k) != right.get(k) for k in ('pos', 'voice', 'aspect', 'tense', 'mood', 'transitivity'))):
                 return False
+            if 'PART.SUBSTANTIVE' in (row.get('rule'), stored.get('rule')):
+                return (row.get('rule') == stored.get('rule') and _case(row) == _case(stored)
+                        and all(left.get(k) == right.get(k) for k in ('number', 'gender')))
             if left.get('pos') == 'PRTF' or variable_subject:
                 return True
             return all(left.get(k) == right.get(k) for k in ('number', 'gender'))
@@ -946,6 +955,8 @@ def _compatible(rows, i, stored, focus, root, variable_subject):
         return actual_case in cases and form_animacy == animacy
     surface = (stored.get('recovery') or {}).get('corrected', stored['surface'])
     if stored.get('counted'):
+        if stored.get('rule') == 'GAP.NOUN':
+            return actual_case in cases and stored['morphology']['animacy'] == animacy
         return actual_case in cases and any(lemma == stored['lemma'] and tag.POS == 'NOUN' and tag.animacy == animacy
                                             for lemma, tag in known_forms(surface))
     return any(lemma == stored['lemma'] and tag.POS in ('NOUN', 'NPRO') and tag.case in cases and
@@ -1058,7 +1069,7 @@ def submit(core, text, choose=None, *, source='user', speaker_ref=None, addresse
     rows = _rows(result, participants)
     fixed_expressions = {row['head'] for row in rows if row['role'] == 'fixed'}
     variables = [i for i, row in enumerate(rows) if i not in fixed_expressions and row['role'] != 'fixed' and
-                 'quotation' not in row and row.get('antecedent') is None and row['rule'] not in ('CL.WH', 'CL.SPATIAL.WH', 'CL.SPATIAL.FREE') and
+                 'quotation' not in row and row.get('antecedent') is None and row['rule'] not in ('CL.WH', 'CL.SPATIAL.WH', 'CL.SPATIAL.FREE', 'NEG.PRON.ARG') and
                  row['role'] not in ('clause_marker', 'coordinator') and _question_word(row['surface'], row['lemma'])]
     if marked_question or variables or any(row['rule'] == 'UTT.POLAR' and 'quotation' not in row for row in rows):
         if len(variables) > 1 or any(not (adjuncts.question(rows[i]) or rows[i]['role'] == 'possessive' and rows[i]['lemma'] == 'чей'

@@ -21,6 +21,10 @@ def entries(path):
                 rows.add(('prenominal', word[2]))
             if head[3] not in {'VERB', 'AUX'} or word[3] not in {'ADV', 'PART', 'SCONJ'}:
                 continue
+            negative = words.get(index + 1)
+            if (word[3] == 'PART' and negative and 'Polarity=Neg' in negative[5]
+                    and negative[6:8] == [head[0], 'advmod'] and index + 2 == int(head[0])):
+                rows.add(('prenegative', word[2]))
             parts = [j for j, other in words.items() if other[6] == word[0] and other[7] == 'fixed']
             if parts and sorted(parts) == list(range(index + 1, index + len(parts) + 1)):
                 rows.add(('adverbial', ' '.join(words[j][1].casefold()

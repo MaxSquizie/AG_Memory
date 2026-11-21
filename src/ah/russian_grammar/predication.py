@@ -1,6 +1,8 @@
 from dataclasses import replace
+from importlib.resources import files
 from itertools import product
 
+from .morphology import _common, from_tag
 from .prepositions import DASHES, group_heads
 from .rules import known_forms, readings
 
@@ -89,7 +91,23 @@ def _personal(tokens, forms, root, lemma, pred, substantive=None):
                 yield tree
 
 
-def _impersonal(tokens, forms, root, lemma, pred):
+IMPERSONAL_INFINITIVES = frozenset(files(__package__).joinpath(
+    'lexicon/impersonal-infinitives.tsv').read_text(encoding='utf8').splitlines())
+
+
+def experiencer(surface, lemma, root):
+    from .parser import Link
+
+    forms = tuple((word, tag) for word, tag in known_forms(surface)
+                  if tag.POS == 'NPRO' and tag.person == '3per' and tag.case == 'datv')
+    lemmas = {word for word, _ in forms}
+    if lemma in lemmas and len(lemmas) > 1:
+        common = _common(tuple(from_tag(tag) for _, tag in forms))
+        return Link('experiencer', surface.casefold(), root, 'V3.DAT.UNBOUND', 'datv', morphology=common)
+    return Link('experiencer', lemma, root, 'V3.DAT', 'datv')
+
+
+def _impersonal(tokens, forms, root, lemma, pred, *, requires_infinitive=False, unavailable=False):
     from .parser import Link
 
     infinitives = [(i, form, tag) for i, variants in enumerate(forms) if i != root
@@ -98,15 +116,29 @@ def _impersonal(tokens, forms, root, lemma, pred):
                for form, tag in variants if _nominal(tag, 'datv') and 'Af-p' not in tag]
     accusatives = [(i, form, tag) for i, variants in enumerate(forms) if i != root
                    for form, tag in variants if _nominal(tag, 'accs') and 'Af-p' not in tag]
-    for infinitive, dat in product([None, *infinitives], [None, *datives]):
+    if unavailable:
+        complements = [None]
+    elif requires_infinitive:
+        complements = infinitives
+    else:
+        complements = [None, *infinitives]
+    for infinitive, dat in product(complements, [None, *datives]):
         if infinitive and dat and infinitive[0] == dat[0]:
             continue
-        bindings = {root: Link('predicate', lemma, None, 'V3')}
+        if unavailable:
+            predicate = Link('predicate', lemma, None, 'V3.UNAVAILABLE', scope='unavailable',
+                             morphology=from_tag(pred), controller=dat[0] if dat else None)
+        elif requires_infinitive:
+            predicate = Link('predicate', lemma, None, 'V3.FRAME', morphology=from_tag(pred))
+        else:
+            predicate = Link('predicate', lemma, None, 'V3')
+        bindings = {root: predicate}
         heads = []
         if infinitive:
-            bindings[infinitive[0]] = Link('infinitive', infinitive[1], root, 'V3.INF')
+            bindings[infinitive[0]] = Link('infinitive', infinitive[1], root, 'V3.INF',
+                                           controller=dat[0] if dat else None)
         if dat:
-            bindings[dat[0]] = Link('experiencer', dat[1], root, 'V3.DAT', 'datv')
+            bindings[dat[0]] = experiencer(tokens[dat[0]].surface, dat[1], root)
             heads.append((dat[0], dat[2]))
         transitive = 'tran' in (infinitive[2] if infinitive else pred)
         for obj in [None, *(accusatives if transitive else ())]:
@@ -132,6 +164,8 @@ def _bare_trees(tokens, substantive=None):
                 candidates = _personal(tokens, forms, root, lemma, pred, substantive)
             elif pred.POS == 'PRED' or 'Prdx' in pred or (pred.POS == 'VERB' and 'Impe' in pred):
                 candidates = _impersonal(tokens, forms, root, lemma, pred)
+            elif lemma in IMPERSONAL_INFINITIVES and pred.POS == 'VERB' and pred.mood == 'indc' and _copula_agrees(pred, None):
+                candidates = _impersonal(tokens, forms, root, lemma, pred, requires_infinitive=True)
             else:
                 continue
             for tree in candidates:
@@ -220,10 +254,50 @@ def _attach(tokens, kept, tree, layout):
         yield tuple(replace(link, head=attached.get(i)) for i, link in enumerate(mapped))
 
 
-def trees(tokens, *, budget=256):
-    yield from _bare_trees(tokens)
+def _unavailable_predicates(tokens):
+    forms = [known_forms(token.surface) for token in tokens]
+    for index, variants in enumerate(forms):
+        for lemma, tag in variants:
+            if tag.POS == 'INFN':
+                yield from _impersonal(tokens, forms, index, lemma, tag, unavailable=True)
+
+
+def _unavailable(tokens, budget):
+    from .homogeneous import _restore
+    from .parser import Link
+
+    for marker, token in enumerate(tokens[:-2]):
+        if token.surface.casefold() != 'не':
+            continue
+        prep = marker + 1
+        for group in _groups_at(tokens, prep, budget):
+            noun = prep + group.groups[0][1]
+            word = group.words[noun - prep]
+            if (word.role != 'governed' or word.lemma not in {'кто', 'что'} or noun != marker + len(group.words)
+                    or any(w.role != 'prep_part' for w in group.words[1:-1])):
+                continue
+            kept = tuple(i for i in range(len(tokens)) if not marker <= i <= noun)
+            reduced = tuple(tokens[i] for i in kept)
+            for tree in _with_prepositions(reduced, _unavailable_predicates, budget):
+                restored = _restore(tree, kept, len(tokens))
+                root = next(i for i in kept if restored[i].head is None)
+                restored[marker] = Link('particle', 'не', noun, 'NEG.PRON', scope='negative')
+                restored[prep] = Link('preposition', group.words[0].lemma, root, 'P2')
+                for i in range(prep + 1, noun):
+                    restored[i] = Link('prep_part', group.words[i - prep].lemma, prep, 'P1')
+                restored[noun] = Link('governed', word.lemma, prep, 'NEG.PRON.ARG', case=word.case)
+                yield tuple(restored)
+
+
+def _with_prepositions(tokens, bare, budget):
+    yield from bare(tokens)
     for layout in _layouts(tokens, budget):
         covered = {i for start, group in layout for i in range(start, start + len(group.words))}
         kept = tuple(i for i in range(len(tokens)) if i not in covered)
-        for tree in _bare_trees(tuple(tokens[i] for i in kept)):
+        for tree in bare(tuple(tokens[i] for i in kept)):
             yield from _attach(tokens, kept, tree, layout)
+
+
+def trees(tokens, *, budget=256):
+    yield from _unavailable(tokens, budget)
+    yield from _with_prepositions(tokens, _bare_trees, budget)

@@ -353,6 +353,27 @@ def _partitions(analyses, tokens, text):
     yield from modifier_focus.partitions(analyses, tokens, text)
     yield from capitalized_nominals.partitions(analyses, tokens, text)
 
+    for i in range(len(tokens)):
+        if any(tree[i].rule == 'GAP.REMNANT' for tree in analyses):
+            anchors = []
+            for tree in analyses:
+                if tree[i].rule == 'GAP.REMNANT' or tree[i].role == 'subject':
+                    anchors.append(tree[i].head)
+                else:
+                    break
+            if len(anchors) == len(analyses) and len(set(anchors)) > 1:
+                focus = _span_label(tokens, i)
+                yield word_choice(f'Какое слово передаёт действие или характеристику участника «{focus}» во второй части?', anchors)
+    for i, token in enumerate(tokens):
+        if all(tree[i].rule in ('GAP', 'GAP.REMNANT') for tree in analyses):
+            actions = [tree[i].ellipsis_source for tree in analyses]
+            if len(set(actions)) > 1:
+                yield word_choice('Какое действие повторяется в неполной части предложения?', actions)
+        if all(tree[i].rule == 'GAP.COUNT' for tree in analyses):
+            sources = [tree[i].ellipsis_source for tree in analyses]
+            if len(set(sources)) > 1:
+                yield word_choice(f'Какое существительное подразумевается после «{token.surface}»?', sources)
+
     predicates = [next(i for i, link in enumerate(a) if link.head is None) for a in analyses]
     if len(set(predicates)) > 1:
         yield word_choice('Which word is the main predicate?', predicates)
@@ -704,6 +725,15 @@ def _partition(analyses, tokens, text):
             continue
         focus = _span_label(tokens, i)
         roles = sorted({link.role for link in links})
+        if roles == ['object', 'oblique'] and len({link.head for link in links}) == 1:
+            head = links[0].head
+            if head is not None and all(link.role == 'object' or link.case == 'ablt' for link in links):
+                action = _span_label(tokens, head)
+                other = 'такого слова нет'
+                question = f'Какое слово отвечает на вопрос «кого или что?» при «{action}»?'
+                choices.append((Probe(question, (focus, other), text),
+                                [focus if link.role == 'object' else other for link in links]))
+                continue
         if len(roles) > 1:
             for role in roles[:-1]:
                 choices.append(binary(f'Copy «{focus}» if its role here is {role.replace("_", " ")}.', focus,
@@ -1036,7 +1066,7 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
 
     @reuse_completed
     def local(part):
-        for tree in determiners.trees(part, lambda words: participles.trees(words, comparative, budget=budget)):
+        for tree in determiners.trees(part, lambda words: participles.trees(words, comparative, budget=budget), budget=budget):
             if short_participles.allows_copula_reading(part, tree):
                 yield from morphology.variants(part, tree, budget=budget)
 
@@ -1412,4 +1442,5 @@ def analyze(text: str, choose: Callable[[Probe], str | Mapping] | None = None, *
         reason = 'NOMINAL_FRAGMENT'
     else:
         reason = 'COMPLEX_CLAUSE' if any(link.role.startswith('clause_') for link in analyses[0]) else 'SIMPLE_CLAUSE'
-    return Result(text, 'PARSED_FRAGMENT', reason, tokens, analyses, tuple(probes), tuple(steps), tuple(confirmed_focus))
+    tokens, tree = ellipsis.expand(tokens, analyses[0])
+    return Result(text, 'PARSED_FRAGMENT', reason, tokens, (tree,), tuple(probes), tuple(steps), tuple(confirmed_focus))
